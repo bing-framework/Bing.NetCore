@@ -3,9 +3,53 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing", "src\Bing\Bing.csproj", "{B4159996-5640-4757-AE7F-B18989C7E5E1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{4A869F5F-6D49-458C-84C7-C202182BF4A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{CD2ACEBC-5B5D-4754-A638-916F2D071721}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-sample", "03-sample", "{474AB182-21D2-44C4-A99C-31FC31E469CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-Utils", "00-Utils", "{2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Utils", "src\Bing.Utils\Bing.Utils.csproj", "{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Extensions", "02-Extensions", "{6FADCB24-306E-4EAF-8B24-594000568744}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Extensions.AutoMapper", "src\Bing.Extensions.AutoMapper\Bing.Extensions.AutoMapper.csproj", "{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4159996-5640-4757-AE7F-B18989C7E5E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4159996-5640-4757-AE7F-B18989C7E5E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4159996-5640-4757-AE7F-B18989C7E5E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4159996-5640-4757-AE7F-B18989C7E5E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B4159996-5640-4757-AE7F-B18989C7E5E1} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
+		{1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{937E7C90-19F2-4FB4-A671-8CDFEA70C79F} = {2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}
+		{6FADCB24-306E-4EAF-8B24-594000568744} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B} = {6FADCB24-306E-4EAF-8B24-594000568744}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
