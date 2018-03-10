@@ -21,13 +21,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Extensions", "02-Extensi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Extensions.AutoMapper", "src\Bing.Extensions.AutoMapper\Bing.Extensions.AutoMapper.csproj", "{5D1CCBDA-49CC-4DDA-94BF-C0479097E14B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Extensions.AutoMapper.Tests", "tests\Bing.Extensions.AutoMapper.Tests\Bing.Extensions.AutoMapper.Tests.csproj", "{FA1954C8-3373-401F-A0F8-7DEFB08C0279}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Extensions.AutoMapper.Tests", "tests\Bing.Extensions.AutoMapper.Tests\Bing.Extensions.AutoMapper.Tests.csproj", "{FA1954C8-3373-401F-A0F8-7DEFB08C0279}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{77209C11-A719-45C3-9C49-27FA702503A1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-Utils", "00-Utils", "{52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-Extensions", "03-Extensions", "{30D5ACC1-E099-4201-AD86-4CDD039FD4F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06-Tools", "06-Tools", "{B8B98A21-4821-425B-BF52-531F82EFE75F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Utils.Tests", "tests\Bing.Utils.Tests\Bing.Utils.Tests.csproj", "{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,10 @@ Global
 		{FA1954C8-3373-401F-A0F8-7DEFB08C0279}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA1954C8-3373-401F-A0F8-7DEFB08C0279}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA1954C8-3373-401F-A0F8-7DEFB08C0279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +74,8 @@ Global
 		{77209C11-A719-45C3-9C49-27FA702503A1} = {CD2ACEBC-5B5D-4754-A638-916F2D071721}
 		{52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F} = {CD2ACEBC-5B5D-4754-A638-916F2D071721}
 		{30D5ACC1-E099-4201-AD86-4CDD039FD4F0} = {CD2ACEBC-5B5D-4754-A638-916F2D071721}
+		{B8B98A21-4821-425B-BF52-531F82EFE75F} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F} = {52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
