@@ -26,7 +26,7 @@ namespace Bing.Utils.Configs
         {
             basePath = string.IsNullOrWhiteSpace(basePath)
                 ? Directory.GetCurrentDirectory()
-                : Directory.GetCurrentDirectory() + basePath;
+                : Path.Combine(Directory.GetCurrentDirectory(), basePath);
 
             var configuration = new ConfigurationBuilder().SetBasePath(basePath)
                 .AddJsonFile(configFileName, false, true)
@@ -49,7 +49,7 @@ namespace Bing.Utils.Configs
         {
             basePath = string.IsNullOrWhiteSpace(basePath)
                 ? Directory.GetCurrentDirectory()
-                : Directory.GetCurrentDirectory() + basePath;
+                : Path.Combine(Directory.GetCurrentDirectory(), basePath);
 
             var configuration=new ConfigurationBuilder().AddXmlFile(config =>
             {

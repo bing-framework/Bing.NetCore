@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing", "src\Bing\Bing.csproj", "{B4159996-5640-4757-AE7F-B18989C7E5E1}"
 EndProject
@@ -31,7 +31,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-Extensions", "03-Extensi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06-Tools", "06-Tools", "{B8B98A21-4821-425B-BF52-531F82EFE75F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Utils.Tests", "tests\Bing.Utils.Tests\Bing.Utils.Tests.csproj", "{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Tests", "tests\Bing.Utils.Tests\Bing.Utils.Tests.csproj", "{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Utils.Encrypts", "src\Bing.Utils.Encrypts\Bing.Utils.Encrypts.csproj", "{9C515093-AEF6-4290-862F-D14FB1F19C6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C515093-AEF6-4290-862F-D14FB1F19C6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C515093-AEF6-4290-862F-D14FB1F19C6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C515093-AEF6-4290-862F-D14FB1F19C6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C515093-AEF6-4290-862F-D14FB1F19C6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +82,7 @@ Global
 		{30D5ACC1-E099-4201-AD86-4CDD039FD4F0} = {CD2ACEBC-5B5D-4754-A638-916F2D071721}
 		{B8B98A21-4821-425B-BF52-531F82EFE75F} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
 		{648CFD84-B89E-4EB0-B7BF-33AB99CC522F} = {52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F}
+		{9C515093-AEF6-4290-862F-D14FB1F19C6E} = {2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
