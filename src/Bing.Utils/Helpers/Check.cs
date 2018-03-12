@@ -71,7 +71,7 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
-        #region CheckNotNull(不可空检查)
+        #region NotNull(不可空检查)
 
         /// <summary>
         /// 检查参数不能为空引用，否则抛出<see cref="ArgumentNullException"/>异常
@@ -79,7 +79,7 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void CheckNotNull<T>(T value, string paramName) where T : class
+        public static void NotNull<T>(T value, string paramName) where T : class
         {
             Require<ArgumentNullException>(value != null, string.Format(R.ParameterCheck_NotNull, paramName));
         }
@@ -89,9 +89,9 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void CheckNotNullOrEmpty(string value, string paramName)
+        public static void NotNullOrEmpty(string value, string paramName)
         {
-            CheckNotNull(value, paramName);
+            NotNull(value, paramName);
             Require<ArgumentException>(value.Length > 0, string.Format(R.ParameterCheck_NotNullOrEmpty_String, paramName));
         }
 
@@ -100,7 +100,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void CheckNotEmpty(Guid value, string paramName)
+        public static void NotEmpty(Guid value, string paramName)
         {
             Require<ArgumentException>(value != Guid.Empty, string.Format(R.ParameterCheck_NotEmpty_Guid, paramName));
         }
@@ -111,15 +111,15 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">集合项的类型</typeparam>
         /// <param name="collection">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void CheckNotNullOrEmpty<T>(IEnumerable<T> collection, string paramName)
+        public static void NotNullOrEmpty<T>(IEnumerable<T> collection, string paramName)
         {
-            CheckNotNull(collection, paramName);
+            NotNull(collection, paramName);
             Require<ArgumentException>(collection.Any(), string.Format(R.ParameterCheck_NotNullOrEmpty_Collection, paramName));
         }
 
         #endregion
 
-        #region CheckBetween(范围检查)
+        #region Between(范围检查)
 
         /// <summary>
         /// 检查参数必须小于[或可等于，参数canEqual]指定值，否则抛出<see cref="ArgumentOutOfRangeException"/>异常
@@ -129,7 +129,7 @@ namespace Bing.Utils.Helpers
         /// <param name="paramName">参数名</param>
         /// <param name="target">要比较的值</param>
         /// <param name="canEqual">是否可等于</param>
-        public static void CheckLessThan<T>(T value, string paramName, T target, bool canEqual = false)
+        public static void LessThan<T>(T value, string paramName, T target, bool canEqual = false)
             where T : IComparable<T>
         {
             bool flag = canEqual ? value.CompareTo(target) <= 0 : value.CompareTo(target) < 0;
@@ -145,7 +145,7 @@ namespace Bing.Utils.Helpers
         /// <param name="paramName">参数名</param>
         /// <param name="target">要比较的值</param>
         /// <param name="canEqual">是否可等于</param>
-        public static void CheckGreaterThan<T>(T value, string paramName, T target, bool canEqual = false)
+        public static void GreaterThan<T>(T value, string paramName, T target, bool canEqual = false)
             where T : IComparable<T>
         {
             bool flag = canEqual ? value.CompareTo(target) >= 0 : value.CompareTo(target) > 0;
@@ -163,7 +163,7 @@ namespace Bing.Utils.Helpers
         /// <param name="end">比较范围的结束值</param>
         /// <param name="startEqual">是否可等于起始值</param>
         /// <param name="endEqual">是否可等于结束值</param>
-        public static void CheckBetween<T>(T value, string paramName, T start, T end, bool startEqual = false,
+        public static void Between<T>(T value, string paramName, T start, T end, bool startEqual = false,
             bool endEqual = false) where T : IComparable<T>
         {
             bool flag = startEqual ? value.CompareTo(start) >= 0 : value.CompareTo(start) > 0;
@@ -181,16 +181,16 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
-        #region CheckIO(文件检查)
+        #region IO(文件检查)
 
         /// <summary>
         /// 检查指定路径的文件夹必须存在，否则抛出<see cref="DirectoryNotFoundException"/>异常
         /// </summary>
         /// <param name="directory">目录路径</param>
         /// <param name="paramName">参数名</param>
-        public static void CheckDirectoryExists(string directory, string paramName = null)
+        public static void DirectoryExists(string directory, string paramName = null)
         {
-            CheckNotNull(directory, paramName);
+            NotNull(directory, paramName);
             Require<DirectoryNotFoundException>(Directory.Exists(directory), string.Format(R.ParameterCheck_DirectoryNotExists, directory));
         }
 
@@ -199,9 +199,9 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="fileName">文件路径，包含文件名</param>
         /// <param name="paramName">参数名</param>
-        public static void CheckFileExists(string fileName, string paramName = null)
+        public static void FileExists(string fileName, string paramName = null)
         {
-            CheckNotNull(fileName, paramName);
+            NotNull(fileName, paramName);
             Require<FileNotFoundException>(File.Exists(fileName), string.Format(R.ParameterCheck_FileNotExists, fileName));
         }
 

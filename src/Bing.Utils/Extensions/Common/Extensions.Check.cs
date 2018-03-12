@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Bing.Utils.Helpers;
 
-namespace Bing.Utils.Extensions.Common
+// ReSharper disable once CheckNamespace
+namespace Bing.Utils.Extensions
 {
     /// <summary>
     /// 系统扩展 - 参数检查
@@ -52,7 +53,7 @@ namespace Bing.Utils.Extensions.Common
         /// <param name="paramName">参数名</param>
         public static void CheckNotNull<T>(this T value, string paramName) where T : class
         {
-            Check.CheckNotNull<T>(value, paramName);
+            Check.NotNull<T>(value, paramName);
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace Bing.Utils.Extensions.Common
         /// <param name="paramName">参数名</param>
         public static void CheckNotNullOrEmpty(this string value, string paramName)
         {
-            Check.CheckNotNullOrEmpty(value, paramName);
+            Check.NotNullOrEmpty(value, paramName);
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace Bing.Utils.Extensions.Common
         /// <param name="paramName">参数名</param>
         public static void CheckNotEmpty(this Guid value, string paramName)
         {
-            Check.CheckNotEmpty(value, paramName);
+            Check.NotEmpty(value, paramName);
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace Bing.Utils.Extensions.Common
         /// <param name="paramName">参数名</param>
         public static void CheckNotNullOrEmpty<T>(this IEnumerable<T> collection, string paramName)
         {
-            Check.CheckNotNullOrEmpty<T>(collection, paramName);
+            Check.NotNullOrEmpty<T>(collection, paramName);
         }
 
         #endregion
@@ -101,7 +102,7 @@ namespace Bing.Utils.Extensions.Common
         public static void CheckLessThan<T>(this T value, string paramName, T target, bool canEqual = false)
             where T : IComparable<T>
         {
-            Check.CheckLessThan<T>(value, paramName, target, canEqual);
+            Check.LessThan<T>(value, paramName, target, canEqual);
         }
 
         /// <summary>
@@ -115,7 +116,7 @@ namespace Bing.Utils.Extensions.Common
         public static void CheckGreaterThan<T>(this T value, string paramName, T target, bool canEqual = false)
             where T : IComparable<T>
         {
-            Check.CheckGreaterThan<T>(value, paramName, target, canEqual);
+            Check.GreaterThan<T>(value, paramName, target, canEqual);
         }
 
         /// <summary>
@@ -131,7 +132,7 @@ namespace Bing.Utils.Extensions.Common
         public static void CheckBetween<T>(this T value, string paramName, T start, T end, bool startEqual = false,
             bool endEqual = false) where T : IComparable<T>
         {
-            Check.CheckBetween<T>(value, paramName, start, end, startEqual, endEqual);
+            Check.Between<T>(value, paramName, start, end, startEqual, endEqual);
         }
 
         #endregion
@@ -145,7 +146,7 @@ namespace Bing.Utils.Extensions.Common
         /// <param name="paramName">参数名</param>
         public static void CheckDirectoryExists(this string directory, string paramName = null)
         {
-            Check.CheckDirectoryExists(directory, paramName);
+            Check.DirectoryExists(directory, paramName);
         }
 
         /// <summary>
@@ -155,7 +156,7 @@ namespace Bing.Utils.Extensions.Common
         /// <param name="paramName">参数名</param>
         public static void CheckFileExists(this string fileName, string paramName = null)
         {
-            Check.CheckFileExists(fileName, paramName);
+            Check.FileExists(fileName, paramName);
         }
 
         #endregion

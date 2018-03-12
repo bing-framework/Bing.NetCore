@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +44,7 @@
 
   <ItemGroup>
     <Folder Include="Expressions\" />
+    <Folder Include="Extensions\Linq\" />
   </ItemGroup>
 
 </Project>
