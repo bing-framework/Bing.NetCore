@@ -43,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Expressions\" />
     <Folder Include="Extensions\Linq\" />
   </ItemGroup>
 

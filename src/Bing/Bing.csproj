@@ -21,6 +21,7 @@
     <PackageReference Include="AspectCore.Core" Version="0.3.1" />
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="0.3.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +50,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>R.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Domains\Entities\Auditing\" />
+    <Folder Include="Domains\Entities\Tenants\" />
   </ItemGroup>
 
 </Project>
