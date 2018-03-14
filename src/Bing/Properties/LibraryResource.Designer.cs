@@ -68,5 +68,14 @@ namespace Bing.Properties {
                 return ResourceManager.GetString("ConcurrencyExceptionMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 仅允许添加一个条件,条件：{0} 的本地化字符串。
+        /// </summary>
+        internal static string OnlyOnePredicate {
+            get {
+                return ResourceManager.GetString("OnlyOnePredicate", resourceCulture);
+            }
+        }
     }
 }
