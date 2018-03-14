@@ -53,8 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domains\Entities\Auditing\" />
-    <Folder Include="Domains\Entities\Tenants\" />
+    <Folder Include="Domains\Repositories\" />
   </ItemGroup>
 
 </Project>
