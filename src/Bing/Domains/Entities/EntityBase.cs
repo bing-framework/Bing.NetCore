@@ -47,7 +47,7 @@ namespace Bing.Domains.Entities
         }
 
         /// <summary>
-        /// 相等运算
+        /// 判断两个实体是否同一数据记录的实体
         /// </summary>
         /// <param name="other">领域实体</param>
         /// <returns></returns>
@@ -57,7 +57,7 @@ namespace Bing.Domains.Entities
         }
 
         /// <summary>
-        /// 获取哈希
+        /// 用作特定类型的哈希函数。
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()

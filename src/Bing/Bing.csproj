@@ -20,6 +20,9 @@
     <PackageReference Include="AspectCore.Abstractions" Version="0.3.1" />
     <PackageReference Include="AspectCore.Core" Version="0.3.1" />
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="0.3.1" />
+    <PackageReference Include="AspectCore.Extensions.Autofac" Version="0.3.1" />
+    <PackageReference Include="Autofac" Version="4.6.2" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
   </ItemGroup>
@@ -53,7 +56,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domains\Repositories\" />
+    <Folder Include="Configuration\Startup\" />
+    <Folder Include="Datas\Queries\" />
   </ItemGroup>
 
 </Project>
