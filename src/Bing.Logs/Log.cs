@@ -143,7 +143,7 @@ namespace Bing.Logs
         {
             try
             {
-                return Ioc.Create<ILogContext>();
+                return Ioc.Create<ILogContext>(name);
             }
             catch
             {

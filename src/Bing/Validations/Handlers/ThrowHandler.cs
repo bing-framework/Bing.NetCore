@@ -22,9 +22,8 @@ namespace Bing.Validations.Handlers
             {
                 return;
             }
-
-            //new BingConfig().ValidationHandler(results.First().ErrorMessage);
-            throw new Warning(results.First().ErrorMessage);
+            BingConfig.Current.ValidationHandler(results.First().ErrorMessage);
+            //throw new Warning(results.First().ErrorMessage);
         }
     }
 }
