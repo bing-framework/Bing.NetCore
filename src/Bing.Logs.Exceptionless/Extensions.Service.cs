@@ -26,6 +26,7 @@ namespace Bing.Logs.Exceptionless
             services.AddSingleton(typeof(ILogFormat), t => NullLogFormat.Instance);
             services.AddScoped<ILogContext, Bing.Logs.Exceptionless.LogContext>();
             services.AddScoped<ILog, Log>();
+
             configAction?.Invoke(ExceptionlessClient.Default.Configuration);
         }
     }

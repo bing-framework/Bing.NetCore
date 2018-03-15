@@ -23,6 +23,13 @@ namespace Bing.Datas.Attributes
         /// <summary>
         /// 初始化一个<see cref="DecimalPrecisionAttribute"/>类型的实例
         /// </summary>
+        public DecimalPrecisionAttribute():this(18,4)
+        {
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="DecimalPrecisionAttribute"/>类型的实例
+        /// </summary>
         /// <param name="precision">精确度</param>
         /// <param name="scale">保留小数位数</param>
         public DecimalPrecisionAttribute(byte precision, byte scale)
