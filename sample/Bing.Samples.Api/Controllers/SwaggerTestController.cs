@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Webs.Filters;
+//using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Samples.Api.Controllers
@@ -77,6 +79,7 @@ namespace Bing.Samples.Api.Controllers
         /// </summary>
         /// <param name="info">样例信息</param>
         /// <returns></returns>
+        [ResultHandler]
         [HttpPost]
         public SampleNameValue Test2([FromBody] SampleNameValue info)
         {
