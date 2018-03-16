@@ -11,6 +11,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// Swagger测试信息
     /// </summary>
+    [IgnoreResultHandler]
     [Route("api/[controller]/[action]")]
     public class SwaggerTestController : Controller
     {
@@ -79,7 +80,7 @@ namespace Bing.Samples.Api.Controllers
         /// </summary>
         /// <param name="info">样例信息</param>
         /// <returns></returns>
-        [ResultHandler]
+        [IgnoreResultHandler]
         [HttpPost]
         public SampleNameValue Test2([FromBody] SampleNameValue info)
         {
