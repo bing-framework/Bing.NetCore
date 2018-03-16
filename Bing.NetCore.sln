@@ -43,17 +43,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs", "src\Bing.Logs\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.NLog", "src\Bing.Logs.NLog\Bing.Logs.NLog.csproj", "{3D451C67-4AB6-46D9-A4DF-790692BBA245}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Api", "sample\Bing.Samples.Api\Bing.Samples.Api.csproj", "{97068AC1-A622-466C-8144-FA2BEC899533}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Api", "sample\Bing.Samples.Api\Bing.Samples.Api.csproj", "{97068AC1-A622-466C-8144-FA2BEC899533}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.Exceptionless", "src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj", "{6F0F0A10-0939-4A1D-85E8-FB47294144A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logs.Log4Net", "src\Bing.Logs.Log4Net\Bing.Logs.Log4Net.csproj", "{09C7061E-53F0-480B-8ED5-858F27D5BE86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.Log4Net", "src\Bing.Logs.Log4Net\Bing.Logs.Log4Net.csproj", "{09C7061E-53F0-480B-8ED5-858F27D5BE86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework", "src\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj", "{52CCF153-7CA5-4EAF-A38B-67FBBDE6F338}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework", "src\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj", "{52CCF153-7CA5-4EAF-A38B-67FBBDE6F338}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework.MySql", "src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj", "{3C64B26A-9324-4024-B824-7AC117CE876E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.MySql", "src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj", "{3C64B26A-9324-4024-B824-7AC117CE876E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework.SqlServer", "src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj", "{3A3C07E6-6B41-4442-8B4A-114D27C330BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.SqlServer", "src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj", "{3A3C07E6-6B41-4442-8B4A-114D27C330BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework.PgSql", "src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj", "{E94C294A-04EB-42E5-B924-52C009113F1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,6 +127,10 @@ Global
 		{3A3C07E6-6B41-4442-8B4A-114D27C330BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A3C07E6-6B41-4442-8B4A-114D27C330BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A3C07E6-6B41-4442-8B4A-114D27C330BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E94C294A-04EB-42E5-B924-52C009113F1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E94C294A-04EB-42E5-B924-52C009113F1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E94C294A-04EB-42E5-B924-52C009113F1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E94C294A-04EB-42E5-B924-52C009113F1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -153,6 +159,7 @@ Global
 		{52CCF153-7CA5-4EAF-A38B-67FBBDE6F338} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{3C64B26A-9324-4024-B824-7AC117CE876E} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{3A3C07E6-6B41-4442-8B4A-114D27C330BD} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
+		{E94C294A-04EB-42E5-B924-52C009113F1F} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

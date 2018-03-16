@@ -9,7 +9,7 @@ namespace Bing.Datas.EntityFramework.Extensions
     /// <summary>
     /// 内部属性生成器扩展
     /// </summary>
-    public static class InternalPropertyBuilderExtensions
+    public static partial class InternalPropertyBuilderExtensions
     {
         /// <summary>
         /// 设置精度

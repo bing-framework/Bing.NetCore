@@ -7,7 +7,7 @@ namespace Bing.Datas.EntityFramework.Extensions
     /// <summary>
     /// 属性生成器扩展
     /// </summary>
-    public static class PropertyBuilderExtensions
+    public static partial class PropertyBuilderExtensions
     {
         /// <summary>
         /// 设置精度
