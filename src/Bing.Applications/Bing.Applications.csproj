@@ -5,11 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
+    <ProjectReference Include="..\Bing.Extensions.AutoMapper\Bing.Extensions.AutoMapper.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+    <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
 
 </Project>
