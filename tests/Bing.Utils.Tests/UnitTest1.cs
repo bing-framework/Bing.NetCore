@@ -8,7 +8,8 @@ namespace Bing.Utils.Tests
         [Fact]
         public void Test1()
         {
-
+            DateTimeOffset offset=DateTimeOffset.Now;
+            Console.WriteLine(offset.ToString("yyyy-MM-dd HH:mm:ss"));
         }
     }
 }
