@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 namespace Bing.Webs.Extensions
 {
     /// <summary>
-    /// 中间件哭总喊
+    /// 中间件扩展
     /// </summary>
     public static partial class Extensions
     {
