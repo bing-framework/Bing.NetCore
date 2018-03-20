@@ -55,11 +55,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.SqlServer", "src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj", "{3A3C07E6-6B41-4442-8B4A-114D27C330BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework.PgSql", "src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj", "{E94C294A-04EB-42E5-B924-52C009113F1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.PgSql", "src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj", "{E94C294A-04EB-42E5-B924-52C009113F1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Applications", "src\Bing.Applications\Bing.Applications.csproj", "{9E1C17B4-B332-499F-814D-FA4FB8226F0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Applications", "src\Bing.Applications\Bing.Applications.csproj", "{9E1C17B4-B332-499F-814D-FA4FB8226F0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Webs", "src\Bing.Webs\Bing.Webs.csproj", "{6B0F31BD-C8B1-43E8-BE83-50827231AF6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Webs", "src\Bing.Webs\Bing.Webs.csproj", "{6B0F31BD-C8B1-43E8-BE83-50827231AF6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Encryption", "src\Bing.Encryption\Bing.Encryption.csproj", "{8F740664-3801-4AB1-B795-BC77BA6BCE40}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,6 +145,10 @@ Global
 		{6B0F31BD-C8B1-43E8-BE83-50827231AF6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B0F31BD-C8B1-43E8-BE83-50827231AF6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B0F31BD-C8B1-43E8-BE83-50827231AF6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,6 +180,7 @@ Global
 		{E94C294A-04EB-42E5-B924-52C009113F1F} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{9E1C17B4-B332-499F-814D-FA4FB8226F0E} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{6B0F31BD-C8B1-43E8-BE83-50827231AF6C} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
+		{8F740664-3801-4AB1-B795-BC77BA6BCE40} = {2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
