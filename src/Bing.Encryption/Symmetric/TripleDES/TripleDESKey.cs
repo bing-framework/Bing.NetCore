@@ -6,10 +6,10 @@ using System.Text;
 namespace Bing.Encryption
 {
     /// <summary>
-    /// DES 密钥
+    /// TripleDES 密钥
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public class DESKey
+    public class TripleDESKey
     {
         /// <summary>
         /// 密钥
@@ -20,5 +20,10 @@ namespace Bing.Encryption
         /// 偏移量
         /// </summary>
         public string IV { get; set; }
+
+        /// <summary>
+        /// 密钥长度
+        /// </summary>
+        public TripleDESKeySizeType Size { get; set; }
     }
 }

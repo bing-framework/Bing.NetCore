@@ -3,33 +3,43 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using Bing.Encryption.Core;
-using Bing.Encryption.Core.Internals;
 using Bing.Encryption.Core.Internals.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Encryption
 {
     /// <summary>
-    /// DES 加密提供程序
+    /// TripleDES 加密提供程序
     /// </summary>
-    public sealed class DESEncryptionProvider:SymmetricEncryptionBase
+    public sealed class TripleDESEncryptionProvider:SymmetricEncryptionBase
     {
         /// <summary>
-        /// 初始化一个<see cref="DESEncryptionProvider"/>类型的实例
+        /// 初始化一个<see cref="TripleDESEncryptionProvider"/>类型的实例
         /// </summary>
-        private DESEncryptionProvider() { }
+        private TripleDESEncryptionProvider() { }
 
         /// <summary>
-        /// 创建 DES 密钥
+        /// 创建 AES 密钥
         /// </summary>
+        /// <param name="size">密钥长度类型，默认为<see cref="TripleDESKeySizeType.L192"/></param>
+        /// <param name="encoding">编码类型，默认为<see cref="Encoding.UTF8"/></param>
         /// <returns></returns>
-        public static DESKey CreateKey()
+        public static TripleDESKey CreateKey(TripleDESKeySizeType size = TripleDESKeySizeType.L192, Encoding encoding = null)
         {
-            return new DESKey()
+            if (encoding == null)
             {
-                Key = RandomStringGenerator.Generate(),
-                IV = RandomStringGenerator.Generate(),
-            };
+                encoding = Encoding.UTF8;
+            }
+
+            using (var provider = new TripleDESCryptoServiceProvider())
+            {
+                return new TripleDESKey()
+                {
+                    Key = encoding.GetString(provider.Key),
+                    IV = encoding.GetString(provider.IV),
+                    Size = size
+                };
+            }
         }
 
         /// <summary>
@@ -41,10 +51,11 @@ namespace Bing.Encryption
         /// <param name="salt">加盐</param>
         /// <param name="outType">输出类型，默认为<see cref="OutType.Base64"/></param>
         /// <param name="encoding">编码类型，默认为<see cref="Encoding.UTF8"/></param>
+        /// <param name="keySize">密钥长度类型，默认为<see cref="TripleDESKeySizeType.L192"/></param>
         /// <returns></returns>
         public static string Encrypt(string value, string key, string iv = null, string salt = null,
             OutType outType = OutType.Base64,
-            Encoding encoding = null)
+            Encoding encoding = null, TripleDESKeySizeType keySize = TripleDESKeySizeType.L192)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -61,8 +72,8 @@ namespace Bing.Encryption
                 encoding = Encoding.UTF8;
             }
 
-            var result = EncryptCore<AesCryptoServiceProvider>(encoding.GetBytes(value),
-                ComputeRealValueFunc()(key)(salt)(encoding)(64),
+            var result = EncryptCore<TripleDESCryptoServiceProvider>(encoding.GetBytes(value),
+                ComputeRealValueFunc()(key)(salt)(encoding)((int)keySize),
                 ComputeRealValueFunc()(iv)(salt)(encoding)(64));
 
             if (outType == OutType.Base64)
@@ -77,11 +88,11 @@ namespace Bing.Encryption
         /// 加密
         /// </summary>
         /// <param name="value">待加密的值</param>
-        /// <param name="key">DES 密钥对象</param>
+        /// <param name="key">TripleDES 密钥对象</param>
         /// <param name="outType">输出类型，默认为<see cref="OutType.Base64"/></param>
         /// <param name="encoding">编码类型，默认为<see cref="Encoding.UTF8"/></param>
         /// <returns></returns>
-        public static string Encrypt(string value, DESKey key, OutType outType = OutType.Base64,
+        public static string Encrypt(string value, TripleDESKey key, OutType outType = OutType.Base64,
             Encoding encoding = null)
         {
             if (key == null)
@@ -89,7 +100,7 @@ namespace Bing.Encryption
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return Encrypt(value, key.Key, key.IV, outType: outType, encoding: encoding);
+            return Encrypt(value, key.Key, key.IV, outType: outType, encoding: encoding, keySize: key.Size);
         }
 
         /// <summary>
@@ -101,10 +112,11 @@ namespace Bing.Encryption
         /// <param name="salt">加盐</param>
         /// <param name="outType">输出类型，默认为<see cref="OutType.Base64"/></param>
         /// <param name="encoding">编码类型，默认为<see cref="Encoding.UTF8"/></param>
+        /// <param name="keySize">密钥长度类型，默认为<see cref="TripleDESKeySizeType.L192"/></param>
         /// <returns></returns>
         public static string Decrypt(string value, string key, string iv = null, string salt = null,
             OutType outType = OutType.Base64,
-            Encoding encoding = null)
+            Encoding encoding = null, TripleDESKeySizeType keySize = TripleDESKeySizeType.L192)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -121,8 +133,8 @@ namespace Bing.Encryption
                 encoding = Encoding.UTF8;
             }
 
-            var result = DecryptCore<DESCryptoServiceProvider>(value.GetEncryptBytes(outType),
-                ComputeRealValueFunc()(key)(salt)(encoding)(64),
+            var result = DecryptCore<AesCryptoServiceProvider>(value.GetEncryptBytes(outType),
+                ComputeRealValueFunc()(key)(salt)(encoding)((int)keySize),
                 ComputeRealValueFunc()(iv)(salt)(encoding)(64));
 
             if (outType == OutType.Base64)
@@ -137,11 +149,11 @@ namespace Bing.Encryption
         /// 解密
         /// </summary>
         /// <param name="value">待加密的值</param>
-        /// <param name="key">DES 密钥对象</param>
+        /// <param name="key">TripleDES 密钥对象</param>
         /// <param name="outType">输出类型，默认为<see cref="OutType.Base64"/></param>
         /// <param name="encoding">编码类型，默认为<see cref="Encoding.UTF8"/></param>
         /// <returns></returns>
-        public static string Decrypt(string value, DESKey key, OutType outType = OutType.Base64,
+        public static string Decrypt(string value, TripleDESKey key, OutType outType = OutType.Base64,
             Encoding encoding = null)
         {
             if (key == null)
@@ -149,7 +161,7 @@ namespace Bing.Encryption
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return Decrypt(value, key.Key, key.IV, outType: outType, encoding: encoding);
+            return Decrypt(value, key.Key, key.IV, outType: outType, encoding: encoding, keySize: key.Size);
         }
     }
 }

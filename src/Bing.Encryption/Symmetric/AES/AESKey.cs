@@ -11,12 +11,12 @@ namespace Bing.Encryption
     public class AESKey
     {
         /// <summary>
-        /// AES 密钥
+        /// 密钥
         /// </summary>
         public string Key { get; set; }
 
         /// <summary>
-        /// AES 偏移量
+        /// 偏移量
         /// </summary>
         public string IV { get; set; }
 
