@@ -40,7 +40,8 @@ namespace Bing.Samples.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvcWithDefaultRoute();
+            //app.UseMvcWithDefaultRoute();
+            app.UseMvc(routes => { routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}"); });
             app.UseSwagger(config => { });
             app.UseSwaggerUI(config =>
             {

@@ -14,7 +14,6 @@ namespace Bing.Encryption
     // ReSharper disable once InconsistentNaming
     public static class MD5HasingProvider
     {
-
         /// <summary>
         /// 获取字符串的 MD5 哈希值，默认编码为<see cref="Encoding.UTF8"/>
         /// </summary>
