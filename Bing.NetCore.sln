@@ -61,6 +61,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Webs", "src\Bing.Webs\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Encryption", "src\Bing.Encryption\Bing.Encryption.csproj", "{8F740664-3801-4AB1-B795-BC77BA6BCE40}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Encryption.Tests", "tests\Bing.Encryption.Tests\Bing.Encryption.Tests.csproj", "{BE4D633B-7F23-4862-A8FD-EA2709F88812}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -143,6 +145,10 @@ Global
 		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F740664-3801-4AB1-B795-BC77BA6BCE40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE4D633B-7F23-4862-A8FD-EA2709F88812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE4D633B-7F23-4862-A8FD-EA2709F88812}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE4D633B-7F23-4862-A8FD-EA2709F88812}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE4D633B-7F23-4862-A8FD-EA2709F88812}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,6 +180,7 @@ Global
 		{9E1C17B4-B332-499F-814D-FA4FB8226F0E} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{6B0F31BD-C8B1-43E8-BE83-50827231AF6C} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{8F740664-3801-4AB1-B795-BC77BA6BCE40} = {2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}
+		{BE4D633B-7F23-4862-A8FD-EA2709F88812} = {52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
