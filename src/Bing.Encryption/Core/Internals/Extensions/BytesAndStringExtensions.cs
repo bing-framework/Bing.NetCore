@@ -25,6 +25,24 @@ namespace Bing.Encryption.Core.Internals.Extensions
         }
 
         /// <summary>
+        /// 获取加密字符串的加密字节数组
+        /// </summary>
+        /// <param name="data">加密字符串</param>
+        /// <param name="outType">输出类型</param>
+        /// <returns></returns>
+        internal static byte[] GetEncryptBytes(this string data, OutType outType)
+        {
+            switch (outType)
+            {
+                case OutType.Base64:
+                    return Convert.FromBase64String(data);
+                case OutType.Hex:
+                    return ToBytes(data);
+            }
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// 将16进制字符串转换成字节数组
         /// </summary>
         /// <param name="hex">16进制字符串</param>
