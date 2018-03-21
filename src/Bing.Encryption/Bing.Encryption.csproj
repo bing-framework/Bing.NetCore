@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <Folder Include="Asymmetric\" />
-    <Folder Include="Symmetric\DES\" />
   </ItemGroup>
 
 </Project>
