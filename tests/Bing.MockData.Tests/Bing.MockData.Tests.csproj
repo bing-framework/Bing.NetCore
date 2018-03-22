@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Bing.TestData.Generator\Bing.TestData.Generator.csproj" />
+    <ProjectReference Include="..\..\src\Bing.MockData\Bing.MockData.csproj" />
   </ItemGroup>
 
 </Project>

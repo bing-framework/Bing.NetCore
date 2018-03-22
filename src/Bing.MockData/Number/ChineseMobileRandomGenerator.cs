@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.TestData.Generator.Core;
+using Bing.MockData.Core;
 
-namespace Bing.TestData.Generator.Number
+namespace Bing.MockData.Number
 {
     /// <summary>
     /// 中国手机号码生成器
     /// </summary>
-    public class ChineseMobileNumberGenerator:GeneratorBase
+    public class ChineseMobileRandomGenerator:RandomGeneratorBase,IRandomGenerator
     {
+        /// <summary>
+        /// 实例
+        /// </summary>
+        public static readonly ChineseMobileRandomGenerator Instance =new ChineseMobileRandomGenerator();
+
         /// <summary>
         /// 手机号码前缀
         /// </summary>
@@ -22,31 +27,17 @@ namespace Bing.TestData.Generator.Number
         };
 
         /// <summary>
-        /// 实例
+        /// 初始化一个<see cref="ChineseMobileRandomGenerator"/>类型的实例
         /// </summary>
-        private static readonly ChineseMobileNumberGenerator Instance=new ChineseMobileNumberGenerator();
+        private ChineseMobileRandomGenerator() { }
 
         /// <summary>
-        /// 初始化一个<see cref="ChineseMobileNumberGenerator"/>类型的实例
-        /// </summary>
-        private ChineseMobileNumberGenerator() { }
-
-        /// <summary>
-        /// 获取生成器实例
-        /// </summary>
-        /// <returns></returns>
-        public static ChineseMobileNumberGenerator GetInstance()
-        {
-            return Instance;
-        }
-
-        /// <summary>
-        /// 生成模拟手机号码
+        /// 生成中国手机号码
         /// </summary>
         /// <returns></returns>
         public override string Generate()
         {
-            return GetMobilePre()+ string.Format("{0}", GetRandomInstance().Next(0, 99999999 + 1)).PadLeft(8, '0');
+            return GetMobilePre() + string.Format("{0}", GetRandom().Next(0, 99999999 + 1)).PadLeft(8, '0');
         }
 
         /// <summary>
@@ -55,7 +46,7 @@ namespace Bing.TestData.Generator.Number
         /// <returns></returns>
         private string GetMobilePre()
         {
-            return MobilePrefix[GetRandomInstance().Next(0, MobilePrefix.Length)].ToString();
+            return MobilePrefix[GetRandom().Next(0, MobilePrefix.Length)].ToString();
         }
 
         /// <summary>
@@ -64,7 +55,7 @@ namespace Bing.TestData.Generator.Number
         /// <returns></returns>
         public string GenerateFake()
         {
-            return "19" + string.Format("{0}",GetRandomInstance().Next(0, 999999999 + 1)).PadLeft(9, '0');
-        }        
+            return "19" + string.Format("{0}", GetRandom().Next(0, 999999999 + 1)).PadLeft(9, '0');
+        }
     }
 }
