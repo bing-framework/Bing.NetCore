@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.MockData.Core;
+﻿using Bing.MockData.Core;
 
-namespace Bing.MockData.Number
+namespace Bing.MockData.Generators
 {
     /// <summary>
     /// 中国手机号码生成器

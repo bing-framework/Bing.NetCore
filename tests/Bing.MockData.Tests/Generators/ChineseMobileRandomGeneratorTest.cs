@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.MockData.Number;
+﻿using Bing.MockData.Generators;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.MockData.Tests.Number
+namespace Bing.MockData.Tests.Generators
 {
     public class ChineseMobileRandomGeneratorTest:TestBase
     {
