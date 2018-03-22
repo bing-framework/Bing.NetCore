@@ -21,5 +21,15 @@ namespace Bing.MockData.Tests.Generators
                 Output.WriteLine(BankCardRandomGenerator.Instance.Generate());
             }
         }
+
+        [Fact]
+        public void Test_BatchGenerate()
+        {
+            var list = BankCardRandomGenerator.Instance.BatchGenerate(1000);
+            foreach (var item in list)
+            {
+                Output.WriteLine(item);
+            }
+        }
     }
 }

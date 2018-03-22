@@ -26,6 +26,13 @@ namespace Bing.MockData.Core
         public abstract string Generate();
 
         /// <summary>
+        /// 批量生产随机数
+        /// </summary>
+        /// <param name="maxLength">生成数量</param>
+        /// <returns></returns>
+        public abstract List<string> BatchGenerate(int maxLength);        
+
+        /// <summary>
         /// 获取随机数
         /// </summary>
         /// <returns></returns>

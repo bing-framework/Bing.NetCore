@@ -1,4 +1,6 @@
-﻿using Bing.MockData.Core;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Bing.MockData.Core;
 
 namespace Bing.MockData.Generators
 {
@@ -34,7 +36,23 @@ namespace Bing.MockData.Generators
         /// <returns></returns>
         public override string Generate()
         {
-            return GetMobilePre() + string.Format("{0}", GetRandom().Next(0, 99999999 + 1)).PadLeft(8, '0');
+            return BatchGenerate(1).First();
+        }
+
+        /// <summary>
+        /// 批量生成手机号码
+        /// </summary>
+        /// <param name="maxLength">生成数量</param>
+        /// <returns></returns>
+        public override List<string> BatchGenerate(int maxLength)
+        {
+            List<string> list=new List<string>();
+            for (int i = 0; i < maxLength; i++)
+            {
+                list.Add(GetMobilePre() + string.Format("{0}", GetRandom().Next(0, 99999999 + 1)).PadLeft(8, '0'));
+            }
+
+            return list;
         }
 
         /// <summary>

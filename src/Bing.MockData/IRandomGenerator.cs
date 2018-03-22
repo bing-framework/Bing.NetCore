@@ -14,5 +14,12 @@ namespace Bing.MockData
         /// </summary>
         /// <returns></returns>
         string Generate();
+
+        /// <summary>
+        /// 批量生产随机数
+        /// </summary>
+        /// <param name="maxLength">生成数量</param>
+        /// <returns></returns>
+        List<string> BatchGenerate(int maxLength);
     }
 }

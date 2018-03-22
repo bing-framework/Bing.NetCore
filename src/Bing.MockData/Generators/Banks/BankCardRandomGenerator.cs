@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Bing.MockData.Core;
 
@@ -26,11 +27,27 @@ namespace Bing.MockData.Generators.Banks
         /// <returns></returns>
         public override string Generate()
         {
+            return BatchGenerate(1).First();
+        }
+
+        /// <summary>
+        /// 批量生成银行卡号
+        /// </summary>
+        /// <param name="maxLength">生成数量</param>
+        /// <returns></returns>
+        public override List<string> BatchGenerate(int maxLength)
+        {
             var bankInfo = GetBankInfo();
             var cardRule = GetCardRule(bankInfo);
-            var cardNum = cardRule.CardPrefix + GenerateNumber(cardRule.Length-1);
-            cardNum += GetCheckCode(cardNum);
-            return cardNum;
+            List<string> list=new List<string>();
+            for (int i = 0; i < maxLength; i++)
+            {
+                var cardNum = cardRule.CardPrefix + GenerateNumber(cardRule.Length - 1);
+                cardNum += GetCheckCode(cardNum);
+                list.Add(cardNum);
+            }
+
+            return list;
         }
 
         /// <summary>
