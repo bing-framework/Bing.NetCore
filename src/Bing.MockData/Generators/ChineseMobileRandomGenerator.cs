@@ -5,7 +5,7 @@ using Bing.MockData.Core;
 namespace Bing.MockData.Generators
 {
     /// <summary>
-    /// 中国手机号码生成器
+    /// 手机号码生成器
     /// </summary>
     public class ChineseMobileRandomGenerator:RandomGeneratorBase,IRandomGenerator
     {
@@ -31,7 +31,7 @@ namespace Bing.MockData.Generators
         private ChineseMobileRandomGenerator() { }
 
         /// <summary>
-        /// 生成中国手机号码
+        /// 生成手机号码
         /// </summary>
         /// <returns></returns>
         public override string Generate()
@@ -49,7 +49,7 @@ namespace Bing.MockData.Generators
             List<string> list=new List<string>();
             for (int i = 0; i < maxLength; i++)
             {
-                list.Add(GetMobilePre() + string.Format("{0}", GetRandom().Next(0, 99999999 + 1)).PadLeft(8, '0'));
+                list.Add(GetMobilePre() + string.Format("{0}", Builder.GenerateNumber(8)).PadLeft(8, '0'));
             }
 
             return list;
@@ -61,7 +61,7 @@ namespace Bing.MockData.Generators
         /// <returns></returns>
         private string GetMobilePre()
         {
-            return MobilePrefix[GetRandom().Next(0, MobilePrefix.Length)].ToString();
+            return MobilePrefix[Builder.GenerateInt(0, MobilePrefix.Length)].ToString();
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Bing.MockData.Generators
         /// <returns></returns>
         public string GenerateFake()
         {
-            return "19" + string.Format("{0}", GetRandom().Next(0, 999999999 + 1)).PadLeft(9, '0');
+            return "19" + string.Format("{0}", Builder.GenerateNumber(9)).PadLeft(9, '0');
         }
     }
 }

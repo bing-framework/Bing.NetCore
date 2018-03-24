@@ -42,7 +42,7 @@ namespace Bing.MockData.Generators.Banks
             List<string> list=new List<string>();
             for (int i = 0; i < maxLength; i++)
             {
-                var cardNum = cardRule.CardPrefix + GenerateNumber(cardRule.Length - 1);
+                var cardNum = cardRule.CardPrefix + Builder.GenerateNumber(cardRule.Length - 1);
                 cardNum += GetCheckCode(cardNum);
                 list.Add(cardNum);
             }
@@ -57,7 +57,7 @@ namespace Bing.MockData.Generators.Banks
         private BankInfo GetBankInfo()
         {
             var length = BankConfig.GetBankInfoList().Count;
-            var bankInfo = BankConfig.GetBankInfoList()[GetRandom().Next(0, length)];
+            var bankInfo = BankConfig.GetBankInfoList()[Builder.GenerateInt(0,length)];
             return bankInfo;
         }
 
@@ -69,7 +69,7 @@ namespace Bing.MockData.Generators.Banks
         private CardRuleItem GetCardRule(BankInfo bankInfo)
         {
             var length = bankInfo.AllRules.Count;
-            var cardRule = bankInfo.AllRules[GetRandom().Next(0, length)];
+            var cardRule = bankInfo.AllRules[Builder.GenerateInt(0, length)];
             return cardRule;
         }
 
@@ -96,23 +96,6 @@ namespace Bing.MockData.Generators.Banks
 
             char checkCode = luhnSum % 10 == 0 ? '0' : (char) (10 - luhnSum % 10 + '0');
             return checkCode.ToString();
-        }
-
-        /// <summary>
-        /// 生成随机数字
-        /// </summary>
-        /// <param name="maxLength">最大长度</param>
-        /// <returns></returns>
-        private string GenerateNumber(int maxLength)
-        {
-            StringBuilder sb=new StringBuilder();
-            for (int i = 0; i < maxLength; i++)
-            {
-                int num = GetRandom().Next();
-                string temp= ((char)(0x30 + (ushort)(num % 10))).ToString();
-                sb.Append(temp);
-            }
-            return sb.ToString();
         }
     }
 }

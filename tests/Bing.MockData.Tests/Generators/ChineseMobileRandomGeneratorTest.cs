@@ -1,4 +1,5 @@
-﻿using Bing.MockData.Generators;
+﻿using System;
+using Bing.MockData.Generators;
 using Xunit;
 using Xunit.Abstractions;
 

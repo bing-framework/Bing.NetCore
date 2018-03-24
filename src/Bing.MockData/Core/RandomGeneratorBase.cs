@@ -10,14 +10,9 @@ namespace Bing.MockData.Core
     public abstract class RandomGeneratorBase:IRandomGenerator
     {
         /// <summary>
-        /// 随机数
+        /// 随机数生成器
         /// </summary>
-        private static Random _random=null;
-
-        /// <summary>
-        /// 重复数
-        /// </summary>
-        private static int _repeat = 0;
+        protected RandomBuilder Builder { get; set; } = new RandomBuilder();
 
         /// <summary>
         /// 生成随机数
@@ -30,22 +25,6 @@ namespace Bing.MockData.Core
         /// </summary>
         /// <param name="maxLength">生成数量</param>
         /// <returns></returns>
-        public abstract List<string> BatchGenerate(int maxLength);        
-
-        /// <summary>
-        /// 获取随机数
-        /// </summary>
-        /// <returns></returns>
-        protected Random GetRandom()
-        {
-            if (_random == null)
-            {
-                long ticks = DateTime.Now.Ticks+_repeat;
-                _repeat++;
-                _random=new Random((int)((ulong)ticks & 0xffffffffL) | (int)(ticks >> _repeat));
-            }
-
-            return _random;
-        }
+        public abstract List<string> BatchGenerate(int maxLength);
     }
 }
