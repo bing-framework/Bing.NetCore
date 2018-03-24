@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Bing.MockData.Core;
+using Bing.MockData.Utils;
 
 namespace Bing.MockData.Generators.Banks
 {
@@ -80,20 +81,7 @@ namespace Bing.MockData.Generators.Banks
         /// <returns></returns>
         private string GetCheckCode(string cardNo)
         {
-            int luhnSum = 0;
-            char[] chs = cardNo.Trim().ToCharArray();
-            for (int i = chs.Length - 1, j = 0; i >= 0; i--, j++)
-            {
-                int k = chs[i] - '0';
-                if (j % 2 == 0)
-                {
-                    k *= 2;
-                    k = k / 10 + k % 10;
-                }
-
-                luhnSum += k;
-            }
-
+            int luhnSum = LuhnUtil.GetLuhnSum(cardNo.Trim().ToCharArray());
             char checkCode = luhnSum % 10 == 0 ? '0' : (char) (10 - luhnSum % 10 + '0');
             return checkCode.ToString();
         }
