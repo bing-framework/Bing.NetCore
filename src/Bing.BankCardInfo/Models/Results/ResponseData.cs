@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Bing.BankCardInfo.Models.Results
 {
-    internal class ResponseData
+    public class ResponseData
     {
         /// <summary>
         /// 验证结果

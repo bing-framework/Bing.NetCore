@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.BankCardInfo.Core;
 
 namespace Bing.BankCardInfo.Models
 {
@@ -22,7 +23,7 @@ namespace Bing.BankCardInfo.Models
         /// <summary>
         /// 银行名称
         /// </summary>
-        public string Name { get; set; }
+        public string Name => GetBankName();
 
         /// <summary>
         /// 银行Logo
@@ -37,6 +38,39 @@ namespace Bing.BankCardInfo.Models
         /// <summary>
         /// 银行卡类型名称
         /// </summary>
-        public string CarTypeName { get; set; }
+        public string CardTypeName => GetCardTypeName();
+
+        /// <summary>
+        /// 银行卡卡号
+        /// </summary>
+        public string CardNo { get; set; }
+
+        /// <summary>
+        /// 获取 银行名称
+        /// </summary>
+        /// <returns></returns>
+        private string GetBankName()
+        {
+            if (BankConstants.BankInfo.ContainsKey(this.Code))
+            {
+                return BankConstants.BankInfo[Code];
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 获取 银行卡类型名称
+        /// </summary>
+        /// <returns></returns>
+        private string GetCardTypeName()
+        {
+            if (BankConstants.CardType.ContainsKey(this.CardType))
+            {
+                return BankConstants.CardType[CardType];
+            }
+
+            return string.Empty;
+        }
     }
 }

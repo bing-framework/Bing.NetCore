@@ -5,7 +5,7 @@ namespace Bing.BankCardInfo.Models.Results
     /// <summary>
     /// 错误消息
     /// </summary>
-    internal class ErrorMessage
+    public class ErrorMessage
     {
         /// <summary>
         /// 错误码
