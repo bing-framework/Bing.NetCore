@@ -119,6 +119,17 @@ namespace Bing.MockData.Core
             return GenerateRandomLengthText(maxLength, Const.SIMPLIFIED_CHINESE);
         }
 
+        /// <summary>
+        /// 生成随机长度常用汉字
+        /// </summary>
+        /// <param name="minLength">最小长度</param>
+        /// <param name="maxLength">最大长度</param>
+        /// <returns></returns>
+        public string GenerateRandomLengthChinese(int minLength, int maxLength)
+        {
+            return GenerateRandomLengthText(minLength, maxLength, Const.SIMPLIFIED_CHINESE);
+        }
+
         #endregion
 
         #region GenerateText(生成随机文本)
@@ -164,6 +175,19 @@ namespace Bing.MockData.Core
         public string GenerateRandomLengthText(int maxLength, string text)
         {
             var length = GenerateInt(1, maxLength);
+            return GenerateText(length, text);
+        }
+
+        /// <summary>
+        /// 生成随机长度文本
+        /// </summary>
+        /// <param name="minLength">最小长度</param>
+        /// <param name="maxLength">最大长度</param>
+        /// <param name="text">随机内容</param>
+        /// <returns></returns>
+        public string GenerateRandomLengthText(int minLength, int maxLength, string text)
+        {
+            var length = GenerateInt(minLength, maxLength);
             return GenerateText(length, text);
         }
 
