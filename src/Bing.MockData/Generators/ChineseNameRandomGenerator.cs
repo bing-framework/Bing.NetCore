@@ -61,7 +61,7 @@ namespace Bing.MockData.Generators
             List<string> list=new List<string>();
             for (int i = 0; i < maxLength; i++)
             {
-                string name = GetFirstName() + Builder.GenerateRandomLengthChinese(2);
+                string name = GetFirstName() + Builder.GenerateRandomLengthChinese(3);
                 list.Add(name);
             }
 
