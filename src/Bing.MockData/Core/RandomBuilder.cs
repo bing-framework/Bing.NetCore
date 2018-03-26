@@ -192,5 +192,24 @@ namespace Bing.MockData.Core
         }
 
         #endregion
+
+        #region GenerateAlphanumeric(生成随机字母数字)
+
+        /// <summary>
+        /// 生成随机字母数字
+        /// </summary>
+        /// <param name="maxLength">最大长度</param>
+        /// <param name="hasUppercase">是否包含大写字母,true:是,false:否</param>
+        /// <returns></returns>
+        public string GenerateAlphanumeric(int maxLength, bool hasUppercase = false)
+        {
+            string text = hasUppercase
+                ? Const.LOWERCASE + Const.UPPERCASE + Const.ARABIC_NUMBERS
+                : Const.LOWERCASE + Const.ARABIC_NUMBERS;
+
+            return GenerateText(maxLength, text);
+        }
+
+        #endregion
     }
 }
