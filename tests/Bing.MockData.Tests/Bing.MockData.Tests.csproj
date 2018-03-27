@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.MockData\Bing.MockData.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Utils\Bing.Utils.csproj" />
   </ItemGroup>
 
 </Project>
