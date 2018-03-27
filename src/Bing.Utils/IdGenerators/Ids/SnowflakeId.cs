@@ -2,88 +2,109 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bing.Utils.IdGenerators.Snowflake
+namespace Bing.Utils.IdGenerators.Ids
 {
     /// <summary>
-    /// 雪花算法
+    /// 雪花算法，代码出自：https://github.com/dunitian/snowflake-net/blob/master/Snowflake.Net.Core/IdWorker.cs
     /// </summary>
-    public class IdWorker
+    public class SnowflakeId
     {
         /// <summary>
         /// 基准时间
         /// </summary>
-        public const long Twepoch = 1288834974657L;
+        public const long TWEPOCH = 1288834974657L;
 
         /// <summary>
         /// 机器标识位数
         /// </summary>
-        private const int WorkerIdBits = 5;
+        private const int WORKER_ID_BITS = 5;
 
         /// <summary>
         /// 数据标志位数
         /// </summary>
-        private const int DatacenterIdBits = 5;
+        private const int DATACENTER_ID_BITS = 5;
 
         /// <summary>
         /// 序列号标识位数
         /// </summary>
-        private const int SequenceBits = 12;
+        private const int SEQUENCE_BITS = 12;
 
         /// <summary>
         /// 机器ID最大值
         /// </summary>
-        private const long MaxWorkerId = -1L ^ (-1L << WorkerIdBits);
+        private const long MAX_WORKER_ID = -1L ^ (-1L << WORKER_ID_BITS);
 
         /// <summary>
         /// 数据标志最大值
         /// </summary>
-        private const long MaxDatacenterId = -1L ^ (-1L << DatacenterIdBits);
+        private const long MAX_DATACENTER_ID = -1L ^ (-1L << DATACENTER_ID_BITS);
 
         /// <summary>
         /// 序列号ID最大值
         /// </summary>
-        private const long SequenceMask = -1L ^ (-1L << SequenceBits);
+        private const long SEQUENCE_MASK = -1L ^ (-1L << SEQUENCE_BITS);
 
         /// <summary>
         /// 机器ID偏左移12位
         /// </summary>
-        private const int WorkerIdShift = SequenceBits;
+        private const int WORKER_ID_SHIFT = SEQUENCE_BITS;
 
         /// <summary>
         /// 数据ID偏左移17位
         /// </summary>
-        private const int DatacenterIdShift = SequenceBits + WorkerIdBits;
+        private const int DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
 
         /// <summary>
         /// 时间毫秒左移22位
         /// </summary>
-        private const int TimestampLeftShift = SequenceBits + WorkerIdBits + DatacenterIdBits;
+        private const int TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
 
+        /// <summary>
+        /// 序列号ID
+        /// </summary>
         private long _sequence = 0L;
 
+        /// <summary>
+        /// 最后时间戳
+        /// </summary>
         private long _lastTimestamp = -1L;
 
+        /// <summary>
+        /// 机器ID
+        /// </summary>
         public long WorkerId { get; protected set; }
 
+        /// <summary>
+        /// 数据标志ID
+        /// </summary>
         public long DatacenterId { get; protected set; }
 
+        /// <summary>
+        /// 序列号ID
+        /// </summary>
         public long Sequence
         {
-            get { return _sequence; }
-            internal set { _sequence = value; }
+            get => _sequence;
+            internal set => _sequence = value;
         }
 
-        public IdWorker(long workerId, long datacenterId, long sequence = 0L)
+        /// <summary>
+        /// 初始化一个<see cref="SnowflakeId"/>类型的实例
+        /// </summary>
+        /// <param name="workerId">机器ID</param>
+        /// <param name="datacenterId">数据标志ID</param>
+        /// <param name="sequence">序列号ID</param>
+        public SnowflakeId(long workerId, long datacenterId, long sequence = 0L)
         {
             // 如果超出范围就抛出异常
-            if (workerId > MaxWorkerId || workerId < 0)
+            if (workerId > MAX_WORKER_ID || workerId < 0)
             {
-                throw new ArgumentException($"worker Id 必须大于0，且不能大于 MaxWorkerId：{MaxWorkerId}");
+                throw new ArgumentException($"worker Id 必须大于0，且不能大于 MaxWorkerId：{MAX_WORKER_ID}");
             }
 
-            if (datacenterId > MaxDatacenterId || datacenterId < 0)
+            if (datacenterId > MAX_DATACENTER_ID || datacenterId < 0)
             {
-                throw new ArgumentException($"datacenter Id 必须大于0，且不能大于 MaxDatacenterId：{MaxDatacenterId}");
+                throw new ArgumentException($"datacenter Id 必须大于0，且不能大于 MaxDatacenterId：{MAX_DATACENTER_ID}");
             }
 
             // 先校验再赋值
@@ -92,7 +113,15 @@ namespace Bing.Utils.IdGenerators.Snowflake
             _sequence = sequence;
         }
 
-        readonly object _lock=new object();
+        /// <summary>
+        /// 对象锁
+        /// </summary>
+        private readonly object _lock=new object();
+
+        /// <summary>
+        /// 获取下一个ID
+        /// </summary>
+        /// <returns></returns>
         public virtual long NextId()
         {
             lock (_lock)
@@ -107,7 +136,7 @@ namespace Bing.Utils.IdGenerators.Snowflake
                 if (_lastTimestamp == timestamp)
                 {
                     // sequence自增，和sequenceMask相与一下，去掉高位
-                    _sequence = (_sequence + 1) & SequenceMask;
+                    _sequence = (_sequence + 1) & SEQUENCE_MASK;
                     //判断是否溢出,也就是每毫秒内超过1024，当为1024时，与sequenceMask相与，sequence就等于0
                     if (_sequence == 0)
                     {
@@ -123,7 +152,7 @@ namespace Bing.Utils.IdGenerators.Snowflake
                 }
 
                 _lastTimestamp = timestamp;
-                return ((timestamp - Twepoch) << TimestampLeftShift) | (DatacenterId << DatacenterIdShift) | (WorkerId << WorkerIdShift) | _sequence;
+                return ((timestamp - TWEPOCH) << TIMESTAMP_LEFT_SHIFT) | (DatacenterId << DATACENTER_ID_SHIFT) | (WorkerId << WORKER_ID_SHIFT) | _sequence;
             }
         }
 
@@ -152,21 +181,36 @@ namespace Bing.Utils.IdGenerators.Snowflake
             return CurrentTimeMills();
         }
 
-
+        /// <summary>
+        /// 获取当前时间戳
+        /// </summary>
         public static Func<long> CurrentTimeFunc = InternalCurrentTimeMillis;
 
+        /// <summary>
+        /// 获取当前时间戳
+        /// </summary>
+        /// <returns></returns>
         public static long CurrentTimeMills()
         {
             return CurrentTimeFunc();
         }
 
+        /// <summary>
+        /// 重置当前时间戳
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
         public static IDisposable StubCurrentTime(Func<long> func)
         {
             CurrentTimeFunc = func;
             return new DisposableAction(() => { CurrentTimeFunc = InternalCurrentTimeMillis; });
         }
 
-
+        /// <summary>
+        /// 重置当前时间戳
+        /// </summary>
+        /// <param name="millis"></param>
+        /// <returns></returns>
         public static IDisposable StubCurrentTime(long millis)
         {
             CurrentTimeFunc = () => millis;
@@ -175,9 +219,41 @@ namespace Bing.Utils.IdGenerators.Snowflake
 
         private static readonly DateTime Jan1St1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
+        /// <summary>
+        /// 默认当前时间戳
+        /// </summary>
+        /// <returns></returns>
         private static long InternalCurrentTimeMillis()
         {
             return (long)(DateTime.UtcNow - Jan1St1970).TotalMilliseconds;
+        }
+
+        /// <summary>
+        /// 一次性方法
+        /// </summary>
+        public class DisposableAction : IDisposable
+        {
+            /// <summary>
+            /// 执行方法
+            /// </summary>
+            private readonly Action _action;
+
+            /// <summary>
+            /// 初始化一个<see cref="DisposableAction"/>类型的实例
+            /// </summary>
+            /// <param name="action">执行方法</param>
+            public DisposableAction(Action action)
+            {
+                _action = action ?? throw new ArgumentNullException(nameof(action));
+            }
+
+            /// <summary>
+            /// 释放资源
+            /// </summary>
+            public void Dispose()
+            {
+                _action();
+            }
         }
     }
 }
