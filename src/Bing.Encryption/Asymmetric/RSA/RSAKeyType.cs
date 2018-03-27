@@ -12,6 +12,7 @@ namespace Bing.Encryption
     public enum RSAKeyType
     {
         Xml,
-        Json
+        Json,
+        Base64
     }
 }

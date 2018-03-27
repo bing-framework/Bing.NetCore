@@ -58,6 +58,10 @@ namespace Bing.Encryption
             {
                 rsa.FromExtXmlString(rsaKey);
             }
+            else if (keyType == RSAKeyType.Base64)
+            {
+                rsa.FromBase64StringByPrivateKey(rsaKey);
+            }
             else
             {
                 rsa.FromJsonString(rsaKey);
@@ -135,11 +139,15 @@ namespace Bing.Encryption
         /// <returns></returns>
         public static byte[] Encrypt(byte[] sourceBytes, string publicKey, RSAKeyType keyType = RSAKeyType.Xml)
         {
-            using (var rsa=new RSACryptoServiceProvider())
+            using (var rsa= RSA.Create())
             {
                 if (keyType == RSAKeyType.Xml)
                 {
                     rsa.FromExtXmlString(publicKey);
+                }
+                else if (keyType == RSAKeyType.Base64)
+                {
+                    rsa.FromBase64StringByPrivateKey(publicKey);
                 }
                 else
                 {
@@ -179,11 +187,15 @@ namespace Bing.Encryption
         /// <returns></returns>
         public static byte[] Decrypt(byte[] sourceBytes, string privateKey,RSAKeyType keyType = RSAKeyType.Xml)
         {            
-            using (var rsa=new RSACryptoServiceProvider())
+            using (var rsa= RSA.Create())
             {
                 if (keyType == RSAKeyType.Xml)
                 {
                     rsa.FromExtXmlString(privateKey);
+                }
+                else if (keyType == RSAKeyType.Base64)
+                {
+                    rsa.FromBase64StringByPrivateKey(privateKey);
                 }
                 else
                 {
@@ -201,9 +213,11 @@ namespace Bing.Encryption
         /// <param name="privateKey">私钥</param>
         /// <param name="encoding">编码类型</param>
         /// <param name="outType">输出类型</param>
+        /// <param name="rsaType">算法类型</param>
         /// <param name="keyType">密钥类型</param>
         /// <returns></returns>
-        public static string SignData(string source, string privateKey,Encoding encoding=null, OutType outType = OutType.Base64,
+        public static string SignData(string source, string privateKey, Encoding encoding = null,
+            OutType outType = OutType.Base64, RSAType rsaType = RSAType.RSA,
             RSAKeyType keyType = RSAKeyType.Xml)
         {
             if (encoding == null)
@@ -211,7 +225,7 @@ namespace Bing.Encryption
                 encoding = Encoding.UTF8;
             }
 
-            var result = SignData(encoding.GetBytes(source), privateKey, keyType);
+            var result = SignData(encoding.GetBytes(source), privateKey, rsaType, keyType);
             if (outType == OutType.Base64)
             {
                 return Convert.ToBase64String(result);
@@ -225,22 +239,28 @@ namespace Bing.Encryption
         /// </summary>
         /// <param name="source">要签名的明文字节数组</param>
         /// <param name="privateKey">私钥</param>
+        /// <param name="rsaType">算法类型</param>
         /// <param name="keyType">密钥类型</param>
         /// <returns></returns>
-        public static byte[] SignData(byte[] source, string privateKey, RSAKeyType keyType = RSAKeyType.Xml)
+        public static byte[] SignData(byte[] source, string privateKey,RSAType rsaType=RSAType.RSA, RSAKeyType keyType = RSAKeyType.Xml)
         {
-            using (var rsa=new RSACryptoServiceProvider())
+            using (var rsa= RSA.Create())
             {
                 if (keyType == RSAKeyType.Xml)
                 {
                     rsa.FromExtXmlString(privateKey);
+                }
+                else if (keyType == RSAKeyType.Base64)
+                {
+                    rsa.FromBase64StringByPrivateKey(privateKey);
                 }
                 else
                 {
                     rsa.FromJsonString(privateKey);
                 }
 
-                return rsa.SignData(source, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                return rsa.SignData(source, rsaType == RSAType.RSA ? HashAlgorithmName.SHA1 : HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
             }
         }
 
@@ -252,10 +272,11 @@ namespace Bing.Encryption
         /// <param name="publicKey">公钥</param>
         /// <param name="encoding">编码类型</param>
         /// <param name="outType">输出类型</param>
+        /// <param name="rsaType">算法类型</param>
         /// <param name="keyType">密钥类型</param>
         /// <returns></returns>
         public static bool VerifyData(string source, string signData, string publicKey, Encoding encoding = null,
-            OutType outType = OutType.Base64, RSAKeyType keyType = RSAKeyType.Xml)
+            OutType outType = OutType.Base64, RSAType rsaType = RSAType.RSA, RSAKeyType keyType = RSAKeyType.Xml)
         {
             if (encoding == null)
             {
@@ -264,7 +285,7 @@ namespace Bing.Encryption
             byte[] sourceBytes = encoding.GetBytes(source);
             byte[] signBytes = signData.GetEncryptBytes(outType);
 
-            return VerifyData(sourceBytes, signBytes, publicKey, keyType);
+            return VerifyData(sourceBytes, signBytes, publicKey,rsaType, keyType);
         }
 
         /// <summary>
@@ -273,21 +294,29 @@ namespace Bing.Encryption
         /// <param name="source">解密得到的明文字节数组</param>
         /// <param name="signData">明文签名字节数组</param>
         /// <param name="publicKey">公钥</param>
+        /// <param name="rsaType">算法类型</param>
         /// <param name="keyType">密钥类型</param>
         /// <returns></returns>
-        public static bool VerifyData(byte[] source, byte[] signData, string publicKey, RSAKeyType keyType = RSAKeyType.Xml)
+        public static bool VerifyData(byte[] source, byte[] signData, string publicKey, RSAType rsaType = RSAType.RSA, RSAKeyType keyType = RSAKeyType.Xml)
         {
-            using (var rsa=new RSACryptoServiceProvider())
+            using (var rsa=RSA.Create())
             {
                 if (keyType == RSAKeyType.Xml)
                 {
                     rsa.FromExtXmlString(publicKey);
                 }
+                else if (keyType == RSAKeyType.Base64)
+                {
+                    rsa.FromBase64StringByPublicKey(publicKey);
+                }
                 else
                 {
                     rsa.FromJsonString(publicKey);
                 }
-                return rsa.VerifyData(source, signData, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+
+                return rsa.VerifyData(source, signData,
+                    rsaType == RSAType.RSA ? HashAlgorithmName.SHA1 : HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
             }
         }
     }
