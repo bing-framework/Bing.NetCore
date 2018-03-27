@@ -19,7 +19,7 @@ namespace Bing.Utils.IdGenerators.Core
         /// <summary>
         /// 获取<see cref="SnowflakeIdGenerator"/>类型的实例
         /// </summary>
-        public static SnowflakeIdGenerator Current { get;} = new SnowflakeIdGenerator();        
+        public static SnowflakeIdGenerator Current { get;} = new SnowflakeIdGenerator();
 
         /// <summary>
         /// 创建ID
