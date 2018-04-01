@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Webs.Filters;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Antiforgery.Internal;
 //using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +17,13 @@ namespace Bing.Samples.Api.Controllers
     [Route("api/[controller]/[action]")]
     public class SwaggerTestController : Controller
     {
+        private readonly IAntiforgery _antiforgery;
+
+        public SwaggerTestController(IAntiforgery antiforgery)
+        {
+            _antiforgery = antiforgery;
+        }
+
         /// <summary>
         /// 获取所有信息
         /// </summary>
@@ -30,6 +39,7 @@ namespace Bing.Samples.Api.Controllers
         /// </summary>
         /// <param name="id">系统编号</param>
         /// <returns></returns>
+        [ValidateAntiForgeryToken]
         [HttpGet("{id}")]
         public string Get(int id)
         {
@@ -85,6 +95,23 @@ namespace Bing.Samples.Api.Controllers
         public SampleNameValue Test2([FromBody] SampleNameValue info)
         {
             return info;
+        }
+
+        [HttpGet]
+        public IActionResult GetToken()
+        {
+            var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+
+            var token = tokens.RequestToken;
+            var tokenName = tokens.HeaderName;
+
+            HttpContext.Response.Cookies.Append(tokenName,token);
+
+            return new ObjectResult(new
+            {
+                token= token,
+                tokenName= tokenName
+            });
         }
     }
 

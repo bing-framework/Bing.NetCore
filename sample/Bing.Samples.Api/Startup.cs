@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Bing.Samples.Api.SwaggerExtensions;
 using Bing.Webs.Filters;
@@ -30,6 +31,7 @@ namespace Bing.Samples.Api
                 config.OperationFilter<AddAuthTokenHeaderParameter>();
             });
             services.AddMvcCore().AddApiExplorer();
+            services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,8 +51,10 @@ namespace Bing.Samples.Api
             app.UseSwagger(config => { });
             app.UseSwaggerUI(config =>
             {
+                config.IndexStream = () =>
+                    GetType().GetTypeInfo().Assembly.GetManifestResourceStream("Bing.Samples.Api.Swagger.index.html");
                 config.ShowExtensions();
-                config.SwaggerEndpoint("/swagger/v1/swagger.json", "Bing.Samples.Api v1");
+                config.SwaggerEndpoint("/swagger/v1/swagger.json", "Bing.Samples.Api v1");                
             });
         }
     }
