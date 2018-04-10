@@ -77,8 +77,13 @@ namespace Bing.Reflections
         /// </summary>
         /// <param name="assemblyName">程序集名</param>
         /// <returns></returns>
-        private bool Match(AssemblyName assemblyName)
+        protected virtual bool Match(AssemblyName assemblyName)
         {
+            if (assemblyName.FullName.Contains("PrecompiledViews"))
+            {
+                return false;
+            }
+
             return !Regex.IsMatch(assemblyName.FullName, SKIP_ASSEMBLIES,
                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
