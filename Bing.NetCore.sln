@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing", "src\Bing\Bing.csproj", "{B4159996-5640-4757-AE7F-B18989C7E5E1}"
 EndProject
@@ -74,7 +74,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-document", "00-document"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.BankCardInfo", "src\Bing.BankCardInfo\Bing.BankCardInfo.csproj", "{5556CD02-008C-4DAB-B9F4-DD23EDACE87E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.BankCardInfo.Tests", "tests\Bing.BankCardInfo.Tests\Bing.BankCardInfo.Tests.csproj", "{B50EC54D-B1C9-44CB-BE13-1475735FE304}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.BankCardInfo.Tests", "tests\Bing.BankCardInfo.Tests\Bing.BankCardInfo.Tests.csproj", "{B50EC54D-B1C9-44CB-BE13-1475735FE304}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Events", "src\Bing.Events\Bing.Events.csproj", "{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -178,6 +180,10 @@ Global
 		{B50EC54D-B1C9-44CB-BE13-1475735FE304}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B50EC54D-B1C9-44CB-BE13-1475735FE304}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B50EC54D-B1C9-44CB-BE13-1475735FE304}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -214,6 +220,7 @@ Global
 		{C744ED9E-F1C4-4E5E-B9D6-FA8C96D3959C} = {52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F}
 		{5556CD02-008C-4DAB-B9F4-DD23EDACE87E} = {2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}
 		{B50EC54D-B1C9-44CB-BE13-1475735FE304} = {52A836E8-CB0B-46F5-9BC5-DBFF92A5A57F}
+		{B55867B3-E6FE-410D-A27F-55A7C63B8F2E} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
