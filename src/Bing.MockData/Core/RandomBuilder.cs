@@ -211,5 +211,41 @@ namespace Bing.MockData.Core
         }
 
         #endregion
+
+        #region GenerateDate(生成随机日期)
+
+        /// <summary>
+        /// 生成随机日期
+        /// </summary>
+        /// <param name="beginYear">起始年份</param>
+        /// <param name="endYear">结束年份</param>
+        /// <returns></returns>
+        public DateTime GenerateDate(int beginYear = 1970, int endYear = 2080)
+        {
+            var year = GenerateInt(beginYear, endYear);
+            var month = GenerateInt(1, 13);
+            var day = GenerateInt(1, (month == 2 && IsLeapYear(year) ? 29 : 28) + 1);
+            var hour = GenerateInt(0, 24);
+            var minute = GenerateInt(0, 60);
+            var second = GenerateInt(0, 60);
+            return new DateTime(year, month, day, hour, minute, second);
+        }
+
+        /// <summary>
+        /// 是否闰年
+        /// </summary>
+        /// <param name="year">年份</param>
+        /// <returns></returns>
+        private bool IsLeapYear(int year)
+        {
+            if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
     }
 }

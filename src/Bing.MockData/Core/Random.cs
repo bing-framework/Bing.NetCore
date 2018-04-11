@@ -53,6 +53,16 @@ namespace Bing.MockData.Core
         }
 
         /// <summary>
+        /// 获取指定最大值（包含）的随机整数，
+        /// </summary>
+        /// <param name="maxValue">最大值</param>
+        /// <returns></returns>
+        public int GetInt(int maxValue)
+        {
+            return _random.Next(maxValue);
+        }
+
+        /// <summary>
         /// 获取随机整数
         /// </summary>
         /// <returns></returns>

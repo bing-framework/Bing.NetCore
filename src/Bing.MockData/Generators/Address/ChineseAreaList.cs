@@ -19,6 +19,11 @@ namespace Bing.MockData.Generators.Address
         /// </summary>
         public static List<string> CityNameList { get; set; } = new List<string>();
 
+        /// <summary>
+        /// 行政代码 列表
+        /// </summary>
+        public static List<KeyValuePair<string,string>> AreaCodeDict { get; set; }=new List<KeyValuePair<string, string>>();
+
         static ChineseAreaList()
         {
             ProvinceCityList.Add("黑龙江省齐齐哈尔市");
@@ -706,6 +711,42 @@ namespace Bing.MockData.Generators.Address
             CityNameList.Add("伊犁哈萨克自治州");
             CityNameList.Add("塔城地区");
             CityNameList.Add("阿勒泰地区");
+
+            AreaCodeDict.Add(new KeyValuePair<string, string>("11", "北京"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("12", "天津"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("13", "河北"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("14", "山西"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("15", "内蒙古"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("21", "辽宁"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("22", "吉林"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("23", "黑龙江"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("31", "上海"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("32", "江苏"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("33", "浙江"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("34", "安徽"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("35", "福建"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("36", "江西"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("37", "山东"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("41", "河南"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("42", "湖北"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("43", "湖南"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("44", "广东"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("45", "广西"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("46", "海南"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("50", "重庆"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("51", "四川"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("52", "贵州"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("53", "云南"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("54", "西藏"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("61", "陕西"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("62", "甘肃"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("63", "青海"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("64", "宁夏"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("65", "新疆"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("71", "台湾"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("81", "香港"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("82", "澳门"));
+            AreaCodeDict.Add(new KeyValuePair<string, string>("91", "国外"));
         }
     }
 }
