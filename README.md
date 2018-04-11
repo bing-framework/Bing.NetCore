@@ -73,7 +73,7 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - [ABP](https://github.com/aspnetboilerplate/aspnetboilerplate)
   - [Nop](https://www.nopcommerce.com) 
     - Nop是一个开源商城，封装了大量实用的基础代码。
-  - [Utils](https://github.com/dotnetcore/util)
+  - [Util](https://github.com/dotnetcore/util)
     - 使用 .net core 可使用该框架。
 
 ## 框架开发流程
