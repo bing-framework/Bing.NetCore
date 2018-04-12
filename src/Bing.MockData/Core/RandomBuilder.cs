@@ -247,5 +247,24 @@ namespace Bing.MockData.Core
         }
 
         #endregion
+
+        #region GenerateBool(生成随机布尔值)
+
+        /// <summary>
+        /// 生成随机布尔值
+        /// </summary>
+        /// <returns></returns>
+        public bool GenerateBool()
+        {
+            var random = _random.GetInt(1, 100);
+            if (random % 2 == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
     }
 }
