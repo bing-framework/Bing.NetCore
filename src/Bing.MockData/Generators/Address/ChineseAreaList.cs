@@ -24,7 +24,28 @@ namespace Bing.MockData.Generators.Address
         /// </summary>
         public static List<KeyValuePair<string,string>> AreaCodeDict { get; set; }=new List<KeyValuePair<string, string>>();
 
+        /// <summary>
+        /// 大区 列表
+        /// </summary>
+        public static List<string> RegionList { get; set; }=new List<string>();
+
+        /// <summary>
+        /// 初始化<see cref="ChineseAreaList"/>静态实例
+        /// </summary>
         static ChineseAreaList()
+        {
+            InitProvinceCityList();
+            InitCityNameList();
+            InitAreaCodeDict();
+            InitRegionList();
+        }
+
+        #region InitProvinceCityList(初始化省市列表)
+
+        /// <summary>
+        /// 初始化省市列表
+        /// </summary>
+        private static void InitProvinceCityList()
         {
             ProvinceCityList.Add("黑龙江省齐齐哈尔市");
             ProvinceCityList.Add("黑龙江省黑河市");
@@ -371,7 +392,17 @@ namespace Bing.MockData.Generators.Address
             ProvinceCityList.Add("云南省丽江市");
             ProvinceCityList.Add("云南省临沧市");
             ProvinceCityList.Add("上海市上海市");
+        }
 
+        #endregion
+
+        #region InitCityNameList(初始化城市列表)
+
+        /// <summary>
+        /// 初始化城市列表
+        /// </summary>
+        private static void InitCityNameList()
+        {
             CityNameList.Add("北京市");
             CityNameList.Add("上海市");
             CityNameList.Add("天津市");
@@ -711,7 +742,17 @@ namespace Bing.MockData.Generators.Address
             CityNameList.Add("伊犁哈萨克自治州");
             CityNameList.Add("塔城地区");
             CityNameList.Add("阿勒泰地区");
+        }
 
+        #endregion
+
+        #region InitAreaCodeDict(初始化行政代码列表)
+
+        /// <summary>
+        /// 初始化行政代码列表
+        /// </summary>
+        private static void InitAreaCodeDict()
+        {
             AreaCodeDict.Add(new KeyValuePair<string, string>("11", "北京"));
             AreaCodeDict.Add(new KeyValuePair<string, string>("12", "天津"));
             AreaCodeDict.Add(new KeyValuePair<string, string>("13", "河北"));
@@ -748,5 +789,25 @@ namespace Bing.MockData.Generators.Address
             AreaCodeDict.Add(new KeyValuePair<string, string>("82", "澳门"));
             AreaCodeDict.Add(new KeyValuePair<string, string>("91", "国外"));
         }
+
+        #endregion
+
+        #region InitRegionList(初始化大区列表)
+
+        /// <summary>
+        /// 初始化大区列表
+        /// </summary>
+        private static void InitRegionList()
+        {
+            RegionList.Add("东北");
+            RegionList.Add("华北");
+            RegionList.Add("华东");
+            RegionList.Add("华中");
+            RegionList.Add("华南");
+            RegionList.Add("西南");
+            RegionList.Add("西北");
+        }
+
+        #endregion
     }
 }

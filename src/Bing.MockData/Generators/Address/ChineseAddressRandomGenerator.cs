@@ -47,6 +47,15 @@ namespace Bing.MockData.Generators.Address
         }
 
         /// <summary>
+        /// 随机生成一个大区
+        /// </summary>
+        /// <returns></returns>
+        public string GenerateRegion()
+        {
+            return ChineseAreaList.RegionList[Builder.GenerateInt(0, ChineseAreaList.RegionList.Count)];
+        }
+
+        /// <summary>
         /// 获取地址
         /// </summary>
         /// <returns></returns>

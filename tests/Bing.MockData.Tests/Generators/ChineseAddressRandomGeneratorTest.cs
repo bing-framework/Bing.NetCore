@@ -22,5 +22,14 @@ namespace Bing.MockData.Tests.Generators
                 Output.WriteLine(item);
             }
         }
+
+        [Fact]
+        public void Test_GenerateRegion()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                Output.WriteLine(ChineseAddressRandomGenerator.Instance.GenerateRegion());
+            }
+        }
     }
 }
