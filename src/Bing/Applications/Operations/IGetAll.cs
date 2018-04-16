@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Bing.Applications.Dtos;
 
-namespace Bing.Applications
+namespace Bing.Applications.Operations
 {
     /// <summary>
     /// 获取全部数据
@@ -16,12 +13,6 @@ namespace Bing.Applications
         /// 获取全部
         /// </summary>
         /// <returns></returns>
-        List<TDto> GetAll();
-
-        /// <summary>
-        /// 获取全部
-        /// </summary>
-        /// <returns></returns>
-        Task<List<TDto>> GetAllAsync();
+        List<TDto> GetAll();        
     }
 }

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
 
-namespace Bing.Applications
+namespace Bing.Applications.Operations
 {
     /// <summary>
     /// 分页查询
@@ -25,24 +22,10 @@ namespace Bing.Applications
         List<TDto> Query(TQueryParameter parameter);
 
         /// <summary>
-        /// 查询
-        /// </summary>
-        /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
-        Task<List<TDto>> QueryAsync(TQueryParameter parameter);
-
-        /// <summary>
         /// 分页查询
         /// </summary>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
         PagerList<TDto> PagerQuery(TQueryParameter parameter);
-
-        /// <summary>
-        /// 分页查询
-        /// </summary>
-        /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
-        Task<PagerList<TDto>> PagerQueryAsync(TQueryParameter parameter);
     }
 }
