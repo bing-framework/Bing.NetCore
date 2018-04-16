@@ -18,7 +18,7 @@ namespace Bing.Applications
     public interface IQueryService<TDto, in TQueryParameter> : IService,
         IGetAll<TDto>, IGetById<TDto>, IPagerQuery<TDto, TQueryParameter>,
         IGetAllAsync<TDto>, IGetByIdAsync<TDto>, IPagerQueryAsync<TDto, TQueryParameter>
-        where TDto : IDto, new()
+        where TDto : IResponse, new()
         where TQueryParameter : IQueryParameter
     {
     }

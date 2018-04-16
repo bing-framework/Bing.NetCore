@@ -8,7 +8,7 @@ namespace Bing.Applications.Operations
     /// 获取指定标识实体
     /// </summary>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
-    public interface IGetByIdAsync<TDto> where TDto : IDto, new()
+    public interface IGetByIdAsync<TDto> where TDto : IResponse, new()
     {
         /// <summary>
         /// 通过编号获取
