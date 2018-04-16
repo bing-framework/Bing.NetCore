@@ -296,13 +296,16 @@ namespace Bing.SqlBuilder.Conditions
         protected bool IsContinue<T>(params T[] fieldValue)
         {
             // 如果选择IsExcludeEmpty为true，并且该字段为空值的话则跳过
-
-            bool result = IsExcludeEmpty
-                          && fieldValue != null
-                          && fieldValue.Length > 0
-                          && (string.IsNullOrWhiteSpace(fieldValue[0] + "") || typeof(T) == typeof(Guid) &&
-                              fieldValue[0].ToString().ToGuid().IsEmpty());
-            return result;
+            if (IsExcludeEmpty)
+            {
+                return fieldValue == null || fieldValue.Length == 0 ||
+                       (string.IsNullOrWhiteSpace(fieldValue[0] + "") || typeof(T) == typeof(Guid) &&
+                        fieldValue[0].ToString().ToGuid().IsEmpty());
+            }
+            else
+            {
+                return fieldValue == null || fieldValue.Length == 0;
+            }
         }
 
         /// <summary>
