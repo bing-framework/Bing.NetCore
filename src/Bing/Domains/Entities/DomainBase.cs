@@ -190,10 +190,10 @@ namespace Bing.Domains.Entities
         /// <param name="newValue">新值，范例：newEntity.Name</param>
         protected void AddChange<TProperty, TValue>(Expression<Func<T, TProperty>> expression, TValue newValue)
         {
-            var name = Utils.Helpers.Lambda.GetName(expression);
-            var description =
-                Utils.Helpers.Reflection.GetDisplayNameOrDescription(Utils.Helpers.Lambda.GetMember(expression));
-            var value = Utils.Helpers.Lambda.GetValue(expression);
+            var member = Utils.Helpers.Lambda.GetMemberExpression(expression);
+            var name = Utils.Helpers.Lambda.GetMemberName(member);
+            var description = Utils.Helpers.Reflection.GetDisplayNameOrDescription(member.Member);
+            var value = member.Member.GetPropertyValue(this);
             AddChange(name, description, Utils.Helpers.Conv.To<TValue>(value), newValue);
         }
 
@@ -300,18 +300,31 @@ namespace Bing.Domains.Entities
         /// <param name="name">属性名</param>
         /// <param name="value">属性值</param>
         protected void AddDescription<TValue>(string name, TValue value)
-        {
-            if (value == null)
-            {
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(value.ToString()))
+        {            
+            if (string.IsNullOrWhiteSpace(value.SafeString()))
             {
                 return;
             }
             _description.AppendFormat("{0}:{1},", name, value);
         }
 
+        /// <summary>
+        /// 添加描述
+        /// </summary>
+        /// <typeparam name="TProperty">属性类型</typeparam>
+        /// <param name="expression">属性表达式，范例：t => t.Name</param>
+        protected void AddDescription<TProperty>(Expression<Func<T, TProperty>> expression)
+        {
+            var member = Utils.Helpers.Lambda.GetMember(expression);
+            var description = Utils.Helpers.Reflection.GetDisplayNameOrDescription(member);
+            var value = member.GetPropertyValue(this);
+            if (Utils.Helpers.Reflection.IsBool(member))
+            {
+                value = Utils.Helpers.Conv.ToBool(value).Description();
+            }
+
+            AddDescription(description, value);
+        }
         #endregion
 
         #region ToString(输出对象状态)

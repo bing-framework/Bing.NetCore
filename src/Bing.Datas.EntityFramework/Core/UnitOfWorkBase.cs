@@ -198,7 +198,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         protected virtual IEnumerable<IMap> GetMapTypes(Assembly assembly)
         {
-            return Bing.Utils.Helpers.Reflection.GetTypesByInterface<IMap>(assembly);
+            return Bing.Utils.Helpers.Reflection.GetInstancesByInterface<IMap>(assembly);
         }
 
         #endregion

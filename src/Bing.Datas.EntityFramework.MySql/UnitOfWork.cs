@@ -49,7 +49,7 @@ namespace Bing.Datas.EntityFramework.MySql
         /// <returns></returns>
         protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapTypes(Assembly assembly)
         {
-            return Bing.Utils.Helpers.Reflection.GetTypesByInterface<IMap>(assembly);
+            return Bing.Utils.Helpers.Reflection.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

@@ -29,7 +29,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="expression">表达式</param>
         /// <returns></returns>
-        private static MemberExpression GetMemberExpression(Expression expression)
+        public static MemberExpression GetMemberExpression(Expression expression)
         {
             if (expression == null)
             {
@@ -65,14 +65,14 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="memberExpression">表达式</param>
         /// <returns></returns>
-        private static string GetMemberName(MemberExpression memberExpression)
+        public static string GetMemberName(MemberExpression memberExpression)
         {
             if (memberExpression == null)
             {
                 return string.Empty;
             }
             string result = memberExpression.ToString();
-            return result.Substring(result.IndexOf(".") + 1);
+            return result.Substring(result.IndexOf(".", StringComparison.Ordinal) + 1);
         }
         #endregion
 

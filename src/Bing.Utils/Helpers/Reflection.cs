@@ -64,8 +64,10 @@ namespace Bing.Utils.Helpers
             {
                 return string.Empty;
             }
-            var attribute = member.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute;
-            return attribute == null ? member.Name : attribute.Description;
+
+            return member.GetCustomAttribute<DescriptionAttribute>() is DescriptionAttribute attribute
+                ? attribute.Description
+                : member.Name;
         }
         #endregion
 
@@ -78,22 +80,7 @@ namespace Bing.Utils.Helpers
         public static string GetDisplayName<T>()
         {
             return GetDisplayName(Common.GetType<T>());
-        }
-
-        /// <summary>
-        /// 获取类型显示名称，使用<see cref="DisplayNameAttribute"/>设置显示名称
-        /// </summary>
-        /// <param name="type">类型</param>
-        /// <returns></returns>
-        private static string GetDisplayName(Type type)
-        {
-            if (type == null)
-            {
-                return string.Empty;
-            }
-            var attribute = type.GetCustomAttribute(typeof(DisplayNameAttribute)) as DisplayNameAttribute;
-            return attribute != null ? attribute.DisplayName : string.Empty;
-        }
+        }        
 
         /// <summary>
         /// 获取类型成员显示名称，，使用<see cref="DisplayNameAttribute"/>或<see cref="DisplayAttribute"/>设置显示名称
@@ -106,17 +93,15 @@ namespace Bing.Utils.Helpers
             {
                 return string.Empty;
             }
-            var displayNameAttribute = member.GetCustomAttribute(typeof(DisplayNameAttribute)) as DisplayNameAttribute;
-            if (displayNameAttribute != null)
+            if (member.GetCustomAttribute<DisplayAttribute>() is DisplayAttribute displayAttribute)
+            {
+                return displayAttribute.Description; ;
+            }
+            if (member.GetCustomAttribute<DisplayNameAttribute>() is DisplayNameAttribute displayNameAttribute)
             {
                 return displayNameAttribute.DisplayName;
             }
-            var displayAttribute = member.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
-            if (displayAttribute == null)
-            {
-                return string.Empty;
-            }
-            return displayAttribute.Description;
+            return string.Empty;
         }
 
         #endregion
@@ -129,13 +114,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static string GetDisplayNameOrDescription<T>()
         {
-            var type = Common.GetType<T>();
-            var result = GetDisplayName(type);
-            if (result.IsEmpty())
-            {
-                result = GetDescription(type);
-            }
-            return result;
+            return GetDisplayNameOrDescription(Common.GetType<T>());
         }
 
         /// <summary>
@@ -145,23 +124,19 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static string GetDisplayNameOrDescription(MemberInfo member)
         {
-            var result = GetDisplayName(member);
-            if (!result.IsEmpty())
-            {
-                return result;
-            }
-            return GetDescription(member);
+            var result = GetDisplayName(member);            
+            return string.IsNullOrWhiteSpace(result) ? GetDescription(member) : result;
         }
         #endregion
 
-        #region GetTypesByInterface(获取实现了接口的所有具体类型)
+        #region GetInstancesByInterface(获取实现了接口的所有实例)
         /// <summary>
-        /// 获取实现了接口的所有具体类型
+        /// 获取实现了接口的所有实例
         /// </summary>
         /// <typeparam name="TInterface">接口类型</typeparam>
         /// <param name="assembly">在该程序集中查找</param>
         /// <returns></returns>
-        public static List<TInterface> GetTypesByInterface<TInterface>(Assembly assembly)
+        public static List<TInterface> GetInstancesByInterface<TInterface>(Assembly assembly)
         {
             var typeInterface = typeof(TInterface);
             return
@@ -520,5 +495,19 @@ namespace Bing.Utils.Helpers
         }
         #endregion
 
+        #region GetPublicProperties(获取公共属性列表)
+
+        /// <summary>
+        /// 获取公共属性列表
+        /// </summary>
+        /// <param name="instance">实例</param>
+        /// <returns></returns>
+        public static List<Item> GetPublicProperties(object instance)
+        {
+            var properties = instance.GetType().GetProperties();
+            return properties.ToList().Select(t => new Item(t.Name, t.GetValue(instance))).ToList();
+        }
+
+        #endregion
     }
 }
