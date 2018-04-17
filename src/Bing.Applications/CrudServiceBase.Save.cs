@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Domains.Entities;
+using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Applications
@@ -12,28 +14,30 @@ namespace Bing.Applications
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TRequest">请求参数类型</typeparam>
+    /// <typeparam name="TCreateRequest">创建参数类型</typeparam>
+    /// <typeparam name="TUpdateRequest">修改参数类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
-    public abstract partial class CrudServiceBase<TEntity, TDto, TRequest, TQueryParameter, TKey>
+
+    public abstract partial class CrudServiceBase<TEntity, TDto, TRequest, TCreateRequest, TUpdateRequest, TQueryParameter, TKey>
     {
         /// <summary>
         /// 创建
         /// </summary>
-        /// <param name="request">请求参数</param>
-        public void Create(TRequest request)
+        /// <param name="request">创建参数</param>
+        public string Create(TCreateRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
-
-            var entity = ToEntity(request);
+            var entity = ToEntityFromCreateRequest(request);
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
             Create(entity);
-            request.Id = entity.Id.ToString();
+            return entity.Id.ToString();
         }
 
         /// <summary>
@@ -68,22 +72,21 @@ namespace Bing.Applications
         /// <summary>
         /// 创建
         /// </summary>
-        /// <param name="request">请求参数</param>
+        /// <param name="request">创建参数</param>
         /// <returns></returns>
-        public async Task CreateAsync(TRequest request)
+        public async Task<string> CreateAsync(TCreateRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
-
-            var entity = ToEntity(request);
+            var entity = ToEntityFromCreateRequest(request);
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
             await CreateAsync(entity);
-            request.Id = entity.Id.ToString();
+            return entity.Id.ToString();
         }
 
         /// <summary>
@@ -102,15 +105,14 @@ namespace Bing.Applications
         /// <summary>
         /// 修改
         /// </summary>
-        /// <param name="request">请求参数</param>
-        public void Update(TRequest request)
+        /// <param name="request">修改参数</param>
+        public void Update(TUpdateRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
-
-            var entity = ToEntity(request);
+            var entity = ToEntityFromUpdateRequest(request);
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
@@ -124,9 +126,15 @@ namespace Bing.Applications
         /// <param name="entity">实体</param>
         protected void Update(TEntity entity)
         {
+            var oldEntity = _repository.Find(entity.Id);
+            if (oldEntity == null)
+            {
+                throw new ArgumentNullException(nameof(oldEntity));
+            }
+            var changes = oldEntity.GetChanges(entity);
             UpdateBefore(entity);
             _repository.Update(entity);
-            UpdateAfter(entity);
+            UpdateAfter(entity, changes);
         }
 
         /// <summary>
@@ -141,24 +149,24 @@ namespace Bing.Applications
         /// 修改后操作
         /// </summary>
         /// <param name="entity">实体</param>
-        protected virtual void UpdateAfter(TEntity entity)
+        /// <param name="changeValues">变更值集合</param>
+        protected virtual void UpdateAfter(TEntity entity, ChangeValueCollection changeValues)
         {
-            AddLog(entity);
+            Log.BussinessId(entity.Id.SafeString()).Content(changeValues.SafeString());
         }
 
         /// <summary>
         /// 修改
         /// </summary>
-        /// <param name="request">请求参数</param>
+        /// <param name="request">修改参数</param>
         /// <returns></returns>
-        public async Task UpdateAsync(TRequest request)
+        public async Task UpdateAsync(TUpdateRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
-
-            var entity = ToEntity(request);
+            var entity = ToEntityFromUpdateRequest(request);
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
@@ -174,9 +182,15 @@ namespace Bing.Applications
         /// <returns></returns>
         protected async Task UpdateAsync(TEntity entity)
         {
+            var oldEntity = await _repository.FindAsync(entity.Id);
+            if (oldEntity == null)
+            {
+                throw new ArgumentNullException(nameof(oldEntity));
+            }
+            var changes = oldEntity.GetChanges(entity);
             UpdateBefore(entity);
             await _repository.UpdateAsync(entity);
-            UpdateAfter(entity);
+            UpdateAfter(entity, changes);
         }
 
         /// <summary>
@@ -235,14 +249,6 @@ namespace Bing.Applications
         }
 
         /// <summary>
-        /// 提交后操作 - 该方法由工作单元拦截器调用
-        /// </summary>
-        public void CommitAfter()
-        {
-            SaveAfter();
-        }
-
-        /// <summary>
         /// 保存前操作
         /// </summary>
         /// <param name="request">请求参数</param>
@@ -251,7 +257,7 @@ namespace Bing.Applications
         }
 
         /// <summary>
-        /// 是否新增
+        /// 是否创建
         /// </summary>
         /// <param name="request">请求参数</param>
         /// <param name="entity">实体</param>
@@ -259,6 +265,14 @@ namespace Bing.Applications
         protected virtual bool IsNew(TRequest request, TEntity entity)
         {
             return string.IsNullOrWhiteSpace(request.Id) || entity.Id.Equals(default(TKey));
+        }
+
+        /// <summary>
+        /// 提交后操作 - 该方法由工作单元拦截器调用
+        /// </summary>
+        public void CommitAfter()
+        {
+            SaveAfter();
         }
 
         /// <summary>

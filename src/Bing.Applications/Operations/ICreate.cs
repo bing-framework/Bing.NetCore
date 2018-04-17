@@ -18,6 +18,6 @@ namespace Bing.Applications.Operations
         /// </summary>
         /// <param name="request">请求参数</param>
         [UnitOfWork]
-        void Create([Valid] TCreateRequest request);
+        string Create([Valid] TCreateRequest request);
     }
 }

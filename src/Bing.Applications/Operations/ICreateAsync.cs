@@ -20,6 +20,6 @@ namespace Bing.Applications.Operations
         /// <param name="request">请求参数</param>
         /// <returns></returns>
         [UnitOfWork]
-        Task CreateAsync([Valid] TCreateRequest request);
+        Task<string> CreateAsync([Valid] TCreateRequest request);
     }
 }
