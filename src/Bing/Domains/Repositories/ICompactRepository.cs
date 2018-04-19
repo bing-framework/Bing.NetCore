@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Dependency;
 using Bing.Domains.Entities;
 using Bing.Validations.Aspects;
 
@@ -22,7 +23,7 @@ namespace Bing.Domains.Repositories
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
-    public interface ICompactRepository<TEntity, in TKey> where TEntity : class, IAggregateRoot
+    public interface ICompactRepository<TEntity, in TKey>: IScopeDependency where TEntity : class, IAggregateRoot
     {
         /// <summary>
         /// 查找实体
