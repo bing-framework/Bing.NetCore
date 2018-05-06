@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Bing.Domains.Entities;
 
 namespace Bing.Datas.Persistence
 {
     /// <summary>
     /// 持久化对象
     /// </summary>
+    public abstract class PersistentObjectBase : PersistentObjectBase<Guid>
+    {
+    }
+
+    /// <summary>
+    /// 持久化对象
+    /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public abstract class PersistentObjectBase<TKey> : IPersistentObject<TKey>
+    public abstract class PersistentObjectBase<TKey> : IKey<TKey>,IVersion
     {
         /// <summary>
         /// 标识

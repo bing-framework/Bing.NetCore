@@ -55,23 +55,23 @@ namespace Bing.Datas.Queries.Trees
         /// 是否搜索
         /// </summary>
         /// <returns></returns>
-        public bool IsSearch()
+        public virtual bool IsSearch()
         {
             var items = Bing.Utils.Helpers.Reflection.GetPublicProperties(this);
-            return items.All(t => Ignore(t.Text, t.Value)) == false;
+            return items.Any(t => IsSearchProperty(t.Text, t.Value));
         }
 
         /// <summary>
-        /// 是否忽略
+        /// 是否搜索属性
         /// </summary>
         /// <param name="name">属性名</param>
         /// <param name="value">属性值</param>
         /// <returns></returns>
-        private bool Ignore(string name, object value)
+        protected virtual bool IsSearchProperty(string name, object value)
         {
             if (value.SafeString().IsEmpty())
             {
-                return true;
+                return false;
             }
 
             switch (name.SafeString().ToLower())
@@ -80,11 +80,12 @@ namespace Bing.Datas.Queries.Trees
                 case "pagesize":
                 case "page":
                 case "totalcount":
-                    return true;
+                    return false;
             }
 
-            return false;
+            return true;
         }
+
     }
 
     /// <summary>

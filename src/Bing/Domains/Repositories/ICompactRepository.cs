@@ -11,7 +11,7 @@ using Bing.Validations.Aspects;
 namespace Bing.Domains.Repositories
 {
     /// <summary>
-    /// 精简仓储 - 配合Po使用
+    /// 仓储
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
     public interface ICompactRepository<TEntity> : ICompactRepository<TEntity, Guid>
@@ -20,7 +20,7 @@ namespace Bing.Domains.Repositories
     }
 
     /// <summary>
-    /// 精简仓储 - 配合Po使用
+    /// 仓储
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
