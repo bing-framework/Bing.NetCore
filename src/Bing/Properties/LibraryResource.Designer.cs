@@ -70,6 +70,15 @@ namespace Bing.Properties {
         }
         
         /// <summary>
+        ///   查找类似 不允许将节点移动到自己或子节点下 的本地化字符串。
+        /// </summary>
+        internal static string NotSupportMoveToChildren {
+            get {
+                return ResourceManager.GetString("NotSupportMoveToChildren", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 仅允许添加一个条件,条件：{0} 的本地化字符串。
         /// </summary>
         internal static string OnlyOnePredicate {

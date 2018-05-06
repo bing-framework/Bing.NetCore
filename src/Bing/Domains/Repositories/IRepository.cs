@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Validations.Aspects;
@@ -39,7 +40,7 @@ namespace Bing.Domains.Repositories
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
-    public interface IRepository<TEntity, in TKey> : IRepository, IQueryRepository<TEntity, TKey>
+    public interface IRepository<TEntity, in TKey> : IRepository, IQueryRepository<TEntity, TKey>, IStore<TEntity, TKey>
         where TEntity : class, IAggregateRoot, IKey<TKey>
     {
     }

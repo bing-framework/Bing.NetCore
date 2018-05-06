@@ -17,6 +17,6 @@ namespace Bing.Domains.Entities.Trees
         /// <summary>
         /// 级数
         /// </summary>
-        int Level { get; set; }
+        int Level { get; }
     }
 }

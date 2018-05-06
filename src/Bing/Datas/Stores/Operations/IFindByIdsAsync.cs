@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Bing.Domains.Entities;
 
@@ -24,8 +25,9 @@ namespace Bing.Datas.Stores.Operations
         /// 查找实体列表
         /// </summary>
         /// <param name="ids">标识列表</param>
+        /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids);
+        Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// 查找实体列表

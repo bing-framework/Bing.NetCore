@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Bing.Domains.Entities;
 
@@ -17,7 +18,8 @@ namespace Bing.Datas.Stores.Operations
         /// 查找未跟踪单个实体
         /// </summary>
         /// <param name="id">标识</param>
+        /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        Task<TEntity> FindByIdNoTrackingAsync(TKey id);
+        Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

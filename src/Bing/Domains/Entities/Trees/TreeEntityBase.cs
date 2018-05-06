@@ -11,44 +11,44 @@ namespace Bing.Domains.Entities.Trees
     /// 树型实体
     /// </summary>
     /// <typeparam name="TEntity">树型实体类型</typeparam>
+    public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid, Guid?> where TEntity : ITreeEntity<TEntity, Guid, Guid?>
+    {
+        /// <summary>
+        /// 初始化一个<see cref="TreeEntityBase{TEntity}"/>类型的实例
+        /// </summary>
+        /// <param name="id">标识</param>
+        /// <param name="path">路径</param>
+        /// <param name="level">级数</param>
+        protected TreeEntityBase(Guid id, string path, int level) : base(id, path, level)
+        {
+        }
+    }
+
+    /// <summary>
+    /// 树型实体
+    /// </summary>
+    /// <typeparam name="TEntity">树型实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
     /// <typeparam name="TParentId">父编号类型</typeparam>
     public abstract class TreeEntityBase<TEntity, TKey, TParentId> : AggregateRoot<TEntity, TKey>,
         ITreeEntity<TEntity, TKey, TParentId> where TEntity : ITreeEntity<TEntity, TKey, TParentId>
     {
-        /// <summary>
-        /// 父对象
-        /// </summary>
-        private TEntity _parent;
 
         /// <summary>
-        /// 父对象
-        /// </summary>
-        public virtual TEntity Parent
-        {
-            get => _parent;
-            set
-            {
-                _parent = value;
-                InitPath();
-            }
-        }
-
-        /// <summary>
-        /// 父编号
+        /// 父标识
         /// </summary>
         public TParentId ParentId { get; set; }
-
-        /// <summary>
-        /// 级数
-        /// </summary>
-        public int Level { get; private set; }
 
         /// <summary>
         /// 路径
         /// </summary>
         [Required]
         public virtual string Path { get; private set; }
+
+        /// <summary>
+        /// 级数
+        /// </summary>
+        public int Level { get; private set; }
 
         /// <summary>
         /// 排序号
@@ -77,7 +77,7 @@ namespace Bing.Domains.Entities.Trees
         /// </summary>
         public virtual void InitPath()
         {
-            InitPath(Parent);
+            InitPath(default(TEntity));
         }
 
         /// <summary>
@@ -119,20 +119,5 @@ namespace Bing.Domains.Entities.Trees
         }
     }
 
-    /// <summary>
-    /// 树型实体
-    /// </summary>
-    /// <typeparam name="TEntity">树型实体类型</typeparam>
-    public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid,Guid?>  where TEntity : ITreeEntity<TEntity, Guid, Guid?>
-    {
-        /// <summary>
-        /// 初始化一个<see cref="TreeEntityBase{TEntity}"/>类型的实例
-        /// </summary>
-        /// <param name="id">标识</param>
-        /// <param name="path">路径</param>
-        /// <param name="level">级数</param>
-        protected TreeEntityBase(Guid id, string path, int level) : base(id, path, level)
-        {
-        }
-    }
+   
 }
