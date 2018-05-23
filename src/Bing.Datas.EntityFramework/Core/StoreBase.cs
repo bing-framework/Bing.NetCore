@@ -11,6 +11,10 @@ using Bing.Exceptions;
 
 namespace Bing.Datas.EntityFramework.Core
 {
+    /// <summary>
+    /// 存储器
+    /// </summary>
+    /// <typeparam name="TEntity">对象类型</typeparam>
     public abstract class StoreBase<TEntity> : StoreBase<TEntity, Guid>, IStore<TEntity>
         where TEntity : class, IKey<Guid>, IVersion
     {

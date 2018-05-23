@@ -26,6 +26,7 @@ namespace Bing.Datas.Stores
         IFindByIdsNoTracking<TEntity, TKey>, IFindByIdsNoTrackingAsync<TEntity, TKey>,
         ISingle<TEntity, TKey>, ISingleAsync<TEntity, TKey>,
         IFindAll<TEntity, TKey>, IFindAllAsync<TEntity, TKey>,
+        IFindAllNoTracking<TEntity, TKey>, IFindAllNoTrackingAsync<TEntity, TKey>,
         IExists<TEntity, TKey>, IExistsAsync<TEntity, TKey>,
         IExistsByExpression<TEntity, TKey>, IExistsByExpressionAsync<TEntity, TKey>,
         ICount<TEntity, TKey>, ICountAsync<TEntity, TKey>,

@@ -365,6 +365,36 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         /// <summary>
+        /// 查找实体列表，不跟踪
+        /// </summary>
+        /// <param name="predicate">查询条件</param>
+        /// <returns></returns>
+        public List<TEntity> FindAllNoTracking(Expression<Func<TEntity, bool>> predicate = null)
+        {
+            if (predicate == null)
+            {
+                return FindAsNoTracking().ToList();
+            }
+
+            return FindAsNoTracking().Where(predicate).ToList();
+        }
+
+        /// <summary>
+        /// 查找实体列表，不跟踪
+        /// </summary>
+        /// <param name="predicate">查询条件</param>
+        /// <returns></returns>
+        public async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null)
+        {
+            if (predicate == null)
+            {
+                return await FindAsNoTracking().ToListAsync();
+            }
+
+            return await FindAsNoTracking().Where(predicate).ToListAsync();
+        }
+
+        /// <summary>
         /// 判断是否存在
         /// </summary>
         /// <param name="ids">标识列表</param>
@@ -551,5 +581,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             return await FindAsNoTracking().Where(query).ToPagerListAsync(query.GetPager());
         }
+
+        
     }
 }
