@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.0-rc1-final" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.1.0-rc1-final" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bing.Utils\Bing.Utils.csproj" />
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
