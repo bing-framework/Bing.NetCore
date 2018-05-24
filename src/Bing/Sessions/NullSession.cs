@@ -16,9 +16,9 @@
         public string UserName => string.Empty;
 
         /// <summary>
-        /// 租户ID
+        /// 是否认证
         /// </summary>
-        public string TenantId => string.Empty;
+        public bool IsAuthenticated => false;
 
         /// <summary>
         /// 空用户会话实例

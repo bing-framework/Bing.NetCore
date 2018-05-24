@@ -12,7 +12,7 @@ namespace Bing.Utils.Helpers
     /// <summary>
     /// Web操作
     /// </summary>
-    public static class Web
+    public static partial class Web
     {
         #region 属性
 
@@ -31,7 +31,17 @@ namespace Bing.Utils.Helpers
         /// </summary>
         public static IHostingEnvironment Environment { get; set; }
 
-        #endregion
+        /// <summary>
+        /// 当前Http请求
+        /// </summary>
+        public static HttpRequest Request => HttpContext?.Request;
+
+        /// <summary>
+        /// 当前Http响应
+        /// </summary>
+        public static HttpResponse Response => HttpContext?.Response;
+
+        #endregion        
 
         #region Url(请求地址)
 

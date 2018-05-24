@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Security
+﻿namespace Bing.Security.Encryptors
 {
     /// <summary>
     /// 空加密器

@@ -6,7 +6,7 @@
     public interface ISession
     {
         /// <summary>
-        /// 用户编号
+        /// 用户标识
         /// </summary>
         string UserId { get; }
 
@@ -16,8 +16,8 @@
         string UserName { get; }
 
         /// <summary>
-        /// 租户ID
+        /// 是否认证
         /// </summary>
-        string TenantId { get; }
+        bool IsAuthenticated { get; }
     }
 }
