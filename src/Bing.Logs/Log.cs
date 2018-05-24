@@ -1,9 +1,9 @@
-﻿using Bing.Domains.Sessions;
-using Bing.Helpers;
+﻿using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;
 using Bing.Logs.Formats;
+using Bing.Sessions;
 
 namespace Bing.Logs
 {
@@ -164,7 +164,7 @@ namespace Bing.Logs
             }
             catch
             {
-                return Bing.Domains.Sessions.Session.Null;
+                return NullSession.Instance;
             }
         }
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
-using Bing.Domains.Sessions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Extensions;
+using Bing.Sessions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Logs.Core
@@ -62,7 +62,7 @@ namespace Bing.Logs.Core
         {
             Provider = provider;
             Context = context;
-            Session = session??Bing.Domains.Sessions.Session.Null;
+            Session = session ?? NullSession.Instance;
         }
         #endregion
 

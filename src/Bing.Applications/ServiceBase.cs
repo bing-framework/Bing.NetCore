@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.Domains.Sessions;
 using Bing.Logs;
+using Bing.Sessions;
 
 namespace Bing.Applications
 {
@@ -28,7 +28,7 @@ namespace Bing.Applications
         protected ServiceBase()
         {
             Log = Bing.Logs.Log.Null;
-            Session = Bing.Domains.Sessions.Session.Null;
+            //Session = Bing.Domains.Sessions.Session.Null;
         }
     }
 }

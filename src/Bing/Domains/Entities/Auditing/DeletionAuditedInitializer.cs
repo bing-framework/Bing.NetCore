@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Bing.Configuration;
-using Bing.Domains.Sessions;
+using Bing.Sessions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Domains.Entities.Auditing

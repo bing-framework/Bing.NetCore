@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bing.Configuration;
 using Bing.Contexts;
-using Bing.Domains.Sessions;
+using Bing.Sessions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Domains.Entities.Auditing

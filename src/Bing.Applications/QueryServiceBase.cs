@@ -9,7 +9,6 @@ using Bing.Datas.EntityFramework.Extensions;
 using Bing.Datas.Queries;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
-using Bing.Domains.Sessions;
 using Bing.Extensions.AutoMapper;
 using Bing.Logs;
 using Microsoft.EntityFrameworkCore;

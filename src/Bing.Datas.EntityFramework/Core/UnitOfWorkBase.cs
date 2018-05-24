@@ -9,9 +9,9 @@ using Bing.Datas.EntityFramework.Logs;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Auditing;
-using Bing.Domains.Sessions;
 using Bing.Exceptions;
 using Bing.Logs;
+using Bing.Sessions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
@@ -48,7 +48,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             manager?.Register(this);
             TraceId = Guid.NewGuid().ToString();
-            Session = Bing.Domains.Sessions.Session.Null;
+            Session = NullSession.Instance;
         }
 
         #endregion

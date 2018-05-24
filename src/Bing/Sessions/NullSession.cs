@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Sessions
+﻿namespace Bing.Sessions
 {
     /// <summary>
     /// 空用户会话
@@ -23,5 +19,10 @@ namespace Bing.Domains.Sessions
         /// 租户ID
         /// </summary>
         public string TenantId => string.Empty;
+
+        /// <summary>
+        /// 空用户会话实例
+        /// </summary>
+        public static readonly ISession Instance=new NullSession();
     }
 }

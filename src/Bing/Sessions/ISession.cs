@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Sessions
+﻿namespace Bing.Sessions
 {
     /// <summary>
     /// 用户会话
