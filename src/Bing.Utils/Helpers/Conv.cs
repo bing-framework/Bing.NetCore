@@ -571,13 +571,14 @@ namespace Bing.Utils.Helpers
                 return default(T);
             }
             Type type = Common.GetType<T>();
+            var typeName = type.Name.ToLower();
             try
             {
-                if (type.Name.ToLower() == "string")
+                if (typeName == "string")
                 {
                     return (T)(object)input.ToString();
                 }
-                if (type.Name.ToLower() == "guid")
+                if (typeName == "guid")
                 {
                     return (T)(object)new Guid(input.ToString());
                 }

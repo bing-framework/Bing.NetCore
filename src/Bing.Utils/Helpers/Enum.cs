@@ -155,7 +155,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static List<Item> GetItems<TEnum>()
         {
-            return GetItems(Common.GetType<TEnum>());
+            return GetItems(typeof(TEnum));
         }
 
         /// <summary>
@@ -165,13 +165,13 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static List<Item> GetItems(Type type)
         {
-            TypeInfo enumType = type.GetTypeInfo();
-            if (enumType.IsEnum == false)
+            type = Common.GetType(type);
+            if (type.IsEnum == false)
             {
                 throw new InvalidOperationException($"类型 {type} 不是枚举");
             }
             var result = new List<Item>();
-            foreach (var field in enumType.GetFields())
+            foreach (var field in type.GetFields())
             {
                 AddItem(type, result, field);
             }
@@ -198,7 +198,7 @@ namespace Bing.Utils.Helpers
         /// <param name="field">字段</param>
         private static void AddItem(Type type, ICollection<Item> result, FieldInfo field)
         {
-            if (!field.FieldType.GetTypeInfo().IsEnum)
+            if (!field.FieldType.IsEnum)
             {
                 return;
             }

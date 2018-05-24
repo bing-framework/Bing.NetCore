@@ -58,11 +58,11 @@ namespace Bing.Logs.Core
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
         /// <param name="session">用户会话</param>
-        protected LogBase(ILogProvider provider, ILogContext context, ISession session)
+        protected LogBase(ILogProvider provider, ILogContext context, Bing.Sessions.ISession session)
         {
             Provider = provider;
             Context = context;
-            Session = session ?? NullSession.Instance;
+            Session = session ?? Bing.Sessions.NullSession.Instance;
         }
         #endregion
 

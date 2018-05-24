@@ -15,7 +15,16 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static Type GetType<T>()
         {
-            var type = typeof(T);
+            return GetType(typeof(T));
+        }
+
+        /// <summary>
+        /// 获取类型
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        public static Type GetType(Type type)
+        {            
             return Nullable.GetUnderlyingType(type) ?? type;
         }
 
