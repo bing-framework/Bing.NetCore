@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Bing.Applications.Dtos;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Datas.Queries;
+using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 using Bing.Extensions.AutoMapper;
@@ -22,18 +23,19 @@ namespace Bing.Applications
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     public abstract class QueryServiceBase<TEntity, TDto, TQueryParameter> : QueryServiceBase<TEntity, TDto, TQueryParameter, Guid>
-        where TEntity : class, IAggregateRoot<TEntity, Guid>
+        where TEntity : class, IKey<Guid>, IVersion
         where TDto : IResponse, new()
         where TQueryParameter : IQueryParameter
     {
         /// <summary>
         /// 初始化一个<see cref="QueryServiceBase{TEntity,TDto,TQueryParameter}"/>类型的实例
         /// </summary>
-        /// <param name="repository">仓储</param>
-        protected QueryServiceBase(IRepository<TEntity> repository) : base(repository)
+        /// <param name="store">查询存储器</param>
+        protected QueryServiceBase(IQueryStore<TEntity, Guid> store) : base(store)
         {
         }
     }
+
     /// <summary>
     /// 查询服务
     /// </summary>
@@ -42,14 +44,14 @@ namespace Bing.Applications
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     public abstract class QueryServiceBase<TEntity, TDto, TQueryParameter, TKey> :ServiceBase, IQueryService<TDto, TQueryParameter>
-        where TEntity : class, IAggregateRoot<TEntity, TKey>
+        where TEntity : class, IKey<TKey>,IVersion
         where TDto : IResponse, new()
         where TQueryParameter : IQueryParameter
     {
         /// <summary>
-        /// 仓储
+        /// 查询存储器
         /// </summary>
-        private readonly IRepository<TEntity, TKey> _repository;
+        private readonly IQueryStore<TEntity, TKey> _store;
 
         /// <summary>
         /// 查询时是否跟踪对象
@@ -59,10 +61,10 @@ namespace Bing.Applications
         /// <summary>
         /// 初始化一个<see cref="QueryServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
         /// </summary>
-        /// <param name="repository">仓储</param>
-        protected QueryServiceBase(IRepository<TEntity, TKey> repository)
+        /// <param name="store">查询存储器</param>
+        protected QueryServiceBase(IQueryStore<TEntity, TKey> store)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _store = store ?? throw new ArgumentNullException(nameof(store));
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace Bing.Applications
         /// <returns></returns>
         public List<TDto> GetAll()
         {
-            return _repository.FindAll().Select(ToDto).ToList();
+            return _store.FindAll().Select(ToDto).ToList();
         }
 
         /// <summary>
@@ -90,7 +92,7 @@ namespace Bing.Applications
         /// <returns></returns>
         public async Task<List<TDto>> GetAllAsync()
         {
-            var entities = await _repository.FindAllAsync();
+            var entities = await _store.FindAllAsync();
             return entities.Select(ToDto).ToList();
         }
 
@@ -102,7 +104,7 @@ namespace Bing.Applications
         public TDto GetById(object id)
         {
             var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
-            return ToDto(_repository.Find(key));
+            return ToDto(_store.Find(key));
         }
 
         /// <summary>
@@ -113,7 +115,7 @@ namespace Bing.Applications
         public async Task<TDto> GetByIdAsync(object id)
         {
             var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
-            return ToDto(await _repository.FindAsync(key));
+            return ToDto(await _store.FindAsync(key));
         }
 
         /// <summary>
@@ -123,7 +125,7 @@ namespace Bing.Applications
         /// <returns></returns>
         public List<TDto> GetByIds(string ids)
         {
-            return _repository.FindByIds(ids).Select(ToDto).ToList();
+            return _store.FindByIds(ids).Select(ToDto).ToList();
         }
 
         /// <summary>
@@ -133,7 +135,7 @@ namespace Bing.Applications
         /// <returns></returns>
         public async Task<List<TDto>> GetByIdsAsync(string ids)
         {
-            var entities = await _repository.FindByIdsAsync(ids);
+            var entities = await _store.FindByIdsAsync(ids);
             return entities.Select(ToDto).ToList();
         }
 
@@ -148,8 +150,8 @@ namespace Bing.Applications
             {
                 return new List<TDto>();
             }
-            var queryable = ExecuteQuery(parameter);
-            return queryable.ToList().Select(ToDto).ToList();
+
+            return ExecuteQuery(parameter).ToList().Select(ToDto).ToList();
         }
 
         /// <summary>
@@ -163,9 +165,8 @@ namespace Bing.Applications
             {
                 return new List<TDto>();
             }
-            var queryable = ExecuteQuery(parameter);
-            var entities = await queryable.ToListAsync();
-            return entities.Select(ToDto).ToList();
+
+            return (await ExecuteQuery(parameter).ToListAsync()).Select(ToDto).ToList();
         }
 
         /// <summary>
@@ -196,7 +197,7 @@ namespace Bing.Applications
         /// <returns></returns>
         private IQueryable<TEntity> Filter(IQueryBase<TEntity> query)
         {
-            return IsTracking ? _repository.Find().Where(query) : _repository.FindAsNoTracking().Where(query);
+            return IsTracking ? _store.Find().Where(query) : _store.FindAsNoTracking().Where(query);
         }
 
         /// <summary>
@@ -232,8 +233,9 @@ namespace Bing.Applications
                 return new PagerList<TDto>();
             }
             var query = CreateQuery(parameter);
-            var pager = query.GetPager();
-            return ExecutePagerQuery(query, pager, parameter).ToPagerList(pager).Convert(ToDto);
+            var queryable = Filter(query);
+            queryable = Filter(queryable, parameter);
+            return queryable.ToPagerList(query.GetPager()).Convert(ToDto);
         }
 
         /// <summary>
@@ -248,29 +250,9 @@ namespace Bing.Applications
                 return new PagerList<TDto>();
             }
             var query = CreateQuery(parameter);
-            var pager = query.GetPager();
-            var queryable = ExecutePagerQuery(query, pager, parameter);
-            var result = await queryable.ToPagerListAsync(pager);
-            return result.Convert(ToDto);
-        }
-
-        /// <summary>
-        /// 执行分页查询
-        /// </summary>
-        /// <param name="query">查询条件</param>
-        /// <param name="pager">分页</param>
-        /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
-        private IQueryable<TEntity> ExecutePagerQuery(IQueryBase<TEntity> query, IPager pager,TQueryParameter parameter)
-        {
             var queryable = Filter(query);
-            queryable = Filter(queryable,parameter);
-            var order = query.GetOrder();
-            if (string.IsNullOrWhiteSpace(order))
-            {
-                order = "Id";
-            }
-            return queryable.OrderBy(order).Pager(pager);
+            queryable = Filter(queryable, parameter);
+            return (await queryable.ToPagerListAsync(query.GetPager())).Convert(ToDto);
         }
     }
 }

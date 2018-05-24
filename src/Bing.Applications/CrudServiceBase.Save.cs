@@ -126,7 +126,7 @@ namespace Bing.Applications
         /// <param name="entity">实体</param>
         protected void Update(TEntity entity)
         {
-            var oldEntity = _repository.Find(entity.Id);
+            var oldEntity = FindOldEntity(entity.Id);
             if (oldEntity == null)
             {
                 throw new ArgumentNullException(nameof(oldEntity));
@@ -135,6 +135,26 @@ namespace Bing.Applications
             UpdateBefore(entity);
             _repository.Update(entity);
             UpdateAfter(entity, changes);
+        }
+
+        /// <summary>
+        /// 查找旧实体
+        /// </summary>
+        /// <param name="id">标识</param>
+        /// <returns></returns>
+        protected virtual TEntity FindOldEntity(TKey id)
+        {
+            return _repository.Find(id);
+        }
+
+        /// <summary>
+        /// 查找旧实体
+        /// </summary>
+        /// <param name="id">标识</param>
+        /// <returns></returns>
+        protected virtual async Task<TEntity> FindOldEntityAsync(TKey id)
+        {
+            return await _repository.FindAsync(id);
         }
 
         /// <summary>
@@ -182,7 +202,7 @@ namespace Bing.Applications
         /// <returns></returns>
         protected async Task UpdateAsync(TEntity entity)
         {
-            var oldEntity = await _repository.FindAsync(entity.Id);
+            var oldEntity = await FindOldEntityAsync(entity.Id);
             if (oldEntity == null)
             {
                 throw new ArgumentNullException(nameof(oldEntity));
