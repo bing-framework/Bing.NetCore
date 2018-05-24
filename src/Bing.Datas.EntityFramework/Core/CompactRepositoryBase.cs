@@ -15,6 +15,24 @@ namespace Bing.Datas.EntityFramework.Core
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TPo">持久化对象类型</typeparam>
+    public abstract class CompactRepositoryBase<TEntity, TPo> : CompactRepositoryBase<TEntity, TPo, Guid>,ICompactRepository<TEntity> 
+        where TEntity : class, IAggregateRoot<Guid> 
+        where TPo : class, IKey<Guid>, IVersion
+    {
+        /// <summary>
+        /// 初始化一个<see cref="CompactRepositoryBase{TEntity,TPo}"/>类型的实例
+        /// </summary>
+        /// <param name="store">存储器</param>
+        protected CompactRepositoryBase(IStore<TPo, Guid> store) : base(store)
+        {
+        }
+    }
+
+    /// <summary>
+    /// 仓储 - 配合持久化对象使用
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <typeparam name="TPo">持久化对象类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactRepository<TEntity, TKey>
         where TEntity : class, IAggregateRoot<TKey> 
