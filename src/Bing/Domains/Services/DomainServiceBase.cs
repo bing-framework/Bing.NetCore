@@ -17,7 +17,7 @@ namespace Bing.Domains.Services
         /// </summary>
         protected DomainServiceBase()
         {
-            Log=NullLog.Instance;
+            Log = NullLog.Instance;
             Session = Bing.Domains.Sessions.Session.Null;
         }
 
