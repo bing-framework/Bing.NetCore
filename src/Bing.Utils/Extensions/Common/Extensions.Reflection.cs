@@ -19,7 +19,16 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static object GetPropertyValue(this MemberInfo member, object instance)
         {
-            return instance.GetType().GetProperty(member.Name).GetValue(instance);
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            if (instance == null)
+            {
+                throw new ArgumentNullException(nameof(instance));
+            }
+            return instance.GetType().GetProperty(member.Name)?.GetValue(instance);
         }
     }
 }
