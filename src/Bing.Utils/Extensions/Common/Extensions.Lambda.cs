@@ -5,6 +5,7 @@ using System.Reflection;
 using Bing.Utils.Expressions;
 using Bing.Utils.Helpers;
 
+// ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
 {
     /// <summary>
