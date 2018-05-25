@@ -6,6 +6,7 @@ using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
+using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers
@@ -40,7 +41,7 @@ namespace Bing.Webs.Controllers
         /// <returns></returns>
         protected virtual LoadMode GetLoadMode()
         {
-            return LoadMode.Async;
+            return LoadMode.OnlyRootAsync;
         }
 
         /// <summary>
@@ -92,6 +93,73 @@ namespace Bing.Webs.Controllers
         public virtual async Task<IActionResult> BatchDeleteAsync([FromBody] string ids)
         {
             await _service.DeleteAsync(ids);
+            return Success();
+        }
+
+        /// <summary>
+        /// 启用
+        /// </summary>
+        /// <param name="ids">标识列表</param>
+        /// <returns></returns>
+        [HttpPost("enable")]
+        public virtual async Task<IActionResult> Enable([FromBody] string ids)
+        {
+            await _service.EnableAsync(ids);
+            var result = await _service.FindByIdsAsync(ids);
+            return Success(result);
+        }
+
+        /// <summary>
+        /// 冻结
+        /// </summary>
+        /// <param name="ids">标识列表</param>
+        /// <returns></returns>
+        [HttpPost("disable")]
+        public virtual async Task<IActionResult> Disable([FromBody] string ids)
+        {
+            await _service.DisableAsync(ids);
+            var result = await _service.FindByIdsAsync(ids);
+            return Success(result);
+        }
+
+        /// <summary>
+        /// 交换排序
+        /// </summary>
+        /// <param name="ids">两个Id的标识列表，用逗号分隔，范例：1,2</param>
+        /// <remarks>
+        /// 调用范例:
+        /// POST   
+        /// /api/customer/SwapSort
+        /// body: "'1,2'"
+        /// </remarks>
+        /// <returns></returns>
+        [HttpPost("SwapSort")]
+        public virtual async Task<IActionResult> SwapSortAsync([FromBody] string ids)
+        {
+            var idList = ids.ToGuidList();
+            if (idList.Count < 2)
+            {
+                return Fail("交换排序失败");
+            }
+
+            await _service.SwapSortAsync(idList[0], idList[1]);
+            return Success();
+        }
+
+        /// <summary>
+        /// 修正排序
+        /// </summary>
+        /// <param name="parameter">查询参数</param>
+        /// <returns></returns>
+        [HttpPost("fix")]
+        public virtual async Task<IActionResult> FixAsync([FromBody] TQuery parameter)
+        {
+            if (parameter == null)
+            {
+                return Fail("查询参数不能为空");
+            }
+
+            await _service.FixSortIdAsync(parameter);
             return Success();
         }
     }

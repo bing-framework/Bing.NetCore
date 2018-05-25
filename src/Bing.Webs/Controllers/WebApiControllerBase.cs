@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.Helpers;
+using Bing.Logs.Aspects;
 using Bing.Properties;
+using Bing.Sessions;
 using Bing.Webs.Commons;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +16,27 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ExceptionHandler]
+    [ErrorLog]
     public class WebApiControllerBase:Controller
     {
+        /// <summary>
+        /// 会话
+        /// </summary>
+        private readonly ISession _session;
+
+        /// <summary>
+        /// 会话
+        /// </summary>
+        public virtual ISession Session => _session ?? NullSession.Instance;
+
+        /// <summary>
+        /// 初始化一个<see cref="WebApiControllerBase"/>类型的实例
+        /// </summary>
+        public WebApiControllerBase()
+        {
+            _session = Ioc.Create<ISession>();
+        }
+
         /// <summary>
         /// 返回成功消息
         /// </summary>
