@@ -4,4 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Domains\Bing.DbDesigner.Domains.csproj" />
+  </ItemGroup>
+
 </Project>
