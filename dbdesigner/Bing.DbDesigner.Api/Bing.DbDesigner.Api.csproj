@@ -9,11 +9,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.DbDesigner.Data\Bing.DbDesigner.Data.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Domains\Bing.DbDesigner.Domains.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Infrastructure\Bing.DbDesigner.Infrastructure.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Service\Bing.DbDesigner.Service.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,16 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Abstractions" Version="0.3.1" />
-    <PackageReference Include="AspectCore.Core" Version="0.3.1" />
-    <PackageReference Include="AspectCore.Extensions.AspectScope" Version="0.3.1" />
-    <PackageReference Include="AspectCore.Extensions.Autofac" Version="0.3.1" />
-    <PackageReference Include="Autofac" Version="4.6.2" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="AspectCore.Extensions.AspectScope" Version="0.5.0" />
+    <PackageReference Include="AspectCore.Extensions.Autofac" Version="0.5.0" />
+    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.9" />
   </ItemGroup>
 
   <ItemGroup>
