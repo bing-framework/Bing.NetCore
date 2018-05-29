@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bing.Datas.EntityFramework.SqlServer;
 using Bing.DbDesigner.Data;
 using Bing.DbDesigner.Data.UnitOfWorks.SqlServer;
+using Bing.DbDesigner.Service.Configs;
 using Bing.Events.Default;
 using Bing.Logs.NLog;
 using Microsoft.AspNetCore.Builder;
@@ -67,7 +68,7 @@ namespace Bing.DbDesigner.Api
             });
 
             // 添加Bing基础设施服务
-            return services.AddBing();
+            return services.AddBing(new IocConfig());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,7 +79,16 @@ namespace Bing.DbDesigner.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc();
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
+                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            });
+            app.UseSwagger(config => { });
+            app.UseSwaggerUI(config =>
+            {
+                config.SwaggerEndpoint("/swagger/v1/swagger.json","Bing.DbDesigner.Api v1");
+            });
         }
     }
 }

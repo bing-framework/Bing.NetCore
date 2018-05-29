@@ -43,7 +43,7 @@ namespace Bing.DbDesigner.Domains.Models
         /// <summary>
         /// 数据状态。
         /// </summary>
-        public int DataStuats { get; set; }        
+        public int DataStatus { get; set; }        
 
         /// <summary>
         /// 备注

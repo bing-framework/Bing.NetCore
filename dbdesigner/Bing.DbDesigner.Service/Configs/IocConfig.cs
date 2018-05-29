@@ -19,10 +19,10 @@ namespace Bing.DbDesigner.Service.Configs
         /// </summary>
         protected override void Load(ContainerBuilder builder)
         {
-            LoadInfrastructure(builder);
-            LoadRepositories(builder);
-            LoadDomainServices(builder);
-            LoadApplicationServices(builder);
+            //LoadInfrastructure(builder);
+            //LoadRepositories(builder);
+            //LoadDomainServices(builder);
+            //LoadApplicationServices(builder);
         }
 
         /// <summary>

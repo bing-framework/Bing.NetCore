@@ -12,25 +12,25 @@ namespace Bing.Datas.EntityFramework.SqlServer
     /// </summary>
     public abstract class UnitOfWork : UnitOfWorkBase
     {
-        /// <summary>
-        /// 初始化一个<see cref="UnitOfWork"/>类型的实例
-        /// </summary>
-        /// <param name="connection">连接字符串</param>
-        /// <param name="manager">工作单元管理器</param>
-        protected UnitOfWork(string connection, IUnitOfWorkManager manager = null) : base(
-            new DbContextOptionsBuilder().UseSqlServer(connection).Options, manager)
-        {
-        }
+        ///// <summary>
+        ///// 初始化一个<see cref="UnitOfWork"/>类型的实例
+        ///// </summary>
+        ///// <param name="connection">连接字符串</param>
+        ///// <param name="manager">工作单元管理器</param>
+        //protected UnitOfWork(string connection, IUnitOfWorkManager manager = null) : base(
+        //    new DbContextOptionsBuilder().UseSqlServer(connection).Options, manager)
+        //{
+        //}
 
-        /// <summary>
-        /// 初始化一个<see cref="UnitOfWork"/>类型的实例
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <param name="manager">工作单元管理器</param>
-        protected UnitOfWork(DbConnection connection, IUnitOfWorkManager manager = null) : base(
-            new DbContextOptionsBuilder().UseSqlServer(connection).Options, manager)
-        {
-        }
+        ///// <summary>
+        ///// 初始化一个<see cref="UnitOfWork"/>类型的实例
+        ///// </summary>
+        ///// <param name="connection">数据库连接</param>
+        ///// <param name="manager">工作单元管理器</param>
+        //protected UnitOfWork(DbConnection connection, IUnitOfWorkManager manager = null) : base(
+        //    new DbContextOptionsBuilder().UseSqlServer(connection).Options, manager)
+        //{
+        //}
 
         /// <summary>
         /// 初始化一个<see cref="UnitOfWork"/>类型的实例

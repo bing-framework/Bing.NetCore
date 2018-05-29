@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.0\Bing.DbDesigner.Api.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
@@ -20,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Webs\Bing.Webs.csproj" />
     <ProjectReference Include="..\Bing.DbDesigner.Data\Bing.DbDesigner.Data.csproj" />
     <ProjectReference Include="..\Bing.DbDesigner.Domains\Bing.DbDesigner.Domains.csproj" />
     <ProjectReference Include="..\Bing.DbDesigner.Infrastructure\Bing.DbDesigner.Infrastructure.csproj" />

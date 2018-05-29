@@ -17,7 +17,7 @@ namespace Bing.DbDesigner.Data.Repositories
         /// 初始化一个<see cref="ProjectRepository"/>类型的实例
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
-        public ProjectRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public ProjectRepository(IDbDesignerUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
     }

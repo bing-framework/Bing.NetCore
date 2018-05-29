@@ -1,9 +1,11 @@
-﻿namespace Bing.Sessions
+﻿using Bing.Dependency;
+
+namespace Bing.Sessions
 {
     /// <summary>
     /// 用户会话
     /// </summary>
-    public interface ISession
+    public interface ISession: ISingletonDependency
     {
         /// <summary>
         /// 用户标识
