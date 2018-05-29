@@ -41,7 +41,8 @@ namespace Bing.DbDesigner.Data.UnitOfWorks.SqlServer
 
         public override void Dispose()
         {
-            base.Dispose();
+            GC.Collect();
+            //base.Dispose();
         }
     }
 }
