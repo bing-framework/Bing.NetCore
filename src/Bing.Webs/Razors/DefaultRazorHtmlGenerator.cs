@@ -123,6 +123,11 @@ namespace Bing.Webs.Razors
             }
         }
 
+        /// <summary>
+        /// 获取路径
+        /// </summary>
+        /// <param name="info">路由信息</param>
+        /// <returns></returns>
         protected virtual string GetPath(RouteInformation info)
         {
             var area = info.AreaName.SafeString();
