@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.MockData.Core
+﻿namespace Bing.MockData.Core
 {
     /// <summary>
     /// 常量

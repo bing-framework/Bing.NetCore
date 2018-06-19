@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.MockData.Generators.Banks
+﻿namespace Bing.MockData.Generators.Banks
 {
     /// <summary>
     /// 银行卡规则项

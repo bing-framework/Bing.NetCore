@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.MockData.Utils
+﻿namespace Bing.MockData.Utils
 {
     /// <summary>
     /// Luhn 算法工具
