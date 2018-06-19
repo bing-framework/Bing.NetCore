@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Utils.IdGenerators
+﻿namespace Bing.Utils.IdGenerators
 {
     /// <summary>
     /// ID 生成器

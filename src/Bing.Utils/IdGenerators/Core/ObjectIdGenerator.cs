@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Utils.IdGenerators.Abstractions;
+﻿using Bing.Utils.IdGenerators.Abstractions;
 using Bing.Utils.IdGenerators.Ids;
 
 namespace Bing.Utils.IdGenerators.Core
