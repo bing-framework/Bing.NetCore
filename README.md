@@ -37,23 +37,23 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - XUnit
 
 8. ORM
-  - EntityFrameworkCore 2.0.2
+  - [EntityFrameworkCore 2.0.2](https://github.com/aspnet/EntityFrameworkCore)
   - Microsoft.EntityFrameworkCore.Relational 2.0.2
   - Microsoft.EntityFrameworkCore.SqlServer 2.0.2
-  - Pomelo.EntityFrameworkCore.MySql 2.0.1
-  - Npgsql.EntityFrameworkCore.PostgreSQL 2.0.1
+  - [Pomelo.EntityFrameworkCore.MySql 2.0.1](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)
+  - [Npgsql.EntityFrameworkCore.PostgreSQL 2.0.1](https://github.com/npgsql/Npgsql.EntityFrameworkCore.PostgreSQL)
 
 9. Ioc 框架
-  - Autofac
+  - [Autofac](https://github.com/autofac/Autofac)
 
 10. Aop 框架
   - [AspectCore](https://github.com/dotnetcore/AspectCore-Framework)
 
 11. Json框架
-  - Newtonsoft.Json（即Json.Net）
+  - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)（即Json.Net）
 
 12. 映射框架
-  - AutoMapper
+  - [AutoMapper](https://github.com/AutoMapper/AutoMapper)
 
 13. 日志框架
   - [NLog](http://nlog-project.org/)
@@ -64,7 +64,7 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - [System.Linq.Dynamic.Core](https://github.com/StefH/System.Linq.Dynamic.Core)
 
 15. 缓存框架
-  - StackExchange.Redis
+  - [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
 
 16. Web 框架
   - [ASP.NET Core](https://docs.microsoft.com/zh-cn/aspnet/core/)
