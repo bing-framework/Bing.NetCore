@@ -19,5 +19,15 @@ namespace Bing.Webs.Razors
         /// 路径模板，范例：Typings/app/{area}/{controller}/{controller}-{action}.component.html
         /// </summary>
         public string Template { get; set; }
+
+        /// <summary>
+        /// 视图名称，范例：/Home/Index
+        /// </summary>
+        public string ViewName { get; set; }
+
+        /// <summary>
+        /// 是否部分视图，默认：false
+        /// </summary>
+        public bool IsPartialView { get; set; } = false;
     }
 }

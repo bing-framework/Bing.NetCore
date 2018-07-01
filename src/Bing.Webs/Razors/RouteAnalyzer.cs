@@ -64,26 +64,9 @@ namespace Bing.Webs.Razors
                 {
                     if (info.Path.IsEmpty())
                     {
-                        info.Path =
-                            $"/{controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName}";
+                        info.Path = $"/{controllerActionDescriptor.ControllerName}/{controllerActionDescriptor.ActionName}";
                     }
-
-                    var controllerHtmlAttribute = controllerActionDescriptor.ControllerTypeInfo.GetCustomAttribute<RazorHtmlAttribute>();
-
-                    if (controllerHtmlAttribute != null)
-                    {
-                        info.FilePath = controllerHtmlAttribute.Path;
-                        info.TemplatePath = controllerHtmlAttribute.Template;
-                    }
-
-                    var htmlAttribute = controllerActionDescriptor.MethodInfo.GetCustomAttribute<RazorHtmlAttribute>();
-
-                    if (htmlAttribute != null)
-                    {
-                        info.FilePath = htmlAttribute.Path;
-                        info.TemplatePath = htmlAttribute.Template;
-                    }
-
+                    SetHtmlInfo(info, controllerActionDescriptor);
                     info.ControllerName = controllerActionDescriptor.ControllerName;
                     info.ActionName = controllerActionDescriptor.ActionName;
                     info.Invocation = $"{controllerActionDescriptor.ControllerName}Controller.{controllerActionDescriptor.ActionName}";
@@ -95,6 +78,24 @@ namespace Bing.Webs.Razors
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// 设置Html信息
+        /// </summary>
+        /// <param name="routeInformation">路由信息</param>
+        /// <param name="controllerActionDescriptor">控制器</param>
+        private void SetHtmlInfo(RouteInformation routeInformation,
+            ControllerActionDescriptor controllerActionDescriptor)
+        {
+            var htmlAttribute = controllerActionDescriptor.ControllerTypeInfo.GetCustomAttribute<RazorHtmlAttribute>() ??
+                                controllerActionDescriptor.MethodInfo.GetCustomAttribute<RazorHtmlAttribute>();
+            if (htmlAttribute == null)
+                return;
+            routeInformation.FilePath = htmlAttribute.Path;
+            routeInformation.TemplatePath = htmlAttribute.Template;
+            routeInformation.IsPartialView = htmlAttribute.IsPartialView;
+            routeInformation.ViewName = htmlAttribute.ViewName;
         }
     }
 }
