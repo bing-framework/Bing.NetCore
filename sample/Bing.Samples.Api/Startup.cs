@@ -21,7 +21,11 @@ namespace Bing.Samples.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => { options.Filters.Add<ResultHandlerAttribute>(); });
+            services.AddMvc(options =>
+            {
+                options.Filters.Add<ValidationAttribute>();
+                options.Filters.Add<ResultHandlerAttribute>();
+            });
             services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new Info() {Title = "Bing.Samples.Api", Version = "v1"});

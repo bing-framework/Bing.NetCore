@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Webs.Filters;
@@ -13,7 +14,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// Swagger测试信息
     /// </summary>
-    [IgnoreResultHandler]
+    //[IgnoreResultHandler]
     [Route("api/[controller]/[action]")]
     public class SwaggerTestController : Controller
     {
@@ -90,7 +91,7 @@ namespace Bing.Samples.Api.Controllers
         /// </summary>
         /// <param name="info">样例信息</param>
         /// <returns></returns>
-        [IgnoreResultHandler]
+        //[IgnoreResultHandler]
         [HttpPost]
         public SampleNameValue Test2([FromBody] SampleNameValue info)
         {
@@ -123,6 +124,7 @@ namespace Bing.Samples.Api.Controllers
         /// <summary>
         /// 名称
         /// </summary>
+        [Required]
         public string Name { get; set; }
 
         /// <summary>
