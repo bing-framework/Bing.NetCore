@@ -15,6 +15,7 @@ namespace Bing.Samples.Api.Controllers
     /// Swagger测试信息
     /// </summary>
     //[IgnoreResultHandler]
+    [ApiController]
     [Route("api/[controller]/[action]")]
     public class SwaggerTestController : Controller
     {
