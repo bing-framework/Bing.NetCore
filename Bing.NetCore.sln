@@ -116,6 +116,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "08-Caching", "08-Caching", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.InMemory", "src\Bing.Caching.InMemory\Bing.Caching.InMemory.csproj", "{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.Redis", "src\Bing.Caching.Redis\Bing.Caching.Redis.csproj", "{8AE38E3B-EC53-4C56-8925-589D5636C85F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -250,6 +252,10 @@ Global
 		{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -305,6 +311,7 @@ Global
 		{C4D6A768-60EB-4543-B0BD-3B1FC72BFCAB} = {8AE51D5F-023A-42B8-A8AB-420F47B4573F}
 		{6C2A39D9-1D73-4321-B386-468D9BC3D65D} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
+		{8AE38E3B-EC53-4C56-8925-589D5636C85F} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

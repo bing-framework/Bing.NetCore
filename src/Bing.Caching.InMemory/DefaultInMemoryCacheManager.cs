@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Bing.Caching.InMemory
 {
     /// <summary>
-    /// 默认内存缓存管理器
+    /// DefaultInMemory 缓存管理器
     /// </summary>
     public class DefaultInMemoryCacheManager:IInMemoryCacheManager
     {
