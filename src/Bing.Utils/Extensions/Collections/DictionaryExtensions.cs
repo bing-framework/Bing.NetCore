@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
 {
     /// <summary>
@@ -56,16 +57,16 @@ namespace Bing.Utils.Extensions
         }
         #endregion
 
-        #region GetOrAdd(获取指定Key对应的Value,若未找到则添加值)
+        #region GetOrAdd(获取指定键的值，不存在则按指定委托添加值)
 
         /// <summary>
-        /// 获取指定Key对应的Value，若未找到将使用指定的委托增加值
+        /// 获取指定键的值，不存在则按指定委托添加值
         /// </summary>
         /// <typeparam name="TKey">键类型</typeparam>
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="dict">字典</param>
         /// <param name="key">键</param>
-        /// <param name="setValue">设置值</param>
+        /// <param name="setValue">添加值的委托</param>
         /// <returns></returns>
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key,
             Func<TKey, TValue> setValue)
@@ -76,6 +77,26 @@ namespace Bing.Utils.Extensions
                 dict.Add(key, value);
             }
             return value;
+        }
+
+        /// <summary>
+        /// 获取指定键的值，不存在则按指定委托添加值
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <param name="key">键</param>
+        /// <param name="addFunc">添加值的委托</param>
+        /// <returns></returns>
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+            Func<TValue> addFunc)
+        {
+            if (dictionary.TryGetValue(key, out TValue value))
+            {
+                return value;
+            }
+
+            return dictionary[key] = addFunc();
         }
 
         #endregion
