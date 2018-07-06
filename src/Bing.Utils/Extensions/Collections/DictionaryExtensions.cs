@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// 字典扩展
+    /// 字典(<see cref="IDictionary{TKey,TValue}"/>) 扩展
     /// </summary>
     public static class DictionaryExtensions
     {

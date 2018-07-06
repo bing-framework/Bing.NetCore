@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// IQueryable集合扩展
+    /// <see cref="IQueryable{T}"/> 扩展
     /// </summary>
     public static class QueryableExtensions
     {

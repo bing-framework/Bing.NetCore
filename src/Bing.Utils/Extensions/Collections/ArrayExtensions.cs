@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// 数组扩展
+    /// 数组(<see cref="Array"/>) 扩展
     /// </summary>
     public static partial class ArrayExtensions
     {

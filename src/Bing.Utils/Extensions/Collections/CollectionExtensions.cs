@@ -6,7 +6,7 @@ using System.Linq;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// 集合(ICollection)扩展
+    /// 集合(<see cref="ICollection{T}"/>) 扩展
     /// </summary>
     public static class CollectionExtensions
     {

@@ -5,7 +5,7 @@ using System.Text;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// StringBuilder 扩展
+    /// <see cref="StringBuilder"/> 扩展
     /// </summary>
     public static class StringBuilderExtensions
     {
