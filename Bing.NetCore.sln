@@ -114,9 +114,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-Infrastructure", "04-Inf
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "08-Caching", "08-Caching", "{6C2A39D9-1D73-4321-B386-468D9BC3D65D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.InMemory", "src\Bing.Caching.InMemory\Bing.Caching.InMemory.csproj", "{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching.InMemory", "src\Bing.Caching.InMemory\Bing.Caching.InMemory.csproj", "{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.Redis", "src\Bing.Caching.Redis\Bing.Caching.Redis.csproj", "{8AE38E3B-EC53-4C56-8925-589D5636C85F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching.Redis", "src\Bing.Caching.Redis\Bing.Caching.Redis.csproj", "{8AE38E3B-EC53-4C56-8925-589D5636C85F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.Hybrid", "src\Bing.Caching.Hybrid\Bing.Caching.Hybrid.csproj", "{43BB1EAA-9A6A-421A-BDAF-085DA5039A9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -256,6 +258,10 @@ Global
 		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AE38E3B-EC53-4C56-8925-589D5636C85F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43BB1EAA-9A6A-421A-BDAF-085DA5039A9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43BB1EAA-9A6A-421A-BDAF-085DA5039A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43BB1EAA-9A6A-421A-BDAF-085DA5039A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43BB1EAA-9A6A-421A-BDAF-085DA5039A9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -312,6 +318,7 @@ Global
 		{6C2A39D9-1D73-4321-B386-468D9BC3D65D} = {1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}
 		{325D7FC1-03DA-46FB-B3AA-B57DDF497A0C} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
 		{8AE38E3B-EC53-4C56-8925-589D5636C85F} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
+		{43BB1EAA-9A6A-421A-BDAF-085DA5039A9D} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
