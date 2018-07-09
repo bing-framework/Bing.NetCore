@@ -14,7 +14,7 @@ namespace Bing.Utils.Timing
         /// <summary>
         /// 1970年1月1日
         /// </summary>
-        static readonly DateTime Date1970 = new DateTime(1970, 1, 1);
+        internal static readonly DateTime Date1970 = new DateTime(1970, 1, 1);
 
         #endregion
 
