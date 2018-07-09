@@ -25,7 +25,6 @@ namespace Bing.Tools.QrCode.QRCoder
         /// </summary>
         private string _logoPath;
 
-
         /// <summary>
         /// 初始化一个<see cref="QRCoderQrCodeService"/>类型的实例
         /// </summary>
@@ -89,7 +88,7 @@ namespace Bing.Tools.QrCode.QRCoder
         /// </summary>
         /// <param name="content">内容</param>
         /// <returns></returns>
-        public byte[] CreateQrCode(string content)
+        public virtual byte[] CreateQrCode(string content)
         {
             QRCodeGenerator generator=new QRCodeGenerator();
             QRCodeData data = generator.CreateQrCode(content, _level);
@@ -100,7 +99,7 @@ namespace Bing.Tools.QrCode.QRCoder
             }
 
             QRCode qrCode=new QRCode(data);
-            using (var bitmap= qrCode.GetGraphic(_size, Color.White, Color.Black, GetLogo()))
+            using (var bitmap= qrCode.GetGraphic(_size, Color.Black, Color.White, GetLogo()))
             {
                 using (var ms=new MemoryStream())
                 {
@@ -114,7 +113,7 @@ namespace Bing.Tools.QrCode.QRCoder
         /// 获取Logo文件
         /// </summary>
         /// <returns></returns>
-        private Bitmap GetLogo()
+        protected virtual Bitmap GetLogo()
         {
             if (string.IsNullOrWhiteSpace(_logoPath))
             {
