@@ -98,7 +98,7 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region IsTrue(结果为true时，输出参数)
+        #region IfTrue(结果为true时，输出参数)
 
         /// <summary>
         /// 结果为true时，输出参数
@@ -107,7 +107,7 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="t">输出参数</param>
         /// <returns></returns>
-        public static T IsTrue<T>(this bool value, T t)
+        public static T IfTrue<T>(this bool value, T t)
         {
             return value ? t : default(T);
         }
@@ -119,14 +119,44 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="t">输出参数</param>
         /// <returns></returns>
-        public static T IsTrue<T>(this bool? value, T t)
+        public static T IfTrue<T>(this bool? value, T t)
         {
             return value.GetValueOrDefault() ? t : default(T);
         }
 
         #endregion
 
-        #region IsFalse(结果为false时，输出参数)
+        #region IfTrue(结果为true时，执行方法)
+
+        /// <summary>
+        /// 结果为true时，执行方法
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="action">执行方法</param>
+        public static void IfTrue(this bool value, Action action)
+        {
+            if (value)
+            {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// 结果为true时，执行方法
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="action">执行方法</param>
+        public static void IfTrue(this bool? value, Action action)
+        {
+            if (value.GetValueOrDefault())
+            {
+                action();
+            }
+        }
+
+        #endregion
+
+        #region IfFalse(结果为false时，输出参数)
 
         /// <summary>
         /// 结果为false时，输出参数
@@ -135,7 +165,7 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="t">输出参数</param>
         /// <returns></returns>
-        public static T IsFalse<T>(this bool value, T t)
+        public static T IfFalse<T>(this bool value, T t)
         {
             return !value ? t : default(T);
         }
@@ -147,9 +177,39 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="t">输出参数</param>
         /// <returns></returns>
-        public static T IsFalse<T>(this bool? value, T t)
+        public static T IfFalse<T>(this bool? value, T t)
         {
             return !value.GetValueOrDefault() ? t : default(T);
+        }
+
+        #endregion
+
+        #region IfFalse(结果为false时，执行方法)
+
+        /// <summary>
+        /// 结果为false时，执行方法
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="action">执行方法</param>
+        public static void IfFalse(this bool value, Action action)
+        {
+            if (!value)
+            {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// 结果为false时，执行方法
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="action">执行方法</param>
+        public static void IfFalse(this bool? value, Action action)
+        {
+            if (!value.GetValueOrDefault())
+            {
+                action();
+            }
         }
 
         #endregion
