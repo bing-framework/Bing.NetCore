@@ -48,31 +48,6 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region Join(将数组可以转换成指定格式的字符串)
-
-        /// <summary>
-        /// 将数组可以转换成指定格式的字符串
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="separator">连接符，默认：,</param>
-        /// <returns></returns>
-        /// <example>
-        /// <code>
-        /// string[] strJoin={"kencery","liuxiaoji"};
-        /// strJoin.Join("需要分隔的格式，不传递默认按照，分隔")
-        /// </code>
-        /// </example>
-        public static string Join(this IEnumerable<string> value, string separator = ",")
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-            return value.Aggregate((x, y) => x + separator + y);
-        }
-
-        #endregion
-
         #region ExpandAndToString(展开集合并转换为字符串)
 
         /// <summary>

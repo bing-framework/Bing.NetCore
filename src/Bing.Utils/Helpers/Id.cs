@@ -47,10 +47,19 @@ namespace Bing.Utils.Helpers
         }
 
         /// <summary>
+        /// 用Guid创建标识，去掉分隔符
+        /// </summary>
+        /// <returns></returns>
+        public static string Guid()
+        {
+            return string.IsNullOrWhiteSpace(_id) ? System.Guid.NewGuid().ToString("N") : _id;
+        }
+
+        /// <summary>
         /// 创建 Guid ID
         /// </summary>
         /// <returns></returns>
-        public static Guid GuidId()
+        public static Guid GetGuid()
         {
             return GuidGenerator.Create();
         }
@@ -59,7 +68,7 @@ namespace Bing.Utils.Helpers
         /// 创建 Long ID
         /// </summary>
         /// <returns></returns>
-        public static long LongId()
+        public static long GetLong()
         {
             return LongGenerator.Create();
         }
@@ -68,7 +77,7 @@ namespace Bing.Utils.Helpers
         /// 创建 String ID
         /// </summary>
         /// <returns></returns>
-        public static string StringId()
+        public static string GetString()
         {
             return StringGenerator.Create();
         }
