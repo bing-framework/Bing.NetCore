@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
 using Bing.Utils.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Bing
 {
     /// <summary>

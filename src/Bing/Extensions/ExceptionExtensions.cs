@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Bing.Exceptions.Prompts;
 
+// ReSharper disable once CheckNamespace
 namespace Bing
 {
     /// <summary>
