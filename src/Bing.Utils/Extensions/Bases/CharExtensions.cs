@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
@@ -38,10 +40,10 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region Repeat(指定次数重复一个字符)
+        #region Repeat(重复拼接字符)
 
         /// <summary>
-        /// 指定次数重复一个字符
+        /// 重复拼接字符
         /// </summary>
         /// <param name="this">字符</param>
         /// <param name="repeatCount">重复数</param>
@@ -49,6 +51,59 @@ namespace Bing.Utils.Extensions
         public static string Repeat(this char @this, int repeatCount)
         {
             return new string(@this, repeatCount);
+        }
+
+        #endregion
+
+        #region GetAscii(获取ASCII编码)
+
+        /// <summary>
+        /// 获取ASCII编码
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static int GetAsciiCode(this char value)
+        {
+            byte[] bytes = Encoding.GetEncoding(0).GetBytes(value.ToString());
+            if (bytes.Length == 1)
+            {
+                return bytes[0];
+            }
+
+            return (((bytes[0] * 0x100) + bytes[1]) - 0x10000);
+        }
+
+        #endregion
+
+        #region IsChinese(是否中文字符串)
+
+        /// <summary>
+        /// 是否中文字符串
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static bool IsChinese(this char value)
+        {
+            return Regex.IsMatch(value.ToString(), "^[一-龥]$");
+        }
+
+        #endregion
+
+        #region IsLine(是否行标识)
+
+        /// <summary>
+        /// 是否行标识
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static bool IsLine(this char value)
+        {
+            if (value != '\r')
+            {
+                return (value == '\n');
+            }
+
+            return true;
         }
 
         #endregion
