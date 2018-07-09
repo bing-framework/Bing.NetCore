@@ -1,7 +1,8 @@
 ﻿using System;
 using Bing.Utils.Timing;
 
-namespace Bing.Utils.Extensions.Bases
+// ReSharper disable once CheckNamespace
+namespace Bing.Utils.Extensions
 {
     /// <summary>
     /// 长整型(<see cref="Int64"/>) 扩展
