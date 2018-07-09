@@ -11,17 +11,17 @@ namespace Bing.Utils.Extensions
     /// </summary>
     public static class ListExtensions
     {
-        #region InsertUnique(插入唯一值)
+        #region InsertIfNotExists(插入项。如果不存在，则插入)
 
         /// <summary>
-        /// 插入指定项，如果项不存在则插入
+        /// 插入项。如果不存在，则插入
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
         /// <param name="list">列表</param>
         /// <param name="index">索引</param>
         /// <param name="item">项</param>
         /// <returns></returns>
-        public static bool InsertUnique<T>(this IList<T> list, int index, T item)
+        public static bool InsertIfNotExists<T>(this IList<T> list, int index, T item)
         {
             if (list.Contains(item) == false)
             {
@@ -33,16 +33,16 @@ namespace Bing.Utils.Extensions
         }
 
         /// <summary>
-        /// 批量插入指定项，如果项存在则插入
+        /// 批量插入项。如果不存在，则插入
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
         /// <param name="list">列表</param>
         /// <param name="startIndex">开始位置索引</param>
         /// <param name="items">列表项</param>
         /// <returns></returns>
-        public static int InsertUnique<T>(this IList<T> list, int startIndex, IEnumerable<T> items)
+        public static int InsertIfNotExists<T>(this IList<T> list, int startIndex, IEnumerable<T> items)
         {
-            var index = startIndex + items.Reverse().Count(item => list.InsertUnique(startIndex, item));
+            var index = startIndex + items.Reverse().Count(item => list.InsertIfNotExists(startIndex, item));
             return (index - startIndex);
         }
 
