@@ -30,11 +30,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static bool IsEmpty(this Guid? value)
         {
-            if (value == null)
-            {
-                return true;
-            }
-            return IsEmpty(value.Value);
+            return value == null || IsEmpty(value.Value);
         }
 
         /// <summary>
@@ -44,11 +40,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static bool IsEmpty(this Guid value)
         {
-            if (value == Guid.Empty)
-            {
-                return true;
-            }
-            return false;
+            return value == Guid.Empty;
         }
 
         /// <summary>
@@ -114,9 +106,32 @@ namespace Bing.Utils.Extensions
         {
             return null == dictionary || dictionary.Count == 0;
         }
+
+        /// <summary>
+        /// 判断 列表 是否为空
+        /// </summary>
+        /// <param name="list">列表</param>
+        /// <returns></returns>
+        public static bool IsEmpty(this IList list)
+        {
+            return null == list || list.Count == 0;
+        }
+
+        /// <summary>
+        /// 判断 泛型列表 是否为空
+        /// </summary>
+        /// <typeparam name="T">泛型对象</typeparam>
+        /// <param name="list">列表</param>
+        /// <returns></returns>
+        public static bool IsEmpty<T>(this IList<T> list)
+        {
+            return null == list || list.Count == 0;
+        }
+
         #endregion
 
         #region IsNull(是否为空)
+
         /// <summary>
         /// 判断目标对象是否为空
         /// </summary>
@@ -138,6 +153,7 @@ namespace Bing.Utils.Extensions
             var result = ReferenceEquals(target, null);
             return result;
         }
+
         #endregion
     }
 }

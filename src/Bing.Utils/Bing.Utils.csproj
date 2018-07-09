@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Folder Include="Extensions\Linq\" />
+    <Folder Include="Extensions\Xml\" />
   </ItemGroup>
 
 </Project>
