@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
@@ -29,6 +32,7 @@ namespace Bing.Utils.Extensions
         #endregion
 
         #region AddRange(批量添加键值对到字典)
+
         /// <summary>
         /// 批量添加键值对到字典中
         /// </summary>
@@ -55,6 +59,7 @@ namespace Bing.Utils.Extensions
             }
             return dict;
         }
+
         #endregion
 
         #region GetOrAdd(获取指定键的值，不存在则按指定委托添加值)
@@ -140,6 +145,135 @@ namespace Bing.Utils.Extensions
                 throw new ArgumentNullException(nameof(comparer));
             }
             return new SortedDictionary<TKey, TValue>(dictionary, comparer);
+        }
+
+        /// <summary>
+        /// 对指定的字典进行排序，根据值元素进行排序
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static IDictionary<TKey, TValue> SortByValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            return new SortedDictionary<TKey, TValue>(dictionary).OrderBy(x => x.Value)
+                .ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        #endregion
+
+        #region ToQueryString(将字典转换成查询字符串)
+
+        /// <summary>
+        /// 将字典转换成查询字符串
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static string ToQueryString<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            if (dictionary == null || !dictionary.Any())
+            {
+                return string.Empty;
+            }
+            StringBuilder sb=new StringBuilder();
+            foreach (var item in dictionary)
+            {
+                sb.Append($"{item.Key.ToString()}={item.Value.ToString()}&");
+            }
+
+            sb.TrimEnd("&");
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region GetKey(根据Value反向查找Key)
+
+        /// <summary>
+        /// 根据Value反向查找Key
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static TKey GetKey<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value)
+        {
+            foreach (var item in dictionary.Where(x=>x.Value.Equals(value)))
+            {
+                return item.Key;
+            }
+
+            return default(TKey);
+        }
+
+        #endregion
+
+        #region TryAdd(尝试添加键值对到字典)
+
+        /// <summary>
+        /// 尝试将键值对添加到字典中。如果不存在，则添加；存在，不添加也不抛异常
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <param name="key">键</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static IDictionary<TKey, TValue> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary,
+            TKey key, TValue value)
+        {
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary.Add(key,value);
+            }
+
+            return dictionary;
+        }
+
+        #endregion
+
+        #region ToHashTable(将字典转换成哈希表)
+
+        /// <summary>
+        /// 将字典转换成哈希表
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static Hashtable ToHashTable<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            var table=new Hashtable();
+            foreach (var item in dictionary)
+            {
+                table.Add(item.Key,item.Value);
+            }
+
+            return table;
+        }
+
+        #endregion
+
+        #region Invert(字典颠倒)
+
+        /// <summary>
+        /// 对指定字典进行颠倒键值对，创建新字典（值为键，键为值）
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static IDictionary<TValue, TKey> Reverse<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+
+            return dictionary.ToDictionary(x => x.Value, x => x.Key);
         }
 
         #endregion
