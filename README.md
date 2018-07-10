@@ -60,16 +60,20 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - log4net
   - [Exceptionless](https://github.com/exceptionless)
 
-14. Queryable 动态扩展
+14. 二维码操作
+  -	[QRCoder](https://github.com/codebude/QRCoder)
+  - [ZXing.Net](https://github.com/micjahn/ZXing.Net)
+
+15. Queryable 动态扩展
   - [System.Linq.Dynamic.Core](https://github.com/StefH/System.Linq.Dynamic.Core)
 
-15. 缓存框架
+16. 缓存框架
   - [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
 
-16. Web 框架
+17. Web 框架
   - [ASP.NET Core](https://docs.microsoft.com/zh-cn/aspnet/core/)
  
-17. 参考应用框架
+18. 参考应用框架
   - [ABP](https://github.com/aspnetboilerplate/aspnetboilerplate)
   - [Nop](https://www.nopcommerce.com) 
     - Nop是一个开源商城，封装了大量实用的基础代码。
