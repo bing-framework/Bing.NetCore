@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Bing.Tools.QrCode\Bing.Tools.QrCode.csproj" />
+    <ProjectReference Include="..\Bing.Tools.QrCode\Bing.Tools.QrCode.csproj" />
   </ItemGroup>
 
 </Project>
