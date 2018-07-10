@@ -1,11 +1,14 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System.DrawingCore;
+using System.DrawingCore.Drawing2D;
+using System.DrawingCore.Imaging;
 using System.IO;
 using ZXing;
 using ZXing.QrCode;
+using ZXing.Rendering;
+using ZXing.ZKWeb.Rendering;
 using ZQI = global::ZXing.QrCode.Internal;
+using ZR=global::ZXing.Rendering;
 
 namespace Bing.Tools.QrCode.ZXing
 {
@@ -109,38 +112,13 @@ namespace Bing.Tools.QrCode.ZXing
         /// <returns></returns>
         private byte[] CreateBaseQrCode(string content)
         {
-            var qrCodeWriter=new BarcodeWriterPixelData()
+            using (var bitmap = GetBitmap(content))
             {
-                Format = BarcodeFormat.QR_CODE,
-                Options = new QrCodeEncodingOptions()
+                using (var ms = new MemoryStream())
                 {
-                    CharacterSet = "UTF-8",
-                    ErrorCorrection = _level,
-                    Margin = _margin,
-                    Width = _size,
-                    Height = _size,
-                }
-            };
-
-            var pixelData = qrCodeWriter.Write(content);
-            using (var bitmap = new System.Drawing.Bitmap(pixelData.Width, pixelData.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb))
-            {
-                using (var ms=new MemoryStream())
-                {
-                    var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, pixelData.Width, pixelData.Height),
-                        System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-                    try
-                    {
-                        System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0,
-                            pixelData.Pixels.Length);
-                    }
-                    finally
-                    {
-                        bitmap.UnlockBits(bitmapData);
-                    }
                     // 此处会导致容错等级 Q H 无效
                     //bitmap.MakeTransparent();
-                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    bitmap.Save(ms, ImageFormat.Png);
                     return ms.ToArray();
                 }
             }
@@ -153,7 +131,21 @@ namespace Bing.Tools.QrCode.ZXing
         /// <returns></returns>
         private byte[] CreateLogoQrCode(string content)
         {
-            var qrCodeWriter = new BarcodeWriterPixelData()
+            using (var bitmap = GetBitmap(content))
+            {
+                Bitmap logo = new Bitmap(_logoPath);
+                return MergeQrImg(bitmap, logo);
+            }
+        }
+
+        /// <summary>
+        /// 获取二维码图片
+        /// </summary>
+        /// <param name="content">内容</param>
+        /// <returns></returns>
+        private Bitmap GetBitmap(string content)
+        {
+            BarcodeWriter<Bitmap> bitmapBarcodeWriter = new BarcodeWriter<Bitmap>()
             {
                 Format = BarcodeFormat.QR_CODE,
                 Options = new QrCodeEncodingOptions()
@@ -163,35 +155,23 @@ namespace Bing.Tools.QrCode.ZXing
                     Margin = _margin,
                     Width = _size,
                     Height = _size,
+                },
+                Renderer = new BitmapRenderer()
+                {
+                    Foreground = Color.Black,
+                    Background = Color.White
                 }
             };
 
-            var pixelData = qrCodeWriter.Write(content);
-            using (var bitmap = new System.Drawing.Bitmap(pixelData.Width, pixelData.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb))
-            {
-                var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, pixelData.Width, pixelData.Height),
-                    System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-                try
-                {
-                    System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0,
-                        pixelData.Pixels.Length);
-                }
-                finally
-                {
-                    bitmap.UnlockBits(bitmapData);
-                }
-
-                Bitmap logo=new Bitmap(_logoPath);
-                return MergeQrImg(bitmap, logo);
-            }
+            return bitmapBarcodeWriter.Write(content);
         }
 
         /// <summary>
         /// 合并二维码以及Logo
         /// 参考：http://www.cnblogs.com/zoro-zero/p/6225697.html
         /// </summary>
-        /// <param name="qrImg"></param>
-        /// <param name="logoImg"></param>
+        /// <param name="qrImg">二维码图片</param>
+        /// <param name="logoImg">logo图片</param>
         /// <param name="n"></param>
         /// <returns></returns>
         private static byte[] MergeQrImg(Bitmap qrImg, Bitmap logoImg, double n = 0.23)
@@ -207,8 +187,8 @@ namespace Bing.Tools.QrCode.ZXing
             Bitmap logoBgImg = new Bitmap(newImgWidth, newImgWidth);
             logoBgImg.MakeTransparent();
             Graphics g = Graphics.FromImage(logoBgImg);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
             g.Clear(Color.Transparent);
             Pen p = new Pen(new SolidBrush(Color.White));
             Rectangle rect = new Rectangle(0, 0, newImgWidth - 1, newImgWidth - 1);
@@ -220,8 +200,8 @@ namespace Bing.Tools.QrCode.ZXing
             // 画Logo
             Bitmap img1 = new Bitmap(newLogoImg.Width, newLogoImg.Height);
             Graphics g1 = Graphics.FromImage(img1);
-            g1.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g1.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g1.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g1.SmoothingMode = SmoothingMode.HighQuality;
             g1.Clear(Color.Transparent);
             Pen p1 = new Pen(new SolidBrush(Color.Gray));
             Rectangle rect1 = new Rectangle(0, 0, newLogoImg.Width - 1, newLogoImg.Height - 1);
@@ -288,24 +268,23 @@ namespace Bing.Tools.QrCode.ZXing
         /// <param name="initImage">需要缩放的图片</param>
         /// <param name="n">缩放比例</param>
         /// <returns></returns>
-        private static System.Drawing.Image ZoomPic(System.Drawing.Image initImage, double n)
+        private static Image ZoomPic(Image initImage, double n)
         {
             // 缩略图宽、高计算
             var newWidth = n * initImage.Width;
             var newHeight = n * initImage.Height;
             // 生成新图
-            System.Drawing.Image newImage = new System.Drawing.Bitmap((int)newWidth, (int)newHeight);
+            Image newImage = new Bitmap((int)newWidth, (int)newHeight);
             // 新建一个画板
-            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newImage);
+            Graphics g = Graphics.FromImage(newImage);
             // 设置质量
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
             // 设置背景色
-            g.Clear(System.Drawing.Color.Transparent);
+            g.Clear(Color.Transparent);
             // 画图
-            g.DrawImage(initImage, new System.Drawing.Rectangle(0, 0, newImage.Width, newImage.Height),
-                new System.Drawing.Rectangle(0, 0, initImage.Width, initImage.Height),
-                System.Drawing.GraphicsUnit.Pixel);
+            g.DrawImage(initImage, new Rectangle(0, 0, newImage.Width, newImage.Height),
+                new Rectangle(0, 0, initImage.Width, initImage.Height),GraphicsUnit.Pixel);
             g.Dispose();
             return newImage;
         }
