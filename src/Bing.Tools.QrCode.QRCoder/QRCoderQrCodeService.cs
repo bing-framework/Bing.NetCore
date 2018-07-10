@@ -26,6 +26,16 @@ namespace Bing.Tools.QrCode.QRCoder
         private string _logoPath;
 
         /// <summary>
+        /// 前景色
+        /// </summary>
+        private Color _foregroundColor;
+
+        /// <summary>
+        /// 背景色
+        /// </summary>
+        private Color _backgroundColor;
+
+        /// <summary>
         /// 初始化一个<see cref="QRCoderQrCodeService"/>类型的实例
         /// </summary>
         public QRCoderQrCodeService()
@@ -33,6 +43,8 @@ namespace Bing.Tools.QrCode.QRCoder
             _size = 10;
             _level = QRCodeGenerator.ECCLevel.L;
             _logoPath = string.Empty;
+            _foregroundColor = Color.Black;
+            _backgroundColor = Color.White;
         }
 
         /// <summary>
@@ -84,6 +96,28 @@ namespace Bing.Tools.QrCode.QRCoder
         }
 
         /// <summary>
+        /// 设置前景色
+        /// </summary>
+        /// <param name="color">颜色</param>
+        /// <returns></returns>
+        public IQrCodeService Foreground(Color color)
+        {
+            _foregroundColor = color;
+            return this;
+        }
+
+        /// <summary>
+        /// 设置背景色
+        /// </summary>
+        /// <param name="color">颜色</param>
+        /// <returns></returns>
+        public IQrCodeService Background(Color color)
+        {
+            _backgroundColor = color;
+            return this;
+        }
+
+        /// <summary>
         /// 创建二维码
         /// </summary>
         /// <param name="content">内容</param>
@@ -92,14 +126,14 @@ namespace Bing.Tools.QrCode.QRCoder
         {
             QRCodeGenerator generator=new QRCodeGenerator();
             QRCodeData data = generator.CreateQrCode(content, _level);
-            if (string.IsNullOrWhiteSpace(_logoPath))
-            {
-                BitmapByteQRCode bitmapByteQrCode = new BitmapByteQRCode(data);
-                return bitmapByteQrCode.GetGraphic(_size);
-            }
+            //if (string.IsNullOrWhiteSpace(_logoPath))
+            //{
+            //    BitmapByteQRCode bitmapByteQrCode = new BitmapByteQRCode(data);
+            //    return bitmapByteQrCode.GetGraphic(_size);
+            //}
 
             QRCode qrCode=new QRCode(data);
-            using (var bitmap= qrCode.GetGraphic(_size, Color.Black, Color.White, GetLogo()))
+            using (var bitmap= qrCode.GetGraphic(_size, _foregroundColor, _backgroundColor, GetLogo()))
             {
                 using (var ms=new MemoryStream())
                 {

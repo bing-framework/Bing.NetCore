@@ -28,19 +28,19 @@ namespace Bing.Tools.QrCode
         /// <returns></returns>
         IQrCodeService Logo(string logoPath);
 
-        ///// <summary>
-        ///// 设置前景色
-        ///// </summary>
-        ///// <param name="color">颜色</param>
-        ///// <returns></returns>
-        //IQrCodeService Foreground(Color color);
+        /// <summary>
+        /// 设置前景色
+        /// </summary>
+        /// <param name="color">颜色</param>
+        /// <returns></returns>
+        IQrCodeService Foreground(Color color);
 
-        ///// <summary>
-        ///// 设置背景色
-        ///// </summary>
-        ///// <param name="color">颜色</param>
-        ///// <returns></returns>
-        //IQrCodeService Background(Color color);
+        /// <summary>
+        /// 设置背景色
+        /// </summary>
+        /// <param name="color">颜色</param>
+        /// <returns></returns>
+        IQrCodeService Background(Color color);
 
         /// <summary>
         /// 创建二维码

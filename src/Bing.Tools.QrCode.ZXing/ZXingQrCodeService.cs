@@ -38,6 +38,16 @@ namespace Bing.Tools.QrCode.ZXing
         private int _margin;
 
         /// <summary>
+        /// 前景色
+        /// </summary>
+        private System.Drawing.Color _foregroundColor;
+
+        /// <summary>
+        /// 背景色
+        /// </summary>
+        private System.Drawing.Color _backgroundColor;
+
+        /// <summary>
         /// 初始化一个<see cref="ZXingQrCodeService"/>类型的实例
         /// </summary>
         public ZXingQrCodeService()
@@ -46,6 +56,8 @@ namespace Bing.Tools.QrCode.ZXing
             _level = ZQI.ErrorCorrectionLevel.L;
             _margin = 0;
             _logoPath = string.Empty;
+            _foregroundColor = System.Drawing.Color.Black;
+            _backgroundColor = System.Drawing.Color.White;
         }
 
         /// <summary>
@@ -92,6 +104,28 @@ namespace Bing.Tools.QrCode.ZXing
         public IQrCodeService Logo(string logoPath)
         {
             _logoPath = logoPath;
+            return this;
+        }
+
+        /// <summary>
+        /// 设置前景色
+        /// </summary>
+        /// <param name="color">颜色</param>
+        /// <returns></returns>
+        public IQrCodeService Foreground(System.Drawing.Color color)
+        {
+            _foregroundColor = color;
+            return this;
+        }
+
+        /// <summary>
+        /// 设置背景色
+        /// </summary>
+        /// <param name="color">颜色</param>
+        /// <returns></returns>
+        public IQrCodeService Background(System.Drawing.Color color)
+        {
+            _backgroundColor = color;
             return this;
         }
 
@@ -158,8 +192,8 @@ namespace Bing.Tools.QrCode.ZXing
                 },
                 Renderer = new BitmapRenderer()
                 {
-                    Foreground = Color.Black,
-                    Background = Color.White
+                    Foreground = Color.FromName(_foregroundColor.Name),
+                    Background = Color.FromName(_backgroundColor.Name)
                 }
             };
 
