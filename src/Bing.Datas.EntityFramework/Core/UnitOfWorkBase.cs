@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -12,8 +13,10 @@ using Bing.Domains.Entities.Auditing;
 using Bing.Exceptions;
 using Bing.Logs;
 using Bing.Sessions;
+using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Datas.EntityFramework.Core
@@ -34,6 +37,18 @@ namespace Bing.Datas.EntityFramework.Core
         /// 用户会话
         /// </summary>
         public ISession Session { get; set; }
+
+        /// <summary>
+        /// 是否启用逻辑删除过滤
+        /// </summary>
+        protected virtual bool IsDeleteFilterEnabled => DataConfig.EnabledDeleteFilter;
+
+        #endregion
+
+        #region 字段
+
+        private static MethodInfo ConfigureGlobalFiltersMethodInfo =
+            typeof(UnitOfWorkBase).GetMethod(nameof(ConfigureGlobalFilters), BindingFlags.Instance | BindingFlags.NonPublic);
 
         #endregion
 
@@ -166,6 +181,12 @@ namespace Bing.Datas.EntityFramework.Core
             {
                 mapper.Map(modelBuilder);
             }
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                ConfigureGlobalFiltersMethodInfo.MakeGenericMethod(entityType.ClrType)
+                    .Invoke(this, new object[] {modelBuilder, entityType});
+            }
         }
 
         /// <summary>
@@ -199,6 +220,122 @@ namespace Bing.Datas.EntityFramework.Core
         protected virtual IEnumerable<IMap> GetMapTypes(Assembly assembly)
         {
             return Bing.Utils.Helpers.Reflection.GetInstancesByInterface<IMap>(assembly);
+        }
+
+        /// <summary>
+        /// 配置全局过滤器
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="modelBuilder">映射生成器</param>
+        /// <param name="entityType">实体类型</param>
+        protected void ConfigureGlobalFilters<TEntity>(ModelBuilder modelBuilder, IMutableEntityType entityType)
+            where TEntity : class
+        {
+            if (entityType.BaseType == null && ShouldFilterEntity<TEntity>(entityType))
+            {
+                var filterExpression = CreateFilterExpression<TEntity>();
+                if (filterExpression != null)
+                {
+                    modelBuilder.Entity<TEntity>().HasQueryFilter(filterExpression);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 是否应该过滤实体
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="entityType">实体类型</param>
+        /// <returns></returns>
+        protected virtual bool ShouldFilterEntity<TEntity>(IMutableEntityType entityType) where TEntity : class
+        {
+            if (typeof(IDelete).IsAssignableFrom(typeof(TEntity)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 创建过滤表达式
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <returns></returns>
+        protected virtual Expression<Func<TEntity, bool>> CreateFilterExpression<TEntity>() where TEntity : class
+        {
+            Expression<Func<TEntity, bool>> expression = null;
+            if (typeof(IDelete).IsAssignableFrom(typeof(TEntity)))
+            {
+                Expression<Func<TEntity, bool>> deleteFilter = e =>
+                    !((IDelete) e).IsDeleted || ((IDelete) e).IsDeleted != IsDeleteFilterEnabled;
+                expression = expression == null ? deleteFilter : CombineExpression(expression, deleteFilter);
+            }
+
+            return expression;
+        }
+
+        /// <summary>
+        /// 合并表达式
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="expression1">表达式1</param>
+        /// <param name="expression2">表达式2</param>
+        /// <returns></returns>
+        protected virtual Expression<Func<T, bool>> CombineExpression<T>(Expression<Func<T, bool>> expression1,
+            Expression<Func<T, bool>> expression2)
+        {
+            var parameter = Expression.Parameter(typeof(T));
+
+            var leftVisitor=new ReplaceExpressionVisitor(expression1.Parameters[0],parameter);
+            var left = leftVisitor.Visit(expression1.Body);
+
+            var rightVisitor = new ReplaceExpressionVisitor(expression2.Parameters[0], parameter);
+            var right = rightVisitor.Visit(expression2.Body);
+
+            return Expression.Lambda<Func<T, bool>>(Expression.AndAlso(left, right), parameter);
+        }
+
+        /// <summary>
+        /// 替换表达式访问器
+        /// </summary>
+        class ReplaceExpressionVisitor:ExpressionVisitor
+        {
+            /// <summary>
+            /// 旧值
+            /// </summary>
+            private readonly Expression _oldValue;
+
+            /// <summary>
+            /// 新值
+            /// </summary>
+            private readonly Expression _newValue;
+
+            /// <summary>
+            /// 初始化一个<see cref="ReplaceExpressionVisitor"/>类型的实例
+            /// </summary>
+            /// <param name="oldValue">旧值</param>
+            /// <param name="newValue">新值</param>
+            public ReplaceExpressionVisitor(Expression oldValue, Expression newValue)
+            {
+                _oldValue = oldValue;
+                _newValue = newValue;
+            }
+
+            /// <summary>
+            /// 访问
+            /// </summary>
+            /// <param name="node">表达式</param>
+            /// <returns></returns>
+            public override Expression Visit(Expression node)
+            {
+                if (node == _oldValue)
+                {
+                    return _newValue;
+                }
+
+                return base.Visit(node);
+            }
         }
 
         #endregion

@@ -28,5 +28,10 @@ namespace Bing.Datas.Configs
         /// ADO日志拦截器，
         /// </summary>
         public static Action<string, string, object> AdoLogInterceptor { get; set; } = null;
+
+        /// <summary>
+        /// 是否启用逻辑删除过滤
+        /// </summary>
+        public static bool EnabledDeleteFilter { get; set; } = true;
     }
 }
