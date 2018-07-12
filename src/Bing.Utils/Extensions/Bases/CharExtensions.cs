@@ -107,5 +107,44 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region IsDoubleByte(是否双字节字符)
+
+        /// <summary>
+        /// 是否双字节字符
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static bool IsDoubleByte(this char value)
+        {
+            return Regex.IsMatch(value.ToString(), @"[^\x00-\xff]");
+        }
+
+        #endregion
+
+        #region ToDBCChar(全角字符转半角字符)
+
+        /// <summary>
+        /// 全角字符转半角字符
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        // ReSharper disable once InconsistentNaming
+        public static char ToDBCChar(this char value)
+        {
+            if (value == 12288)
+            {
+                value = (char) 32;
+            }
+
+            if (value > 65280 && value < 65375)
+            {
+                value = (char) (value - 65248);
+            }
+
+            return value;
+        }
+
+        #endregion
     }
 }
