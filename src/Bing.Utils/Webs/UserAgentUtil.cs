@@ -14,6 +14,14 @@
         /// <returns></returns>
         public static string GetOperatingSystemName(string userAgent)
         {
+            if (userAgent.Contains("NT 10.0"))
+            {
+                return "Windows 10";
+            }
+            if (userAgent.Contains("NT 6.2"))
+            {
+                return "Windows 8";
+            }
             if (userAgent.Contains("NT 6.1 "))
             {
                 return "Windows 7";
@@ -30,9 +38,13 @@
             {
                 return "Windows XP";
             }
-            if (userAgent.Contains("NT 5"))
+            if (userAgent.Contains("NT 5.0"))
             {
                 return "Windows 2000";
+            }
+            if (userAgent.Contains("ME"))
+            {
+                return "Windows ME";
             }
             if (userAgent.Contains("Mac"))
             {
@@ -48,7 +60,11 @@
             }
             if (userAgent.Contains("SunOS"))
             {
-                return "SunOS";
+                return "Solaris";
+            }
+            if (userAgent.Contains("FreeBSD"))
+            {
+                return "FreeBSD";
             }
             return "Other OperationSystem";
         }
@@ -129,5 +145,23 @@
 
         #endregion
 
+        #region IsWechatBrowser(是否微信浏览器)
+
+        /// <summary>
+        /// 是否微信浏览器
+        /// </summary>
+        /// <param name="userAgent">UA</param>
+        /// <returns></returns>
+        public static bool IsWechatBrowser(string userAgent)
+        {
+            if (userAgent.Contains("MicroMessenger"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
     }
 }
