@@ -122,15 +122,15 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region ToDBCChar(全角字符转半角字符)
+        #region ToDBC(转换为半角字符)
 
         /// <summary>
-        /// 全角字符转半角字符
+        /// 转换为半角字符
         /// </summary>
         /// <param name="value">值</param>
         /// <returns></returns>
         // ReSharper disable once InconsistentNaming
-        public static char ToDBCChar(this char value)
+        public static char ToDBC(this char value)
         {
             if (value == 12288)
             {
@@ -140,6 +140,31 @@ namespace Bing.Utils.Extensions
             if (value > 65280 && value < 65375)
             {
                 value = (char) (value - 65248);
+            }
+
+            return value;
+        }
+
+        #endregion
+
+        #region ToSBC(转换为全角字符)
+
+        /// <summary>
+        /// 转换为全角字符
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        // ReSharper disable once InconsistentNaming
+        public static char ToSBC(this char value)
+        {
+            if (value == 32)
+            {
+                value = (char) 12288;
+            }
+
+            if (value < 127)
+            {
+                value = (char) (value + 65248);
             }
 
             return value;

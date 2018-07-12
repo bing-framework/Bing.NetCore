@@ -98,5 +98,39 @@ namespace Bing.Utils.Extensions
                    || type.GetTypeInfo().IsEnum
                    || Nullable.GetUnderlyingType(type) != null && CanUseForDb(Nullable.GetUnderlyingType(type));
         }
+
+        /// <summary>
+        /// 是否自定义类型
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        public static bool IsCustomType(this Type type)
+        {
+            if (type.IsPrimitive)
+            {
+                return false;
+            }
+
+            if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive)
+            {
+                return false;
+            }
+
+            return type != typeof(object) && type != typeof(Guid) &&
+                   Type.GetTypeCode(type) == TypeCode.Object && !type.IsGenericType;
+        }
+
+        /// <summary>
+        /// 是否匿名类型
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        public static bool IsAnonymousType(this Type type)
+        {
+            const string csharpAnonPrefix = "<>f__AnonymousType";
+            const string vbAnonPrefix = "VB$Anonymous";
+            var typeName = type.Name;
+            return typeName.StartsWith(csharpAnonPrefix) || typeName.StartsWith(vbAnonPrefix);
+        }        
     }
 }
