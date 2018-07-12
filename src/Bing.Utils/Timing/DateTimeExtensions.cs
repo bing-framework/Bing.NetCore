@@ -436,5 +436,118 @@ namespace Bing.Utils.Timing
             return (long)ts.TotalMilliseconds;
         }
         #endregion
+
+        #region CompareInterval(计算两个时间的间隔)
+
+        /// <summary>
+        /// 计算两个时间的间隔
+        /// </summary>
+        /// <param name="begin">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <param name="dateFormat">间隔格式(y:年,M:月,d:天,h:小时,m:分钟,s:秒,fff:毫秒)</param>
+        /// <returns></returns>
+        public static long CompareInterval(this DateTime begin, DateTime end, string dateFormat)
+        {
+            long interval = begin.Ticks - end.Ticks;
+            DateTime dt1;
+            DateTime dt2;
+            switch (dateFormat)
+            {
+                case "fff":
+                    interval /= 10000;
+                    break;
+                case "s":
+                    interval /= 10000000;
+                    break;
+                case "m":
+                    interval /= 600000000;
+                    break;
+                case "h":
+                    interval /= 36000000000;
+                    break;
+                case "d":
+                    interval /= 864000000000;
+                    break;
+                case "M":
+                    dt1 = (begin.CompareTo(end) >= 0) ? end : begin;
+                    dt2 = (begin.CompareTo(end) >= 0) ? begin : end;
+                    interval = -1;
+                    while (dt2.CompareTo(dt1)>=0)
+                    {
+                        interval++;
+                        dt1 = dt1.AddMonths(1);
+                    }
+                    break;
+                case "y":
+                    dt1 = (begin.CompareTo(end) >= 0) ? end : begin;
+                    dt2 = (begin.CompareTo(end) >= 0) ? begin : end;
+                    interval = -1;
+                    while (dt2.CompareTo(dt1) >= 0)
+                    {
+                        interval++;
+                        dt1 = dt1.AddMonths(1);
+                    }
+
+                    interval /= 12;
+                    break;
+            }
+
+            return interval;
+        }
+
+        #endregion
+
+        #region IsBetweenTime(判断当前时间是否在指定时间段内)
+
+        /// <summary>
+        /// 判断当前时间是否在指定时间段内，格式：hh:mm:ss
+        /// </summary>
+        /// <param name="currentTime">当前时间</param>
+        /// <param name="beginTime">开始时间</param>
+        /// <param name="endTime">结束时间</param>
+        /// <returns></returns>
+        public static bool IsBetweenTime(this DateTime currentTime, DateTime beginTime, DateTime endTime)
+        {
+            var am = beginTime.TimeOfDay;
+            var pm = endTime.TimeOfDay;
+
+            var now = currentTime.TimeOfDay;
+            if (pm < am)//截止时间小于开始时间，表示跨天
+            {
+                if (now <= pm || now >= am)
+                {
+                    return true;
+                }
+            }
+
+            if (now >= am && now <= pm)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region IsBetweenDate(判断当前时间是否在指定日期时间段内)
+
+        /// <summary>
+        /// 判断当前时间是否在指定日期时间段内，格式：yyyy-MM-dd
+        /// </summary>
+        /// <param name="currentDate">当前日期</param>
+        /// <param name="beginDate">开始日期</param>
+        /// <param name="endDate">结束日期</param>
+        /// <returns></returns>
+        public static bool IsBetweenDate(this DateTime currentDate, DateTime beginDate, DateTime endDate)
+        {
+            var begin = beginDate.Date;
+            var end = endDate.Date;
+            var now = currentDate.Date;
+
+            return now >= begin && now <= end;
+        }
+
+        #endregion
     }
 }
