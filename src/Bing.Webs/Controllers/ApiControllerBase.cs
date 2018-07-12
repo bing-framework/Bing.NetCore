@@ -12,12 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bing.Webs.Controllers
 {
     /// <summary>
-    /// WebApi控制器
+    /// WebApi控制器基类
     /// </summary>
-    [Route("api/[controller]")]
+    [ApiController]
+    [Route("api/[controller]/[action]")]
     [ExceptionHandler]
     [ErrorLog]
-    public class WebApiControllerBase:Controller
+    public class ApiControllerBase:Controller
     {
         /// <summary>
         /// 会话
@@ -30,9 +31,9 @@ namespace Bing.Webs.Controllers
         public virtual ISession Session => _session ?? NullSession.Instance;
 
         /// <summary>
-        /// 初始化一个<see cref="WebApiControllerBase"/>类型的实例
+        /// 初始化一个<see cref="ApiControllerBase"/>类型的实例
         /// </summary>
-        public WebApiControllerBase()
+        public ApiControllerBase()
         {
             _session = Ioc.Create<ISession>();
         }

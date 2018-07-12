@@ -17,7 +17,7 @@ namespace Bing.Webs.Controllers
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
-    public abstract class TreeControllerBase<TDto, TQuery, TParentId> : WebApiControllerBase
+    public abstract class TreeControllerBase<TDto, TQuery, TParentId> : ApiControllerBase
         where TDto : class, IResponse, ITreeNode, new() 
         where TQuery : class, ITreeQueryParameter<TParentId>
     {

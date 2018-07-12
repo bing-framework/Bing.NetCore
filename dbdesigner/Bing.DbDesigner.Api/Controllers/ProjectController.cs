@@ -12,7 +12,7 @@ namespace Bing.DbDesigner.Api.Controllers
     /// <summary>
     /// 项目 相关API
     /// </summary>
-    public class ProjectController:WebApiControllerBase
+    public class ProjectController: ApiControllerBase
     {
         /// <summary>
         /// 项目服务
