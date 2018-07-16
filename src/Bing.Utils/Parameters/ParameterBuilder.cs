@@ -16,14 +16,14 @@ namespace Bing.Utils.Parameters
         /// <summary>
         /// 参数字典
         /// </summary>
-        private readonly IDictionary<string, string> _params;
+        private readonly IDictionary<string, object> _params;
 
         /// <summary>
         /// 初始化一个<see cref="ParameterBuilder"/>类型的实例
         /// </summary>
         public ParameterBuilder()
         {
-            _params=new Dictionary<string, string>();
+            _params=new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -38,11 +38,11 @@ namespace Bing.Utils.Parameters
         /// 初始化一个<see cref="ParameterBuilder"/>类型的实例
         /// </summary>
         /// <param name="dictionary">字典</param>
-        public ParameterBuilder(IDictionary<string, string> dictionary)
+        public ParameterBuilder(IDictionary<string, object> dictionary)
         {
             _params = dictionary == null
-                ? new Dictionary<string, string>()
-                : new Dictionary<string, string>(dictionary);
+                ? new Dictionary<string, object>()
+                : new Dictionary<string, object>(dictionary);
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace Bing.Utils.Parameters
                 return this;
             }
 
-            string strValue = GetValue(value).Trim();
-            if (string.IsNullOrWhiteSpace(strValue))
+            value = GetValue(value);
+            if (string.IsNullOrWhiteSpace(value.SafeString()))
             {
                 return this;
             }
@@ -67,11 +67,11 @@ namespace Bing.Utils.Parameters
             key = key.Trim();
             if (_params.ContainsKey(key))
             {
-                _params[key] = strValue;
+                _params[key] = value;
             }
             else
             {
-                _params.Add(key,strValue);
+                _params.Add(key, value);
             }
 
             return this;
@@ -84,6 +84,11 @@ namespace Bing.Utils.Parameters
         /// <returns></returns>
         private string GetValue(object value)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             if (value is DateTime dateTime)
             {
                 return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
@@ -92,6 +97,11 @@ namespace Bing.Utils.Parameters
             if (value is bool boolValue)
             {
                 return boolValue.ToString().ToLower();
+            }
+
+            if (value is decimal)
+            {
+                return value.SafeString();
             }
 
             return value.SafeString();
@@ -104,7 +114,7 @@ namespace Bing.Utils.Parameters
         /// <param name="isUrlEncode">是否Url编码</param>
         /// <param name="encoding">字符编码，默认值：UTF-8</param>
         /// <returns></returns>
-        public IDictionary<string, string> GetDictionary(bool isSort = true, bool isUrlEncode = false,
+        public IDictionary<string, object> GetDictionary(bool isSort = true, bool isUrlEncode = false,
             string encoding = "UTF-8")
         {
             var result = _params.ToDictionary(t => t.Key, t => GetEncodeValue(t.Value, isUrlEncode, encoding));
@@ -112,7 +122,7 @@ namespace Bing.Utils.Parameters
             {
                 return result;
             }
-            return new SortedDictionary<string, string>(result);
+            return new SortedDictionary<string, object>(result);
         }
 
         /// <summary>
@@ -122,11 +132,11 @@ namespace Bing.Utils.Parameters
         /// <param name="isUrlEncode">是否Url编码</param>
         /// <param name="encoding">字符编码</param>
         /// <returns></returns>
-        private string GetEncodeValue(string value, bool isUrlEncode, string encoding)
+        private object GetEncodeValue(object value, bool isUrlEncode, string encoding)
         {
             if (isUrlEncode)
             {
-                return Web.UrlEncode(value, encoding);
+                return Web.UrlEncode(value.SafeString(), encoding);
             }
 
             return value;
@@ -136,7 +146,7 @@ namespace Bing.Utils.Parameters
         /// 获取键值对集合
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<KeyValuePair<string, string>> GetKeyValuePairs()
+        public IEnumerable<KeyValuePair<string, object>> GetKeyValuePairs()
         {
             return _params;
         }
@@ -199,7 +209,7 @@ namespace Bing.Utils.Parameters
         /// </summary>
         /// <param name="name">参数名</param>
         /// <returns></returns>
-        public string GetValue(string name)
+        public object GetValue(string name)
         {
             if (name.IsEmpty())
             {
@@ -219,7 +229,7 @@ namespace Bing.Utils.Parameters
         /// </summary>
         /// <param name="name">参数名</param>
         /// <returns></returns>
-        public string this[string name]
+        public object this[string name]
         {
             get => GetValue(name);
             set => Add(name, value);

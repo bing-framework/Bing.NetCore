@@ -21,7 +21,7 @@
         /// <param name="key">键</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public string Format(string key, string value)
+        public string Format(string key, object value)
         {
             return $"{key}{FormatSeparator}{value}";
         }

@@ -107,7 +107,7 @@ namespace Bing.Utils.Parameters
         /// </summary>
         /// <param name="name">参数名</param>
         /// <returns></returns>
-        public string GetValue(string name)
+        public object GetValue(string name)
         {
             return ParameterBuilder.GetValue(name);
         }
@@ -117,7 +117,7 @@ namespace Bing.Utils.Parameters
         /// </summary>
         /// <param name="name">参数名</param>
         /// <returns></returns>
-        public string this[string name]
+        public object this[string name]
         {
             get => GetValue(name);
             set => Add(name, value);
@@ -130,7 +130,7 @@ namespace Bing.Utils.Parameters
         /// <param name="isUrlEncode">是否Url编码</param>
         /// <param name="encoding">字符编码，默认值：UTF-8</param>
         /// <returns></returns>
-        public IDictionary<string, string> GetDictionary(bool isSort = true, bool isUrlEncode = false,
+        public IDictionary<string, object> GetDictionary(bool isSort = true, bool isUrlEncode = false,
             string encoding = "UTF-8")
         {
             return ParameterBuilder.GetDictionary(isSort, isUrlEncode, encoding);
@@ -140,7 +140,7 @@ namespace Bing.Utils.Parameters
         /// 获取键值对集合
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<KeyValuePair<string, string>> GetKeyValuePairs()
+        public IEnumerable<KeyValuePair<string, object>> GetKeyValuePairs()
         {
             return ParameterBuilder.GetKeyValuePairs();
         }
@@ -164,32 +164,7 @@ namespace Bing.Utils.Parameters
         /// <returns></returns>
         public string JoinUrl(string url)
         {
-            return $"{GetUrl(url)}{Result()}";
-        }
-
-        /// <summary>
-        /// 获取Url
-        /// </summary>
-        /// <param name="url">url</param>
-        /// <returns></returns>
-        private string GetUrl(string url)
-        {
-            if (!url.Contains("?"))
-            {
-                return $"{url}?";
-            }
-
-            if (url.EndsWith("?"))
-            {
-                return url;
-            }
-
-            if (url.EndsWith("&"))
-            {
-                return url;
-            }
-
-            return $"{url}&";
+            return Url.Join(url, Result());
         }
 
         /// <summary>
