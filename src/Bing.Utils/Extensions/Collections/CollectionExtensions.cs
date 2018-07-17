@@ -59,8 +59,10 @@ namespace Bing.Utils.Extensions
         public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> values)
         {
             collection.CheckNotNull(nameof(collection));
-            values.CheckNotNull(nameof(values));
-
+            if (values == null)
+            {
+                return;
+            }
             foreach (var value in values)
             {
                 collection.Add(value);
@@ -183,6 +185,6 @@ namespace Bing.Utils.Extensions
             collection.ReplaceItems(newItems, x => x);
         }
 
-        #endregion
+        #endregion        
     }
 }

@@ -16,6 +16,21 @@ namespace Bing.Utils.Timing
         /// </summary>
         internal static readonly DateTime Date1970 = new DateTime(1970, 1, 1);
 
+        /// <summary>
+        /// 最小日期
+        /// </summary>
+        internal static readonly DateTime MinDate = new DateTime(1900, 1, 1);
+
+        /// <summary>
+        /// 最大日期
+        /// </summary>
+        internal static readonly DateTime MaxDate = new DateTime(9999, 12, 31, 23, 59, 59, 999);
+
+        /// <summary>
+        /// 初始化js日期时间戳
+        /// </summary>
+        public static long InitialJavaScriptDateTicks = (new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks;
+
         #endregion
 
         #region ToDateTimeString(yyyy-MM-dd HH:mm:ss)
@@ -546,6 +561,20 @@ namespace Bing.Utils.Timing
             var now = currentDate.Date;
 
             return now >= begin && now <= end;
+        }
+
+        #endregion
+
+        #region IsValid(是否有效时间)
+
+        /// <summary>
+        /// 是否有效时间
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static bool IsValid(this DateTime value)
+        {
+            return (value >= MinDate) && (value <= MaxDate);
         }
 
         #endregion

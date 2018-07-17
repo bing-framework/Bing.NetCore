@@ -59,7 +59,7 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region ContentEqual(比较流内容是否相等)
+        #region ContentsEqual(比较流内容是否相等)
 
         /// <summary>
         /// 比较流内容是否相等
@@ -67,7 +67,7 @@ namespace Bing.Utils.Extensions
         /// <param name="stream">流</param>
         /// <param name="other">待比较的流</param>
         /// <returns></returns>
-        public static bool ContentEqual(this Stream stream, Stream other)
+        public static bool ContentsEqual(this Stream stream, Stream other)
         {
             stream.CheckNotNull(nameof(stream));
             other.CheckNotNull(nameof(other));

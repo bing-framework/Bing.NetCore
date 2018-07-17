@@ -127,5 +127,40 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region EqaulsAll(是否完全相等)
+
+        /// <summary>
+        /// 是否完全相等
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="list">待比较列表</param>
+        /// <param name="other">待比较列表</param>
+        /// <returns></returns>
+        public static bool EqualsAll<T>(this IList<T> list, IList<T> other)
+        {
+            if (list == null || other == null)
+            {
+                return list == null && other == null;
+            }
+
+            if (list.Count != other.Count)
+            {
+                return false;
+            }
+
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!comparer.Equals(list[i], other[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        #endregion
     }
 }
