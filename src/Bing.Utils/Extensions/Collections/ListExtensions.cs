@@ -162,5 +162,68 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region Slice(获取列表指定范围的列表)
+
+        /// <summary>
+        /// 获取列表指定范围的列表
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="list">列表</param>
+        /// <param name="start">开始索引</param>
+        /// <param name="end">结束索引</param>
+        /// <returns></returns>
+        public static IList<T> Slice<T>(this IList<T> list, int? start, int? end)
+        {
+            return Slice(list, start, end, null);
+        }
+
+        /// <summary>
+        /// 获取列表指定范围的列表
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="list">列表</param>
+        /// <param name="start">开始索引</param>
+        /// <param name="end">结束索引</param>
+        /// <param name="step">递增值</param>
+        /// <returns></returns>
+        public static IList<T> Slice<T>(this IList<T> list, int? start, int? end,int? step)
+        {
+            if (list == null)
+            {
+                throw new ArgumentNullException(nameof(list));
+            }
+
+            if (step == 0)
+            {
+                throw new ArgumentException($"{nameof(step)} 不能为0");
+            }
+
+            List<T> result=new List<T>();
+
+            if (list.Count == 0)
+            {
+                return result;
+            }
+
+            var s = step ?? 1;
+            var startIndex = start ?? 0;
+            var endIndex = end ?? list.Count;
+
+            startIndex = (startIndex < 0) ? list.Count + startIndex : startIndex;
+            endIndex = (endIndex < 0) ? list.Count + endIndex : endIndex;
+
+            startIndex = Math.Max(startIndex, 0);
+            endIndex = Math.Min(endIndex, list.Count - 1);
+
+            for (int i = startIndex; i < endIndex; i += s)
+            {
+                result.Add(list[i]);
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
