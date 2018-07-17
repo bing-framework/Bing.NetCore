@@ -35,7 +35,6 @@
     <Folder Include="Extensions\Linq\" />
     <Folder Include="Extensions\Xml\" />
     <Folder Include="Extensions\Datas\" />
-    <Folder Include="Extensions\IO\" />
   </ItemGroup>
 
 </Project>
