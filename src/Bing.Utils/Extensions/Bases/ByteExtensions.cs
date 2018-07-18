@@ -8,6 +8,8 @@ namespace Bing.Utils.Extensions
     /// </summary>
     public static class ByteExtensions
     {
+        #region Max(获取两个数中最大值)
+
         /// <summary>
         /// 获取两个数中最大值
         /// </summary>
@@ -19,6 +21,10 @@ namespace Bing.Utils.Extensions
             return Math.Max(value1, value2);
         }
 
+        #endregion
+
+        #region Min(获取两个数中最小值)
+
         /// <summary>
         /// 获取两个数中最小值
         /// </summary>
@@ -29,5 +35,8 @@ namespace Bing.Utils.Extensions
         {
             return Math.Min(value1, value2);
         }
+
+        #endregion
+
     }
 }
