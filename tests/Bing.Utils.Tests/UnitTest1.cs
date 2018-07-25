@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -48,6 +50,42 @@ namespace Bing.Utils.Tests
             var strs = new string[] { "1", "2", "3", "4", "5" };
             var upperBound = strs.GetUpperBound(0);
             Output.WriteLine(upperBound.ToString());
+        }
+
+        [Fact]
+        public void Test_Except()
+        {
+            var list=new string[]{"1","2","3","4","5"};
+            var newList = new string[] {"1", "2"};
+            var result=list.Except(newList);
+            Output.WriteLine(result.ToJson());
+        }
+
+        [Fact]
+        public void Test_Except_Int()
+        {
+            var list = new int[] {1, 3, 5, 7, 9, 11};
+            var newList = new int[] {1, 4, 7,8, 9, 11};
+            var result = newList.Except(list);
+            Output.WriteLine(result.ToJson());
+        }
+
+        [Fact]
+        public void Test_Except_Guid()
+        {
+            var oneGuid = Guid.NewGuid();
+            var twoGuid = Guid.NewGuid();
+            var threeGuid = Guid.NewGuid();
+            var fourGuid = Guid.NewGuid();
+            var fiveGuid = Guid.NewGuid();
+            var sixGuid = Guid.NewGuid();
+            var sevenGuid = Guid.NewGuid();
+            var list = new Guid[] {oneGuid, twoGuid, threeGuid, fourGuid, fiveGuid, sixGuid, sevenGuid};
+            var newList = new Guid[] { fourGuid, fiveGuid, sixGuid, sevenGuid };
+            var result = list.Except(newList);
+            Output.WriteLine(list.ToJson());
+            Output.WriteLine(newList.ToJson());
+            Output.WriteLine(result.ToJson());
         }
     }
 }
