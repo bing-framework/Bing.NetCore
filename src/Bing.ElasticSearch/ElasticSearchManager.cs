@@ -248,10 +248,10 @@ namespace Bing.ElasticSearch
                 for (var i = 0; i < total; i++)
                 {
                     var i1 = i;
-                    tasks.Add(Task.Factory.StartNew(()=>SaveAsync(indexName,entities.Skip(i1*bulkNum).Take(bulkNum).ToList())));
+                    tasks.Add(Task.Factory.StartNew(()=> BulkSave<T>(indexName,entities.Skip(i1*bulkNum).Take(bulkNum).ToList())));
                 }
 
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks.ToArray());
             }
         }
 
