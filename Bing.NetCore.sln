@@ -144,9 +144,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-Components", "03-Compone
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Sequence.Tests", "tests\Bing.Sequence.Tests\Bing.Sequence.Tests.csproj", "{E46243A1-2E12-4D17-960F-B4043B8095E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.ElasticSearch", "src\Bing.ElasticSearch\Bing.ElasticSearch.csproj", "{B84A1878-5E7F-4ECF-978C-B49E93FF620C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ElasticSearch", "src\Bing.ElasticSearch\Bing.ElasticSearch.csproj", "{B84A1878-5E7F-4ECF-978C-B49E93FF620C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.ElasticSearch.Tests", "tests\Bing.ElasticSearch.Tests\Bing.ElasticSearch.Tests.csproj", "{EBE7886E-3A12-4049-BC64-3EC386BBA98F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ElasticSearch.Tests", "tests\Bing.ElasticSearch.Tests\Bing.ElasticSearch.Tests.csproj", "{EBE7886E-3A12-4049-BC64-3EC386BBA98F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Offices", "src\Bing.Offices\Bing.Offices.csproj", "{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -322,6 +324,10 @@ Global
 		{EBE7886E-3A12-4049-BC64-3EC386BBA98F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBE7886E-3A12-4049-BC64-3EC386BBA98F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBE7886E-3A12-4049-BC64-3EC386BBA98F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -393,6 +399,7 @@ Global
 		{E46243A1-2E12-4D17-960F-B4043B8095E2} = {2BDF4383-6293-40F7-AF71-B8598FA83596}
 		{B84A1878-5E7F-4ECF-978C-B49E93FF620C} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 		{EBE7886E-3A12-4049-BC64-3EC386BBA98F} = {2BDF4383-6293-40F7-AF71-B8598FA83596}
+		{69BE7C6C-C570-432E-AE41-0540E5E2B7BB} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
