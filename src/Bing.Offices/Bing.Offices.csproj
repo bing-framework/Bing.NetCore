@@ -4,4 +4,12 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Excels\Exports\" />
+    <Folder Include="Excels\Models\Results\" />
+    <Folder Include="Excels\Imports\" />
+    <Folder Include="Pdfs\" />
+    <Folder Include="Words\" />
+  </ItemGroup>
+
 </Project>
