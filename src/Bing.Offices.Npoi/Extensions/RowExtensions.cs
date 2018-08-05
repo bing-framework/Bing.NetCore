@@ -32,5 +32,19 @@ namespace Bing.Offices.Npoi.Extensions
             action?.Invoke(cell);
             return row;
         }
+
+        /// <summary>
+        /// 清空内容
+        /// </summary>
+        /// <param name="row">行</param>
+        /// <returns></returns>
+        public static IRow ClearContent(this IRow row)
+        {
+            foreach (var cell in row.Cells)
+            {
+                cell.SetCellValue(string.Empty);
+            }
+            return row;
+        }        
     }
 }

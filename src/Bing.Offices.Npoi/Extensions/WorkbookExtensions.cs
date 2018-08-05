@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Bing.Offices.Excels.Enums;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
@@ -103,6 +104,20 @@ namespace Bing.Offices.Npoi.Extensions
             var sheet = workbook.GetOrCreateSheet();
             action?.Invoke(sheet);
             return workbook;
+        }
+
+        /// <summary>
+        /// 将工作簿转换成二进制文件流
+        /// </summary>
+        /// <param name="workbook">工作簿</param>
+        /// <returns></returns>
+        public static byte[] SaveToBuffer(this IWorkbook workbook)
+        {
+            using (var ms=new MemoryStream())
+            {
+                workbook.Write(ms);
+                return ms.ToArray();
+            }
         }
     }
 }

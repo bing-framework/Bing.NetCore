@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Core\Styles\" />
     <Folder Include="Excels\Exports\" />
     <Folder Include="Excels\Models\Results\" />
     <Folder Include="Excels\Imports\" />
