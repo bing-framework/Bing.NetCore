@@ -9,6 +9,7 @@
     <Folder Include="Excels\Exports\" />
     <Folder Include="Excels\Models\Results\" />
     <Folder Include="Excels\Imports\" />
+    <Folder Include="Models\" />
     <Folder Include="Pdfs\" />
     <Folder Include="Words\" />
   </ItemGroup>

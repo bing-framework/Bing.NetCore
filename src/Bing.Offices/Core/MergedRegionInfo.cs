@@ -1,9 +1,11 @@
-﻿namespace Bing.Offices.Core
+﻿using Bing.Offices.Abstractions;
+
+namespace Bing.Offices.Core
 {
     /// <summary>
     /// 合并区域信息
     /// </summary>
-    public class MergedRegionInfo
+    public class MergedRegionInfo : IRegionRangeInfo
     {
         /// <summary>
         /// 索引
