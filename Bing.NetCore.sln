@@ -148,9 +148,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ElasticSearch", "src\B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ElasticSearch.Tests", "tests\Bing.ElasticSearch.Tests\Bing.ElasticSearch.Tests.csproj", "{EBE7886E-3A12-4049-BC64-3EC386BBA98F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Offices", "src\Bing.Offices\Bing.Offices.csproj", "{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Offices", "src\Bing.Offices\Bing.Offices.csproj", "{69BE7C6C-C570-432E-AE41-0540E5E2B7BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Offices.Npoi", "src\Bing.Offices.Npoi\Bing.Offices.Npoi.csproj", "{212B76C3-4544-4EF3-BF4E-9460D1A2D588}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Offices.Npoi", "src\Bing.Offices.Npoi\Bing.Offices.Npoi.csproj", "{212B76C3-4544-4EF3-BF4E-9460D1A2D588}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.EmailCenter", "src\Bing.EmailCenter\Bing.EmailCenter.csproj", "{062E3CAE-8EB8-489B-821E-35EF7E3A402A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -334,6 +336,10 @@ Global
 		{212B76C3-4544-4EF3-BF4E-9460D1A2D588}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{212B76C3-4544-4EF3-BF4E-9460D1A2D588}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{212B76C3-4544-4EF3-BF4E-9460D1A2D588}.Release|Any CPU.Build.0 = Release|Any CPU
+		{062E3CAE-8EB8-489B-821E-35EF7E3A402A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{062E3CAE-8EB8-489B-821E-35EF7E3A402A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{062E3CAE-8EB8-489B-821E-35EF7E3A402A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{062E3CAE-8EB8-489B-821E-35EF7E3A402A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -407,6 +413,7 @@ Global
 		{EBE7886E-3A12-4049-BC64-3EC386BBA98F} = {2BDF4383-6293-40F7-AF71-B8598FA83596}
 		{69BE7C6C-C570-432E-AE41-0540E5E2B7BB} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 		{212B76C3-4544-4EF3-BF4E-9460D1A2D588} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
+		{062E3CAE-8EB8-489B-821E-35EF7E3A402A} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
