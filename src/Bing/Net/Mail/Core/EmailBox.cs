@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.EmailCenter.Abstractions;
+﻿using System.Collections.Generic;
+using Bing.Net.Mail.Abstractions;
 
-namespace Bing.EmailCenter.Core
+namespace Bing.Net.Mail.Core
 {
     /// <summary>
-    /// 邮件
+    /// 电子邮件
     /// </summary>
-    public class MailBox
+    public class EmailBox
     {
         /// <summary>
         /// 附件列表

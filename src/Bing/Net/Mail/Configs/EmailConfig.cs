@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.EmailCenter.Configs
+﻿namespace Bing.Net.Mail.Configs
 {
     /// <summary>
-    /// 邮件配置
+    /// 电子邮件配置
     /// </summary>
     public class EmailConfig
     {
@@ -52,7 +48,7 @@ namespace Bing.EmailCenter.Configs
         /// <summary>
         /// 发送地址
         /// </summary>
-        public string FromAddress { get; set; }        
+        public string FromAddress { get; set; }
 
         /// <summary>
         /// 睡眠间隔。默认：3秒

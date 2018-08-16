@@ -12,14 +12,14 @@ namespace Bing.EmailCenter.Abstractions
     public interface IMailQueueProvider
     {
         /// <summary>
-        /// 队列剩余邮件数量
+        /// 队列邮件数量
         /// </summary>
         int Count { get; }
 
         /// <summary>
         /// 队列是否为空
         /// </summary>
-        bool IsEmpty { get; set; }
+        bool IsEmpty { get; }
 
         /// <summary>
         /// 入队
@@ -33,7 +33,5 @@ namespace Bing.EmailCenter.Abstractions
         /// <param name="box">邮件</param>
         /// <returns></returns>
         bool TryDequeue(out MailBox box);
-
-        
     }
 }
