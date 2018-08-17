@@ -51,7 +51,7 @@
 
   <ItemGroup>
     <Folder Include="Configuration\Startup\" />
-    <Folder Include="Datas\Sql\Queries\Builders\Abstractions\" />
+    <Folder Include="Datas\Sql\Queries\Builders\Clauses\" />
   </ItemGroup>
 
 </Project>
