@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.EmailCenter.Core;
+﻿using Bing.Net.Mail.Core;
 
-namespace Bing.EmailCenter.Abstractions
+namespace Bing.Net.Mail.Abstractions
 {
     /// <summary>
     /// 邮件队列提供程序
-    /// 参考：https://www.cnblogs.com/rocketRobin/p/9294845.html
     /// </summary>
     public interface IMailQueueProvider
     {
@@ -20,18 +16,18 @@ namespace Bing.EmailCenter.Abstractions
         /// 队列是否为空
         /// </summary>
         bool IsEmpty { get; }
-
+        
         /// <summary>
         /// 入队
         /// </summary>
-        /// <param name="box">邮件</param>
-        void Enqueue(MailBox box);
+        /// <param name="box">电子邮件</param>
+        void Enqueue(EmailBox box);
 
         /// <summary>
-        /// 尝试出队，获取邮件
+        /// 尝试出队，获取电子邮件
         /// </summary>
-        /// <param name="box">邮件</param>
+        /// <param name="box">电子邮件</param>
         /// <returns></returns>
-        bool TryDequeue(out MailBox box);
+        bool TryDequeue(out EmailBox box);
     }
 }

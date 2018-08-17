@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.EmailCenter.Core;
+﻿using Bing.Net.Mail.Core;
 
-namespace Bing.EmailCenter.Abstractions
+namespace Bing.Net.Mail.Abstractions
 {
     /// <summary>
     /// 邮件队列服务
@@ -14,6 +11,6 @@ namespace Bing.EmailCenter.Abstractions
         /// 入队
         /// </summary>
         /// <param name="box">邮件</param>
-        void Enqueue(MailBox box);
+        void Enqueue(EmailBox box);
     }
 }

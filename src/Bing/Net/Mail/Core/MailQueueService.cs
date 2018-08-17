@@ -1,6 +1,6 @@
-﻿using Bing.EmailCenter.Abstractions;
+﻿using Bing.Net.Mail.Abstractions;
 
-namespace Bing.EmailCenter.Core
+namespace Bing.Net.Mail.Core
 {
     /// <summary>
     /// 邮件队列服务
@@ -24,8 +24,8 @@ namespace Bing.EmailCenter.Core
         /// <summary>
         /// 入队
         /// </summary>
-        /// <param name="box">邮件</param>
-        public void Enqueue(MailBox box)
+        /// <param name="box">电子邮件</param>
+        public void Enqueue(EmailBox box)
         {
             _provider.Enqueue(box);
         }
