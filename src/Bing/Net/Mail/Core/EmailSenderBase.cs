@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Mail;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -97,7 +98,19 @@ namespace Bing.Net.Mail.Core
         /// </summary>
         /// <param name="box">邮件</param>
         public void Send(EmailBox box)
-        {            
+        {
+            var mail = new MailMessage();
+            var config = ConfigProvider.GetConfig();
+            mail.From = new MailAddress(config.FromAddress);
+            PaserMailAddress(box.To, mail.To);
+            PaserMailAddress(box.Cc, mail.CC);
+            PaserMailAddress(box.Bcc,mail.Bcc);
+            PaserMailAddress(config.FromAddress, mail.ReplyToList);
+            mail.Subject = box.Subject;
+            mail.Body = box.Body;
+            mail.IsBodyHtml = box.IsBodyHtml;
+            HandlerAttachments(box.Attachments, mail.Attachments);
+            Send(mail);
         }
 
         /// <summary>
@@ -107,7 +120,18 @@ namespace Bing.Net.Mail.Core
         /// <returns></returns>
         public async Task SendAsync(EmailBox box)
         {
-            throw new System.NotImplementedException();
+            var mail = new MailMessage();
+            var config = await ConfigProvider.GetConfigAsync();
+            mail.From = new MailAddress(config.FromAddress, config.DisplayName);
+            PaserMailAddress(box.To, mail.To);
+            PaserMailAddress(box.Cc, mail.CC);
+            PaserMailAddress(box.Bcc, mail.Bcc);
+            PaserMailAddress(config.FromAddress, mail.ReplyToList);
+            mail.Subject = box.Subject;
+            mail.Body = box.Body;
+            mail.IsBodyHtml = box.IsBodyHtml;
+            HandlerAttachments(box.Attachments,mail.Attachments);
+            await SendAsync(mail);
         }
 
         /// <summary>
@@ -153,35 +177,23 @@ namespace Bing.Net.Mail.Core
         protected abstract Task SendEmailAsync(MailMessage mail);
 
         /// <summary>
-        /// 获取附件集合
+        /// 处理附件
         /// </summary>
         /// <param name="attachments">附件集合</param>
+        /// <param name="attachmentCollection">附件集合对象</param>
         /// <returns></returns>
-        protected virtual AttachmentCollection GetAttachments(IEnumerable<IAttachment> attachments)
+        protected virtual void HandlerAttachments(IList<IAttachment> attachments,AttachmentCollection attachmentCollection)
         {
-            if (attachments == null)
+            if (attachments == null || !attachments.Any())
             {
-                throw new ArgumentNullException(nameof(attachments));
+                return;
             }
 
-            AttachmentCollection collection = null;
             foreach (var item in attachments)
             {
-                var fileName = item.GetName();
-                Attachment attachment;
-                Stream stream = null;
-                try
-                {
-                    stream = item.GetFileStream();
-                    attachment=new Attachment(stream,fileName);
-                }
-                catch (Exception ex)
-                {
-                    stream?.Dispose();
-                    continue;
-                }
+                Attachment attachment=new Attachment(item.GetFileStream(),item.GetName());
+                attachmentCollection.Add(attachment);
             }
-            return null;
         }
 
         /// <summary>
@@ -209,6 +221,45 @@ namespace Bing.Net.Mail.Core
             if (mail.BodyEncoding == null)
             {
                 mail.BodyEncoding=Encoding.UTF8;
+            }
+        }
+
+        /// <summary>
+        /// 解析分解邮件地址
+        /// </summary>
+        /// <param name="mailAddress">邮件地址</param>
+        /// <param name="mailAddressCollection">邮件地址对象</param>
+        protected static void PaserMailAddress(string mailAddress, MailAddressCollection mailAddressCollection)
+        {
+            if (mailAddress.IsEmpty())
+            {
+                return;
+            }
+            char[] separator = new char[2] {',', ';'};
+            string[] addressArray = mailAddress.Split(separator);
+            PaserMailAddress(addressArray.ToList(), mailAddressCollection);
+        }
+
+        /// <summary>
+        /// 解析分解邮件地址
+        /// </summary>
+        /// <param name="mailAddress">邮件地址列表</param>
+        /// <param name="mailAddressCollection">邮件地址对象</param>
+        protected static void PaserMailAddress(List<string> mailAddress,
+            MailAddressCollection mailAddressCollection)
+        {
+            if (mailAddress == null || mailAddress.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var address in mailAddress)
+            {
+                if (address.Trim() == string.Empty)
+                {
+                    continue;
+                }
+                mailAddressCollection.Add(new MailAddress(address));
             }
         }
     }

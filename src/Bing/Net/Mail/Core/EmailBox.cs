@@ -11,7 +11,7 @@ namespace Bing.Net.Mail.Core
         /// <summary>
         /// 附件列表
         /// </summary>
-        public IEnumerable<IAttachment> Attachments { get; set; }
+        public List<IAttachment> Attachments { get; set; } = new List<IAttachment>();
 
         /// <summary>
         /// 正文
@@ -21,12 +21,12 @@ namespace Bing.Net.Mail.Core
         /// <summary>
         /// 抄送人
         /// </summary>
-        public IEnumerable<string> Cc { get; set; }
+        public List<string> Cc { get; set; } = new List<string>();
 
         /// <summary>
         /// 是否Html内容
         /// </summary>
-        public bool IsBodyHtml { get; set; }
+        public bool IsBodyHtml { get; set; } = true;
 
         /// <summary>
         /// 主题
@@ -36,6 +36,11 @@ namespace Bing.Net.Mail.Core
         /// <summary>
         /// 收件人
         /// </summary>
-        public IEnumerable<string> To { get; set; }
+        public List<string> To { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 秘密抄送人
+        /// </summary>
+        public List<string> Bcc { get; set; } = new List<string>();
     }
 }

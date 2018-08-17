@@ -34,7 +34,7 @@ namespace Bing.Net.Mail.Smtp
         /// <param name="mail">邮件</param>
         protected override void SendEmail(MailMessage mail)
         {
-            using (var smtpClient=BuildClient())
+            using (var smtpClient = BuildClient())
             {
                 smtpClient.Send(mail);
             }
@@ -46,7 +46,7 @@ namespace Bing.Net.Mail.Smtp
         /// <param name="mail">邮件</param>
         protected override async Task SendEmailAsync(MailMessage mail)
         {
-            using (var smtpClient=BuildClient())
+            using (var smtpClient = BuildClient())
             {
                 await smtpClient.SendMailAsync(mail);
             }
