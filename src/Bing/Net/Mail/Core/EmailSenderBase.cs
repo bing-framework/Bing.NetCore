@@ -97,7 +97,7 @@ namespace Bing.Net.Mail.Core
         /// 发送邮件
         /// </summary>
         /// <param name="box">邮件</param>
-        public void Send(EmailBox box)
+        public virtual void Send(EmailBox box)
         {
             var mail = new MailMessage();
             var config = ConfigProvider.GetConfig();
@@ -118,7 +118,7 @@ namespace Bing.Net.Mail.Core
         /// </summary>
         /// <param name="box">邮件</param>
         /// <returns></returns>
-        public async Task SendAsync(EmailBox box)
+        public virtual async Task SendAsync(EmailBox box)
         {
             var mail = new MailMessage();
             var config = await ConfigProvider.GetConfigAsync();
@@ -139,7 +139,7 @@ namespace Bing.Net.Mail.Core
         /// </summary>
         /// <param name="mail">邮件消息</param>
         /// <param name="normalize">是否规范化邮件，如果是，则设置发件人地址/名称并使邮件编码为UTF-8</param>
-        public void Send(MailMessage mail, bool normalize = true)
+        public virtual void Send(MailMessage mail, bool normalize = true)
         {
             if (normalize)
             {
@@ -153,7 +153,7 @@ namespace Bing.Net.Mail.Core
         /// </summary>
         /// <param name="mail">邮件消息</param>
         /// <param name="normalize">是否规范化邮件，如果是，则设置发件人地址/名称并使邮件编码为UTF-8</param>
-        public async Task SendAsync(MailMessage mail, bool normalize = true)
+        public virtual async Task SendAsync(MailMessage mail, bool normalize = true)
         {
             if (normalize)
             {
