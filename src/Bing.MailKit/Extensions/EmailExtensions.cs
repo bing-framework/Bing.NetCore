@@ -248,12 +248,23 @@ namespace Bing.MailKit.Extensions
             part.Content = new MimeContent(stream);
             if (attachemt != null)
             {
+                // 解决中文文件名乱码
                 var charset = "GB18030";
                 part.ContentType.Parameters.Clear();
                 part.ContentDisposition.Parameters.Clear();
                 var fileName = attachemt.Name;
                 part.ContentType.Parameters.Add(charset, "name", fileName);
                 part.ContentDisposition.Parameters.Add(charset, "filename", fileName);
+                // 解决文件名不能超过41字符
+                foreach (var parameter in part.ContentDisposition.Parameters)
+                {
+                    parameter.EncodingMethod = ParameterEncodingMethod.Rfc2047;
+                }
+
+                foreach (var parameter in part.ContentType.Parameters)
+                {
+                    parameter.EncodingMethod = ParameterEncodingMethod.Rfc2047;
+                }
             }
             return part;
         }

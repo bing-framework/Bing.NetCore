@@ -88,7 +88,7 @@ namespace Bing.Tests.Net.Mail.Smtp
                 Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
                 IsBodyHtml = true,
             };
-            box.Attachments.Add(new PhysicalFileAttachment("D:\\员工自愿不购买社保承诺书.doc"));
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.doc"));
             this._smtpEmailSender.Send(box);
         }
 
@@ -106,7 +106,7 @@ namespace Bing.Tests.Net.Mail.Smtp
                 IsBodyHtml = true,
             };
             box.Attachments.Add(new PhysicalFileAttachment("D:\\123.xlsx"));
-            box.Attachments.Add(new PhysicalFileAttachment("D:\\员工自愿不购买社保承诺书.doc"));
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.doc"));
             this._smtpEmailSender.Send(box);
         }
     }

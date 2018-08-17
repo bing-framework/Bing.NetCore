@@ -96,7 +96,7 @@ namespace Bing.MailKit.Tests
                 Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
                 IsBodyHtml = true,
             };
-            box.Attachments.Add(new PhysicalFileAttachment("D:\\收益表格.xlsx"));
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.xlsx"));
             this._mailKitEmailSender.Send(box);
         }
 
@@ -114,7 +114,24 @@ namespace Bing.MailKit.Tests
                 IsBodyHtml = true,
             };
             box.Attachments.Add(new PhysicalFileAttachment("D:\\123.xlsx"));
-            box.Attachments.Add(new PhysicalFileAttachment("D:\\员工自愿不购买社保承诺书.doc"));
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.doc"));
+            this._mailKitEmailSender.Send(box);
+        }
+
+        /// <summary>
+        /// 测试发送邮件以及附件_长文件名
+        /// </summary>
+        [Fact]
+        public void Test_SendEmail_Attachment_LongLengthFileName()
+        {
+            var box = new EmailBox()
+            {
+                Subject = "MailKit 测试发送邮件以及附件_多个文件",
+                To = _to,
+                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+                IsBodyHtml = true,
+            };
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件123456789012345678901234567894444564645666666666666.doc"));
             this._mailKitEmailSender.Send(box);
         }
     }
