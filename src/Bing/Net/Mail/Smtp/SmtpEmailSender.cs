@@ -1,8 +1,6 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using Bing.Dependency;
 using Bing.Net.Mail.Configs;
 using Bing.Net.Mail.Core;
 using Bing.Utils.Extensions;
@@ -12,7 +10,7 @@ namespace Bing.Net.Mail.Smtp
     /// <summary>
     /// 基于SMTP的电子邮件发送器
     /// </summary>
-    public class SmtpEmailSender:EmailSenderBase,ISmtpEmailSender,ITransientDependency
+    public class SmtpEmailSender:EmailSenderBase,ISmtpEmailSender
     {
         /// <summary>
         /// 电子邮件配置提供器
