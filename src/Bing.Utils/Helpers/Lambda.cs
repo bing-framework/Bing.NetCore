@@ -28,8 +28,9 @@ namespace Bing.Utils.Helpers
         /// 获取成员表达式
         /// </summary>
         /// <param name="expression">表达式</param>
+        /// <param name="right">取表达式右侧，(l,r)=> l.LId == r.RId，设置为true，返回 RID</param>
         /// <returns></returns>
-        public static MemberExpression GetMemberExpression(Expression expression)
+        public static MemberExpression GetMemberExpression(Expression expression,bool right=false)
         {
             if (expression == null)
             {
@@ -38,19 +39,50 @@ namespace Bing.Utils.Helpers
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return GetMemberExpression(((LambdaExpression)expression).Body);
+                    return GetMemberExpression(((LambdaExpression) expression).Body, right);
                 case ExpressionType.Convert:
-                    return GetMemberExpression(((UnaryExpression)expression).Operand);
+                    return GetMemberExpression(((UnaryExpression) expression).Operand, right);
                 case ExpressionType.MemberAccess:
                     return (MemberExpression)expression;
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.LessThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.LessThanOrEqual:
+                    return GetMemberExpression(right
+                        ? ((BinaryExpression) expression).Right
+                        : ((BinaryExpression) expression).Left);
+                case ExpressionType.Call:
+                    return GetMethodCallExpressionName(expression);
             }
             return null;
+        }
+
+        /// <summary>
+        /// 获取方法调用表达式的成员名称
+        /// </summary>
+        /// <param name="expression">表达式</param>
+        /// <returns></returns>
+        private static MemberExpression GetMethodCallExpressionName(Expression expression)
+        {
+            var methodCallExpression = (MethodCallExpression) expression;
+            var left = (MemberExpression) methodCallExpression.Object;
+            if (Reflection.IsGenericCollection(left?.Type))
+            {
+                var argumentExpression = methodCallExpression.Arguments.FirstOrDefault();
+                if (argumentExpression != null && argumentExpression.NodeType == ExpressionType.MemberAccess)
+                {
+                    return (MemberExpression) argumentExpression;
+                }
+            }
+            return left;
         }
         #endregion
 
         #region GetName(获取成员名称)
         /// <summary>
-        /// 获取成员名称，范例：t => t.Name，返回 Name
+        /// 获取成员名称，范例：t => t.A.Name，返回 A.Name
         /// </summary>
         /// <param name="expression">表达式，范例：t => t.Name</param>
         /// <returns></returns>
@@ -78,7 +110,7 @@ namespace Bing.Utils.Helpers
 
         #region GetNames(获取名称列表)
         /// <summary>
-        /// 获取名称列表
+        /// 获取名称列表，范例：t => new object[] {t.A.B,t.C}，返回 A.B,C
         /// </summary>
         /// <typeparam name="T">实体类型</typeparam>
         /// <param name="expression">属性集合表达式，范例：t => new object[]{t.A,t.B}</param>
@@ -90,8 +122,8 @@ namespace Bing.Utils.Helpers
             {
                 return result;
             }
-            var arrayExpression = expression.Body as NewArrayExpression;
-            if (arrayExpression == null)
+
+            if (!(expression.Body is NewArrayExpression arrayExpression))
             {
                 return result;
             }
@@ -116,6 +148,59 @@ namespace Bing.Utils.Helpers
             }
             result.Add(name);
         }
+        #endregion
+
+        #region GetLastName(获取最后一级成员名称)
+
+        /// <summary>
+        /// 获取最后以及成员名称，范例：t => t.Name，返回 Name
+        /// </summary>
+        /// <param name="expression">表达式，范例：t => t.Name</param>
+        /// <param name="right">取表达式右侧，(l,r)=> l.LId == r.RId，设置为true，返回 RID</param>
+        /// <returns></returns>
+        public static string GetLastName(Expression expression, bool right = false)
+        {
+            var memberExpression = GetMemberExpression(expression, right);
+            if (memberExpression == null)
+            {
+                return string.Empty;
+            }
+            string result = memberExpression.ToString();
+            return result.Substring(result.LastIndexOf(".", StringComparison.Ordinal) + 1);
+        }
+
+        #endregion
+
+        #region GetLastNames(获取最后一级成员名称列表)
+
+        /// <summary>
+        /// 获取最后一级成员名称列表，范例：t => new object[] {t.A.B,t.C}，返回 B,C
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="expression">属性集合表达式，范例：t => new object[] {t.A,t.B}</param>
+        /// <returns></returns>
+        public static List<string> GetLastNames<T>(Expression<Func<T, object[]>> expression)
+        {
+            var result = new List<string>();
+            if (expression == null)
+            {
+                return result;
+            }
+            if (!(expression.Body is NewArrayExpression arrayExpression))
+            {
+                return result;
+            }
+            foreach (var each in arrayExpression.Expressions)
+            {
+                var name = GetLastName(each);
+                if (string.IsNullOrWhiteSpace(name) == false)
+                {
+                    result.Add(name);
+                }
+            }
+            return result;
+        }
+
         #endregion
 
         #region GetValue(获取值)
@@ -216,6 +301,65 @@ namespace Bing.Utils.Helpers
         }
         #endregion
 
+        #region GetOperator(获取查询操作符)
+
+        /// <summary>
+        /// 获取查询操作符，范例：t => t.Name == "A"，返回 Operator.Equal
+        /// </summary>
+        /// <param name="expression">表达式，范例：t => t.Name == "A"</param>
+        /// <returns></returns>
+        public static Operator? GetOperator(Expression expression)
+        {
+            if (expression == null)
+            {
+                return null;
+            }
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Lambda:
+                    return GetOperator(((LambdaExpression) expression).Body);
+                case ExpressionType.Convert:
+                    return GetOperator(((UnaryExpression) expression).Operand);
+                case ExpressionType.Equal:
+                    return Operator.Equal;
+                case ExpressionType.NotEqual:
+                    return Operator.NotEqual;
+                case ExpressionType.GreaterThan:
+                    return Operator.Greater;
+                case ExpressionType.LessThan:
+                    return Operator.Less;
+                case ExpressionType.GreaterThanOrEqual:
+                    return Operator.GreaterEqual;
+                case ExpressionType.LessThanOrEqual:
+                    return Operator.LessEqual;
+                case ExpressionType.Call:
+                    return GetMethodCallExpressionOperator(expression);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 获取方法调用表达式的值
+        /// </summary>
+        /// <param name="expression">表达式</param>
+        /// <returns></returns>
+        private static Operator? GetMethodCallExpressionOperator(Expression expression)
+        {
+            var methodCallExpression = (MethodCallExpression) expression;
+            switch (methodCallExpression?.Method?.Name?.ToLower())
+            {
+                case "contains":
+                    return Operator.Contains;
+                case "endswith":
+                    return Operator.Ends;
+                case "startswith":
+                    return Operator.Starts;                    
+            }
+            return null;
+        }
+
+        #endregion
+
         #region GetParameter(获取参数)
         /// <summary>
         /// 获取参数，范例：t.Name，返回 t
@@ -250,6 +394,65 @@ namespace Bing.Utils.Helpers
             }
             return null;
         }
+        #endregion
+
+        #region GetGroupPredicates(获取分组的谓词表达式)
+
+        /// <summary>
+        /// 获取分组的谓词表达式，通过Or进行分组
+        /// </summary>
+        /// <param name="expression">谓词表达式</param>
+        /// <returns></returns>
+        public static List<List<Expression>> GetGroupPredicates(Expression expression)
+        {
+            var result = new List<List<Expression>>();
+            if (expression == null)
+            {
+                return result;
+            }
+            AddPredicates(expression, result, CreateGroup(result));
+            return result;
+        }
+
+        /// <summary>
+        /// 创建分组
+        /// </summary>
+        /// <param name="result">表达式结果</param>
+        /// <returns></returns>
+        private static List<Expression> CreateGroup(List<List<Expression>> result)
+        {
+            var group = new List<Expression>();
+            result.Add(group);
+            return group;
+        }
+
+        /// <summary>
+        /// 添加通过Or分割的谓词表达式
+        /// </summary>
+        /// <param name="expression">谓词表达式</param>
+        /// <param name="result">表达式结果</param>
+        /// <param name="group">分组表达式</param>
+        private static void AddPredicates(Expression expression, List<List<Expression>> result, List<Expression> group)
+        {
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Lambda:
+                    AddPredicates(((LambdaExpression) expression).Body, result, group);
+                    break;
+                case ExpressionType.OrElse:
+                    AddPredicates(((BinaryExpression)expression).Left,result,group);
+                    AddPredicates(((BinaryExpression) expression).Right, result, CreateGroup(result));
+                    break;
+                case ExpressionType.AndAlso:
+                    AddPredicates(((BinaryExpression)expression).Left, result, group);
+                    AddPredicates(((BinaryExpression)expression).Right, result, group);
+                    break;
+                default:
+                    group.Add(expression);
+                    break;
+            }
+        }
+
         #endregion
 
         #region GetConditionCount(获取查询条件个数)
