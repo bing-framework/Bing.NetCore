@@ -14,7 +14,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
     public class SelectClause:ISelectClause
     {
         /// <summary>
-        /// 方言
+        /// Sql方言
         /// </summary>
         private readonly IDialect _dialect;
 
@@ -36,7 +36,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 初始化一个<see cref="SelectClause"/>类型的实例
         /// </summary>
-        /// <param name="dialect">方言</param>
+        /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
         public SelectClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)

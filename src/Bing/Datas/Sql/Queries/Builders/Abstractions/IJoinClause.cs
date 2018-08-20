@@ -75,6 +75,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 设置连接条件
         /// </summary>
+        /// <param name="left">左表列名</param>
+        /// <param name="right">右表列名</param>
+        /// <param name="operator">条件运算符</param>
+        void On(string left, string right, Operator @operator = Operator.Equal);
+
+        /// <summary>
+        /// 设置连接条件
+        /// </summary>
         /// <typeparam name="TLeft">左表实体类型</typeparam>
         /// <typeparam name="TRight">右表实体类型</typeparam>
         /// <param name="left">左表列名</param>

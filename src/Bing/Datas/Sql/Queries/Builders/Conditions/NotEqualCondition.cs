@@ -30,7 +30,7 @@
         /// 获取查询条件
         /// </summary>
         /// <returns></returns>
-        public string Getondition()
+        public string GetCondition()
         {
             return $"{_left}<>{_right}";
         }

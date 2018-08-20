@@ -9,6 +9,6 @@
         /// 获取查询条件
         /// </summary>
         /// <returns></returns>
-        string Getondition();
+        string GetCondition();
     }
 }

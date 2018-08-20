@@ -47,7 +47,7 @@ namespace Bing.Properties {
         }
         
         /// <summary>
-        ///   使用此强类型资源类，为所有资源查找
+        ///   重写当前线程的 CurrentUICulture 属性
         ///   重写当前线程的 CurrentUICulture 属性。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -84,6 +84,15 @@ namespace Bing.Properties {
         internal static string OnlyOnePredicate {
             get {
                 return ResourceManager.GetString("OnlyOnePredicate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 必须设置表名 的本地化字符串。
+        /// </summary>
+        internal static string TableIsEmpty {
+            get {
+                return ResourceManager.GetString("TableIsEmpty", resourceCulture);
             }
         }
     }

@@ -146,7 +146,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         {
             var left = item.Left.ToSql(dialect);
             var right = item.Right.ToSql(dialect);
-            result.Append(SqlConditionFactory.Create(left, right, item.Operator).Getondition());
+            result.Append(SqlConditionFactory.Create(left, right, item.Operator).GetCondition());
         }
     }
 }

@@ -33,15 +33,15 @@
         /// <param name="right">右操作数</param>
         public OrCondition(ICondition left, ICondition right)
         {
-            _left = left?.Getondition();
-            _right = right?.Getondition();
+            _left = left?.GetCondition();
+            _right = right?.GetCondition();
         }
 
         /// <summary>
         /// 获取查询条件
         /// </summary>
         /// <returns></returns>
-        public string Getondition()
+        public string GetCondition()
         {
             if (string.IsNullOrWhiteSpace(_left))
             {
