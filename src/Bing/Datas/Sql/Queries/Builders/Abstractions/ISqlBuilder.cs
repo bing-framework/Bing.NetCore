@@ -337,9 +337,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 排序
         /// </summary>
-        /// <param name="sql">排序列表</param>
+        /// <param name="order">排序列表</param>
         /// <returns></returns>
-        ISqlBuilder OrderBy(string sql);
+        ISqlBuilder OrderBy(string order);
 
         /// <summary>
         /// 排序

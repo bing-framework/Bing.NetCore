@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Bing.Exceptions;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
+using Bing.Utils.Extensions;
 
 namespace Bing.Logs.Extensions
 {
@@ -90,7 +93,7 @@ namespace Bing.Logs.Extensions
         /// <returns></returns>
         public static ILog Sql(this ILog log, string value)
         {
-            return log.Set<LogContent>(content => content.AppendLine(content.Sql, value));
+            return log.Set<LogContent>(content => content.Sql.AppendLine(value));
         }
 
         /// <summary>
@@ -102,6 +105,21 @@ namespace Bing.Logs.Extensions
         public static ILog SqlParams(this ILog log, string value)
         {
             return log.Set<LogContent>(content => content.AppendLine(content.SqlParams, value));
+        }
+
+        /// <summary>
+        /// 设置Sql参数
+        /// </summary>
+        /// <param name="log">日志操作</param>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static ILog SqlParams(this ILog log, IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null || dictionary.Count == 0)
+            {
+                return log;
+            }
+            return SqlParams(log, dictionary.Select(t => $"{t.Key} : {t.Value}").Join());
         }
 
         /// <summary>

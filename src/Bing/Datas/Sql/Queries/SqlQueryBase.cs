@@ -151,7 +151,7 @@ namespace Bing.Datas.Sql.Queries
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public abstract Task<List<TResult>> ToListAsyncAsync<TResult>(IDbConnection connection = null);
+        public abstract Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null);
 
         /// <summary>
         /// 获取分页列表
