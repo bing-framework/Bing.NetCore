@@ -164,13 +164,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10-Mail", "10-Mail", "{26F5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MailKit.Tests", "tests\Bing.MailKit.Tests\Bing.MailKit.Tests.csproj", "{9FB87130-502F-4819-8768-0F0C78C04DDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.Dapper", "src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj", "{7C3BE429-7A33-4054-854D-31FF1C0B340E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.Dapper.SqlServer", "src\Bing.Datas.Dapper.SqlServer\Bing.Datas.Dapper.SqlServer.csproj", "{C82E7C9D-1199-44F7-9174-8760BD622A25}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.Dapper.MySql", "src\Bing.Datas.Dapper.MySql\Bing.Datas.Dapper.MySql.csproj", "{B850E019-28C9-4ED8-AC65-C8CF87E472CB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.Dapper.PgSql", "src\Bing.Datas.Dapper.PgSql\Bing.Datas.Dapper.PgSql.csproj", "{DCC9106B-D857-42BB-AEA0-5CCA489B5058}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Dapper", "src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj", "{7C3BE429-7A33-4054-854D-31FF1C0B340E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -370,18 +364,6 @@ Global
 		{7C3BE429-7A33-4054-854D-31FF1C0B340E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C3BE429-7A33-4054-854D-31FF1C0B340E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C3BE429-7A33-4054-854D-31FF1C0B340E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C82E7C9D-1199-44F7-9174-8760BD622A25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C82E7C9D-1199-44F7-9174-8760BD622A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C82E7C9D-1199-44F7-9174-8760BD622A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C82E7C9D-1199-44F7-9174-8760BD622A25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B850E019-28C9-4ED8-AC65-C8CF87E472CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B850E019-28C9-4ED8-AC65-C8CF87E472CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B850E019-28C9-4ED8-AC65-C8CF87E472CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B850E019-28C9-4ED8-AC65-C8CF87E472CB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DCC9106B-D857-42BB-AEA0-5CCA489B5058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCC9106B-D857-42BB-AEA0-5CCA489B5058}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCC9106B-D857-42BB-AEA0-5CCA489B5058}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCC9106B-D857-42BB-AEA0-5CCA489B5058}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -462,9 +444,6 @@ Global
 		{26F546EE-E4AD-4B0A-B2AB-5B6F362E23C2} = {77209C11-A719-45C3-9C49-27FA702503A1}
 		{9FB87130-502F-4819-8768-0F0C78C04DDB} = {26F546EE-E4AD-4B0A-B2AB-5B6F362E23C2}
 		{7C3BE429-7A33-4054-854D-31FF1C0B340E} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
-		{C82E7C9D-1199-44F7-9174-8760BD622A25} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
-		{B850E019-28C9-4ED8-AC65-C8CF87E472CB} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
-		{DCC9106B-D857-42BB-AEA0-5CCA489B5058} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
