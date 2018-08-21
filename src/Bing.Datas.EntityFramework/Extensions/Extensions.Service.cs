@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Datas.Configs;
+using AspectCore.Extensions.DependencyInjection;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.Datas.EntityFramework.Extensions
 {
@@ -23,11 +22,16 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <param name="configAction">配置操作</param>
         /// <returns></returns>
         public static IServiceCollection AddUnitOfWork<TService, TImplementation>(this IServiceCollection services,
-            Action<DbContextOptionsBuilder> configAction) where TService : class, IUnitOfWork
+            Action<DbContextOptionsBuilder> configAction) 
+            where TService : class, IUnitOfWork
             where TImplementation : UnitOfWorkBase, TService
         {
+            services.AddDynamicProxy(config =>
+            {
+                config.NonAspectPredicates.Add(t => t.DeclaringType?.BaseType == typeof(DbContext));
+            });
             services.AddDbContext<TImplementation>(configAction);
-            services.AddScoped<TService, TImplementation>();
+            services.TryAddScoped<TService>(t => t.GetService<TImplementation>());
             return services;
         }
     }

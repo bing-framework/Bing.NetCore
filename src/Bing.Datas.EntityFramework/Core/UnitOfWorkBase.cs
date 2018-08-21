@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -7,16 +8,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Logs;
+using Bing.Datas.Matedatas;
+using Bing.Datas.Sql;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Auditing;
 using Bing.Exceptions;
 using Bing.Logs;
 using Bing.Sessions;
+using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Datas.EntityFramework.Core
@@ -24,7 +29,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// <summary>
     /// 工作单元
     /// </summary>
-    public abstract class UnitOfWorkBase:DbContext,IUnitOfWork
+    public abstract class UnitOfWorkBase:DbContext,IUnitOfWork,IDatabase,IEntityMatedata
     {
         #region 属性
 
@@ -461,5 +466,70 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         #endregion
+
+        #region GetConnection(获取数据库连接)
+
+        /// <summary>
+        /// 获取数据库连接
+        /// </summary>
+        /// <returns></returns>
+        public IDbConnection GetConnection()
+        {
+            return Database.GetDbConnection();
+        }
+
+        #endregion
+
+        #region Matedata(获取元数据)
+
+        /// <summary>
+        /// 获取表名
+        /// </summary>
+        /// <param name="entity">实体类型</param>
+        /// <returns></returns>
+        public string GetTable(Type entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            var entityType = Model.FindEntityType(entity);
+            return entityType?.FindAnnotation("Relational:TableName")?.Value.SafeString();
+        }
+
+        /// <summary>
+        /// 获取架构
+        /// </summary>
+        /// <param name="entity">实体类型</param>
+        /// <returns></returns>
+        public string GetSchema(Type entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            var entityType = Model.FindEntityType(entity);
+            return entityType?.FindAnnotation("Relational:Schema")?.Value.SafeString();
+        }
+
+        /// <summary>
+        /// 获取列名
+        /// </summary>
+        /// <param name="entity">实体类型</param>
+        /// <param name="property">属性名</param>
+        /// <returns></returns>
+        public string GetColumn(Type entity, string property)
+        {
+            if (entity == null || string.IsNullOrWhiteSpace(property))
+            {
+                return null;
+            }
+            var entityType = Model.FindEntityType(entity);
+            var result = entityType?.GetProperty(property)?.FindAnnotation("Relational:ColumnName")?.Value.SafeString();
+            return string.IsNullOrWhiteSpace(result) ? property : result;
+        }
+
+        #endregion
+
     }
 }

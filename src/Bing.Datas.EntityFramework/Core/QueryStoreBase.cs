@@ -13,6 +13,8 @@ using Bing.Domains.Repositories;
 using Bing.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Bing.Datas.Sql.Queries;
+using Bing.Helpers;
 
 namespace Bing.Datas.EntityFramework.Core
 {
@@ -38,7 +40,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// <typeparam name="TEntity">对象类型</typeparam>
     /// <typeparam name="TKey">对象标识类型</typeparam>
     public abstract class QueryStoreBase<TEntity,TKey>:IQueryStore<TEntity,TKey>where TEntity:class,IKey<TKey>
-    {
+    {        
         #region 属性
 
         /// <summary>
@@ -50,6 +52,16 @@ namespace Bing.Datas.EntityFramework.Core
         /// 实体集
         /// </summary>
         protected DbSet<TEntity> Set => UnitOfWork.Set<TEntity>();
+
+        /// <summary>
+        /// Sql查询对象
+        /// </summary>
+        private ISqlQuery _sqlQuery;
+
+        /// <summary>
+        /// Sql查询对象
+        /// </summary>
+        protected ISqlQuery Sql => _sqlQuery ?? (_sqlQuery = Ioc.Create<ISqlQuery>());
 
         #endregion
 

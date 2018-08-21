@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="0.7.0" />
     <PackageReference Include="AspectCore.Extensions.Autofac" Version="0.7.0" />
+    <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="0.7.0" />
     <PackageReference Include="Autofac" Version="4.8.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
