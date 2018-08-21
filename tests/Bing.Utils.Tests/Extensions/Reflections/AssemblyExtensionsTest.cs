@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Bing.Utils.Extensions;
 using Xunit;
 
-namespace Bing.Extensions.Tests
+namespace Bing.Utils.Tests.Extensions.Reflections
 {
     /// <summary>
     /// 程序集 扩展测试

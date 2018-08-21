@@ -2,7 +2,8 @@
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Bing.Extensions
+// ReSharper disable once CheckNamespace
+namespace Bing.Utils.Extensions
 {
     /// <summary>
     /// 程序集(Assembly)扩展
