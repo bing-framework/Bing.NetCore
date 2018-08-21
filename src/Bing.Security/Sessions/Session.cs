@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Helpers;
-using Bing.Security.Principals;
+﻿using Bing.Helpers;
 using Bing.Sessions;
+using IdentityModel;
 
 namespace Bing.Security.Sessions
 {
@@ -15,17 +12,40 @@ namespace Bing.Security.Sessions
         /// <summary>
         /// 用户标识
         /// </summary>
-        public string UserId => WebIdentity.Identity.GetValue(ClaimTypes.UserId);
+        public string UserId
+        {
+            get
+            {
+                var result = WebIdentity.Identity.GetValue(JwtClaimTypes.Subject);
+                return string.IsNullOrWhiteSpace(result)
+                    ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.NameIdentifier)
+                    : result;
+            }
+        }
 
         /// <summary>
         /// 用户名
         /// </summary>
-        public string UserName => WebIdentity.Identity.GetValue(ClaimTypes.UserName);
+        public string UserName 
+        {
+            get
+            {
+                var result = WebIdentity.Identity.GetValue(JwtClaimTypes.Name);
+                return string.IsNullOrWhiteSpace(result)
+                    ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Name)
+                    : result;
+            }
+        }
 
         /// <summary>
         /// 是否认证
         /// </summary>
         public bool IsAuthenticated => WebIdentity.Identity.IsAuthenticated;
+
+        /// <summary>
+        /// 用户会话
+        /// </summary>
+        public static readonly ISession Instance = new Session();
 
         /// <summary>
         /// 空用户会话

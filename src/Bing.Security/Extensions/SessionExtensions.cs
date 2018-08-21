@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Bing.Helpers;
-using Bing.Security.Principals;
+using Bing.Security.Claims;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using IdentityModel;
 
-namespace Bing.Security
+namespace Bing.Security.Extensions
 {
     /// <summary>
     /// 用户会话扩展
@@ -21,7 +21,7 @@ namespace Bing.Security
         /// <returns></returns>
         public static Guid GetUserId(this ISession session)
         {
-            return WebIdentity.Identity.GetValue(ClaimTypes.UserId).ToGuid();
+            return session.UserId.ToGuid();
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Bing.Security
         /// <returns></returns>
         public static T GetUserId<T>(this ISession session)
         {
-            return Conv.To<T>(WebIdentity.Identity.GetValue(ClaimTypes.UserId));
+            return Conv.To<T>(session.UserId);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Bing.Security
         /// <returns></returns>
         public static string GetUserName(this ISession session)
         {
-            return WebIdentity.Identity.GetValue(ClaimTypes.UserName);
+            return session.UserName;
         }
 
         /// <summary>
@@ -62,7 +62,23 @@ namespace Bing.Security
         /// <returns></returns>
         public static string GetEmail(this ISession session)
         {
-            return WebIdentity.Identity.GetValue(ClaimTypes.Email);
+            var result = WebIdentity.Identity.GetValue(ClaimTypes.Email);
+            return string.IsNullOrWhiteSpace(result)
+                ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Email)
+                : result;
+        }
+
+        /// <summary>
+        /// 获取当前操作人手机号
+        /// </summary>
+        /// <param name="session">用户会话</param>
+        /// <returns></returns>
+        public static string GetMobile(this ISession session)
+        {
+            var result = WebIdentity.Identity.GetValue(ClaimTypes.Mobile);
+            return string.IsNullOrWhiteSpace(result)
+                ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.MobilePhone)
+                : result;
         }
 
         /// <summary>
@@ -83,6 +99,16 @@ namespace Bing.Security
         public static T GetApplicationId<T>(this ISession session)
         {
             return Conv.To<T>(WebIdentity.Identity.GetValue(ClaimTypes.ApplicationId));
+        }
+
+        /// <summary>
+        /// 获取当前应用程序编码
+        /// </summary>
+        /// <param name="session">用户会话</param>
+        /// <returns></returns>
+        public static string GetApplicationCode(this ISession session)
+        {
+            return WebIdentity.Identity.GetValue(ClaimTypes.ApplicationCode);
         }
 
         /// <summary>
