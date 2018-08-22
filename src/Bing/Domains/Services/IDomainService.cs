@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Dependency;
+﻿using Bing.Dependency;
 
 namespace Bing.Domains.Services
 {

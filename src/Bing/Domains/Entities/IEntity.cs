@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Entities
+﻿namespace Bing.Domains.Entities
 {
     /// <summary>
     /// 实体

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Contexts
+﻿namespace Bing.Contexts
 {
     /// <summary>
     /// 上下文

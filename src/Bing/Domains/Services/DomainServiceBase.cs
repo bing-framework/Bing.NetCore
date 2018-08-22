@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Logs;
+﻿using Bing.Logs;
 using Bing.Logs.Core;
 using Bing.Sessions;
 

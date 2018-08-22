@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Entities.Tenants
+﻿namespace Bing.Domains.Entities.Tenants
 {
     /// <summary>
     /// 租户

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Datas.Configs
+﻿namespace Bing.Datas.Configs
 {
     /// <summary>
     /// 数据日志级别

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Domains.Entities.Auditing;
+﻿using Bing.Domains.Entities.Auditing;
 
 namespace Bing.Domains.Entities
 {

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 

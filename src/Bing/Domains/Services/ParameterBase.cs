@@ -1,15 +1,13 @@
 ﻿using System.Linq;
-using System.Runtime.Serialization;
 using Bing.Exceptions;
 using Bing.Validations;
 
-namespace Bing.Applications.Dtos
+namespace Bing.Domains.Services
 {
     /// <summary>
-    /// 请求对象
+    /// 参数基类
     /// </summary>
-    [DataContract]
-    public abstract class RequestBase:IRequest
+    public abstract class ParameterBase:IValidation
     {
         /// <summary>
         /// 验证
@@ -22,7 +20,6 @@ namespace Bing.Applications.Dtos
             {
                 return ValidationResultCollection.Success;
             }
-
             throw new Warning(result.First().ErrorMessage);
         }
     }

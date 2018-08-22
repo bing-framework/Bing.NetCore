@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Entities
+﻿namespace Bing.Domains.Entities
 {
     /// <summary>
     /// 通过对象比较获取变更属性集

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Domains.Entities;
+﻿using Bing.Domains.Entities;
 
 namespace Bing.Datas.Stores.Operations
 {

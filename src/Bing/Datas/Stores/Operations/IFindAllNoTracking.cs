@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 using Bing.Domains.Entities;
 
 namespace Bing.Datas.Stores.Operations

@@ -12,7 +12,7 @@ namespace Bing.Utils.Maths
         /// <summary>
         /// 基础字符
         /// </summary>
-        private const string BASE_CHAR = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        private const string BaseChar = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         /// <summary>
         /// 二进制转换为八进制
@@ -255,7 +255,7 @@ namespace Bing.Utils.Maths
                     result = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
                     break;
                 default:
-                    result = BASE_CHAR;
+                    result = BaseChar;
                     break;
             }
 

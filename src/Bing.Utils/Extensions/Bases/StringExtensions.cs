@@ -13,7 +13,6 @@ using System.Web;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using Bing.Utils.Helpers;
 using Enum = System.Enum;
 
 // ReSharper disable once CheckNamespace

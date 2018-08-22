@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Bing.Configuration;
 using Bing.Sessions;
 using Bing.Utils.Extensions;

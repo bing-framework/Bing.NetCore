@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Dependency
+﻿namespace Bing.Dependency
 {
     /// <summary>
     /// 依赖注入接口，表示该接口的实现类将自动注册到Ioc容器中

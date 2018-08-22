@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Entities.Auditing
+﻿namespace Bing.Domains.Entities.Auditing
 {
     /// <summary>
     /// 操作审计

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Dependency
+﻿namespace Bing.Dependency
 {
     /// <summary>
     /// 表示依赖注入的对象声明周期

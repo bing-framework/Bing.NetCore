@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bing.Domains.Repositories
+﻿namespace Bing.Domains.Repositories
 {
     /// <summary>
     /// 查询对象

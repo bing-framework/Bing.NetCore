@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Domains.Entities.Trees
+﻿namespace Bing.Domains.Entities.Trees
 {
     /// <summary>
     /// 树型父标识
