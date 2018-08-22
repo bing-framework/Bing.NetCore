@@ -6,6 +6,7 @@ using Bing.Security.Identity.Models;
 using Bing.Security.Identity.Options;
 using Bing.Security.Identity.Repositories;
 using Bing.Security.Identity.Services.Abstractions;
+using Bing.Security.Identity.Services.Configs;
 using Bing.Utils.Extensions;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Identity;
@@ -51,6 +52,12 @@ namespace Bing.Security.Identity.Services.Implements
 
         #region Create(创建用户)
 
+        /// <summary>
+        /// 创建用户
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="password">密码</param>
+        /// <returns></returns>
         public async Task CreateAsync(TUser user, string password)
         {
             if (user == null)
@@ -67,6 +74,14 @@ namespace Bing.Security.Identity.Services.Implements
 
         #region GenerateToken(生成令牌)
 
+        /// <summary>
+        /// 生成令牌
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <param name="purpose">用途</param>
+        /// <param name="application">应用程序</param>
+        /// <param name="provider">令牌提供器</param>
+        /// <returns></returns>
         public async Task<string> GenerateTokenAsync(string phone, string purpose, string application = "", string provider = "")
         {
             var user = await GetUserOrDefault(phone);
@@ -101,7 +116,14 @@ namespace Bing.Security.Identity.Services.Implements
             return "56df9984-bc05-460a-a4ce-9dec3922a5e9";
         }
 
-
+        /// <summary>
+        /// 生成令牌
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="purpose">用途</param>
+        /// <param name="application">应用程序</param>
+        /// <param name="provider">令牌提供器</param>
+        /// <returns></returns>
         public async Task<string> GenerateTokenAsync(TUser user, string purpose, string application = "", string provider = "")
         {
             user.CheckNotNull(nameof(user));
@@ -126,76 +148,205 @@ namespace Bing.Security.Identity.Services.Implements
 
         #endregion
 
+        #region VerifyToken(验证令牌)
 
-
+        /// <summary>
+        /// 验证令牌
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <param name="purpose">用途</param>
+        /// <param name="token">令牌</param>
+        /// <param name="application">应用程序</param>
+        /// <param name="provider">令牌提供器</param>
+        /// <returns></returns>
         public async Task<bool> VerifyTokenAsync(string phone, string purpose, string token, string application = "", string provider = "")
         {
-            throw new System.NotImplementedException();
+            var user = await GetUserOrDefault(phone);
+            return await VerifyTokenAsync(user, purpose, token, application, provider);
         }
 
+        /// <summary>
+        /// 验证令牌
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="purpose">用途</param>
+        /// <param name="token">令牌</param>
+        /// <param name="application">应用程序</param>
+        /// <param name="provider">令牌提供器</param>
+        /// <returns></returns>
         public async Task<bool> VerifyTokenAsync(TUser user, string purpose, string token, string application = "", string provider = "")
         {
-            throw new System.NotImplementedException();
+            user.CheckNotNull(nameof(user));
+            purpose = GetPurpose(purpose, application);
+            if (provider.IsEmpty())
+            {
+                purpose = TokenOptions.DefaultPhoneProvider;
+            }
+            return await Manager.VerifyUserTokenAsync(user, provider, purpose, token);
         }
 
+        #endregion
+
+        #region 生成和验证手机号注册令牌
+
+        /// <summary>
+        /// 生成手机号注册令牌
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <param name="application">应用程序</param>
+        /// <returns></returns>
         public async Task<string> GenerateRegisterTokenAsync(string phone, string application = "")
         {
-            throw new System.NotImplementedException();
+            return await GenerateTokenAsync(phone, TokenPurpose.PhoneRegister, application);
         }
 
+        /// <summary>
+        /// 验证手机号注册令牌
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <param name="token">令牌</param>
+        /// <param name="application">应用程序</param>
+        /// <returns></returns>
         public async Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "")
         {
-            throw new System.NotImplementedException();
+            return await VerifyTokenAsync(phone, TokenPurpose.PhoneRegister, token, application);
         }
 
+        #endregion
+
+        #region 激活电子邮件
+
+        /// <summary>
+        /// 生成电子邮件确认令牌
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <returns></returns>
         public async Task<string> GenerateEmailConfirmationTokenAsync(TUser user)
         {
-            throw new System.NotImplementedException();
+            return await Manager.GenerateEmailConfirmationTokenAsync(user);
         }
 
+        /// <summary>
+        /// 激活电子邮件
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="token">令牌</param>
+        /// <returns></returns>
         public async Task ConfirmEmailAsync(TUser user, string token)
         {
-            throw new System.NotImplementedException();
+            var result = await Manager.ConfirmEmailAsync(user, token);
+            result.ThrowIfError();
         }
 
+        #endregion
+
+        #region 电子邮件找回密码
+
+        /// <summary>
+        /// 生成电子邮件重置密码令牌
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <returns></returns>
         public async Task<string> GenerateEmailPasswordResetTokenAsync(TUser user)
         {
-            throw new System.NotImplementedException();
+            return await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider,
+                UserManager<TUser>.ResetPasswordTokenPurpose);
         }
 
+        /// <summary>
+        /// 通过电子邮件重置密码
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="token">令牌</param>
+        /// <param name="newPassword">新密码</param>
+        /// <returns></returns>
         public async Task ResetPasswordByEmailAsync(TUser user, string token, string newPassword)
         {
-            throw new System.NotImplementedException();
+            var result = await Manager.ResetPasswordAsync(user, TokenOptions.DefaultEmailProvider, token, newPassword);
+            result.ThrowIfError();
         }
 
+        #endregion
+
+        #region 手机号找回密码
+
+        /// <summary>
+        /// 生成手机号重置密码令牌
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <returns></returns>
         public async Task<string> GeneratePhonePasswordResetTokenAsync(TUser user)
         {
-            throw new System.NotImplementedException();
+            return await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultPhoneProvider,
+                UserManager<TUser>.ResetPasswordTokenPurpose);
         }
 
+        /// <summary>
+        /// 通过手机号重置密码
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="token">令牌</param>
+        /// <param name="newPassword">新密码</param>
+        /// <returns></returns>
         public async Task ResetPasswordByPhoneAsync(TUser user, string token, string newPassword)
         {
-            throw new System.NotImplementedException();
+            var result = await Manager.ResetPasswordAsync(user, TokenOptions.DefaultPhoneProvider, token, newPassword);
+            result.ThrowIfError();
         }
 
+        #endregion
+
+        #region ChangePassword(修改密码)
+
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="currentPassword">当前密码</param>
+        /// <param name="newPassword">新密码</param>
+        /// <returns></returns>
         public async Task ChangePasswordAsync(TUser user, string currentPassword, string newPassword)
         {
-            throw new System.NotImplementedException();
+            var result = await Manager.ChangePasswordAsync(user, currentPassword, newPassword);
+            result.ThrowIfError();
         }
 
+        #endregion
+
+        #region FindUser(查找用户)
+
+        /// <summary>
+        /// 通过用户名查找
+        /// </summary>
+        /// <param name="userName">用户名</param>
+        /// <returns></returns>
         public async Task<TUser> FindByNameAsync(string userName)
         {
-            throw new System.NotImplementedException();
+            return await Manager.FindByNameAsync(userName);
         }
 
+        /// <summary>
+        /// 通过电子邮件查找
+        /// </summary>
+        /// <param name="email">电子邮件</param>
+        /// <returns></returns>
         public async Task<TUser> FindByEmailAsync(string email)
         {
-            throw new System.NotImplementedException();
+            return await Manager.FindByEmailAsync(email);
         }
 
+        /// <summary>
+        /// 通过手机号查找
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <returns></returns>
         public async Task<TUser> FindByPhoneAsync(string phone)
         {
-            throw new System.NotImplementedException();
+            return await UserRepository.SingleAsync(t => t.PhoneNumber == phone);
         }
+
+        #endregion
+
+
     }
 }
