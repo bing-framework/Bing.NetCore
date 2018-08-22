@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bing.Events.Handlers;
 using Bing.Events.Messages;
-using Bing.Logs.Aspects;
 
 namespace Bing.Events.Default
 {
@@ -40,22 +35,7 @@ namespace Bing.Events.Default
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
         /// <param name="event">事件</param>        
-        [TraceLog]
         public void Publish<TEvent>(TEvent @event) where TEvent : IEvent
-        {
-            SyncHandle(@event);
-            if (@event is IMessageEvent messageEvent)
-            {
-                AsyncHandle(messageEvent);
-            }
-        }
-
-        /// <summary>
-        /// 同步处理 - 在当前线程处理
-        /// </summary>
-        /// <typeparam name="TEvent">事件类型</typeparam>
-        /// <param name="event">事件</param>
-        private void SyncHandle<TEvent>(TEvent @event) where TEvent : IEvent
         {
             var handlers = Manager.GetHandlers<TEvent>();
             if (handlers == null)
@@ -65,34 +45,72 @@ namespace Bing.Events.Default
 
             foreach (var handler in handlers)
             {
-                handler.Handle(@event);
+                handler?.Handle(@event);
             }
-
-            //handlers?.Select(eventHandler => Task.Factory.StartNew(() =>
-            //{
-            //    HandleEvent(eventHandler, @event);
-            //})
-            //).ToArray();
+            PublishMessageEvents(@event);
         }
 
         /// <summary>
-        /// 处理事件
+        /// 发布消息事件
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
-        /// <param name="handler">事件处理器</param>
-        /// <param name="event">事件</param>        
-        private void HandleEvent<TEvent>(IEventHandler<TEvent> handler, TEvent @event) where TEvent : IEvent
+        /// <param name="event">事件</param>
+        /// <returns></returns>
+        private void PublishMessageEvents<TEvent>(TEvent @event)
         {
-            handler.Handle(@event);
+            if (MessageEventBus == null)
+            {
+                return;
+            }
+
+            if (@event is IMessageEvent messageEvent)
+            {
+                MessageEventBus.Publish(messageEvent);
+            }
         }
 
         /// <summary>
-        /// 异步处理 - 发送到消息中间件
-        /// </summary>        
-        /// <param name="messageEvent">消息事件</param>
-        private void AsyncHandle(IMessageEvent messageEvent)
+        /// 发布事件
+        /// </summary>
+        /// <typeparam name="TEvent">事件类型</typeparam>
+        /// <param name="event">事件</param>
+        /// <returns></returns>
+        public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : IEvent
         {
-            MessageEventBus?.Publish(messageEvent);
+            var handlers = Manager.GetHandlers<TEvent>();
+            if (handlers == null)
+            {
+                return;
+            }
+
+            foreach (var handler in handlers)
+            {
+                if (handler == null)
+                {
+                    continue;
+                }
+                await handler.HandleAsync(@event);
+            }
+            await PublishMessageEventsAsync(@event);
+        }
+
+        /// <summary>
+        /// 发布消息事件
+        /// </summary>
+        /// <typeparam name="TEvent">事件类型</typeparam>
+        /// <param name="event">事件</param>
+        /// <returns></returns>
+        private async Task PublishMessageEventsAsync<TEvent>(TEvent @event)
+        {
+            if (MessageEventBus == null)
+            {
+                return;
+            }
+
+            if (@event is IMessageEvent messageEvent)
+            {
+                await MessageEventBus.PublishAsync(messageEvent);
+            }
         }
     }
 }

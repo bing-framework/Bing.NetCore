@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Events.Handlers;
+﻿using Bing.Events.Handlers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.Events.Default
 {
@@ -18,8 +16,9 @@ namespace Bing.Events.Default
         /// <returns></returns>
         public static IServiceCollection AddDefaultEventBus(this IServiceCollection services)
         {
-            return services.AddSingleton<IEventHandlerManager, EventHandlerManager>()
-                .AddSingleton<IEventBus, EventBus>();
+            services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();
+            services.TryAddSingleton<IEventBus, EventBus>();
+            return services;
         }
     }
 }

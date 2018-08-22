@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Bing.Events.Handlers
 {
@@ -22,5 +23,12 @@ namespace Bing.Events.Handlers
         /// </summary>
         /// <param name="event">事件</param>
         void Handle(TEvent @event);
+
+        /// <summary>
+        /// 处理事件
+        /// </summary>
+        /// <param name="event">事件</param>
+        /// <returns></returns>
+        Task HandleAsync(TEvent @event);
     }
 }
