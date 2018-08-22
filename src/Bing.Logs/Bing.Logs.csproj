@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
     <ProjectReference Include="..\Bing.Utils\Bing.Utils.csproj" />
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>

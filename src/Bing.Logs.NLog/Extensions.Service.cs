@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Logs.Abstractions;
+﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.Logs.NLog
 {
@@ -19,10 +17,10 @@ namespace Bing.Logs.NLog
         /// <param name="name">服务名称</param>
         public static void AddNLog(this IServiceCollection services, string name = null)
         {            
-            services.AddScoped<ILogProviderFactory, Bing.Logs.NLog.LogProviderFactory>();
-            services.AddSingleton<ILogFormat, ContentFormat>();
-            services.AddScoped<ILogContext, Bing.Logs.Core.LogContext>();
-            services.AddScoped<ILog, Log>();
+            services.TryAddScoped<ILogProviderFactory, Bing.Logs.NLog.LogProviderFactory>();
+            services.TryAddSingleton<ILogFormat, ContentFormat>();
+            services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
+            services.TryAddScoped<ILog, Log>();
         }
     }
 }

@@ -3,6 +3,7 @@ using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;
 using Bing.Logs.Formats;
+using Bing.Security.Extensions;
 using Bing.Sessions;
 
 namespace Bing.Logs
@@ -57,10 +58,10 @@ namespace Bing.Logs
         protected override void Init(LogContent content)
         {
             base.Init(content);
-            //content.Tenant = Session.GetTenant();
-            //content.Application = UserContext.GetApplication();
-            //content.Operator = UserContext.GetFullName();
-            //content.Role = UserContext.GetRoleName();
+            content.Tenant = Session.GetTenantName();
+            content.Application = Session.GetApplicationName();
+            content.Operator = Session.GetFullName();
+            content.Role = Session.GetRoleName();
         }
 
         /// <summary>
@@ -164,7 +165,7 @@ namespace Bing.Logs
             }
             catch
             {
-                return NullSession.Instance;
+                return Security.Sessions.Session.Null;
             }
         }
 

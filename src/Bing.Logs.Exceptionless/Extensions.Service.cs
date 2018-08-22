@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Core;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.Logs.Exceptionless
 {
@@ -22,10 +21,10 @@ namespace Bing.Logs.Exceptionless
         public static void AddExceptionless(this IServiceCollection services,
             Action<ExceptionlessConfiguration> configAction, string name = null)
         {
-            services.AddScoped<ILogProviderFactory, Bing.Logs.Exceptionless.LogProviderFactory>();
-            services.AddSingleton(typeof(ILogFormat), t => NullLogFormat.Instance);
-            services.AddScoped<ILogContext, Bing.Logs.Exceptionless.LogContext>();
-            services.AddScoped<ILog, Log>();
+            services.TryAddScoped<ILogProviderFactory, Bing.Logs.Exceptionless.LogProviderFactory>();
+            services.TryAddSingleton(typeof(ILogFormat), t => NullLogFormat.Instance);
+            services.TryAddScoped<ILogContext, Bing.Logs.Exceptionless.LogContext>();
+            services.TryAddScoped<ILog, Log>();
 
             configAction?.Invoke(ExceptionlessClient.Default.Configuration);
         }
