@@ -1,15 +1,12 @@
-﻿namespace Bing.Applications.Trees
+﻿using Bing.Applications.Dtos;
+
+namespace Bing.Applications.Trees
 {
     /// <summary>
     /// 树节点
     /// </summary>
-    public interface ITreeNode
+    public interface ITreeNode:IKey
     {
-        /// <summary>
-        /// 标识
-        /// </summary>
-        string Id { get; set; }
-
         /// <summary>
         /// 父标识
         /// </summary>
@@ -24,5 +21,10 @@
         /// 级数
         /// </summary>
         int? Level { get; set; }
+
+        /// <summary>
+        /// 是否展开
+        /// </summary>
+        bool? Expanded { get; set; }
     }
 }

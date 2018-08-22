@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.Applications.Dtos;
 using Bing.Datas.EntityFramework.Extensions;
@@ -11,7 +10,6 @@ using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 using Bing.Extensions.AutoMapper;
-using Bing.Logs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Applications
@@ -77,11 +75,13 @@ namespace Bing.Applications
             return entity.MapTo<TDto>();
         }
 
+        #region GetAll(获取全部)
+
         /// <summary>
         /// 获取全部
         /// </summary>
         /// <returns></returns>
-        public List<TDto> GetAll()
+        public virtual List<TDto> GetAll()
         {
             return _store.FindAll().Select(ToDto).ToList();
         }
@@ -90,18 +90,22 @@ namespace Bing.Applications
         /// 获取全部
         /// </summary>
         /// <returns></returns>
-        public async Task<List<TDto>> GetAllAsync()
+        public virtual async Task<List<TDto>> GetAllAsync()
         {
             var entities = await _store.FindAllAsync();
             return entities.Select(ToDto).ToList();
         }
+
+        #endregion
+
+        #region GetById(通过编号获取)
 
         /// <summary>
         /// 通过编号获取
         /// </summary>
         /// <param name="id">实体编号</param>
         /// <returns></returns>
-        public TDto GetById(object id)
+        public virtual TDto GetById(object id)
         {
             var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
             return ToDto(_store.Find(key));
@@ -112,18 +116,22 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="id">实体编号</param>
         /// <returns></returns>
-        public async Task<TDto> GetByIdAsync(object id)
+        public virtual async Task<TDto> GetByIdAsync(object id)
         {
             var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
             return ToDto(await _store.FindAsync(key));
         }
+
+        #endregion
+
+        #region GetByIds(通过编号列表获取)
 
         /// <summary>
         /// 通过编号列表获取
         /// </summary>
         /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
         /// <returns></returns>
-        public List<TDto> GetByIds(string ids)
+        public virtual List<TDto> GetByIds(string ids)
         {
             return _store.FindByIds(ids).Select(ToDto).ToList();
         }
@@ -133,11 +141,15 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="ids">用逗号分隔带额Id列表，范例："1,2"</param>
         /// <returns></returns>
-        public async Task<List<TDto>> GetByIdsAsync(string ids)
+        public virtual async Task<List<TDto>> GetByIdsAsync(string ids)
         {
             var entities = await _store.FindByIdsAsync(ids);
             return entities.Select(ToDto).ToList();
         }
+
+        #endregion
+
+        #region Query(查询)
 
         /// <summary>
         /// 查询
@@ -204,22 +216,16 @@ namespace Bing.Applications
         /// 过滤
         /// </summary>
         /// <param name="queryable">查询条件</param>
-        /// <returns></returns>
-        protected virtual IQueryable<TEntity> Filter(IQueryable<TEntity> queryable)
-        {
-            return queryable;
-        }
-
-        /// <summary>
-        /// 过滤
-        /// </summary>
-        /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
         protected virtual IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter)
         {
             return queryable;
         }
+
+        #endregion
+
+        #region PagerQuery(分页查询)
 
         /// <summary>
         /// 分页查询
@@ -254,5 +260,9 @@ namespace Bing.Applications
             queryable = Filter(queryable, parameter);
             return (await queryable.ToPagerListAsync(query.GetPager())).Convert(ToDto);
         }
+
+        #endregion
+
+
     }
 }

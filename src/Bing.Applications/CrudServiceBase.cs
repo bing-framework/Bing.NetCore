@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Bing.Applications.Aspects;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
@@ -10,9 +6,6 @@ using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 using Bing.Extensions.AutoMapper;
-using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Applications
 {

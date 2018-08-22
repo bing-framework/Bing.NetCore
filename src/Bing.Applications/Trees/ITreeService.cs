@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Applications.Dtos;
-using Bing.Applications.Operations;
 using Bing.Datas.Queries.Trees;
 
 namespace Bing.Applications.Trees
@@ -16,7 +15,6 @@ namespace Bing.Applications.Trees
         where TDto : class, IResponse, ITreeNode, new()
         where TQueryParameter : class, ITreeQueryParameter
     {
-
     }
 
     /// <summary>

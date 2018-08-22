@@ -8,7 +8,6 @@ using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Trees;
-using Bing.Domains.Repositories;
 using Bing.Utils.Helpers;
 
 namespace Bing.Applications.Trees
@@ -22,17 +21,23 @@ namespace Bing.Applications.Trees
     public abstract class TreeServiceBase<TEntity, TDto, TQueryParameter>
         : TreeServiceBase<TEntity, TDto,  TQueryParameter, Guid,Guid?>,
             ITreeService<TDto, TQueryParameter>
-        where TEntity : class, ITreeEntity<TEntity, Guid, Guid?>, new()
+        where TEntity : class, IParentId<Guid?>, IPath, IEnabled, ISortId, IKey<Guid>, IVersion, new()
         where TDto : class, IDto, ITreeNode, new()
         where TQueryParameter : class, ITreeQueryParameter
     {
         /// <summary>
+        /// 存储器
+        /// </summary>
+        private readonly IStore<TEntity, Guid> _store;
+
+        /// <summary>
         /// 初始化一个<see cref="TreeServiceBase{TEntity,TDto,TQueryParameter}"/>类型的实例
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
-        /// <param name="repository">仓储</param>
-        protected TreeServiceBase(IUnitOfWork unitOfWork, IRepository<TEntity, Guid> repository) : base(unitOfWork, repository)
+        /// <param name="store">存储器</param>
+        protected TreeServiceBase(IUnitOfWork unitOfWork, IStore<TEntity, Guid> store) : base(unitOfWork, store)
         {
+            _store = store;
         }
 
         /// <summary>
@@ -44,6 +49,16 @@ namespace Bing.Applications.Trees
         protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter)
         {
             return queryable.Where(new TreeCriteria<TEntity>(parameter));
+        }
+
+        /// <summary>
+        /// 获取直接下级子节点列表
+        /// </summary>
+        /// <param name="parameter">查询参数</param>
+        /// <returns></returns>
+        protected override async Task<List<TEntity>> GetChildren(TQueryParameter parameter)
+        {
+            return await _store.FindAllAsync(t => t.ParentId == parameter.ParentId);
         }
     }
 
@@ -127,7 +142,6 @@ namespace Bing.Applications.Trees
             {
                 return;
             }
-
             var entities = await _store.FindByIdsAsync(ids);
             if (entities == null)
             {
@@ -139,12 +153,10 @@ namespace Bing.Applications.Trees
                 {
                     return;
                 }
-
                 if (enabled == false && await AllowDisable(entity) == false)
                 {
                     return;
                 }
-
                 entity.Enabled = enabled;
                 await _store.UpdateAsync(entity);
             });
@@ -169,7 +181,7 @@ namespace Bing.Applications.Trees
         /// <returns></returns>
         protected virtual Task<bool> AllowDisable(TEntity entity)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(true);
         }
 
         /// <summary>
@@ -225,13 +237,11 @@ namespace Bing.Applications.Trees
             {
                 return;
             }
-
             var list = children.OrderBy(t => t.SortId).ToList();
             for (int i = 0; i < children.Count; i++)
             {
                 children[i].SortId = i + 1;
             }
-
             await _store.UpdateAsync(list);
             await _unitOfWork.CommitAsync();
         }
