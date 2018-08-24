@@ -27,7 +27,7 @@ namespace Bing.Security.Identity.Models
         /// </summary>
         [DisplayName("应用程序编码")]
         [Required(ErrorMessage = "应用程序编码不能为空")]
-        [StringLength(60, ErrorMessage = "应用程序编码输入过长，不能超过60位")]
+        [StringLength(50, ErrorMessage = "应用程序编码输入过长，不能超过50位")]
         public string Code { get; set; }
         /// <summary>
         /// 应用程序名称
