@@ -16,7 +16,7 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]/[action]")]
-    [ExceptionHandler]
+    //[ExceptionHandler]
     [ErrorLog]
     public class ApiControllerBase:Controller
     {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Bing.Reflections
 {
@@ -64,29 +65,32 @@ namespace Bing.Reflections
         {
             foreach (var file in Directory.GetFiles(path, "*.dll"))
             {
-                var assemblyName = AssemblyName.GetAssemblyName(file);
-                if (Match(assemblyName))
+                if (Match(Path.GetFileName(file)) == false)
                 {
-                    AppDomain.CurrentDomain.Load(assemblyName);
+                    continue;
                 }
+                var assemblyName = AssemblyName.GetAssemblyName(file);
+                AppDomain.CurrentDomain.Load(assemblyName);                
             }
         }
 
         /// <summary>
         /// 程序集是否匹配
         /// </summary>
-        /// <param name="assemblyName">程序集名</param>
+        /// <param name="assemblyName">程序集名称</param>
         /// <returns></returns>
-        protected virtual bool Match(AssemblyName assemblyName)
+        protected virtual bool Match(string assemblyName)
         {
-            if (assemblyName.FullName.Contains("PrecompiledViews"))
+            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.Views"))
             {
                 return false;
             }
-
-            return !Regex.IsMatch(assemblyName.FullName, SKIP_ASSEMBLIES,
-                RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        }
+            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.PrecompiledViews"))
+            {
+                return false;
+            }
+            return !Regex.IsMatch(assemblyName, SKIP_ASSEMBLIES, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        }        
 
         #endregion
 

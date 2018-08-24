@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.Logs;
 using Bing.Logs.Extensions;
@@ -18,13 +16,16 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         private readonly RequestDelegate _next;
 
+        private readonly ILog _log;
+
         /// <summary>
         /// 初始化一个<see cref="ErrorLogMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        public ErrorLogMiddleware(RequestDelegate next)
+        public ErrorLogMiddleware(RequestDelegate next,ILog log)
         {
             _next = next;
+            _log = log;
         }
 
         /// <summary>
@@ -56,8 +57,8 @@ namespace Bing.Webs.Middlewares
             {
                 return;
             }
-
-            var log = Log.GetLog().Caption("全局异常捕获").Content($"状态码：{context.Response.StatusCode}");
+            //var log = Log.GetLog().Caption("全局异常捕获").Content($"状态码：{context.Response.StatusCode}");
+            var log = _log.Caption("全局异常捕获").Content($"状态码：{context.Response.StatusCode}");
             ex.Log(log);
         }
     }
