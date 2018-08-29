@@ -26,7 +26,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 添加到OrderBy子句
         /// </summary>
         /// <param name="order">排序列表</param>
-        void AppendOrderBy(string order);
+        void AppendSql(string order);
 
         /// <summary>
         /// 获取Sql

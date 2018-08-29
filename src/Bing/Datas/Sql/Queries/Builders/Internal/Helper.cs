@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
 using Bing.Datas.Sql.Queries.Builders.Core;
@@ -171,5 +172,34 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
             }
             return result;
         }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ICondition Between(string column, object min, object max, Boundary boundary)
+        {
+            column = GetColumn(column);
+            string minParamName = null;
+            string maxParamName = null;
+            if (string.IsNullOrWhiteSpace(min.SafeString()) == false)
+            {
+                minParamName = _parameterManager.GenerateName();
+                _parameterManager.Add(minParamName, min);
+            }
+
+            if (string.IsNullOrWhiteSpace(max.SafeString()) == false)
+            {
+                maxParamName = _parameterManager.GenerateName();
+                _parameterManager.Add(maxParamName, max);
+            }
+
+            return new SegmentCondition(column, minParamName, maxParamName, boundary);
+        }
+
     }
 }

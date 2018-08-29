@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
 using Bing.Domains.Repositories;
 using Bing.Utils;
@@ -17,6 +18,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <returns></returns>
         ISqlBuilder New();
+
+        /// <summary>
+        /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
+        /// </summary>
+        /// <returns></returns>
+        string ToDebugSql();
 
         /// <summary>
         /// 生成Sql语句
@@ -55,16 +62,16 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         string GetWhere();
 
         /// <summary>
-        /// 获取OrderBy语句
+        /// 获取分组语句
+        /// </summary>
+        /// <returns></returns>
+        string GetGroupBy();
+
+        /// <summary>
+        /// 获取排序语句
         /// </summary>
         /// <returns></returns>
         string GetOrderBy();
-
-        /// <summary>
-        /// 获取Having语句
-        /// </summary>
-        /// <returns></returns>
-        string GetHaving();
 
         /// <summary>
         /// 设置列名
@@ -243,6 +250,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 设置查询条件
         /// </summary>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
+        ISqlBuilder Where(ICondition condition);
+
+        /// <summary>
+        /// 设置查询条件
+        /// </summary>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
@@ -333,6 +347,395 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="sql">Sql语句</param>
         /// <returns></returns>
         ISqlBuilder AppendWhere(string sql);
+
+        /// <summary>
+        /// 设置相等查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Equal(string column, object value);
+
+        /// <summary>
+        /// 设置相等查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Equal<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置不相等查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder NotEqual(string column, object value);
+
+        /// <summary>
+        /// 设置不相等查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder NotEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置大于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Greater(string column, object value);
+
+        /// <summary>
+        /// 设置大于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Greater<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置大于等于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder GreaterEqual(string column, object value);
+
+        /// <summary>
+        /// 设置大于等于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder GreaterEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置小于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Less(string column, object value);
+
+        /// <summary>
+        /// 设置小于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Less<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置小于等于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder LessEqual(string column, object value);
+
+        /// <summary>
+        /// 设置小于等于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder LessEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置模糊匹配查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Contains(string column, object value);
+
+        /// <summary>
+        /// 设置模糊匹配查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Contains<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置头匹配查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Starts(string column, object value);
+
+        /// <summary>
+        /// 设置头匹配查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Starts<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置尾匹配查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Ends(string column, object value);
+
+        /// <summary>
+        /// 设置尾匹配查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        ISqlBuilder Ends<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
+
+        /// <summary>
+        /// 设置Is Null查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        ISqlBuilder IsNull(string column);
+
+        /// <summary>
+        /// 设置Is Null查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        ISqlBuilder IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置Is Not Null查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        ISqlBuilder IsNotNull(string column);
+
+        /// <summary>
+        /// 设置Is Not Null查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        ISqlBuilder IsNotNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        ISqlBuilder IsEmpty(string column);
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        ISqlBuilder IsEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        ISqlBuilder IsNotEmpty(string column);
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        ISqlBuilder IsNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        ISqlBuilder In(string column, IEnumerable<object> values);
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        ISqlBuilder In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max,
+            Boundary boundary = Boundary.Both) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max,
+            Boundary boundary = Boundary.Both) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max,
+            Boundary boundary = Boundary.Both) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max,
+            Boundary boundary = Boundary.Both) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max,
+            Boundary boundary = Boundary.Both) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max,
+            bool includeTime = true, Boundary boundary = Boundary.Both) where TEntity : class;
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between(string column, int? min, int? max, Boundary boundary = Boundary.Both);
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between(string column, long? min, long? max, Boundary boundary = Boundary.Both);
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between(string column, float? min, float? max, Boundary boundary = Boundary.Both);
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between(string column, double? min, double? max, Boundary boundary = Boundary.Both);
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between(string column, decimal? min, decimal? max, Boundary boundary = Boundary.Both);
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        ISqlBuilder Between(string column, DateTime? min, DateTime? max, bool includeTime = true, Boundary boundary = Boundary.Both);
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <param name="group">分组字段</param>
+        /// <param name="having">分组条件</param>
+        /// <returns></returns>
+        ISqlBuilder GroupBy(string group, string having = null);
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="column">分组字段</param>
+        /// <param name="having">分组条件</param>
+        /// <returns></returns>
+        ISqlBuilder GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加到GroupBy子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        ISqlBuilder AppendGroupBy(string sql);
 
         /// <summary>
         /// 排序

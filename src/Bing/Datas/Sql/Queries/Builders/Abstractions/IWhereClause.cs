@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
 using Bing.Utils;
 
@@ -22,6 +23,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <param name="condition">查询条件</param>
         void Or(ICondition condition);
+
+        /// <summary>
+        /// 设置查询条件
+        /// </summary>
+        /// <param name="condition">查询条件</param>
+        void Where(ICondition condition);
 
         /// <summary>
         /// 设置查询条件
@@ -106,6 +113,131 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <param name="sql">Sql语句</param>
         void AppendSql(string sql);
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary boundary)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between(string column, int? min, int? max, Boundary boundary);
+
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between(string column, long? min, long? max, Boundary boundary);
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between(string column, float? min, float? max, Boundary boundary);
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between(string column, double? min, double? max, Boundary boundary);
+
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        void Between(string column, decimal? min, decimal? max, Boundary boundary);
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary boundary);
+
 
         /// <summary>
         /// 设置Is Null条件

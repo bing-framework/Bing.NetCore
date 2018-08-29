@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using Bing.Datas.Matedatas;
+using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Clauses;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
@@ -17,16 +18,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
     public abstract class SqlBuilderBase:ISqlBuilder
     {
         #region 属性
-
-        /// <summary>
-        /// 参数标识，用于防止多个Sql生成器生成的参数重复
-        /// </summary>
-        public string Tag { get; set; }
-
-        /// <summary>
-        /// 子生成器数量，用于生成子生成器的Tag
-        /// </summary>
-        protected int ChildBuilderCount { get; set; } = 0;
 
         /// <summary>
         /// 实体元数据解析器
@@ -46,7 +37,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 参数管理器
         /// </summary>
-        protected IParameterManager ParameterManager { get; }
+        private IParameterManager _parameterManager;
+
+        /// <summary>
+        /// 参数管理器
+        /// </summary>
+        protected IParameterManager ParameterManager =>
+            _parameterManager ?? (_parameterManager = CreateParameterManager());
+
+        /// <summary>
+        /// 创建参数管理器
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IParameterManager CreateParameterManager()
+        {
+            return new ParameterManager(GetDialect());
+        }
 
         #endregion
 
@@ -62,6 +68,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             EntityMatedata = matedata;
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
+            _parameterManager = parameterManager;
         }
 
         #endregion
@@ -73,6 +80,25 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <returns></returns>
         public abstract ISqlBuilder New();
+
+        #endregion
+
+        #region ToDebugSql(生成调试Sql语句)
+
+        /// <summary>
+        /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
+        /// </summary>
+        /// <returns></returns>
+        public string ToDebugSql()
+        {
+            var result = ToSql();
+            var parameters = GetParams();
+            foreach (var parameter in parameters)
+            {
+                result = result.Replace(parameter.Key, SqlHelper.GetParamLiterals(parameter.Value));
+            }
+            return result;
+        }
 
         #endregion
 
@@ -118,10 +144,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="result">Sql拼接器</param>
         protected virtual void CreateNoPagerSql(StringBuilder result)
         {
-            AppendSql(result,GetSelect());
-            AppendSql(result,GetFrom());
-            AppendSql(result,GetJoin());
-            AppendSql(result,GetWhere());
+            AppendSql(result, GetSelect());
+            AppendSql(result, GetFrom());
+            AppendSql(result, GetJoin());
+            AppendSql(result, GetWhere());
+            AppendSql(result, GetGroupBy());
             AppendSql(result, GetOrderBy());
         }
 
@@ -500,7 +527,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         protected virtual IWhereClause CreateWhereClause()
         {
-            return new WhereClause(GetDialect(), EntityResolver, AliasRegister, ParameterManager, Tag);
+            return new WhereClause(GetDialect(), EntityResolver, AliasRegister, ParameterManager);
         }
 
         /// <summary>
@@ -530,15 +557,36 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             return ParameterManager.GetParams();
         }
 
+        /// <summary>
+        /// And连接条件
+        /// </summary>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
         public ISqlBuilder And(ICondition condition)
         {
             WhereClause.And(condition);
             return this;
         }
 
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
         public ISqlBuilder Or(ICondition condition)
         {
             WhereClause.Or(condition);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置查询条件
+        /// </summary>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
+        public ISqlBuilder Where(ICondition condition)
+        {
+            WhereClause.Where(condition);
             return this;
         }
 
@@ -673,6 +721,573 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             return this;
         }
 
+        /// <summary>
+        /// 设置相等查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Equal(string column, object value)
+        {
+            return Where(column, value);
+        }
+
+        /// <summary>
+        /// 设置相等查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Equal<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value);
+        }
+
+        /// <summary>
+        /// 设置不相等查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder NotEqual(string column, object value)
+        {
+            return Where(column, value, Operator.NotEqual);
+        }
+
+        /// <summary>
+        /// 设置不相等查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder NotEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.NotEqual);
+        }
+
+        /// <summary>
+        /// 设置大于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Greater(string column, object value)
+        {
+            return Where(column, value, Operator.Greater);
+        }
+
+        /// <summary>
+        /// 设置大于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Greater<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.Greater);
+        }
+
+        /// <summary>
+        /// 设置大于等于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder GreaterEqual(string column, object value)
+        {
+            return Where(column, value, Operator.GreaterEqual);
+        }
+
+        /// <summary>
+        /// 设置大于等于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder GreaterEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.GreaterEqual);
+        }
+
+        /// <summary>
+        /// 设置小于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Less(string column, object value)
+        {
+            return Where(column, value, Operator.Less);
+        }
+
+        /// <summary>
+        /// 设置小于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Less<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.Less);
+        }
+
+        /// <summary>
+        /// 设置小于等于查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder LessEqual(string column, object value)
+        {
+            return Where(column, value, Operator.LessEqual); 
+        }
+
+        /// <summary>
+        /// 设置小于等于查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder LessEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.LessEqual);
+        }
+
+        /// <summary>
+        /// 设置模糊匹配查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Contains(string column, object value)
+        {
+            return Where(column, value, Operator.Contains);
+        }
+
+        /// <summary>
+        /// 设置模糊匹配查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Contains<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.Contains);
+        }
+
+        /// <summary>
+        /// 设置头匹配查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Starts(string column, object value)
+        {
+            return Where(column, value, Operator.Starts);
+        }
+
+        /// <summary>
+        /// 设置头匹配查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Starts<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.Starts);
+        }
+
+        /// <summary>
+        /// 设置尾匹配查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Ends(string column, object value)
+        {
+            return Where(column, value, Operator.Ends);
+        }
+
+        /// <summary>
+        /// 设置尾匹配查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public ISqlBuilder Ends<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class
+        {
+            return Where(expression, value, Operator.Ends);
+        }
+
+        /// <summary>
+        /// 设置Is Null查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        public ISqlBuilder IsNull(string column)
+        {
+            WhereClause.IsNull(column);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置Is Null查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        public ISqlBuilder IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            WhereClause.IsNull(expression);
+            return this; 
+        }
+
+        /// <summary>
+        /// 设置Is Not Null查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        public ISqlBuilder IsNotNull(string column)
+        {
+            WhereClause.IsNotNull(column);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置Is Not Null查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        public ISqlBuilder IsNotNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            WhereClause.IsNotNull(expression);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        public ISqlBuilder IsEmpty(string column)
+        {
+            WhereClause.IsEmpty(column);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        public ISqlBuilder IsEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            WhereClause.IsEmpty(expression);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <returns></returns>
+        public ISqlBuilder IsNotEmpty(string column)
+        {
+            WhereClause.IsNotEmpty(column);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        public ISqlBuilder IsNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            WhereClause.IsNotEmpty(expression);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        public ISqlBuilder In(string column, IEnumerable<object> values)
+        {
+            WhereClause.In(column,values);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        public ISqlBuilder In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class
+        {
+            WhereClause.In(expression,values);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary = Boundary.Both) where TEntity : class
+        {
+            WhereClause.Between(expression, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary = Boundary.Both) where TEntity : class
+        {
+            WhereClause.Between(expression, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary = Boundary.Both) where TEntity : class
+        {
+            WhereClause.Between(expression, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary = Boundary.Both) where TEntity : class
+        {
+            WhereClause.Between(expression, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary = Boundary.Both) where TEntity : class
+        {
+            WhereClause.Between(expression, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime = true,
+            Boundary boundary = Boundary.Both) where TEntity : class
+        {
+            WhereClause.Between(expression, min, max,includeTime, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between(string column, int? min, int? max, Boundary boundary = Boundary.Both)
+        {
+            WhereClause.Between(column, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between(string column, long? min, long? max, Boundary boundary = Boundary.Both)
+        {
+            WhereClause.Between(column, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between(string column, float? min, float? max, Boundary boundary = Boundary.Both)
+        {
+            WhereClause.Between(column, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between(string column, double? min, double? max, Boundary boundary = Boundary.Both)
+        {
+            WhereClause.Between(column, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between(string column, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
+        {
+            WhereClause.Between(column, min, max, boundary);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        /// <returns></returns>
+        public ISqlBuilder Between(string column, DateTime? min, DateTime? max, bool includeTime = true,
+            Boundary boundary = Boundary.Both)
+        {
+            WhereClause.Between(column, min, max, includeTime, boundary);
+            return this;
+        }
+
+        #endregion
+
+        #region GroupBy(分组)
+
+        /// <summary>
+        /// 分组字句
+        /// </summary>
+        private IGroupByClause _groupByClause;
+
+        protected IGroupByClause GroupByClause => _groupByClause ?? (_groupByClause = CreateGroupByClause());
+
+        /// <summary>
+        /// 创建分组子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IGroupByClause CreateGroupByClause()
+        {
+            return new GroupByClause(GetDialect(), EntityResolver, AliasRegister);
+        }
+
+        /// <summary>
+        /// 获取分组语句
+        /// </summary>
+        /// <returns></returns>
+        public virtual string GetGroupBy()
+        {
+            return GroupByClause.ToSql();
+        }
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <param name="group">分组字段</param>
+        /// <param name="having">分组条件</param>
+        /// <returns></returns>
+        public ISqlBuilder GroupBy(string @group, string having = null)
+        {
+            GroupByClause.GroupBy(group,having);
+            return this;
+        }
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="column">分组字段</param>
+        /// <param name="having">分组条件</param>
+        /// <returns></returns>
+        public ISqlBuilder GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null) where TEntity : class
+        {
+            GroupByClause.GroupBy(column,having);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到GroupBy子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        public ISqlBuilder AppendGroupBy(string sql)
+        {
+            GroupByClause.AppendSql(sql);
+            return this;
+        }
+
         #endregion
 
         #region OrderBy(设置排序)
@@ -736,7 +1351,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public virtual ISqlBuilder AppendOrderBy(string order)
         {
-            OrderByClause.AppendOrderBy(order);
+            OrderByClause.AppendSql(order);
             return this;
         }
 
@@ -770,10 +1385,5 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         #endregion
-
-        public virtual string GetHaving()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
 using Bing.Datas.Sql.Queries.Builders.Core;
@@ -69,6 +70,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void Or(ICondition condition)
         {
             _condition = new OrCondition(_condition, condition);
+        }
+
+        /// <summary>
+        /// 设置查询条件
+        /// </summary>
+        /// <param name="condition">查询条件</param>
+        public void Where(ICondition condition)
+        {
+            And(condition);
         }
 
         /// <summary>
@@ -220,7 +230,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void AppendSql(string sql)
         {
             And(new SqlCondition(sql));
-        }
+        }        
 
         /// <summary>
         /// 设置Is Null条件
@@ -324,6 +334,258 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             where TEntity : class
         {
             Where(expression,values,Operator.Contains);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary) where TEntity : class
+        {
+            var column = _helper.GetColumn(expression);
+            Between(column, min, max, boundary);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary) where TEntity : class
+        {
+            var column = _helper.GetColumn(expression);
+            Between(column, min, max, boundary);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary) where TEntity : class
+        {
+            var column = _helper.GetColumn(expression);
+            Between(column, min, max, boundary);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary) where TEntity : class
+        {
+            var column = _helper.GetColumn(expression);
+            Between(column, min, max, boundary);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary) where TEntity : class
+        {
+            var column = _helper.GetColumn(expression);
+            Between(column, min, max, boundary);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary boundary) where TEntity : class
+        {
+            var column = _helper.GetColumn(expression);
+            Between(column, min, max, includeTime, boundary);
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between(string column, int? min, int? max, Boundary boundary)
+        {
+            if (min > max)
+            {
+                Where(_helper.Between(column, max, min, boundary));
+                return;
+            }
+            Where(_helper.Between(column, min, max, boundary));
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between(string column, long? min, long? max, Boundary boundary)
+        {
+            if (min > max)
+            {
+                Where(_helper.Between(column, max, min, boundary));
+                return;
+            }
+            Where(_helper.Between(column, min, max, boundary));
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between(string column, float? min, float? max, Boundary boundary)
+        {
+            if (min > max)
+            {
+                Where(_helper.Between(column, max, min, boundary));
+                return;
+            }
+            Where(_helper.Between(column, min, max, boundary));
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between(string column, double? min, double? max, Boundary boundary)
+        {
+            if (min > max)
+            {
+                Where(_helper.Between(column, max, min, boundary));
+                return;
+            }
+            Where(_helper.Between(column, min, max, boundary));
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between(string column, decimal? min, decimal? max, Boundary boundary)
+        {
+            if (min > max)
+            {
+                Where(_helper.Between(column, max, min, boundary));
+                return;
+            }
+            Where(_helper.Between(column, min, max, boundary));
+        }
+
+        /// <summary>
+        /// 添加范围查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <param name="boundary">包含边界</param>
+        public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary boundary)
+        {
+            Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime),
+                GetBoundary(boundary, includeTime)));
+        }
+
+        /// <summary>
+        /// 获取最小日期
+        /// </summary>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <returns></returns>
+        private DateTime? GetMin(DateTime? min, DateTime? max, bool includeTime)
+        {
+            if (min == null && max == null)
+            {
+                return null;
+            }
+            DateTime? result = min;
+            if (min > max)
+            {
+                result = min;
+            }
+            if (includeTime)
+            {
+                return result;
+            }
+            return result.SafeValue().Date.AddDays(1);
+        }
+
+        /// <summary>
+        /// 获取最大日期
+        /// </summary>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <returns></returns>
+        private DateTime? GetMax(DateTime? min, DateTime? max, bool includeTime)
+        {
+            if (min == null && max == null)
+            {
+                return null;
+            }
+            DateTime? result = max;
+            if (min > max)
+            {
+                result = min;
+            }
+            if (includeTime)
+            {
+                return result;
+            }
+            return result.SafeValue().Date.AddDays(1);
+        }
+        /// <summary>
+        /// 获取日期范围查询条件边界
+        /// </summary>
+        /// <param name="boundary">包含边界</param>
+        /// <param name="includeTime">是否包含时间</param>
+        /// <returns></returns>
+        private Boundary GetBoundary(Boundary? boundary, bool includeTime)
+        {
+            if (boundary != null)
+            {
+                return boundary.SafeValue();
+            }
+            if (includeTime)
+            {
+                return Boundary.Both;
+            }
+            return Boundary.Left;
         }
 
         /// <summary>
