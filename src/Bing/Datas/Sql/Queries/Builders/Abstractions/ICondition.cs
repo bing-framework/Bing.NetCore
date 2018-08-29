@@ -1,4 +1,4 @@
-﻿namespace Bing.Datas.Sql.Queries.Builders.Conditions
+﻿namespace Bing.Datas.Sql.Queries.Builders.Abstractions
 {
     /// <summary>
     /// Sql查询条件

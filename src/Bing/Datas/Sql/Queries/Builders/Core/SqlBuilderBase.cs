@@ -62,7 +62,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             EntityMatedata = matedata;
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
-            ParameterManager = parameterManager ?? new ParameterManager();
         }
 
         #endregion

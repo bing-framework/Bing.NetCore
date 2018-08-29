@@ -1,4 +1,6 @@
-﻿namespace Bing.Datas.Sql.Queries.Builders.Conditions
+﻿using Bing.Datas.Sql.Queries.Builders.Abstractions;
+
+namespace Bing.Datas.Sql.Queries.Builders.Conditions
 {
     /// <summary>
     /// Or连接条件

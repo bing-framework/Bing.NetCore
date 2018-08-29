@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
 using Bing.Utils;
@@ -105,6 +106,74 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <param name="sql">Sql语句</param>
         void AppendSql(string sql);
+
+        /// <summary>
+        /// 设置Is Null条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        void IsNull(string column);
+
+        /// <summary>
+        /// 设置Is Null条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        void IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置Is Not Null条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        void IsNotNull(string column);
+
+        /// <summary>
+        /// 设置Is Not Null条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        void IsNotNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        void IsEmpty(string column);
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        void IsEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        void IsNotEmpty(string column);
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        void IsNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        void In(string column, IEnumerable<object> values);
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        void In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
+            where TEntity : class;
 
         /// <summary>
         /// 输出Sql

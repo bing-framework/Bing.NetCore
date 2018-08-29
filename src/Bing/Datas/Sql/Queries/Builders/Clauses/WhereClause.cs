@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
 using Bing.Datas.Sql.Queries.Builders.Core;
+using Bing.Datas.Sql.Queries.Builders.Internal;
 using Bing.Properties;
 using Bing.Utils;
 using Bing.Utils.Extensions;
@@ -15,41 +16,26 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
     /// Where子句
     /// </summary>
     public class WhereClause:IWhereClause
-    {
-        /// <summary>
-        /// Sql方言
-        /// </summary>
-        private readonly IDialect _dialect;
-
+    {        
         /// <summary>
         /// 实体解析器
         /// </summary>
         private readonly IEntityResolver _resolver;
 
         /// <summary>
-        /// 实体别名注册器
+        /// 辅助操作
         /// </summary>
-        private readonly IEntityAliasRegister _register;
+        private readonly Helper _helper;
 
         /// <summary>
-        /// 参数管理器
+        /// 谓词表达式解析器
         /// </summary>
-        private readonly IParameterManager _parameterManager;
+        private readonly PredicateExpressionResolver _expressionResolver;
 
         /// <summary>
         /// 查询条件
         /// </summary>
         private ICondition _condition;
-
-        /// <summary>
-        /// 参数索引
-        /// </summary>
-        private int _paramIndex;
-
-        /// <summary>
-        /// 参数标识
-        /// </summary>
-        private readonly string _tag;
 
         /// <summary>
         /// 初始化一个<see cref="WhereClause"/>类型的实例
@@ -60,23 +46,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="parameterManager">参数管理器</param>
         /// <param name="tag">参数标识</param>
         public WhereClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-            IParameterManager parameterManager, string tag = null)
+            IParameterManager parameterManager)
         {
-            _dialect = dialect;
             _resolver = resolver;
-            _register = register;
-            _parameterManager = parameterManager;
-            _tag = tag;
-            _paramIndex = 0;
-        }
-
-        /// <summary>
-        /// 获取查询条件
-        /// </summary>
-        /// <returns></returns>
-        public string GetCondition()
-        {
-            return _condition?.GetCondition();
+            _helper = new Helper(dialect, resolver, register, parameterManager);
+            _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager);
         }
 
         /// <summary>
@@ -105,46 +79,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="operator">运算符</param>
         public void Where(string column, object value, Operator @operator = Operator.Equal)
         {
-            And(GetCondition(column, value, @operator));
-        }
-
-        /// <summary>
-        /// 获取查询条件并添加参数
-        /// </summary>
-        /// <param name="column">列名</param>
-        /// <param name="value">值</param>
-        /// <param name="operator">运算符</param>
-        /// <returns></returns>
-        private ICondition GetCondition(string column, object value, Operator @operator)
-        {
-            if (string.IsNullOrWhiteSpace(column))
-            {
-                throw new ArgumentNullException(nameof(column));
-            }
-            column = GetColumn(column);
-            var paramName = GetParamName();
-            _parameterManager.Add(paramName,value,@operator);
-            return SqlConditionFactory.Create(column, paramName, @operator);
-        }
-
-        /// <summary>
-        /// 获取参数名
-        /// </summary>
-        /// <returns></returns>
-        private string GetParamName()
-        {
-            return $"{_dialect.GetPrefix()}_p_{_tag}_{_paramIndex++}";
-        }
-
-        /// <summary>
-        /// 获取列名
-        /// </summary>
-        /// <param name="column">列名</param>
-        /// <returns></returns>
-        private string GetColumn(string column)
-        {
-            return new SqlItem(column).ToSql(_dialect);
-        }
+            And(_helper.CreateCondition(column, value, @operator));
+        }        
 
         /// <summary>
         /// 设置查询条件
@@ -155,18 +91,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="operator">运算符</param>
         public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal) where TEntity : class
         {
-            Where(GetColumn(_resolver.GetColumn(expression), typeof(TEntity)), value, @operator);
-        }
-
-        /// <summary>
-        /// 获取列名
-        /// </summary>
-        /// <param name="column">列名</param>
-        /// <param name="type">实体类型</param>
-        /// <returns></returns>
-        private string GetColumn(string column, Type type)
-        {
-            return new SqlItem(column, _register.GetAlias(type)).ToSql(_dialect);
+            Where(_helper.GetColumn(expression), value, @operator);
         }
 
         /// <summary>
@@ -181,46 +106,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            ICondition result = null;
-            var expressions = Lambda.GetGroupPredicates(expression);
-            for (var i = 0; i < expressions.Count; i++)
-            {
-                if (i == 0)
-                {
-                    result=new AndCondition(result,GetCondition(expressions[i],typeof(TEntity)));
-                    continue;
-                }
-                result=new OrCondition(result,GetCondition(expressions[i],typeof(TEntity)));
-            }
-            And(result);
-        }
-
-        /// <summary>
-        /// 获取查询条件
-        /// </summary>
-        /// <param name="group">表达式列表</param>
-        /// <param name="type">实体类型</param>
-        /// <returns></returns>
-        private ICondition GetCondition(List<Expression> group, Type type)
-        {
-            ICondition condition = null;
-            group.ForEach(expression =>
-            {
-                condition=new AndCondition(condition,GetCondition(expression,type));
-            });
-            return condition;
-        }
-
-        /// <summary>
-        /// 获取查询条件并添加参数
-        /// </summary>
-        /// <param name="expression">表达式</param>
-        /// <param name="type">实体类型</param>
-        /// <returns></returns>
-        private ICondition GetCondition(Expression expression, Type type)
-        {
-            var column = GetColumn(_resolver.GetColumn(expression, type), type);
-            return GetCondition(column, Lambda.GetValue(expression), Lambda.GetOperator(expression).SafeValue());
+            var condition = _expressionResolver.Resolve(expression);
+            And(condition);
         }
 
         /// <summary>
@@ -336,6 +223,110 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 设置Is Null条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        public void IsNull(string column)
+        {
+            Where(column, null);
+        }
+
+        /// <summary>
+        /// 设置Is Null条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        public void IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            Where(expression, null);
+        }
+
+        /// <summary>
+        /// 设置Is Not Null条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        public void IsNotNull(string column)
+        {
+            column = _helper.GetColumn(column);
+            And(new IsNotNullCondition(column));
+        }
+
+        /// <summary>
+        /// 设置Is Not Null条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        public void IsNotNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
+            IsNotNull(column);
+        }
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        public void IsEmpty(string column)
+        {
+            column = _helper.GetColumn(column);
+            And(new OrCondition(new IsNullCondition(column), new EqualCondition(column, "''")));
+        }
+
+        /// <summary>
+        /// 设置空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        public void IsEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
+            IsEmpty(column);
+        }
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        public void IsNotEmpty(string column)
+        {
+            column = _helper.GetColumn(column);
+            And(new OrCondition(new IsNotNullCondition(column), new NotEqualCondition(column, "''")));
+        }
+
+        /// <summary>
+        /// 设置非空条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        public void IsNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
+        {
+            var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
+            IsNotEmpty(column);
+        }
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        public void In(string column, IEnumerable<object> values)
+        {
+            Where(column,values,Operator.Contains);
+        }
+
+        /// <summary>
+        /// 设置In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        public void In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
+            where TEntity : class
+        {
+            Where(expression,values,Operator.Contains);
+        }
+
+        /// <summary>
         /// 输出Sql
         /// </summary>
         /// <returns></returns>
@@ -347,6 +338,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
                 return null;
             }
             return $"Where {condition}";
+        }
+
+        /// <summary>
+        /// 获取查询条件
+        /// </summary>
+        /// <returns></returns>
+        public string GetCondition()
+        {
+            return _condition?.GetCondition();
         }
     }
 }

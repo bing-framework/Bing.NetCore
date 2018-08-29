@@ -473,6 +473,24 @@ namespace Bing.Utils.Helpers
         }
         #endregion
 
+        #region IsCollection(是否集合)
+
+        /// <summary>
+        /// 是否集合
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        public static bool IsCollection(Type type)
+        {
+            if (type.IsArray)
+            {
+                return true;
+            }
+            return IsGenericCollection(type);
+        }
+
+        #endregion
+
         #region IsGenericCollection(是否泛型集合)
         /// <summary>
         /// 是否泛型集合
