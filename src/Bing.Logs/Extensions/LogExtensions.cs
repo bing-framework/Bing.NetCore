@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Bing.Datas.Sql;
 using Bing.Exceptions;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
@@ -119,7 +120,7 @@ namespace Bing.Logs.Extensions
             {
                 return log;
             }
-            return SqlParams(log, dictionary.Select(t => $"{t.Key} : {t.Value}").Join());
+            return SqlParams(log, dictionary.Select(t => $"{t.Key} : {SqlHelper.GetParamLiterals(t.Value)}").Join());
         }
 
         /// <summary>

@@ -23,10 +23,7 @@ namespace Bing.Datas.Dapper.MySql
         /// <returns></returns>
         public override ISqlBuilder New()
         {
-            return new MySqlBuilder(EntityMatedata, ParameterManager)
-            {
-                Tag = $"{Tag}{++ChildBuilderCount}"
-            };
+            return new MySqlBuilder(EntityMatedata, ParameterManager);
         }
 
         /// <summary>

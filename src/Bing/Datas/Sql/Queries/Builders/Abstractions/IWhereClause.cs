@@ -178,7 +178,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
-        void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary boundary)
+        void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary)
             where TEntity : class;
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
-        void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary boundary);
+        void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary);
 
 
         /// <summary>

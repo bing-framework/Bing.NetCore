@@ -23,10 +23,7 @@ namespace Bing.Datas.Dapper.SqlServer
         /// <returns></returns>
         public override ISqlBuilder New()
         {
-            return new SqlServerBuilder(EntityMatedata, ParameterManager)
-            {
-                Tag = $"{Tag}{++ChildBuilderCount}"
-            };
+            return new SqlServerBuilder(EntityMatedata, ParameterManager);
         }
 
         /// <summary>

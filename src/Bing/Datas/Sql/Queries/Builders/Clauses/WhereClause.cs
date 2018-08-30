@@ -415,7 +415,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
-        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary boundary) where TEntity : class
+        public void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) where TEntity : class
         {
             var column = _helper.GetColumn(expression);
             Between(column, min, max, includeTime, boundary);
@@ -514,7 +514,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
-        public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary boundary)
+        public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary)
         {
             Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime),
                 GetBoundary(boundary, includeTime)));

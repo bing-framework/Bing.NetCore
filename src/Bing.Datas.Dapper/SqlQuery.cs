@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +8,7 @@ using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Domains.Repositories;
 using Bing.Logs;
 using Bing.Logs.Extensions;
+using Bing.Utils.Helpers;
 using Dapper;
 
 namespace Bing.Datas.Dapper
@@ -192,9 +192,18 @@ namespace Bing.Datas.Dapper
             {
                 return;
             }
+
+            var debugSql = sql;
+            foreach (var parameter in parameters)
+            {
+                debugSql = debugSql.Replace(parameter.Key, SqlHelper.GetParamLiterals(parameter.Value));
+            }
             log.Class(GetType().FullName)
                 .Caption("SqlQuery查询调试:")
-                .Sql(sql)
+                .Sql("原始Sql:")
+                .Sql($"{sql}{Common.Line}")
+                .Sql("调试Sql:")
+                .Sql(debugSql)
                 .SqlParams(parameters)
                 .Trace();
         }

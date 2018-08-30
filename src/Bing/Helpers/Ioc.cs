@@ -43,7 +43,7 @@ namespace Bing.Helpers
         /// <summary>
         /// 创建集合
         /// </summary>
-        /// <typeparam name="TResult">返回类型</typeparam>
+        /// <typeparam name="TResult">对象类型</typeparam>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
         /// <returns></returns>
@@ -53,7 +53,7 @@ namespace Bing.Helpers
         }
 
         /// <summary>
-        /// 创建对象
+        /// 创建实例
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="name">服务名称</param>
@@ -64,7 +64,7 @@ namespace Bing.Helpers
         }
 
         /// <summary>
-        /// 创建对象
+        /// 创建实例
         /// </summary>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
@@ -75,9 +75,9 @@ namespace Bing.Helpers
         }
 
         /// <summary>
-        /// 创建对象
+        /// 创建实例
         /// </summary>
-        /// <typeparam name="TResult">返回类型</typeparam>
+        /// <typeparam name="TResult">对象类型</typeparam>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
         /// <returns></returns>

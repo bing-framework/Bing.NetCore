@@ -41,6 +41,7 @@ namespace Bing.Utils.Helpers
                 case ExpressionType.Lambda:
                     return GetMemberExpression(((LambdaExpression) expression).Body, right);
                 case ExpressionType.Convert:
+                case ExpressionType.Not:
                     return GetMemberExpression(((UnaryExpression) expression).Operand, right);
                 case ExpressionType.MemberAccess:
                     return (MemberExpression)expression;
@@ -235,6 +236,12 @@ namespace Bing.Utils.Helpers
                     return GetMemberValue((MemberExpression)expression);
                 case ExpressionType.Constant:
                     return GetConstantExpressionValue(expression);
+                case ExpressionType.Not:
+                    if (expression.Type == typeof(bool))
+                    {
+                        return false;
+                    }
+                    return null;
             }
             return null;
         }
@@ -251,6 +258,11 @@ namespace Bing.Utils.Helpers
             if (value != null)
             {
                 return value;
+            }
+            if (methodCallExpression.Object == null)
+            {
+                return methodCallExpression.Type.InvokeMember(methodCallExpression.Method.Name,
+                    BindingFlags.InvokeMethod, null, null, null);
             }
             return GetValue(methodCallExpression.Object);
         }
@@ -284,6 +296,10 @@ namespace Bing.Utils.Helpers
             var value = GetMemberValue(expression.Expression as MemberExpression);
             if (value == null)
             {
+                if (property.PropertyType == typeof(bool))
+                {
+                    return true;
+                }
                 return null;
             }
             return property.GetValue(value);

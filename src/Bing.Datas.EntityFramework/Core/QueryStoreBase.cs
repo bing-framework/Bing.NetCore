@@ -61,7 +61,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// Sql查询对象
         /// </summary>
-        protected ISqlQuery Sql => _sqlQuery ?? (_sqlQuery = Ioc.Create<ISqlQuery>());
+        protected virtual ISqlQuery Sql => _sqlQuery ?? (_sqlQuery = Ioc.Create<ISqlQuery>());
 
         #endregion
 

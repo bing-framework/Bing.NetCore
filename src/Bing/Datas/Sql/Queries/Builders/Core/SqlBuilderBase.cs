@@ -1131,7 +1131,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="boundary">包含边界</param>
         /// <returns></returns>
         public ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime = true,
-            Boundary boundary = Boundary.Both) where TEntity : class
+            Boundary? boundary = null) where TEntity : class
         {
             WhereClause.Between(expression, min, max,includeTime, boundary);
             return this;
@@ -1217,7 +1217,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="boundary">包含边界</param>
         /// <returns></returns>
         public ISqlBuilder Between(string column, DateTime? min, DateTime? max, bool includeTime = true,
-            Boundary boundary = Boundary.Both)
+            Boundary? boundary = null)
         {
             WhereClause.Between(column, min, max, includeTime, boundary);
             return this;

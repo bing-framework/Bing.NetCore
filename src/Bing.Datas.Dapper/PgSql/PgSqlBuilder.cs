@@ -23,10 +23,7 @@ namespace Bing.Datas.Dapper.PgSql
         /// <returns></returns>
         public override ISqlBuilder New()
         {
-            return new PgSqlBuilder(EntityMatedata, ParameterManager)
-            {
-                Tag = $"{Tag}{++ChildBuilderCount}"
-            };
+            return new PgSqlBuilder(EntityMatedata, ParameterManager);
         }
 
         /// <summary>

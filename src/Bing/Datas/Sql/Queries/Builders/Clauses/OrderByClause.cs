@@ -76,10 +76,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
-        /// 排序
+        /// 添加到OrderBy子句
         /// </summary>
         /// <param name="order">排序列表</param>
-        public void AppendOrderBy(string order)
+        public void AppendSql(string order)
         {
             _items.Add(new OrderByItem(order, raw: true));
         }

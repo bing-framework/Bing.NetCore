@@ -76,7 +76,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 设置列名
         /// </summary>
-        /// <param name="columns">列名</param>
+        /// <param name="columns">列名，范例：a.AppId As Id,a.Name</param>
         /// <param name="tableAlias">表别名</param>
         /// <returns></returns>
         ISqlBuilder Select(string columns, string tableAlias = null);
@@ -85,7 +85,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="columns">列名</param>
+        /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
         /// <returns></returns>
         ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class;
 
@@ -93,7 +93,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="column">列名</param>
+        /// <param name="column">列名，范例：t => t.Name</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
         ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object>> column, string columnAlias = null)
@@ -102,7 +102,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到Select子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendSelect(string sql);
 
@@ -126,7 +126,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到From子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendFrom(string sql);
 
@@ -150,7 +150,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到内连接子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendJoin(string sql);
 
@@ -174,7 +174,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到左外连接子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendLeftJoin(string sql);
 
@@ -198,7 +198,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到右外连接子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendRightJoin(string sql);
 
@@ -216,8 +216,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <typeparam name="TLeft">左表实体类型</typeparam>
         /// <typeparam name="TRight">右表实体类型</typeparam>
-        /// <param name="left">左表列名</param>
-        /// <param name="right">右表列名</param>
+        /// <param name="left">左表列名，范例：t => t.Name</param>
+        /// <param name="right">右表列名，范例：t => t.Name</param>
         /// <param name="operator">条件运算符</param>
         /// <returns></returns>
         ISqlBuilder On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right,
@@ -228,7 +228,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <typeparam name="TLeft">左表实体类型</typeparam>
         /// <typeparam name="TRight">右表实体类型</typeparam>
-        /// <param name="expression">条件表达式</param>
+        /// <param name="expression">条件表达式，范例：(l,r) => l.Id == r.Id</param>
         /// <returns></returns>
         ISqlBuilder On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression)
             where TLeft : class where TRight : class;
@@ -267,7 +267,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
         /// <returns></returns>
@@ -278,7 +278,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">查询条件表达式</param>
+        /// <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age>1 )</param>
         /// <returns></returns>
         ISqlBuilder Where<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class;
 
@@ -296,7 +296,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
         /// <param name="operator">运算符</param>
@@ -308,7 +308,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">查询条件表达式</param>
+        /// <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age>1 )</param>
         /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
         /// <returns></returns>
         ISqlBuilder WhereIf<TEntity>(Expression<Func<TEntity, bool>> expression,bool condition) where TEntity : class;
@@ -326,7 +326,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值，如果该值为空，则忽略该查询条件</param>
         /// <param name="operator">运算符</param>
         /// <returns></returns>
@@ -344,7 +344,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到Where子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendWhere(string sql);
 
@@ -360,7 +360,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置相等查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder Equal<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -377,7 +377,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置不相等查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder NotEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -394,7 +394,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置大于查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder Greater<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -411,7 +411,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置大于等于查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder GreaterEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -428,7 +428,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置小于查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder Less<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -445,7 +445,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置小于等于查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder LessEqual<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -462,7 +462,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置模糊匹配查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder Contains<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -479,7 +479,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置头匹配查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder Starts<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -496,7 +496,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置尾匹配查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="value">值</param>
         /// <returns></returns>
         ISqlBuilder Ends<TEntity>(Expression<Func<TEntity, object>> expression, object value) where TEntity : class;
@@ -512,7 +512,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置Is Null查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <returns></returns>
         ISqlBuilder IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
 
@@ -527,37 +527,37 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置Is Not Null查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <returns></returns>
         ISqlBuilder IsNotNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
 
         /// <summary>
-        /// 设置空条件
+        /// 设置空条件，范例：[Name] Is Null Or [Name]=''
         /// </summary>
         /// <param name="column">列名</param>
         /// <returns></returns>
         ISqlBuilder IsEmpty(string column);
 
         /// <summary>
-        /// 设置空条件
+        /// 设置空条件，范例：[Name] Is Null Or [Name]=''
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <returns></returns>
         ISqlBuilder IsEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
 
         /// <summary>
-        /// 设置非空条件
+        /// 设置非空条件，范例：[Name] Is Null Or [Name]&lt;&gt;''
         /// </summary>
         /// <param name="column">列名</param>
         /// <returns></returns>
         ISqlBuilder IsNotEmpty(string column);
 
         /// <summary>
-        /// 设置非空条件
+        /// 设置非空条件，范例：[Name] Is Null Or [Name]&lt;&gt;''
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <returns></returns>
         ISqlBuilder IsNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
 
@@ -573,7 +573,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置In条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="values">值集合</param>
         /// <returns></returns>
         ISqlBuilder In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class;
@@ -582,7 +582,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
@@ -594,7 +594,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
@@ -606,7 +606,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
@@ -618,7 +618,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
@@ -630,7 +630,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
@@ -642,14 +642,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">列名表达式</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
         /// <returns></returns>
         ISqlBuilder Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max,
-            bool includeTime = true, Boundary boundary = Boundary.Both) where TEntity : class;
+            bool includeTime = true, Boundary? boundary = null) where TEntity : class;
 
         /// <summary>
         /// 设置范围查询条件
@@ -710,13 +710,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
         /// <returns></returns>
-        ISqlBuilder Between(string column, DateTime? min, DateTime? max, bool includeTime = true, Boundary boundary = Boundary.Both);
+        ISqlBuilder Between(string column, DateTime? min, DateTime? max, bool includeTime = true, Boundary? boundary = null);
 
         /// <summary>
         /// 分组
         /// </summary>
-        /// <param name="group">分组字段</param>
-        /// <param name="having">分组条件</param>
+        /// <param name="group">分组字段，范例：a.Id,b.Name</param>
+        /// <param name="having">分组条件，范例：Count(*) > 1</param>
         /// <returns></returns>
         ISqlBuilder GroupBy(string group, string having = null);
 
@@ -724,8 +724,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 分组
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="column">分组字段</param>
-        /// <param name="having">分组条件</param>
+        /// <param name="column">分组字段，范例：t => t.Name</param>
+        /// <param name="having">分组条件，范例：Count(*) > 1</param>
         /// <returns></returns>
         ISqlBuilder GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null)
             where TEntity : class;
@@ -733,14 +733,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到GroupBy子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendGroupBy(string sql);
 
         /// <summary>
         /// 排序
         /// </summary>
-        /// <param name="order">排序列表</param>
+        /// <param name="order">排序列表，范例：a.Id, b.Name desc</param>
         /// <returns></returns>
         ISqlBuilder OrderBy(string order);
 
@@ -748,17 +748,17 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 排序
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="column">排序列</param>
+        /// <param name="column">排序列，范例：t => t.Name</param>
         /// <param name="desc">是否降序</param>
         /// <returns></returns>
         ISqlBuilder OrderBy<TEntity>(Expression<Func<TEntity, object>> column, bool desc = false);
 
         /// <summary>
-        /// 排序
+        /// 添加到OrderBy子句
         /// </summary>
-        /// <param name="order">排序列表</param>
+        /// <param name="sql">排序列表，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
-        ISqlBuilder AppendOrderBy(string order);
+        ISqlBuilder AppendOrderBy(string sql);
 
         /// <summary>
         /// 设置分页
