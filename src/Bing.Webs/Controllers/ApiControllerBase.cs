@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Helpers;
-using Bing.Logs.Aspects;
-using Bing.Properties;
+﻿using Bing.Helpers;
 using Bing.Sessions;
 using Bing.Webs.Commons;
 using Bing.Webs.Filters;
@@ -16,7 +11,6 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]/[action]")]
-    //[ExceptionHandler]
     [ErrorLog]
     public class ApiControllerBase:Controller
     {

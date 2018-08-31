@@ -143,6 +143,11 @@ namespace Bing.Logs.Contents
         /// </summary>
         public Warning Exception { get; set; }
 
+        /// <summary>
+        /// 排序
+        /// </summary>
+        public int Order { get; set; }
+
         #endregion
 
         #region 构造函数

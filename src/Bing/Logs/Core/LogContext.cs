@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
 using Bing.Contexts;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
@@ -51,6 +49,22 @@ namespace Bing.Logs.Core
         /// 请求地址
         /// </summary>
         public string Url => GetInfo().Url;
+
+        /// <summary>
+        /// 顺序
+        /// </summary>
+        public int Order => GetInfo().Order;
+
+        /// <summary>
+        /// 更新上下文
+        /// </summary>
+        public void UpdateContext()
+        {
+            if (_info != null)
+            {
+                _info.Order += 1;
+            }
+        }
 
         /// <summary>
         /// 上下文
@@ -103,7 +117,8 @@ namespace Bing.Logs.Core
                 Ip = Web.IP,
                 Host = Dns.GetHostName(),
                 Browser = Web.Browser,
-                Url = Web.Url
+                Url = Web.Url,
+                Order = 0
             };
         }
 

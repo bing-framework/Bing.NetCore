@@ -230,6 +230,7 @@ namespace Bing.Logs.Core
             content.Browser = Context.Browser;
             content.Url = Context.Url;
             content.UserId = Session.UserId;
+            content.Order = Context.Order;
         }
 
         /// <summary>
@@ -255,6 +256,7 @@ namespace Bing.Logs.Core
             }
             finally
             {
+                Context.UpdateContext();
                 content = null;
             }
         }
@@ -262,7 +264,7 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 是否启用
         /// </summary>
-        /// <param name="level"></param>
+        /// <param name="level">日志级别</param>
         /// <returns></returns>
         private bool Enabled(LogLevel level)
         {

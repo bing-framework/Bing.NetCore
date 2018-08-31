@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Bing.Logs.Exceptionless;
-using Bing.Samples.Api.SwaggerExtensions;
+using Bing.Logs.NLog;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Swashbuckle.AspNetCore.Swagger;
@@ -27,7 +23,9 @@ namespace Bing.Samples.Api
             {
                 options.Filters.Add<ValidationAttribute>();
                 options.Filters.Add<ResultHandlerAttribute>();
+                options.Filters.Add<ExceptionHandlerAttribute>();
             }).AddControllersAsServices();
+            //services.AddNLog();
             services.AddExceptionless(options =>
             {
                 options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
@@ -72,6 +70,8 @@ namespace Bing.Samples.Api
         private void CommonConfig(IApplicationBuilder app)
         {
             app.UseErrorLog();
+            app.UseStaticHttpContext();
+            app.UseRequestLog();
             ConfigRoute(app);
         }
 

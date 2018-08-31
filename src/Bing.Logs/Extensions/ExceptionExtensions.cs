@@ -15,12 +15,13 @@ namespace Bing.Logs.Extensions
         /// <param name="log">日志</param>
         public static void Log(this Exception exception, ILog log)
         {
-            if (!(exception is Warning warning))
+            exception = exception.GetRawException();
+            if (exception is Warning warning)
             {
-                log.Exception(exception).Error();
+                log.Exception(exception, warning.Code).Warn();
                 return;
             }
-            log.Exception(exception,warning.Code).Warn();
+            log.Exception(exception).Error();
         }
     }
 }

@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Webs.Controllers;
+using Exceptionless;
 using Microsoft.AspNetCore.Mvc;
+using LogLevel = Exceptionless.Logging.LogLevel;
 
 namespace Bing.Samples.Api.Controllers
 {
@@ -43,9 +45,19 @@ namespace Bing.Samples.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task WriteNotImplementedExceptionLog()
+        public async Task WriteNotImplementedExceptionLog(int type)
         {
-            throw new NotImplementedException("尚未实现这个方法");
+            switch (type)
+            {
+                case 1:
+                    throw new NotImplementedException("尚未实现这个方法");
+                case 2:
+                    throw new ArgumentNullException(nameof(type));
+                case 3:
+                    throw new ArgumentException(nameof(type));
+                default:
+                    throw new OutOfMemoryException(nameof(type));
+            }
         }
 
         /// <summary>
@@ -63,10 +75,32 @@ namespace Bing.Samples.Api.Controllers
             }
             catch (Exception e)
             {
-                Log.Caption("全局异常捕获").Error(e.Message);
+                Log.Caption("全局异常捕获").Content(e.Message);
                 e.Log(Log);
             }
-            
+        }
+
+        /// <summary>
+        /// 写入多个日志
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task WriteMoreInfo()
+        {
+            Log.Caption("测试日志1").Content("测试一下内容1").Info();
+            Log.Caption("测试日志2").Content("测试一下内容2").Trace();
+        }
+
+        /// <summary>
+        /// Exceptionless 多日志写入
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task ExceptionlessMoreInfo()
+        {
+            ExceptionlessClient _client = ExceptionlessClient.Default;
+            _client.CreateLog("测试日志1",LogLevel.Info).Submit();
+            _client.CreateLog("测试日志2",LogLevel.Trace).Submit();
         }
     }
 }

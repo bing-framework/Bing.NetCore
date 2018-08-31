@@ -92,7 +92,7 @@ namespace Bing.Logs.Exceptionless
         {
             if (content.Exception != null)
             {
-                return _client.CreateException(content.Exception);
+                return _client.CreateException(content.Exception).AddTags(level.Description());
             }
             return _client.CreateLog(GetMessage(content), ConvertTo(level));
         }
@@ -175,7 +175,7 @@ namespace Bing.Logs.Exceptionless
         /// <param name="content">日志内容</param>
         private void SetReferenceId(EventBuilder builder, ILogContent content)
         {
-            builder.SetReferenceId(content.TraceId);
+            builder.SetReferenceId($"{content.TraceId}-{content.Order}");
         }
 
         /// <summary>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Webs.Commons;
+﻿using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.Webs.Filters
