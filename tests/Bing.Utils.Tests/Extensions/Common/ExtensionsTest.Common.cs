@@ -13,8 +13,6 @@ namespace Bing.Utils.Tests.Extensions
     /// </summary>
     public partial class ExtensionsTest : TestBase
     {
-        #region Test_SafeValue(测试获取安全值)
-
         /// <summary>
         /// 测试安全获取值-short
         /// </summary>
@@ -87,23 +85,15 @@ namespace Bing.Utils.Tests.Extensions
             Assert.Equal(new DateTime(2018, 9, 1), value.SafeValue());
         }
 
-        #endregion
-
-        #region Test_Value(测试获取枚举值)
-
         /// <summary>
         /// 测试获取枚举值
         /// </summary>
         [Fact]
         public void Test_Value()
         {
-            Assert.Equal(2,EnumSample.B.Value());
-            Assert.Equal("2",EnumSample.B.Value<string>());
+            Assert.Equal(2, EnumSample.B.Value());
+            Assert.Equal("2", EnumSample.B.Value<string>());
         }
-
-        #endregion
-
-        #region Test_Description(测试获取枚举描述)
 
         /// <summary>
         /// 测试获取枚举描述
@@ -114,24 +104,16 @@ namespace Bing.Utils.Tests.Extensions
             Assert.Equal("B2", EnumSample.B.Description());
         }
 
-        #endregion
-
-        #region Test_Join(测试转换为用分隔符连接的字符串)
-
         /// <summary>
         /// 测试转换为用分隔符连接的字符串
         /// </summary>
         [Fact]
         public void Test_Join()
         {
-            var source = new List<int>() {1, 2, 3};
+            var source = new List<int>() { 1, 2, 3 };
             Assert.Equal("1,2,3", source.Join());
             Assert.Equal("'1','2','3'", source.Join(quotes: "'"));
         }
-
-        #endregion
-
-        #region Test_IsMatch(测试是否匹配正则表达式)
 
         /// <summary>
         /// 测试是否匹配正则表达式-1
@@ -153,10 +135,6 @@ namespace Bing.Utils.Tests.Extensions
             Assert.True(source.IsMatch(@"^[a-z]+$", RegexOptions.IgnoreCase));
         }
 
-        #endregion
-
-        #region GetMatch(测试获取匹配项)
-
         /// <summary>
         /// 测试获取匹配项-第一个匹配项
         /// </summary>
@@ -174,9 +152,7 @@ namespace Bing.Utils.Tests.Extensions
         public void Test_GetMatchingValues()
         {
             var source = "123456";
-            Assert.Equal(new string[] {"1", "2", "3", "4", "5", "6"}, source.GetMatchingValues(@"[0-9]"));
+            Assert.Equal(new string[] { "1", "2", "3", "4", "5", "6" }, source.GetMatchingValues(@"[0-9]"));
         }
-
-        #endregion
     }
 }

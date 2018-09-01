@@ -355,8 +355,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static decimal? ToDecimalOrNull(object input, int? digits = null)
         {
-            decimal result;
-            var success = decimal.TryParse(input.SafeString(), out result);
+            var success = decimal.TryParse(input.SafeString(), out var result);
             if (!success)
             {
                 return null;
@@ -403,8 +402,7 @@ namespace Bing.Utils.Helpers
             {
                 return value.Value;
             }
-            bool result;
-            return bool.TryParse(input.SafeString(), out result) ? (bool?)result : null;
+            return bool.TryParse(input.SafeString(), out var result) ? (bool?)result : null;
         }
 
         /// <summary>
