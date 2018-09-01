@@ -27,5 +27,18 @@ namespace Bing.Utils.Tests.Helpers
                 .ResultAsync();
             Output.WriteLine(result);
         }
+
+        /// <summary>
+        /// 测试客户端网页访问
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_Client_WebAccess()
+        {
+            var result = await Web.Client()
+                .Get("https://www.cnblogs.com")
+                .ResultAsync();
+            Output.WriteLine(result);
+        }
     }
 }
