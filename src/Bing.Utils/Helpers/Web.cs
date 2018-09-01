@@ -57,6 +57,28 @@ namespace Bing.Utils.Helpers
         #region IP(客户端IP地址)
 
         /// <summary>
+        /// IP地址
+        /// </summary>
+        private static string _ip;
+
+        /// <summary>
+        /// 设置IP地址
+        /// </summary>
+        /// <param name="ip">IP地址</param>
+        public static void SetIp(string ip)
+        {
+            _ip = ip;
+        }
+
+        /// <summary>
+        /// 重置IP地址
+        /// </summary>
+        public static void ResetIp()
+        {
+            _ip = null;
+        }
+
+        /// <summary>
         /// 客户端IP地址
         /// </summary>
         // ReSharper disable once InconsistentNaming
@@ -64,13 +86,16 @@ namespace Bing.Utils.Helpers
         {
             get
             {
+                if (string.IsNullOrWhiteSpace(_ip) == false)
+                {
+                    return _ip;
+                }
                 var list = new[] {"127.0.0.1", "::1"};
                 var result = HttpContext?.Connection?.RemoteIpAddress.SafeString();
                 if (string.IsNullOrWhiteSpace(result) || list.Contains(result))
                 {
                     result = GetLanIP();
                 }
-
                 return result;
             }
         }
@@ -89,7 +114,6 @@ namespace Bing.Utils.Helpers
                     return hostAddress.ToString();
                 }
             }
-
             return string.Empty;
         }
 
@@ -113,13 +137,11 @@ namespace Bing.Utils.Helpers
             {
                 return Dns.GetHostName();
             }
-
             var result = Dns.GetHostEntry(IPAddress.Parse(address)).HostName;
             if (result == "localhost.localdomain")
             {
                 result = Dns.GetHostName();
             }
-
             return result;
         }
 
