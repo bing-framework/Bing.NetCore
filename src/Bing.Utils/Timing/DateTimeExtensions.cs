@@ -565,6 +565,23 @@ namespace Bing.Utils.Timing
 
         #endregion
 
+        #region IsBetween(判断当前时间是否在指定时间范围内)
+
+        /// <summary>
+        /// 判断当前时间是否在指定时间范围内，格式：yyyy-MM-dd HH:mm:ss
+        /// </summary>
+        /// <param name="current">当前时间</param>
+        /// <param name="begin">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <returns></returns>
+        public static bool IsBetween(this DateTime current, DateTime begin, DateTime end)
+        {
+            var ticks = current.Ticks;
+            return ticks >= begin.Ticks && ticks <= end.Ticks;
+        }
+
+        #endregion
+
         #region IsValid(是否有效时间)
 
         /// <summary>
