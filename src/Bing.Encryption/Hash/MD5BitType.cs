@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Encryption.Hash
+﻿namespace Bing.Encryption.Hash
 {
     /// <summary>
     /// MD5字节类型

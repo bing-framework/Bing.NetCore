@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Encryption.Core
+﻿namespace Bing.Encryption.Core
 {
     /// <summary>
     /// 输出类型
