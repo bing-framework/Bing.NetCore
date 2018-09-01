@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -43,7 +44,25 @@ namespace Bing.Utils.Helpers
         /// </summary>
         public static HttpResponse Response => HttpContext?.Response;
 
-        #endregion        
+        #endregion
+
+        #region Body(请求正文)
+
+        /// <summary>
+        /// 请求正文
+        /// </summary>
+        public static string Body
+        {
+            get
+            {
+                using (var reader=new StreamReader(Request.Body))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+
+        #endregion
 
         #region Url(请求地址)
 
@@ -181,6 +200,29 @@ namespace Bing.Utils.Helpers
         /// Web根路径，即wwwroot
         /// </summary>
         public static string WebRootPath => Environment?.WebRootPath;
+
+        #endregion
+
+        #region Client(Web客户端)
+
+        /// <summary>
+        /// Web客户端，用于发送Http请求
+        /// </summary>
+        /// <returns></returns>
+        public static Bing.Utils.Webs.Clients.WebClient Client()
+        {
+            return new Bing.Utils.Webs.Clients.WebClient();
+        }
+
+        /// <summary>
+        /// Web客户端，用于发送Http请求
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <returns></returns>
+        public static Bing.Utils.Webs.Clients.WebClient<TResult> Client<TResult>() where TResult : class
+        {
+            return new Bing.Utils.Webs.Clients.WebClient<TResult>();
+        }
 
         #endregion
 
