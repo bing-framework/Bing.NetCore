@@ -32,16 +32,6 @@ namespace Bing.Utils.Webs.Clients
         {
         }
 
-        public IHttpRequest FileData(string filePath)
-        {
-            return this;
-        }
-
-        public IHttpRequest FileData(string name, string filePath)
-        {
-            return this;
-        }
-
         /// <summary>
         /// 请求成功回调函数
         /// </summary>
@@ -116,16 +106,6 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="url">请求地址</param>
         public HttpRequest(HttpMethod httpMethod, string url) : base(httpMethod, url)
         {
-        }
-
-        public IHttpRequest<TResult> FileData(string filePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IHttpRequest<TResult> FileData(string name, string filePath)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

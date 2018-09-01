@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bing.Utils.Extensions;
 using Bing.Utils.Json;
+using Bing.Utils.Webs.Clients.Parameters;
 
 namespace Bing.Utils.Webs.Clients
 {
@@ -87,6 +89,11 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         private string _token;
 
+        /// <summary>
+        /// 文件集合
+        /// </summary>
+        private readonly IList<IFileParameter> _files;
+
         #endregion
 
         #region 构造函数
@@ -111,6 +118,7 @@ namespace Bing.Utils.Webs.Clients
             _timeout = new TimeSpan(0, 0, 30);
             _headers = new Dictionary<string, string>();
             _encoding = System.Text.Encoding.UTF8;
+            _files = new List<IFileParameter>();
         }
 
         /// <summary>
@@ -318,6 +326,29 @@ namespace Bing.Utils.Webs.Clients
             return This();
         }
 
+        /// <summary>
+        /// 添加文件参数
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <returns></returns>
+        public TRequest FileData(string filePath)
+        {
+            return FileData("files", filePath);
+        }
+
+        /// <summary>
+        /// 添加文件参数
+        /// </summary>
+        /// <param name="name">参数名</param>
+        /// <param name="filePath">文件路径</param>
+        /// <returns></returns>
+        public TRequest FileData(string name, string filePath)
+        {
+            ContentType(HttpContentType.FormData);
+            _files.Add(new PhysicalFileParameter(filePath, name));
+            return This();
+        }
+
         #endregion
 
         #region OnFail(请求失败回调函数)
@@ -471,7 +502,9 @@ namespace Bing.Utils.Webs.Clients
                 case "application/json":
                     return CreateJsonContent();
                 case "text/xml":
-                    return createXmlContent();
+                    return CreateXmlContent();
+                case "multipart/form-data":
+                    return CreateMultipartFormDataContent();
             }
             throw new NotImplementedException($"未实现该 '{contentType}' ContentType");
         }
@@ -493,9 +526,24 @@ namespace Bing.Utils.Webs.Clients
         /// 创建Xml内容
         /// </summary>
         /// <returns></returns>
-        private HttpContent createXmlContent()
+        private HttpContent CreateXmlContent()
         {
             return new StringContent(_data, _encoding, "text/xml");
+        }
+
+        /// <summary>
+        /// 创建表单内容
+        /// </summary>
+        /// <returns></returns>
+        private HttpContent CreateMultipartFormDataContent()
+        {
+            var content =
+                new MultipartFormDataContent("Upload----" + DateTime.Now.ToString(CultureInfo.InvariantCulture));
+            foreach (var file in _files)
+            {
+                content.Add(new StreamContent(file.GetFileStream()), file.GetName(), file.GetFileName());
+            }
+            return content;
         }
 
         #endregion
