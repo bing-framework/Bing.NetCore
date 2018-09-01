@@ -353,7 +353,7 @@ namespace Bing.Utils.Timing
 
         #region EndOfDay(设置指定时间为当天的结束时间)
         /// <summary>
-        /// 设置指定时间为当天的结束时间，23:59:59.999
+        /// 设置指定时间为当天的结束时间。范例：yyyy-MM-dd 23:59:59.999
         /// </summary>
         /// <param name="date">指定时间</param>
         /// <returns>当天的结束时间</returns>
@@ -365,15 +365,42 @@ namespace Bing.Utils.Timing
 
         #region BeginOfDay(设置指定时间为当天的开始时间)
         /// <summary>
-        /// 设置指定时间为当天的开始时间（凌晨）,00:00:00
+        /// 设置指定时间为当天的开始时间（凌晨）。范例：yyyy-MM-dd 00:00:00
         /// </summary>
         /// <param name="time">指定时间</param>
         /// <returns>当天的开始时间</returns>
         public static DateTime BeginOfDay(this DateTime time)
         {
-
             return time.SetTime(0, 0, 0, 0);
         }
+        #endregion
+
+        #region EndOfMonth(设置指定时间为当月的结束时间)
+
+        /// <summary>
+        /// 设置指定时间为当月的结束时间。范例：yyyy-MM-dd 23:59:59:999
+        /// </summary>
+        /// <param name="date">时间</param>
+        /// <returns>当月的结束时间</returns>
+        public static DateTime EndOfMonth(this DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month), 23, 59, 59, 999);
+        }
+
+        #endregion
+
+        #region BeginOfMonth(设置指定时间为当月的开始时间)
+
+        /// <summary>
+        /// 设置指定时间为当月的开始时间。范例：yyyy-MM-01 00:00:00.000
+        /// </summary>
+        /// <param name="date">时间</param>
+        /// <returns>当月的开始时间</returns>
+        public static DateTime BeginOfMonth(this DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, 1, 0, 0, 0, 0);
+        }
+
         #endregion
 
         #region GetFirstDayOfMonth(获取指定日期的月份第一天)
