@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Bing.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable once CheckNamespace
 namespace Bing.Utils.Tests.Extensions
 {
     /// <summary>

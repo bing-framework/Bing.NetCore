@@ -138,6 +138,7 @@ namespace Bing.Utils.Extensions
             }
             return GetMatchingValues(value, pattern, RegexOptions.None);
         }
+
         /// <summary>
         /// 使用正则表达式来确定一个给定的正则表达式模式的所有匹配的字符串返回的枚举
         /// </summary>
@@ -149,6 +150,7 @@ namespace Bing.Utils.Extensions
         {
             return from Match match in GetMatches(value, pattern, options) where match.Success select match.Value;
         }
+
         /// <summary>
         /// 使用正则表达式来确定指定的正则表达式模式的所有匹配项
         /// </summary>
@@ -160,6 +162,7 @@ namespace Bing.Utils.Extensions
         {
             return Regex.Matches(value, pattern, options);
         }
+
         #endregion
     }
 }
