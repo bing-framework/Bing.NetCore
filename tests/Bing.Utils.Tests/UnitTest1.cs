@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
@@ -87,5 +88,31 @@ namespace Bing.Utils.Tests
             Output.WriteLine(newList.ToJson());
             Output.WriteLine(result.ToJson());
         }
+
+        [Fact]
+        public void Test_GetDomainName()
+        {
+            string url1 = "https://www.cnblogs.com";
+            string url2 = "https://www.cnblogs.com/";
+            string url3 = "https://www.cnblogs.com/jeffwongishandsome/archive/2010/10/14/1851217.html";
+            string url4 = "http://www.cnblogs.com/jeffwongishandsome/archive/2010/10/14/1851217.html";
+            string url5 = "https://www.cnblogs.gz.org/";
+            Output.WriteLine(GetDomainName(url1));
+            Output.WriteLine(GetDomainName(url2));
+            Output.WriteLine(GetDomainName(url3));
+            Output.WriteLine(GetDomainName(url4));
+            Output.WriteLine(GetDomainName(url5));
+        }
+
+        private string GetDomainName(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+            Regex regex=new Regex(@"(http|https)://(?<domain>[^(:|/]*)", RegexOptions.IgnoreCase);
+            return regex.Match(url, 0).Value;
+        }
     }
 }
+

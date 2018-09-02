@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bing.Utils.Extensions;
 using Bing.Utils.Json;
+using Bing.Utils.Webs.Clients.Internal;
 using Bing.Utils.Webs.Clients.Parameters;
 
 namespace Bing.Utils.Webs.Clients
@@ -453,11 +454,13 @@ namespace Bing.Utils.Webs.Clients
         /// <returns></returns>
         protected virtual HttpClient CreateHttpClient()
         {
+            //return HttpClientBuilderFactory.CreateClient(_url);
             return new HttpClient(new HttpClientHandler()
             {
                 CookieContainer = _cookieContainer,
                 ServerCertificateCustomValidationCallback = _serverCertificateCustomValidationCallback
-            }) {Timeout = _timeout};
+            })
+            { Timeout = _timeout };
         }
 
         /// <summary>
@@ -466,6 +469,7 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="client">Http客户端</param>
         protected virtual void InitHttpClient(HttpClient client)
         {
+            client.Timeout = _timeout;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 

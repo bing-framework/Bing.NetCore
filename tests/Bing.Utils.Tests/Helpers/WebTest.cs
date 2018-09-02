@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using Bing.Utils.Develops;
+using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,10 +39,18 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public async Task Test_Client_WebAccess()
         {
+            await WriteFile("http://www.cnblogs.com");
+            await WriteFile("http://www.cnblogs.com/artech/p/logging-for-net-core-05.html");
+        }
+
+        private async Task WriteFile(string url)
+        {
+            var path = @"D:\Test\File\";
             var result = await Web.Client()
-                .Get("https://www.cnblogs.com")
+                .Get(url)
                 .ResultAsync();
-            Output.WriteLine(result);
+            var key = Bing.Utils.Randoms.GuidRandomGenerator.Instance.Generate();
+            File.WriteAllBytes($"{path}test_{key}.txt", result.ToBytes());
         }
     }
 }
