@@ -54,6 +54,21 @@ namespace Bing.Samples.Api
                     Type = "apiKey",
                 });
             });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", authBuilder =>
+                {
+                    authBuilder.AddAuthenticationSchemes("Bearer");
+                    authBuilder.RequireRole("Admin");
+                });
+                options.AddPolicy("Customer", authBuilder =>
+                {
+                    authBuilder.AddAuthenticationSchemes("Bearer");
+                    authBuilder.RequireRole("Customer");
+                });
+            });
+
             //services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
             return services.AddBing();
         }

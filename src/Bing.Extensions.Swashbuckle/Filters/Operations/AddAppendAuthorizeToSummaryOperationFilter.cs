@@ -28,14 +28,14 @@ namespace Bing.Extensions.Swashbuckle.Filters.Operations
             {
                 Label = "policies",
                 Selector = authAttributes =>
-                    authAttributes.Where(x => string.IsNullOrWhiteSpace(x.Policy)).Select(x => x.Policy)
+                    authAttributes.Where(x => !string.IsNullOrWhiteSpace(x.Policy)).Select(x => x.Policy)
             };
 
             var rolesSelector=new PolicySelectorWithLabel<AuthorizeAttribute>()
             {
                 Label = "roles",
                 Selector = authAttributes =>
-                    authAttributes.Where(x => string.IsNullOrWhiteSpace(x.Roles)).Select(x => x.Roles)
+                    authAttributes.Where(x => !string.IsNullOrWhiteSpace(x.Roles)).Select(x => x.Roles)
             };
             _filter = new AddAppendAuthorizeToSummaryOperationFilter<AuthorizeAttribute>(
                 new[] {policySelector, rolesSelector}.AsEnumerable());

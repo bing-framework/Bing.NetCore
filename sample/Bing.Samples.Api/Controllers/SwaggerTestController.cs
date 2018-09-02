@@ -127,8 +127,8 @@ namespace Bing.Samples.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        //[Authorize("Admin")]
-        //[Authorize("Customer")]
+        [Authorize("Admin")]
+        [Authorize("Customer")]
         public async Task<IActionResult> TestAuthorizeInfo()
         {
             return Success();
