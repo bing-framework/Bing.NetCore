@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
-using Bing.Webs.Filters;
+using Bing.Extensions.Swashbuckle.Attributes;
+using Bing.Webs.Controllers;
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Antiforgery.Internal;
-//using Bing.Webs.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Samples.Api.Controllers
@@ -14,10 +12,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// Swagger测试信息
     /// </summary>
-    //[IgnoreResultHandler]
-    [ApiController]
-    [Route("api/[controller]/[action]")]
-    public class SwaggerTestController : Controller
+    public class SwaggerTestController : ApiControllerBase
     {
         private readonly IAntiforgery _antiforgery;
 
@@ -99,21 +94,66 @@ namespace Bing.Samples.Api.Controllers
             return info;
         }
 
-        [HttpGet]
-        public IActionResult GetToken()
+        //[HttpGet]
+        //public IActionResult GetToken()
+        //{
+        //    var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+
+        //    var token = tokens.RequestToken;
+        //    var tokenName = tokens.HeaderName;
+
+        //    HttpContext.Response.Cookies.Append(tokenName,token);
+
+        //    return new ObjectResult(new
+        //    {
+        //        token= token,
+        //        tokenName= tokenName
+        //    });
+        //}
+
+        /// <summary>
+        /// 上传文件
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [SwaggerUpload]
+        public async Task<IActionResult> TestUpload()
         {
-            var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+            return Success();
+        }
 
-            var token = tokens.RequestToken;
-            var tokenName = tokens.HeaderName;
+        /// <summary>
+        /// 授权信息
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        //[Authorize("Admin")]
+        //[Authorize("Customer")]
+        public async Task<IActionResult> TestAuthorizeInfo()
+        {
+            return Success();
+        }
 
-            HttpContext.Response.Cookies.Append(tokenName,token);
+        /// <summary>
+        /// 请求头
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [SwaggerRequestHeader("Refrence","引用")]
+        public async Task<IActionResult> TestRequestHeader()
+        {
+            return Success();
+        }
 
-            return new ObjectResult(new
-            {
-                token= token,
-                tokenName= tokenName
-            });
+        /// <summary>
+        /// 响应头
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [SwaggerResponseHeader(200,"正常","tt","成功响应")]
+        public async Task<IActionResult> TestResponseHeader()
+        {
+            return Success();
         }
     }
 

@@ -164,7 +164,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Dapper", "src\Bi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-Biz", "04-Biz", "{0A581A8F-E2C0-4E25-8AEB-5354D91F576E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Biz", "src\Bing.Biz\Bing.Biz.csproj", "{66193BA5-54EE-4482-ABCA-5E7E052C98A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz", "src\Bing.Biz\Bing.Biz.csproj", "{66193BA5-54EE-4482-ABCA-5E7E052C98A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Extensions.Swashbuckle", "src\Bing.Extensions.Swashbuckle\Bing.Extensions.Swashbuckle.csproj", "{FBBCB384-5040-415A-BBCF-59F85D8CC000}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -360,6 +362,10 @@ Global
 		{66193BA5-54EE-4482-ABCA-5E7E052C98A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66193BA5-54EE-4482-ABCA-5E7E052C98A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66193BA5-54EE-4482-ABCA-5E7E052C98A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBBCB384-5040-415A-BBCF-59F85D8CC000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBBCB384-5040-415A-BBCF-59F85D8CC000}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBBCB384-5040-415A-BBCF-59F85D8CC000}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBBCB384-5040-415A-BBCF-59F85D8CC000}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -440,6 +446,7 @@ Global
 		{7C3BE429-7A33-4054-854D-31FF1C0B340E} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
 		{0A581A8F-E2C0-4E25-8AEB-5354D91F576E} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
 		{66193BA5-54EE-4482-ABCA-5E7E052C98A0} = {0A581A8F-E2C0-4E25-8AEB-5354D91F576E}
+		{FBBCB384-5040-415A-BBCF-59F85D8CC000} = {6FADCB24-306E-4EAF-8B24-594000568744}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

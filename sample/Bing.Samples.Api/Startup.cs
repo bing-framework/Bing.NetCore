@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.Exceptionless;
 using Bing.Logs.NLog;
 using Bing.Webs.Extensions;
@@ -25,19 +26,33 @@ namespace Bing.Samples.Api
                 options.Filters.Add<ResultHandlerAttribute>();
                 options.Filters.Add<ExceptionHandlerAttribute>();
             }).AddControllersAsServices();
-            //services.AddNLog();
-            services.AddExceptionless(options =>
-            {
-                options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
-                options.ServerUrl = "";
-            });
+            services.AddNLog();
+            //services.AddExceptionless(options =>
+            //{
+            //    options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
+            //    options.ServerUrl = "";
+            //});
             services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new Info() {Title = "Bing.Samples.Api", Version = "v1"});
                 var basePath = PlatformServices.Default.Application.ApplicationBasePath;
                 var xmlPath = Path.Combine(basePath, "Bing.Samples.Api.xml");
                 config.IncludeXmlComments(xmlPath);
-                //config.OperationFilter<AddAuthTokenHeaderParameter>();
+
+                config.OperationFilter<AddRequestHeaderOperationFilter>();
+                config.OperationFilter<AddResponseHeadersOperationFilter>();
+                config.OperationFilter<AddFileParameterOperationFilter>();
+
+                // 授权组合
+                config.OperationFilter<AddSecurityRequirementsOperationFilter>();
+                config.OperationFilter<AddAppendAuthorizeToSummaryOperationFilter>();
+                config.AddSecurityDefinition("oauth2", new ApiKeyScheme()
+                {
+                    Description = "Token令牌",
+                    In = "header",
+                    Name = "Authorization",
+                    Type = "apiKey",
+                });
             });
             //services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
             return services.AddBing();
