@@ -454,13 +454,13 @@ namespace Bing.Utils.Webs.Clients
         /// <returns></returns>
         protected virtual HttpClient CreateHttpClient()
         {
-            //return HttpClientBuilderFactory.CreateClient(_url);
-            return new HttpClient(new HttpClientHandler()
-            {
-                CookieContainer = _cookieContainer,
-                ServerCertificateCustomValidationCallback = _serverCertificateCustomValidationCallback
-            })
-            { Timeout = _timeout };
+            return HttpClientBuilderFactory.CreateClient(_url, _timeout);
+            //return new HttpClient(new HttpClientHandler()
+            //{
+            //    CookieContainer = _cookieContainer,
+            //    ServerCertificateCustomValidationCallback = _serverCertificateCustomValidationCallback
+            //})
+            //{ Timeout = _timeout };
         }
 
         /// <summary>
@@ -469,7 +469,6 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="client">Http客户端</param>
         protected virtual void InitHttpClient(HttpClient client)
         {
-            client.Timeout = _timeout;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 

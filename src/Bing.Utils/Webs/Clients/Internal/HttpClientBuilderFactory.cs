@@ -27,15 +27,17 @@ namespace Bing.Utils.Webs.Clients.Internal
         /// 创建Http客户端
         /// </summary>
         /// <param name="url">请求地址</param>
+        /// <param name="timeout">超时时间</param>
         /// <returns></returns>
-        public static HttpClient CreateClient(string url)
+        public static HttpClient CreateClient(string url,TimeSpan timeout)
         {
             var domain = GetDomainByUrl(url);
             if (_httpClients.ContainsKey(domain))
             {
                 return _httpClients[domain];
             }
-            var httpClient = Create();
+
+            var httpClient = Create(timeout);
             _httpClients[domain] = httpClient;
             return httpClient;
         }
@@ -54,14 +56,14 @@ namespace Bing.Utils.Webs.Clients.Internal
         /// 创建Http客户端
         /// </summary>
         /// <returns></returns>
-        private static HttpClient Create()
+        private static HttpClient Create(TimeSpan timeout)
         {
             var httpClient = new HttpClient(new HttpClientHandler()
             {
                 UseProxy = false,
             })
             {
-                Timeout = TimeSpan.FromSeconds(30)
+                Timeout = timeout
             };
             //httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
             return httpClient;

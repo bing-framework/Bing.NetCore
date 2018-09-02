@@ -39,6 +39,10 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public async Task Test_Client_WebAccess()
         {
+            for (int i = 0; i < 100; i++)
+            {
+                await WriteFile("http://www.cnblogs.com");
+            }
             await WriteFile("http://www.cnblogs.com");
             await WriteFile("http://www.cnblogs.com/artech/p/logging-for-net-core-05.html");
         }
