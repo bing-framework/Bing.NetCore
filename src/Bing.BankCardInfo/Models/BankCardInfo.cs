@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.BankCardInfo.Core;
+﻿using Bing.BankCardInfo.Core;
 
 namespace Bing.BankCardInfo.Models
 {

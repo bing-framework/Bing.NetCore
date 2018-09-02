@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.BankCardInfo.Core;
-using Bing.BankCardInfo.Models.Results;
 using WebApiClient;
 
 namespace Bing.BankCardInfo

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
 using Bing.BankCardInfo.Models.Results;
 using Newtonsoft.Json.Linq;

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.BankCardInfo.Models.Results;
+﻿using Bing.BankCardInfo.Models.Results;
 using WebApiClient;
 using WebApiClient.Attributes;
 
