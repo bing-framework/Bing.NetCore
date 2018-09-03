@@ -59,6 +59,7 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - [NLog](http://nlog-project.org/)
   - log4net
   - [Exceptionless](https://github.com/exceptionless)
+  - [Serilog](https://github.com/serilog/serilog-aspnetcore)
 
 14. 二维码操作
   -	[QRCoder](https://github.com/codebude/QRCoder)
@@ -128,7 +129,7 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - 枚举操作 [已发布]
   - 字符串操作 [已发布]
   - Lambda 表达式操作 [已发布]
-  - 日志操作 - 基于 NLog、log4net、Exceptionless [已发布]
+  - 日志操作 - 基于 NLog、log4net、Exceptionless、Serilog [已发布]
   - 日志操作拦截器 [已发布]
   - IQueryable 查询扩展 [已发布]
   - 时间操作 [已发布]
@@ -224,7 +225,7 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
 - 2018年07月08日，更新了参数格式化器、参数生成器、Url参数生成器。
 - 2018年07月09日，更新了字节扩展、字符扩展、long扩展、int扩展、double扩展、float扩展、字节数组扩展、List扩展、IEnumerable扩展、文件存储器。
 - 2018年07月10日，更新了二维码操作(Bing.Tools.QrCode，基于QRCoder以及ZXing.Net)以及相关单元测试。
-
+- 2018年09月03日，更新了日志操作(Bing.Logs.Serilog，基于Serilog)。
 ## 架构说明
 
 ## 常用Api

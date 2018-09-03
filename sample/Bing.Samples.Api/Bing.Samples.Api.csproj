@@ -21,6 +21,7 @@
     <ProjectReference Include="..\..\src\Bing.Extensions.Swashbuckle\Bing.Extensions.Swashbuckle.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Logs.Serilog\Bing.Logs.Serilog.csproj" />
     <ProjectReference Include="..\..\src\Bing.Webs\Bing.Webs.csproj" />
   </ItemGroup>
 

@@ -4,6 +4,7 @@ using System.Reflection;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.Exceptionless;
 using Bing.Logs.NLog;
+using Bing.Logs.Serilog;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
@@ -26,12 +27,13 @@ namespace Bing.Samples.Api
                 options.Filters.Add<ResultHandlerAttribute>();
                 options.Filters.Add<ExceptionHandlerAttribute>();
             }).AddControllersAsServices();
-            services.AddNLog();
+            //services.AddNLog();
             //services.AddExceptionless(options =>
             //{
             //    options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
             //    options.ServerUrl = "";
             //});
+            services.AddSerilog();
             services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new Info() {Title = "Bing.Samples.Api", Version = "v1"});
