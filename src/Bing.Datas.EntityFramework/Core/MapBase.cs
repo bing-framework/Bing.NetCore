@@ -27,7 +27,7 @@ namespace Bing.Datas.EntityFramework.Core
             if (DataConfig.EnabledValidateVersion)
             {
                 MapVersion(builder);
-            }            
+            }
             MapProperties(builder);
             MapAssociations(builder);
         }
