@@ -17,7 +17,6 @@ using Bing.Exceptions;
 using Bing.Logs;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Logs;
 using Microsoft.Extensions.Logging;

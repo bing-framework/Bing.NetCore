@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
-using Bing.Datas.Queries;
-using Bing.Datas.Queries.Criterias;
-using Bing.Datas.Queries.Internal;
 using Bing.Domains.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 
 namespace Bing.Datas.EntityFramework.Extensions
 {
