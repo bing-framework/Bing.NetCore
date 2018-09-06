@@ -27,7 +27,7 @@ namespace Bing.Tests.Events
         /// 测试发布事件
         /// </summary>
         /// <returns></returns>
-        [Fact]
+        //[Fact]
         public async Task TestPublish()
         {
             var manager=new EventHandlerManagerSample(_handler);

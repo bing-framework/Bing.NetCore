@@ -133,7 +133,7 @@ namespace Bing.Utils.Helpers
             {
                 return string.Empty;
             }
-            using (var transform=CreateDesProvider(key).CreateEncryptor())
+            using (var transform = CreateDesProvider(key).CreateEncryptor())
             {
                 return GetEncryptResult(text, encoding, transform);
             }
@@ -509,6 +509,72 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region HmacMd5加密
+
+        /// <summary>
+        /// HMACMD5加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <returns></returns>
+        public static string HmacMd5(string value, string key)
+        {
+            return HmacMd5(value, key, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// HMACMD5加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string HmacMd5(string value, string key, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(key))
+            {
+                return string.Empty;
+            }
+            var md5 = new HMACMD5(encoding.GetBytes(key));
+            var hash = md5.ComputeHash(encoding.GetBytes(value));
+            return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+        }
+
+        #endregion
+
+        #region HmacSha1加密
+
+        /// <summary>
+        /// HMACSHA1加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <returns></returns>
+        public static string HmacSha1(string value, string key)
+        {
+            return HmacSha1(value, key, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// HMACSHA1加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string HmacSha1(string value, string key, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(key))
+            {
+                return string.Empty;
+            }
+            var sha1 = new HMACSHA1(encoding.GetBytes(key));
+            var hash = sha1.ComputeHash(encoding.GetBytes(value));
+            return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+        }
+
+        #endregion
+
         #region HmacSha256加密
 
         /// <summary>
@@ -538,6 +604,252 @@ namespace Bing.Utils.Helpers
             var sha256 = new HMACSHA256(encoding.GetBytes(key));
             var hash = sha256.ComputeHash(encoding.GetBytes(value));
             return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+        }
+
+        #endregion
+
+        #region HmacSha384加密
+
+        /// <summary>
+        /// HMACSHA384加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <returns></returns>
+        public static string HmacSha384(string value, string key)
+        {
+            return HmacSha384(value, key, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// HMACSHA384加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string HmacSha384(string value, string key, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(key))
+            {
+                return string.Empty;
+            }
+            var sha384 = new HMACSHA384(encoding.GetBytes(key));
+            var hash = sha384.ComputeHash(encoding.GetBytes(value));
+            return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+        }
+
+        #endregion
+
+        #region HmacSha512加密
+
+        /// <summary>
+        /// HMACSHA512加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <returns></returns>
+        public static string HmacSha512(string value, string key)
+        {
+            return HmacSha512(value, key, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// HMACSHA512加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="key">密钥</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string HmacSha512(string value, string key, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(key))
+            {
+                return string.Empty;
+            }
+            var sha512 = new HMACSHA512(encoding.GetBytes(key));
+            var hash = sha512.ComputeHash(encoding.GetBytes(value));
+            return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+        }
+
+        #endregion
+
+        #region SHA1加密
+
+        /// <summary>
+        /// SHA1加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static string Sha1(string value)
+        {
+            return Sha1(value, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// SHA1加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string Sha1(string value, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+            using (var sha1 = SHA1.Create())
+            {
+                var hash = sha1.ComputeHash(encoding.GetBytes(value));
+                return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+            }
+        }
+
+        #endregion
+
+        #region SHA256加密
+
+        /// <summary>
+        /// SHA256加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static string Sha256(string value)
+        {
+            return Sha256(value, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// SHA256加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string Sha256(string value, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+            using (var sha = SHA256.Create())
+            {
+                var hash = sha.ComputeHash(encoding.GetBytes(value));
+                return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+            }
+        }
+
+        #endregion
+
+        #region SHA384加密
+
+        /// <summary>
+        /// SHA384加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static string Sha384(string value)
+        {
+            return Sha384(value, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// SHA384加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string Sha384(string value, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+            using (var sha = SHA384.Create())
+            {
+                var hash = sha.ComputeHash(encoding.GetBytes(value));
+                return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+            }
+        }
+
+        #endregion
+
+        #region SHA512加密
+
+        /// <summary>
+        /// SHA512加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static string Sha512(string value)
+        {
+            return Sha512(value, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// SHA512加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string Sha512(string value, Encoding encoding)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+            using (var sha = SHA512.Create())
+            {
+                var hash = sha.ComputeHash(encoding.GetBytes(value));
+                return string.Join("", hash.ToList().Select(x => x.ToString("x2")).ToArray());
+            }
+        }
+
+        #endregion
+
+        #region Base64加密
+
+        /// <summary>
+        /// Base64加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static string Base64Encrypt(string value)
+        {
+            return Base64Encrypt(value, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// Base64加密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string Base64Encrypt(string value, Encoding encoding)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : Convert.ToBase64String(encoding.GetBytes(value));
+        }
+
+        /// <summary>
+        /// Base64解密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static string Base64Decrypt(string value)
+        {
+            return Base64Decrypt(value, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// Base64解密
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static string Base64Decrypt(string value, Encoding encoding)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? string.Empty
+                : encoding.GetString(Convert.FromBase64String(value));
         }
 
         #endregion
