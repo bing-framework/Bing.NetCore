@@ -35,6 +35,10 @@ namespace Bing.Webs.Filters
                 }
             }
 
+            if (context.Result is Result result)
+            {
+                return;
+            }
             if (context.Result is ObjectResult objectResult)
             {
                 context.Result = new Result(StateCode.Ok, string.Empty, objectResult.Value);
@@ -49,7 +53,7 @@ namespace Bing.Webs.Filters
             }
             else if (context.Result is ViewResult viewResult)
             {
-                var result = viewResult.ToHtml(context.HttpContext);
+                //var result = viewResult.ToHtml(context.HttpContext);
             }
         }
     }
