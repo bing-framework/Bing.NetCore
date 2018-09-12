@@ -12,6 +12,7 @@ using Bing.Samples.Api.OAuths;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using IdentityModel;
+using IdentityServer4;
 using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
@@ -74,11 +75,24 @@ namespace Bing.Samples.Api
                     options.DefaultAuthenticateScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddIdentityServerAuthentication(options =>
+                //.AddIdentityServerAuthentication(options =>
+                //{
+                //    options.RequireHttpsMetadata = false;
+                //    options.ApiName = "Admin"; // API作用域范围
+                //    options.Authority = "http://localhost:37680"; // IdentityServer 授权地址
+                //})
+                .AddJwtBearer(options =>
                 {
+                    options.Authority = "http://localhost:37680";
                     options.RequireHttpsMetadata = false;
-                    options.ApiName = "Admin"; // API作用域范围
-                    options.Authority = "http://localhost:37680"; // IdentityServer 授权地址
+                    options.TokenValidationParameters=new TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "http://localhost:37680",
+                        ValidateAudience = false,
+                        ValidAudience = "Admin",
+                        ValidateLifetime = true
+                    };
                 });
 
             //services.AddAuthorization(options =>
@@ -181,11 +195,12 @@ namespace Bing.Samples.Api
                 {
                     ClientId = "bing.ro.admin",
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                    AllowOfflineAccess = true,// 启用刷新Token
                     ClientSecrets = new List<Secret>()
                     {
                         new Secret("secret".Sha256())
                     },
-                    AllowedScopes = { "Admin", "Customer", "EveryOne" }
+                    AllowedScopes = { "Admin", "Customer", "EveryOne"}
                 }
             };
         }
