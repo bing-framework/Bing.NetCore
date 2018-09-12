@@ -233,7 +233,7 @@ namespace Bing.Utils.Maths
         /// <returns></returns>
         private static string GetBaseChar(int radix)
         {
-            var result = string.Empty;
+            string result;
             switch (radix)
             {
                 case 26:

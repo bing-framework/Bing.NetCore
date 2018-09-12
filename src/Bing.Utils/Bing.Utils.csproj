@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../../build/version.props"></Import>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>
 
@@ -36,6 +37,12 @@
   <ItemGroup>
     <Folder Include="Extensions\Xml\" />
     <Folder Include="Extensions\Datas\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Medias/Images/ImageUtil.*.cs">
+      <DependentUpon>ImageUtil.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>
