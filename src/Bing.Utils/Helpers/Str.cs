@@ -266,6 +266,87 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region FullPinYin(获取汉字的全拼)
+
+        /// <summary>
+        /// 将汉字转换成拼硬(全拼)
+        /// </summary>
+        /// <param name="text">汉字字符串</param>
+        /// <returns></returns>
+        public static string FullPinYin(string text)
+        {
+            // 匹配中文字符
+            Regex regex=new Regex("^[\u4e00-\u9fa5]$");
+            byte[] array=new byte[2];
+            string pyString = "";
+            int chrAsc = 0;
+            int i1 = 0;
+            int i2 = 0;
+            char[] nowChar = text.ToCharArray();
+            for (int j = 0; j < nowChar.Length; j++)
+            {
+                // 中文字符
+                if (regex.IsMatch(nowChar[j].ToString()))
+                {
+                    array = Encoding.Default.GetBytes(nowChar[j].ToString());
+                    i1 = (short) (array[0]);
+                    i2 = (short)(array[1]);
+                    chrAsc = i1 * 256 + i2 - 65536;
+                    if (chrAsc > 0 && chrAsc < 160)
+                    {
+                        pyString += nowChar[j];
+                    }
+                    else
+                    {
+                        // 修正部分文字
+                        switch (chrAsc)
+                        {
+                            case -9254:
+                                pyString += "Zhen"; break;
+                            case -8985:
+                                pyString += "Qian"; break;
+                            case -5463:
+                                pyString += "Jia"; break;
+                            case -8274:
+                                pyString += "Ge"; break;
+                            case -5448:
+                                pyString += "Ga"; break;
+                            case -5447:
+                                pyString += "La"; break;
+                            case -4649:
+                                pyString += "Chen"; break;
+                            case -5436:
+                                pyString += "Mao"; break;
+                            case -5213:
+                                pyString += "Mao"; break;
+                            case -3597:
+                                pyString += "Die"; break;
+                            case -5659:
+                                pyString += "Tian"; break;
+                            default:
+                                for (int i = (Const.SpellCode.Length - 1); i >= 0; i--)
+                                {
+                                    if (Const.SpellCode[i] <= chrAsc)
+                                    {
+                                        //判断汉字的拼音区编码是否在指定范围内
+                                        pyString += Const.SpellLetter[j];//如果不超出范围则获取对应的拼音
+                                        break;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+                else // 非中文字符
+                {
+                    pyString += nowChar[j].ToString();
+                }
+            }
+            return pyString;
+        }
+
+        #endregion
+
         #region FirstLowerCase(首字母小写)
 
         /// <summary>
@@ -282,6 +363,15 @@ namespace Bing.Utils.Helpers
 
             return $"{value.Substring(0, 1).ToLower()}{value.Substring(1)}";
         }
+
+        #endregion
+
+        #region Empty(空字符串)
+
+        /// <summary>
+        /// 空字符串
+        /// </summary>
+        public static string Empty => string.Empty;
 
         #endregion
     }
