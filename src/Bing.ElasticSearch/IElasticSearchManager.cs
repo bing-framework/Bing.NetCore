@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nest;
 
 namespace Bing.ElasticSearch
 {
@@ -84,5 +85,23 @@ namespace Bing.ElasticSearch
         /// <param name="bulkNum">批量操作数</param>
         /// <returns></returns>
         Task BulkDeleteAsync<T>(string indexName, List<T> entities, int bulkNum = 1000) where T : class;
+
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="indexName">索引名称</param>
+        /// <param name="query">查询</param>
+        /// <param name="skip">跳过的行数</param>
+        /// <param name="size">每页显示记录数</param>
+        /// <param name="includeFields">包含字段</param>
+        /// <param name="preTags">高亮标签</param>
+        /// <param name="postTags">高亮标签</param>
+        /// <param name="disableHigh">是否禁用高亮</param>
+        /// <param name="highFields">高亮字段</param>
+        /// <returns></returns>
+        Task<ISearchResponse<T>> SearchAsync<T>(string indexName, SearchDescriptor<T> query, int skip, int size,
+            string[] includeFields = null, string preTags = "<strong style=\"color: red;\">",
+            string postTags = "</strong>", bool disableHigh = false, params string[] highFields) where T : class;
     }
 }

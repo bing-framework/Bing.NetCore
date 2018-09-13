@@ -353,5 +353,58 @@ namespace Bing.ElasticSearch
                 throw new ElasticSearchException($"批量删除文档在索引 {indexName} 失败：{response.ServerError.Error.Reason}");
             }
         }
+
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="indexName">索引名称</param>
+        /// <param name="query">查询</param>
+        /// <param name="skip">跳过的行数</param>
+        /// <param name="size">每页显示记录数</param>
+        /// <param name="includeFields">包含字段</param>
+        /// <param name="preTags">高亮标签</param>
+        /// <param name="postTags">高亮标签</param>
+        /// <param name="disableHigh">是否禁用高亮</param>
+        /// <param name="highFields">高亮字段</param>
+        /// <returns></returns>
+        public virtual async Task<ISearchResponse<T>> SearchAsync<T>(string indexName, SearchDescriptor<T> query, int skip, int size, string[] includeFields = null,
+            string preTags = "<strong style=\"color: red;\">", string postTags = "</strong>", bool disableHigh = false,
+            params string[] highFields) where T : class
+        {
+            query.Index(indexName);
+            var highdes = new HighlightDescriptor<T>();
+            if (disableHigh)
+            {
+                preTags = "";
+                postTags = "";
+            }
+            highdes.PreTags(preTags).PostTags(postTags);
+
+            var isHigh = highFields != null && highFields.Length > 0;
+            var hfs = new List<Func<HighlightFieldDescriptor<T>, IHighlightField>>();
+
+            // 分页
+            query.Skip(skip).Take(size);
+            // 关键词高亮
+            if (isHigh)
+            {
+                foreach (var highField in highFields)
+                {
+                    hfs.Add(f=>f.Field(highField));
+                }
+            }
+
+            highdes.Fields(hfs.ToArray());
+            query.Highlight(h => highdes);
+            if (includeFields != null)
+            {
+                query.Source(ss => ss.Includes(ff => ff.Fields(includeFields.ToArray())));
+            }
+
+            var client = await GetClientAsync();
+            var response = await client.SearchAsync<T>(query);
+            return response;
+        }
     }
 }
