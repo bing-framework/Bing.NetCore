@@ -462,9 +462,17 @@ namespace Bing.Utils.IO
             {
                 return string.Empty;
             }
+            if (data.CanRead == false)
+            {
+                return string.Empty;
+            }
             string result;
             using (var reader = new StreamReader(data, encoding))
             {
+                if (reader.BaseStream.CanSeek)
+                {
+                    reader.BaseStream.Position = 0;
+                }
                 result = reader.ReadToEnd();
             }
             return result;

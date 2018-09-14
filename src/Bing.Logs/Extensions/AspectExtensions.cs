@@ -18,7 +18,7 @@ namespace Bing.Logs.Extensions
         /// <param name="log">日志</param>
         public static void AppendTo(this Parameter parameter, ILog log)
         {
-            log.Params(parameter.ParameterInfo.ParameterType.FullName, parameter.Name, GetParameterValue(parameter));
+            log.Params( parameter.Name, GetParameterValue(parameter), parameter.ParameterInfo.ParameterType.FullName);
         }
 
         /// <summary>

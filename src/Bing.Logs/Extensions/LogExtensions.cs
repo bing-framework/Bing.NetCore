@@ -62,17 +62,53 @@ namespace Bing.Logs.Extensions
         /// 设置参数
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <param name="type">参数类型</param>
-        /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
         /// <returns></returns>
-        public static ILog Params(this ILog log, string type, string name, string value)
+        public static ILog Params(this ILog log, string value)
         {
-            return
-                log.Set<LogContent>(
-                    content =>
-                        content.AppendLine(content.Params,
-                            $"{LogResource.ParameterType}: {type}, {LogResource.ParameterName}: {name}, {LogResource.ParameterValue}: {value}。"));
+            return log.Set<LogContent>(content => content.AppendLine(content.Params, value));
+        }
+
+        /// <summary>
+        /// 设置参数
+        /// </summary>
+        /// <param name="log">日志操作</param>
+        /// <param name="name">参数名</param>
+        /// <param name="value">参数值</param>
+        /// <param name="type">参数类型</param>
+        /// <returns></returns>
+        public static ILog Params(this ILog log, string name, string value, string type = null)
+        {
+            return log.Set<LogContent>(content =>
+            {
+                if (string.IsNullOrWhiteSpace(type))
+                {
+                    content.AppendLine(content.Params,
+                        $"{LogResource.ParameterName}: {name}, {LogResource.ParameterValue}: {value}");
+                    return;
+                }
+                content.AppendLine(content.Params,
+                    $"{LogResource.ParameterType}: {type}, {LogResource.ParameterName}: {name}, {LogResource.ParameterValue}: {value}");
+            });
+        }
+
+        /// <summary>
+        /// 设置参数
+        /// </summary>
+        /// <param name="log">日志操作</param>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static ILog Params(this ILog log, IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null || dictionary.Count == 0)
+            {
+                return log;
+            }
+            foreach (var item in dictionary)
+            {
+                Params(log, item.Key, item.Value.SafeString());
+            }
+            return log;
         }
 
         /// <summary>
