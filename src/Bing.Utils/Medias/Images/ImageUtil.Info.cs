@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Bing.Utils.Medias.Images
 {
@@ -60,5 +61,21 @@ namespace Bing.Utils.Medias.Images
 
         #endregion
 
+        #region GetBase64String(获取真正的图片Base64数据)
+
+        /// <summary>
+        /// 获取真正的图片Base64数据。
+        /// 即去掉data:image/jpg;base64,这样的格式
+        /// </summary>
+        /// <param name="base64Url">带前缀的Base64图片字符串</param>
+        /// <returns></returns>
+        public static string GetBase64String(string base64Url)
+        {
+            string parttern = "^(data:image/.*?;base64,).*?$";
+            var match = Regex.Match(base64Url, parttern);
+            return base64Url.Replace(match.Groups[1].ToString(), "");
+        }
+
+        #endregion
     }
 }

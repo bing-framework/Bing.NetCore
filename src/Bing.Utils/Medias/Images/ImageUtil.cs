@@ -456,48 +456,5 @@ namespace Bing.Utils.Medias.Images
         }
 
         #endregion
-
-        #region Binaryzation(补光效果)
-
-
-
-        #endregion
-
-        #region FromFile(从指定文件创建图片)
-
-        /// <summary>
-        /// 从指定文件创建图片
-        /// </summary>
-        /// <param name="filePath">文件的绝对路径</param>
-        /// <returns></returns>
-        public static Image FromFile(string filePath)
-        {
-            return Image.FromFile(filePath);
-        }
-
-        /// <summary>
-        /// 从指定流创建图片
-        /// </summary>
-        /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static Image FromStream(Stream stream)
-        {
-            return Image.FromStream(stream);
-        }
-
-        /// <summary>
-        /// 从指定字节数组创建图片
-        /// </summary>
-        /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
-        public static Image FromBytes(byte[] bytes)
-        {
-            using (var stream=new MemoryStream(bytes))
-            {
-                return FromStream(stream);
-            }
-        }
-
-        #endregion
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 
 namespace Bing.Utils.Medias.Images
@@ -64,56 +65,59 @@ namespace Bing.Utils.Medias.Images
 
         #endregion
 
-        #region ImageToBase64(将图片转换成Base64字符串)
+        #region ToBase64String(将图片转换为Base64字符串)
 
         /// <summary>
-        /// 将图片转换成Base64字符串
+        /// 将图片转换为Base64字符串，默认使用jpg格式
         /// </summary>
         /// <param name="image">图片</param>
         /// <returns></returns>
-        public static string ImageToBase64(Image image)
+        public static string ToBase64String(Image image)
+        {
+            return ToBase64String(image, ImageFormat.Jpeg);
+        }
+
+        /// <summary>
+        /// 将图片转换为Base64字符串，使用指定格式
+        /// </summary>
+        /// <param name="image">图片</param>
+        /// <param name="imageFormat">图片格式</param>
+        /// <returns></returns>
+        public static string ToBase64String(Image image, ImageFormat imageFormat)
         {
             using (MemoryStream ms=new MemoryStream())
             {
-                image.Save(ms, image.RawFormat);
-                byte[] bytes = new byte[ms.Length];
-                ms.Seek(0, SeekOrigin.Begin);
-                ms.Read(bytes, 0, bytes.Length);
+                image.Save(ms, imageFormat);
+                byte[] bytes = ms.ToArray();
                 return Convert.ToBase64String(bytes);
             }
         }
 
+        #endregion
+
+        #region ToBase64StringUrl(将图片转换为Base64字符串URL格式)
+
         /// <summary>
-        /// 将图片转换成Base64字符串，带有头部"data:image/png;base64,xxxxx"
+        /// 将图片转换为Base64字符串URL格式
+        /// 默认使用jpg格式，并添加data:image/jpg;base64,前缀
         /// </summary>
         /// <param name="image">图片</param>
         /// <returns></returns>
-        public static string ImageToBase64WithHeader(Image image)
+        public static string ToBase64StringUrl(Image image)
         {
-            return $"data:image/{GetImageExtension(image)};base64,{ImageToBase64(image)}";
+            return $"data:image/jpg;base64,{ToBase64String(image, ImageFormat.Jpeg)}";
         }
 
-        #endregion
-
-        #region Base64ToImage(将Base64字符串转换成图片)
-
         /// <summary>
-        /// 将Base64字符串转换成图片
+        /// 将图片转换为Base64字符串URL格式。
+        /// 使用指定格式，并添加data:image/jpg;base64,前缀
         /// </summary>
-        /// <param name="base64">Base64字符串</param>
+        /// <param name="image">图片</param>
+        /// <param name="imageFormat">图片格式</param>
         /// <returns></returns>
-        public static Image Base64ToImage(string base64)
+        public static string ToBase64StringUrl(Image image, ImageFormat imageFormat)
         {
-            if (base64.IndexOf(',') > -1)
-            {
-                base64 = base64.Substring(base64.IndexOf(',') + 1);
-            }
-            byte[] bytes = Convert.FromBase64String(base64);
-            using (MemoryStream ms=new MemoryStream(bytes))
-            {
-                Image image = Image.FromStream(ms);
-                return image;
-            }
+            return $"data:image/{imageFormat.ToString().ToLower()};base64,{ToBase64String(image, imageFormat)}";
         }
 
         #endregion
