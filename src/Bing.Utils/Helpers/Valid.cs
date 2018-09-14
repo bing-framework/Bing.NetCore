@@ -668,6 +668,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region IsContainsNumber(是否包含数字)
+
         /// <summary>
         /// 是否包含数字
         /// </summary>
@@ -681,6 +682,7 @@ namespace Bing.Utils.Helpers
             }
             return value.IsMatch(@"[0-9]+");
         }
+
         #endregion
 
         #region IsIpAddress(是否IP地址)
