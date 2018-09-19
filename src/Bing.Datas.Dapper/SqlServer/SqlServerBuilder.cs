@@ -36,6 +36,7 @@ namespace Bing.Datas.Dapper.SqlServer
             AppendSql(result,GetFrom());
             AppendSql(result,GetJoin());
             AppendSql(result,GetWhere());
+            AppendSql(result, GetGroupBy());
             AppendSql(result,GetOrderBy());
             result.Append($"Offset {GetPager().GetSkipCount()} Rows Fetch Next {GetPager().PageSize} Rows Only");
         }

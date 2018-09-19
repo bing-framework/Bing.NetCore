@@ -36,6 +36,7 @@ namespace Bing.Datas.Dapper.MySql
             AppendSql(result, GetFrom());
             AppendSql(result, GetJoin());
             AppendSql(result, GetWhere());
+            AppendSql(result, GetGroupBy());
             AppendSql(result, GetOrderBy());
             result.Append($"Limit {GetPager().GetSkipCount()}, {GetPager().PageSize}");
         }

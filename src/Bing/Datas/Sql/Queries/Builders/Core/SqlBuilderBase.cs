@@ -32,7 +32,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 实体别名注册器
         /// </summary>
-        protected IEntityAliasRegister AliasRegister { get; }
+        protected IEntityAliasRegister AliasRegister { get; private set; }
 
         /// <summary>
         /// 参数管理器
@@ -69,6 +69,25 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
             _parameterManager = parameterManager;
+        }
+
+        #endregion
+
+        #region Clear(清空并初始化)
+
+        /// <summary>
+        /// 清空并初始化
+        /// </summary>
+        public void Clear()
+        {
+            AliasRegister = new EntityAliasRegister();
+            _parameterManager = CreateParameterManager();
+            _selectClause = CreateSelectClause();
+            _fromClause = CreateFromClause();
+            _joinClause = CreateJoinClause();
+            _whereClause = CreateWhereClause();
+            _groupByClause = CreateGroupByClause();
+            _orderByClause = CreateOrderByClause();
         }
 
         #endregion

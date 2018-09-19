@@ -46,6 +46,14 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
+        /// 清空并初始化
+        /// </summary>
+        public void Clear()
+        {
+            Builder.Clear();
+        }
+
+        /// <summary>
         /// 获取调试Sql语句
         /// </summary>
         /// <returns></returns>

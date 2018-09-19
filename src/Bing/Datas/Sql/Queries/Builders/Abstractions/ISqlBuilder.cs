@@ -14,6 +14,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
     public interface ISqlBuilder:ICondition
     {
         /// <summary>
+        /// 清空并初始化
+        /// </summary>
+        void Clear();
+
+        /// <summary>
         /// 创建Sql生成器
         /// </summary>
         /// <returns></returns>
