@@ -2,6 +2,7 @@
   <Import Project="../../build/version.props"></Import>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Bing.Extensions.Swashbuckle是扩展Swashbuckle.AspNetCore一些常用操作，便于使用以及过滤。</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

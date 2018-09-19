@@ -2,6 +2,7 @@
   <Import Project="../../build/version.props"></Import>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Bing.Extensions.AutoMapper是扩展AutoMapper映射操作，解决配置映射的问题.</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
