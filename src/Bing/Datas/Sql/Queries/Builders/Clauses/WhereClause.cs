@@ -45,7 +45,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
-        /// <param name="tag">参数标识</param>
         public WhereClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
             IParameterManager parameterManager)
         {

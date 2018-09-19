@@ -1251,6 +1251,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         private IGroupByClause _groupByClause;
 
+        /// <summary>
+        /// 分组子句
+        /// </summary>
         protected IGroupByClause GroupByClause => _groupByClause ?? (_groupByClause = CreateGroupByClause());
 
         /// <summary>
