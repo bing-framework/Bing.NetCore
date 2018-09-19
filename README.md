@@ -3,6 +3,29 @@
 
 Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装，第三方业务接口封装等组成。
 
+## Nuget包
+|Nuget|版本号|说明|
+|---|---|---|
+|Bing.Utils|[![NuGet Badge](https://buildstats.info/nuget/Bing.Utils?includePreReleases=true)](https://www.nuget.org/packages/Bing.Utils)|
+|Bing.Core|[![NuGet Badge](https://buildstats.info/nuget/Bing.Core?includePreReleases=true)](https://www.nuget.org/packages/Bing.Core)|
+|Bing.Security|[![NuGet Badge](https://buildstats.info/nuget/Bing.Security?includePreReleases=true)](https://www.nuget.org/packages/Bing.Security)|
+|Bing.Logs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs)|
+|Bing.Logs.Exceptionless|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.Exceptionless?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.Exceptionless)|
+|Bing.Logs.Log4Net|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.Log4Net?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.Log4Net)|
+|Bing.Logs.NLog|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.NLog?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.NLog)|
+|Bing.Logs.Serilog|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.Serilog?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.Serilog)|
+|Bing.Datas.Dapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.Dapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.Dapper)|
+|Bing.Datas.EntityFramework|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework)|
+|Bing.Datas.EntityFramework.MySql|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework.MySql?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.MySql)|
+|Bing.Datas.EntityFramework.PgSql|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework.PgSql?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.PgSql)|
+|Bing.Datas.EntityFramework.SqlServer|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework.SqlServer?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.SqlServer)|
+|Bing.Events|[![NuGet Badge](https://buildstats.info/nuget/Bing.Events?includePreReleases=true)](https://www.nuget.org/packages/Bing.Events)|
+|Bing.Applications|[![NuGet Badge](https://buildstats.info/nuget/Bing.Applications?includePreReleases=true)](https://www.nuget.org/packages/Bing.Applications)|
+|Bing.Webs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Webs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Webs)|
+|Bing.Extensions.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.AutoMapper)|
+|Bing.Extensions.Swashbuckle|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.Swashbuckle?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.Swashbuckle)|
+
+
 ## 开发环境以及类库依赖
 
 以下是我们在项目开发和部署时使用的工具和组件，这个列表会经常更新。
