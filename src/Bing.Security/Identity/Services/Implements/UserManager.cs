@@ -8,7 +8,6 @@ using Bing.Security.Identity.Repositories;
 using Bing.Security.Identity.Services.Abstractions;
 using Bing.Security.Identity.Services.Configs;
 using Bing.Utils.Extensions;
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 

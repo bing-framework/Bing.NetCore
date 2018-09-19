@@ -5,7 +5,6 @@ using Bing.Security.Claims;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
-using IdentityModel;
 
 namespace Bing.Security.Extensions
 {
