@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Applications\Bing.Applications.csproj" />
-    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
   </ItemGroup>
 
   <ItemGroup>
