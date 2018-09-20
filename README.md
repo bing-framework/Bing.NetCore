@@ -3,7 +3,9 @@
 
 Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装，第三方业务接口封装等组成。
 
-## Nuget包
+## Nuget Packages
+Bing 框架Nuget包分布
+
 |Nuget|版本号|说明|
 |---|---|---|
 |Bing.Utils|[![NuGet Badge](https://buildstats.info/nuget/Bing.Utils?includePreReleases=true)](https://www.nuget.org/packages/Bing.Utils)|
@@ -24,6 +26,18 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
 |Bing.Webs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Webs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Webs)|
 |Bing.Extensions.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.AutoMapper)|
 |Bing.Extensions.Swashbuckle|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.Swashbuckle?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.Swashbuckle)|
+|Bing.Biz|[![NuGet Badge](https://buildstats.info/nuget/Bing.Biz?includePreReleases=true)](https://www.nuget.org/packages/Bing.Biz)|
+|Bing.Tools.QrCode|[![NuGet Badge](https://buildstats.info/nuget/Bing.Tools.QrCode?includePreReleases=true)](https://www.nuget.org/packages/Bing.Tools.QrCode)|
+|Bing.Tools.QrCode.QRCoder|[![NuGet Badge](https://buildstats.info/nuget/Bing.Tools.QrCode.QRCoder?includePreReleases=true)](https://www.nuget.org/packages/Bing.Tools.QrCode.QRCoder)|
+|Bing.Tools.QrCode.ZXing|[![NuGet Badge](https://buildstats.info/nuget/Bing.Tools.QrCode.ZXing?includePreReleases=true)](https://www.nuget.org/packages/Bing.Tools.QrCode.ZXing)|
+|Bing.MailKit|[![NuGet Badge](https://buildstats.info/nuget/Bing.MailKit?includePreReleases=true)](https://www.nuget.org/packages/Bing.MailKit)|
+|Bing.Geetest|[![NuGet Badge](https://buildstats.info/nuget/Bing.Geetest?includePreReleases=true)](https://www.nuget.org/packages/Bing.Geetest)|
+|Bing.Encryption|[![NuGet Badge](https://buildstats.info/nuget/Bing.Encryption?includePreReleases=true)](https://www.nuget.org/packages/Bing.Encryption)|
+|Bing.BankCardInfo|[![NuGet Badge](https://buildstats.info/nuget/Bing.BankCardInfo?includePreReleases=true)](https://www.nuget.org/packages/Bing.BankCardInfo)|
+|Bing.ElasticSearch|[![NuGet Badge](https://buildstats.info/nuget/Bing.ElasticSearch?includePreReleases=true)](https://www.nuget.org/packages/Bing.ElasticSearch)|
+|Bing.Sequence|[![NuGet Badge](https://buildstats.info/nuget/Bing.Sequence?includePreReleases=true)](https://www.nuget.org/packages/Bing.Sequence)|
+|Bing.MockData|[![NuGet Badge](https://buildstats.info/nuget/Bing.MockData?includePreReleases=true)](https://www.nuget.org/packages/Bing.MockData)|
+
 
 
 ## 开发环境以及类库依赖
