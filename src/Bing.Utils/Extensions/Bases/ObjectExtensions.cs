@@ -45,33 +45,33 @@ namespace Bing.Utils.Extensions
 
         #region ToDynamic(将对象转换为dynamic)
 
-        /// <summary>
-        /// 将对象[主要是匿名对象]转换为dynamic
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public static dynamic ToDynamic(this object value)
-        {
-            IDictionary<string,object> expando=new ExpandoObject();
-            Type type = value.GetType();
-            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(type);
-            foreach (PropertyDescriptor property in properties)
-            {
-                var val = property.GetValue(value);
-                if (property.PropertyType.FullName != null &&
-                    property.PropertyType.FullName.StartsWith("<>f__AnonymousType"))
-                {
-                    dynamic dval = val.ToDynamic();
-                    expando.Add(property.Name,dval);
-                }
-                else
-                {
-                    expando.Add(property.Name, val);
-                }
-            }
+        ///// <summary>
+        ///// 将对象[主要是匿名对象]转换为dynamic
+        ///// </summary>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public static dynamic ToDynamic(this object value)
+        //{
+        //    IDictionary<string,object> expando=new ExpandoObject();
+        //    Type type = value.GetType();
+        //    PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(type);
+        //    foreach (PropertyDescriptor property in properties)
+        //    {
+        //        var val = property.GetValue(value);
+        //        if (property.PropertyType.FullName != null &&
+        //            property.PropertyType.FullName.StartsWith("<>f__AnonymousType"))
+        //        {
+        //            dynamic dval = val.ToDynamic();
+        //            expando.Add(property.Name,dval);
+        //        }
+        //        else
+        //        {
+        //            expando.Add(property.Name, val);
+        //        }
+        //    }
 
-            return (ExpandoObject) expando;
-        }
+        //    return (ExpandoObject) expando;
+        //}
 
         #endregion
     }

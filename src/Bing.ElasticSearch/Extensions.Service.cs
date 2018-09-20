@@ -27,7 +27,7 @@ namespace Bing.ElasticSearch
         /// 注册Elasticsearch日志操作
         /// </summary>
         /// <typeparam name="TElasticSearchConfigProvider">Elasticsearch配置提供器</typeparam>
-        /// <param name="services"></param>
+        /// <param name="services">服务集合</param>
         public static void AddElasticsearch<TElasticSearchConfigProvider>(this IServiceCollection services)
             where TElasticSearchConfigProvider : class, IElasticSearchConfigProvider
         {

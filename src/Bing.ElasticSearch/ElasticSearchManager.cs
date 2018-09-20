@@ -30,7 +30,7 @@ namespace Bing.ElasticSearch
         /// <param name="provider">配置提供器</param>
         public ElasticSearchManager(IElasticSearchConfigProvider provider)
         {
-            ConfigProvider = provider ?? throw new ArgumentNullException();
+            ConfigProvider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         /// <summary>
