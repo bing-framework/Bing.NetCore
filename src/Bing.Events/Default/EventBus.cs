@@ -34,45 +34,6 @@ namespace Bing.Events.Default
         /// 发布事件
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
-        /// <param name="event">事件</param>        
-        public void Publish<TEvent>(TEvent @event) where TEvent : IEvent
-        {
-            var handlers = Manager.GetHandlers<TEvent>();
-            if (handlers == null)
-            {
-                return;
-            }
-
-            foreach (var handler in handlers)
-            {
-                handler?.Handle(@event);
-            }
-            PublishMessageEvents(@event);
-        }
-
-        /// <summary>
-        /// 发布消息事件
-        /// </summary>
-        /// <typeparam name="TEvent">事件类型</typeparam>
-        /// <param name="event">事件</param>
-        /// <returns></returns>
-        private void PublishMessageEvents<TEvent>(TEvent @event)
-        {
-            if (MessageEventBus == null)
-            {
-                return;
-            }
-
-            if (@event is IMessageEvent messageEvent)
-            {
-                MessageEventBus.Publish(messageEvent);
-            }
-        }
-
-        /// <summary>
-        /// 发布事件
-        /// </summary>
-        /// <typeparam name="TEvent">事件类型</typeparam>
         /// <param name="event">事件</param>
         /// <returns></returns>
         public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : IEvent

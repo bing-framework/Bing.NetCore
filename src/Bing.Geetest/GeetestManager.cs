@@ -11,6 +11,7 @@ namespace Bing.Geetest
 {
     /// <summary>
     /// 极验管理器
+    /// 参考地址：https://www.cnblogs.com/LiangSW/p/9674273.html
     /// </summary>
     public class GeetestManager:IGeetestManager
     {
