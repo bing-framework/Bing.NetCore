@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Logs.Abstractions
+﻿namespace Bing.Logs.Abstractions
 {
     /// <summary>
     /// 日志格式化器

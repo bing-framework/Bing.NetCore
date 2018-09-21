@@ -174,7 +174,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.IdentityServer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Geetest", "src\Bing.Geetest\Bing.Geetest.csproj", "{0C43718A-1C12-45E1-936D-D26AF091014B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Skywalking", "sample\Bing.Samples.Skywalking\Bing.Samples.Skywalking.csproj", "{E3920279-942A-4F80-9462-D87AED66CDB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Skywalking", "sample\Bing.Samples.Skywalking\Bing.Samples.Skywalking.csproj", "{E3920279-942A-4F80-9462-D87AED66CDB4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "05-IM", "05-IM", "{314C2C26-6544-4852-A7F4-36E4E203A770}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.IM", "src\Bing.IM\Bing.IM.csproj", "{EE43E123-F1EA-4FF4-827E-BD67676247E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -390,6 +394,10 @@ Global
 		{E3920279-942A-4F80-9462-D87AED66CDB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3920279-942A-4F80-9462-D87AED66CDB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3920279-942A-4F80-9462-D87AED66CDB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE43E123-F1EA-4FF4-827E-BD67676247E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE43E123-F1EA-4FF4-827E-BD67676247E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE43E123-F1EA-4FF4-827E-BD67676247E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE43E123-F1EA-4FF4-827E-BD67676247E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -475,6 +483,8 @@ Global
 		{07CB0244-420B-42F3-A44C-CC287804D586} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
 		{0C43718A-1C12-45E1-936D-D26AF091014B} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 		{E3920279-942A-4F80-9462-D87AED66CDB4} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
+		{314C2C26-6544-4852-A7F4-36E4E203A770} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{EE43E123-F1EA-4FF4-827E-BD67676247E1} = {314C2C26-6544-4852-A7F4-36E4E203A770}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
