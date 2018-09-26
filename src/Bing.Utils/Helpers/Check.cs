@@ -77,7 +77,7 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void NotNull<T>(T value, string paramName) where T : class
+        public static void NotNull<T>(T value, string paramName)// where T : class
         {
             Require<ArgumentNullException>(value != null, string.Format(R.ParameterCheck_NotNull, paramName));
         }
@@ -90,7 +90,7 @@ namespace Bing.Utils.Helpers
         public static void NotNullOrEmpty(string value, string paramName)
         {
             NotNull(value, paramName);
-            Require<ArgumentException>(value.Length > 0, string.Format(R.ParameterCheck_NotNullOrEmpty_String, paramName));
+            Require<ArgumentException>(!string.IsNullOrEmpty(value), string.Format(R.ParameterCheck_NotNullOrEmpty_String, paramName));
         }
 
         /// <summary>
@@ -113,6 +113,18 @@ namespace Bing.Utils.Helpers
         {
             NotNull(collection, paramName);
             Require<ArgumentException>(collection.Any(), string.Format(R.ParameterCheck_NotNullOrEmpty_Collection, paramName));
+        }
+
+        /// <summary>
+        /// 检查字典不能为空引用或空字典，否则抛出<see cref="ArgumentNullException"/>异常或<see cref="ArgumentException"/>异常。
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="paramName"></param>
+        public static void NotNullOrEmpty<T>(IDictionary<string, T> dictionary, string paramName)
+        {
+            NotNull(dictionary,paramName);
+            Require<ArgumentException>(dictionary.Any(),string.Format(R.ParameterCheck_NotNullOrEmpty_Collection));
         }
 
         #endregion
@@ -175,6 +187,16 @@ namespace Bing.Utils.Helpers
                 ? string.Format(R.ParameterCheck_Between, paramName, start, end)
                 : string.Format(R.ParameterCheck_BetweenNotEqual, paramName, start, end, end);
             Require<ArgumentOutOfRangeException>(flag, message);
+        }
+
+        /// <summary>
+        /// 检查参数不能为负数或零，否则抛出<see cref="ArgumentOutOfRangeException"/>异常
+        /// </summary>
+        /// <param name="timeSpan">时间戳</param>
+        /// <param name="paramaName">参数名</param>
+        public static void NotNegativeOrZero(TimeSpan timeSpan, string paramaName)
+        {
+            Require<ArgumentOutOfRangeException>(timeSpan > TimeSpan.Zero, paramaName);
         }
 
         #endregion

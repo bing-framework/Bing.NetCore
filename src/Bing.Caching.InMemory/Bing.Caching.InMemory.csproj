@@ -17,6 +17,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConcurrentHashSet" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.1.1" />
   </ItemGroup>
 
