@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Caching.Hybrid;
 using Bing.Caching.InMemory;
 using Bing.Caching.Internal;
 using Bing.Caching.Redis;
@@ -49,13 +50,16 @@ namespace Bing.Samples.Caching
             });
 
             // 添加内存缓存操作
-            //services.AddDefaultInMemoryCache();
+            services.AddDefaultInMemoryCache();
 
             // 添加Redis缓存操作
             services.AddDefaultRedisCache(x =>
             {
                 x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129",6379));
             });
+
+            // 添加混合缓存操作
+            services.AddDefaultHybridCache();
 
             // 添加Bing基础设施服务
             return services.AddBing();

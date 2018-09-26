@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Caching.Hybrid\Bing.Caching.Hybrid.csproj" />
     <ProjectReference Include="..\..\src\Bing.Caching.InMemory\Bing.Caching.InMemory.csproj" />
     <ProjectReference Include="..\..\src\Bing.Caching.Redis\Bing.Caching.Redis.csproj" />
     <ProjectReference Include="..\..\src\Bing.Extensions.Swashbuckle\Bing.Extensions.Swashbuckle.csproj" />
