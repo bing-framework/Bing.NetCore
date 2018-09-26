@@ -1,42 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bing.Caching.CacheStats;
 using Bing.Logs;
 using Bing.Logs.Core;
 using Bing.Utils.Helpers;
-using ConcurrentCollections;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
-namespace Bing.Caching.InMemory
+namespace Bing.Caching.Redis
 {
     /// <summary>
-    /// 默认内存缓存提供程序
+    /// 默认Redis缓存提供程序
     /// </summary>
-    public class DefaultInMemoryCacheProvider:ICacheProvider
+    public class DefaultRedisCacheProvider:ICacheProvider
     {
         /// <summary>
-        /// 内存缓存
+        /// 缓存数据库
         /// </summary>
-        private readonly IMemoryCache _cache;
+        private readonly IDatabase _cache;
 
         /// <summary>
-        /// 选项
+        /// 服务器
         /// </summary>
-        private readonly InMemoryOptions _options;
+        private readonly IEnumerable<IServer> _servers;
 
         /// <summary>
-        /// 缓存键
+        /// Redis数据库提供程序
         /// </summary>
-        private readonly ConcurrentHashSet<string> _cacheKeys;
+        private readonly IRedisDatabaseProvider _dbProvider;
+
+        /// <summary>
+        /// 缓存序列化器
+        /// </summary>
+        private readonly ICacheSerializer _serializer;
 
         /// <summary>
         /// 日志
         /// </summary>
         private readonly ILog _log;
+
+        /// <summary>
+        /// Redis选项
+        /// </summary>
+        private readonly RedisOptions _options;
+
+        /// <summary>
+        /// 缓存统计信息
+        /// </summary>
+        private readonly CacheStatsInfo _cacheStatsInfo;
 
         /// <summary>
         /// 是否分布式缓存
@@ -61,22 +75,28 @@ namespace Bing.Caching.InMemory
         /// <summary>
         /// 缓存统计信息
         /// </summary>
-        public CacheStatsInfo CacheStatsInfo { get; }
+        public CacheStatsInfo CacheStatsInfo => _cacheStatsInfo;
 
         /// <summary>
-        /// 初始化一个<see cref="DefaultInMemoryCacheProvider"/>类型的实例
+        /// 初始化一个<see cref="DefaultRedisCacheProvider"/>类型的实例
         /// </summary>
-        /// <param name="cache">内存缓存</param>
-        /// <param name="options">内存缓存选项</param>
+        /// <param name="dbProvider">Redis数据库提供程序</param>
+        /// <param name="serializer">缓存序列化器</param>
+        /// <param name="options">Redis选项</param>
         /// <param name="log">日志</param>
-        public DefaultInMemoryCacheProvider(IMemoryCache cache, IOptionsMonitor<InMemoryOptions> options,
-            ILog log = null)
+        public DefaultRedisCacheProvider(IRedisDatabaseProvider dbProvider, ICacheSerializer serializer,
+            IOptionsMonitor<RedisOptions> options, ILog log = null)
         {
-            this._cache = cache;
+            Check.NotNull(dbProvider,nameof(dbProvider));
+            Check.NotNull(serializer,nameof(serializer));
+
+            this._dbProvider = dbProvider;
+            this._serializer = serializer;
             this._options = options.CurrentValue;
             this._log = log ?? NullLog.Instance;
-            this._cacheKeys = new ConcurrentHashSet<string>();
-            this.CacheStatsInfo = new CacheStatsInfo();
+            this._cache = _dbProvider.GetDatabase();
+            this._servers = _dbProvider.GetServerList();
+            this._cacheStatsInfo = new CacheStatsInfo();
         }
 
         /// <summary>
@@ -94,12 +114,11 @@ namespace Bing.Caching.InMemory
 
             if (MaxRdSecond > 0)
             {
-                var addSec=new Random().Next(1,MaxRdSecond);
+                var addSec = new Random().Next(1, MaxRdSecond);
                 expiry.Add(new TimeSpan(0, 0, addSec));
             }
 
-            _cache.Set(cacheKey, cacheValue, expiry);
-            _cacheKeys.Add(cacheKey);
+            _cache.StringSet(cacheKey, _serializer.Serialize(cacheValue), expiry);
         }
 
         /// <summary>
@@ -110,13 +129,15 @@ namespace Bing.Caching.InMemory
         /// <param name="expiry">过期时间</param>
         public void SetAll<T>(IDictionary<string, T> values, TimeSpan expiry)
         {
-            Check.NotNegativeOrZero(expiry,nameof(expiry));
+            Check.NotNegativeOrZero(expiry, nameof(expiry));
             Check.NotNullOrEmpty(values, nameof(values));
 
+            var batch = _cache.CreateBatch();
             foreach (var value in values)
             {
-                this.Set(value.Key,value.Value,expiry);
+                batch.StringSetAsync(value.Key, _serializer.Serialize(value.Value), expiry);
             }
+            batch.Execute();
         }
 
         /// <summary>
@@ -138,12 +159,7 @@ namespace Bing.Caching.InMemory
                 expiry.Add(new TimeSpan(0, 0, addSec));
             }
 
-            await Task.Run(() =>
-            {
-                _cache.Set(cacheKey, cacheValue, expiry);
-                _cacheKeys.Add(cacheKey);
-            });
-
+            await _cache.StringSetAsync(cacheKey, _serializer.Serialize(cacheValue), expiry);
         }
 
         /// <summary>
@@ -158,9 +174,10 @@ namespace Bing.Caching.InMemory
             Check.NotNullOrEmpty(values, nameof(values));
 
             var tasks=new List<Task>();
+
             foreach (var value in values)
             {
-                tasks.Add(SetAsync(value.Key, value.Value, expiry));
+                tasks.Add(SetAsync(value.Key,value.Value,expiry));
             }
             await Task.WhenAll(tasks);
         }
@@ -175,11 +192,14 @@ namespace Bing.Caching.InMemory
         {
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
 
-            if (_cache.Get(cacheKey) is T result)
+            var result = _cache.StringGet(cacheKey);
+
+            if (!result.IsNull)
             {
                 WriteLog($"缓存击中 : cacheKey = {cacheKey}");
                 CacheStatsInfo.OnHit();
-                return new CacheValue<T>(result, true);
+                var value = _serializer.Deserialize<T>(result);
+                return new CacheValue<T>(value, true);
             }
 
             CacheStatsInfo.OnMiss();
@@ -199,23 +219,25 @@ namespace Bing.Caching.InMemory
         public CacheValue<T> Get<T>(string cacheKey, Func<T> dataRetriever, TimeSpan expiry) where T : class
         {
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
-            Check.NotNegativeOrZero(expiry,nameof(expiry));
+            Check.NotNegativeOrZero(expiry, nameof(expiry));
 
-            if (_cache.Get(cacheKey) is T result)
+            var result = _cache.StringGet(cacheKey);
+            if (!result.IsNull)
             {
                 WriteLog($"缓存击中 : cacheKey = {cacheKey}");
                 CacheStatsInfo.OnHit();
-                return new CacheValue<T>(result, true);
+                var value = _serializer.Deserialize<T>(result);
+                return new CacheValue<T>(value, true);
             }
 
             CacheStatsInfo.OnMiss();
             WriteLog($"缓存穿透 : cacheKey = {cacheKey}");
 
-            result = dataRetriever?.Invoke();
-            if (result != null)
+            var item = dataRetriever?.Invoke();
+            if (item != null)
             {
-                Set(cacheKey, result, expiry);
-                return new CacheValue<T>(result,true);
+                Set(cacheKey, item, expiry);
+                return new CacheValue<T>(item, true);
             }
             return CacheValue<T>.NoValue;
         }
@@ -231,12 +253,24 @@ namespace Bing.Caching.InMemory
             Check.NotNullOrEmpty(cacheKeys, nameof(cacheKeys));
             WriteLog($"GetAll : cacheKeys = {string.Join(",", cacheKeys)}");
 
-            var map = new Dictionary<string, CacheValue<T>>();
-            foreach (var cacheKey in cacheKeys)
+            var keyArray = cacheKeys.ToArray();
+            var values = _cache.StringGet(keyArray.Select(x => (RedisKey) x).ToArray());
+
+            var result = new Dictionary<string, CacheValue<T>>();
+            for (var i = 0; i < keyArray.Length; i++)
             {
-                map[cacheKey] = Get<T>(cacheKey);
+                var cachedValue = values[i];
+                if (!cachedValue.IsNull)
+                {
+                    result.Add(keyArray[i], new CacheValue<T>(_serializer.Deserialize<T>(cachedValue), true));
+                }
+                else
+                {
+                    result.Add(keyArray[i], CacheValue<T>.NoValue);
+                }
             }
-            return map;
+
+            return result;
         }
 
         /// <summary>
@@ -248,20 +282,94 @@ namespace Bing.Caching.InMemory
         public IDictionary<string, CacheValue<T>> GetByPrefix<T>(string prefix)
         {
             Check.NotNullOrEmpty(prefix, nameof(prefix));
+
+            prefix = this.HandlerPrefix(prefix);
             WriteLog($"GetByPrefix : prefix = {prefix}");
 
-            var map = new Dictionary<string, CacheValue<T>>();
-            var keys = _cacheKeys.Where(x => x.StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase));
+            var redisKeys = this.SearchRedisKeys(prefix);
 
-            if (keys.Any())
+            var values = _cache.StringGet(redisKeys).ToArray();
+
+            var result = new Dictionary<string, CacheValue<T>>();
+
+            for (var i = 0; i < redisKeys.Length; i++)
             {
-                foreach (var key in keys)
+                var cachedValue = values[i];
+                if (!cachedValue.IsNull)
                 {
-                    map[key] = Get<T>(key);
+                    result.Add(redisKeys[i], new CacheValue<T>(_serializer.Deserialize<T>(cachedValue), true));
+                }
+                else
+                {
+                    result.Add(redisKeys[i], CacheValue<T>.NoValue);
                 }
             }
 
-            return map;
+            return result;
+        }
+
+        /// <summary>
+        /// 处理缓存键前缀
+        /// </summary>
+        /// <param name="prefix">前缀</param>
+        /// <returns></returns>
+        private string HandlerPrefix(string prefix)
+        {
+            // 禁止
+            if (prefix.Trim().Equals("*"))
+            {
+                throw new ArgumentException("前缀不能等于 * ");
+            }
+            // 禁止前缀开头为 *
+            prefix = new Regex("^\\*+").Replace(prefix, "");
+
+            // 尾部匹配 *
+            if (!prefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
+            {
+                prefix = string.Concat(prefix, "*");
+            }
+
+            return prefix;
+        }
+
+        /// <summary>
+        /// 查询Redis缓存键
+        /// </summary>
+        /// <param name="pattern">前缀</param>
+        /// <remarks>
+        /// 如果您的Redis服务器支持命令 SCAN，
+        /// IServer.Keys 将使用命令SCAN找出密钥，
+        /// 以下：
+        /// https://github.com/StackExchange/StackExchange.Redis/blob/master/StackExchange.Redis/StackExchange/Redis/RedisServer.cs#L289
+        /// </remarks>
+        /// <returns></returns>
+        private RedisKey[] SearchRedisKeys(string pattern)
+        {
+            var keys=new List<RedisKey>();
+
+            foreach (var server in _servers)
+            {
+                keys.AddRange(server.Keys(pattern: pattern));
+            }
+            return keys.Distinct().ToArray();
+
+            //var keys = new HashSet<RedisKey>();
+
+            //int nextCursor = 0;
+            //do
+            //{
+            //    RedisResult redisResult = _cache.Execute("SCAN", nextCursor.ToString(), "MATCH", pattern, "COUNT", "1000");
+            //    var innerResult = (RedisResult[])redisResult;
+
+            //    nextCursor = int.Parse((string)innerResult[0]);
+
+            //    List<RedisKey> resultLines = ((RedisKey[])innerResult[1]).ToList();
+
+            //    keys.UnionWith(resultLines);
+            //}
+            //while (nextCursor != 0);
+
+            //return keys.ToArray();
         }
 
         /// <summary>
@@ -274,13 +382,14 @@ namespace Bing.Caching.InMemory
         {
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
 
-            var result = await Task.FromResult((T) _cache.Get(cacheKey));
+            var result =await _cache.StringGetAsync(cacheKey);
 
-            if (result != null)
+            if (!result.IsNull)
             {
                 WriteLog($"缓存击中 : cacheKey = {cacheKey}");
                 CacheStatsInfo.OnHit();
-                return new CacheValue<T>(result, true);
+                var value = _serializer.Deserialize<T>(result);
+                return new CacheValue<T>(value, true);
             }
 
             CacheStatsInfo.OnMiss();
@@ -302,21 +411,23 @@ namespace Bing.Caching.InMemory
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
             Check.NotNegativeOrZero(expiry, nameof(expiry));
 
-            if (_cache.Get(cacheKey) is T result)
+            var result = await _cache.StringGetAsync(cacheKey);
+            if (!result.IsNull)
             {
                 WriteLog($"缓存击中 : cacheKey = {cacheKey}");
                 CacheStatsInfo.OnHit();
-                return new CacheValue<T>(result, true);
+                var value = _serializer.Deserialize<T>(result);
+                return new CacheValue<T>(value, true);
             }
 
             CacheStatsInfo.OnMiss();
             WriteLog($"缓存穿透 : cacheKey = {cacheKey}");
 
-            result =await dataRetriever?.Invoke();
-            if (result != null)
+            var item = await dataRetriever?.Invoke();
+            if (item != null)
             {
-                Set(cacheKey, result, expiry);
-                return new CacheValue<T>(result, true);
+                await SetAsync(cacheKey, item, expiry);
+                return new CacheValue<T>(item, true);
             }
             return CacheValue<T>.NoValue;
         }
@@ -327,19 +438,29 @@ namespace Bing.Caching.InMemory
         /// <typeparam name="T">数据类型</typeparam>
         /// <param name="cacheKeys">缓存键集合</param>
         /// <returns></returns>
-        public Task<IDictionary<string, CacheValue<T>>> GetAllAsync<T>(IEnumerable<string> cacheKeys)
+        public async Task<IDictionary<string, CacheValue<T>>> GetAllAsync<T>(IEnumerable<string> cacheKeys)
         {
             Check.NotNullOrEmpty(cacheKeys, nameof(cacheKeys));
             WriteLog($"GetAllAsync : cacheKeys = {string.Join(",", cacheKeys)}");
 
-            var map = new Dictionary<string, Task<CacheValue<T>>>();
-            foreach (var cacheKey in cacheKeys)
+            var keyArray = cacheKeys.ToArray();
+            var values = await _cache.StringGetAsync(keyArray.Select(x => (RedisKey)x).ToArray());
+
+            var result = new Dictionary<string, CacheValue<T>>();
+            for (var i = 0; i < keyArray.Length; i++)
             {
-                map[cacheKey] = GetAsync<T>(cacheKey);
+                var cachedValue = values[i];
+                if (!cachedValue.IsNull)
+                {
+                    result.Add(keyArray[i], new CacheValue<T>(_serializer.Deserialize<T>(cachedValue), true));
+                }
+                else
+                {
+                    result.Add(keyArray[i], CacheValue<T>.NoValue);
+                }
             }
 
-            return Task.WhenAll(map.Values).ContinueWith<IDictionary<string, CacheValue<T>>>(
-                t => map.ToDictionary(k => k.Key, v => v.Value.Result), TaskContinuationOptions.OnlyOnRanToCompletion);
+            return result;
         }
 
         /// <summary>
@@ -348,24 +469,33 @@ namespace Bing.Caching.InMemory
         /// <typeparam name="T">数据类型</typeparam>
         /// <param name="prefix">缓存键前缀</param>
         /// <returns></returns>
-        public Task<IDictionary<string, CacheValue<T>>> GetByPrefixAsync<T>(string prefix)
+        public async Task<IDictionary<string, CacheValue<T>>> GetByPrefixAsync<T>(string prefix)
         {
             Check.NotNullOrEmpty(prefix, nameof(prefix));
+
+            prefix = this.HandlerPrefix(prefix);
             WriteLog($"GetByPrefixAsync : prefix = {prefix}");
 
-            var map = new Dictionary<string, Task<CacheValue<T>>>();
-            var keys = _cacheKeys.Where(x => x.StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase));
+            var redisKeys = this.SearchRedisKeys(prefix);
 
-            if (keys.Any())
+            var values = (await _cache.StringGetAsync(redisKeys)).ToArray();
+
+            var result = new Dictionary<string, CacheValue<T>>();
+
+            for (var i = 0; i < redisKeys.Length; i++)
             {
-                foreach (var key in keys)
+                var cachedValue = values[i];
+                if (!cachedValue.IsNull)
                 {
-                    map[key] = GetAsync<T>(key);
+                    result.Add(redisKeys[i], new CacheValue<T>(_serializer.Deserialize<T>(cachedValue), true));
+                }
+                else
+                {
+                    result.Add(redisKeys[i], CacheValue<T>.NoValue);
                 }
             }
 
-            return Task.WhenAll(map.Values).ContinueWith<IDictionary<string, CacheValue<T>>>(
-                t => map.ToDictionary(k => k.Key, v => v.Value.Result), TaskContinuationOptions.OnlyOnRanToCompletion);
+            return result;
         }
 
         /// <summary>
@@ -377,8 +507,7 @@ namespace Bing.Caching.InMemory
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
             WriteLog($"Remove : cacheKey = {cacheKey}");
 
-            _cache.Remove(cacheKey);
-            _cacheKeys.TryRemove(cacheKey);
+            _cache.KeyDelete(cacheKey);
         }
 
         /// <summary>
@@ -388,16 +517,13 @@ namespace Bing.Caching.InMemory
         public void RemoveByPrefix(string prefix)
         {
             Check.NotNullOrEmpty(prefix, nameof(prefix));
+
+            prefix = this.HandlerPrefix(prefix);
             WriteLog($"RemoveByPrefix : prefix = {prefix}");
 
-            var keys = _cacheKeys.Where(x => x.StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (keys.Any())
-            {
-                foreach (var key in keys)
-                {
-                    this.Remove(key);
-                }
-            }
+            var redisKeys = this.SearchRedisKeys(prefix);
+
+            _cache.KeyDelete(redisKeys);
         }
 
         /// <summary>
@@ -409,9 +535,10 @@ namespace Bing.Caching.InMemory
             Check.NotNullOrEmpty(cacheKeys, nameof(cacheKeys));
             WriteLog($"RemoveAll : cacheKeys = {string.Join(",", cacheKeys)}");
 
-            foreach (var key in cacheKeys.Distinct())
+            var redisKeys = cacheKeys.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => (RedisKey) x).ToArray();
+            if (redisKeys.Length > 0)
             {
-                _cache.Remove(key);
+                _cache.KeyDelete(redisKeys);
             }
         }
 
@@ -424,11 +551,7 @@ namespace Bing.Caching.InMemory
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
             WriteLog($"RemoveAsync : cacheKey = {cacheKey}");
 
-            await Task.Run(() =>
-            {
-                _cache.Remove(cacheKey);
-                _cacheKeys.TryRemove(cacheKey);
-            });
+            await _cache.KeyDeleteAsync(cacheKey);
         }
 
         /// <summary>
@@ -438,19 +561,13 @@ namespace Bing.Caching.InMemory
         public async Task RemoveByPrefixAsync(string prefix)
         {
             Check.NotNullOrEmpty(prefix, nameof(prefix));
+
+            prefix = this.HandlerPrefix(prefix);
             WriteLog($"RemoveByPrefixAsync : prefix = {prefix}");
 
-            var keys = _cacheKeys.Where(x => x.StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (keys.Any())
-            {
-                var tasks = new List<Task>();
-                foreach (var key in keys)
-                {
-                    tasks.Add(this.RemoveAsync(key));
-                }
+            var redisKeys = this.SearchRedisKeys(prefix);
 
-                await Task.WhenAll(tasks);
-            }
+            await _cache.KeyDeleteAsync(redisKeys);
         }
 
         /// <summary>
@@ -460,16 +577,13 @@ namespace Bing.Caching.InMemory
         public async Task RemoveAllAsync(IEnumerable<string> cacheKeys)
         {
             Check.NotNullOrEmpty(cacheKeys, nameof(cacheKeys));
-
             WriteLog($"RemoveAllAsync : cacheKeys = {string.Join(",", cacheKeys)}");
 
-            var tasks=new List<Task>();
-            foreach (var key in cacheKeys.Distinct())
+            var redisKeys = cacheKeys.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => (RedisKey)x).ToArray();
+            if (redisKeys.Length > 0)
             {
-                tasks.Add(this.RemoveAsync(key));
+                await _cache.KeyDeleteAsync(redisKeys);
             }
-
-            await Task.WhenAll(tasks);
         }
 
         /// <summary>
@@ -479,9 +593,9 @@ namespace Bing.Caching.InMemory
         /// <returns></returns>
         public bool Exists(string cacheKey)
         {
-            Check.NotNullOrEmpty(cacheKey,nameof(cacheKey));
+            Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
 
-            return _cache.TryGetValue(cacheKey, out var value);
+            return _cache.KeyExists(cacheKey);
         }
 
         /// <summary>
@@ -493,7 +607,7 @@ namespace Bing.Caching.InMemory
         {
             Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
 
-            return await Task.FromResult(_cache.TryGetValue(cacheKey, out var value));
+            return await _cache.KeyExistsAsync(cacheKey);
         }
 
         /// <summary>
@@ -505,9 +619,9 @@ namespace Bing.Caching.InMemory
         /// <param name="expiry">过期时间</param>
         public void Refresh<T>(string cacheKey, T cacheValue, TimeSpan expiry)
         {
-            Check.NotNullOrEmpty(cacheKey,nameof(cacheKey));
-            Check.NotNull(cacheValue,nameof(cacheValue));
-            Check.NotNegativeOrZero(expiry,nameof(expiry));
+            Check.NotNullOrEmpty(cacheKey, nameof(cacheKey));
+            Check.NotNull(cacheValue, nameof(cacheValue));
+            Check.NotNegativeOrZero(expiry, nameof(expiry));
 
             this.Remove(cacheKey);
             this.Set(cacheKey,cacheValue,expiry);
@@ -537,9 +651,18 @@ namespace Bing.Caching.InMemory
         /// <returns></returns>
         public int GetCount(string prefix = "")
         {
-            return string.IsNullOrWhiteSpace(prefix)
-                ? _cacheKeys.Count
-                : _cacheKeys.Count(x => x.StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrWhiteSpace(prefix))
+            {
+                var allCount = 0;
+                foreach (var server in _servers)
+                {
+                    allCount += (int) server.DatabaseSize(_cache.Database);
+                }
+
+                return allCount;
+            }
+
+            return this.SearchRedisKeys(this.HandlerPrefix(prefix)).Length;
         }
 
         /// <summary>
@@ -549,12 +672,10 @@ namespace Bing.Caching.InMemory
         {
             WriteLog($"Flush");
 
-            foreach (var key in _cacheKeys)
+            foreach (var server in _servers)
             {
-                _cache.Remove(key);
+                server.FlushDatabase(_cache.Database);
             }
-
-            _cacheKeys.Clear();
         }
 
         /// <summary>
@@ -564,9 +685,14 @@ namespace Bing.Caching.InMemory
         {
             WriteLog($"FlushAsync");
 
-            Flush();
+            var tasks = new List<Task>();
 
-            await Task.CompletedTask;
+            foreach (var server in _servers)
+            {
+                tasks.Add(server.FlushDatabaseAsync(_cache.Database));
+            }
+
+            await Task.WhenAll(tasks);
         }
 
         /// <summary>

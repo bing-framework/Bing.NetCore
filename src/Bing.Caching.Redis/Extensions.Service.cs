@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Bing.Caching.Default;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.Caching.Redis
 {
@@ -9,27 +12,33 @@ namespace Bing.Caching.Redis
     public static partial class Extensions
     {
         /// <summary>
-        /// 注册 Default Redis 缓存操作
+        /// 注册Redis缓存操作
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="providerAction">提供程序操作</param>
+        public static void AddDefaultRedisCache(this IServiceCollection services, Action<RedisOptions> providerAction)
+        {
+            services.AddOptions();
+            services.Configure(providerAction);
+
+            services.TryAddSingleton<ICacheSerializer, DefaultBinaryFormatterSerializer>();
+            services.TryAddSingleton<IRedisDatabaseProvider, RedisDatabaseProvider>();
+            services.TryAddSingleton<ICacheProvider, DefaultRedisCacheProvider>();
+        }
+
+        /// <summary>
+        /// 注册Redis缓存操作
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="configuration">配置</param>
-        /// <param name="useHybridMode">是否启用混合模式</param>
-        public static void AddDefaultRedisCache(this IServiceCollection services, IConfiguration configuration,
-            bool useHybridMode = false)
+        public static void AddDefaultRedisCache(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<RedisCacheOptions>(options =>
-            {
-                RedisBootstrap.SetRedisCacheOptions(configuration, options);
-            });
+            var cacheConfig = configuration.GetSection(CacheConst.RedisSection);
+            services.Configure<RedisOptions>(cacheConfig);
 
-            if (useHybridMode)
-            {
-                services.AddSingleton<IRedisCacheManager, DefaultRedisCacheManager>();
-            }
-            else
-            {
-                services.AddSingleton<ICacheManager, DefaultRedisCacheManager>();
-            }
+            services.TryAddSingleton<ICacheSerializer, DefaultBinaryFormatterSerializer>();
+            services.TryAddSingleton<IRedisDatabaseProvider, RedisDatabaseProvider>();
+            services.TryAddSingleton<ICacheProvider, DefaultRedisCacheProvider>();
         }
     }
 }

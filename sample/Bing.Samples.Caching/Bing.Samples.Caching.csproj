@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Caching.InMemory\Bing.Caching.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Caching.Redis\Bing.Caching.Redis.csproj" />
     <ProjectReference Include="..\..\src\Bing.Extensions.Swashbuckle\Bing.Extensions.Swashbuckle.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\src\Bing.Webs\Bing.Webs.csproj" />
