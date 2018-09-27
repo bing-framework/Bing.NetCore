@@ -49,16 +49,22 @@ namespace Bing.Samples.Caching
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Samples.Caching.xml"));
             });
 
-            // 添加内存缓存操作
-            services.AddDefaultInMemoryCache();
+            //// 添加内存缓存操作
+            //services.AddDefaultInMemoryCache();
 
-            // 添加Redis缓存操作
-            services.AddDefaultRedisCache(x =>
-            {
-                x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129",6379));
-            });
+            //// 添加Redis缓存操作
+            //services.AddDefaultRedisCache(x =>
+            //{
+            //    x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129",6379));
+            //});
 
             // 添加混合缓存操作
+            services.AddDefaultInMemoryCache(x => { x.Order = 1; });
+            services.AddDefaultRedisCache(x =>
+            {
+                x.Order = 2;
+                x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129", 6379));
+            });
             services.AddDefaultHybridCache();
 
             // 添加Bing基础设施服务

@@ -234,6 +234,12 @@ Bing 框架Nuget包分布
   - 手机号码生成器 [已发布]
   - 姓名生成器 [已发布]
   - 邮箱生成器 [已发布]
+- 缓存操作
+  - 运行时内存缓存操作 [已发布]
+  - Redis 缓存操作 [已发布]
+  - 混合缓存操作 [开发中]
+  - Memcached 缓存操作 [开发中]
+  - SQLite 操作 [开发中]
 - 支付操作
   - 支付宝
   - 微信
@@ -263,6 +269,10 @@ Bing 框架Nuget包分布
 - 2018年07月09日，更新了字节扩展、字符扩展、long扩展、int扩展、double扩展、float扩展、字节数组扩展、List扩展、IEnumerable扩展、文件存储器。
 - 2018年07月10日，更新了二维码操作(Bing.Tools.QrCode，基于QRCoder以及ZXing.Net)以及相关单元测试。
 - 2018年09月03日，更新了日志操作(Bing.Logs.Serilog，基于Serilog)。
+- 2018年09月24日，更新了缓存操作(Bing.Caching.InMemory，基于内存)。
+- 2018年09月25日，更新了缓存操作(Bing.Caching.Redis，基于StackExchange.Redis)。
+- 2018年09月26日，更新了缓存操作(Bing.Caching.Hybrid)。
+- 2018年09月27日，更新了缓存操作(Bing.Caching.Memcached)。
 ## 架构说明
 
 ## 常用Api

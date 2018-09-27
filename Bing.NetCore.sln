@@ -180,7 +180,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "05-IM", "05-IM", "{314C2C26
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.IM", "src\Bing.IM\Bing.IM.csproj", "{EE43E123-F1EA-4FF4-827E-BD67676247E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Caching", "sample\Bing.Samples.Caching\Bing.Samples.Caching.csproj", "{93D32430-2F50-4B8B-A1CF-E318AC5D6EFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Caching", "sample\Bing.Samples.Caching\Bing.Samples.Caching.csproj", "{93D32430-2F50-4B8B-A1CF-E318AC5D6EFA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching.Memcached", "src\Bing.Caching.Memcached\Bing.Caching.Memcached.csproj", "{EB39491E-D3C4-4BB1-8A09-BD56EBBDDF60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -404,6 +406,10 @@ Global
 		{93D32430-2F50-4B8B-A1CF-E318AC5D6EFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93D32430-2F50-4B8B-A1CF-E318AC5D6EFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93D32430-2F50-4B8B-A1CF-E318AC5D6EFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB39491E-D3C4-4BB1-8A09-BD56EBBDDF60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB39491E-D3C4-4BB1-8A09-BD56EBBDDF60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB39491E-D3C4-4BB1-8A09-BD56EBBDDF60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB39491E-D3C4-4BB1-8A09-BD56EBBDDF60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -492,6 +498,7 @@ Global
 		{314C2C26-6544-4852-A7F4-36E4E203A770} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
 		{EE43E123-F1EA-4FF4-827E-BD67676247E1} = {314C2C26-6544-4852-A7F4-36E4E203A770}
 		{93D32430-2F50-4B8B-A1CF-E318AC5D6EFA} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
+		{EB39491E-D3C4-4BB1-8A09-BD56EBBDDF60} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
