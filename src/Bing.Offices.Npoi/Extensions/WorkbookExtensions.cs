@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using Bing.Offices.Excels.Enums;
 using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -118,6 +120,30 @@ namespace Bing.Offices.Npoi.Extensions
                 workbook.Write(ms);
                 return ms.ToArray();
             }
+        }
+
+        /// <summary>
+        /// 获取Xls颜色
+        /// </summary>
+        /// <param name="workbook">工作簿</param>
+        /// <param name="color">系统颜色</param>
+        /// <returns></returns>
+        public static short GetXlsColour(this HSSFWorkbook workbook, Color color)
+        {
+            short s = 0;
+            HSSFPalette palette = workbook.GetCustomPalette(); //调色板实例
+            HSSFColor hssfColor = palette.FindColor(color.R, color.G, color.B);
+            if (hssfColor == null)
+            {
+                hssfColor = palette.FindSimilarColor(color.R, color.G, color.B);
+                s = hssfColor.Indexed;
+            }
+            else
+            {
+                s = hssfColor.Indexed;
+            }
+
+            return s;
         }
     }
 }

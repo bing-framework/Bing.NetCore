@@ -26,4 +26,8 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
     <Folder Include="Words\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
+  </ItemGroup>
+
 </Project>

@@ -24,24 +24,18 @@ namespace Bing.Offices.Npoi.Extensions
                 return string.Empty;
             }
 
-            if (cell.CellType == CellType.String)
+            switch (cell.CellType)
             {
-                return cell.StringCellValue;
-            }
-
-            if (cell.CellType == CellType.Boolean)
-            {
-                return cell.BooleanCellValue.ToString();
-            }
-
-            if (cell.CellType == CellType.Formula)
-            {
-                return cell.CellFormula;
-            }
-
-            if (cell.CellType == CellType.Numeric)
-            {
-                return cell.NumericCellValue.ToString(CultureInfo.InvariantCulture);
+                case CellType.String:
+                    return cell.StringCellValue;
+                case CellType.Boolean:
+                    return cell.BooleanCellValue.ToString();
+                case CellType.Formula:
+                    return cell.CellFormula;
+                case CellType.Numeric:
+                    return DateUtil.IsCellDateFormatted(cell)
+                        ? cell.DateCellValue.ToString(CultureInfo.InvariantCulture)
+                        : cell.NumericCellValue.ToString(CultureInfo.InvariantCulture);
             }
 
             cell.SetCellType(CellType.String);
