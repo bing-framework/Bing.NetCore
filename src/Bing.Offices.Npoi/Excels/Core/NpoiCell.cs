@@ -34,6 +34,9 @@ namespace Bing.Offices.Npoi.Excels.Core
             set => _cell.CellStyle.GetFont(_cell.Sheet.Workbook).IsItalic = value;
         }
 
+        public int ColSpan { get; }
+        public bool MergeCell { get; set; }
+
         /// <summary>
         /// 初始化一个<see cref="NpoiCell"/>类型的实例
         /// </summary>
@@ -59,6 +62,11 @@ namespace Bing.Offices.Npoi.Excels.Core
         public void SetValue(string value)
         {
             _cell.SetValue(value);
+        }
+
+        public void SetValue(object value)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <summary>

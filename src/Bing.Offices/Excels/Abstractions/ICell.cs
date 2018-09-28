@@ -18,6 +18,16 @@ namespace Bing.Offices.Excels.Abstractions
         bool Italic { get; set; }
 
         /// <summary>
+        /// 获取合并单元格的列跨度
+        /// </summary>
+        int ColSpan { get; }
+
+        /// <summary>
+        /// 是否合并单元格
+        /// </summary>
+        bool MergeCell { get; set; }
+
+        /// <summary>
         /// 获取单元格的值
         /// </summary>
         /// <returns></returns>
@@ -28,6 +38,12 @@ namespace Bing.Offices.Excels.Abstractions
         /// </summary>
         /// <param name="value">值</param>
         void SetValue(string value);
+
+        /// <summary>
+        /// 设置单元格的值
+        /// </summary>
+        /// <param name="value">值</param>
+        void SetValue(object value);
 
         /// <summary>
         /// 设置单元格的计算公式

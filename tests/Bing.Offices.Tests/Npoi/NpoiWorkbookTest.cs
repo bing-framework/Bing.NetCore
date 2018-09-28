@@ -1,4 +1,5 @@
-﻿using Bing.Offices.Excels.Abstractions;
+﻿using System.Drawing;
+using Bing.Offices.Excels.Abstractions;
 using Bing.Offices.Excels.Enums;
 using Bing.Offices.Npoi.Excels.Core;
 using Xunit;
@@ -24,6 +25,10 @@ namespace Bing.Offices.Tests.Npoi
             sheet.InsertRow(1);
             var cell = sheet.GetCell(1, 1);
             cell.SetValue("测试数值");
+            cell.SetFontColor(Color.Yellow);
+            cell.SetBackgroundColor(Color.Red);
+            cell.Italic = true;
+            cell.Bold = true;
             workbook.Save("D:\\测试Npoi.xlsx");
         }
     }

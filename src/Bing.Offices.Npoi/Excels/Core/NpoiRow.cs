@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.Drawing;
 using Bing.Offices.Npoi.Extensions;
 using NPOI.HSSF.UserModel;
@@ -44,6 +45,10 @@ namespace Bing.Offices.Npoi.Excels.Core
             get => _row.RowStyle.GetFont(_sheet.Workbook).IsItalic;
             set => _row.RowStyle.GetFont(_sheet.Workbook).IsItalic = value;
         }
+
+        public int RowIndex { get; }
+        public int ColCount { get; }
+        public int ColSpanCount { get; }
 
         /// <summary>
         /// 初始化一个<see cref="NpoiRow"/>类型的实例
@@ -144,6 +149,16 @@ namespace Bing.Offices.Npoi.Excels.Core
         {
             ICell cell = _row.GetCell(columnIndex);
             return new NpoiCell(cell);
+        }
+
+        public void AddCell(Offices.Excels.Abstractions.ICell cell)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IList<Offices.Excels.Abstractions.ICell> GetCells()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
