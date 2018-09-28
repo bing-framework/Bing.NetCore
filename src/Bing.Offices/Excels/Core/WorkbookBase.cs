@@ -58,13 +58,13 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 加载工作簿
         /// </summary>
-        /// <param name="fileName">文件名称</param>
+        /// <param name="fileName">文件名称，绝对路径</param>
         protected abstract void LoadWorkbook(string fileName);
 
         /// <summary>
         /// 获取Excel格式类型
         /// </summary>
-        /// <param name="fileName">文件名称</param>
+        /// <param name="fileName">文件名称，绝对路径</param>
         /// <returns></returns>
         protected ExcelFormat GetExcelFormat(string fileName)
         {

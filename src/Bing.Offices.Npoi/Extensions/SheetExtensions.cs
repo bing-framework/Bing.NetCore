@@ -252,6 +252,7 @@ namespace Bing.Offices.Npoi.Extensions
             for (var i = 0; i < rowsCount; i++)
             {
                 IRow row = sheet.CreateRow(rowIndex + i);
+                rows.Add(row);
             }
 
             sheet.MovePictures(rowIndex, null, null, null, moveRowCount: rowsCount);
