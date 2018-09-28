@@ -37,15 +37,13 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 工作表
         /// </summary>
-        IWorkSheet Sheet { get; }
+        IWorkSheet Sheet { get; set; }
 
         /// <summary>
         /// 添加单元格
         /// </summary>
         /// <param name="value">值</param>
-        /// <param name="columnSpan">列跨度</param>
-        /// <param name="rowSpan">行跨度</param>
-        void Add(object value, int columnSpan = 1, int rowSpan = 1);
+        void Add(object value);
 
         /// <summary>
         /// 添加单元格

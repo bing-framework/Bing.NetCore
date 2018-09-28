@@ -79,12 +79,5 @@ namespace Bing.Offices.Excels.Abstractions
         /// <param name="formula">公式</param>
         /// <returns></returns>
         ICell SetFormula(string formula);
-
-        /// <summary>
-        /// 设置单元格的范围
-        /// </summary>
-        /// <param name="range">单元格范围</param>
-        /// <returns></returns>
-        void SetRange(ICellRange range);
     }
 }

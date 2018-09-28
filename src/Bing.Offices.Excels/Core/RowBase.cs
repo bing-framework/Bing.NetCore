@@ -45,7 +45,7 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 工作表
         /// </summary>
-        public abstract IWorkSheet Sheet { get; }
+        public IWorkSheet Sheet { get; set; }
 
         protected RowBase(int rowIndex)
         {
@@ -58,9 +58,7 @@ namespace Bing.Offices.Excels.Core
         /// 添加单元格
         /// </summary>
         /// <param name="value">值</param>
-        /// <param name="columnSpan">列跨度</param>
-        /// <param name="rowSpan">行跨度</param>
-        public abstract void Add(object value, int columnSpan = 1, int rowSpan = 1);
+        public abstract void Add(object value);
 
         /// <summary>
         /// 添加单元格

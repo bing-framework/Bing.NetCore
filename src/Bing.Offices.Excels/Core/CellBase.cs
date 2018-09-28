@@ -78,20 +78,7 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 单元格范围
         /// </summary>
-        public abstract ICellRange Range { get; internal set; }
-
-        /// <summary>
-        /// 初始化一个<see cref="CellBase"/>类型的实例
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="columnSpan">列跨度</param>
-        /// <param name="rowSpan">行跨度</param>
-        protected CellBase(object value, int columnSpan = 1, int rowSpan = 1)
-        {
-            Value = value;
-            ColumnSpan = columnSpan;
-            RowSpan = rowSpan;
-        }
+        public abstract ICellRange Range { get; }
 
         /// <summary>
         /// 设置单元格的值
@@ -128,14 +115,5 @@ namespace Bing.Offices.Excels.Core
         /// <param name="formula">公式</param>
         /// <returns></returns>
         public abstract ICell SetFormula(string formula);
-
-        /// <summary>
-        /// 设置单元格的范围
-        /// </summary>
-        /// <param name="range">单元格范围</param>
-        public void SetRange(ICellRange range)
-        {
-            Range = range;
-        }
     }
 }

@@ -67,7 +67,7 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 单元行列表
         /// </summary>
-        public abstract IList<IRow> Rows { get; }
+        public IList<IRow> Rows { get; protected set; }
 
         /// <summary>
         /// 单元行
