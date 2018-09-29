@@ -1,5 +1,4 @@
 ﻿using Bing.Offices.Excels.Core.Styles;
-using Bing.Offices.Excels.Npoi.Extensions;
 using NPOI.SS.UserModel;
 
 namespace Bing.Offices.Excels.Npoi.Resolvers
@@ -55,6 +54,7 @@ namespace Bing.Offices.Excels.Npoi.Resolvers
             _result.Alignment = GetHorizontalAlignment();
             _result.VerticalAlignment = GetVerticalAlignment();
             SetBackgroundColor();
+            SetForegroundColor();
             SetFillPattern();
             SetBorderColor();
             SetFont();
@@ -114,6 +114,14 @@ namespace Bing.Offices.Excels.Npoi.Resolvers
         private void SetBackgroundColor()
         {
             _result.FillBackgroundColor = ColorResolver.Resolve(_style.BackgroundColor);
+        }
+
+        /// <summary>
+        /// 设置前景色
+        /// </summary>
+        private void SetForegroundColor()
+        {
+            _result.FillForegroundColor = ColorResolver.Resolve(_style.ForegroundColor);
         }
 
         /// <summary>
@@ -201,6 +209,7 @@ namespace Bing.Offices.Excels.Npoi.Resolvers
             font.FontHeightInPoints = _style.FontSize;
             font.Color = ColorResolver.Resolve(_style.FontColor);
             font.Boldweight = _style.FontBoldWeight;
+            font.IsItalic = _style.Italic;
             _result.SetFont(font);
         }
 

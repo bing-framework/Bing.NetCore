@@ -1,4 +1,3 @@
-using System;
 using Bing.Offices.Excels.Abstractions;
 using Bing.Offices.Excels.Core.Styles;
 using Bing.Offices.Excels.Npoi.Core;
@@ -19,9 +18,10 @@ namespace Bing.Offices.Excels.Tests
             cell.SetStyle(new CellStyle()
             {
                 FontColor = Color.Blue,
-                BackgroundColor = Color.Red,
+                ForegroundColor = Color.Yellow,
                 FillPattern = FillPattern.SolidForeground
             });
+
             workbook.SaveToFile("D:\\≤‚ ‘Npoi_007.xlsx");
         }
     }

@@ -23,6 +23,11 @@
         public Color BackgroundColor { get; set; }
 
         /// <summary>
+        /// 前景色。需要同时设置 FillPattern.SolidForeground
+        /// </summary>
+        public Color ForegroundColor { get; set; }
+
+        /// <summary>
         /// 填充模式
         /// </summary>
         public FillPattern FillPattern { get; set; }
@@ -87,6 +92,7 @@
                 Alignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 BackgroundColor = Color.LightGreen,
+                ForegroundColor = Color.LightGreen,
                 FillPattern = FillPattern.SolidForeground,
                 FontSize = 14,
                 FontBoldWeight = 700
@@ -121,6 +127,7 @@
                 Alignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 BackgroundColor = Color.LightGreen,
+                ForegroundColor = Color.LightGreen,
                 FillPattern = FillPattern.SolidForeground,
                 FontSize = 14,
                 FontBoldWeight = 700

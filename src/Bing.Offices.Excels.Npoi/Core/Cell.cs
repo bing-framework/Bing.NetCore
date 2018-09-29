@@ -23,8 +23,16 @@ namespace Bing.Offices.Excels.Npoi.Core
             _cell = cell;
             ColumnIndex = cell.ColumnIndex;
             RowSpan = ColumnSpan = 0;
-            //RowSpan = cell.ArrayFormulaRange.LastRow - cell.ArrayFormulaRange.FirstRow + 1;
-            //ColumnSpan = cell.ArrayFormulaRange.LastColumn - cell.ArrayFormulaRange.FirstColumn + 1;
+            if (cell.IsMergedCell)
+            {
+                RowSpan = cell.ArrayFormulaRange.LastRow - cell.ArrayFormulaRange.FirstRow + 1;
+                ColumnSpan = cell.ArrayFormulaRange.LastColumn - cell.ArrayFormulaRange.FirstColumn + 1;
+            }
+            else
+            {
+                RowSpan = 1;
+                ColumnSpan = 1;
+            }
         }
 
         /// <summary>
