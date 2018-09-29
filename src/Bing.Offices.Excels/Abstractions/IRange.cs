@@ -35,7 +35,7 @@ namespace Bing.Offices.Excels.Abstractions
         /// 获取单元行列表
         /// </summary>
         /// <returns></returns>
-        IList<IRow> GetRows();
+        List<IRow> GetRows();
 
         /// <summary>
         /// 添加单元行

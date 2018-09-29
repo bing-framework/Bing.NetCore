@@ -13,11 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Bing.Offices.Com\Bing.Offices.Com.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Offices.EPPlus\Bing.Offices.EPPlus.csproj" />
     <ProjectReference Include="..\..\src\Bing.Offices.Npoi\Bing.Offices.Npoi.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Offices.OleDb\Bing.Offices.OleDb.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Offices.OpenXml\Bing.Offices.OpenXml.csproj" />
     <ProjectReference Include="..\..\src\Bing.Offices\Bing.Offices.csproj" />
   </ItemGroup>
 

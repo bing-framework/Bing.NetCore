@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using Bing.Offices.Excels.Abstractions;
 using Bing.Offices.Excels.Core.Styles;
 
-namespace Bing.Offices.Excels.Abstractions
+namespace Bing.Offices.Excels
 {
     /// <summary>
     /// Excel 操作
@@ -17,9 +18,9 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 创建工作簿
         /// </summary>
-        /// <param name="fileName">文件名称，绝对路径</param>
+        /// <param name="filePath">文件名称，绝对路径</param>
         /// <returns></returns>
-        IExcel CreateWorkbook(string fileName);
+        IExcel CreateWorkbook(string filePath);
 
         /// <summary>
         /// 创建工作簿
@@ -33,7 +34,7 @@ namespace Bing.Offices.Excels.Abstractions
         /// </summary>
         /// <param name="sheetName">工作表名称</param>
         /// <returns></returns>
-        IExcel CreatSheet(string sheetName = "");
+        IExcel CreateSheet(string sheetName = "");
 
         /// <summary>
         /// 创建单元行
@@ -72,13 +73,6 @@ namespace Bing.Offices.Excels.Abstractions
         /// <param name="endColumnIndex">结束列索引</param>
         /// <returns></returns>
         IExcel MergeCell(int startRowIndex, int endRowIndex, int startColumnIndex, int endColumnIndex);
-
-        /// <summary>
-        /// 合并单元格
-        /// </summary>
-        /// <param name="range">单元格范围</param>
-        /// <returns></returns>
-        IExcel Merge(ICellRange range);
 
         /// <summary>
         /// 合并单元格

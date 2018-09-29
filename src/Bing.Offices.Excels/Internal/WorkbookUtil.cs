@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Bing.Offices.Excels.Utils
+namespace Bing.Offices.Excels.Internal
 {
     /// <summary>
     /// 工作簿操作类

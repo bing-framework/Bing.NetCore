@@ -1,6 +1,4 @@
-﻿using Bing.Offices.Excels.Core.Styles;
-
-namespace Bing.Offices.Excels.Abstractions
+﻿namespace Bing.Offices.Excels.Abstractions
 {
     /// <summary>
     /// 单元格
@@ -8,78 +6,54 @@ namespace Bing.Offices.Excels.Abstractions
     public interface ICell
     {
         /// <summary>
-        /// 值
+        /// 单元格值
         /// </summary>
         object Value { get; set; }
 
         /// <summary>
         /// 单元行
         /// </summary>
-        IRow Row { get; }
+        IRow Row { get; set; }
 
         /// <summary>
-        /// 工作表
-        /// </summary>
-        IWorkSheet Sheet { get; }
-
-        /// <summary>
-        /// 是否合并单元格
-        /// </summary>
-        bool MergeCell { get; }
-
-        /// <summary>
-        /// 行跨度。合并单元格的行跨度
-        /// </summary>
-        int RowSpan { get; set; }
-
-        /// <summary>
-        /// 列跨度。合并单元格的列跨度
+        /// 列跨度
         /// </summary>
         int ColumnSpan { get; set; }
 
         /// <summary>
-        /// 当前行索引
+        /// 行跨度
+        /// </summary>
+        int RowSpan { get; set; }
+
+        /// <summary>
+        /// 是否需要合并单元格。true:是,false:否
+        /// </summary>
+        bool NeedMerge { get; }
+
+        /// <summary>
+        /// 行索引
         /// </summary>
         int RowIndex { get; }
 
         /// <summary>
-        /// 当前列索引
+        /// 列索引
         /// </summary>
-        int ColumnIndex { get;}
+        int ColumnIndex { get; set; }
 
         /// <summary>
-        /// 单元格范围
+        /// 结束行索引
         /// </summary>
-        ICellRange Range { get; }
+        int EndRowIndex { get; }
 
         /// <summary>
-        /// 设置单元格的值
+        /// 结束列索引
+        /// </summary>
+        int EndColumnIndex { get; }
+
+        /// <summary>
+        /// 设置单元格值
         /// </summary>
         /// <param name="value">值</param>
         void SetValue(object value);
-
-        /// <summary>
-        /// 获取单元格的值
-        /// </summary>
-        /// <returns></returns>
-        string GetValue();
-
-        /// <summary>
-        /// 设置单元格的样式
-        /// </summary>
-        /// <param name="style">单元格样式</param>
-        void SetStyle(CellStyle style);
-
-        /// <summary>
-        /// 设置单元格的值类型
-        /// </summary>
-        /// <param name="cellValueType">单元格值类型</param>
-        void SetValueType(CellValueType cellValueType);
-
-        /// <summary>
-        /// 设置单元格的公式
-        /// </summary>
-        /// <param name="formula">公式</param>
-        void SetFormula(string formula);
     }
 }

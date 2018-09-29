@@ -10,7 +10,7 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 单元格列表
         /// </summary>
-        List<ICell> Cells { get; }
+        List<ICell> Cells { get; set; }
 
         /// <summary>
         /// 单元格
@@ -25,50 +25,17 @@ namespace Bing.Offices.Excels.Abstractions
         int RowIndex { get; set; }
 
         /// <summary>
-        /// 列数。返回所在行的列数量，合并的列算1列
+        /// 列数
         /// </summary>
-        int ColumnCount { get; }
-
-        /// <summary>
-        /// 列数。返回所在行的列数量，按拆分的列算
-        /// </summary>
-        int ColumnSpanCount { get; }
-
-        /// <summary>
-        /// 工作表
-        /// </summary>
-        IWorkSheet Sheet { get; set; }
-
-        /// <summary>
-        /// 行高
-        /// </summary>
-        short Height { get; set; }
-
-        /// <summary>
-        /// 创建单元格
-        /// </summary>
-        /// <returns></returns>
-        ICell CreateCell();
-
-        /// <summary>
-        /// 获取单元格
-        /// </summary>
-        /// <param name="columnIndex">列索引</param>
-        /// <returns></returns>
-        ICell GetCell(int columnIndex);
-
-        /// <summary>
-        /// 获取或创建单元格
-        /// </summary>
-        /// <param name="columnIndex">列索引</param>
-        /// <returns></returns>
-        ICell GetOrCreateCell(int columnIndex);
+        int ColumnNumber { get; }
 
         /// <summary>
         /// 添加单元格
         /// </summary>
         /// <param name="value">值</param>
-        void Add(object value);
+        /// <param name="columnSpan">列跨度</param>
+        /// <param name="rowSpan">行跨度</param>
+        void Add(object value, int columnSpan = 1, int rowSpan = 1);
 
         /// <summary>
         /// 添加单元格
@@ -80,6 +47,6 @@ namespace Bing.Offices.Excels.Abstractions
         /// 清空内容
         /// </summary>
         /// <returns></returns>
-        void ClearContent();
+        IRow ClearContent();
     }
 }
