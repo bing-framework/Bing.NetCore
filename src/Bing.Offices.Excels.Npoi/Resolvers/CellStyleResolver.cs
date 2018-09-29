@@ -1,4 +1,5 @@
 ﻿using Bing.Offices.Excels.Core.Styles;
+using Bing.Offices.Excels.Npoi.Extensions;
 using NPOI.SS.UserModel;
 
 namespace Bing.Offices.Excels.Npoi.Resolvers

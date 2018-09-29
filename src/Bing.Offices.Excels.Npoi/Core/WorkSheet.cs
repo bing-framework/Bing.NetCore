@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using Bing.Offices.Excels.Abstractions;
-using Bing.Offices.Excels.Core;
+﻿using Bing.Offices.Excels.Npoi.Extensions;
 using NPOI.SS.UserModel;
-using IRow = Bing.Offices.Excels.Abstractions.IRow;
 
 namespace Bing.Offices.Excels.Npoi.Core
 {
@@ -14,20 +11,47 @@ namespace Bing.Offices.Excels.Npoi.Core
         /// <summary>
         /// 工作表
         /// </summary>
-        private ISheet _sheet;
+        private NPOI.SS.UserModel.ISheet _sheet;
 
-        public WorkSheet(ISheet sheet)
+        public WorkSheet(Bing.Offices.Excels.Abstractions.IWorkbook workbook, NPOI.SS.UserModel.ISheet sheet,
+            int sheetIndex) : base(workbook, sheetIndex)
         {
             _sheet = sheet;
             SheetName = sheet.SheetName;
-            Rows = new List<IRow>();
-            RowIndex = 0;
             Header = new Range();
+        }
+
+        /// <summary>
+        /// 创建单元行
+        /// </summary>
+        /// <returns></returns>
+        public override Bing.Offices.Excels.Abstractions.IRow CreateRow()
+        {
+            var row = new Row(this, _sheet, RowIndex);
+            RowIndex++;
+            Rows.Add(row);
+            return row;
+        }
+
+        /// <summary>
+        /// 获取或创建单元行
+        /// </summary>
+        /// <param name="rowIndex">行索引</param>
+        /// <returns></returns>
+        public override Bing.Offices.Excels.Abstractions.IRow GetOrCreateRow(int rowIndex)
+        {
+            var row = GetRow(rowIndex);
+            if (row == null)
+            {
+                row = new Row(this, _sheet, RowIndex);
+                Rows.Add(row);
+            }
+            return row;
         }
 
         protected override Bing.Offices.Excels.Abstractions.ICell CreateCell(object value)
         {
-            throw new System.NotImplementedException();
+            return null;
         }
 
         protected override Bing.Offices.Excels.Abstractions.IRange GetBodyRange()
@@ -85,9 +109,27 @@ namespace Bing.Offices.Excels.Npoi.Core
             throw new System.NotImplementedException();
         }
 
+        /// <summary>
+        /// 获取单元格的值
+        /// </summary>
+        /// <param name="rowIndex">行索引</param>
+        /// <param name="columnIndex">列索引</param>
+        /// <returns></returns>
         public override object GetCelLValue(int rowIndex, int columnIndex)
         {
-            throw new System.NotImplementedException();
+            if (rowIndex > _sheet.LastRowNum)
+            {
+                return string.Empty;
+            }
+
+            if (columnIndex > _sheet.GetRow(rowIndex).LastCellNum)
+            {
+                return string.Empty;
+            }
+
+            var cell = _sheet.GetRow(rowIndex).GetCell(columnIndex);
+            return cell.GetCellValue();
         }
+
     }
 }

@@ -10,7 +10,7 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 单元格列表
         /// </summary>
-        IList<ICell> Cells { get; }
+        List<ICell> Cells { get; }
 
         /// <summary>
         /// 单元格
@@ -40,6 +40,31 @@ namespace Bing.Offices.Excels.Abstractions
         IWorkSheet Sheet { get; set; }
 
         /// <summary>
+        /// 行高
+        /// </summary>
+        short Height { get; set; }
+
+        /// <summary>
+        /// 创建单元格
+        /// </summary>
+        /// <returns></returns>
+        ICell CreateCell();
+
+        /// <summary>
+        /// 获取单元格
+        /// </summary>
+        /// <param name="columnIndex">列索引</param>
+        /// <returns></returns>
+        ICell GetCell(int columnIndex);
+
+        /// <summary>
+        /// 获取或创建单元格
+        /// </summary>
+        /// <param name="columnIndex">列索引</param>
+        /// <returns></returns>
+        ICell GetOrCreateCell(int columnIndex);
+
+        /// <summary>
         /// 添加单元格
         /// </summary>
         /// <param name="value">值</param>
@@ -52,27 +77,9 @@ namespace Bing.Offices.Excels.Abstractions
         void Add(ICell cell);
 
         /// <summary>
-        /// 添加单元格
-        /// </summary>
-        /// <param name="cells">单元格列表</param>
-        void Add(IList<ICell> cells);
-
-        /// <summary>
         /// 清空内容
         /// </summary>
         /// <returns></returns>
-        IRow ClearContent();
-
-        /// <summary>
-        /// 设置行高
-        /// </summary>
-        /// <param name="height">高度</param>
-        void SetHeight(int height);
-
-        /// <summary>
-        /// 获取行高
-        /// </summary>
-        /// <returns></returns>
-        int GetHeight();
+        void ClearContent();
     }
 }

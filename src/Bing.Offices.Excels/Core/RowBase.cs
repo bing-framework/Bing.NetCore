@@ -18,14 +18,14 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 单元格列表
         /// </summary>
-        public IList<ICell> Cells { get; protected set; }
+        public List<ICell> Cells { get; protected set; }
 
         /// <summary>
         /// 单元格
         /// </summary>
         /// <param name="columnIndex">列索引</param>
         /// <returns></returns>
-        public ICell this[int columnIndex] => Cells[columnIndex];
+        public ICell this[int columnIndex] => GetCell(columnIndex);
 
         /// <summary>
         /// 当前行索引
@@ -47,18 +47,55 @@ namespace Bing.Offices.Excels.Core
         /// </summary>
         public IWorkSheet Sheet { get; set; }
 
-        protected RowBase(int rowIndex)
+        /// <summary>
+        /// 行高
+        /// </summary>
+        public short Height
         {
-            Cells = new List<ICell>();
-            RowIndex = rowIndex;
-            IndexManager = new IndexManager();
+            get => GetHeight();
+            set => SetHeight(value);
         }
+
+        protected RowBase(IWorkSheet sheet, int rowIndex)
+        {
+            Sheet = sheet;
+            RowIndex = rowIndex;
+            Cells = new List<ICell>();
+        }
+
+        /// <summary>
+        /// 创建单元格
+        /// </summary>
+        /// <returns></returns>
+        public abstract ICell CreateCell();
+
+        /// <summary>
+        /// 获取单元格
+        /// </summary>
+        /// <param name="columnIndex">列索引</param>
+        /// <returns></returns>
+        public ICell GetCell(int columnIndex)
+        {
+            return Cells.Find(x => x.ColumnIndex == columnIndex);
+        }
+
+        /// <summary>
+        /// 获取或创建单元格
+        /// </summary>
+        /// <param name="columnIndex">列索引</param>
+        /// <returns></returns>
+        public abstract ICell GetOrCreateCell(int columnIndex);
 
         /// <summary>
         /// 添加单元格
         /// </summary>
         /// <param name="value">值</param>
-        public abstract void Add(object value);
+        public void Add(object value)
+        {
+            var cell = CreateCell();
+            cell.SetValue(value);
+            //Add(cell);
+        }
 
         /// <summary>
         /// 添加单元格
@@ -71,9 +108,9 @@ namespace Bing.Offices.Excels.Core
                 return;
             }
 
-            cell.Row = this;
-            SetColumnIndex(cell);
-            Cells.Add(cell);
+            //cell.Row = this;
+            //SetColumnIndex(cell);
+            //Cells.Add(cell);
         }
 
         /// <summary>
@@ -88,44 +125,31 @@ namespace Bing.Offices.Excels.Core
                 return;
             }
 
-            cell.ColumnIndex = IndexManager.GetIndex(cell.ColumnSpan);
-        }
-
-        /// <summary>
-        /// 添加单元格
-        /// </summary>
-        /// <param name="cells">单元格列表</param>
-        public void Add(IList<ICell> cells)
-        {
-            foreach (var cell in cells)
-            {
-                Add(cell);
-            }
+            //cell.ColumnIndex = IndexManager.GetIndex(cell.ColumnSpan);
         }
 
         /// <summary>
         /// 清空内容
         /// </summary>
         /// <returns></returns>
-        public IRow ClearContent()
+        public void ClearContent()
         {
             foreach (var cell in Cells)
             {
                 cell.SetValue(string.Empty);
             }
-            return this;
         }
 
         /// <summary>
         /// 设置行高
         /// </summary>
         /// <param name="height">高度</param>
-        public abstract void SetHeight(int height);
+        protected abstract void SetHeight(short height);
 
         /// <summary>
         /// 获取行高
         /// </summary>
         /// <returns></returns>
-        public abstract int GetHeight();
+        protected abstract short GetHeight();
     }
 }

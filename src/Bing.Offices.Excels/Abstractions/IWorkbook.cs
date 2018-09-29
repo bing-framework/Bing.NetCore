@@ -51,6 +51,13 @@ namespace Bing.Offices.Excels.Abstractions
         IWorkSheet CreateSheet();
 
         /// <summary>
+        /// 创建工作表
+        /// </summary>
+        /// <param name="sheetName">工作表名称</param>
+        /// <returns></returns>
+        IWorkSheet CreateSheet(string sheetName);
+
+        /// <summary>
         /// 获取或创建工作表
         /// </summary>
         /// <returns></returns>
@@ -61,34 +68,21 @@ namespace Bing.Offices.Excels.Abstractions
         /// </summary>
         /// <param name="sheetName">工作表名称</param>
         /// <returns></returns>
-        IWorkSheet CreateSheet(string sheetName);
-
-        /// <summary>
-        /// 创建工作表
-        /// </summary>
-        /// <param name="sheetName">工作表名称</param>
-        /// <returns></returns>
         IWorkSheet GetOrCreateSheet(string sheetName);
 
-        /// <summary>
-        /// 获取工作表名称列表
-        /// </summary>
-        /// <returns></returns>
-        IList<string> GetSheetNames();
+        ///// <summary>
+        ///// 复制工作表
+        ///// </summary>
+        ///// <param name="sheetIndex">工作表索引</param>
+        ///// <returns></returns>
+        //IWorkSheet CloneSheet(int sheetIndex);
 
-        /// <summary>
-        /// 复制工作表
-        /// </summary>
-        /// <param name="sheetIndex">工作表索引</param>
-        /// <returns></returns>
-        IWorkSheet CloneSheet(int sheetIndex);
-
-        /// <summary>
-        /// 复制工作表
-        /// </summary>
-        /// <param name="sheetName">工作表名称</param>
-        /// <returns></returns>
-        IWorkSheet CloneSheet(string sheetName);
+        ///// <summary>
+        ///// 复制工作表
+        ///// </summary>
+        ///// <param name="sheetName">工作表名称</param>
+        ///// <returns></returns>
+        //IWorkSheet CloneSheet(string sheetName);
 
         /// <summary>
         /// 保存到文件

@@ -21,12 +21,21 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 值
         /// </summary>
-        public object Value { get; protected set; }
+        public object Value
+        {
+            get => GetValue();
+            set => SetValue(value);
+        }
 
         /// <summary>
         /// 单元行
         /// </summary>
-        public IRow Row { get; set; }
+        public IRow Row { get; }
+
+        /// <summary>
+        /// 工作表
+        /// </summary>
+        public IWorkSheet Sheet { get; }
 
         /// <summary>
         /// 是否合并单元格
@@ -73,21 +82,24 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 当前列索引
         /// </summary>
-        public int ColumnIndex { get; set; }
+        public int ColumnIndex { get; protected set; }
 
         /// <summary>
         /// 单元格范围
         /// </summary>
         public abstract ICellRange Range { get; }
 
+        protected CellBase(IRow row)
+        {
+            Row = row;
+            Sheet = row.Sheet;
+        }
+
         /// <summary>
         /// 设置单元格的值
         /// </summary>
         /// <param name="value">值</param>
-        public void SetValue(object value)
-        {
-            Value = value;
-        }
+        public abstract void SetValue(object value);
 
         /// <summary>
         /// 获取单元格的值
@@ -100,20 +112,18 @@ namespace Bing.Offices.Excels.Core
         /// </summary>
         /// <param name="style">单元格样式</param>
         /// <returns></returns>
-        public abstract ICell SetStyle(CellStyle style);
+        public abstract void SetStyle(CellStyle style);
 
         /// <summary>
         /// 设置单元格的值类型
         /// </summary>
         /// <param name="cellValueType">单元格值类型</param>
-        /// <returns></returns>
-        public abstract ICell SetValueType(CellValueType cellValueType);
+        public abstract void SetValueType(CellValueType cellValueType);
 
         /// <summary>
         /// 设置单元格的公式
         /// </summary>
         /// <param name="formula">公式</param>
-        /// <returns></returns>
-        public abstract ICell SetFormula(string formula);
+        public abstract void SetFormula(string formula);
     }
 }

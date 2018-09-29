@@ -10,12 +10,17 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 值
         /// </summary>
-        object Value { get; }
+        object Value { get; set; }
 
         /// <summary>
         /// 单元行
         /// </summary>
-        IRow Row { get; set; }
+        IRow Row { get; }
+
+        /// <summary>
+        /// 工作表
+        /// </summary>
+        IWorkSheet Sheet { get; }
 
         /// <summary>
         /// 是否合并单元格
@@ -40,7 +45,7 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 当前列索引
         /// </summary>
-        int ColumnIndex { get; set; }
+        int ColumnIndex { get;}
 
         /// <summary>
         /// 单元格范围
@@ -63,21 +68,18 @@ namespace Bing.Offices.Excels.Abstractions
         /// 设置单元格的样式
         /// </summary>
         /// <param name="style">单元格样式</param>
-        /// <returns></returns>
-        ICell SetStyle(CellStyle style);
+        void SetStyle(CellStyle style);
 
         /// <summary>
         /// 设置单元格的值类型
         /// </summary>
         /// <param name="cellValueType">单元格值类型</param>
-        /// <returns></returns>
-        ICell SetValueType(CellValueType cellValueType);
+        void SetValueType(CellValueType cellValueType);
 
         /// <summary>
         /// 设置单元格的公式
         /// </summary>
         /// <param name="formula">公式</param>
-        /// <returns></returns>
-        ICell SetFormula(string formula);
+        void SetFormula(string formula);
     }
 }

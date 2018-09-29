@@ -1,7 +1,4 @@
-﻿using Bing.Offices.Excels.Abstractions;
-using Bing.Offices.Excels.Core;
-using Bing.Offices.Excels.Npoi.Extensions;
-using NPOI.SS.UserModel;
+﻿using Bing.Offices.Excels.Npoi.Extensions;
 
 namespace Bing.Offices.Excels.Npoi.Core
 {
@@ -25,40 +22,56 @@ namespace Bing.Offices.Excels.Npoi.Core
         /// </summary>
         private int _columnIndex;
 
-        public Row(NPOI.SS.UserModel.ISheet sheet, int rowIndex) : base(rowIndex)
+        public Row(Bing.Offices.Excels.Abstractions.IWorkSheet sheet, NPOI.SS.UserModel.ISheet npoiSheet,
+            int rowIndex) : base(sheet, rowIndex)
         {
-            _row = sheet.GetRow(rowIndex);
-            _sheet = sheet;
+            _sheet = npoiSheet;
+            _row = npoiSheet.GetOrCreateRow(rowIndex);
             _columnIndex = 0;
         }
 
         /// <summary>
-        /// 添加单元格
+        /// 创建单元格
         /// </summary>
-        /// <param name="value">值</param>
-        public override void Add(object value)
+        /// <returns></returns>
+        public override Bing.Offices.Excels.Abstractions.ICell CreateCell()
         {
-            var npoiCell = _row.GetOrCreateCell(_columnIndex);
+            var cell = new Cell(this, _row.GetOrCreateCell(_columnIndex));
             _columnIndex++;
-            var cell = new Cell(npoiCell);
-            cell.SetValue(value);
-            Add(cell);
+            Cells.Add(cell);
+            return cell;
+        }
+
+        /// <summary>
+        /// 获取或创建单元格
+        /// </summary>
+        /// <param name="columnIndex">列索引</param>
+        /// <returns></returns>
+        public override Bing.Offices.Excels.Abstractions.ICell GetOrCreateCell(int columnIndex)
+        {
+            var cell = GetCell(columnIndex);
+            if (cell == null)
+            {
+                cell = new Cell(this, _row.GetOrCreateCell(columnIndex));
+                Cells.Add(cell);
+            }
+            return cell;
         }
 
         /// <summary>
         /// 设置行高
         /// </summary>
         /// <param name="height">高度</param>
-        public override void SetHeight(int height)
+        protected override void SetHeight(short height)
         {
-            _row.Height = (short) height;
+            _row.Height = height;
         }
 
         /// <summary>
         /// 获取行高
         /// </summary>
         /// <returns></returns>
-        public override int GetHeight()
+        protected override short GetHeight()
         {
             return _row.Height;
         }

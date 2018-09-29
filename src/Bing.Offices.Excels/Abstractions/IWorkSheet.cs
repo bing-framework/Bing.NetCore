@@ -45,7 +45,7 @@ namespace Bing.Offices.Excels.Abstractions
         /// <summary>
         /// 单元行列表
         /// </summary>
-        IList<IRow> Rows { get; }
+        List<IRow> Rows { get; }
 
         /// <summary>
         /// 单元行
@@ -68,6 +68,26 @@ namespace Bing.Offices.Excels.Abstractions
         /// 工作簿
         /// </summary>
         IWorkbook Workbook { get; set; }
+
+        /// <summary>
+        /// 创建单元行
+        /// </summary>
+        /// <returns></returns>
+        IRow CreateRow();
+
+        /// <summary>
+        /// 获取单元行
+        /// </summary>
+        /// <param name="rowIndex">行索引</param>
+        /// <returns></returns>
+        IRow GetRow(int rowIndex);
+
+        /// <summary>
+        /// 获取或创建单元行
+        /// </summary>
+        /// <param name="rowIndex">行索引</param>
+        /// <returns></returns>
+        IRow GetOrCreateRow(int rowIndex);
 
         /// <summary>
         /// 获取表头

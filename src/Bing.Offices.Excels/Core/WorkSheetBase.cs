@@ -67,14 +67,14 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 单元行列表
         /// </summary>
-        public IList<IRow> Rows { get; protected set; }
+        public List<IRow> Rows { get; protected set; }
 
         /// <summary>
         /// 单元行
         /// </summary>
         /// <param name="rowIndex">列索引</param>
         /// <returns></returns>
-        public IRow this[int rowIndex] => Rows[rowIndex];
+        public IRow this[int rowIndex] => GetRow(rowIndex);
 
         /// <summary>
         /// 当前工作表索引
@@ -90,6 +90,37 @@ namespace Bing.Offices.Excels.Core
         /// 工作簿
         /// </summary>
         public IWorkbook Workbook { get; set; }
+
+        protected WorkSheetBase(IWorkbook workbook, int sheetIndex)
+        {
+            Workbook = workbook;
+            SheetIndex = sheetIndex;
+            Rows = new List<IRow>();
+            RowIndex = 0;
+        }
+
+        /// <summary>
+        /// 创建单元行
+        /// </summary>
+        /// <returns></returns>
+        public abstract IRow CreateRow();
+
+        /// <summary>
+        /// 获取单元行
+        /// </summary>
+        /// <param name="rowIndex">行索引</param>
+        /// <returns></returns>
+        public IRow GetRow(int rowIndex)
+        {
+            return Rows.Find(x => x.RowIndex == rowIndex);
+        }
+
+        /// <summary>
+        /// 获取或创建单元行
+        /// </summary>
+        /// <param name="rowIndex">行索引</param>
+        /// <returns></returns>
+        public abstract IRow GetOrCreateRow(int rowIndex);
 
         /// <summary>
         /// 获取表头

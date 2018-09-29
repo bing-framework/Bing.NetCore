@@ -31,12 +31,56 @@ namespace Bing.Offices.Excels.Core
         /// </summary>
         /// <param name="sheetIndex">工作表索引</param>
         /// <returns></returns>
-        public IWorkSheet this[int sheetIndex] => Sheets[sheetIndex];
+        public IWorkSheet this[int sheetIndex] => GetSheetAt(sheetIndex);
 
         /// <summary>
         /// Excel 版本
         /// </summary>
         public ExcelVersion Version { get; protected set; }
+
+        protected WorkbookBase()
+        {
+            Sheets = new List<IWorkSheet>();
+        }
+
+        protected WorkbookBase(string fileName)
+        {
+            Version = GetExcelFormat(fileName);
+            Sheets = new List<IWorkSheet>();
+            PrePare();
+            LoadWorkbook(fileName);
+        }
+
+        /// <summary>
+        /// 准备工作
+        /// </summary>
+        protected virtual void PrePare()
+        {
+        }
+
+        /// <summary>
+        /// 加载工作簿
+        /// </summary>
+        /// <param name="fileName">文件名称，绝对路径</param>
+        protected abstract void LoadWorkbook(string fileName);
+
+        /// <summary>
+        /// 获取Excel格式类型
+        /// </summary>
+        /// <param name="fileName">文件名称，绝对路径</param>
+        /// <returns></returns>
+        protected ExcelVersion GetExcelFormat(string fileName)
+        {
+            string extension = Path.GetExtension(fileName)?.ToLower();
+            switch (extension)
+            {
+                case ".xlsx":
+                    return ExcelVersion.Xlsx;
+                case ".xls":
+                    return ExcelVersion.Xls;
+            }
+            throw new Exception("未知 Excel 格式文件");
+        }
 
         /// <summary>
         /// 获取工作表
@@ -56,7 +100,7 @@ namespace Bing.Offices.Excels.Core
         public IWorkSheet GetSheetAt(int sheetIndex)
         {
             ValidateSheetIndex(sheetIndex);
-            return Sheets[sheetIndex];
+            return Sheets.Find(x => x.SheetIndex == sheetIndex);
         }
 
         /// <summary>
@@ -64,6 +108,13 @@ namespace Bing.Offices.Excels.Core
         /// </summary>
         /// <returns></returns>
         public abstract IWorkSheet CreateSheet();
+
+        /// <summary>
+        /// 创建工作表
+        /// </summary>
+        /// <param name="sheetName">工作表名称</param>
+        /// <returns></returns>
+        public abstract IWorkSheet CreateSheet(string sheetName);
 
         /// <summary>
         /// 获取或创建工作表
@@ -76,34 +127,21 @@ namespace Bing.Offices.Excels.Core
         /// </summary>
         /// <param name="sheetName">工作表名称</param>
         /// <returns></returns>
-        public abstract IWorkSheet CreateSheet(string sheetName);
+        public abstract IWorkSheet GetOrCreateSheet(string sheetName);        
 
-        /// <summary>
-        /// 创建工作表
-        /// </summary>
-        /// <param name="sheetName">工作表名称</param>
-        /// <returns></returns>
-        public abstract IWorkSheet GetOrCreateSheet(string sheetName);
+        ///// <summary>
+        ///// 复制工作表
+        ///// </summary>
+        ///// <param name="sheetIndex">工作表索引</param>
+        ///// <returns></returns>
+        //public abstract IWorkSheet CloneSheet(int sheetIndex);
 
-        /// <summary>
-        /// 获取工作表名称列表
-        /// </summary>
-        /// <returns></returns>
-        public IList<string> GetSheetNames() => Sheets.Select(x => x.SheetName).ToList();
-
-        /// <summary>
-        /// 复制工作表
-        /// </summary>
-        /// <param name="sheetIndex">工作表索引</param>
-        /// <returns></returns>
-        public abstract IWorkSheet CloneSheet(int sheetIndex);
-
-        /// <summary>
-        /// 复制工作表
-        /// </summary>
-        /// <param name="sheetName">工作表名称</param>
-        /// <returns></returns>
-        public abstract IWorkSheet CloneSheet(string sheetName);
+        ///// <summary>
+        ///// 复制工作表
+        ///// </summary>
+        ///// <param name="sheetName">工作表名称</param>
+        ///// <returns></returns>
+        //public abstract IWorkSheet CloneSheet(string sheetName);
 
         /// <summary>
         /// 保存到文件
