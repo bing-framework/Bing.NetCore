@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq.Expressions;
 using System.Text;
 using Bing.Offices.Excels.Abstractions;
+using Bing.Offices.Excels.Common;
 using Bing.Offices.Excels.Core.Styles;
 
 namespace Bing.Offices.Excels.Exports

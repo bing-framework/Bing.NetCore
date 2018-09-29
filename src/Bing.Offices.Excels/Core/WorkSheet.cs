@@ -65,22 +65,22 @@ namespace Bing.Offices.Excels.Core
         /// <summary>
         /// 列数
         /// </summary>
-        public int ColumnCount => _body == null ? _header.ColumnCount : _body.ColumnCount;
+        public int ColumnCount => _body?.ColumnCount ?? _header.ColumnCount;
 
         /// <summary>
         /// 表头行数
         /// </summary>
-        public int HeadRowCount => _header.RowCount;
+        public int HeadRowCount => _header?.RowCount ?? 0;
 
         /// <summary>
         /// 正文行数
         /// </summary>
-        public int BodyRowCount => _body.RowCount;
+        public int BodyRowCount => _body?.RowCount ?? 0;
 
         /// <summary>
         /// 页脚行数
         /// </summary>
-        public int FootRowCount => _footer.RowCount;
+        public int FootRowCount => _footer?.RowCount ?? 0;
 
         /// <summary>
         /// 总行数
@@ -161,7 +161,7 @@ namespace Bing.Offices.Excels.Core
         /// </summary>
         /// <param name="value">值</param>
         /// <returns></returns>
-        private ICell CreateCell(object value)
+        private static ICell CreateCell(object value)
         {
             return new Cell(value);
         }

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Bing.Offices.Excels.Abstractions;
+using Bing.Offices.Excels.Common;
 using Bing.Offices.Excels.Core.Styles;
 
 namespace Bing.Offices.Excels
@@ -167,6 +168,6 @@ namespace Bing.Offices.Excels
         /// </summary>
         /// <param name="fileName">文件名称，绝对路径</param>
         /// <returns></returns>
-        IWorkbook GetWorkbook(string fileName);
+        IWorkbook GetWorkbook(string fileName);        
     }
 }

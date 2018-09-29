@@ -8,4 +8,8 @@
     <ProjectReference Include="..\Bing.Utils\Bing.Utils.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Mappings\Core\" />
+  </ItemGroup>
+
 </Project>
