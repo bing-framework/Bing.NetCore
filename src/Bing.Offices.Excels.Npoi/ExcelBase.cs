@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
 using Bing.Offices.Excels.Abstractions;
-using Bing.Offices.Excels.Common;
 using Bing.Offices.Excels.Core;
 using Bing.Offices.Excels.Core.Styles;
 using Bing.Offices.Excels.Npoi.Resolvers;
-using NPOI.HPSF;
-using NPOI.HSSF.UserModel;
 using ICell = Bing.Offices.Excels.Abstractions.ICell;
 using IWorkbook = Bing.Offices.Excels.Abstractions.IWorkbook;
 
