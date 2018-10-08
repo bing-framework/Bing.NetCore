@@ -39,9 +39,9 @@ namespace Bing.Offices.Excels.Npoi.Imports
             switch (version)
             {
                 case ExcelVersion.Xlsx:
-                    return CreateExcel2007Import(_path, _sheetName);
+                    return new Excel2003Import(_path,_sheetName);
                 case ExcelVersion.Xls:
-                    return CreateExcel2003Import(_path, _sheetName);
+                    return new Excel2007Import(_path, _sheetName);
             }
             throw new NotImplementedException();
         }

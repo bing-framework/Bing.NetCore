@@ -27,6 +27,65 @@ namespace Bing.Offices.Excels.Npoi
         /// <typeparam name="T">实体类型</typeparam>
         /// <param name="excelFile">Excel文件路径</param>
         /// <param name="startRow">数据读取起始行</param>
+        /// <returns></returns>
+        public static IEnumerable<T> LoadAll<T>(string excelFile, int startRow = 1) where T : class, new() =>
+            LoadAll<T>(excelFile, ExcelSetting.Default, startRow);
+
+        /// <summary>
+        /// 从指定Excel文件加载数据到<see cref="IEnumerable{T}"/>集合
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="excelFile">Excel文件路径</param>
+        /// <param name="excelSetting">用于加载数据的Excel设置</param>
+        /// <param name="startRow">数据读取起始行</param>
+        /// <returns></returns>
+        public static IEnumerable<T> LoadAll<T>(string excelFile, ExcelSetting excelSetting, int startRow = 1)
+            where T : class, new()
+        {
+            if (!File.Exists(excelFile))
+            {
+                throw new FileNotFoundException($"找不到文件 {excelFile}");
+            }
+
+            return LoadAll<T>(File.OpenRead(excelFile), excelSetting, startRow);
+        }
+
+        /// <summary>
+        /// 从指定流加载数据到<see cref="IEnumerable{T}"/>集合
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="excelStream">流</param>
+        /// <param name="startRow">数据读取起始行</param>
+        /// <returns></returns>
+        public static IEnumerable<T> LoadAll<T>(Stream excelStream, int startRow = 1) where T : class, new() =>
+            LoadAll<T>(excelStream, ExcelSetting.Default, startRow);
+
+        /// <summary>
+        /// 从指定流加载数据到<see cref="IEnumerable{T}"/>集合
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="excelStream">流</param>
+        /// <param name="excelSetting">用于加载数据的Excel设置</param>
+        /// <param name="startRow">数据读取起始行</param>
+        /// <returns></returns>
+        public static IEnumerable<T> LoadAll<T>(Stream excelStream, ExcelSetting excelSetting, int startRow = 1)
+            where T : class, new()
+        {
+            var workbook = InitializeWorkbook(excelStream);
+            var list = new List<T>();
+            foreach (var sheet in workbook.GetSheets())
+            {
+                list.AddRange(Load<T>(sheet, _formulaEvaluator, excelSetting, startRow));
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 从指定Excel文件加载数据到<see cref="IEnumerable{T}"/>集合
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="excelFile">Excel文件路径</param>
+        /// <param name="startRow">数据读取起始行</param>
         /// <param name="sheetIndex">工作表索引</param>
         /// <returns></returns>
         public static IEnumerable<T> Load<T>(string excelFile, int startRow = 1, int sheetIndex = 0)

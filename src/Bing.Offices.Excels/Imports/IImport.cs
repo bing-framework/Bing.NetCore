@@ -12,6 +12,6 @@ namespace Bing.Offices.Excels.Imports
         /// </summary>
         /// <typeparam name="T">返回类型</typeparam>
         /// <returns></returns>
-        List<T> GetResult<T>();
+        List<T> GetResult<T>() where T : class, new();
     }
 }

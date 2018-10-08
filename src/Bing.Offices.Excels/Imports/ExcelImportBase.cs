@@ -28,11 +28,6 @@ namespace Bing.Offices.Excels.Imports
         {
             _excel = excel;
             _sheetName = sheetName;
-        }
-
-        protected override List<T> GetResult<T>(Stream stream)
-        {
-            return null;
-        }
+        }        
     }
 }

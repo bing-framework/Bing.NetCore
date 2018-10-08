@@ -1,4 +1,7 @@
-﻿using Bing.Offices.Excels.Imports;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Bing.Offices.Excels.Imports;
 
 namespace Bing.Offices.Excels.Npoi.Imports
 {
@@ -14,6 +17,17 @@ namespace Bing.Offices.Excels.Npoi.Imports
         /// <param name="sheetName">工作表名称</param>
         public Excel2007Import(string path, string sheetName = "") : base(path, new Excel2007(), sheetName)
         {
+        }
+
+        /// <summary>
+        /// 获取结果
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="stream">文件流</param>
+        /// <returns></returns>
+        protected override List<T> GetResult<T>(Stream stream)
+        {
+            return Excel.LoadAll<T>(stream).ToList();
         }
     }
 }

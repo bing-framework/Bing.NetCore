@@ -27,7 +27,7 @@ namespace Bing.Offices.Excels.Imports
         /// </summary>
         /// <typeparam name="T">实体类型</typeparam>
         /// <returns></returns>
-        public List<T> GetResult<T>()
+        public List<T> GetResult<T>() where T : class, new()
         {
             using (var stream=new FileStream(Path,FileMode.Open,FileAccess.Read))
             {
@@ -41,6 +41,6 @@ namespace Bing.Offices.Excels.Imports
         /// <typeparam name="T">实体类型</typeparam>
         /// <param name="stream">文件流</param>
         /// <returns></returns>
-        protected abstract List<T> GetResult<T>(Stream stream);
+        protected abstract List<T> GetResult<T>(Stream stream) where T : class, new();
     }
 }
