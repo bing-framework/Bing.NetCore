@@ -15,8 +15,9 @@ namespace Bing.Offices.Excels.Npoi.Extensions
         /// 获取单元格的值
         /// </summary>
         /// <param name="cell">单元格</param>
+        /// <param name="eval">计算公式</param>
         /// <returns></returns>
-        public static string GetCellValue(this ICell cell)
+        public static string GetCellValue(this ICell cell,IFormulaEvaluator eval=null)
         {
             if (cell == null)
             {
@@ -30,6 +31,10 @@ namespace Bing.Offices.Excels.Npoi.Extensions
                 case CellType.Boolean:
                     return cell.BooleanCellValue.ToString();
                 case CellType.Formula:
+                    if (eval != null)
+                    {
+                        return GetCellValue(eval.EvaluateInCell(cell));
+                    }
                     return cell.CellFormula;
                 case CellType.Numeric:
                     return DateUtil.IsCellDateFormatted(cell)

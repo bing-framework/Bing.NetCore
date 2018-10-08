@@ -46,5 +46,19 @@ namespace Bing.Offices.Excels.Npoi.Extensions
             }
             return row;
         }
+
+        /// <summary>
+        /// 获取单元格的值
+        /// </summary>
+        /// <param name="row">行</param>
+        /// <param name="index">单元格索引</param>
+        /// <param name="eval">计算公式</param>
+        /// <returns></returns>
+        public static string GetCellValue(this IRow row, int index, IFormulaEvaluator eval = null)
+        {
+            var cell = row.GetCell(index);
+
+            return cell?.GetCellValue(eval);
+        }
     }
 }

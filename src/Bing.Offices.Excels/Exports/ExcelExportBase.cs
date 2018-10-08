@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Bing.Offices.Excels.Abstractions;
-using Bing.Offices.Excels.Common;
 
 namespace Bing.Offices.Excels.Exports
 {

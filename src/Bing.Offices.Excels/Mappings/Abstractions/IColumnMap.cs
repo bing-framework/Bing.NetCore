@@ -35,12 +35,7 @@ namespace Bing.Offices.Excels.Mappings.Abstractions
         /// <summary>
         /// 数据格式化
         /// </summary>
-        string Format { get; }
-
-        /// <summary>
-        /// 日期格式化
-        /// </summary>
-        string DateFormat { get; }
+        string Formatter { get; }
 
         /// <summary>
         /// 是否忽略映射

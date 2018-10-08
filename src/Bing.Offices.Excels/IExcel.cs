@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Bing.Offices.Excels.Abstractions;
-using Bing.Offices.Excels.Common;
 using Bing.Offices.Excels.Core.Styles;
 
 namespace Bing.Offices.Excels

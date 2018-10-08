@@ -10,8 +10,7 @@ namespace Bing.Offices.Excels.Mappings.Attributes
         public bool AutoIndex { get; set; }
         public int Index { get; set; }
         public bool AllowMerge { get; set; }
-        public string Format { get; set; }
-        public string DateFormat { get; set; }
+        public string Formatter { get; set; }
         public bool Ignore { get; set; }
         public object DefaultValue { get; set; }
         public string Value { get; set; }

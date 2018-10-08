@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Bing.Offices.Excels.Abstractions;
-using Bing.Offices.Excels.Common;
 using Bing.Offices.Excels.Core;
 using Bing.Offices.Excels.Core.Styles;
 using Bing.Utils.Extensions;
