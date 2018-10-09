@@ -315,7 +315,7 @@ namespace Bing.Offices.Excels.Exports
 
         #endregion
 
-        #region Write(写入文件)
+        #region Write(写入)
 
         /// <summary>
         /// 写入文件
@@ -330,6 +330,28 @@ namespace Bing.Offices.Excels.Exports
                 WriteStream(stream);
             }
             return this;
+        }
+
+        /// <summary>
+        /// 写入到字节数组
+        /// </summary>
+        /// <returns></returns>
+        public byte[] WriteToBuffer()
+        {
+            using (var stream = new MemoryStream())
+            {
+                WriteStream(stream);
+                return stream.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// 写入到内存流
+        /// </summary>
+        /// <param name="stream">内存流</param>
+        public void WriteToStream(Stream stream)
+        {
+            WriteStream(stream);
         }
 
         /// <summary>
@@ -393,23 +415,10 @@ namespace Bing.Offices.Excels.Exports
             using (var stream = new MemoryStream())
             {
                 WriteStream(stream);
-
             }
             return this;
         }
 
         #endregion
-
-        /// <summary>
-        /// 写入到字节数组
-        /// </summary>
-        /// <returns></returns>
-        public abstract byte[] WriteToBuffer();
-
-        /// <summary>
-        /// 写入到内存流
-        /// </summary>
-        /// <param name="stream">内存流</param>
-        public abstract void WriteToStream(Stream stream);
     }
 }

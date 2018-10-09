@@ -19,15 +19,5 @@ namespace Bing.Offices.Excels.Npoi.Exports
         {
             throw new System.NotImplementedException();
         }
-
-        public override byte[] WriteToBuffer()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override void WriteToStream(Stream stream)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

@@ -18,16 +18,6 @@ namespace Bing.Offices.Excels.Npoi.Exports
         public override IExport Title(string title)
         {
             throw new System.NotImplementedException();
-        }
-
-        public override byte[] WriteToBuffer()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override void WriteToStream(Stream stream)
-        {
-            throw new System.NotImplementedException();
-        }
+        }        
     }
 }
