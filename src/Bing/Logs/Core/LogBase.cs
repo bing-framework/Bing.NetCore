@@ -230,7 +230,6 @@ namespace Bing.Logs.Core
             content.Browser = Context.Browser;
             content.Url = Context.Url;
             content.UserId = Session.UserId;
-            content.Order = Context.Order;
         }
 
         /// <summary>
@@ -256,7 +255,6 @@ namespace Bing.Logs.Core
             }
             finally
             {
-                Context.UpdateContext();
                 content = null;
             }
         }

@@ -21,9 +21,14 @@ namespace Bing.Logs.Core
         private LogContextInfo _info;
 
         /// <summary>
+        /// 序号
+        /// </summary>
+        private int _orderId;
+
+        /// <summary>
         /// 跟踪号
         /// </summary>
-        public string TraceId => GetInfo().TraceId;
+        public string TraceId => $"{GetInfo().TraceId}-{++_orderId}";
 
         /// <summary>
         /// 计时器
@@ -51,22 +56,6 @@ namespace Bing.Logs.Core
         public string Url => GetInfo().Url;
 
         /// <summary>
-        /// 顺序
-        /// </summary>
-        public int Order => GetInfo().Order;
-
-        /// <summary>
-        /// 更新上下文
-        /// </summary>
-        public void UpdateContext()
-        {
-            if (_info != null)
-            {
-                _info.Order += 1;
-            }
-        }
-
-        /// <summary>
         /// 上下文
         /// </summary>
         public IContext Context { get; set; }
@@ -80,6 +69,7 @@ namespace Bing.Logs.Core
         public LogContext(IContext context)
         {
             Context = context;
+            _orderId = 0;
         }
         #endregion
 
@@ -118,7 +108,6 @@ namespace Bing.Logs.Core
                 Host = Dns.GetHostName(),
                 Browser = Web.Browser,
                 Url = Web.Url,
-                Order = 0
             };
         }
 

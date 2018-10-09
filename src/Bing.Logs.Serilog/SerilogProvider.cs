@@ -3,7 +3,6 @@ using System.IO;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
 using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 using Serilog;
 using Serilog.Events;
 using Serilogs = Serilog;

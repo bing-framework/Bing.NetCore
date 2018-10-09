@@ -39,20 +39,8 @@ namespace Bing.Logs.Core
         public string Url => string.Empty;
 
         /// <summary>
-        /// 顺序
-        /// </summary>
-        public int Order => 0;
-
-        /// <summary>
         /// 空日志上下文实例
         /// </summary>
         public static readonly ILogContext Instance = new NullLogContext();
-
-        /// <summary>
-        /// 更新上下文
-        /// </summary>
-        public void UpdateContext()
-        {
-        }
     }
 }

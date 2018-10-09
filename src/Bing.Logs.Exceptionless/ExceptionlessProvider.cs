@@ -175,7 +175,7 @@ namespace Bing.Logs.Exceptionless
         /// <param name="content">日志内容</param>
         private void SetReferenceId(EventBuilder builder, ILogContent content)
         {
-            builder.SetReferenceId($"{content.TraceId}-{content.Order}");
+            builder.SetReferenceId($"{content.TraceId}");
         }
 
         /// <summary>

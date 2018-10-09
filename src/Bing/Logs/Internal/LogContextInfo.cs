@@ -37,11 +37,6 @@ namespace Bing.Logs.Internal
         /// 请求地址
         /// </summary>
         public string Url { get; set; }
-
-        /// <summary>
-        /// 排序
-        /// </summary>
-        public int Order { get; set; }
         #endregion       
     }
 }
