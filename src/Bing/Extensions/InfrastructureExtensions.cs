@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Configuration;
 using Bing.Dependency;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ namespace Bing
         public static IServiceProvider AddBing(this IServiceCollection services, params IConfig[] configs)
         {
             services.AddHttpContextAccessor();
+            services.TryAddSingleton<IConfigurationAccessor>(DefaultConfigurationAccessor.Empty);
             return new DependencyConfiguration(services, configs).Config();
         }
 

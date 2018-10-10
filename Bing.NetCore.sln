@@ -190,7 +190,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Offices.Excels", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Offices.Excels.Npoi", "src\Bing.Offices.Excels.Npoi\Bing.Offices.Excels.Npoi.csproj", "{B0022347-7E0B-4C7B-ACE7-FE23F1AE513B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Offices.Excels.Tests", "tests\Bing.Offices.Excels.Tests\Bing.Offices.Excels.Tests.csproj", "{577AEE7E-8E80-42EF-8786-A3C577B24FAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Offices.Excels.Tests", "tests\Bing.Offices.Excels.Tests\Bing.Offices.Excels.Tests.csproj", "{577AEE7E-8E80-42EF-8786-A3C577B24FAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
