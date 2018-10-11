@@ -11,8 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions\Servers\" />
     <Folder Include="Core\Servers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Utils\Bing.Utils.csproj" />
   </ItemGroup>
 
 </Project>

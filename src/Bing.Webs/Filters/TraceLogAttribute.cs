@@ -114,12 +114,26 @@ namespace Bing.Webs.Filters
         /// <param name="request">Http请求</param>
         private void AddFormParams(Microsoft.AspNetCore.Http.HttpRequest request)
         {
+            if (IsMultipart(request.ContentType))
+            {
+                return;
+            }
             var result = FileUtil.ToString(request.Body);
             if (string.IsNullOrWhiteSpace(result))
             {
                 return;
             }
             Logger.Params("表单参数:").Params(result);
+        }
+
+        /// <summary>
+        /// 是否multipart内容类型
+        /// </summary>
+        /// <param name="contentType">内容类型</param>
+        /// <returns></returns>
+        private static bool IsMultipart(string contentType)
+        {
+            return !string.IsNullOrEmpty(contentType) && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
@@ -195,5 +209,7 @@ namespace Bing.Webs.Filters
                 .Content("响应结果:")
                 .Content($"{JsonUtil.ToJson(result.Data)}");
         }
+
+        
     }
 }
