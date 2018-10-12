@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.Exceptionless;
+using Bing.Logs.Log4Net;
 using Bing.Logs.NLog;
 using Bing.Logs.Serilog;
 using Bing.Samples.Api.OAuths;
@@ -41,6 +42,17 @@ namespace Bing.Samples.Api
                 .AddControllersAsServices();
 
             services.AddNLog();
+
+            // 多日志输出
+            services.AddLog4NetWithFactory();
+            services.AddNLogWithFactory();
+            services.AddSerilogWithFactory();
+            services.AddExceptionlessWithFactory(options =>
+            {
+                options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
+                options.ServerUrl = "";
+            });
+
             //services.AddExceptionless(options =>
             //{
             //    options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";

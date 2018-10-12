@@ -48,6 +48,12 @@ namespace Bing.Logs.Core
         /// 跟踪级别是否启用
         /// </summary>
         public bool IsTraceEnabled => Provider.IsTraceEnabled;
+
+        /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name { get; }
+
         #endregion
 
         #region 构造函数
@@ -64,6 +70,22 @@ namespace Bing.Logs.Core
             Context = context;
             Session = session ?? Bing.Sessions.NullSession.Instance;
         }
+
+        /// <summary>
+        /// 初始化一个<see cref="LogBase{TContent}"/>类型的实例
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="provider">日志提供程序</param>
+        /// <param name="context">日志上下文</param>
+        /// <param name="session">用户会话</param>
+        protected LogBase(string name, ILogProvider provider, ILogContext context, Bing.Sessions.ISession session)
+        {
+            Provider = provider;
+            Context = context;
+            Session = session ?? Bing.Sessions.NullSession.Instance;
+            Name = name;
+        }
+
         #endregion
 
         /// <summary>

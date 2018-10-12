@@ -25,6 +25,12 @@ namespace Bing.Logs.Core
         /// 跟踪级别是否启用
         /// </summary>
         public bool IsTraceEnabled => false;
+
+        /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name => string.Empty;
+
         #endregion        
 
         /// <summary>

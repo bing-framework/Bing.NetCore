@@ -19,6 +19,11 @@ namespace Bing.Logs
         bool IsTraceEnabled { get; }
 
         /// <summary>
+        /// 名称
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         /// 设置内容
         /// </summary>
         /// <typeparam name="TContent">日志内容类型</typeparam>

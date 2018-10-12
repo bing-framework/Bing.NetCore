@@ -43,6 +43,20 @@ namespace Bing.Logs
         }
 
         /// <summary>
+        /// 初始化一个<see cref="Log"/>类型的实例
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="provider">日志提供程序</param>
+        /// <param name="context">日志上下文</param>
+        /// <param name="session">用户会话</param>
+        /// <param name="class">类名</param>
+        public Log(string name, ILogProvider provider, ILogContext context, ISession session, string @class) : base(
+            name, provider, context, session)
+        {
+            _class = @class;
+        }
+
+        /// <summary>
         /// 获取日志内容
         /// </summary>
         /// <returns></returns>
