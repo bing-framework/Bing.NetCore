@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Caching;
 using Bing.Caching.Hybrid;
 using Bing.Caching.InMemory;
 using Bing.Caching.Internal;
@@ -55,17 +56,36 @@ namespace Bing.Samples.Caching
             //// 添加Redis缓存操作
             //services.AddDefaultRedisCache(x =>
             //{
-            //    x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129",6379));
+            //    x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129", 6379));
             //});
 
-            // 添加混合缓存操作
-            services.AddDefaultInMemoryCache(x => { x.Order = 1; });
-            services.AddDefaultRedisCache(x =>
+            //// 添加混合缓存操作
+            //services.AddDefaultInMemoryCache(x => { x.Order = 1; });
+            //services.AddDefaultRedisCache(x =>
+            //{
+            //    x.Order = 2;
+            //    x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129", 6379));
+            //});
+            //services.AddDefaultHybridCache();
+
+            // 多缓存操作
+            services.AddDefaultInMemoryCacheWithFactory();
+            services.AddDefaultRedisCacheWithFactory(CacheConst.DefaultRedisName, x =>
             {
-                x.Order = 2;
-                x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129", 6379));
+                x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129",6379));
+                x.DbConfig.Database = 0;
             });
-            services.AddDefaultHybridCache();
+
+            services.AddDefaultRedisCacheWithFactory($"{CacheConst.DefaultRedisName}001", x =>
+            {
+                x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129", 6379));
+                x.DbConfig.Database = 1;
+            });
+            services.AddDefaultRedisCacheWithFactory($"{CacheConst.DefaultRedisName}002", x =>
+            {
+                x.DbConfig.EndPoints.Add(new ServerEndPoint("192.168.205.129", 6379));
+                x.DbConfig.Database = 2;
+            });
 
             // 添加Bing基础设施服务
             return services.AddBing();
