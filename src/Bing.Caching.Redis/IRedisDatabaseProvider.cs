@@ -9,6 +9,11 @@ namespace Bing.Caching.Redis
     public interface IRedisDatabaseProvider
     {
         /// <summary>
+        /// 数据库提供程序名称
+        /// </summary>
+        string DbProviderName { get; }
+
+        /// <summary>
         /// 获取数据库
         /// </summary>
         /// <returns></returns>

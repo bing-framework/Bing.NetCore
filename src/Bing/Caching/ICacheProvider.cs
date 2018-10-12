@@ -15,6 +15,11 @@ namespace Bing.Caching
         IFlush, IFlushAsync
     {
         /// <summary>
+        /// 名称
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         /// 是否分布式缓存
         /// </summary>
         bool IsDistributedCache { get; }

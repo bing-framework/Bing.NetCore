@@ -18,6 +18,11 @@ namespace Bing.Caching.Hybrid
         private readonly IEnumerable<ICacheProvider> _providers;
 
         /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name => throw new NotImplementedException();
+
+        /// <summary>
         /// 是否分布式缓存
         /// </summary>
         public bool IsDistributedCache => throw new NotImplementedException();

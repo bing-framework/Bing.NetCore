@@ -23,13 +23,30 @@ namespace Bing.Caching.Redis
         private readonly Lazy<ConnectionMultiplexer> _connectionMultiplexer;
 
         /// <summary>
+        /// 数据库提供程序名称
+        /// </summary>
+        public string DbProviderName { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="RedisDatabaseProvider"/>类型的实例
         /// </summary>
         /// <param name="options">Redis选项</param>
         public RedisDatabaseProvider(IOptionsMonitor<RedisOptions> options)
         {
             _options = options.CurrentValue.DbConfig;
-            _connectionMultiplexer=new Lazy<ConnectionMultiplexer>(CreateConnectionMultiplexer);
+            _connectionMultiplexer = new Lazy<ConnectionMultiplexer>(CreateConnectionMultiplexer);
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="RedisDatabaseProvider"/>类型的实例
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="options">Redis选项</param>
+        public RedisDatabaseProvider(string name, RedisOptions options)
+        {
+            _options = options.DbConfig;
+            _connectionMultiplexer = new Lazy<ConnectionMultiplexer>(CreateConnectionMultiplexer);
+            DbProviderName = name;
         }
 
         /// <summary>

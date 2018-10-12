@@ -25,5 +25,19 @@
         /// </summary>
         public const string SQLiteSection = "bingcache:sqlite";
 
+        /// <summary>
+        /// 默认 内存缓存 名称
+        /// </summary>
+        public const string DefaultInMemoryName = "DefaultInMemory";
+
+        /// <summary>
+        /// 默认 Redis 名称
+        /// </summary>
+        public const string DefaultRedisName = "DefaultRedis";
+
+        /// <summary>
+        /// 默认 Memcached 名称
+        /// </summary>
+        public const string DefaultMemcachedName = "DefaultMemcached";
     }
 }

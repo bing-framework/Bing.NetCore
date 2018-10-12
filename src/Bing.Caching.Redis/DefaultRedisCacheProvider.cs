@@ -48,6 +48,11 @@ namespace Bing.Caching.Redis
         private readonly RedisOptions _options;
 
         /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
         /// 是否分布式缓存
         /// </summary>
         public bool IsDistributedCache => false;
@@ -92,6 +97,31 @@ namespace Bing.Caching.Redis
             this._cache = _dbProvider.GetDatabase();
             this._servers = _dbProvider.GetServerList();
             this.CacheStatsInfo = new CacheStatsInfo();
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="DefaultRedisCacheProvider"/>类型的实例
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="dbProviders">Redis数据库提供程序列表</param>
+        /// <param name="serializer">缓存序列化器</param>
+        /// <param name="options">Redis选项</param>
+        /// <param name="log">日志</param>
+        public DefaultRedisCacheProvider(string name,IEnumerable<IRedisDatabaseProvider> dbProviders, ICacheSerializer serializer,
+            IOptionsMonitor<RedisOptions> options, ILog log = null)
+        {
+            Check.NotNullOrEmpty(dbProviders, nameof(dbProviders));
+            Check.NotNull(serializer, nameof(serializer));
+
+            this._dbProvider = dbProviders.FirstOrDefault(x => x.DbProviderName.Equals(name));
+            this._serializer = serializer;
+            this._options = options.CurrentValue;
+            this._log = log ?? NullLog.Instance;
+            this._cache = _dbProvider.GetDatabase();
+            this._servers = _dbProvider.GetServerList();
+            this.CacheStatsInfo = new CacheStatsInfo();
+
+            this.Name = name;
         }
 
         /// <summary>
@@ -344,7 +374,7 @@ namespace Bing.Caching.Redis
 
             foreach (var server in _servers)
             {
-                keys.AddRange(server.Keys(pattern: pattern));
+                keys.AddRange(server.Keys(pattern: pattern, database: _cache.Database));
             }
             return keys.Distinct().ToArray();
 
@@ -700,6 +730,17 @@ namespace Bing.Caching.Redis
             {
                 _log.Info(message);
             }
+        }
+
+        /// <summary>
+        /// 构建缓存键
+        /// </summary>
+        /// <param name="providerName">提供程序名称</param>
+        /// <param name="cahceKey">缓存键</param>
+        /// <returns></returns>
+        private string BuildCacheKey(string providerName, string cahceKey)
+        {
+            return string.IsNullOrWhiteSpace(providerName) ? cahceKey : $"{providerName}-{cahceKey}";
         }
     }
 }

@@ -33,6 +33,8 @@ namespace Bing.Caching.Memcached
         /// </summary>
         private readonly Bing.Logs.ILog _log;
 
+        public string Name { get; }
+
         /// <summary>
         /// 是否分布式缓存
         /// </summary>
