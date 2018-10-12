@@ -42,6 +42,11 @@ namespace Bing.Logs.Log4Net
         /// </summary>
         public bool IsTraceEnabled => false;
 
+        /// <summary>
+        /// 是否分布式日志
+        /// </summary>
+        public bool IsDistributedLog => false;
+
         #endregion
 
         #region 构造函数

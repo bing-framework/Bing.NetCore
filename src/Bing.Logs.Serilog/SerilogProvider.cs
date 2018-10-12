@@ -43,6 +43,11 @@ namespace Bing.Logs.Serilog
         public bool IsTraceEnabled => _logger.IsEnabled(LogEventLevel.Verbose);
 
         /// <summary>
+        /// 是否分布式日志
+        /// </summary>
+        public bool IsDistributedLog => false;
+
+        /// <summary>
         /// Serilog 配置
         /// </summary>
         internal static LoggerConfiguration Configuration { get; set; }

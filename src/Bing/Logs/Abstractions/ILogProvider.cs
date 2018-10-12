@@ -21,6 +21,11 @@
         bool IsTraceEnabled { get; }
 
         /// <summary>
+        /// 是否分布式日志
+        /// </summary>
+        bool IsDistributedLog { get; }
+
+        /// <summary>
         /// 写日志
         /// </summary>
         /// <param name="level">日志等级</param>

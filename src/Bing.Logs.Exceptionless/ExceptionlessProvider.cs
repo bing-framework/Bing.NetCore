@@ -42,7 +42,12 @@ namespace Bing.Logs.Exceptionless
         /// <summary>
         /// 跟踪级别是否启用
         /// </summary>
-        public bool IsTraceEnabled { get; }        
+        public bool IsTraceEnabled { get; }
+
+        /// <summary>
+        /// 是否分布式日志
+        /// </summary>
+        public bool IsDistributedLog => true;
 
         #endregion
 

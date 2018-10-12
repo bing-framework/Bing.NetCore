@@ -36,6 +36,11 @@ namespace Bing.Logs.NLog
         /// </summary>
         public bool IsTraceEnabled => _logger.IsTraceEnabled;
 
+        /// <summary>
+        /// 是否分布式日志
+        /// </summary>
+        public bool IsDistributedLog => false;
+
         #endregion
 
         #region 构造函数
