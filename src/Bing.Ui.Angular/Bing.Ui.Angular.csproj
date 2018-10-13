@@ -7,12 +7,14 @@
 
   <ItemGroup>
     <Folder Include="Services\" />
-    <Folder Include="Angular\" />
     <Folder Include="Controllers\" />
-    <Folder Include="Extensions\" />
     <Folder Include="FlexLayout\" />
-    <Folder Include="Zorro\" />
     <Folder Include="Alain\" />
+    <Folder Include="Zorro\Buttons\Builders\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Ui.Core\Bing.Ui.Core.csproj" />
   </ItemGroup>
 
 </Project>
