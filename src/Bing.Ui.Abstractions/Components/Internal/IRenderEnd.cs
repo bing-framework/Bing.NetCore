@@ -6,7 +6,7 @@
     public interface IRenderEnd
     {
         /// <summary>
-        /// 渲染结束
+        /// 容器渲染结束
         /// </summary>
         void End();
     }

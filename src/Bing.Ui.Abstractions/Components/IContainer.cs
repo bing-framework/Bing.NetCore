@@ -19,6 +19,6 @@ namespace Bing.Ui.Components
         /// 准备渲染器
         /// </summary>
         /// <returns></returns>
-        TWrapper Begion();
+        TWrapper Begin();
     }
 }

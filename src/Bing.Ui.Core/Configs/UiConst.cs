@@ -196,6 +196,11 @@
         public const string MaxLength = "max-length";
 
         /// <summary>
+        /// 最大长度错误消息
+        /// </summary>
+        public const string MaxLengthMessage = "max-length-message";
+
+        /// <summary>
         /// 电子邮件错误消息
         /// </summary>
         public const string EmailMessage = "email-message";

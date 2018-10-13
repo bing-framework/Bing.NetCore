@@ -11,11 +11,4 @@
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\" />
-    <Folder Include="Enums\" />
-    <Folder Include="Renders\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>
