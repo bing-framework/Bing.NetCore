@@ -198,9 +198,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Scheduler", "01-Schedule
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Scheduler.Client", "src\Bing.Scheduler.Client\Bing.Scheduler.Client.csproj", "{B848D7BC-B45E-43DD-98CE-3FD36E84D281}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Scheduler.Server", "src\Bing.Scheduler.Server\Bing.Scheduler.Server.csproj", "{2A696850-2998-4688-8781-AE8340D16E0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Scheduler.Server", "src\Bing.Scheduler.Server\Bing.Scheduler.Server.csproj", "{2A696850-2998-4688-8781-AE8340D16E0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Scheduler.Quartz", "src\Bing.Scheduler.Quartz\Bing.Scheduler.Quartz.csproj", "{D5D1BE99-C916-447A-8CA5-6E2297CAA6F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Scheduler.Quartz", "src\Bing.Scheduler.Quartz\Bing.Scheduler.Quartz.csproj", "{D5D1BE99-C916-447A-8CA5-6E2297CAA6F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06-UI", "06-UI", "{EE2052B4-E25F-4BA2-8783-CC7F5DAC0AAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ui.Abstractions", "src\Bing.Ui.Abstractions\Bing.Ui.Abstractions.csproj", "{4420A190-F94C-4894-8641-4027C1645FD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -460,6 +464,10 @@ Global
 		{D5D1BE99-C916-447A-8CA5-6E2297CAA6F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D1BE99-C916-447A-8CA5-6E2297CAA6F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5D1BE99-C916-447A-8CA5-6E2297CAA6F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4420A190-F94C-4894-8641-4027C1645FD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4420A190-F94C-4894-8641-4027C1645FD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4420A190-F94C-4894-8641-4027C1645FD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4420A190-F94C-4894-8641-4027C1645FD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -558,6 +566,8 @@ Global
 		{B848D7BC-B45E-43DD-98CE-3FD36E84D281} = {1D196EF0-0B06-4E04-9C0D-B80343A48161}
 		{2A696850-2998-4688-8781-AE8340D16E0C} = {1D196EF0-0B06-4E04-9C0D-B80343A48161}
 		{D5D1BE99-C916-447A-8CA5-6E2297CAA6F4} = {1D196EF0-0B06-4E04-9C0D-B80343A48161}
+		{EE2052B4-E25F-4BA2-8783-CC7F5DAC0AAB} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{4420A190-F94C-4894-8641-4027C1645FD4} = {EE2052B4-E25F-4BA2-8783-CC7F5DAC0AAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
