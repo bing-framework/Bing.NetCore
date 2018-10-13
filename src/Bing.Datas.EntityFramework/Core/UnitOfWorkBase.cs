@@ -106,7 +106,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
-                return Log.GetLogByName(EfLog.TRACE_LOG_NAME);
+                return Log.GetLog(EfLog.TRACE_LOG_NAME);
             }
             catch
             {

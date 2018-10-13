@@ -18,7 +18,7 @@ namespace Bing.Logs.Aspects
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
             var methodName = GetMethodName(context);
-            var log = Log.GetLogByName(methodName);
+            var log = Log.GetLog(methodName);
             if (!Enabled(log))
             {
                 return;

@@ -1,4 +1,5 @@
-﻿using Bing.Helpers;
+﻿using System;
+using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;
@@ -17,6 +18,11 @@ namespace Bing.Logs
         /// 类名
         /// </summary>
         private readonly string _class;
+
+        /// <summary>
+        /// 空日志操作
+        /// </summary>
+        public static readonly ILog Null = NullLog.Instance;
 
         /// <summary>
         /// 初始化一个<see cref="Log"/>类型的实例
@@ -84,7 +90,7 @@ namespace Bing.Logs
         /// <returns></returns>
         public static ILog GetLog()
         {
-            return GetLogByName(string.Empty);
+            return GetLog(string.Empty);
         }
 
         /// <summary>
@@ -107,7 +113,7 @@ namespace Bing.Logs
         /// </summary>
         /// <param name="logName">日志名称</param>
         /// <returns></returns>
-        public static ILog GetLogByName(string logName)
+        public static ILog GetLog(string logName)
         {
             return GetLog(logName, string.Empty);
         }
@@ -120,11 +126,27 @@ namespace Bing.Logs
         /// <returns></returns>
         private static ILog GetLog(string logName, string @class)
         {
-            var providerFactory = Ioc.Create<ILogProviderFactory>();
+            var providerFactory = GetLogProviderFactory();
             var format = GetLogFormat();
             var context = GetLogContext();
             var session = GetSession();
             return new Log(providerFactory.Create(logName, format), context, session, @class);
+        }
+
+        /// <summary>
+        /// 获取日志提供程序工厂
+        /// </summary>
+        /// <returns></returns>
+        private static ILogProviderFactory GetLogProviderFactory()
+        {
+            try
+            {
+                return Ioc.Create<ILogProviderFactory>();
+            }
+            catch
+            {
+                return NullLogProviderFactory.Instance;
+            }
         }
 
         /// <summary>
@@ -173,11 +195,6 @@ namespace Bing.Logs
             {
                 return Security.Sessions.Session.Null;
             }
-        }
-
-        /// <summary>
-        /// 空日志操作
-        /// </summary>
-        public static readonly ILog Null = NullLog.Instance;
+        }        
     }
 }
