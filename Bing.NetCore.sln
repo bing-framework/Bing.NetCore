@@ -230,6 +230,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Tools.ExpressDelivery.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-ExpressDelivery", "03-ExpressDelivery", "{918F995B-9807-4287-AA47-4D1B28CDFD4D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Tools.ExpressDelivery.CaiNiao", "src\Bing.Tools.ExpressDelivery.CaiNiao\Bing.Tools.ExpressDelivery.CaiNiao.csproj", "{9C37F3D8-D4E7-487F-B013-5872811CB6E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -528,6 +530,10 @@ Global
 		{B5C5C06F-8168-43CB-A33F-E4F4AA50B86D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5C5C06F-8168-43CB-A33F-E4F4AA50B86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5C5C06F-8168-43CB-A33F-E4F4AA50B86D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -640,6 +646,7 @@ Global
 		{2D4A606C-71BC-4750-85FA-2255E7C7C80A} = {FF13190A-4FBE-4DCA-BBC2-F0DDC61A9960}
 		{B5C5C06F-8168-43CB-A33F-E4F4AA50B86D} = {918F995B-9807-4287-AA47-4D1B28CDFD4D}
 		{918F995B-9807-4287-AA47-4D1B28CDFD4D} = {51C7D0AA-4830-45FE-80B9-3F0C78267773}
+		{9C37F3D8-D4E7-487F-B013-5872811CB6E0} = {26809458-459B-402A-ABCF-FB034D06B5AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

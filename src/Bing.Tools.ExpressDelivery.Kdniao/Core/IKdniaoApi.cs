@@ -18,6 +18,6 @@ namespace Bing.Tools.ExpressDelivery.Kdniao.Core
         /// <returns></returns>
         [HttpPost("/Ebusiness/EbusinessOrderHandle.aspx")]
         [JsonReturn]
-        ITask<QueryKdniaoTrackResult> TrackAsync(FormUrlEncodedContent content);
+        ITask<KdniaoTrackQueryResult> TrackAsync(FormUrlEncodedContent content);
     }
 }

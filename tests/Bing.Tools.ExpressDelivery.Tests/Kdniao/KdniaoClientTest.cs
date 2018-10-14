@@ -37,7 +37,7 @@ namespace Bing.Tools.ExpressDelivery.Tests.Kdniao
         [Fact]
         public async void Test_Track()
         {
-            var request = new QueryKdniaoTrack()
+            var request = new KdniaoTrackQuery()
             {
                 LogisticCode = "",
                 ShipperCode = "YTO",

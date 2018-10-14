@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using Bing.Tools.ExpressDelivery.Exceptions;
+﻿using Bing.Tools.ExpressDelivery.Exceptions;
 using Bing.Tools.ExpressDelivery.Kdniao.Core;
 
 namespace Bing.Tools.ExpressDelivery.Kdniao.Models
@@ -7,7 +6,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao.Models
     /// <summary>
     /// 快递鸟 即时跟踪
     /// </summary>
-    public class QueryKdniaoTrack
+    public class KdniaoTrackQuery
     {
         /// <summary>
         /// 快递公司编码

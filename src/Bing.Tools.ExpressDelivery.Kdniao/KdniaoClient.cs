@@ -62,7 +62,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao
         /// </summary>
         /// <param name="request">即时查询请求</param>
         /// <returns></returns>
-        public async Task<QueryKdniaoTrackResult> TracKAsync(QueryKdniaoTrack request)
+        public async Task<KdniaoTrackQueryResult> TracKAsync(KdniaoTrackQuery request)
         {
             if (request == null)
             {
@@ -175,7 +175,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao
         /// 返回默认响应结果
         /// </summary>
         /// <returns></returns>
-        private static QueryKdniaoTrackResult ReturnAsDefaultResponse() => new QueryKdniaoTrackResult()
+        private static KdniaoTrackQueryResult ReturnAsDefaultResponse() => new KdniaoTrackQueryResult()
         {
             Success = false,
             Reason = "解析错误，返回默认结果"

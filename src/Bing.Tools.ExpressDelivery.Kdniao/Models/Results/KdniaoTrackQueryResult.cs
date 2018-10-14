@@ -7,7 +7,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao.Models.Results
     /// <summary>
     /// 快递鸟 即使查询结果
     /// </summary>
-    public class QueryKdniaoTrackResult
+    public class KdniaoTrackQueryResult
     {
         /// <summary>
         /// 用户ID
