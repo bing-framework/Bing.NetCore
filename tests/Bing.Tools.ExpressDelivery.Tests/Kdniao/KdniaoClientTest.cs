@@ -26,12 +26,21 @@ namespace Bing.Tools.ExpressDelivery.Tests.Kdniao
         }
 
         [Fact]
+        public void Test_ConfigChecking()
+        {
+            Assert.NotNull(_config);
+            Assert.NotNull(_config.Account);
+            Assert.NotEmpty(_config.Account.MerchantId);
+            Assert.NotEmpty(_config.Account.ApiKey);
+        }
+
+        [Fact]
         public async void Test_Track()
         {
             var request = new QueryKdniaoTrack()
             {
                 LogisticCode = "",
-                ShipperCode = "",
+                ShipperCode = "YTO",
             };
 
             var result = await _client.TracKAsync(request);
