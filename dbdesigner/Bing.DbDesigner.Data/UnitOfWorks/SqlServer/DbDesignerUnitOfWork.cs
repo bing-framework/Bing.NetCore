@@ -1,48 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Text;
+﻿using Microsoft.EntityFrameworkCore;
 using Bing.Datas.UnitOfWorks;
-using Microsoft.EntityFrameworkCore;
 
-namespace Bing.DbDesigner.Data.UnitOfWorks.SqlServer
-{
+namespace Bing.DbDesigner.Data.UnitOfWorks.SqlServer {
     /// <summary>
-    /// DbDesigner 工作单元
+    /// 工作单元
     /// </summary>
-    public class DbDesignerUnitOfWork:Bing.Datas.EntityFramework.SqlServer.UnitOfWork,IDbDesignerUnitOfWork
-    {
-        ///// <summary>
-        ///// 初始化一个<see cref="DbDesignerUnitOfWork"/>类型的实例
-        ///// </summary>
-        ///// <param name="connection">连接字符串</param>
-        ///// <param name="manager">工作单元管理器</param>
-        //public DbDesignerUnitOfWork(string connection, IUnitOfWorkManager manager = null) : base(connection, manager)
-        //{
-        //}
-
-        ///// <summary>
-        ///// 初始化一个<see cref="DbDesignerUnitOfWork"/>类型的实例
-        ///// </summary>
-        ///// <param name="connection">数据库连接</param>
-        ///// <param name="manager">工作单元管理器</param>
-        //public DbDesignerUnitOfWork(DbConnection connection, IUnitOfWorkManager manager = null) : base(connection, manager)
-        //{
-        //}
-
+    public class DbDesignerUnitOfWork : Bing.Datas.EntityFramework.SqlServer.UnitOfWork,IDbDesignerUnitOfWork {
         /// <summary>
-        /// 初始化一个<see cref="DbDesignerUnitOfWork"/>类型的实例
+        /// 初始化工作单元
         /// </summary>
-        /// <param name="options">配置</param>
-        /// <param name="manager">工作单元管理器</param>
-        public DbDesignerUnitOfWork(DbContextOptions options, IUnitOfWorkManager manager) : base(options, manager)
-        {
-        }
-
-        public override void Dispose()
-        {
-            GC.Collect();
-            //base.Dispose();
+        /// <param name="options">配置项</param>
+        /// <param name="unitOfWorkManager">工作单元服务</param>
+        public DbDesignerUnitOfWork( DbContextOptions options, IUnitOfWorkManager unitOfWorkManager ) : base( options, unitOfWorkManager ) {
         }
     }
 }

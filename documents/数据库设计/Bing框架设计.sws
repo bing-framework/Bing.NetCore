@@ -4,7 +4,7 @@
 
 <Workspace>
 	<Local Expanded="Yes" Name="Bing 框架中心">
-		<Model Expanded="Yes" ID="{EAA148FB-57BA-4892-B54D-EC9F1CBDB88B}" Name="数据库设计器" Selected="Yes" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="数据建模/数据库设计器.pdm"/>
+		<Model Expanded="Yes" ID="{EAA148FB-57BA-4892-B54D-EC9F1CBDB88B}" Name="数据库设计器" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="数据建模/数据库设计器.pdm"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
 </Workspace>

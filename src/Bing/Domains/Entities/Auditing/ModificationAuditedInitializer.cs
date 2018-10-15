@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Configuration;
+using Bing.Configurations;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
 

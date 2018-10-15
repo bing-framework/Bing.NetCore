@@ -17,7 +17,6 @@
     <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
     <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\Bing.DbDesigner.Data\Bing.DbDesigner.Data.csproj" />
-    <ProjectReference Include="..\Bing.DbDesigner.Domains\Bing.DbDesigner.Domains.csproj" />
     <ProjectReference Include="..\Bing.DbDesigner.Infrastructure\Bing.DbDesigner.Infrastructure.csproj" />
   </ItemGroup>
 

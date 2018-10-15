@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Bing.Configuration;
+using Bing.Configurations;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Utils.Extensions;

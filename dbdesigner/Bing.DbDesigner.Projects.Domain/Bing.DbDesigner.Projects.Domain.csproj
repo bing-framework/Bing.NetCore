@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.DbDesigner.Infrastructure\Bing.DbDesigner.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Models/Project.*.cs">
+      <DependentUpon>Project.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Solution.*.cs">
+      <DependentUpon>Solution.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/UserProject.*.cs">
+      <DependentUpon>UserProject.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/UserSolution.*.cs">
+      <DependentUpon>UserSolution.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Parameters\" />
+    <Folder Include="Services\Abstractions\" />
+    <Folder Include="Services\Implements\" />
+  </ItemGroup>
+
+</Project>

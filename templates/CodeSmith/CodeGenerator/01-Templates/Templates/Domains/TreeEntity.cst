@@ -22,6 +22,7 @@ using System.ComponentModel.DataAnnotations;
 using Bing.Utils;
 using Bing;
 using Bing.Domains;
+using Bing.Domains.Entities;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Entities.Auditing;
 using Bing.Domains.Entities.Tenants;

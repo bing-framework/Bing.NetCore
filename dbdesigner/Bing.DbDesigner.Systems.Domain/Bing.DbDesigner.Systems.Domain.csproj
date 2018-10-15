@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.DbDesigner.Infrastructure\Bing.DbDesigner.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Models/Application.*.cs">
+      <DependentUpon>Application.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/ApplicationRole.*.cs">
+      <DependentUpon>ApplicationRole.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/ApplicationTenant.*.cs">
+      <DependentUpon>ApplicationTenant.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/ApplicationUser.*.cs">
+      <DependentUpon>ApplicationUser.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Permission.*.cs">
+      <DependentUpon>Permission.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Resource.*.cs">
+      <DependentUpon>Resource.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Role.*.cs">
+      <DependentUpon>Role.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Tenant.*.cs">
+      <DependentUpon>Tenant.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/TenantRole.*.cs">
+      <DependentUpon>TenantRole.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/TenantUser.*.cs">
+      <DependentUpon>TenantUser.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/User.*.cs">
+      <DependentUpon>User.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/UserRole.*.cs">
+      <DependentUpon>UserRole.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Abstractions\" />
+    <Folder Include="Services\Implements\" />
+    <Folder Include="Parameters\" />
+  </ItemGroup>
+
+</Project>

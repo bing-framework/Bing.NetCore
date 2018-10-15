@@ -8,10 +8,11 @@
     <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj" />
-    <ProjectReference Include="..\Bing.DbDesigner.Commons.Domains\Bing.DbDesigner.Commons.Domains.csproj" />
-    <ProjectReference Include="..\Bing.DbDesigner.Databases.Domains\Bing.DbDesigner.Databases.Domains.csproj" />
-    <ProjectReference Include="..\Bing.DbDesigner.Domains\Bing.DbDesigner.Domains.csproj" />
-    <ProjectReference Include="..\Bing.DbDesigner.Projects.Domains\Bing.DbDesigner.Projects.Domains.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Commons.Domain\Bing.DbDesigner.Commons.Domain.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Databases.Domain\Bing.DbDesigner.Databases.Domain.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Domain\Bing.DbDesigner.Domain.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Projects.Domain\Bing.DbDesigner.Projects.Domain.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Systems.Domain\Bing.DbDesigner.Systems.Domain.csproj" />
   </ItemGroup>
 
 </Project>

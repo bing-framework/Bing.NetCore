@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Bing.Configuration;
+using Bing.Configurations;
 using Bing.Exceptions;
 
 namespace Bing.Validations.Handlers
