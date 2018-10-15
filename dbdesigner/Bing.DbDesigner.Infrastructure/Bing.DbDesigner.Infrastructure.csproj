@@ -4,4 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Biz\Bing.Biz.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
+  </ItemGroup>
+
 </Project>

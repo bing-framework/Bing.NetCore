@@ -230,7 +230,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Tools.ExpressDelivery.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-ExpressDelivery", "03-ExpressDelivery", "{918F995B-9807-4287-AA47-4D1B28CDFD4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Tools.ExpressDelivery.CaiNiao", "src\Bing.Tools.ExpressDelivery.CaiNiao\Bing.Tools.ExpressDelivery.CaiNiao.csproj", "{9C37F3D8-D4E7-487F-B013-5872811CB6E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Tools.ExpressDelivery.CaiNiao", "src\Bing.Tools.ExpressDelivery.CaiNiao\Bing.Tools.ExpressDelivery.CaiNiao.csproj", "{9C37F3D8-D4E7-487F-B013-5872811CB6E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.DbDesigner.Commons.Domains", "dbdesigner\Bing.DbDesigner.Commons.Domains\Bing.DbDesigner.Commons.Domains.csproj", "{DD102FB8-716E-4CF4-B8BA-657DEC1E6F7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.DbDesigner.Databases.Domains", "dbdesigner\Bing.DbDesigner.Databases.Domains\Bing.DbDesigner.Databases.Domains.csproj", "{544F0F75-7007-4AEA-8676-DD39103821AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.DbDesigner.Projects.Domains", "dbdesigner\Bing.DbDesigner.Projects.Domains\Bing.DbDesigner.Projects.Domains.csproj", "{82FDF11E-0B3E-4F30-B42C-7AAE7F5F1A95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.DbDesigner.Systems.Domains", "dbdesigner\Bing.DbDesigner.Systems.Domains\Bing.DbDesigner.Systems.Domains.csproj", "{C60AFCAB-3672-491B-A72A-C111E1AD53AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -534,6 +542,22 @@ Global
 		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C37F3D8-D4E7-487F-B013-5872811CB6E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD102FB8-716E-4CF4-B8BA-657DEC1E6F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD102FB8-716E-4CF4-B8BA-657DEC1E6F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD102FB8-716E-4CF4-B8BA-657DEC1E6F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD102FB8-716E-4CF4-B8BA-657DEC1E6F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544F0F75-7007-4AEA-8676-DD39103821AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544F0F75-7007-4AEA-8676-DD39103821AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544F0F75-7007-4AEA-8676-DD39103821AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544F0F75-7007-4AEA-8676-DD39103821AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82FDF11E-0B3E-4F30-B42C-7AAE7F5F1A95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82FDF11E-0B3E-4F30-B42C-7AAE7F5F1A95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82FDF11E-0B3E-4F30-B42C-7AAE7F5F1A95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82FDF11E-0B3E-4F30-B42C-7AAE7F5F1A95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C60AFCAB-3672-491B-A72A-C111E1AD53AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60AFCAB-3672-491B-A72A-C111E1AD53AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60AFCAB-3672-491B-A72A-C111E1AD53AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60AFCAB-3672-491B-A72A-C111E1AD53AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -647,6 +671,10 @@ Global
 		{B5C5C06F-8168-43CB-A33F-E4F4AA50B86D} = {918F995B-9807-4287-AA47-4D1B28CDFD4D}
 		{918F995B-9807-4287-AA47-4D1B28CDFD4D} = {51C7D0AA-4830-45FE-80B9-3F0C78267773}
 		{9C37F3D8-D4E7-487F-B013-5872811CB6E0} = {26809458-459B-402A-ABCF-FB034D06B5AE}
+		{DD102FB8-716E-4CF4-B8BA-657DEC1E6F7B} = {C604FB01-55F4-4FBE-8C77-EFD7DAB7A175}
+		{544F0F75-7007-4AEA-8676-DD39103821AD} = {C604FB01-55F4-4FBE-8C77-EFD7DAB7A175}
+		{82FDF11E-0B3E-4F30-B42C-7AAE7F5F1A95} = {C604FB01-55F4-4FBE-8C77-EFD7DAB7A175}
+		{C60AFCAB-3672-491B-A72A-C111E1AD53AB} = {C604FB01-55F4-4FBE-8C77-EFD7DAB7A175}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

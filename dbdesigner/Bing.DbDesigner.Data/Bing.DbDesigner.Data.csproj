@@ -5,10 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Commons.Domains\Bing.DbDesigner.Commons.Domains.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Databases.Domains\Bing.DbDesigner.Databases.Domains.csproj" />
     <ProjectReference Include="..\Bing.DbDesigner.Domains\Bing.DbDesigner.Domains.csproj" />
+    <ProjectReference Include="..\Bing.DbDesigner.Projects.Domains\Bing.DbDesigner.Projects.Domains.csproj" />
   </ItemGroup>
 
 </Project>
