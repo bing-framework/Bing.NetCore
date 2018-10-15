@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /sample/Bing.Samples.Api/Properties/PublishProfiles
+/templates/CodeSmith/CodeGenerator/02-Result

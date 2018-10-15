@@ -3,6 +3,7 @@
   <variables>
     <add key="ConnectionString1" value="Data Source=.\sql2014;Initial Catalog=Sample;Integrated Security=True" />
     <add key="ConnectionString2" value="Data Source=Bing\JIAN;Initial Catalog=Naddn;Persist Security Info=True;User ID=sa;Password=123456" />
+    <add key="ConnectionString3" value="Data Source=192.168.205.129,1433;Initial Catalog=DbDesigner;Persist Security Info=True;User ID=sa;Password=jian123456@sa" />
   </variables>
   <propertySets>
     <propertySet name="Templates" template="01-Templates\Templates.cst">
@@ -22,11 +23,11 @@
     </stringList>
       </property>
       <property name="Database">
-        <connectionString>$(ConnectionString2)</connectionString>
+        <connectionString>$(ConnectionString3)</connectionString>
         <providerType>SchemaExplorer.SqlSchemaProvider,SchemaExplorer.SqlSchemaProvider</providerType>
       </property>
-      <property name="Namespace">Naddn</property>
-      <property name="DbName">Naddn</property>
+      <property name="Namespace">Bing.DbDesigner</property>
+      <property name="DbName">DbDesigner</property>
     </propertySet>
   </propertySets>
 </codeSmith>
