@@ -8,47 +8,47 @@ namespace Bing.DbDesigner.Service.Dtos.Systems.Extensions {
     /// 用户数据传输对象扩展
     /// </summary>
     public static class UserDtoExtension {
-        /// <summary>
-        /// 转换为用户实体
-        /// </summary>
-        /// <param name="dto">用户数据传输对象</param>
-        public static User ToEntity( this UserDto dto ) {
-            if( dto == null )
-                return new User();
-            return new User( dto.Id.ToGuid() ) {
-                UserName = dto.UserName,
-                NormalizedUserName = dto.NormalizedUserName,
-                Email = dto.Email,
-                NormalizedEmail = dto.NormalizedEmail,
-                    EmailConfirmed = dto.EmailConfirmed.SafeValue(),
-                PhoneNumber = dto.PhoneNumber,
-                    PhoneNumberConfirmed = dto.PhoneNumberConfirmed.SafeValue(),
-                Password = dto.Password,
-                PasswordHash = dto.PasswordHash,
-                SafePassword = dto.SafePassword,
-                SafePasswordHash = dto.SafePasswordHash,
-                    TwoFactorEnabled = dto.TwoFactorEnabled.SafeValue(),
-                    Enabled = dto.Enabled.SafeValue(),
-                DisabledTime = dto.DisabledTime,
-                    LockoutEnabled = dto.LockoutEnabled.SafeValue(),
-                LockoutEnd = dto.LockoutEnd,
-                AccessFailedCount = dto.AccessFailedCount,
-                LoginCount = dto.LoginCount,
-                RegisterIp = dto.RegisterIp,
-                LastLoginTime = dto.LastLoginTime,
-                LastLoginIp = dto.LastLoginIp,
-                CurrentLoginTime = dto.CurrentLoginTime,
-                CurrentLoginIp = dto.CurrentLoginIp,
-                SecunityStamp = dto.SecunityStamp,
-                Note = dto.Note,
-                CreationTime = dto.CreationTime,
-                CreatorId = dto.CreatorId,
-                LastModificationTime = dto.LastModificationTime,
-                LastModifierId = dto.LastModifierId,
-                    IsDeleted = dto.IsDeleted.SafeValue(),
-                Version = dto.Version,
-            };
-        }
+        ///// <summary>
+        ///// 转换为用户实体
+        ///// </summary>
+        ///// <param name="dto">用户数据传输对象</param>
+        //public static User ToEntity( this UserDto dto ) {
+        //    if( dto == null )
+        //        return new User();
+        //    return new User( dto.Id.ToGuid() ) {
+        //        UserName = dto.UserName,
+        //        NormalizedUserName = dto.NormalizedUserName,
+        //        Email = dto.Email,
+        //        NormalizedEmail = dto.NormalizedEmail,
+        //            EmailConfirmed = dto.EmailConfirmed.SafeValue(),
+        //        PhoneNumber = dto.PhoneNumber,
+        //            PhoneNumberConfirmed = dto.PhoneNumberConfirmed.SafeValue(),
+        //        Password = dto.Password,
+        //        PasswordHash = dto.PasswordHash,
+        //        SafePassword = dto.SafePassword,
+        //        SafePasswordHash = dto.SafePasswordHash,
+        //            TwoFactorEnabled = dto.TwoFactorEnabled.SafeValue(),
+        //            Enabled = dto.Enabled.SafeValue(),
+        //        DisabledTime = dto.DisabledTime,
+        //            LockoutEnabled = dto.LockoutEnabled.SafeValue(),
+        //        LockoutEnd = dto.LockoutEnd,
+        //        AccessFailedCount = dto.AccessFailedCount,
+        //        LoginCount = dto.LoginCount,
+        //        RegisterIp = dto.RegisterIp,
+        //        LastLoginTime = dto.LastLoginTime,
+        //        LastLoginIp = dto.LastLoginIp,
+        //        CurrentLoginTime = dto.CurrentLoginTime,
+        //        CurrentLoginIp = dto.CurrentLoginIp,
+        //        SecunityStamp = dto.SecunityStamp,
+        //        Note = dto.Note,
+        //        CreationTime = dto.CreationTime,
+        //        CreatorId = dto.CreatorId,
+        //        LastModificationTime = dto.LastModificationTime,
+        //        LastModifierId = dto.LastModifierId,
+        //            IsDeleted = dto.IsDeleted.SafeValue(),
+        //        Version = dto.Version,
+        //    };
+        //}
 
         /// <summary>
         /// 转换为用户数据传输对象
@@ -82,7 +82,7 @@ namespace Bing.DbDesigner.Service.Dtos.Systems.Extensions {
                 LastLoginIp = entity.LastLoginIp,
                 CurrentLoginTime = entity.CurrentLoginTime,
                 CurrentLoginIp = entity.CurrentLoginIp,
-                SecunityStamp = entity.SecunityStamp,
+                //SecunityStamp = entity.SecunityStamp,
                 Note = entity.Note,
                 CreationTime = entity.CreationTime,
                 CreatorId = entity.CreatorId,

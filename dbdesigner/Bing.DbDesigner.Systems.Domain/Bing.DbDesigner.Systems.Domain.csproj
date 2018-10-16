@@ -48,9 +48,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Abstractions\" />
-    <Folder Include="Services\Implements\" />
     <Folder Include="Parameters\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="SystemResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SystemResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="SystemResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SystemResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

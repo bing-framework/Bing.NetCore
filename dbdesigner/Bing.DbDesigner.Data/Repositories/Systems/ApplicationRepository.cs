@@ -1,4 +1,5 @@
-﻿using Bing.DbDesigner.Systems.Domain.Models;
+﻿using System.Threading.Tasks;
+using Bing.DbDesigner.Systems.Domain.Models;
 using Bing.DbDesigner.Systems.Domain.Repositories;
 using Bing.Datas.EntityFramework.Core;
 
@@ -12,6 +13,11 @@ namespace Bing.DbDesigner.Data.Repositories.Systems {
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         public ApplicationRepository( IDbDesignerUnitOfWork unitOfWork ) : base( unitOfWork ) {
+        }
+
+        public async Task<Application> GetByCodeAsync(string code)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

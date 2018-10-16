@@ -14,35 +14,33 @@ namespace Bing.DbDesigner.Systems.Domain.Models {
     /// 用户角色
     /// </summary>
     [DisplayName( "用户角色" )]
-    public partial class UserRole : AggregateRoot<UserRole> {
+    public partial class UserRole {
+
+        /// <summary>
+        /// 用户标识
+        /// </summary>
+        public Guid UserId { get; set; }
+
+        /// <summary>
+        /// 角色标识
+        /// </summary>
+        public Guid RoleId { get; set; }
+
         /// <summary>
         /// 初始化用户角色
         /// </summary>
-        public UserRole() : this( Guid.Empty ) {
+        public UserRole() {
         }
 
         /// <summary>
         /// 初始化用户角色
         /// </summary>
-        /// <param name="id">用户角色标识</param>
-        public UserRole( Guid id ) : base( id ) {
-        }
-
-        
-        /// <summary>
-        /// 添加描述
-        /// </summary>
-        protected override void AddDescriptions() {
-            AddDescription( t => t.Id );
-            AddDescription( t => t.Id );
-        }
-        
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        protected override void AddChanges( UserRole other ) {
-            AddChange( t => t.Id, other.Id );
-            AddChange( t => t.Id, other.Id );
+        /// <param name="userId">用户标识</param>
+        /// <param name="roleId">角色标识</param>
+        public UserRole(Guid userId, Guid roleId)
+        {
+            UserId = userId;
+            RoleId = roleId;
         }
     }
 }

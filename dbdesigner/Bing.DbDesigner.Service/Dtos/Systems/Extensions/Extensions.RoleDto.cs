@@ -8,32 +8,31 @@ namespace Bing.DbDesigner.Service.Dtos.Systems.Extensions {
     /// 角色数据传输对象扩展
     /// </summary>
     public static class RoleDtoExtension {
-        /// <summary>
-        /// 转换为角色实体
-        /// </summary>
-        /// <param name="dto">角色数据传输对象</param>
-        public static Role ToEntity( this RoleDto dto ) {
-            if( dto == null )
-                return new Role();
-            return new Role( dto.Id.ToGuid(),dto.Id,1 ) {
-                Code = dto.Code,
-                Name = dto.Name,
-                Type = dto.Type,
-                    IsAdmin = dto.IsAdmin.SafeValue(),
-                ParentId = dto.ParentId.ToGuidOrNull(),
-                Enabled = dto.Enabled.SafeValue(),
-                SortId = dto.SortId,
-                Note = dto.Note,
-                PinYin = dto.PinYin,
-                Sign = dto.Sign,
-                CreationTime = dto.CreationTime,
-                CreatorId = dto.CreatorId,
-                LastModificationTime = dto.LastModificationTime,
-                LastModifierId = dto.LastModifierId,
-                    IsDeleted = dto.IsDeleted.SafeValue(),
-                Version = dto.Version,
-            };
-        }
+        ///// <summary>
+        ///// 转换为角色实体
+        ///// </summary>
+        ///// <param name="dto">角色数据传输对象</param>
+        //public static Role ToEntity( this RoleDto dto ) {
+        //    if( dto == null )
+        //        return new Role();
+        //    return new Role( dto.Id.ToGuid(),dto.Id,1 ) {
+        //        Code = dto.Code,
+        //        Name = dto.Name,
+        //        Type = dto.Type,
+        //            IsAdmin = dto.IsAdmin.SafeValue(),
+        //        ParentId = dto.ParentId.ToGuidOrNull(),
+        //        Enabled = dto.Enabled.SafeValue(),
+        //        SortId = dto.SortId,
+        //        PinYin = dto.PinYin,
+        //        Sign = dto.Sign,
+        //        CreationTime = dto.CreationTime,
+        //        CreatorId = dto.CreatorId,
+        //        LastModificationTime = dto.LastModificationTime,
+        //        LastModifierId = dto.LastModifierId,
+        //            IsDeleted = dto.IsDeleted.SafeValue(),
+        //        Version = dto.Version,
+        //    };
+        //}
 
         /// <summary>
         /// 转换为角色数据传输对象
@@ -53,7 +52,6 @@ namespace Bing.DbDesigner.Service.Dtos.Systems.Extensions {
                 Level = entity.Level,
                 Enabled = entity.Enabled,
                 SortId = entity.SortId,
-                Note = entity.Note,
                 PinYin = entity.PinYin,
                 Sign = entity.Sign,
                 CreationTime = entity.CreationTime,

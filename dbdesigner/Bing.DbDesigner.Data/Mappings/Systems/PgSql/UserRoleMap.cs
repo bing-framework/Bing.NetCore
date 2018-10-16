@@ -6,7 +6,7 @@ namespace Bing.DbDesigner.Data.Mappings.Systems.PgSql {
     /// <summary>
     /// 用户角色映射配置
     /// </summary>
-    public class UserRoleMap : Bing.Datas.EntityFramework.PgSql.AggregateRootMap<UserRole> {
+    public class UserRoleMap : Bing.Datas.EntityFramework.PgSql.EntityMap<UserRole> {
         /// <summary>
         /// 映射表
         /// </summary>
@@ -19,10 +19,10 @@ namespace Bing.DbDesigner.Data.Mappings.Systems.PgSql {
         /// </summary>
         protected override void MapProperties( EntityTypeBuilder<UserRole> builder ) {
             //角色标识
-            builder.Property(t => t.Id)
+            builder.Property(t => t.RoleId)
                 .HasColumnName("RoleId");
             //用户标识
-            builder.Property(t => t.Id)
+            builder.Property(t => t.UserId)
                 .HasColumnName("UserId");
         }
     }

@@ -1,4 +1,6 @@
-﻿using Bing.DbDesigner.Systems.Domain.Models;
+﻿using System;
+using System.Linq;
+using Bing.DbDesigner.Systems.Domain.Models;
 using Bing.DbDesigner.Systems.Domain.Repositories;
 using Bing.Datas.EntityFramework.Core;
 
@@ -12,6 +14,11 @@ namespace Bing.DbDesigner.Data.Repositories.Systems {
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         public UserRepository( IDbDesignerUnitOfWork unitOfWork ) : base( unitOfWork ) {
+        }
+
+        public IQueryable<User> FilterRole(IQueryable<User> queryable, Guid roleId, bool except = false)
+        {
+            throw new NotImplementedException();
         }
     }
 }
