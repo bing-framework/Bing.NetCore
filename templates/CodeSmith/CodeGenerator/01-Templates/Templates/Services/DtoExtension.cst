@@ -16,6 +16,7 @@
 <%-- 描述 --%>
 <% string Description = Entity.Description; %>
 using Bing;
+using Bing.Utils.Extensions;
 using Bing.Extensions.AutoMapper;
 using <%= Entity.GetNamespace(Namespace,"Domain","Models") %>;
 

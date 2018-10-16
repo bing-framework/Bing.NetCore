@@ -10,7 +10,8 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-    <Folder Include="Queries\" />
+    <Folder Include="Requests\" />
+    <Folder Include="Responses\" />
   </ItemGroup>
 
   <ItemGroup>
