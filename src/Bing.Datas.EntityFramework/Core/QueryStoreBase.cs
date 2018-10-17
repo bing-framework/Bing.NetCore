@@ -339,10 +339,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// 查找单个实体
         /// </summary>
         /// <param name="predicate">查询条件</param>
+        /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await Set.FirstOrDefaultAsync(predicate);
+            return await Set.FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
         /// <summary>

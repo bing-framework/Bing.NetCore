@@ -42,9 +42,9 @@ namespace Bing.DbDesigner.Systems.Domain.Repositories
         /// <summary>
         /// 是否存在角色
         /// </summary>
-        /// <param name="user">用户标识</param>
+        /// <param name="userId">用户标识</param>
         /// <param name="roleCode">角色编码</param>
         /// <returns></returns>
-        Task<bool> ExistRoleAsync(Guid user, string roleCode);
+        Task<bool> ExistRoleAsync(Guid userId, string roleCode);
     }
 }

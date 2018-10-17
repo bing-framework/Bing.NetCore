@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Bing.Domains.Entities;
 
@@ -16,7 +17,8 @@ namespace Bing.Datas.Stores.Operations
         /// 查找单个实体
         /// </summary>
         /// <param name="predicate">查询条件</param>
+        /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default(CancellationToken));
     }
 }
