@@ -15,9 +15,19 @@ namespace Bing.DbDesigner.Data.Repositories.Systems {
         public ApplicationRepository( IDbDesignerUnitOfWork unitOfWork ) : base( unitOfWork ) {
         }
 
+        #region GetByCodeAsync(通过应用程序编码查找)
+
+        /// <summary>
+        /// 通过应用程序编码查找
+        /// </summary>
+        /// <param name="code">应用程序编码</param>
+        /// <returns></returns>
         public async Task<Application> GetByCodeAsync(string code)
         {
-            throw new System.NotImplementedException();
+            return await SingleAsync(x => x.Code == code);
         }
+
+        #endregion
+
     }
 }
