@@ -37,7 +37,7 @@ namespace Bing.DbDesigner.Systems.Domain.Models {
         /// 资源标识
         /// </summary>
         [DisplayName( "资源标识" )]
-        public Guid? ResourceId { get; set; }
+        public Guid ResourceId { get; set; }
         /// <summary>
         /// 拒绝
         /// </summary>

@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Parameters\" />
     <Folder Include="Services\Abstractions\" />
     <Folder Include="Services\Implements\" />
   </ItemGroup>

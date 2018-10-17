@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Bing.DbDesigner.Systems.Domain.Models;
 using Bing.DbDesigner.Systems.Domain.Repositories;
 using Bing.Datas.EntityFramework.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bing.DbDesigner.Data.Repositories.Systems {
     /// <summary>
@@ -44,11 +46,18 @@ namespace Bing.DbDesigner.Data.Repositories.Systems {
         /// <returns></returns>
         public async Task<List<Resource>> GetResoucesAsync(Guid roleId, bool isDeny, Guid? applicationId)
         {
-            throw new NotImplementedException();
+            var queryable = from permission in Find()
+                join resource in UnitOfWork.Set<Resource>() on permission.ResourceId equals resource.Id
+                where permission.RoleId == roleId && permission.IsDeny == isDeny
+                select resource;
+            queryable = queryable.WhereIfNotEmpty(x => x.ApplicationId == applicationId);
+            var resources = await queryable.ToListAsync();
+            return resources;
         }
 
         #endregion
 
+        #region GetPermissionIdsAsync(获取权限标识列表)
 
         /// <summary>
         /// 获取权限标识列表
@@ -58,8 +67,13 @@ namespace Bing.DbDesigner.Data.Repositories.Systems {
         /// <returns></returns>
         public async Task<List<Guid>> GetPermissionIdsAsync(Guid roleId, List<Guid> resouceIds)
         {
-            throw new NotImplementedException();
+            return await Find().Where(x => x.RoleId == roleId && resouceIds.Contains(x.ResourceId)).Select(x => x.Id)
+                .ToListAsync();
         }
+
+        #endregion
+
+        #region RemoveAsync(移除权限)
 
         /// <summary>
         /// 移除权限
@@ -69,7 +83,11 @@ namespace Bing.DbDesigner.Data.Repositories.Systems {
         /// <returns></returns>
         public async Task RemoveAsync(Guid roleId, List<Guid> resourceIds)
         {
-            throw new NotImplementedException();
+            var permissionIds = await GetPermissionIdsAsync(roleId, resourceIds);
+            await RemoveAsync(permissionIds);
         }
+
+        #endregion
+
     }
 }

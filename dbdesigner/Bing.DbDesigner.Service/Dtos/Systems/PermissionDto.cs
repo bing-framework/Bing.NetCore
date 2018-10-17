@@ -19,7 +19,7 @@ namespace Bing.DbDesigner.Service.Dtos.Systems {
         /// </summary>
         [Display( Name = "资源标识" )]
         [DataMember]
-        public Guid? ResourceId { get; set; }
+        public Guid ResourceId { get; set; }
         /// <summary>
         /// 拒绝
         /// </summary>
