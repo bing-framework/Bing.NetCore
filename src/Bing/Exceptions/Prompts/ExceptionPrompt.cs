@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Bing.Properties;
 using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Exceptions.Prompts
 {
@@ -50,7 +51,7 @@ namespace Bing.Exceptions.Prompts
 
             if (exception is Warning warning)
             {
-                return warning.Message;
+                return Filter(warning.Message);
             }
 
             return R.SystemError;
@@ -73,6 +74,16 @@ namespace Bing.Exceptions.Prompts
             }
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// 过滤无用消息
+        /// </summary>
+        /// <param name="message">消息</param>
+        /// <returns></returns>
+        private static string Filter(string message)
+        {
+            return message.Replace($"{Common.Line}@exceptionless:{Common.Line}", "");
         }
     }
 }
