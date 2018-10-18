@@ -203,5 +203,32 @@ namespace Bing.Utils.Extensions
         }
         #endregion
 
+        #region ToSnakeCase(将字符串转换为蛇形策略)
+
+        /// <summary>
+        /// 将字符串转换为蛇形策略
+        /// </summary>
+        /// <param name="str">字符串</param>
+        /// <returns></returns>
+        public static string ToSnakeCase(this string str)
+        {
+            return Bing.Utils.Helpers.Str.ToSnakeCase(str);
+        }
+
+        #endregion
+
+        #region ToCamelCase(将字符串转换为骆驼策略)
+
+        /// <summary>
+        /// 将字符串转换为骆驼策略
+        /// </summary>
+        /// <param name="str">字符串</param>
+        /// <returns></returns>
+        public static string ToCamelCase(this string str)
+        {
+            return Bing.Utils.Helpers.Str.ToCamelCase(str);
+        }
+
+        #endregion
     }
 }

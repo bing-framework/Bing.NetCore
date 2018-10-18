@@ -508,5 +508,157 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region ToSnakeCase(将字符串转换为蛇形策略)
+
+        /// <summary>
+        /// 将字符串转换为蛇形策略
+        /// </summary>
+        /// <param name="str">字符串</param>
+        /// <returns></returns>
+        public static string ToSnakeCase(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            SnakeCaseState state = SnakeCaseState.Start;
+            for (var i = 0; i < str.Length;i++)
+            {
+                if (str[i] == ' ')
+                {
+                    if (state != SnakeCaseState.Start)
+                    {
+                        state = SnakeCaseState.NewWord;
+                    }
+                }
+                else if (char.IsUpper(str[i]))
+                {
+                    switch (state)
+                    {
+                        case SnakeCaseState.Upper:
+                            bool hasNext = (i + 1 < str.Length);
+                            if (i > 0 && hasNext)
+                            {
+                                char nextChar = str[i + 1];
+                                if (!char.IsUpper(nextChar) && nextChar != '_')
+                                {
+                                    sb.Append('_');
+                                }
+                            }
+                            break;
+                        case SnakeCaseState.Lower:
+                        case SnakeCaseState.NewWord:
+                            sb.Append('_');
+                            break;
+                    }
+
+                    sb.Append(char.ToLowerInvariant(str[i]));
+                    state = SnakeCaseState.Upper;
+                }
+                else if(str[i]=='_')
+                {
+                    sb.Append('_');
+                    state = SnakeCaseState.Start;
+                }
+                else
+                {
+                    if (state == SnakeCaseState.NewWord)
+                    {
+                        sb.Append('_');
+                    }
+
+                    sb.Append(str[i]);
+                    state = SnakeCaseState.Lower;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region ToCamelCase(将字符串转换为骆驼策略)
+
+        /// <summary>
+        /// 将字符串转换为骆驼策略
+        /// </summary>
+        /// <param name="str">字符串</param>
+        /// <returns></returns>
+        public static string ToCamelCase(string str)
+        {
+            if (string.IsNullOrEmpty(str) || !char.IsUpper(str[0]))
+            {
+                return str;
+            }
+
+            char[] chars = str.ToCharArray();
+            for (var i = 0; i < chars.Length; i++)
+            {
+                if (i == 1 && !char.IsUpper(chars[i]))
+                {
+                    break;
+                }
+
+                bool hasNext = (i + 1 < chars.Length);
+                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+                {
+                    if (char.IsSeparator(chars[i + 1]))
+                    {
+                        chars[i] = char.ToLowerInvariant(chars[i]);
+                    }
+                    break;
+                }
+
+                chars[i] = char.ToLowerInvariant(chars[i]);
+            }
+            return new string(chars);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 字符串策略
+    /// </summary>
+    public enum StringCase
+    {
+        /// <summary>
+        /// 蛇形策略
+        /// </summary>
+        Snake,
+        /// <summary>
+        /// 骆驼策略
+        /// </summary>
+        Camel,
+        /// <summary>
+        /// 不执行策略
+        /// </summary>
+        None,
+    }
+
+    /// <summary>
+    /// 蛇形策略状态
+    /// </summary>
+    internal enum SnakeCaseState
+    {
+        /// <summary>
+        /// 开头
+        /// </summary>
+        Start,
+        /// <summary>
+        /// 小写
+        /// </summary>
+        Lower,
+        /// <summary>
+        /// 大写
+        /// </summary>
+        Upper,
+        /// <summary>
+        /// 单词
+        /// </summary>
+        NewWord
     }
 }
