@@ -622,5 +622,19 @@ namespace Bing.Utils.Timing
         }
 
         #endregion
+
+        #region ToTimeStamp(将时间转换为时间戳)
+
+        /// <summary>
+        /// 将时间转换为时间戳
+        /// </summary>
+        /// <param name="time">时间</param>
+        /// <returns></returns>
+        public static int ToTimeStamp(this DateTime time)
+        {
+            return (int) (time.ToUniversalTime().Ticks / 10000000 - 62135596800);
+        }
+
+        #endregion
     }
 }

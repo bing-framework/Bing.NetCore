@@ -618,6 +618,19 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region GenerateNonceStr(生成随机字符串)
+
+        /// <summary>
+        /// 生成随机字符串
+        /// </summary>
+        /// <returns></returns>
+        public static string GenerateNonceStr()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+
+        #endregion
     }
 
     /// <summary>
