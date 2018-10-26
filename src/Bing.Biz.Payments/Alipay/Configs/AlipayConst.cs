@@ -64,5 +64,65 @@
         /// 内容
         /// </summary>
         public const string BizContent = "biz_content";
+
+        /// <summary>
+        /// 支付订单号
+        /// </summary>
+        public const string TradeNo = "trade_no";
+
+        /// <summary>
+        /// 商户订单号
+        /// </summary>
+        public const string OutTradeNo = "out_trade_no";
+
+        /// <summary>
+        /// 订单金额
+        /// </summary>
+        public const string TotalAmount = "total_amount";
+
+        /// <summary>
+        /// 订单标题
+        /// </summary>
+        public const string Subject = "subject";
+
+        /// <summary>
+        /// 用户付款授权码
+        /// </summary>
+        public const string AuthCode = "auth_code";
+
+        /// <summary>
+        /// 交易超时时间
+        /// </summary>
+        public const string TimeoutExpress = "timeout_express";
+
+        /// <summary>
+        /// 场景
+        /// </summary>
+        public const string Scene = "scene";
+
+        /// <summary>
+        /// 商户门店编号
+        /// </summary>
+        public const string StoreId = "store_id";
+
+        /// <summary>
+        /// 买家支付宝用户号
+        /// </summary>
+        public const string BuyerId = "buyer_id";
+
+        /// <summary>
+        /// 交易状态
+        /// </summary>
+        public const string TradeStatus = "trade_status";
+
+        /// <summary>
+        /// 回调通知标识
+        /// </summary>
+        public const string NotifyId = "notify_id";
+
+        /// <summary>
+        /// 二维码
+        /// </summary>
+        public const string QrCode = "qr_code";
     }
 }

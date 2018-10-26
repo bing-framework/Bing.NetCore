@@ -24,12 +24,4 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Alipay\Abstractions\" />
-    <Folder Include="Alipay\Parameters\" />
-    <Folder Include="Alipay\Results\" />
-    <Folder Include="Alipay\Services\" />
-    <Folder Include="Alipay\Enums\" />
-  </ItemGroup>
-
 </Project>
