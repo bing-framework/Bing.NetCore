@@ -169,11 +169,13 @@ namespace Bing.Dependency
         {
             var builder=new ContainerBuilder();
             actionBefore?.Invoke(builder);
-            foreach (var config in configs)
+            if (configs != null)
             {
-                builder.RegisterModule(config);
+                foreach (var config in configs)
+                {
+                    builder.RegisterModule(config);
+                }
             }
-
             if (services != null)
             {
                 builder.Populate(services);

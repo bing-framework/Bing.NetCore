@@ -1,9 +1,13 @@
-﻿using AspectCore.DynamicProxy;
+﻿using System;
+using AspectCore.Configuration;
+using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.Autofac;
 using Autofac;
 using Autofac.Builder;
+using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Dependency
 {
@@ -112,13 +116,22 @@ namespace Bing.Dependency
         #endregion
 
         #region EnableAop(启用Aop)
+
         /// <summary>
         /// 启用Aop
         /// </summary>
         /// <param name="builder">容器生成器</param>
-        public static void EnableAop(this ContainerBuilder builder)
+        /// <param name="configAction">Aop配置</param>
+        public static void EnableAop(this ContainerBuilder builder, Action<IAspectConfiguration> configAction = null)
         {
-            builder.RegisterDynamicProxy(config => config.EnableParameterAspect());
+            builder.RegisterDynamicProxy(config =>
+            {
+                config.EnableParameterAspect();
+                config.NonAspectPredicates.Add(t =>
+                    Reflection.GetTopBaseType(t.DeclaringType).SafeString() ==
+                    "Microsoft.EntityFrameworkCore.DbContext");
+                configAction?.Invoke(config);
+            });
             builder.EnableAspectScoped();
         }
 

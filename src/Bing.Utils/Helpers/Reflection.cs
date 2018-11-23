@@ -527,5 +527,44 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region GetTopBaseType(获取顶级基类)
+
+        /// <summary>
+        /// 获取顶级基类
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <returns></returns>
+        public static Type GetTopBaseType<T>()
+        {
+            return GetTopBaseType(typeof(T));
+        }
+
+        /// <summary>
+        /// 获取顶级基类
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        public static Type GetTopBaseType(Type type)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+
+            if (type.IsInterface)
+            {
+                return type;
+            }
+
+            if (type.BaseType == typeof(object))
+            {
+                return type;
+            }
+
+            return GetTopBaseType(type.BaseType);
+        }
+
+        #endregion
     }
 }

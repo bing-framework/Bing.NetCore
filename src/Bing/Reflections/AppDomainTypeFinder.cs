@@ -27,6 +27,7 @@ namespace Bing.Reflections
         /// <returns></returns>
         public virtual List<Assembly> GetAssemblies()
         {
+            LoadAssemblies(PlatformServices.Default.Application.ApplicationBasePath);
             return GetAssembliesFromCurrentAppDomain();
         }
 

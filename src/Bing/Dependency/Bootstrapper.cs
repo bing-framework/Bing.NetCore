@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using AspectCore.Configuration;
 using Autofac;
 using Bing.Contexts;
 using Bing.Events.Handlers;
@@ -13,9 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Dependency
 {
     /// <summary>
-    /// 依赖配置
+    /// 依赖引导器
     /// </summary>
-    public class DependencyConfiguration
+    public class Bootstrapper
     {
         /// <summary>
         /// 服务集合
@@ -26,6 +27,11 @@ namespace Bing.Dependency
         /// 依赖配置
         /// </summary>
         private readonly IConfig[] _configs;
+
+        /// <summary>
+        /// 上下文
+        /// </summary>
+        private readonly IContext _context;
 
         /// <summary>
         /// 容器生成器
@@ -43,22 +49,62 @@ namespace Bing.Dependency
         private List<Assembly> _assemblies;
 
         /// <summary>
-        /// 初始化一个<see cref="DependencyConfiguration"/>类型的实例
+        /// Aop配置操作
+        /// </summary>
+        private readonly Action<IAspectConfiguration> _aopConfigAction;
+
+        /// <summary>
+        /// 初始化一个<see cref="Bootstrapper"/>类型的实例
         /// </summary>
         /// <param name="services">服务集合</param>
+        /// <param name="context">上下文</param>
         /// <param name="configs">依赖配置</param>
-        public DependencyConfiguration(IServiceCollection services, IConfig[] configs)
+        /// <param name="aopConfigAction">Aop配置操作</param>
+        /// <param name="finder">类型查找器</param>
+        public Bootstrapper(IServiceCollection services, IContext context, IConfig[] configs,
+            Action<IAspectConfiguration> aopConfigAction, ITypeFinder finder)
         {
-            _services = services;
+            _services = services ?? new ServiceCollection();
+            _context = context;
             _configs = configs;
+            _aopConfigAction = aopConfigAction;
+            _finder = finder ?? new WebAppTypeFinder();
         }
 
         /// <summary>
-        /// 配置依赖
+        /// 启动引导
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="context">上下文</param>
+        /// <param name="configs">依赖配置</param>
+        /// <param name="aopConfigAction">Aop配置操作</param>
+        /// <param name="finder">类型查找器</param>
+        /// <returns></returns>
+        public static IServiceProvider Run(IServiceCollection services = null, IContext context = null,
+            IConfig[] configs = null, Action<IAspectConfiguration> aopConfigAction = null, ITypeFinder finder = null)
+        {
+            return new Bootstrapper(services, context, configs, aopConfigAction, finder).Bootstrap();
+        }
+
+        /// <summary>
+        /// 启动引导
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="context">上下文</param>
+        /// <param name="configs">依赖配置</param>
+        /// <returns></returns>
+        public static IServiceProvider Run(IServiceCollection services, IContext context, params IConfig[] configs)
+        {
+            return Run(services, context, configs, null,null);
+        }
+
+        /// <summary>
+        /// 引导
         /// </summary>
         /// <returns></returns>
-        public IServiceProvider Config()
+        public IServiceProvider Bootstrap()
         {
+            _assemblies = _finder.GetAssemblies();
             return Ioc.DefaultContainer.Register(_services, RegistServices, _configs);
         }
 
@@ -69,8 +115,6 @@ namespace Bing.Dependency
         private void RegistServices(ContainerBuilder builder)
         {
             _builder = builder;
-            _finder=new WebAppTypeFinder();
-            _assemblies = _finder.GetAssemblies();
             RegistInfrastracture();
             RegistEventHandlers();
             RegistDependency();
@@ -91,7 +135,7 @@ namespace Bing.Dependency
         /// </summary>
         private void EnableAop()
         {
-            _builder.EnableAop();
+            _builder.EnableAop(_aopConfigAction);
         }
 
         /// <summary>
@@ -107,7 +151,10 @@ namespace Bing.Dependency
         /// </summary>
         private void RegistContext()
         {
-            _builder.AddSingleton<IContext, WebContext>();
+            if (_context != null)
+            {
+                _builder.AddSingleton(_context);
+            }
         }
 
         /// <summary>
@@ -180,7 +227,7 @@ namespace Bing.Dependency
         {
             var types = GetTypes<IDependencyRegistrar>();
             types.Select(type => Reflection.CreateInstance<IDependencyRegistrar>(type)).ToList()
-                .ForEach(t => t.Regist(_services));
+                .ForEach(t => t.Register(_services));
         }
 
         /// <summary>

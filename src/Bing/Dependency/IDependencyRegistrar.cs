@@ -11,6 +11,6 @@ namespace Bing.Dependency
         /// 注册依赖
         /// </summary>
         /// <param name="services">服务集合</param>
-        void Regist(IServiceCollection services);
+        void Register(IServiceCollection services);
     }
 }
