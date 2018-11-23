@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Extensions.AutoMapper\Bing.Extensions.AutoMapper.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
 

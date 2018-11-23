@@ -147,7 +147,8 @@ namespace Bing.Applications.Trees
             {
                 return;
             }
-            entities.ForEach(async entity =>
+
+            foreach (var entity in entities)
             {
                 if (enabled && await AllowEnable(entity) == false)
                 {
@@ -159,7 +160,7 @@ namespace Bing.Applications.Trees
                 }
                 entity.Enabled = enabled;
                 await _store.UpdateAsync(entity);
-            });
+            }            
             _unitOfWork.Commit();
             WriteLog(entities,enabled);
         }
