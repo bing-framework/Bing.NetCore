@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 
@@ -439,44 +440,7 @@ namespace Bing.Utils.IO
 
         #endregion
 
-        #region ToString(转换成字符串)
-        /// <summary>
-        /// 流转换成字符串
-        /// </summary>
-        /// <param name="data">数据</param>
-        /// <returns></returns>
-        public static string ToString(Stream data)
-        {
-            return ToString(data, Encoding.UTF8);
-        }
-
-        /// <summary>
-        /// 流转换成字符串
-        /// </summary>
-        /// <param name="data">数据</param>
-        /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
-        public static string ToString(Stream data, Encoding encoding)
-        {
-            if (data == null)
-            {
-                return string.Empty;
-            }
-            if (data.CanRead == false)
-            {
-                return string.Empty;
-            }
-            string result;
-            using (var reader = new StreamReader(data, encoding))
-            {
-                if (reader.BaseStream.CanSeek)
-                {
-                    reader.BaseStream.Position = 0;
-                }
-                result = reader.ReadToEnd();
-            }
-            return result;
-        }
+        #region ToString(转换成字符串)        
 
         /// <summary>
         /// 字节数组转换成字符串
@@ -502,6 +466,93 @@ namespace Bing.Utils.IO
             }
             return encoding.GetString(data);
         }
+
+        /// <summary>
+        /// 流转换成字符串
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <param name="encoding">字符串编码</param>
+        /// <param name="bufferSize">缓冲区大小</param>
+        /// <param name="isCloseStream">读取完成是否释放流，默认为true</param>
+        /// <returns></returns>
+        public static string ToString(Stream stream, Encoding encoding = null, int bufferSize = 1024 * 2,
+            bool isCloseStream = true)
+        {
+            if (stream == null)
+            {
+                return string.Empty;
+            }
+
+            if (encoding == null)
+            {
+                encoding=Encoding.UTF8;
+            }
+
+            if (stream.CanRead == false)
+            {
+                return string.Empty;
+            }
+
+            using (var reader = new StreamReader(stream, encoding, true, bufferSize, !isCloseStream))
+            {
+                if (stream.CanSeek)
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+
+                var result = reader.ReadToEnd();
+                if (stream.CanSeek)
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// 流转换成字符串
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <param name="encoding">字符串编码</param>
+        /// <param name="bufferSize">缓冲区大小</param>
+        /// <param name="isCloseStream">读取完成是否释放流，默认为true</param>
+        /// <returns></returns>
+        public static async Task<string> ToStringAsync(Stream stream, Encoding encoding = null, int bufferSize = 1024 * 2,
+            bool isCloseStream = true)
+        {
+            if (stream == null)
+            {
+                return string.Empty;
+            }
+
+            if (encoding == null)
+            {
+                encoding = Encoding.UTF8;
+            }
+
+            if (stream.CanRead == false)
+            {
+                return string.Empty;
+            }
+
+            using (var reader = new StreamReader(stream, encoding, true, bufferSize, !isCloseStream))
+            {
+                if (stream.CanSeek)
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+
+                var result = await reader.ReadToEndAsync();
+                if (stream.CanSeek)
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+
+                return result;
+            }
+        }
+
         #endregion
 
         #region ToStream(转换成流)
@@ -605,6 +656,58 @@ namespace Bing.Utils.IO
             subPath = subPath.TrimStart('/').TrimStart('\\');
             string path = basePath + "\\" + subPath;
             return path.Replace("/", "\\").ToLower();
+        }
+
+        #endregion
+
+        #region CopyToStringAsync(复制流并转换成字符串)
+
+        /// <summary>
+        /// 复制流并转换成字符串
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static async Task<string> CopyToStringAsync(Stream stream, Encoding encoding = null)
+        {
+            if (stream == null)
+            {
+                return string.Empty;
+            }
+
+            if (encoding == null)
+            {
+                encoding = Encoding.UTF8;
+            }
+
+            if (stream.CanRead == false)
+            {
+                return string.Empty;
+            }
+
+            using (var memoryStream=new MemoryStream())
+            {
+                using (var reader = new StreamReader(memoryStream, encoding))
+                {
+                    if (stream.CanSeek)
+                    {
+                        stream.Seek(0, SeekOrigin.Begin);
+                    }
+                    stream.CopyTo(memoryStream);
+                    if (memoryStream.CanSeek)
+                    {
+                        memoryStream.Seek(0, SeekOrigin.Begin);
+                    }
+
+                    var result = await reader.ReadToEndAsync();
+                    if (stream.CanSeek)
+                    {
+                        stream.Seek(0, SeekOrigin.Begin);
+                    }
+
+                    return result;
+                }
+            }
         }
 
         #endregion

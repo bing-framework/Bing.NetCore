@@ -8,9 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Bing.Utils.Extensions;
+using Bing.Utils.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http.Internal;
 
 namespace Bing.Utils.Helpers
 {
@@ -118,10 +120,8 @@ namespace Bing.Utils.Helpers
         {
             get
             {
-                using (var reader = new StreamReader(Request.Body))
-                {
-                    return reader.ReadToEnd();
-                }
+                Request.EnableRewind();
+                return FileUtil.ToString(Request.Body, isCloseStream: false);
             }
         }
 

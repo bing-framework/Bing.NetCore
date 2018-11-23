@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;
 using Bing.Webs.Commons;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.Webs.Filters
@@ -31,12 +33,40 @@ namespace Bing.Webs.Filters
         private ILog Logger { get; set; }
 
         /// <summary>
+        /// 执行
+        /// </summary>
+        /// <param name="context">操作执行上下文</param>
+        /// <param name="next">委托</param>
+        /// <returns></returns>
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            ActionFilterAttribute actionFilterAttribute = this;
+            actionFilterAttribute.OnActionExecuting(context);
+            await OnActionExecutingAsync(context);
+            if (context.Result != null)
+            {
+                return;
+            }
+            var executedContext = await next();
+            actionFilterAttribute.OnActionExecuted(executedContext);
+        }
+
+        /// <summary>
         /// 执行前
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        public override void OnActionExecuting(ActionExecutingContext context)
+        protected async Task OnActionExecutingAsync(ActionExecutingContext context)
         {
-            base.OnActionExecuting(context);
             if (Ignore)
             {
                 return;
@@ -46,7 +76,7 @@ namespace Bing.Webs.Filters
             {
                 return;
             }
-            WriteLog(context);
+            await WriteLog(context);
         }
 
         /// <summary>
@@ -69,12 +99,12 @@ namespace Bing.Webs.Filters
         /// 执行前日志
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        private void WriteLog(ActionExecutingContext context)
+        private async Task WriteLog(ActionExecutingContext context)
         {
             Logger.Caption("WebApi跟踪-准备执行操作")
                 .Class(context.Controller.SafeString())
                 .Method(context.ActionDescriptor.DisplayName);
-            AddRequestInfo(context);
+            await AddRequestInfo(context);
             Logger.Trace();
         }
 
@@ -82,7 +112,7 @@ namespace Bing.Webs.Filters
         /// 添加请求信息参数
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        private void AddRequestInfo(ActionExecutingContext context)
+        private async Task AddRequestInfo(ActionExecutingContext context)
         {
             var request = context.HttpContext.Request;
             Logger.Params("Http请求方式", request.Method);
@@ -91,7 +121,7 @@ namespace Bing.Webs.Filters
                 Logger.Params("ContentType", request.ContentType);
             }
             AddHeaders(request);
-            AddFormParams(request);
+            await AddFormParams(request);
             AddCookie(request);
         }
 
@@ -112,13 +142,14 @@ namespace Bing.Webs.Filters
         /// 添加表单参数
         /// </summary>
         /// <param name="request">Http请求</param>
-        private void AddFormParams(Microsoft.AspNetCore.Http.HttpRequest request)
+        private async Task AddFormParams(Microsoft.AspNetCore.Http.HttpRequest request)
         {
             if (IsMultipart(request.ContentType))
             {
                 return;
             }
-            var result = FileUtil.ToString(request.Body);
+            request.EnableRewind();
+            var result = await FileUtil.ToStringAsync(request.Body, isCloseStream: false);
             if (string.IsNullOrWhiteSpace(result))
             {
                 return;
