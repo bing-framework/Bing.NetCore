@@ -502,5 +502,19 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region GetBodyAsync(获取请求正文)
+
+        /// <summary>
+        /// 获取请求正文
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<string> GetBodyAsync()
+        {
+            Request.EnableRewind();
+            return await FileUtil.ToStringAsync(Request.Body, isCloseStream: false);
+        }
+
+        #endregion
     }
 }
