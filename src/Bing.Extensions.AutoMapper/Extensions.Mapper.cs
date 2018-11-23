@@ -141,22 +141,16 @@ namespace Bing.Extensions.AutoMapper
             try
             {
                 var maps = Mapper.Configuration.GetAllTypeMaps();
-                Mapper.Initialize(config =>
+                ClearConfig();
+                Mapper.Initialize(config => { config.CreateMap(sourceType, destinationType); });
+                foreach (var map in maps)
                 {
-                    ClearConfig();
-                    foreach (var item in maps)
-                    {
-                        config.CreateMap(item.SourceType, item.DestinationType);
-                    }
-                    config.CreateMap(sourceType, destinationType);
-                });
+                    Mapper.Configuration.RegisterTypeMap(map);
+                }                
             }
             catch (InvalidOperationException)
             {
-                Mapper.Initialize(config =>
-                {
-                    config.CreateMap(sourceType, destinationType);
-                });
+                Mapper.Initialize(config => { config.CreateMap(sourceType, destinationType); });
             }
         }
 
