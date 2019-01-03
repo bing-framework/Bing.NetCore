@@ -17,7 +17,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="QRCoder" Version="1.3.3" />
+    <PackageReference Include="QRCoder" Version="1.3.5" />
   </ItemGroup>
 
   <ItemGroup>
