@@ -38,5 +38,10 @@ namespace Bing.Biz.Payments.Core
         /// </summary>
         [Description("微信App支付")]
         WechatpayAppPay,
+        /// <summary>
+        /// 微信小程序支付
+        /// </summary>
+        [Description("微信小程序支付")]
+        WechatpayMiniProgramPay
     }
 }

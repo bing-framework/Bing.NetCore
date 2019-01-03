@@ -16,15 +16,36 @@ namespace Bing.Utils.Parameters
         /// </summary>
         private ParameterBuilder ParameterBuilder { get; }
 
+        /// <summary>
+        /// 初始化一个<see cref="UrlParameterBuilder"/>类型的实例
+        /// </summary>
         public UrlParameterBuilder() : this("") { }
 
+        /// <summary>
+        /// 初始化一个<see cref="UrlParameterBuilder"/>类型的实例
+        /// </summary>
+        /// <param name="builder">参数生成器</param>
+        public UrlParameterBuilder(ParameterBuilder builder)
+        {
+            ParameterBuilder = builder == null ? new ParameterBuilder() : new ParameterBuilder(builder);
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="UrlParameterBuilder"/>类型的实例
+        /// </summary>
+        /// <param name="builder">Url参数生成器</param>
         public UrlParameterBuilder(UrlParameterBuilder builder) : this("", builder) { }
 
+        /// <summary>
+        /// 初始化一个<see cref="UrlParameterBuilder"/>类型的实例
+        /// </summary>
+        /// <param name="url">Url</param>
+        /// <param name="builder">Url参数生成器</param>
         public UrlParameterBuilder(string url, UrlParameterBuilder builder = null)
         {
             ParameterBuilder =
                 builder == null ? new ParameterBuilder() : new ParameterBuilder(builder.ParameterBuilder);
-
+            LoadUrl(url);
         }
 
         /// <summary>

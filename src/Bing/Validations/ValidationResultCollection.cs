@@ -35,7 +35,7 @@ namespace Bing.Validations
         /// <summary>
         /// 成功验证结果集合
         /// </summary>
-        public static readonly ValidationResultCollection Success=new ValidationResultCollection();
+        public static readonly ValidationResultCollection Success = new ValidationResultCollection();
 
         #endregion
 
@@ -44,9 +44,22 @@ namespace Bing.Validations
         /// <summary>
         /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
         /// </summary>
-        public ValidationResultCollection()
+        public ValidationResultCollection():this("")
+        {
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+        /// </summary>
+        /// <param name="result">验证结果</param>
+        public ValidationResultCollection(string result)
         {
             _results = new List<ValidationResult>();
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                return;
+            }
+            _results.Add(new ValidationResult(result));
         }
 
         #endregion

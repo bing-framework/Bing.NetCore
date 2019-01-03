@@ -37,7 +37,7 @@ namespace Bing.Biz.Payments.Core
         /// <typeparam name="T">类型</typeparam>
         /// <param name="name">参数名</param>
         /// <returns></returns>
-        T Getparam<T>(string name);
+        T GetParam<T>(string name);
 
         /// <summary>
         /// 获取参数集合

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Bing.Logs.Abstractions;
+using Bing.Utils.Extensions;
 
 namespace Bing.Logs.Extensions
 {
@@ -19,7 +21,7 @@ namespace Bing.Logs.Extensions
         }
 
         /// <summary>
-        /// 设置内容并换行
+        /// 设置内容
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="value">值</param>
@@ -27,6 +29,22 @@ namespace Bing.Logs.Extensions
         public static ILog Content(this ILog log, string value)
         {
             return log.Set<ILogContent>(content => content.Content(value));
+        }
+
+        /// <summary>
+        /// 设置内容
+        /// </summary>
+        /// <param name="log">日志操作</param>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static ILog Content(this ILog log, IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null)
+            {
+                return log;
+            }
+
+            return Content(log, dictionary.ToDictionary(t => t.Key, t => t.Value.SafeString()));
         }
 
         /// <summary>

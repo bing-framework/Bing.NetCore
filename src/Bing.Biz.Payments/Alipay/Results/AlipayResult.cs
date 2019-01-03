@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Utils.Extensions;
 using Newtonsoft.Json.Linq;
 
@@ -36,7 +37,16 @@ namespace Bing.Biz.Payments.Alipay.Results
         /// <param name="json">json响应消息</param>
         private void LoadJson(string json)
         {
+            if (json.IsEmpty())
+            {
+                return;
+            }
 
+            var jObject = JObject.Parse(json);
+            foreach (var token in jObject.Children())
+            {
+                AddNodes(token);
+            }
         }
 
         /// <summary>
@@ -45,7 +55,21 @@ namespace Bing.Biz.Payments.Alipay.Results
         /// <param name="token">token节点</param>
         private void AddNodes(JToken token)
         {
+            if (!(token is JProperty item))
+            {
+                return;
+            }
 
+            foreach (var value in item.Value)
+            {
+                AddNodes(value);
+            }
+
+            if (GetIgnoreItems().Contains(item.Name))
+            {
+                return;
+            }
+            _result.Add(item.Name,item.Value.SafeString());
         }
 
         /// <summary>
@@ -98,5 +122,37 @@ namespace Bing.Biz.Payments.Alipay.Results
 
             return _result.ContainsKey(key);
         }
+
+        /// <summary>
+        /// 获取状态码
+        /// </summary>
+        /// <returns></returns>
+        public string GetCode()
+        {
+            return GetValue("code");
+        }
+
+        /// <summary>
+        /// 获取消息
+        /// </summary>
+        /// <returns></returns>
+        public string GetMessage()
+        {
+            return GetValue("msg");
+        }
+
+        /// <summary>
+        /// 获取支付订单号
+        /// </summary>
+        /// <returns></returns>
+        public string GetTradeNo()
+        {
+            return GetValue(AlipayConst.TradeNo);
+        }
+
+        /// <summary>
+        /// 是否成功
+        /// </summary>
+        public bool Success => GetCode() == "10000";
     }
 }

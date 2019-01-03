@@ -11,7 +11,7 @@ namespace Bing.Utils.Parameters
     /// <summary>
     /// 参数生成器
     /// </summary>
-    public class ParameterBuilder
+    public class ParameterBuilder : IParameterManager
     {
         /// <summary>
         /// 参数字典
@@ -23,7 +23,7 @@ namespace Bing.Utils.Parameters
         /// </summary>
         public ParameterBuilder()
         {
-            _params=new Dictionary<string, object>();
+            _params = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -122,6 +122,7 @@ namespace Bing.Utils.Parameters
             {
                 return result;
             }
+
             return new SortedDictionary<string, object>(result);
         }
 
@@ -196,7 +197,7 @@ namespace Bing.Utils.Parameters
             }
 
             var result = string.Empty;
-            foreach (var param in GetDictionary(isSort,isUrlEncode,encoding))
+            foreach (var param in GetDictionary(isSort, isUrlEncode, encoding))
             {
                 result = format.Join(result, format.Format(param.Key, param.Value));
             }
