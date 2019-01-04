@@ -97,6 +97,7 @@ namespace Bing.Caching.Redis
             this._cache = _dbProvider.GetDatabase();
             this._servers = _dbProvider.GetServerList();
             this.CacheStatsInfo = new CacheStatsInfo();
+            this.Name = CacheConst.DefaultRedisName;
         }
 
         /// <summary>
