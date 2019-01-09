@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
-using Bing.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core
 {
@@ -31,7 +31,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// </summary>
     /// <typeparam name="TEntity">对象类型</typeparam>
     /// <typeparam name="TKey">对象标识类型</typeparam>
-    public abstract class StoreBase<TEntity,TKey>:QueryStoreBase<TEntity,TKey>,IStore<TEntity,TKey> where TEntity:class,IKey<TKey>,IVersion
+    public abstract class StoreBase<TEntity,TKey>:QueryStoreBase<TEntity,TKey>,IStore<TEntity,TKey> where TEntity:class,IKey<TKey>
     {
         /// <summary>
         /// 初始化一个<see cref="StoreBase{TEntity,TKey}"/>类型的实例
@@ -111,53 +111,19 @@ namespace Bing.Datas.EntityFramework.Core
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            var oldEntity = FindByIdNoTracking(entity.Id);
-            Update(entity,oldEntity);
-        }
-
-        /// <summary>
-        /// 修改实体
-        /// </summary>
-        /// <param name="newEntity">新实体</param>
-        /// <param name="oldEntity">旧实体</param>
-        protected void Update(TEntity newEntity, TEntity oldEntity)
-        {
-            if (newEntity == null)
+            UnitOfWork.Entry(entity).State = EntityState.Detached;
+            var old = Find(entity.Id);
+            var oldEntry = UnitOfWork.Entry(old);
+            if (!(entity is IVersion version))
             {
-                throw new ArgumentNullException(nameof(newEntity));
+                oldEntry.CurrentValues.SetValues(entity);
+                return;
             }
 
-            if (oldEntity == null)
-            {
-                throw new ArgumentNullException(nameof(oldEntity));
-            }
-            ValidateVersion(newEntity,oldEntity);
-            var entity = Find(newEntity.Id);
-            UnitOfWork.Entry(entity).CurrentValues.SetValues(newEntity);
-        }
-
-        /// <summary>
-        /// 校验版本号
-        /// </summary>
-        /// <param name="newEntity">新实体</param>
-        /// <param name="oldEntity">旧实体</param>
-        protected void ValidateVersion(TEntity newEntity, TEntity oldEntity)
-        {
-            if (newEntity.Version == null)
-            {
-                throw new ConcurrencyException();
-            }
-            if (newEntity.Version.Length != oldEntity.Version.Length)
-            {
-                throw new ConcurrencyException();
-            }
-            for (int i = 0; i < oldEntity.Version.Length; i++)
-            {
-                if (newEntity.Version[i] != oldEntity.Version[i])
-                {
-                    throw new ConcurrencyException();
-                }
-            }
+            oldEntry.State = EntityState.Detached;
+            oldEntry.CurrentValues[nameof(version.Version)] = version.Version;
+            oldEntry = UnitOfWork.Attach(old);
+            oldEntry.CurrentValues.SetValues(entity);
         }
 
         /// <summary>
@@ -171,37 +137,9 @@ namespace Bing.Datas.EntityFramework.Core
                 throw new ArgumentNullException(nameof(entities));
             }
 
-            var newEntities = entities.ToList();
-            var oldEntities = FindByIdsNoTracking(newEntities.Select(t => t.Id));
-            ValidateVersion(newEntities,oldEntities);
-            UnitOfWork.UpdateRange(newEntities);
-        }
-
-        /// <summary>
-        /// 验证版本号
-        /// </summary>
-        /// <param name="newEntities">新实体集合</param>
-        /// <param name="oldEntities">旧实体集合</param>
-        protected void ValidateVersion(List<TEntity> newEntities, List<TEntity> oldEntities)
-        {
-            if (oldEntities == null)
+            foreach (var entity in entities)
             {
-                throw new ArgumentNullException(nameof(oldEntities));
-            }
-
-            if (newEntities.Count != oldEntities.Count)
-            {
-                throw new ConcurrencyException();
-            }
-
-            foreach (var entity in newEntities)
-            {
-                var old = oldEntities.Find(t => t.Id.Equals(entity.Id));
-                if (old == null)
-                {
-                    throw new ConcurrencyException();
-                }
-                ValidateVersion(entity,old);
+                Update(entity);
             }
         }
 
@@ -210,15 +148,10 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="entity">实体</param>
         /// <returns></returns>
-        public virtual async Task UpdateAsync(TEntity entity)
+        public virtual Task UpdateAsync(TEntity entity)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            var oldEntity =await FindByIdNoTrackingAsync(entity.Id);
-            Update(entity, oldEntity);
+            Update(entity);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -233,10 +166,10 @@ namespace Bing.Datas.EntityFramework.Core
                 throw new ArgumentNullException(nameof(entities));
             }
 
-            var newEntities = entities.ToList();
-            var oldEntities = await FindByIdsNoTrackingAsync(newEntities.Select(t => t.Id));
-            ValidateVersion(newEntities, oldEntities);
-            UnitOfWork.UpdateRange(newEntities);
+            foreach (var entity in entities)
+            {
+                await UpdateAsync(entity);
+            }
         }
 
         /// <summary>

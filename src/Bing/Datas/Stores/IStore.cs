@@ -18,8 +18,8 @@ namespace Bing.Datas.Stores
     public interface IStore<TEntity, in TKey> : IQueryStore<TEntity, TKey>,
         IAdd<TEntity, TKey>, IAddAsync<TEntity, TKey>,
         IUpdate<TEntity, TKey>, IUpdateAsync<TEntity, TKey>,
-        IRemove<TEntity, TKey>, IRemoveAsync<TEntity, TKey> 
-        where TEntity : class, IKey<TKey>, IVersion
+        IRemove<TEntity, TKey>, IRemoveAsync<TEntity, TKey>
+        where TEntity : class, IKey<TKey>
     {
     }
 }
