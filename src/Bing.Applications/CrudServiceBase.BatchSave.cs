@@ -26,7 +26,7 @@ namespace Bing.Applications
         /// <param name="updateList">修改列表</param>
         /// <param name="deleteList">删除列表</param>
         /// <returns></returns>
-        public List<TDto> Save(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
+        public virtual List<TDto> Save(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
         {
             if (addList == null && updateList == null && deleteList == null)
             {
@@ -55,7 +55,7 @@ namespace Bing.Applications
         /// <param name="updateList">修改列表</param>
         /// <param name="deleteList">删除列表</param>
         /// <returns></returns>
-        public async Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
+        public virtual async Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
         {
             if (addList == null && updateList == null && deleteList == null)
             {

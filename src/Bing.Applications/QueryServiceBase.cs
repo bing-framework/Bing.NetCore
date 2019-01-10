@@ -156,7 +156,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
-        public List<TDto> Query(TQueryParameter parameter)
+        public virtual List<TDto> Query(TQueryParameter parameter)
         {
             if (parameter == null)
             {
@@ -171,7 +171,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
-        public async Task<List<TDto>> QueryAsync(TQueryParameter parameter)
+        public virtual async Task<List<TDto>> QueryAsync(TQueryParameter parameter)
         {
             if (parameter == null)
             {
@@ -200,7 +200,10 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
-        protected abstract IQueryBase<TEntity> CreateQuery(TQueryParameter parameter);
+        protected virtual IQueryBase<TEntity> CreateQuery(TQueryParameter parameter)
+        {
+            return new Query<TEntity>(parameter);
+        }
 
         /// <summary>
         /// 过滤
@@ -232,7 +235,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
-        public PagerList<TDto> PagerQuery(TQueryParameter parameter)
+        public virtual PagerList<TDto> PagerQuery(TQueryParameter parameter)
         {
             if (parameter == null)
             {
@@ -249,7 +252,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="parameter">查询参数</param>
         /// <returns></returns>
-        public async Task<PagerList<TDto>> PagerQueryAsync(TQueryParameter parameter)
+        public virtual async Task<PagerList<TDto>> PagerQueryAsync(TQueryParameter parameter)
         {
             if (parameter == null)
             {

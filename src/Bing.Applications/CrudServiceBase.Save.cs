@@ -9,14 +9,6 @@ namespace Bing.Applications
     /// <summary>
     /// 增删改查服务 - Save
     /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <typeparam name="TDto">数据传输对象类型</typeparam>
-    /// <typeparam name="TRequest">请求参数类型</typeparam>
-    /// <typeparam name="TCreateRequest">创建参数类型</typeparam>
-    /// <typeparam name="TUpdateRequest">修改参数类型</typeparam>
-    /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
-    /// <typeparam name="TKey">实体标识类型</typeparam>
-
     public abstract partial class CrudServiceBase<TEntity, TDto, TRequest, TCreateRequest, TUpdateRequest, TQueryParameter, TKey>
     {
         #region Create(创建)
