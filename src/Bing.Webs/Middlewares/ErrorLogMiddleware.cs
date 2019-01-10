@@ -54,7 +54,9 @@ namespace Bing.Webs.Middlewares
             {
                 return;
             }
-            var log = Log.GetLog(this).Caption("全局异常捕获").Content($"状态码：{context.Response.StatusCode}");
+
+            var log = (ILog) context.RequestServices.GetService(typeof(ILog));
+            log.Caption("全局异常捕获 - 错误日志中间件").Content($"状态码：{context.Response.StatusCode}");
             ex.Log(log);
         }
     }
