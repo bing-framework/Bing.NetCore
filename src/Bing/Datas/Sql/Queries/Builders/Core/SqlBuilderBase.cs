@@ -839,7 +839,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="whereClause">Where子句</param>
         private void AddFilters(IWhereClause whereClause)
         {
-            var context = new SqlQueryContext(AliasRegister, whereClause);
+            var context = new SqlQueryContext(AliasRegister, whereClause, EntityMatedata);
             SqlFilterCollection.Filters.ForEach(filter => filter.Filter(context));
         }
 

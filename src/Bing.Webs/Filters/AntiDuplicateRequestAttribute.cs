@@ -44,8 +44,7 @@ namespace Bing.Webs.Filters
                 throw new ArgumentNullException(nameof(next));
             }
 
-            var @lock = Ioc.Create<ILock>();
-            @lock = @lock ?? NullLock.Instance;
+            var @lock = CreateLock();
             var key = GetKey(context);
             try
             {
@@ -69,6 +68,15 @@ namespace Bing.Webs.Filters
             {
                 @lock.UnLock();
             }
+        }
+
+        /// <summary>
+        /// 创建业务锁
+        /// </summary>
+        /// <returns></returns>
+        private ILock CreateLock()
+        {
+            return Ioc.Create<ILock>() ?? NullLock.Instance;
         }
 
         /// <summary>

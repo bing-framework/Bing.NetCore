@@ -45,7 +45,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 添加实体
         /// </summary>
         /// <param name="entity">实体</param>
-        public void Add(TEntity entity)
+        public virtual void Add(TEntity entity)
         {
             if (entity == null)
             {
@@ -59,7 +59,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 添加实体集合
         /// </summary>
         /// <param name="entities">实体集合</param>
-        public void Add(IEnumerable<TEntity> entities)
+        public virtual void Add(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -74,7 +74,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entity">实体</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (entity == null)
             {
@@ -90,7 +90,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entities">实体集合</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (entities == null)
             {
@@ -176,7 +176,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 移除实体
         /// </summary>
         /// <param name="id">标识</param>
-        public void Remove(object id)
+        public virtual void Remove(object id)
         {
             var entity = Find(id);
             Delete(entity);
@@ -206,7 +206,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 移除实体
         /// </summary>
         /// <param name="entity">实体</param>
-        public void Remove(TEntity entity)
+        public virtual void Remove(TEntity entity)
         {
             if (entity == null)
             {
@@ -219,7 +219,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 移除实体集合
         /// </summary>
         /// <param name="ids">标识集合</param>
-        public void Remove(IEnumerable<TKey> ids)
+        public virtual void Remove(IEnumerable<TKey> ids)
         {
             if (ids == null)
             {
@@ -261,7 +261,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 移除实体集合
         /// </summary>
         /// <param name="entities">实体集合</param>
-        public void Remove(IEnumerable<TEntity> entities)
+        public virtual void Remove(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -277,7 +277,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="id">标识</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task RemoveAsync(object id, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default(CancellationToken))
         {
             var entity = await FindAsync(id, cancellationToken);
             Delete(entity);
@@ -289,7 +289,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entity">实体</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (entity == null)
             {
@@ -305,7 +305,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="ids">标识集合</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (ids == null)
             {
@@ -321,7 +321,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="entities">实体集合</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (entities == null)
             {
