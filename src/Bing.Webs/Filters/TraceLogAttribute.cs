@@ -8,6 +8,7 @@ using Bing.Utils.Json;
 using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Webs.Filters
 {
@@ -28,9 +29,20 @@ namespace Bing.Webs.Filters
         public bool Ignore { get; set; }
 
         /// <summary>
-        /// 日志
+        /// 获取日志操作
         /// </summary>
-        private ILog Logger { get; set; }
+        /// <returns></returns>
+        private ILog GetLog()
+        {
+            try
+            {
+                return Log.GetLog(LogName);
+            }
+            catch
+            {
+                return Log.Null;
+            }
+        }
 
         /// <summary>
         /// 执行
@@ -50,111 +62,90 @@ namespace Bing.Webs.Filters
                 throw new ArgumentNullException(nameof(next));
             }
 
-            ActionFilterAttribute actionFilterAttribute = this;
-            actionFilterAttribute.OnActionExecuting(context);
-            await OnActionExecutingAsync(context);
+            var log = GetLog();
+            OnActionExecuting(context);
+            await OnActionExecutingAsync(context, log);
             if (context.Result != null)
             {
                 return;
             }
             var executedContext = await next();
-            actionFilterAttribute.OnActionExecuted(executedContext);
+            OnActionExecuted(executedContext);
+            OnActionExecuted(executedContext, log);
         }
 
         /// <summary>
         /// 执行前
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        protected async Task OnActionExecutingAsync(ActionExecutingContext context)
+        /// <param name="log">日志</param>
+        protected async Task OnActionExecutingAsync(ActionExecutingContext context, ILog log)
         {
             if (Ignore)
             {
                 return;
             }
-            Logger = GetLog();
-            if (Logger.IsTraceEnabled == false)
+
+            if (log.IsTraceEnabled == false)
             {
                 return;
             }
-            await WriteLog(context);
-        }
 
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        /// <returns></returns>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(LogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
+            await WriteLog(context, log);
         }
 
         /// <summary>
         /// 执行前日志
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        private async Task WriteLog(ActionExecutingContext context)
+        /// <param name="log">日志</param>
+        private async Task WriteLog(ActionExecutingContext context, ILog log)
         {
-            Logger.Caption("WebApi跟踪-准备执行操作")
+            log.Caption("WebApi跟踪-准备执行操作")
                 .Class(context.Controller.SafeString())
                 .Method(context.ActionDescriptor.DisplayName);
-            await AddRequestInfo(context);
-            Logger.Trace();
+            await AddRequestInfo(context, log);
+            log.Trace();
         }
 
         /// <summary>
         /// 添加请求信息参数
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        private async Task AddRequestInfo(ActionExecutingContext context)
+        /// <param name="log">日志</param>
+        private async Task AddRequestInfo(ActionExecutingContext context, ILog log)
         {
             var request = context.HttpContext.Request;
-            Logger.Params("Http请求方式", request.Method);
+            log.Params("Http请求方式", request.Method);
             if (string.IsNullOrWhiteSpace(request.ContentType) == false)
             {
-                Logger.Params("ContentType", request.ContentType);
+                log.Params("ContentType", request.ContentType);
             }
-            AddHeaders(request);
-            await AddFormParams(request);
-            AddCookie(request);
-        }
 
-        /// <summary>
-        /// 添加请求头
-        /// </summary>
-        /// <param name="request">Http请求</param>
-        private void AddHeaders(Microsoft.AspNetCore.Http.HttpRequest request)
-        {
-            Logger.Params("请求头:");
-            foreach (var header in request.Headers)
-            {
-                Logger.Params(header.Key, header.Value);
-            }
+            await AddFormParams(request, log);
+            AddCookie(request, log);
         }
 
         /// <summary>
         /// 添加表单参数
         /// </summary>
         /// <param name="request">Http请求</param>
-        private async Task AddFormParams(Microsoft.AspNetCore.Http.HttpRequest request)
+        /// <param name="log">日志</param>
+        private async Task AddFormParams(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
         {
             if (IsMultipart(request.ContentType))
             {
                 return;
             }
+
             request.EnableRewind();
             var result = await FileUtil.ToStringAsync(request.Body, isCloseStream: false);
             if (string.IsNullOrWhiteSpace(result))
             {
                 return;
             }
-            Logger.Params("表单参数:").Params(result);
+
+            log.Params("表单参数:").Params(result);
         }
 
         /// <summary>
@@ -171,76 +162,82 @@ namespace Bing.Webs.Filters
         /// 添加Cookie
         /// </summary>
         /// <param name="request">Http请求</param>
-        private void AddCookie(Microsoft.AspNetCore.Http.HttpRequest request)
+        /// <param name="log">日志</param>
+        private void AddCookie(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
         {
-            Logger.Params("Cookie:");
+            log.Params("Cookie:");
             foreach (var key in request.Cookies.Keys)
             {
-                Logger.Params(key, request.Cookies[key]);
+                log.Params(key, request.Cookies[key]);
             }
         }
 
         /// <summary>
         /// 执行后
         /// </summary>
-        /// <param name="context">结果执行上下文</param>
-        public override void OnResultExecuted(ResultExecutedContext context)
+        /// <param name="context">操作执行上下文</param>
+        /// <param name="log">日志</param>
+        public virtual void OnActionExecuted(ActionExecutedContext context, ILog log)
         {
-            base.OnResultExecuted(context);
             if (Ignore)
             {
                 return;
             }
-            if (Logger.IsTraceEnabled == false)
+
+            if (log.IsTraceEnabled == false)
             {
                 return;
             }
-            WriteLog(context);
+
+            WriteLog(context, log);
         }
 
         /// <summary>
         /// 执行后的日志
         /// </summary>
-        /// <param name="context">结果执行上下文</param>
-        private void WriteLog(ResultExecutedContext context)
+        /// <param name="context">操作执行上下文</param>
+        /// <param name="log">日志</param>
+        private void WriteLog(ActionExecutedContext context, ILog log)
         {
-            Logger.Caption("WebApi跟踪-执行操作完成")
+            log.Caption("WebApi跟踪-执行操作完成")
                 .Class(context.Controller.SafeString())
                 .Method(context.ActionDescriptor.DisplayName);
-            AddResponseInfo(context);
-            AddResult(context);
-            Logger.Trace();
+            AddResponseInfo(context, log);
+            AddResult(context, log);
+            log.Trace();
         }
 
         /// <summary>
         /// 添加响应信息参数
         /// </summary>
-        /// <param name="context">结果执行上下文</param>
-        private void AddResponseInfo(ResultExecutedContext context)
+        /// <param name="context">操作执行上下文</param>
+        /// <param name="log">日志</param>
+        private void AddResponseInfo(ActionExecutedContext context, ILog log)
         {
             var response = context.HttpContext.Response;
             if (string.IsNullOrWhiteSpace(response.ContentType) == false)
             {
-                Logger.Content($"ContentType: {response.ContentType}");
+                log.Content($"ContentType: {response.ContentType}");
             }
-            Logger.Content($"Http状态码: {response.StatusCode}");
+
+            log.Content($"Http状态码: {response.StatusCode}");
         }
 
         /// <summary>
         /// 记录响应结果
         /// </summary>
-        /// <param name="context">结果执行上下文</param>
-        private void AddResult(ResultExecutedContext context)
+        /// <param name="context">操作执行上下文</param>
+        /// <param name="log">日志</param>
+        private void AddResult(ActionExecutedContext context, ILog log)
         {
             if (!(context.Result is Result result))
             {
                 return;
             }
-            Logger.Content($"响应消息: {result.Message}")
+
+            log.Content($"响应消息: {result.Message}")
                 .Content("响应结果:")
                 .Content($"{JsonUtil.ToJson(result.Data)}");
         }
-
-        
     }
 }

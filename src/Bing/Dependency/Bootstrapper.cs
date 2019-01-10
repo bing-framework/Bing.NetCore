@@ -29,11 +29,6 @@ namespace Bing.Dependency
         private readonly IConfig[] _configs;
 
         /// <summary>
-        /// 上下文
-        /// </summary>
-        private readonly IContext _context;
-
-        /// <summary>
         /// 容器生成器
         /// </summary>
         private ContainerBuilder _builder;
@@ -57,15 +52,13 @@ namespace Bing.Dependency
         /// 初始化一个<see cref="Bootstrapper"/>类型的实例
         /// </summary>
         /// <param name="services">服务集合</param>
-        /// <param name="context">上下文</param>
         /// <param name="configs">依赖配置</param>
         /// <param name="aopConfigAction">Aop配置操作</param>
         /// <param name="finder">类型查找器</param>
-        public Bootstrapper(IServiceCollection services, IContext context, IConfig[] configs,
+        public Bootstrapper(IServiceCollection services, IConfig[] configs,
             Action<IAspectConfiguration> aopConfigAction, ITypeFinder finder)
         {
             _services = services ?? new ServiceCollection();
-            _context = context;
             _configs = configs;
             _aopConfigAction = aopConfigAction;
             _finder = finder ?? new WebAppTypeFinder();
@@ -75,27 +68,25 @@ namespace Bing.Dependency
         /// 启动引导
         /// </summary>
         /// <param name="services">服务集合</param>
-        /// <param name="context">上下文</param>
         /// <param name="configs">依赖配置</param>
         /// <param name="aopConfigAction">Aop配置操作</param>
         /// <param name="finder">类型查找器</param>
         /// <returns></returns>
-        public static IServiceProvider Run(IServiceCollection services = null, IContext context = null,
-            IConfig[] configs = null, Action<IAspectConfiguration> aopConfigAction = null, ITypeFinder finder = null)
+        public static IServiceProvider Run(IServiceCollection services = null, IConfig[] configs = null,
+            Action<IAspectConfiguration> aopConfigAction = null, ITypeFinder finder = null)
         {
-            return new Bootstrapper(services, context, configs, aopConfigAction, finder).Bootstrap();
+            return new Bootstrapper(services, configs, aopConfigAction, finder).Bootstrap();
         }
 
         /// <summary>
         /// 启动引导
         /// </summary>
         /// <param name="services">服务集合</param>
-        /// <param name="context">上下文</param>
         /// <param name="configs">依赖配置</param>
         /// <returns></returns>
-        public static IServiceProvider Run(IServiceCollection services, IContext context, params IConfig[] configs)
+        public static IServiceProvider Run(IServiceCollection services, params IConfig[] configs)
         {
-            return Run(services, context, configs, null,null);
+            return Run(services, configs, null);
         }
 
         /// <summary>
@@ -127,7 +118,6 @@ namespace Bing.Dependency
         {
             EnableAop();
             RegistFinder();
-            RegistContext();
         }
 
         /// <summary>
@@ -144,17 +134,6 @@ namespace Bing.Dependency
         private void RegistFinder()
         {
             _builder.AddSingleton(_finder);
-        }
-
-        /// <summary>
-        /// 注册上下文
-        /// </summary>
-        private void RegistContext()
-        {
-            if (_context != null)
-            {
-                _builder.AddSingleton(_context);
-            }
         }
 
         /// <summary>

@@ -2,7 +2,6 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.Configurations;
-using Bing.Contexts;
 using Bing.Dependency;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +39,7 @@ namespace Bing
             services.AddHttpContextAccessor();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             services.TryAddSingleton<IConfigurationAccessor>(DefaultConfigurationAccessor.Empty);
-            return Bootstrapper.Run(services, new WebContext(), configs, aopConfigAction);
+            return Bootstrapper.Run(services, configs, aopConfigAction);
         }
 
         /// <summary>
