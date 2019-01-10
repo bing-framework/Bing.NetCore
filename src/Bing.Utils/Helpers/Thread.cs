@@ -33,6 +33,19 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region ParallelExecute(并发执行多个操作)
+
+        /// <summary>
+        /// 并发执行多个操作
+        /// </summary>
+        /// <param name="actions">操作集合</param>
+        public static void ParallelExecute(params Action[] actions)
+        {
+            Parallel.Invoke(actions);
+        }
+
+        #endregion
+
         #region ThreadId(获取线程编号)
 
         /// <summary>
