@@ -34,12 +34,13 @@ dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 dotnet pack ./src/Bing.Encryption/Bing.Encryption.csproj
 dotnet pack ./src/Bing.Geetest/Bing.Geetest.csproj
-dotnet pack ./src/Bing.MockData/Bing.MockData.csproj
+REM dotnet pack ./src/Bing.MockData/Bing.MockData.csproj
 dotnet pack ./src/Bing.BankCardInfo/Bing.BankCardInfo.csproj
 dotnet pack ./src/Bing.ElasticSearch/Bing.ElasticSearch.csproj
 dotnet pack ./src/Bing.Sequence/Bing.Sequence.csproj
 dotnet pack ./src/Bing.Caching.InMemory/Bing.Caching.InMemory.csproj
 dotnet pack ./src/Bing.Caching.Redis/Bing.Caching.Redis.csproj
+dotnet pack ./src/Bing.Caching.Memcached/Bing.Caching.Memcached.csproj
 rem dotnet pack ./src/Bing.Caching.Hybrid/Bing.Caching.Hybrid.csproj
 rem dotnet pack ./src/Bing.Offices/Bing.Offices.csproj
 rem dotnet pack ./src/Bing.Offices.Npoi/Bing.Offices.Npoi.csproj
