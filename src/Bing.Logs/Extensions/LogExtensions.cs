@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Bing.Exceptions;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
@@ -22,7 +23,15 @@ namespace Bing.Logs.Extensions
         /// <returns></returns>
         public static ILog BussinessId(this ILog log, string bussinessId)
         {
-            return log.Set<LogContent>(content => content.BussinessId = bussinessId);
+            return log.Set<LogContent>(content =>
+            {
+                if (string.IsNullOrWhiteSpace(content.BussinessId) == false)
+                {
+                    content.BussinessId += ",";
+                }
+
+                content.BussinessId += bussinessId;
+            });
         }
 
         /// <summary>
@@ -156,7 +165,14 @@ namespace Bing.Logs.Extensions
             {
                 return log;
             }
-            return SqlParams(log, dictionary.Select(t => $"{t.Key} : {GetParamLiterals(t.Value)}").Join());
+
+            var result = new StringBuilder();
+            foreach (var item in dictionary)
+            {
+                result.AppendLine($"    {item.Key} : {GetParamLiterals(item.Value)} : {item.Value?.GetType()},");
+            }
+
+            return SqlParams(log, result.ToString().RemoveEnd($",{Common.Line}"));
         }
 
         /// <summary>
@@ -196,6 +212,7 @@ namespace Bing.Logs.Extensions
             {
                 return log;
             }
+
             return Exception(log, new Warning("", errorCode, exception));
         }
 
@@ -215,32 +232,6 @@ namespace Bing.Logs.Extensions
             {
                 content.ErrorCode = exception.Code;
                 content.Exception = exception;
-            });
-        }
-
-        /// <summary>
-        /// 获取Sql语句
-        /// </summary>
-        /// <param name="log">日志操作</param>
-        /// <returns></returns>
-        public static string GetSql(this ILog log)
-        {
-            var content=log.Get<LogContent>();
-            return content.Sql.ToString();
-        }
-
-        /// <summary>
-        /// 替换Sql语句
-        /// </summary>
-        /// <param name="log">日志操作</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public static ILog ReplaceSql(this ILog log, string value)
-        {
-            return log.Set<LogContent>(content =>
-            {
-                content.Sql.Clear();
-                content.Sql.Append(value);
             });
         }
     }

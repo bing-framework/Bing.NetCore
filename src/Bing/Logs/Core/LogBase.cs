@@ -14,6 +14,7 @@ namespace Bing.Logs.Core
     public abstract class LogBase<TContent> : ILog where TContent : class, ILogContent
     {
         #region 属性
+
         /// <summary>
         /// 日志内容
         /// </summary>

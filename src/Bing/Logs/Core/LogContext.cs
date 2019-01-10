@@ -26,6 +26,11 @@ namespace Bing.Logs.Core
         private int _orderId;
 
         /// <summary>
+        /// 上下文
+        /// </summary>
+        private IContext _context;
+
+        /// <summary>
         /// 跟踪号
         /// </summary>
         public string TraceId => $"{GetInfo().TraceId}-{++_orderId}";
@@ -58,19 +63,19 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 上下文
         /// </summary>
-        public IContext Context { get; set; }
+        public IContext Context => _context ?? (_context = ContextFactory.Create());
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化一个<see cref="LogContext"/>类型的实例
         /// </summary>
-        /// <param name="context">上下文</param>
-        public LogContext(IContext context)
+        public LogContext()
         {
-            Context = context;
             _orderId = 0;
         }
+
         #endregion
 
         /// <summary>

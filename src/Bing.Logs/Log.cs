@@ -193,7 +193,7 @@ namespace Bing.Logs
             }
             catch
             {
-                return Security.Sessions.Session.Null;
+                return Security.Sessions.Session.Instance;
             }
         }        
     }

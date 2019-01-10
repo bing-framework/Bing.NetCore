@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Contexts;
 using Bing.Logs.Internal;
 using Bing.Utils.Helpers;
 
@@ -10,14 +9,6 @@ namespace Bing.Logs.Exceptionless
     /// </summary>
     public class LogContext : Logs.Core.LogContext
     {
-        /// <summary>
-        /// 初始化一个<see cref="LogContext"/>类型的实例
-        /// </summary>
-        /// <param name="context">上下文</param>
-        public LogContext(IContext context) : base(context)
-        {
-        }
-
         /// <summary>
         /// 创建日志上下文信息
         /// </summary>
