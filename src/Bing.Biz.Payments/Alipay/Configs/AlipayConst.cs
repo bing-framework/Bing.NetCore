@@ -124,5 +124,10 @@
         /// 二维码
         /// </summary>
         public const string QrCode = "qr_code";
+
+        /// <summary>
+        /// 销售产品码
+        /// </summary>
+        public const string ProductCode = "product_code";
     }
 }

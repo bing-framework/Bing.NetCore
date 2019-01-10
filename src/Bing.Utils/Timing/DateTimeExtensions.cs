@@ -636,5 +636,49 @@ namespace Bing.Utils.Timing
         }
 
         #endregion
+
+        #region CsharpTime2JavascriptTime(将C#时间转换为Javascript时间)
+
+        /// <summary>
+        /// 将C#时间转换为Javascript时间
+        /// </summary>
+        /// <param name="dateTime">时间</param>
+        /// <returns></returns>
+        public static long CsharpTime2JavascriptTime(this DateTime dateTime)
+        {
+            return (long) new TimeSpan(dateTime.Ticks - Date1970.Ticks).TotalMilliseconds;
+        }
+
+        #endregion
+
+        #region PhpTime2CsharpTime(将PHP时间转换为C#时间)
+
+        /// <summary>
+        /// 将PHP时间转换为C#时间
+        /// </summary>
+        /// <param name="dateTime">时间</param>
+        /// <param name="time">PHP的时间</param>
+        /// <returns></returns>
+        public static DateTime PhpTime2CsharpTime(this DateTime dateTime, long time)
+        {
+            long t = (time + 8 * 60 * 60) * 10000000 + Date1970.Ticks;
+            return new DateTime(t);
+        }
+
+        #endregion
+
+        #region CsharpTime2PhpTime(将C#时间转换为PHP时间)
+
+        /// <summary>
+        /// 将C#时间转换为PHP时间
+        /// </summary>
+        /// <param name="dateTime">时间</param>
+        /// <returns></returns>
+        public static long CsharpTime2PhpTime(this DateTime dateTime)
+        {
+            return (DateTime.UtcNow.Ticks - Date1970.Ticks) / 10000000;
+        }
+
+        #endregion
     }
 }

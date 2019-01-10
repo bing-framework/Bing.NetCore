@@ -103,7 +103,9 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// </summary>
         /// <param name="builder">内容参数生成器</param>
         /// <param name="param">支付参数</param>
-        protected virtual void InitContentBuilder(AlipayContentBuilder builder,PayParam param) { }
+        protected virtual void InitContentBuilder(AlipayContentBuilder builder, PayParam param)
+        {
+        }
 
         /// <summary>
         /// 请求结果
@@ -226,7 +228,7 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// <returns></returns>
         protected virtual PayResult CreateResult(AlipayParameterBuilder builder, AlipayResult result)
         {
-            return new PayResult(result.Success,result.GetTradeNo(),result.Raw)
+            return new PayResult(result.Success, result.GetTradeNo(), result.Raw)
             {
                 Parameter = builder.ToString(),
                 Message = result.GetMessage()

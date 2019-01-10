@@ -51,6 +51,10 @@ namespace Bing.Biz.Payments.Factories
                     return new AlipayQrCodePayService(_alipayConfigProvider);
                 case PayWay.AlipayAppPay:
                     return new AlipayAppPayService(_alipayConfigProvider);
+                case PayWay.AlipayPagePay:
+                    return new AlipayPagePayService(_alipayConfigProvider);
+                case PayWay.AlipayWapPay:
+                    return new AlipayWapPayService(_alipayConfigProvider);
                 case PayWay.WechatpayAppPay:
                     return new WechatpayAppPayService(_wechatpayConfigProvider);
                 case PayWay.WechatpayMiniProgramPay:
@@ -103,6 +107,24 @@ namespace Bing.Biz.Payments.Factories
         public IAlipayAppPayService CreateAlipayAppPayService()
         {
             return new AlipayAppPayService(_alipayConfigProvider);
+        }
+
+        /// <summary>
+        /// 创建支付宝电脑网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        public IAlipayPagePayService CreateAlipayPagePayService()
+        {
+            return new AlipayPagePayService(_alipayConfigProvider);
+        }
+
+        /// <summary>
+        /// 创建支付宝手机网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        public IAlipayWapPayService CreateAlipayWapPayService()
+        {
+            return new AlipayWapPayService(_alipayConfigProvider);
         }
 
         /// <summary>

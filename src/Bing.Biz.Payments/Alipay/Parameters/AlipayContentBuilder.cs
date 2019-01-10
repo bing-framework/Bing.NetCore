@@ -95,6 +95,17 @@ namespace Bing.Biz.Payments.Alipay.Parameters
         }
 
         /// <summary>
+        /// 设置销售产品码
+        /// </summary>
+        /// <param name="productCode">销售产品码</param>
+        /// <returns></returns>
+        public AlipayContentBuilder ProductCode(string productCode)
+        {
+            Add(AlipayConst.ProductCode, productCode);
+            return this;
+        }
+
+        /// <summary>
         /// 输出结果
         /// </summary>
         /// <returns></returns>

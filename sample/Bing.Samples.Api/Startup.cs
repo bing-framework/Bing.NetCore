@@ -4,6 +4,8 @@ using System.IO;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using Bing.Biz.Payments.Alipay.Configs;
+using Bing.Biz.Payments.Extensions;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.Exceptionless;
 using Bing.Logs.Log4Net;
@@ -41,6 +43,15 @@ namespace Bing.Samples.Api
                 })
                 .AddControllersAsServices();
 
+            services.AddPay(x =>
+            {
+                x.AlipayOptions.AppId = "";
+                x.AlipayOptions.GatewayUrl = "https://openapi.alipaydev.com/gateway.do";
+                x.AlipayOptions.PrivateKey =
+                    "MIIEogIBAAKCAQEAmrTD6XAUY9wM6FCRJMiG1osJ1tiYVa10IazObKfHTBc0foCfcT6MpUVdlyXzGXRbd2D4HL0+NVkLejz5vqpCTHxO0BXD0zBt0r2pCBdXt0PkP21DVz4k9VbX29T0AKTcZ01AAdUd3m4jfqe2jszG1z8j6QcMzH+Nz3aIu2qO7DW+u3WOvIPzpS3CTFCxWYlcgXQnfI5naGd7V8sLV4GhDa3iU3kWklYSBjFNGnOkMcz5hd98mNE5zP35x7fO+ks55eS400I4ZYSiOlHFSAD0KzW3G8K1DSUBpv6FyUqeGW9ckWlgvU6oNec3pC/lkOmirTuBvQMAmCZNjtWfOQIBHQIDAQABAoIBAA4Lp1XERTWjvtBAsEzEn+lOikAlPf9ZVhfQlpUqzl9MJAnwJ4migiZnG84jNeTzuXInLZ9+Vu2E/hPFAW+cCZTkHEusDjFYTkA50+TWKbKLyWcwxlJfY/+aONLOjLCaRyBh1RPVg3a0TSislVh1ov/bzajUaQcP9ZIGUveg/wTW4CreFezetJbOz/CFokc+PazFRJYiq/9rN2Tzhn3hi6V5ICTLGQJmB7/AM35e7SFc0w+lkUMLSX9bMVpgDoFVAgo8LGMysC8xf5z5ahkONR3w551c/bNJjPy2KDUiBg6sVATvU/l4xXzM19ZqMQ9JIiTuf4YdX7Chqx6RbgLbO0ECgYEAy6dQ3kJ2X++X9hZ+jWY3QqLc82F/fLd845QGoau5xn4aTYQwH5jA5Ff3BqzAQMgJOKPMLd6GmH4Y249howTv5MbPfihaCfKB4pjdMfHyceNYLillQtuZaIpyucmTHERLZ8afgzybBxPn7DT6Mk1xfOp6bmN4+h0pw/N2PKIfGVkCgYEAwnijqmmBFHYxFif8L0V5/SvSxzEIdQ5mpH4y7OxnJ0Yka65cP5+HfXVvvrPQUp7yHcwbA1I7olAn8t6GfoHP3y3J0nzS3hVQwvdgIq0KXv5gm93F3ZKObQrbRJYJdkWXffz76E+I6DqX67E1jP5cztjXbdkzCWfpL9id6zmj6WUCgYAe4C8Sg2EPCnQvixmEtoqKP8bf31hEwEze9AJNYIu53ESAnBnvsGkONYfuKyK6r5k2TR8XlTUyyWtbXlGfNZBpTvsGVXfRKkMm56YhfF0VhzJHTV9c045emx7pq/XxwyjrguGMNBQM7qeq2B1WowchuSr2sX4V7XX3j2HNr4angQKBgG8hV43Lirrxq61YnjE5R7PYdjPkHkweNaOshleD5JK575glZIvrExcro/bbdKGyOPO0Ln+gX3mqyplsdnkWn36PAPUq5amJjsRLbwGB1xpfzT9k5WxwErnXaWPxRWjz7dVOW3nu8XKcATLr6oku1kRSABHC+/pVChmQdPX102hNAoGAFUlrtw7N6McE7+ttJUEOW/9rSq7Hjq1j3/9N/5YTVtZnnNlpOKt0eAQ+z7I0vapKjl5hjKAbFyFh6fYy4Z+u5WTg+o4nOaUNOBcD3Mges81pFLb2V+ONWV8QJwE4t0rVt6JEECP6nTRa8ZTRdd9b5UDkrFxxyVRavrJIREFrEow=";
+                x.AlipayOptions.PublicKey =
+                    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn7Oopue3a2x44FgJlWGM3S3QBTz6mBrCRqcvTeX5qH5StlvbF68J34oV3wt+QPn0YIskIgJMC9YwsDKUCPG1k9SjnlKy6hAbHeiAyt2boW9PfoTPYEV36ZH54jzZDGG7k34ZD1EbB3LZnvqpqLwGXQFglg5Xq52eUK6St2wysNzqHlx/WFt6m3OVfKg55udkF1RzBujy1B8Ym8+7YQmD/Ruty+eszBQUOC4nfqq8DsJ3LDMU7AX0J9leuQnReFLq+wCErJSQw/1fplCt3S7iETG7VrCNNRQ5evL8UcaNkDwT0SC+qukhX07Se6Tte61Wur3d6t8IkaeuS1oMQv04qwIDAQAB";
+            });
             services.AddNLog();
 
             // 多日志输出

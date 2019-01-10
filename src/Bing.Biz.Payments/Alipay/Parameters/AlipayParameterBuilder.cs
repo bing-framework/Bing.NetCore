@@ -48,6 +48,14 @@ namespace Bing.Biz.Payments.Alipay.Parameters
         {
             param.Init();
             Content.Init(param);
+            Format("json")
+                .Charset(Config.Charset)
+                .SignType("RSA2")
+                .Timestamp()
+                .Version("1.0")
+                .AppId(Config.AppId)
+                .ReturnUrl(param.ReturnUrl)
+                .NotifyUrl(param.NotifyUrl);
         }
 
         /// <summary>

@@ -47,6 +47,18 @@ namespace Bing.Biz.Payments
         IAlipayAppPayService CreateAlipayAppPayService();
 
         /// <summary>
+        /// 创建支付宝电脑网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        IAlipayPagePayService CreateAlipayPagePayService();
+
+        /// <summary>
+        /// 创建支付宝手机网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        IAlipayWapPayService CreateAlipayWapPayService();
+
+        /// <summary>
         /// 创建微信回调通知服务
         /// </summary>
         /// <returns></returns>
