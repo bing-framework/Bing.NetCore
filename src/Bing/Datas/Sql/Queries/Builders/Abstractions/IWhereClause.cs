@@ -25,6 +25,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void Or(ICondition condition);
 
         /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件</param>
+        void Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件</param>
+        void OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+
+        /// <summary>
         /// 设置查询条件
         /// </summary>
         /// <param name="condition">查询条件</param>
@@ -306,6 +320,28 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="values">值集合</param>
         void In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
             where TEntity : class;
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        void NotIn(string column, IEnumerable<object> values);
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
+            where TEntity : class;
+
+        /// <summary>
+        /// 复制Where子句
+        /// </summary>
+        /// <returns></returns>
+        IWhereClause Clone();
 
         /// <summary>
         /// 输出Sql

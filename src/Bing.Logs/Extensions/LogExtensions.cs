@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bing.Datas.Sql;
 using Bing.Exceptions;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
 using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Logs.Extensions
 {
@@ -156,7 +156,31 @@ namespace Bing.Logs.Extensions
             {
                 return log;
             }
-            return SqlParams(log, dictionary.Select(t => $"{t.Key} : {SqlHelper.GetParamLiterals(t.Value)}").Join());
+            return SqlParams(log, dictionary.Select(t => $"{t.Key} : {GetParamLiterals(t.Value)}").Join());
+        }
+
+        /// <summary>
+        /// 获取参数字面值
+        /// </summary>
+        /// <param name="value">参数值</param>
+        private static string GetParamLiterals(object value)
+        {
+            if (value == null)
+                return "''";
+            switch (value.GetType().Name.ToLower())
+            {
+                case "boolean":
+                    return Conv.ToBool(value) ? "1" : "0";
+                case "int16":
+                case "int32":
+                case "int64":
+                case "single":
+                case "double":
+                case "decimal":
+                    return value.SafeString();
+                default:
+                    return $"'{value}'";
+            }
         }
 
         /// <summary>

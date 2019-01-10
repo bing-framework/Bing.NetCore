@@ -12,6 +12,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 排序列
         /// </summary>
+        public string Order { get; }
+
+        /// <summary>
+        /// 排序列，不带前缀
+        /// </summary>
         public string Column { get; }
 
         /// <summary>
@@ -22,7 +27,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 实体类型
         /// </summary>
-        public Type Entity { get; }
+        public Type Type { get; }
 
         /// <summary>
         /// 是否使用原始值
@@ -30,28 +35,39 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public bool Raw { get; }
 
         /// <summary>
+        /// 前缀
+        /// </summary>
+        public string Prefix { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="OrderByItem"/>类型的实例
         /// </summary>
         /// <param name="order">排序列</param>
         /// <param name="desc">是否降序</param>
-        /// <param name="entity">实体类型</param>
+        /// <param name="type">实体类型</param>
         /// <param name="raw">是否使用原始值</param>
-        public OrderByItem(string order, bool desc = false, Type entity = null, bool raw = false)
+        /// <param name="prefix">前缀</param>
+        public OrderByItem(string order, bool desc = false, Type type = null, bool raw = false, string prefix = null)
         {
-            Column = order.SafeString();
+            Order = order.SafeString();
             Desc = desc;
-            Entity = entity;
+            Type = type;
             Raw = raw;
             if (raw)
             {
                 return;
             }
 
-            if (Column.ToLower().EndsWith("desc"))
+            Order = Order.RemoveEnd("asc");
+            if (Order.ToLower().EndsWith("desc"))
             {
                 Desc = true;
-                Column = Column.Remove(Column.Length - 4, 4);
+                Order = Order.RemoveEnd("desc");
             }
+
+            var item = new NameItem(Order);
+            Column = item.Name;
+            Prefix = string.IsNullOrWhiteSpace(item.Prefix) ? prefix : item.Prefix;
         }
 
         /// <summary>
@@ -64,12 +80,26 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         {
             if (Raw)
             {
-                return Column;
+                return Order;
             }
 
-            var name = new NameItem(Column);
-            var tableAlias = register.GetAlias(Entity);
-            return $"{name.ToSql(dialect, tableAlias)} {(Desc ? "Desc" : null)}".TrimEnd();
+            var name = new NameItem(Order);
+            return $"{name.ToSql(dialect, GetPrefix(register))} {(Desc ? "Desc" : null)}".TrimEnd();
+        }
+
+        /// <summary>
+        /// 获取前缀
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        private string GetPrefix(IEntityAliasRegister register)
+        {
+            if (string.IsNullOrWhiteSpace(Prefix) == false)
+            {
+                return Prefix;
+            }
+
+            return register.GetAlias(Type);
         }
     }
 }

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 using Bing.Datas.Matedatas;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Clauses;
 using Bing.Datas.Sql.Queries.Builders.Conditions;
+using Bing.Datas.Sql.Queries.Builders.Filters;
 using Bing.Domains.Repositories;
 using Bing.Utils;
 
@@ -88,6 +90,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             _whereClause = CreateWhereClause();
             _groupByClause = CreateGroupByClause();
             _orderByClause = CreateOrderByClause();
+            _pager = null;
+            _skipCountParam = null;
+            _pageSizeParam = null;
+            _where = null;
         }
 
         #endregion
@@ -108,15 +114,46 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
         /// </summary>
         /// <returns></returns>
-        public string ToDebugSql()
+        public virtual string ToDebugSql()
         {
-            var result = ToSql();
+            return GetDebugSql(ToSql());
+        }
+
+        /// <summary>
+        /// 获取调试Sql
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        private string GetDebugSql(string sql)
+        {
             var parameters = GetParams();
             foreach (var parameter in parameters)
             {
-                result = result.Replace(parameter.Key, SqlHelper.GetParamLiterals(parameter.Value));
+                sql = Regex.Replace(sql, $@"{parameter.Key}\b",
+                    ParamLiteralsResolver.GetParamLiterals(parameter.Value));
             }
-            return result;
+
+            return sql;
+        }
+
+        /// <summary>
+        /// 参数字面值解析器
+        /// </summary>
+        private IParamLiteralsResolver _paramLiteralsResolver;
+
+        /// <summary>
+        /// 参数字面值解析器
+        /// </summary>
+        protected IParamLiteralsResolver ParamLiteralsResolver =>
+            _paramLiteralsResolver ?? (_paramLiteralsResolver = GetParamLiteralsResolver());
+
+        /// <summary>
+        /// 获取参数字面值解析器
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IParamLiteralsResolver GetParamLiteralsResolver()
+        {
+            return new ParamLiteralsResolver();
         }
 
         #endregion
@@ -127,20 +164,30 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 生成Sql语句
         /// </summary>
         /// <returns></returns>
-        public string ToSql()
+        public virtual string ToSql()
         {
+            Init();
             Validate();
-            var result=new StringBuilder();
+            var result = new StringBuilder();
             CreateSql(result);
             return result.ToString().Trim();
         }
 
         /// <summary>
+        /// 初始化
+        /// </summary>
+        public virtual void Init()
+        {
+            OrderByClause.OrderBy(_pager?.Order);
+        }
+
+        /// <summary>
         /// 验证
         /// </summary>
-        public void Validate()
+        public virtual void Validate()
         {
             FromClause.Validate();
+            OrderByClause.Validate(_pager);
         }
 
         /// <summary>
@@ -163,8 +210,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="result">Sql拼接器</param>
         protected virtual void CreateNoPagerSql(StringBuilder result)
         {
-            AppendSql(result, GetSelect());
-            AppendSql(result, GetFrom());
+            AppendSelect(result);
+            AppendFrom(result);
             AppendSql(result, GetJoin());
             AppendSql(result, GetWhere());
             AppendSql(result, GetGroupBy());
@@ -186,10 +233,119 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
+        /// 添加Select子句
+        /// </summary>
+        /// <param name="result">Sql拼接器</param>
+        protected virtual void AppendSelect(StringBuilder result)
+        {
+            var sql = GetSelect();
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new InvalidOperationException("必须设置Select子句");
+            }
+
+            AppendSql(result, sql);
+        }
+
+        /// <summary>
+        /// 添加From子句
+        /// </summary>
+        /// <param name="result">Sql拼接器</param>
+        protected virtual void AppendFrom(StringBuilder result)
+        {
+            var sql = GetFrom();
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new InvalidOperationException("必须设置From子句");
+            }
+
+            AppendSql(result, sql);
+        }
+
+        /// <summary>
         /// 创建分页Sql
         /// </summary>
         /// <param name="result">Sql拼接</param>
         protected abstract void CreatePagerSql(StringBuilder result);
+
+        #endregion
+
+        #region ToCountDebugSql(生成获取行数调试Sql语句)
+
+        /// <summary>
+        /// 生成获取行数调试Sql语句
+        /// </summary>
+        /// <returns></returns>
+        public virtual string ToCountDebugSql()
+        {
+            return GetDebugSql(ToCountSql());
+        }
+
+        #endregion
+
+        #region ToCountSql(生成获取行数Sql语句)
+
+        /// <summary>
+        /// 生成获取行数Sql语句
+        /// </summary>
+        /// <returns></returns>
+        public virtual string ToCountSql()
+        {
+            Init();
+            Validate();
+            var result = new StringBuilder();
+            if (GroupByClause.IsGroupBy)
+            {
+                AppendGroupCountSql(result);
+            }
+            else
+            {
+                AppendNoGroupCountSql(result);
+            }
+
+            return result.ToString().Trim();
+        }
+
+        /// <summary>
+        /// 添加未分组的获取行数Sql语句
+        /// </summary>
+        /// <param name="result">Sql拼接器</param>
+        private void AppendNoGroupCountSql(StringBuilder result)
+        {
+            result.AppendLine("Select Count(*) ");
+            AppendFrom(result);
+            AppendSql(result, GetJoin());
+            AppendSql(result, GetWhere());
+        }
+
+        /// <summary>
+        /// 添加分组的获取行数Sql语句
+        /// </summary>
+        /// <param name="result">Sql拼接器</param>
+        private void AppendGroupCountSql(StringBuilder result)
+        {
+            result.AppendLine("Select Count(*) ");
+            result.AppendLine("From (");
+            result.AppendLine($"Select {GroupByClause.GroupByColumns} ");
+            AppendFrom(result);
+            AppendSql(result, GetJoin());
+            AppendSql(result, GetWhere());
+            result.AppendLine(GetGroupBy());
+            result.Append(") As t");
+        }
+
+        #endregion
+
+        #region GetParams(获取参数)
+
+        /// <summary>
+        /// 获取参数
+        /// </summary>
+        /// <returns></returns>
+        public IDictionary<string, object> GetParams()
+        {
+            return ParameterManager.GetParams();
+        }
 
         #endregion
 
@@ -211,7 +367,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         protected virtual ISelectClause CreateSelectClause()
         {
-            return new SelectClause(GetDialect(), EntityResolver, AliasRegister);
+            return new SelectClause(this, GetDialect(), EntityResolver, AliasRegister);
         }
 
         /// <summary>
@@ -245,11 +401,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="columns">列名</param>
+        /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class
+        public virtual ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false) where TEntity : class
         {
-            SelectClause.Select(columns);
+            SelectClause.Select(columns, propertyAsAlias);
             return this;
         }
 
@@ -262,7 +419,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public virtual ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object>> column, string columnAlias = null) where TEntity : class
         {
-            SelectClause.Select(column,columnAlias);
+            SelectClause.Select(column, columnAlias);
             return this;
         }
 
@@ -274,6 +431,30 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public virtual ISqlBuilder AppendSelect(string sql)
         {
             SelectClause.AppendSql(sql);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendSelect(ISqlBuilder builder, string columnAlias)
+        {
+            SelectClause.AppendSql(builder, columnAlias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendSelect(Action<ISqlBuilder> action, string columnAlias)
+        {
+            SelectClause.AppendSql(action, columnAlias);
             return this;
         }
 
@@ -365,7 +546,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         protected virtual IJoinClause CreateJoinClause()
         {
-            return new JoinClause(GetDialect(),EntityResolver,AliasRegister);
+            return new JoinClause(this, GetDialect(), EntityResolver, AliasRegister);
         }
 
         /// <summary>
@@ -385,7 +566,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public virtual ISqlBuilder Join(string table, string alias = null)
         {
-            JoinClause.Join(table,alias);
+            JoinClause.Join(table, alias);
             return this;
         }
 
@@ -398,7 +579,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public virtual ISqlBuilder Join<TEntity>(string alias = null, string schema = null) where TEntity : class
         {
-            JoinClause.Join<TEntity>(alias,schema);
+            JoinClause.Join<TEntity>(alias, schema);
             return this;
         }
 
@@ -410,6 +591,30 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public virtual ISqlBuilder AppendJoin(string sql)
         {
             JoinClause.AppendJoin(sql);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendJoin(ISqlBuilder builder, string alias)
+        {
+            JoinClause.AppendJoin(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendJoin(Action<ISqlBuilder> action, string alias)
+        {
+            JoinClause.AppendJoin(action, alias);
             return this;
         }
 
@@ -450,6 +655,30 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendLeftJoin(ISqlBuilder builder, string alias)
+        {
+            JoinClause.AppendLeftJoin(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendLeftJoin(Action<ISqlBuilder> action, string alias)
+        {
+            JoinClause.AppendLeftJoin(action, alias);
+            return this;
+        }
+
+        /// <summary>
         /// 右外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -482,6 +711,30 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public virtual ISqlBuilder AppendRightJoin(string sql)
         {
             JoinClause.AppendRightJoin(sql);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendRightJoin(ISqlBuilder builder, string alias)
+        {
+            JoinClause.AppendRightJoin(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendRightJoin(Action<ISqlBuilder> action, string alias)
+        {
+            JoinClause.AppendRightJoin(action,alias);
             return this;
         }
 
@@ -536,6 +789,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         private IWhereClause _whereClause;
 
         /// <summary>
+        /// Where语句
+        /// </summary>
+        private string _where;
+
+        /// <summary>
         /// Where子句
         /// </summary>
         protected IWhereClause WhereClause => _whereClause ?? (_whereClause = CreateWhereClause());
@@ -564,16 +822,25 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public virtual string GetWhere()
         {
-            return WhereClause.ToSql();
+            if (string.IsNullOrWhiteSpace(_where) == false)
+            {
+                return _where;
+            }
+
+            var whereClause = WhereClause.Clone();
+            AddFilters(whereClause);
+            _where = whereClause.ToSql();
+            return _where;
         }
 
         /// <summary>
-        /// 获取参数
+        /// 添加过滤器列表
         /// </summary>
-        /// <returns></returns>
-        public IDictionary<string, object> GetParams()
+        /// <param name="whereClause">Where子句</param>
+        private void AddFilters(IWhereClause whereClause)
         {
-            return ParameterManager.GetParams();
+            var context = new SqlQueryContext(AliasRegister, whereClause);
+            SqlFilterCollection.Filters.ForEach(filter => filter.Filter(context));
         }
 
         /// <summary>
@@ -595,6 +862,30 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public ISqlBuilder Or(ICondition condition)
         {
             WhereClause.Or(condition);
+            return this;
+        }
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件</param>
+        /// <returns></returns>
+        public ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        {
+            WhereClause.Or(conditions);
+            return this;
+        }
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件，如果表达式中的值为空，泽忽略该查询条件</param>
+        /// <returns></returns>
+        public ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        {
+            WhereClause.OrIfNotEmpty(conditions);
             return this;
         }
 
@@ -1065,6 +1356,31 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        public ISqlBuilder NotIn(string column, IEnumerable<object> values)
+        {
+            WhereClause.NotIn(column, values);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        public ISqlBuilder NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class
+        {
+            WhereClause.NotIn(expression, values);
+            return this;
+        }
+
+        /// <summary>
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
@@ -1282,7 +1598,19 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public ISqlBuilder GroupBy(string @group, string having = null)
         {
-            GroupByClause.GroupBy(group,having);
+            GroupByClause.GroupBy(group, having);
+            return this;
+        }
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="columns">分组字段</param>
+        /// <returns></returns>
+        public ISqlBuilder GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns)
+        {
+            GroupByClause.GroupBy(columns);
             return this;
         }
 
@@ -1330,7 +1658,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         protected virtual IOrderByClause CreateOrderByClause()
         {
-            return new OrderByClause(GetDialect(),EntityResolver,AliasRegister);
+            return new OrderByClause(GetDialect(), EntityResolver, AliasRegister);
         }
 
         /// <summary>
@@ -1345,11 +1673,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 排序
         /// </summary>
-        /// <param name="order">排序列表</param>
+        /// <param name="order">排序列表，范例：a.Id, b.Name desc</param>
+        /// <param name="tableAlias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder OrderBy(string order)
+        public virtual ISqlBuilder OrderBy(string order, string tableAlias = null)
         {
-            OrderByClause.OrderBy(order);
+            OrderByClause.OrderBy(order, tableAlias);
             return this;
         }
 
@@ -1393,6 +1722,48 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         protected IPager GetPager()
         {
             return _pager;
+        }
+
+        /// <summary>
+        /// 分页跳过行数参数名
+        /// </summary>
+        private string _skipCountParam;
+
+        /// <summary>
+        /// 获取分页跳过行数的参数
+        /// </summary>
+        /// <returns></returns>
+        protected string GetSkipCountParam()
+        {
+            if (string.IsNullOrWhiteSpace(_skipCountParam) == false)
+            {
+                return _skipCountParam;
+            }
+
+            _skipCountParam = ParameterManager.GenerateName();
+            ParameterManager.Add(_skipCountParam, GetPager().GetSkipCount());
+            return _skipCountParam;
+        }
+
+        /// <summary>
+        /// 分页大小参数名
+        /// </summary>
+        private string _pageSizeParam;
+
+        /// <summary>
+        /// 获取分页大小的额参数
+        /// </summary>
+        /// <returns></returns>
+        protected string GetPageSizeParam()
+        {
+            if (string.IsNullOrWhiteSpace(_pageSizeParam) == false)
+            {
+                return _pageSizeParam;
+            }
+
+            _pageSizeParam = ParameterManager.GenerateName();
+            ParameterManager.Add(_pageSizeParam, GetPager().PageSize);
+            return _pageSizeParam;
         }
 
         /// <summary>

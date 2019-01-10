@@ -40,6 +40,16 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         private string _having;
 
         /// <summary>
+        /// 是否存在分组
+        /// </summary>
+        public bool IsGroupBy => _group.Count > 0;
+
+        /// <summary>
+        /// 分组列表
+        /// </summary>
+        public string GroupByColumns => _group.Select(t => t.ToSql(_dialect)).Join();
+
+        /// <summary>
         /// 初始化一个<see cref="GroupByClause"/>类型的实例
         /// </summary>
         /// <param name="dialect">Sql方言</param>
@@ -56,16 +66,34 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 分组
         /// </summary>
-        /// <param name="groupBy">分组字段</param>
+        /// <param name="columns">分组字段</param>
         /// <param name="having">分组条件</param>
-        public void GroupBy(string groupBy, string having = null)
+        public void GroupBy(string columns, string having = null)
         {
-            if (string.IsNullOrWhiteSpace(groupBy))
+            if (string.IsNullOrWhiteSpace(columns))
             {
                 return;
             }
-            _group.AddRange(groupBy.Split(',').Select(item=>new SqlItem(item)));
+            _group.AddRange(columns.Split(',').Select(item=>new SqlItem(item)));
             _having = having;
+        }
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="columns">分组字段</param>
+        public void GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns)
+        {
+            if (columns == null)
+            {
+                return;
+            }
+
+            foreach (var column in columns)
+            {
+                GroupBy(column);
+            }
         }
 
         /// <summary>
@@ -80,7 +108,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             {
                 return;
             }
-            _group.Add(new SqlItem(_resolver.GetColumn(column),_register.GetAlias(typeof(TEntity))));
+
+            _group.Add(new SqlItem(_resolver.GetColumn(column), _register.GetAlias(typeof(TEntity))));
             _having = having;
         }
 
@@ -107,8 +136,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             {
                 return null;
             }
-            var result=new StringBuilder();
-            result.Append($"Group By {_group.Select(t => t.ToSql(_dialect)).Join()}");
+
+            var result = new StringBuilder();
+            result.Append($"Group By {GroupByColumns}");
             if (string.IsNullOrWhiteSpace(_having))
             {
                 return result.ToString();

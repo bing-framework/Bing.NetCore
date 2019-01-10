@@ -1,4 +1,4 @@
-﻿namespace Bing.Datas.Configs
+﻿namespace Bing.Datas.Enums
 {
     /// <summary>
     /// 数据库类型

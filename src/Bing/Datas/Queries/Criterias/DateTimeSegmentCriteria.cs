@@ -32,5 +32,21 @@ namespace Bing.Datas.Queries.Criterias
         {
             return min > max;
         }
+
+        /// <summary>
+        /// 获取最小值表达式
+        /// </summary>
+        protected override Expression GetMinValueExpression()
+        {
+            return ValueExpressionHelper.CreateDateTimeExpression(GetMinValue(), GetPropertyType());
+        }
+
+        /// <summary>
+        /// 获取最大值表达式
+        /// </summary>
+        protected override Expression GetMaxValueExpression()
+        {
+            return ValueExpressionHelper.CreateDateTimeExpression(GetMaxValue(), GetPropertyType());
+        }
     }
 }

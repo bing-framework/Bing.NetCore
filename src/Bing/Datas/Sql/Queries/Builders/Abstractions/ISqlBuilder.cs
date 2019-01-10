@@ -37,6 +37,18 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         string ToSql();
 
         /// <summary>
+        /// 生成获取行数调试Sql语句
+        /// </summary>
+        /// <returns></returns>
+        string ToCountDebugSql();
+
+        /// <summary>
+        /// 生成获取行数Sql语句
+        /// </summary>
+        /// <returns></returns>
+        string ToCountSql();
+
+        /// <summary>
         /// 获取参数列表
         /// </summary>
         /// <returns></returns>
@@ -91,8 +103,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>
-        ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class;
+        ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false)
+            where TEntity : class;
 
         /// <summary>
         /// 设置列名
@@ -110,6 +124,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendSelect(string sql);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendSelect(ISqlBuilder builder, string columnAlias);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendSelect(Action<ISqlBuilder> action, string columnAlias);
 
         /// <summary>
         /// 设置表名
@@ -160,6 +190,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         ISqlBuilder AppendJoin(string sql);
 
         /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendJoin(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendJoin(Action<ISqlBuilder> action, string alias);
+
+        /// <summary>
         /// 左外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -184,6 +230,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         ISqlBuilder AppendLeftJoin(string sql);
 
         /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendLeftJoin(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendLeftJoin(Action<ISqlBuilder> action, string alias);
+
+        /// <summary>
         /// 右外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -206,6 +268,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlBuilder AppendRightJoin(string sql);
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendRightJoin(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlBuilder AppendRightJoin(Action<ISqlBuilder> action, string alias);
 
         /// <summary>
         /// 设置连接条件
@@ -251,6 +329,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="condition">查询条件</param>
         /// <returns></returns>
         ISqlBuilder Or(ICondition condition);
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件</param>
+        /// <returns></returns>
+        ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件，如果表达式中的值为空，泽忽略该查询条件</param>
+        /// <returns></returns>
+        ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
 
         /// <summary>
         /// 设置查询条件
@@ -584,6 +678,23 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         ISqlBuilder In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class;
 
         /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        ISqlBuilder NotIn(string column, IEnumerable<object> values);
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
+        /// <param name="values">值集合</param>
+        /// <returns></returns>
+        ISqlBuilder NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class;
+
+        /// <summary>
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
@@ -720,10 +831,18 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 分组
         /// </summary>
-        /// <param name="group">分组字段，范例：a.Id,b.Name</param>
+        /// <param name="columns">分组字段，范例：a.Id,b.Name</param>
         /// <param name="having">分组条件，范例：Count(*) > 1</param>
         /// <returns></returns>
-        ISqlBuilder GroupBy(string group, string having = null);
+        ISqlBuilder GroupBy(string columns, string having = null);
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="columns">分组字段</param>
+        /// <returns></returns>
+        ISqlBuilder GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns);
 
         /// <summary>
         /// 分组
@@ -746,8 +865,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 排序
         /// </summary>
         /// <param name="order">排序列表，范例：a.Id, b.Name desc</param>
+        /// <param name="tableAlias">表别名</param>
         /// <returns></returns>
-        ISqlBuilder OrderBy(string order);
+        ISqlBuilder OrderBy(string order, string tableAlias = null);
 
         /// <summary>
         /// 排序

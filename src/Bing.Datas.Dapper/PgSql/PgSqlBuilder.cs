@@ -32,13 +32,13 @@ namespace Bing.Datas.Dapper.PgSql
         /// <param name="result">Sql拼接</param>
         protected override void CreatePagerSql(StringBuilder result)
         {
-            AppendSql(result, GetSelect());
-            AppendSql(result, GetFrom());
+            AppendSelect(result);
+            AppendFrom(result);
             AppendSql(result, GetJoin());
             AppendSql(result, GetWhere());
             AppendSql(result, GetGroupBy());
             AppendSql(result, GetOrderBy());
-            result.Append($"Limit {GetPager().PageSize} OFFSET {GetPager().GetSkipCount()}");
+            result.Append($"Limit {GetPageSizeParam()} OFFSET {GetSkipCountParam()}");
         }
 
         /// <summary>
@@ -48,6 +48,15 @@ namespace Bing.Datas.Dapper.PgSql
         protected override IDialect GetDialect()
         {
             return new PgSqlDialect();
+        }
+
+        /// <summary>
+        /// 获取参数字面值解析器
+        /// </summary>
+        /// <returns></returns>
+        protected override IParamLiteralsResolver GetParamLiteralsResolver()
+        {
+            return new PgSqlParamLiteralsResolver();
         }
     }
 }

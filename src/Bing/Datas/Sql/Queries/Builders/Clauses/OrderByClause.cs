@@ -4,6 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
+using Bing.Domains.Repositories;
+using Bing.Properties;
 using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Sql.Queries.Builders.Clauses
@@ -41,23 +43,61 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="register">实体别名注册器</param>
         public OrderByClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
         {
+            _items = new List<OrderByItem>();
             _dialect = dialect;
             _resolver = resolver;
             _register = register;
-            _items=new List<OrderByItem>();
         }
 
         /// <summary>
         /// 排序
         /// </summary>
         /// <param name="order">排序列表</param>
-        public void OrderBy(string order)
+        /// <param name="tableAlias">表别名</param>
+        public void OrderBy(string order, string tableAlias = null)
         {
             if (string.IsNullOrWhiteSpace(order))
             {
                 return;
             }
-            _items.AddRange(order.Split(',').Select(column => new OrderByItem(column)));
+
+            order.Split(',').ToList().ForEach(column => AddItem(column, tableAlias: tableAlias));
+        }
+
+        /// <summary>
+        /// 添加排序项
+        /// </summary>
+        /// <param name="column">排序列</param>
+        /// <param name="desc">是否倒序</param>
+        /// <param name="type">实体类型</param>
+        /// <param name="tableAlias">表别名</param>
+        protected void AddItem(string column, bool desc = false, Type type = null, string tableAlias = null)
+        {
+            if (column.IsEmpty())
+            {
+                return;
+            }
+
+            if (Exists(column, tableAlias))
+            {
+                return;
+            }
+
+            _items.Add(new OrderByItem(column, desc, type, prefix: tableAlias));
+        }
+
+        /// <summary>
+        /// 是否已存在
+        /// </summary>
+        /// <param name="column">排序列</param>
+        /// <param name="tableAlias">表别名</param>
+        /// <returns></returns>
+        protected bool Exists(string column, string tableAlias)
+        {
+            var item = new OrderByItem(column, prefix: tableAlias);
+            return _items.Exists(t =>
+                t.Column.ToLower() == item.Column.ToLower() &&
+                (item.Prefix.IsEmpty() || t.Prefix?.ToLower() == item.Prefix?.ToLower()));
         }
 
         /// <summary>
@@ -72,7 +112,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             {
                 return;
             }
-            _items.Add(new OrderByItem(_resolver.GetColumn(column), desc, typeof(TEntity)));
+
+            AddItem(_resolver.GetColumn(column), desc, typeof(TEntity));
         }
 
         /// <summary>
@@ -82,6 +123,23 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void AppendSql(string order)
         {
             _items.Add(new OrderByItem(order, raw: true));
+        }
+
+        /// <summary>
+        /// 验证
+        /// </summary>
+        /// <param name="pager">分页</param>
+        public void Validate(IPager pager)
+        {
+            if (pager == null)
+            {
+                return;
+            }
+
+            if (_items.Count == 0)
+            {
+                throw new ArgumentException(LibraryResource.OrderIsEmptyForPage);
+            }
         }
 
         /// <summary>

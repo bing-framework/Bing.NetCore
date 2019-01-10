@@ -15,7 +15,7 @@ namespace Bing.Datas.Persistence
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
-    public abstract class TreePersistentObjectBase<TKey,TParentId>:PersistentObjectBase<TKey>,IParentId<TParentId>,IPath,IEnabled,ISortId
+    public abstract class TreePersistentObjectBase<TKey, TParentId> : PersistentObjectBase<TKey>, IParentId<TParentId>, IPath, IEnabled, ISortId
     {
         /// <summary>
         /// 父标识

@@ -32,13 +32,13 @@ namespace Bing.Datas.Dapper.MySql
         /// <param name="result">Sql拼接</param>
         protected override void CreatePagerSql(StringBuilder result)
         {
-            AppendSql(result, GetSelect());
-            AppendSql(result, GetFrom());
+            AppendSelect(result);
+            AppendFrom(result);
             AppendSql(result, GetJoin());
             AppendSql(result, GetWhere());
             AppendSql(result, GetGroupBy());
             AppendSql(result, GetOrderBy());
-            result.Append($"Limit {GetPager().GetSkipCount()}, {GetPager().PageSize}");
+            result.Append($"Limit {GetSkipCountParam()}, {GetPageSizeParam()}");
         }
 
         /// <summary>
@@ -48,6 +48,24 @@ namespace Bing.Datas.Dapper.MySql
         protected override IDialect GetDialect()
         {
             return new MySqlDialect();
+        }
+
+        /// <summary>
+        /// 创建From子句
+        /// </summary>
+        /// <returns></returns>
+        protected override IFromClause CreateFromClause()
+        {
+            return new MySqlFromClause(GetDialect(), EntityResolver, AliasRegister);
+        }
+
+        /// <summary>
+        /// 创建Join子句
+        /// </summary>
+        /// <returns></returns>
+        protected override IJoinClause CreateJoinClause()
+        {
+            return new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister);
         }
     }
 }

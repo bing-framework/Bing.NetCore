@@ -51,6 +51,16 @@ namespace Bing.Utils
         /// 模糊匹配
         /// </summary>
         [Description("模糊匹配")]
-        Contains
+        Contains,
+        /// <summary>
+        /// In
+        /// </summary>
+        [Description("In")]
+        In,
+        /// <summary>
+        /// Not In
+        /// </summary>
+        [Description("Not In")]
+        NotIn,
     }
 }

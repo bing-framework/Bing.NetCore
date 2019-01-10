@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Logs;
@@ -21,7 +20,7 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <summary>
         /// EF跟踪日志名
         /// </summary>
-        public const string TRACE_LOG_NAME = "EfTraceLog";
+        public const string TraceLogName = "EfTraceLog";
 
         /// <summary>
         /// 日志操作
@@ -39,16 +38,23 @@ namespace Bing.Datas.EntityFramework.Logs
         private readonly string _category;
 
         /// <summary>
+        /// 数据配置
+        /// </summary>
+        private readonly DataConfig _config;
+
+        /// <summary>
         /// 初始化一个<see cref="EfLog"/>类型的实例
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="unitOfWork">工作单元</param>
         /// <param name="category">日志分类</param>
-        public EfLog(ILog log, UnitOfWorkBase unitOfWork, string category)
+        /// <param name="config">数据配置</param>
+        public EfLog(ILog log, UnitOfWorkBase unitOfWork, string category, DataConfig config)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
-            _unitOfWork=unitOfWork?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _category = category;
+            _config = config;
         }
 
         /// <summary>
@@ -82,12 +88,12 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <returns></returns>
         private bool IsEnabled(EventId eventId)
         {
-            if (DataConfig.LogLevel == DataLogLevel.Off)
+            if (_config.LogLevel == DataLogLevel.Off)
             {
                 return false;
             }
 
-            if (DataConfig.LogLevel == DataLogLevel.All)
+            if (_config.LogLevel == DataLogLevel.All)
             {
                 return true;
             }
@@ -107,7 +113,7 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <param name="state"></param>
         private void AddContent<TState>(TState state)
         {
-            if (DataConfig.LogLevel == DataLogLevel.All)
+            if (_config.LogLevel == DataLogLevel.All)
             {
                 _log.Content("事件内容：").Content(state.SafeString());
             }
@@ -116,7 +122,8 @@ namespace Bing.Datas.EntityFramework.Logs
             {
                 return;
             }
-            var dictionary=new Dictionary<string,string>();
+
+            var dictionary = new Dictionary<string, string>();
             foreach (KeyValuePair<string,object> item in list)
             {
                 dictionary.Add(item.Key,item.Value.SafeString());
@@ -132,7 +139,7 @@ namespace Bing.Datas.EntityFramework.Logs
         {
             AddElapsed(GetValue(dictionary,"elapsed"));
             var sqlParams = GetValue(dictionary, "parameters");
-            AddSql(GetValue(dictionary,"commandText"),sqlParams);
+            AddSql(GetValue(dictionary, "commandText"));
             AddSqlParams(sqlParams);
         }
 
@@ -170,17 +177,14 @@ namespace Bing.Datas.EntityFramework.Logs
         /// 添加Sql
         /// </summary>
         /// <param name="sql">Sql语句</param>
-        /// <param name="sqlParams">Sql参数</param>
-        private void AddSql(string sql, string sqlParams)
+        private void AddSql(string sql)
         {
             if (string.IsNullOrWhiteSpace(sql))
             {
                 return;
             }
 
-            _log.Sql("原始Sql：").Sql($"{sql}{Common.Line}");
-            sql = sql.Replace("SET NOCOUNT ON;", "");
-            _log.Sql($"调试Sql：{Common.Line}{GetSql(sql, sqlParams)}{Common.Line}");
+            _log.Sql($"{sql}{Common.Line}");
         }
 
         /// <summary>
@@ -213,94 +217,6 @@ namespace Bing.Datas.EntityFramework.Logs
         public IDisposable BeginScope<TState>(TState state)
         {
             return null;
-        }
-
-        /// <summary>
-        /// 获取Sql
-        /// </summary>
-        /// <param name="sql">Sql语句</param>
-        /// <param name="sqlParams">Sql参数</param>
-        /// <returns></returns>
-        public static string GetSql(string sql, string sqlParams)
-        {
-            var parameters = GetSqlParameters(sqlParams);
-            foreach (var parameter in parameters)
-            {
-                sql = Bing.Utils.Helpers.Regexs.Replace(sql, $@"{parameter.Key}\b", parameter.Value);
-            }
-
-            return sql;
-        }
-
-        /// <summary>
-        /// 获取Sql参数字典
-        /// </summary>
-        /// <param name="sqlParams">Sql参数</param>
-        /// <returns></returns>
-        public static IDictionary<string, string> GetSqlParameters(string sqlParams)
-        {
-            var result=new Dictionary<string,string>();
-            var paramName = GetParamName(sqlParams);
-            if (string.IsNullOrWhiteSpace(paramName))
-            {
-                return result;
-            }
-            string pattern= $@",\s*?{paramName}";
-            var parameters = Bing.Utils.Helpers.Regexs.Split(sqlParams, pattern);
-            foreach (var parameter in parameters)
-            {
-                AddParameter(result,parameter,paramName);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// 获取参数名
-        /// </summary>
-        /// <param name="sqlParams">sql参数信息</param>
-        /// <returns></returns>
-        private static string GetParamName(string sqlParams)
-        {
-            string pattern = $@"([@].*?)\d+=";
-            return Bing.Utils.Helpers.Regexs.GetValue(sqlParams, pattern, "$1");
-        }
-
-        /// <summary>
-        /// 添加参数
-        /// </summary>
-        /// <param name="result">结果</param>
-        /// <param name="parameter">参数信息</param>
-        /// <param name="paramName">参数名</param>
-        private static void AddParameter(Dictionary<string, string> result, string parameter, string paramName)
-        {
-            string pattern = $@"(?:{paramName})?(\d+)='(.*)'(.*)";
-            var values = Bing.Utils.Helpers.Regexs.GetValues(parameter, pattern, new[] {"$1", "$2", "$3"})
-                .Select(t => t.Value).ToList();
-            if (values.Count != 3)
-            {
-                return;
-            }
-
-            result.Add($"{paramName}{values[0]}", GetValue(values[1], values[2]));
-        }
-
-        /// <summary>
-        /// 获取值
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="parameter">参数</param>
-        /// <returns></returns>
-        private static string GetValue(string value, string parameter)
-        {
-            value = value.SafeString();
-            parameter = parameter.SafeString();
-            if (string.IsNullOrWhiteSpace(value) && parameter.Contains("DbType = Guid"))
-            {
-                return "null";
-            }
-
-            return $"'{value}'";
-        }
+        }                
     }
 }

@@ -97,6 +97,28 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         }
 
         /// <summary>
+        /// 获取值
+        /// </summary>
+        /// <param name="expression">表达式</param>
+        /// <returns></returns>
+        public object GetValue(Expression expression)
+        {
+            var result = Lambda.GetValue(expression);
+            if (result == null)
+            {
+                return null;
+            }
+
+            var type = result.GetType();
+            if (type.IsEnum)
+            {
+                return Bing.Utils.Helpers.Enum.GetValue(type, result);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// 创建查询条件并添加参数
         /// </summary>
         /// <param name="expression">列名</param>
@@ -104,7 +126,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         public ICondition CreateCondition(Expression expression, Type type)
         {
-            return CreateCondition(GetColumn(expression, type), Lambda.GetValue(expression),
+            return CreateCondition(GetColumn(expression, type), GetValue(expression),
                 Lambda.GetOperator(expression).SafeValue());
         }
 
@@ -122,13 +144,55 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
                 throw new ArgumentNullException(nameof(column));
             }
             column = GetColumn(column);
-            if (@operator == Operator.Contains && value != null && Reflection.IsCollection(value.GetType()))
+            if (IsInCondition(@operator, value))
             {
                 return CreateInCondition(column, value as IEnumerable);
             }
+
+            if (IsNotInCondition(@operator, value))
+            {
+                return CreateInCondition(column, value as IEnumerable, true);
+            }            
             var paramName = GenerateParamName(value, @operator);
             _parameterManager.Add(paramName, value, @operator);
             return SqlConditionFactory.Create(column, paramName, @operator);
+        }
+
+        /// <summary>
+        /// 是否In条件
+        /// </summary>
+        /// <param name="operator">运算符</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        private bool IsInCondition(Operator @operator, object value)
+        {
+            if (@operator == Operator.In)
+            {
+                return true;
+            }
+
+            if (@operator == Operator.Contains && value != null && Reflection.IsCollection(value.GetType()))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 是否Not In条件
+        /// </summary>
+        /// <param name="operator">运算符</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        private bool IsNotInCondition(Operator @operator, object value)
+        {
+            if (@operator == Operator.In)
+            {
+                return true;
+            }            
+
+            return false;
         }
 
         /// <summary>
@@ -136,20 +200,28 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// </summary>
         /// <param name="column">列名</param>
         /// <param name="values">值列表</param>
+        /// <param name="notIn">是否Not In条件</param>
         /// <returns></returns>
-        private ICondition CreateInCondition(string column, IEnumerable values)
+        private ICondition CreateInCondition(string column, IEnumerable values, bool notIn = false)
         {
             if (values == null)
             {
                 return NullCondition.Instance;
             }
+
             var paramNames = new List<string>();
             foreach (var value in values)
             {
                 var name = _parameterManager.GenerateName();
                 paramNames.Add(name);
-                _parameterManager.Add(name,value);
+                _parameterManager.Add(name, value);
             }
+
+            if (notIn)
+            {
+                return new NotInCondition(column, paramNames);
+            }
+
             return new InCondition(column, paramNames);
         }
 

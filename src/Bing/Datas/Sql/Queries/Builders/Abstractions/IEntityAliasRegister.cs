@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Bing.Datas.Sql.Queries.Builders.Abstractions
 {
@@ -7,6 +8,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
     /// </summary>
     public interface IEntityAliasRegister
     {
+        /// <summary>
+        /// 实体别名
+        /// </summary>
+        Dictionary<Type,string> Data { get; }
+
         /// <summary>
         /// 注册实体别名
         /// </summary>

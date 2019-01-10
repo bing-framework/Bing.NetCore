@@ -18,6 +18,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
     public class JoinClause:IJoinClause
     {
         /// <summary>
+        /// Sql生成器
+        /// </summary>
+        private readonly ISqlBuilder _sqlBuilder;
+
+        /// <summary>
         /// Join关键字
         /// </summary>
         private const string JoinKey = "Join";
@@ -55,12 +60,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 初始化一个<see cref="JoinClause"/>类型的实例
         /// </summary>
+        /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
-        public JoinClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
+        public JoinClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
+            IEntityAliasRegister register)
         {
-            _params=new List<JoinItem>();
+            _params = new List<JoinItem>();
+            _sqlBuilder = sqlBuilder;
             _dialect = dialect;
             _resolver = resolver;
             _register = register;
@@ -84,7 +92,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="alias">别名</param>
         private void Join(string joinType, string table, string alias)
         {
-            _params.Add(new JoinItem(joinType, table, alias: alias));
+            _params.Add(CreateJoinItem(joinType, table, null, alias));
+        }
+
+        /// <summary>
+        /// 创建连接项
+        /// </summary>
+        /// <param name="joinType">连接类型</param>
+        /// <param name="table">表名</param>
+        /// <param name="schema">架构名</param>
+        /// <param name="alias">别名</param>
+        /// <returns></returns>
+        protected virtual JoinItem CreateJoinItem(string joinType, string table, string schema, string alias)
+        {
+            return new JoinItem(joinType, table, schema, alias);
         }
 
         /// <summary>
@@ -109,7 +130,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         {
             var entity = typeof(TEntity);
             var table = _resolver.GetTableAndSchema(entity);
-            _params.Add(new JoinItem(joinType, table, schema, alias));
+            _params.Add(CreateJoinItem(joinType, table, schema, alias));
             _register.Register(entity, _resolver.GetAlias(entity, alias));
         }
 
@@ -130,6 +151,55 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         private void AppendJoin(string joinType, string sql)
         {
             _params.Add(new JoinItem(joinType, sql, raw: true));
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        public void AppendJoin(ISqlBuilder builder, string alias)
+        {
+            AppendJoin(JoinKey, builder, alias);
+        }
+
+        /// <summary>
+        /// 添加到连接子句
+        /// </summary>
+        /// <param name="joinType">连接类型</param>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        private void AppendJoin(string joinType, ISqlBuilder builder, string alias)
+        {
+            AppendJoin(joinType, $"({builder.ToSql()}) As {_dialect.SafeName(alias)}");
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        public void AppendJoin(Action<ISqlBuilder> action, string alias)
+        {
+            AppendJoin(JoinKey, action, alias);
+        }
+
+        /// <summary>
+        /// 添加到连接子句
+        /// </summary>
+        /// <param name="joinType">连接类型</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        private void AppendJoin(string joinType, Action<ISqlBuilder> action, string alias)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var builder = _sqlBuilder.New();
+            action(builder);
+            AppendJoin(joinType, builder, alias);
         }
 
         /// <summary>
@@ -163,6 +233,26 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        public void AppendLeftJoin(ISqlBuilder builder, string alias)
+        {
+            AppendJoin(LeftJoinKey, builder, alias);
+        }
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        public void AppendLeftJoin(Action<ISqlBuilder> action, string alias)
+        {
+            AppendJoin(LeftJoinKey, action, alias);
+        }
+
+        /// <summary>
         /// 右外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -190,6 +280,26 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void AppendRightJoin(string sql)
         {
             AppendJoin(RightJoinKey,sql);
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        public void AppendRightJoin(ISqlBuilder builder, string alias)
+        {
+            AppendJoin(RightJoinKey, builder, alias);
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        public void AppendRightJoin(Action<ISqlBuilder> action, string alias)
+        {
+            AppendJoin(RightJoinKey, action, alias);
         }
 
         /// <summary>

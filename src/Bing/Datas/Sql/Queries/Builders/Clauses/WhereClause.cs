@@ -17,11 +17,26 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
     /// Where子句
     /// </summary>
     public class WhereClause:IWhereClause
-    {        
+    {
+        /// <summary>
+        /// 方言
+        /// </summary>
+        private readonly IDialect _dialect;
+
         /// <summary>
         /// 实体解析器
         /// </summary>
         private readonly IEntityResolver _resolver;
+
+        /// <summary>
+        /// 实体别名注册器
+        /// </summary>
+        private readonly IEntityAliasRegister _register;
+
+        /// <summary>
+        /// 参数管理器
+        /// </summary>
+        private readonly IParameterManager _parameterManager;
 
         /// <summary>
         /// 辅助操作
@@ -45,10 +60,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
+        /// <param name="condition">查询条件</param>
         public WhereClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-            IParameterManager parameterManager)
+            IParameterManager parameterManager, ICondition condition = null)
         {
+            _dialect = dialect;
             _resolver = resolver;
+            _register = register;
+            _parameterManager = parameterManager;
+            _condition = condition;
             _helper = new Helper(dialect, resolver, register, parameterManager);
             _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager);
         }
@@ -69,6 +89,72 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void Or(ICondition condition)
         {
             _condition = new OrCondition(_condition, condition);
+        }
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件</param>
+        public void Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        {
+            if (conditions == null)
+            {
+                return;
+            }
+
+            foreach (var condition in conditions)
+            {
+                if (condition == null)
+                {
+                    continue;
+                }
+
+                var predicate = _expressionResolver.Resolve(condition);
+                if (predicate == null)
+                {
+                    continue;
+                }
+                Or(predicate);
+            }
+        }
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="conditions">查询条件</param>
+        public void OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        {
+            if (conditions == null)
+            {
+                return;
+            }
+
+            foreach (var condition in conditions)
+            {
+                if (condition == null)
+                {
+                    continue;
+                }
+
+                if (Lambda.GetConditionCount(condition) > 1)
+                {
+                    throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, condition));
+                }
+
+                if (string.IsNullOrWhiteSpace(Lambda.GetValue(condition).SafeString()))
+                {
+                    continue;
+                }
+
+                var predicate = _expressionResolver.Resolve(condition);
+                if (predicate == null)
+                {
+                    continue;
+                }
+                Or(predicate);
+            }
         }
 
         /// <summary>
@@ -320,7 +406,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="values">值集合</param>
         public void In(string column, IEnumerable<object> values)
         {
-            Where(column,values,Operator.Contains);
+            Where(column, values, Operator.In);
         }
 
         /// <summary>
@@ -332,7 +418,38 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
             where TEntity : class
         {
-            Where(expression,values,Operator.Contains);
+            Where(expression, values, Operator.In);
+        }
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        public void NotIn(string column, IEnumerable<object> values)
+        {
+            Where(column, values, Operator.NotIn);
+        }
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class
+        {
+            Where(expression, values, Operator.NotIn);
+        }
+
+        /// <summary>
+        /// 复制Where子句
+        /// </summary>
+        /// <returns></returns>
+        public IWhereClause Clone()
+        {
+            return new WhereClause(_dialect, _resolver, _register, _parameterManager,
+                new SqlCondition(_condition?.GetCondition()));
         }
 
         /// <summary>
@@ -528,7 +645,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <returns></returns>
         private DateTime? GetMin(DateTime? min, DateTime? max, bool includeTime)
         {
-            if (min == null && max == null)
+            if (min == null)
             {
                 return null;
             }
@@ -541,7 +658,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             {
                 return result;
             }
-            return result.SafeValue().Date.AddDays(1);
+            return result.SafeValue().Date;
         }
 
         /// <summary>
@@ -553,7 +670,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <returns></returns>
         private DateTime? GetMax(DateTime? min, DateTime? max, bool includeTime)
         {
-            if (min == null && max == null)
+            if (max == null)
             {
                 return null;
             }

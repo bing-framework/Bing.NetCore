@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Matedatas;
@@ -58,13 +59,38 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="columns">列名表达式</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>
-        public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns)
+        public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias)
         {
             var names = Lambda.GetLastNames(columns);
-            return _matedata == null
-                ? names.Join()
-                : names.Select(name => _matedata.GetColumn(typeof(TEntity), name)).Join();
+            if (_matedata == null)
+            {
+                return names.Join();
+            }
+
+            return GetColumns<TEntity>(names, propertyAsAlias);
+        }
+
+        /// <summary>
+        /// 获取列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="names">列名集合</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+        /// <returns></returns>
+        private string GetColumns<TEntity>(List<string> names, bool propertyAsAlias)
+        {
+            if (propertyAsAlias == false)
+            {
+                return names.Select(name => _matedata.GetColumn(typeof(TEntity), name)).Join();
+            }
+
+            return names.Select(name =>
+            {
+                var column = _matedata.GetColumn(typeof(TEntity), name);
+                return column == name ? column : $"{column} As {name}";
+            }).Join();
         }
 
         /// <summary>
@@ -75,12 +101,144 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public string GetColumn<TEntity>(Expression<Func<TEntity, object>> column)
         {
-            var name = Lambda.GetLastName(column);
-            return _matedata == null
-                ? name
-                : _matedata.GetColumn(typeof(TEntity), name);
+            return GetExpressColumn<TEntity>(column);
         }
 
+
+        /// <summary>
+        /// 获取表达式列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        private string GetExpressColumn<TEntity>(Expression expression)
+        {
+            if (expression == null)
+            {
+                return null;
+            }
+
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Lambda:
+                    return GetExpressColumn<TEntity>(((LambdaExpression) expression).Body);
+                case ExpressionType.Convert:
+                case ExpressionType.MemberAccess:
+                    return GetSingleColumn<TEntity>(expression);
+                case ExpressionType.ListInit:
+                    var isDictionary = typeof(Dictionary<object, string>).GetGenericTypeDefinition()
+                        .IsAssignableFrom(expression.Type.GetGenericTypeDefinition());
+                    return isDictionary ? GetDictionaryColumns<TEntity>((ListInitExpression) expression) : null;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 获取单列
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <returns></returns>
+        private string GetSingleColumn<TEntity>(Expression expression)
+        {
+            var name = Lambda.GetLastName(expression);
+            if (_matedata == null)
+            {
+                return name;
+            }
+
+            return _matedata.GetColumn(typeof(TEntity), name);
+        }
+
+        /// <summary>
+        /// 获取字典多列
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列表表达式</param>
+        /// <returns></returns>
+        private string GetDictionaryColumns<TEntity>(ListInitExpression expression)
+        {
+            var dictionary = GetDictionaryByListInitExpression(expression);
+            return _matedata == null ? GetColumns(dictionary) : GetColumnsByMatedata<TEntity>(dictionary);
+        }
+
+        /// <summary>
+        /// 获取字典
+        /// </summary>
+        /// <param name="expression">列表表达式</param>
+        /// <returns></returns>
+        private IDictionary<object, string> GetDictionaryByListInitExpression(ListInitExpression expression)
+        {
+            var result = new Dictionary<object, string>();
+            foreach (var elementInit in expression.Initializers)
+            {
+                var keyValue = GetKeyValue(elementInit.Arguments);
+                if (keyValue == null)
+                {
+                    continue;
+                }
+
+                var item = keyValue.SafeValue();
+                result.Add(item.Key, item.Value);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 获取键值对
+        /// </summary>
+        /// <param name="arguments">参数表达式</param>
+        /// <returns></returns>
+        private KeyValuePair<object, string>? GetKeyValue(IEnumerable<Expression> arguments)
+        {
+            if (arguments == null)
+            {
+                return null;
+            }
+
+            var list = arguments.ToList();
+            if (list.Count < 2)
+            {
+                return null;
+            }
+
+            return new KeyValuePair<object, string>(Lambda.GetName(list[0]), Lambda.GetValue(list[1]).SafeString());
+        }
+
+        /// <summary>
+        /// 通过元数据解析创建列
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        private string GetColumnsByMatedata<TEntity>(IDictionary<object, string> dictionary)
+        {
+            string result = null;
+            foreach (var item in dictionary)
+            {
+                result += $"{_matedata.GetColumn(typeof(TEntity), item.Key.SafeString())} As {item.Value},";
+            }
+
+            return result?.TrimEnd(',');
+        }
+
+        /// <summary>
+        /// 通过字典创建列
+        /// </summary>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        private string GetColumns(IDictionary<object, string> dictionary)
+        {
+            string result = null;
+            foreach (var item in dictionary)
+            {
+                result += $"{item.Key} As {item.Value},";
+            }
+
+            return result?.TrimEnd(',');
+        }
+        
         /// <summary>
         /// 获取列名
         /// </summary>

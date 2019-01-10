@@ -32,13 +32,13 @@ namespace Bing.Datas.Dapper.SqlServer
         /// <param name="result">Sql拼接</param>
         protected override void CreatePagerSql(StringBuilder result)
         {
-            AppendSql(result,GetSelect());
-            AppendSql(result,GetFrom());
+            AppendSelect(result);
+            AppendFrom(result);
             AppendSql(result,GetJoin());
             AppendSql(result,GetWhere());
             AppendSql(result, GetGroupBy());
             AppendSql(result,GetOrderBy());
-            result.Append($"Offset {GetPager().GetSkipCount()} Rows Fetch Next {GetPager().PageSize} Rows Only");
+            result.Append($"Offset {GetSkipCountParam()} Rows Fetch Next {GetPageSizeParam()} Rows Only");
         }
 
         /// <summary>

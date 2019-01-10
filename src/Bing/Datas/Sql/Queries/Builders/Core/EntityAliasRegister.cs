@@ -10,17 +10,17 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
     public class EntityAliasRegister:IEntityAliasRegister
     {
         /// <summary>
-        /// 实体别名字典
-        /// </summary>
-        private readonly IDictionary<Type, string> _data;
-
-        /// <summary>
         /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
         /// </summary>
         public EntityAliasRegister()
         {
-            _data = new Dictionary<Type, string>();
+            Data = new Dictionary<Type, string>();
         }
+
+        /// <summary>
+        /// 实体别名
+        /// </summary>
+        public Dictionary<Type, string> Data { get; }
 
         /// <summary>
         /// 注册实体别名
@@ -29,11 +29,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="alias">别名</param>
         public void Register(Type entity, string alias)
         {
-            if (_data.ContainsKey(entity))
+            if (Data.ContainsKey(entity))
             {
-                _data.Remove(entity);
+                Data.Remove(entity);
             }
-            _data[entity] = alias;
+            Data[entity] = alias;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public bool Contains(Type entity)
         {
-            return entity != null && _data.ContainsKey(entity);
+            return entity != null && Data.ContainsKey(entity);
         }
 
         /// <summary>
@@ -57,7 +57,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             {
                 return null;
             }
-            return _data.ContainsKey(entity) ? _data[entity] : null;
+
+            return Data.ContainsKey(entity) ? Data[entity] : null;
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
-using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Sql.Queries.Builders.Clauses
 {
@@ -13,6 +11,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
     /// </summary>
     public class SelectClause:ISelectClause
     {
+        /// <summary>
+        /// Sql生成器
+        /// </summary>
+        private readonly ISqlBuilder _sqlBuilder;
+
         /// <summary>
         /// Sql方言
         /// </summary>
@@ -36,12 +39,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 初始化一个<see cref="SelectClause"/>类型的实例
         /// </summary>
+        /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
-        public SelectClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
+        public SelectClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
+            IEntityAliasRegister register)
         {
             _columns = new List<ColumnCollection>();
+            _sqlBuilder = sqlBuilder;
             _dialect = dialect;
             _resolver = resolver;
             _register = register;
@@ -65,30 +71,38 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="columns">列名</param>
-        public void Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class
+        /// <param name="expression">列名表达式</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+        public void Select<TEntity>(Expression<Func<TEntity, object[]>> expression, bool propertyAsAlias = false) where TEntity : class
         {
-            if (columns == null)
+            if (expression == null)
             {
                 return;
             }
-            _columns.Add(new ColumnCollection(_resolver.GetColumns(columns), table: typeof(TEntity)));
+
+            _columns.Add(new ColumnCollection(_resolver.GetColumns(expression, propertyAsAlias), table: typeof(TEntity)));
         }
 
         /// <summary>
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="column">列名</param>
+        /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Select<TEntity>(Expression<Func<TEntity, object>> column, string columnAlias = null) where TEntity : class
+        public void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
         {
-            if (column == null)
+            if (expression == null)
             {
                 return;
             }
-            _columns.Add(
-                new ColumnCollection($"{_resolver.GetColumn(column)} As {columnAlias}", table: typeof(TEntity)));
+
+            var column = _resolver.GetColumn(expression);
+            if (column.Contains("As") == false && string.IsNullOrWhiteSpace(columnAlias) == false)
+            {
+                column += $" As {columnAlias}";
+            }
+
+            _columns.Add(new ColumnCollection(column, table: typeof(TEntity)));
         }
 
         /// <summary>
@@ -97,7 +111,49 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="sql">Sql语句</param>
         public void AppendSql(string sql)
         {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return;
+            }
             _columns.Add(new ColumnCollection(sql, raw: true));
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        public void AppendSql(ISqlBuilder builder, string columnAlias)
+        {
+            if (builder == null)
+            {
+                return;
+            }
+
+            var result = builder.ToSql();
+            if (string.IsNullOrWhiteSpace(columnAlias) == false)
+            {
+                result = $"({result}) As {_dialect.SafeName(columnAlias)}";
+            }
+
+            AppendSql(result);
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        public void AppendSql(Action<ISqlBuilder> action, string columnAlias)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var builder = _sqlBuilder.New();
+            action(builder);
+            AppendSql(builder, columnAlias);
         }
 
         /// <summary>
@@ -115,7 +171,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <returns></returns>
         protected virtual string GetColumns()
         {
-            return _columns.Count == 0 ? "*" : _columns.Select(item => item.ToSql(_dialect, _register)).Join();
+            if (_columns.Count == 0)
+            {
+                return "*";
+            }
+
+            var result = string.Empty;
+            foreach (var item in _columns)
+            {
+                result += item.ToSql(_dialect, _register);
+                if (item.Raw == false)
+                {
+                    result += ",";
+                }
+            }
+
+            return result.TrimEnd(',');
         }
     }
 }

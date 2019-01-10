@@ -1,8 +1,10 @@
-﻿using Bing.Datas.Configs;
+﻿using System;
+using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Datas.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Datas.EntityFramework.SqlServer
@@ -18,20 +20,52 @@ namespace Bing.Datas.EntityFramework.SqlServer
         /// <typeparam name="TService">工作单元接口类型</typeparam>
         /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
         /// <param name="services">服务集合</param>
-        /// <param name="connection">连接字符串</param>
-        /// <param name="level">EF日志级别</param>
+        /// <param name="connection">连接字符串你</param>
+        /// <param name="level">日志级别</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlServerUnitOfWork<TService, TImplementation>(
-            this IServiceCollection services,
-            string connection, DataLogLevel level = DataLogLevel.Sql)
+            this IServiceCollection services, string connection, DataLogLevel level = DataLogLevel.Sql)
             where TService : class, IUnitOfWork
             where TImplementation : UnitOfWorkBase, TService
         {
-            DataConfig.LogLevel = level;
-            return services.AddUnitOfWork<TService, TImplementation>(builder =>
-            {
-                builder.UseSqlServer(connection);
-            });
+            return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlServer(connection); },
+                config => config.LogLevel = level);
+        }
+
+        /// <summary>
+        /// 注册SqlServer工作单元服务
+        /// </summary>
+        /// <typeparam name="TService">工作单元接口类型</typeparam>
+        /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
+        /// <param name="services">服务集合</param>
+        /// <param name="connection">连接字符串你</param>
+        /// <param name="dataConfigAction">数据配置操作</param>
+        /// <returns></returns>
+        public static IServiceCollection AddSqlServerUnitOfWork<TService, TImplementation>(
+            this IServiceCollection services, string connection, Action<DataConfig> dataConfigAction)
+            where TService : class, IUnitOfWork
+            where TImplementation : UnitOfWorkBase, TService
+        {
+            return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlServer(connection); },
+                dataConfigAction);
+        }
+
+        /// <summary>
+        /// 注册SqlServer工作单元服务
+        /// </summary>
+        /// <typeparam name="TService">工作单元接口类型</typeparam>
+        /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
+        /// <param name="services">服务集合</param>
+        /// <param name="connection">连接字符串你</param>
+        /// <param name="configuration">配置</param>
+        /// <returns></returns>
+        public static IServiceCollection AddSqlServerUnitOfWork<TService, TImplementation>(
+            this IServiceCollection services, string connection, IConfiguration configuration)
+            where TService : class, IUnitOfWork
+            where TImplementation : UnitOfWorkBase, TService
+        {
+            return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlServer(connection); }, null,
+                configuration);
         }
     }
 }

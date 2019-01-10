@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
+using Bing.Datas.Sql.Queries.Configs;
 using Bing.Domains.Repositories;
 using Bing.Utils;
 
@@ -15,6 +16,12 @@ namespace Bing.Datas.Sql.Queries
     /// </summary>
     public interface ISqlQuery
     {
+        /// <summary>
+        /// 配置
+        /// </summary>
+        /// <param name="configAction">配置操作</param>
+        void Config(Action<SqlQueryConfig> configAction);
+
         /// <summary>
         /// 清空并初始化，用于多次执行不同Sql语句，当执行完一个Sql语句后，清空即可继续使用
         /// </summary>
@@ -31,6 +38,48 @@ namespace Bing.Datas.Sql.Queries
         /// </summary>
         /// <returns></returns>
         ISqlBuilder NewBuilder();
+
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <typeparam name="TResult">实体类型</typeparam>
+        /// <param name="func">查询操作</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        TResult Query<TResult>(Func<IDbConnection, string, IDictionary<string, object>, TResult> func,
+            IDbConnection connection = null);
+
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <typeparam name="TResult">实体类型</typeparam>
+        /// <param name="func">查询操作</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IDictionary<string, object>, Task<TResult>> func,
+            IDbConnection connection = null);
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="func">获取列表操作</param>
+        /// <param name="parameter">分页参数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter,
+            IDbConnection connection = null);
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="func">获取列表操作</param>
+        /// <param name="parameter">分页参数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter,
+            IDbConnection connection = null);
 
         /// <summary>
         /// 获取字符串
@@ -157,8 +206,10 @@ namespace Bing.Datas.Sql.Queries
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>
-        ISqlQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class;
+        ISqlQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false)
+            where TEntity : class;
 
         /// <summary>
         /// 设置列名
@@ -176,6 +227,22 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlQuery AppendSelect(string sql);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendSelect(ISqlBuilder builder, string columnAlias);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendSelect(Action<ISqlBuilder> action, string columnAlias);
 
         /// <summary>
         /// 设置表名
@@ -226,6 +293,22 @@ namespace Bing.Datas.Sql.Queries
         ISqlQuery AppendJoin(string sql);
 
         /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendJoin(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendJoin(Action<ISqlBuilder> action, string alias);
+
+        /// <summary>
         /// 左外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -250,6 +333,22 @@ namespace Bing.Datas.Sql.Queries
         ISqlQuery AppendLeftJoin(string sql);
 
         /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendLeftJoin(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendLeftJoin(Action<ISqlBuilder> action, string alias);
+
+        /// <summary>
         /// 右外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -272,6 +371,22 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
         /// <returns></returns>
         ISqlQuery AppendRightJoin(string sql);
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendRightJoin(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        ISqlQuery AppendRightJoin(Action<ISqlBuilder> action, string alias);
 
         /// <summary>
         /// 设置连接条件
@@ -317,6 +432,18 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="condition">查询条件</param>
         /// <returns></returns>
         ISqlQuery Or(ICondition condition);
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <param name="conditions">查询条件</param>
+        ISqlQuery Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <param name="conditions">查询条件,如果表达式中的值为空，则忽略该查询条件</param>
+        ISqlQuery OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
 
         /// <summary>
         /// 设置查询条件
@@ -650,6 +777,20 @@ namespace Bing.Datas.Sql.Queries
         ISqlQuery In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class;
 
         /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        ISqlQuery NotIn(string column, IEnumerable<object> values);
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        ISqlQuery NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class;
+
+        /// <summary>
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
@@ -786,10 +927,17 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 分组
         /// </summary>
-        /// <param name="group">分组字段，范例：a.Id,b.Name</param>
+        /// <param name="columns">分组字段，范例：a.Id,b.Name</param>
         /// <param name="having">分组条件，范例：Count(*) > 1</param>
         /// <returns></returns>
-        ISqlQuery GroupBy(string group, string having = null);
+        ISqlQuery GroupBy(string columns, string having = null);
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="columns">分组字段</param>
+        ISqlQuery GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns);
 
         /// <summary>
         /// 分组
@@ -812,8 +960,9 @@ namespace Bing.Datas.Sql.Queries
         /// 排序
         /// </summary>
         /// <param name="order">排序列表，范例：a.Id, b.Name desc</param>
+        /// <param name="tableAlias">表别名</param>
         /// <returns></returns>
-        ISqlQuery OrderBy(string order);
+        ISqlQuery OrderBy(string order, string tableAlias = null);
 
         /// <summary>
         /// 排序

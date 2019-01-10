@@ -12,6 +12,21 @@ namespace Bing.Utils.Helpers
     /// </summary>
     public static class Lambda
     {
+        #region GetType(获取类型)
+
+        /// <summary>
+        /// 获取类型
+        /// </summary>
+        /// <param name="expression">表达式，范例：t => t.Name</param>
+        /// <returns></returns>
+        public static Type GetType(Expression expression)
+        {
+            var memberExpression = GetMemberExpression(expression);
+            return memberExpression?.Type;
+        }
+
+        #endregion
+
         #region GetMember(获取成员)
         /// <summary>
         /// 获取成员
@@ -547,21 +562,38 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region Constant(获取常量表达式)
+
         /// <summary>
         /// 获取常量表达式
         /// </summary>
-        /// <param name="expression">表达式</param>
         /// <param name="value">值</param>
+        /// <param name="expression">表达式</param>
         /// <returns></returns>
-        public static ConstantExpression Constant(Expression expression, object value)
+        public static ConstantExpression Constant(object value, Expression expression = null)
         {
-            var memberExpression = expression as MemberExpression;
-            if (memberExpression == null)
+            var type = GetType(expression);
+            if (type == null)
             {
                 return Expression.Constant(value);
             }
-            return Expression.Constant(value, memberExpression.Type);
+
+            return Expression.Constant(value, type);
         }
+
+        #endregion
+
+        #region CreateParameter(创建参数表达式)
+
+        /// <summary>
+        /// 创建参数表达式
+        /// </summary>
+        /// <typeparam name="T">参数类型</typeparam>
+        /// <returns></returns>
+        public static ParameterExpression CreateParameter<T>()
+        {
+            return Expression.Parameter(typeof(T), "t");
+        }
+
         #endregion
 
         #region Equal(等于表达式)
@@ -579,18 +611,9 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .Equal(value)
-                .ToLambda<Func<T, bool>>();
+                .ToPredicate<T>(parameter);
         }
 
-        /// <summary>
-        /// 创建参数
-        /// </summary>
-        /// <typeparam name="T">实体类型</typeparam>
-        /// <returns></returns>
-        private static ParameterExpression CreateParameter<T>()
-        {
-            return Expression.Parameter(typeof(T), "t");
-        }
         #endregion
 
         #region NotEqual(不等于表达式)
@@ -608,7 +631,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .NotEqual(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -628,7 +651,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .Greater(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -648,7 +671,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .GreaterEqual(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -668,7 +691,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .Less(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -688,7 +711,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .LessEqual(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -708,7 +731,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .StartsWith(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -728,7 +751,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .EndsWith(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -748,7 +771,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .Contains(value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion
@@ -769,7 +792,7 @@ namespace Bing.Utils.Helpers
             return parameter
                 .Property(propertyName)
                 .Operation(@operator, value)
-                .ToLambda<Func<T, bool>>(parameter);
+                .ToPredicate<T>(parameter);
         }
 
         #endregion

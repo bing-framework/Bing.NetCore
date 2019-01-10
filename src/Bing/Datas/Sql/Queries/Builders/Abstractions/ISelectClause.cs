@@ -19,22 +19,38 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="columns">列名</param>
-        void Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class;
+        /// <param name="expression">列名表达式</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+        void Select<TEntity>(Expression<Func<TEntity, object[]>> expression, bool propertyAsAlias = false)
+            where TEntity : class;
 
         /// <summary>
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="column">列名</param>
+        /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        void Select<TEntity>(Expression<Func<TEntity, object>> column, string columnAlias = null) where TEntity : class;
+        void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class;
 
         /// <summary>
         /// 添加到Select子句
         /// </summary>
         /// <param name="sql">Sql语句</param>
         void AppendSql(string sql);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        void AppendSql(ISqlBuilder builder, string columnAlias);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        void AppendSql(Action<ISqlBuilder> action, string columnAlias);
 
         /// <summary>
         /// 输出Sql

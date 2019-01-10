@@ -88,11 +88,29 @@ namespace Bing.Properties {
         }
         
         /// <summary>
+        ///   查找类似 分页必须设置排序字段 的本地化字符串。
+        /// </summary>
+        internal static string OrderIsEmptyForPage {
+            get {
+                return ResourceManager.GetString("OrderIsEmptyForPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 必须设置表名 的本地化字符串。
         /// </summary>
         internal static string TableIsEmpty {
             get {
                 return ResourceManager.GetString("TableIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 必须设置表名 的本地化字符串。
+        /// </summary>
+        internal static string TableIsEmpty1 {
+            get {
+                return ResourceManager.GetString("TableIsEmpty1", resourceCulture);
             }
         }
     }

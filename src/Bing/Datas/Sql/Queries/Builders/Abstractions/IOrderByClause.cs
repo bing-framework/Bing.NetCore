@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Bing.Domains.Repositories;
 
 namespace Bing.Datas.Sql.Queries.Builders.Abstractions
 {
@@ -12,7 +13,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 排序
         /// </summary>
         /// <param name="order">排序列表</param>
-        void OrderBy(string order);
+        /// <param name="tableAlias">表别名</param>
+        void OrderBy(string order, string tableAlias = null);
 
         /// <summary>
         /// 排序
@@ -27,6 +29,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <param name="order">排序列表</param>
         void AppendSql(string order);
+
+        /// <summary>
+        /// 验证
+        /// </summary>
+        /// <param name="pager">分页</param>
+        void Validate(IPager pager);
 
         /// <summary>
         /// 获取Sql

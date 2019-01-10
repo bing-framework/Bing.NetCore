@@ -1,8 +1,9 @@
 ﻿using System;
-using AspectCore.Extensions.DependencyInjection;
+using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -20,17 +21,28 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
         /// <param name="services">服务集合</param>
         /// <param name="configAction">配置操作</param>
+        /// <param name="dataConfigAction">数据配置操作</param>
+        /// <param name="configuration">配置</param>
         /// <returns></returns>
         public static IServiceCollection AddUnitOfWork<TService, TImplementation>(this IServiceCollection services,
-            Action<DbContextOptionsBuilder> configAction) 
+            Action<DbContextOptionsBuilder> configAction, Action<DataConfig> dataConfigAction = null,
+            IConfiguration configuration = null)
             where TService : class, IUnitOfWork
             where TImplementation : UnitOfWorkBase, TService
         {
-            services.AddDynamicProxy(config =>
-            {
-                config.NonAspectPredicates.Add(t => t.DeclaringType?.BaseType == typeof(DbContext));
-            });
             services.AddDbContext<TImplementation>(configAction);
+            var dataConfig = new DataConfig();
+            if (dataConfigAction != null)
+            {
+                services.Configure(dataConfigAction);
+                dataConfigAction.Invoke(dataConfig);
+            }
+
+            if (configuration != null)
+            {
+                services.Configure<DataConfig>(configuration);
+            }
+
             services.TryAddScoped<TService>(t => t.GetService<TImplementation>());
             return services;
         }

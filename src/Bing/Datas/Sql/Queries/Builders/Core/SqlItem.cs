@@ -63,7 +63,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="prefix">前缀</param>
         /// <param name="alias">别名</param>
         /// <param name="raw">是否使用原始值</param>
-        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false)
+        /// <param name="isSplit">是否用句点分割名称</param>
+        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false,bool isSplit=true)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -78,14 +79,16 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
                 Name = name;
                 return;
             }
-            Resolve(name);
+
+            Resolve(name, isSplit);
         }
 
         /// <summary>
         /// 设置别名，返回前缀和名称
         /// </summary>
         /// <param name="name">名称</param>
-        private void Resolve(string name)
+        /// <param name="isSplit">是否用句点分割名称</param>
+        private void Resolve(string name, bool isSplit)
         {
             var pattern = @"\s+[aA][sS]\s+";
             var list = Regexs.Split(name, pattern);
@@ -98,20 +101,28 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             {
                 Alias = list[1];
             }
-            SetName(list[0]);
+
+            if (isSplit)
+            {
+                SplitName(list[0]);
+                return;
+            }
+
+            Name = name;
         }
 
         /// <summary>
-        /// 设置名称
+        /// 分割名称
         /// </summary>
         /// <param name="name">名称</param>
-        private void SetName(string name)
+        private void SplitName(string name)
         {
-            var result=new NameItem(name);
+            var result = new NameItem(name);
             if (string.IsNullOrWhiteSpace(result.Prefix) == false)
             {
                 Prefix = result.Prefix;
             }
+
             if (string.IsNullOrWhiteSpace(result.Name) == false)
             {
                 Name = result.Name;

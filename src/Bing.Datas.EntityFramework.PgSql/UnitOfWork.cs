@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Data.Common;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.UnitOfWorks;
+using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -16,26 +17,6 @@ namespace Bing.Datas.EntityFramework.PgSql
         /// <summary>
         /// 初始化一个<see cref="UnitOfWork"/>类型的实例
         /// </summary>
-        /// <param name="connection">连接字符串</param>
-        /// <param name="manager">工作单元管理器</param>
-        protected UnitOfWork(string connection, IUnitOfWorkManager manager = null) : base(
-            new DbContextOptionsBuilder().UseNpgsql(connection).Options, manager)
-        {
-        }
-
-        /// <summary>
-        /// 初始化一个<see cref="UnitOfWork"/>类型的实例
-        /// </summary>
-        /// <param name="connection">连接</param>
-        /// <param name="manager">工作单元管理器</param>
-        protected UnitOfWork(DbConnection connection, IUnitOfWorkManager manager = null) : base(
-            new DbContextOptionsBuilder().UseNpgsql(connection).Options, manager)
-        {
-        }
-
-        /// <summary>
-        /// 初始化一个<see cref="UnitOfWork"/>类型的实例
-        /// </summary>
         /// <param name="options">配置</param>
         /// <param name="manager">工作单元管理器</param>
         protected UnitOfWork(DbContextOptions options, IUnitOfWorkManager manager) : base(options, manager)
@@ -43,13 +24,22 @@ namespace Bing.Datas.EntityFramework.PgSql
         }
 
         /// <summary>
-        /// 获取映射类型列表
+        /// 获取映射接口类型
+        /// </summary>
+        /// <returns></returns>
+        protected override Type GetMapType()
+        {
+            return typeof(IMap);
+        }
+
+        /// <summary>
+        /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
         /// <returns></returns>
-        protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapTypes(Assembly assembly)
+        protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Bing.Utils.Helpers.Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Reflection.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

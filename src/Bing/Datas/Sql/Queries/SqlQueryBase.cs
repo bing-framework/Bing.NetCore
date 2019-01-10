@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
-using Bing.Datas.Sql.Queries.Builders.Conditions;
+using Bing.Datas.Sql.Queries.Configs;
 using Bing.Domains.Repositories;
+using Bing.Helpers;
 using Bing.Utils;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using Microsoft.Extensions.Options;
 
 namespace Bing.Datas.Sql.Queries
 {
@@ -23,6 +24,11 @@ namespace Bing.Datas.Sql.Queries
         /// 数据库
         /// </summary>
         private readonly IDatabase _database;
+
+        /// <summary>
+        /// Sql查询配置
+        /// </summary>
+        protected SqlQueryConfig SqlQueryConfig { get; set; }
 
         /// <summary>
         /// Sql生成器
@@ -46,11 +52,55 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
+        /// 配置
+        /// </summary>
+        /// <param name="configAction">配置操作</param>
+        public void Config(Action<SqlQueryConfig> configAction)
+        {
+            SqlQueryConfig = new SqlQueryConfig();
+            configAction?.Invoke(SqlQueryConfig);
+        }
+
+        /// <summary>
         /// 清空并初始化
         /// </summary>
         public void Clear()
         {
             Builder.Clear();
+        }
+
+        /// <summary>
+        /// 在执行之后清空Sql和参数
+        /// </summary>
+        protected void ClearAfterExecution()
+        {
+            if (SqlQueryConfig == null)
+            {
+                SqlQueryConfig = GetConfig();
+            }
+
+            if (SqlQueryConfig.IsClearAfterExecution == false)
+            {
+                return;
+            }
+            Clear();
+        }
+
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        /// <returns></returns>
+        private SqlQueryConfig GetConfig()
+        {
+            try
+            {
+                var options = Ioc.Create<IOptionsSnapshot<SqlQueryConfig>>();
+                return options.Value;
+            }
+            catch
+            {
+                return new SqlQueryConfig();
+            }
         }
 
         /// <summary>
@@ -81,85 +131,18 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 获取字符串
+        /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public string ToString(IDbConnection connection = null)
-        {
-            return ToScalar(connection, GetSql(), Params).SafeString();
-        }
-
-        /// <summary>
-        /// 获取字符串
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        public async Task<string> ToStringAsync(IDbConnection connection = null)
-        {
-            var result = await ToScalarAsync(connection, GetSql(), Params);
-            return result.SafeString();
-        }
-
-        /// <summary>
-        /// 获取整型
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        public int ToInt(IDbConnection connection = null)
-        {
-            return Conv.ToInt(ToScalar(connection, GetSql(), Params));
-        }
-
-        /// <summary>
-        /// 获取整型
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        public async Task<int> ToIntAsync(IDbConnection connection = null)
-        {
-            return Conv.ToInt(await ToScalarAsync(connection, GetSql(), Params));
-        }
-
-        /// <summary>
-        /// 获取可空整型
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        public int? ToIntOrNull(IDbConnection connection = null)
-        {
-            return Conv.ToIntOrNull(ToScalar(connection, GetSql(), Params));
-        }
-
-        /// <summary>
-        /// 获取可空整型
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        public async Task<int?> ToIntOrNullAsync(IDbConnection connection = null)
-        {
-            return Conv.ToIntOrNull(await ToScalarAsync(connection, GetSql(), Params));
-        }
+        protected abstract object ToScalar(IDbConnection connection);
 
         /// <summary>
         /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
-        /// <param name="sql">Sql语句</param>
-        /// <param name="parameters">参数</param>
         /// <returns></returns>
-        protected abstract object ToScalar(IDbConnection connection, string sql,
-            IDictionary<string, object> parameters);
-
-        /// <summary>
-        /// 获取单值
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <param name="sql">Sql语句</param>
-        /// <param name="parameters">参数</param>
-        /// <returns></returns>
-        protected abstract Task<object> ToScalarAsync(IDbConnection connection, string sql,
-            IDictionary<string, object> parameters);
+        protected abstract Task<object> ToScalarAsync(IDbConnection connection);
 
         /// <summary>
         /// 获取单个实体
@@ -222,6 +205,28 @@ namespace Bing.Datas.Sql.Queries
         public abstract PagerList<TResult> ToPagerList<TResult>(int page, int pageSize, IDbConnection connection = null);
 
         /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="func">获取列表操作</param>
+        /// <param name="parameter">分页参数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public abstract PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter,
+            IDbConnection connection = null);
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="func">获取列表操作</param>
+        /// <param name="parameter">分页参数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public abstract Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func,
+            IPager parameter, IDbConnection connection = null);
+
+        /// <summary>
         /// 获取分页列表
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
@@ -230,6 +235,99 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
         public abstract Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);
+
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <typeparam name="TResult">实体类型</typeparam>
+        /// <param name="func">查询操作</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public TResult Query<TResult>(Func<IDbConnection, string, IDictionary<string, object>, TResult> func, IDbConnection connection = null)
+        {
+            var sql = GetSql();
+            WriteTraceLog(sql, Params, GetDebugSql());
+            var result = func(GetConnection(connection), sql, Params);
+            ClearAfterExecution();
+            return result;
+        }
+
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <typeparam name="TResult">实体类型</typeparam>
+        /// <param name="func">查询操作</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public async Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IDictionary<string, object>, Task<TResult>> func, IDbConnection connection = null)
+        {
+            var sql = GetSql();
+            WriteTraceLog(sql, Params, GetDebugSql());
+            var result = await func(GetConnection(connection), sql, Params);
+            ClearAfterExecution();
+            return result;
+        }
+
+        /// <summary>
+        /// 获取字符串
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public string ToString(IDbConnection connection = null)
+        {
+            return ToScalar(connection).SafeString();
+        }
+
+        /// <summary>
+        /// 获取字符串
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public async Task<string> ToStringAsync(IDbConnection connection = null)
+        {
+            var result = await ToScalarAsync(connection);
+            return result.SafeString();
+        }
+
+        /// <summary>
+        /// 获取整型
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public int ToInt(IDbConnection connection = null)
+        {
+            return Conv.ToInt(ToScalar(connection));
+        }
+
+        /// <summary>
+        /// 获取整型
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public async Task<int> ToIntAsync(IDbConnection connection = null)
+        {
+            return Conv.ToInt(await ToScalarAsync(connection));
+        }
+
+        /// <summary>
+        /// 获取可空整型
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public int? ToIntOrNull(IDbConnection connection = null)
+        {
+            return Conv.ToIntOrNull(ToScalar(connection));
+        }
+
+        /// <summary>
+        /// 获取可空整型
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public async Task<int?> ToIntOrNullAsync(IDbConnection connection = null)
+        {
+            return Conv.ToIntOrNull(await ToScalarAsync(connection));
+        }
 
         /// <summary>
         /// 获取数据库连接
@@ -266,11 +364,12 @@ namespace Bing.Datas.Sql.Queries
         /// 设置列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="columns">列名，范例：t => new object[] { t.A, t.B }</param>
+        /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>
-        public ISqlQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns) where TEntity : class
+        public ISqlQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false) where TEntity : class
         {
-            Builder.Select(columns);
+            Builder.Select(columns, propertyAsAlias);
             return this;
         }
 
@@ -295,6 +394,30 @@ namespace Bing.Datas.Sql.Queries
         public ISqlQuery AppendSelect(string sql)
         {
             Builder.AppendSelect(sql);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendSelect(ISqlBuilder builder, string columnAlias)
+        {
+            Builder.AppendSelect(builder, columnAlias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendSelect(Action<ISqlBuilder> action, string columnAlias)
+        {
+            Builder.AppendSelect(action, columnAlias);
             return this;
         }
 
@@ -371,6 +494,30 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendJoin(ISqlBuilder builder, string alias)
+        {
+            Builder.AppendJoin(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendJoin(Action<ISqlBuilder> action, string alias)
+        {
+            Builder.AppendJoin(action, alias);
+            return this;
+        }
+
+        /// <summary>
         /// 左外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -407,6 +554,30 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendLeftJoin(ISqlBuilder builder, string alias)
+        {
+            Builder.AppendLeftJoin(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendLeftJoin(Action<ISqlBuilder> action, string alias)
+        {
+            Builder.AppendLeftJoin(action, alias);
+            return this;
+        }
+
+        /// <summary>
         /// 右外连接
         /// </summary>
         /// <param name="table">表名</param>
@@ -439,6 +610,30 @@ namespace Bing.Datas.Sql.Queries
         public ISqlQuery AppendRightJoin(string sql)
         {
             Builder.AppendRightJoin(sql);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendRightJoin(ISqlBuilder builder, string alias)
+        {
+            Builder.AppendRightJoin(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public ISqlQuery AppendRightJoin(Action<ISqlBuilder> action, string alias)
+        {
+            Builder.AppendRightJoin(action, alias);
             return this;
         }
 
@@ -502,6 +697,26 @@ namespace Bing.Datas.Sql.Queries
         public ISqlQuery Or(ICondition condition)
         {
             Builder.Or(condition);
+            return this;
+        }
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <param name="conditions">查询条件</param>
+        public ISqlQuery Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        {
+            Builder.Or(conditions);
+            return this;
+        }
+
+        /// <summary>
+        /// Or连接条件
+        /// </summary>
+        /// <param name="conditions">查询条件,如果表达式中的值为空，则忽略该查询条件</param>
+        public ISqlQuery OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        {
+            Builder.OrIfNotEmpty(conditions);
             return this;
         }
 
@@ -990,6 +1205,28 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="values">值集合</param>
+        public ISqlQuery NotIn(string column, IEnumerable<object> values)
+        {
+            Builder.NotIn(column, values);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置Not In条件
+        /// </summary>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="values">值集合</param>
+        public ISqlQuery NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class
+        {
+            Builder.NotIn(expression, values);
+            return this;
+        }
+
+        /// <summary>
         /// 设置范围查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
@@ -1169,12 +1406,23 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 分组
         /// </summary>
-        /// <param name="group">分组字段，范例：a.Id,b.Name</param>
+        /// <param name="columns">分组字段，范例：a.Id,b.Name</param>
         /// <param name="having">分组条件，范例：Count(*) > 1</param>
         /// <returns></returns>
-        public ISqlQuery GroupBy(string @group, string having = null)
+        public ISqlQuery GroupBy(string columns, string having = null)
         {
-            Builder.GroupBy(group, having);
+            Builder.GroupBy(columns, having);
+            return this;
+        }
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="columns">分组字段</param>
+        public ISqlQuery GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns)
+        {
+            Builder.GroupBy(columns);
             return this;
         }
 
@@ -1205,11 +1453,12 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 排序
         /// </summary>
-        /// <param name="order">排序列表</param>
+        /// <param name="order">排序列表，范例：a.Id, b.Name desc</param>
+        /// <param name="tableAlias">表别名</param>
         /// <returns></returns>
-        public ISqlQuery OrderBy(string order)
+        public ISqlQuery OrderBy(string order, string tableAlias = null)
         {
-            Builder.OrderBy(order);
+            Builder.OrderBy(order, tableAlias);
             return this;
         }
 
@@ -1238,58 +1487,11 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 获取行数
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        protected virtual int GetCount(IDbConnection connection)
-        {
-            return Conv.ToInt(ToScalar(connection, GetCountSql(), Params));
-        }
-
-        /// <summary>
-        /// 获取行数
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        protected virtual async Task<int> GetCountAsync(IDbConnection connection)
-        {
-            return Conv.ToInt(await ToScalarAsync(connection, GetCountSql(), Params));
-        }
-
-        /// <summary>
-        /// 获取行数Sql
-        /// </summary>
-        /// <returns></returns>
-        protected virtual string GetCountSql()
-        {
-            var result = new StringBuilder();
-            result.AppendLine("Select Count(*) ");
-            AppendSql(result,Builder.GetFrom());
-            AppendSql(result, Builder.GetJoin());
-            AppendSql(result,Builder.GetWhere());
-            return result.ToString().Trim();
-        }
-
-        /// <summary>
-        /// 添加Sql
-        /// </summary>
-        /// <param name="result">Sql拼接</param>
-        /// <param name="sql">Sql语句</param>
-        protected void AppendSql(StringBuilder result, string sql)
-        {
-            if (string.IsNullOrWhiteSpace(sql))
-            {
-                return;
-            }
-            result.AppendLine($"{sql} ");
-        }
-
-        /// <summary>
         /// 写日志
         /// </summary>
         /// <param name="sql">Sql语句</param>
         /// <param name="parameters">参数</param>
-        protected abstract void WriteTraceLog(string sql, IDictionary<string, object> parameters);
+        /// <param name="debugSql">调试Sql语句</param>
+        protected abstract void WriteTraceLog(string sql, IDictionary<string, object> parameters, string debugSql);
     }
 }
