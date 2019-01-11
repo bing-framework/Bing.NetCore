@@ -186,6 +186,24 @@ namespace Bing.Biz.Payments.Wechatpay.Results
         }
 
         /// <summary>
+        /// 获取二维码链接
+        /// </summary>
+        /// <returns></returns>
+        public string GetCodeUrl()
+        {
+            return GetParam("code_url");
+        }
+
+        /// <summary>
+        /// 获取支付跳转链接
+        /// </summary>
+        /// <returns></returns>
+        public string GetMWebUrl()
+        {
+            return GetParam("mweb_url");
+        }
+
+        /// <summary>
         /// 获取交易类型
         /// </summary>
         /// <returns></returns>

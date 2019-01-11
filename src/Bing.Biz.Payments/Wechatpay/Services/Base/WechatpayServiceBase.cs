@@ -122,9 +122,18 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
             }
 
             return await Web.Client()
-                .Post(config.GetOrderUrl())
+                .Post(string.IsNullOrWhiteSpace(GetOrderUrl()) ? config.GetOrderUrl() : GetOrderUrl())
                 .XmlData(builder.ToXml())
                 .ResultAsync();
+        }
+
+        /// <summary>
+        /// 获取统一下单地址
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetOrderUrl()
+        {
+            return string.Empty;
         }
 
         /// <summary>

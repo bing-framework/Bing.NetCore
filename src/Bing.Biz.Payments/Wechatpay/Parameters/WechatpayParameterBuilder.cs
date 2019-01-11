@@ -247,6 +247,17 @@ namespace Bing.Biz.Payments.Wechatpay.Parameters
         }
 
         /// <summary>
+        /// 设置用户授权码
+        /// </summary>
+        /// <param name="code">用户授权码</param>
+        /// <returns></returns>
+        public WechatpayParameterBuilder AuthCode(string code)
+        {
+            _builder.Add(WechatpayConst.AuthCode, code);
+            return this;
+        }
+
+        /// <summary>
         /// 获取Xml结果，包含签名
         /// </summary>
         /// <returns></returns>

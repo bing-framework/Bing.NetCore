@@ -109,5 +109,10 @@
         /// 用户标识
         /// </summary>
         public const string OpenId = "openid";
+
+        /// <summary>
+        /// 用户授权码
+        /// </summary>
+        public const string AuthCode = "auth_code";
     }
 }

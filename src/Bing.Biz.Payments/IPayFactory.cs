@@ -75,5 +75,29 @@ namespace Bing.Biz.Payments
         /// </summary>
         /// <returns></returns>
         IWechatpayMiniProgramPayService CreateWechatpayMiniProgramPayService();
+
+        /// <summary>
+        /// 创建微信电脑网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        IWechatpayPagePayService CreateWechatpayPagePayService();
+
+        /// <summary>
+        /// 创建微信手机网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        IWechatpayWapPayService CreateWechatpayWapPayService();
+
+        /// <summary>
+        /// 创建微信公众号支付服务
+        /// </summary>
+        /// <returns></returns>
+        IWechatpayPublicPayService CreateWechatpayPublicPayService();
+
+        /// <summary>
+        /// 创建微信条码支付服务
+        /// </summary>
+        /// <returns></returns>
+        IWechatpayBarcodePayService CreateWechatpayBarcodePayService();
     }
 }

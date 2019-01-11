@@ -59,6 +59,14 @@ namespace Bing.Biz.Payments.Factories
                     return new WechatpayAppPayService(_wechatpayConfigProvider);
                 case PayWay.WechatpayMiniProgramPay:
                     return new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
+                case PayWay.WechatpayPagePay:
+                    return new WechatpayPagePayService(_wechatpayConfigProvider);
+                case PayWay.WechatpayWapPay:
+                    return new WechatpayWapPayService(_wechatpayConfigProvider);
+                case PayWay.WechatpayPublicPay:
+                    return new WechatpayPublicPayService(_wechatpayConfigProvider);
+                case PayWay.WechatpayBarcodePay:
+                    return new WechatpayBarcodePayService(_wechatpayConfigProvider);
             }
 
             throw new NotImplementedException(way.Description());
@@ -152,6 +160,42 @@ namespace Bing.Biz.Payments.Factories
         public IWechatpayMiniProgramPayService CreateWechatpayMiniProgramPayService()
         {
             return new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
+        }
+
+        /// <summary>
+        /// 创建微信电脑网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        public IWechatpayPagePayService CreateWechatpayPagePayService()
+        {
+            return new WechatpayPagePayService(_wechatpayConfigProvider);
+        }
+
+        /// <summary>
+        /// 创建微信手机网站支付服务
+        /// </summary>
+        /// <returns></returns>
+        public IWechatpayWapPayService CreateWechatpayWapPayService()
+        {
+            return new WechatpayWapPayService(_wechatpayConfigProvider);
+        }
+
+        /// <summary>
+        /// 创建微信公众号支付服务
+        /// </summary>
+        /// <returns></returns>
+        public IWechatpayPublicPayService CreateWechatpayPublicPayService()
+        {
+            return new WechatpayPublicPayService(_wechatpayConfigProvider);
+        }
+
+        /// <summary>
+        /// 创建微信条码支付服务
+        /// </summary>
+        /// <returns></returns>
+        public IWechatpayBarcodePayService CreateWechatpayBarcodePayService()
+        {
+            return new WechatpayBarcodePayService(_wechatpayConfigProvider);
         }
     }
 }
