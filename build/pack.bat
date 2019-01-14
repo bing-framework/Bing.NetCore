@@ -27,9 +27,6 @@ dotnet pack ./src/Bing.Applications/Bing.Applications.csproj
 dotnet pack ./src/Bing.Webs/Bing.Webs.csproj
 dotnet pack ./src/Bing.Extensions.AutoMapper/Bing.Extensions.AutoMapper.csproj
 dotnet pack ./src/Bing.Extensions.Swashbuckle/Bing.Extensions.Swashbuckle.csproj
-dotnet pack ./src/Bing.Tools.QrCode/Bing.Tools.QrCode.csproj
-dotnet pack ./src/Bing.Tools.QrCode.QRCoder/Bing.Tools.QrCode.QRCoder.csproj
-dotnet pack ./src/Bing.Tools.QrCode.ZXing/Bing.Tools.QrCode.ZXing.csproj
 dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 dotnet pack ./src/Bing.Encryption/Bing.Encryption.csproj
