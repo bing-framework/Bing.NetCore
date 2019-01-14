@@ -27,9 +27,6 @@ Bing 框架Nuget包分布
 |Bing.Extensions.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.AutoMapper)|
 |Bing.Extensions.Swashbuckle|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.Swashbuckle?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.Swashbuckle)|
 |Bing.Biz|[![NuGet Badge](https://buildstats.info/nuget/Bing.Biz?includePreReleases=true)](https://www.nuget.org/packages/Bing.Biz)|
-|Bing.Tools.QrCode|[![NuGet Badge](https://buildstats.info/nuget/Bing.Tools.QrCode?includePreReleases=true)](https://www.nuget.org/packages/Bing.Tools.QrCode)|
-|Bing.Tools.QrCode.QRCoder|[![NuGet Badge](https://buildstats.info/nuget/Bing.Tools.QrCode.QRCoder?includePreReleases=true)](https://www.nuget.org/packages/Bing.Tools.QrCode.QRCoder)|
-|Bing.Tools.QrCode.ZXing|[![NuGet Badge](https://buildstats.info/nuget/Bing.Tools.QrCode.ZXing?includePreReleases=true)](https://www.nuget.org/packages/Bing.Tools.QrCode.ZXing)|
 |Bing.MailKit|[![NuGet Badge](https://buildstats.info/nuget/Bing.MailKit?includePreReleases=true)](https://www.nuget.org/packages/Bing.MailKit)|
 |Bing.Geetest|[![NuGet Badge](https://buildstats.info/nuget/Bing.Geetest?includePreReleases=true)](https://www.nuget.org/packages/Bing.Geetest)|
 |Bing.Encryption|[![NuGet Badge](https://buildstats.info/nuget/Bing.Encryption?includePreReleases=true)](https://www.nuget.org/packages/Bing.Encryption)|
