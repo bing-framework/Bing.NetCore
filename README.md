@@ -30,7 +30,6 @@ Bing 框架Nuget包分布
 |Bing.MailKit|[![NuGet Badge](https://buildstats.info/nuget/Bing.MailKit?includePreReleases=true)](https://www.nuget.org/packages/Bing.MailKit)|
 |Bing.Geetest|[![NuGet Badge](https://buildstats.info/nuget/Bing.Geetest?includePreReleases=true)](https://www.nuget.org/packages/Bing.Geetest)|
 |Bing.Encryption|[![NuGet Badge](https://buildstats.info/nuget/Bing.Encryption?includePreReleases=true)](https://www.nuget.org/packages/Bing.Encryption)|
-|Bing.BankCardInfo|[![NuGet Badge](https://buildstats.info/nuget/Bing.BankCardInfo?includePreReleases=true)](https://www.nuget.org/packages/Bing.BankCardInfo)|
 |Bing.ElasticSearch|[![NuGet Badge](https://buildstats.info/nuget/Bing.ElasticSearch?includePreReleases=true)](https://www.nuget.org/packages/Bing.ElasticSearch)|
 |Bing.Sequence|[![NuGet Badge](https://buildstats.info/nuget/Bing.Sequence?includePreReleases=true)](https://www.nuget.org/packages/Bing.Sequence)|
 
