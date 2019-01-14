@@ -33,7 +33,6 @@ Bing 框架Nuget包分布
 |Bing.BankCardInfo|[![NuGet Badge](https://buildstats.info/nuget/Bing.BankCardInfo?includePreReleases=true)](https://www.nuget.org/packages/Bing.BankCardInfo)|
 |Bing.ElasticSearch|[![NuGet Badge](https://buildstats.info/nuget/Bing.ElasticSearch?includePreReleases=true)](https://www.nuget.org/packages/Bing.ElasticSearch)|
 |Bing.Sequence|[![NuGet Badge](https://buildstats.info/nuget/Bing.Sequence?includePreReleases=true)](https://www.nuget.org/packages/Bing.Sequence)|
-|Bing.MockData|[![NuGet Badge](https://buildstats.info/nuget/Bing.MockData?includePreReleases=true)](https://www.nuget.org/packages/Bing.MockData)|
 
 
 

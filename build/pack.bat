@@ -31,7 +31,6 @@ dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 dotnet pack ./src/Bing.Encryption/Bing.Encryption.csproj
 dotnet pack ./src/Bing.Geetest/Bing.Geetest.csproj
-REM dotnet pack ./src/Bing.MockData/Bing.MockData.csproj
 dotnet pack ./src/Bing.BankCardInfo/Bing.BankCardInfo.csproj
 dotnet pack ./src/Bing.ElasticSearch/Bing.ElasticSearch.csproj
 dotnet pack ./src/Bing.Sequence/Bing.Sequence.csproj
