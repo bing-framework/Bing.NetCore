@@ -27,6 +27,11 @@ namespace Bing.Webs.Filters
         public LockType Type { get; set; } = LockType.User;
 
         /// <summary>
+        /// 再次提交时间间隔，单位：秒
+        /// </summary>
+        public int Interval { get; set; }
+
+        /// <summary>
         /// 执行
         /// </summary>
         /// <param name="context">操作执行上下文</param>
@@ -46,9 +51,10 @@ namespace Bing.Webs.Filters
 
             var @lock = CreateLock();
             var key = GetKey(context);
+            var isSuccess = false;
             try
             {
-                var isSuccess = @lock.Lock(key);
+                isSuccess = @lock.Lock(key, GetExpiration());
                 if (isSuccess == false)
                 {
                     context.Result = new Result(StateCode.Fail, GetFailMessage());
@@ -66,7 +72,10 @@ namespace Bing.Webs.Filters
             }
             finally
             {
-                @lock.UnLock();
+                if (isSuccess)
+                {
+                    @lock.UnLock();
+                }
             }
         }
 
@@ -93,6 +102,19 @@ namespace Bing.Webs.Filters
             }
 
             return string.IsNullOrWhiteSpace(Key) ? $"{userId}{Web.Request.Path}" : $"{userId}{Key}";
+        }
+
+        /// <summary>
+        /// 获取到期时间间隔
+        /// </summary>
+        /// <returns></returns>
+        private TimeSpan? GetExpiration()
+        {
+            if (Interval == 0)
+            {
+                return null;
+            }
+            return TimeSpan.FromSeconds(Interval);
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -61,6 +62,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// Sql查询对象
         /// </summary>
         protected virtual ISqlQuery Sql => _sqlQuery ?? (_sqlQuery = Ioc.Create<ISqlQuery>());
+
+        /// <summary>
+        /// 数据库连接
+        /// </summary>
+        protected IDbConnection Connection => UnitOfWork.Database.GetDbConnection();
 
         #endregion
 
