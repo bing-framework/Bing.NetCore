@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -11,6 +10,7 @@ using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Logs;
 using Bing.Datas.Matedatas;
 using Bing.Datas.Sql;
+using Bing.Datas.Transactions;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Auditing;
@@ -22,7 +22,6 @@ using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -377,15 +376,57 @@ namespace Bing.Datas.EntityFramework.Core
         #endregion
 
         #region SaveChangesAsync(异步保存更改)
+
         /// <summary>
         /// 异步保存更改
         /// </summary>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             SaveChangesBefore();
-            return base.SaveChangesAsync(cancellationToken);
+            var transactionActionManager = Ioc.Create<ITransactionActionManager>();
+            if (transactionActionManager.Count == 0)
+            {
+                return await base.SaveChangesAsync(cancellationToken);
+            }
+
+            return await TransactionCommit(transactionActionManager, cancellationToken);
+        }
+
+        /// <summary>
+        /// 手工创建事务提交
+        /// </summary>
+        /// <param name="transactionActionManager">事务操作管理器</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns></returns>
+        private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager,
+            CancellationToken cancellationToken)
+        {
+            using (var connection = Database.GetDbConnection())
+            {
+                if (connection.State == ConnectionState.Closed)
+                {
+                    await connection.OpenAsync(cancellationToken);
+                }
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        await transactionActionManager.CommitAsync(transaction);
+                        Database.UseTransaction(transaction);
+                        var result = await base.SaveChangesAsync(cancellationToken);
+                        transaction.Commit();
+                        return result;
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
         }
 
         #endregion
