@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="0.0.1-preview-20190110-1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
@@ -20,7 +21,6 @@
     <ProjectReference Include="..\..\src\Bing.Caching.Hybrid\Bing.Caching.Hybrid.csproj" />
     <ProjectReference Include="..\..\src\Bing.Caching.InMemory\Bing.Caching.InMemory.csproj" />
     <ProjectReference Include="..\..\src\Bing.Caching.Redis\Bing.Caching.Redis.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Extensions.Swashbuckle\Bing.Extensions.Swashbuckle.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\src\Bing.Webs\Bing.Webs.csproj" />
   </ItemGroup>
