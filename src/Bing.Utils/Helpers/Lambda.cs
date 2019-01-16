@@ -244,7 +244,12 @@ namespace Bing.Utils.Helpers
                 case ExpressionType.GreaterThanOrEqual:
                 case ExpressionType.LessThan:
                 case ExpressionType.LessThanOrEqual:
-                    return GetValue(((BinaryExpression)expression).Right);
+                    var result= GetValue(((BinaryExpression)expression).Right);
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                    return GetValue(((BinaryExpression) expression).Left);
                 case ExpressionType.Call:
                     return GetMethodCallExpressionValue(expression);
                 case ExpressionType.MemberAccess:

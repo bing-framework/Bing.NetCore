@@ -47,5 +47,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="right">是否取右侧操作数</param>
         /// <returns></returns>
         string GetColumn(Expression expression, Type entity, bool right = false);
+
+        /// <summary>
+        /// 获取类型
+        /// </summary>
+        /// <param name="expression">表达式</param>
+        /// <param name="right">是否取右侧操作数</param>
+        /// <returns></returns>
+        Type GetType(Expression expression, bool right = false);
     }
 }

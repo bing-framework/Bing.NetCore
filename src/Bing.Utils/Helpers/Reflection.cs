@@ -129,6 +129,119 @@ namespace Bing.Utils.Helpers
         }
         #endregion
 
+        #region FindTypes(查找类型列表)
+
+        /// <summary>
+        /// 查找类型列表
+        /// </summary>
+        /// <typeparam name="TFind">查找类型</typeparam>
+        /// <param name="assemblies">待查找的程序集列表</param>
+        /// <returns></returns>
+        public static List<Type> FindTypes<TFind>(params Assembly[] assemblies)
+        {
+            var findType = typeof(TFind);
+            return FindTypes(findType, assemblies);
+        }
+
+        /// <summary>
+        /// 查找类型列表
+        /// </summary>
+        /// <param name="findType">查找类型</param>
+        /// <param name="assemblies">待查找的程序集列表</param>
+        /// <returns></returns>
+        public static List<Type> FindTypes(Type findType, params Assembly[] assemblies)
+        {
+            var result = new List<Type>();
+            foreach (var assembly in assemblies)
+            {
+                result.AddRange(GetTypes(findType, assembly));
+            }
+
+            return result.Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 获取类型列表
+        /// </summary>
+        /// <param name="findType">查找类型</param>
+        /// <param name="assembly">待查找的程序集</param>
+        /// <returns></returns>
+        private static List<Type> GetTypes(Type findType, Assembly assembly)
+        {
+            var result = new List<Type>();
+            if (assembly == null)
+            {
+                return result;
+            }
+
+            Type[] types;
+            try
+            {
+                types = assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException)
+            {
+                return result;
+            }
+
+            foreach (var type in types)
+            {
+                AddType(result, findType, type);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 添加类型
+        /// </summary>
+        /// <param name="result">类型列表</param>
+        /// <param name="findType">查找类型</param>
+        /// <param name="type">类型</param>
+        private static void AddType(List<Type> result, Type findType, Type type)
+        {
+            if (type.IsInterface || type.IsAbstract)
+            {
+                return;
+            }
+
+            if (findType.IsAssignableFrom(type) == false && MatchGeneric(findType, type) == false)
+            {
+                return;
+            }
+
+            result.Add(type);
+        }
+        
+        /// <summary>
+        /// 泛型匹配
+        /// </summary>
+        /// <param name="findType">查找类型</param>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        private static bool MatchGeneric(Type findType, Type type)
+        {
+            if (findType.IsGenericTypeDefinition == false)
+            {
+                return false;
+            }
+
+            var definition = findType.GetGenericTypeDefinition();
+            foreach (var implementedInterface in type.FindInterfaces((filiter,criteria)=>true,null))
+            {
+                if (implementedInterface.IsGenericType == false)
+                {
+                    continue;
+                }
+
+                return definition.IsAssignableFrom(implementedInterface.GetGenericTypeDefinition());
+            }
+
+            return false;
+        }
+        
+        #endregion
+
         #region GetInstancesByInterface(获取实现了接口的所有实例)
         /// <summary>
         /// 获取实现了接口的所有实例

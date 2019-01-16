@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Webs.Razors
+﻿namespace Bing.Webs.Razors
 {
     /// <summary>
     /// 路由信息

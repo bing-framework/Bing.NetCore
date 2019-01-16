@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Webs.Razors;
+﻿using Bing.Webs.Razors;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Webs.Extensions

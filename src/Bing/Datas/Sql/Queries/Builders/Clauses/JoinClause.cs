@@ -362,19 +362,17 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             }
 
             var expressions = Lambda.GetGroupPredicates(expression);
-            expressions.ForEach(group => On(group, typeof(TLeft), typeof(TRight)));
+            expressions.ForEach(On);
         }
 
         /// <summary>
         /// 设置连接条件组
         /// </summary>
         /// <param name="group">条件组</param>
-        /// <param name="typeLeft">左表实体类型</param>
-        /// <param name="typeRight">右表实体类型</param>
-        private void On(List<Expression> group, Type typeLeft, Type typeRight)
+        private void On(List<Expression> group)
         {
-            var items = group.Select(expression => new OnItem(GetColumn(expression, typeLeft, false),
-                GetColumn(expression, typeRight, true), Lambda.GetOperator(expression).SafeValue())).ToList();
+            var items = group.Select(expression => new OnItem(GetColumn(expression, false), GetColumn(expression, true),
+                Lambda.GetOperator(expression).SafeValue())).ToList();
             _params.LastOrDefault()?.On(items);
         }
 
@@ -382,12 +380,18 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// 获取列
         /// </summary>
         /// <param name="expression">表达式</param>
-        /// <param name="entity">实体类型</param>
         /// <param name="right">是否取右侧操作数</param>
         /// <returns></returns>
-        private string GetColumn(Expression expression, Type entity, bool right)
+        private SqlItem GetColumn(Expression expression, bool right)
         {
-            return GetColumn(entity, _resolver.GetColumn(expression, entity, right));
+            var type = _resolver.GetType(expression, right);
+            var column = _resolver.GetColumn(expression, type, right);
+            if (string.IsNullOrWhiteSpace(column))
+            {
+                return new SqlItem(Lambda.GetValue(expression).SafeString(), raw: true);
+            }
+
+            return new SqlItem(GetColumn(type, column));
         }
 
         /// <summary>

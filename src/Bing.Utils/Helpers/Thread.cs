@@ -44,6 +44,23 @@ namespace Bing.Utils.Helpers
             Parallel.Invoke(actions);
         }
 
+        /// <summary>
+        /// 重复的并发执行操作
+        /// </summary>
+        /// <param name="action">操作</param>
+        /// <param name="count">执行次数</param>
+        /// <param name="options">并发执行配置</param>
+        public static void ParallelExecute(Action action, int count = 1, ParallelOptions options = null)
+        {
+            if (options == null)
+            {
+                Parallel.For(0, count, i => action());
+                return;
+            }
+
+            Parallel.For(0, count, options, i => action());
+        }
+
         #endregion
 
         #region ThreadId(获取线程编号)

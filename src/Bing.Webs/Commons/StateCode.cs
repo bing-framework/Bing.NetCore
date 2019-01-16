@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel;
 
 namespace Bing.Webs.Commons
 {

@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
 using Bing.Webs.Commons;
-using Bing.Webs.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;

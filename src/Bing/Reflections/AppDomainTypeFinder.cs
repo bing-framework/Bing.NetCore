@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
+using Bing.Utils.Helpers;
 using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Bing.Reflections
@@ -17,7 +17,7 @@ namespace Bing.Reflections
         /// <summary>
         /// 跳过的程序集
         /// </summary>
-        private const string SKIP_ASSEMBLIES = "^System|^Mscorlib|^Netstandard|^Microsoft|^Autofac|^AutoMapper|^EntityFramework|^Newtonsoft|^Castle|^NLog|^Pomelo|^AspectCore|^Xunit|^Nito|^Npgsql|^Exceptionless|^MySqlConnector|^Anonymously Hosted|^libuv|^api-ms|^clrcompression|^clretwrc|^clrjit|^coreclr|^dbgshim|^e_sqlite3|^hostfxr|^hostpolicy|^MessagePack|^mscordaccore|^mscordbi|^mscorrc|sni|sos|SOS.NETCore|^sos_amd64|^SQLitePCLRaw|^StackExchange|^Swashbuckle|WindowsBase|ucrtbase";
+        private const string SkipAssemblies = "^System|^Mscorlib|^Netstandard|^Microsoft|^Autofac|^AutoMapper|^EntityFramework|^Newtonsoft|^Castle|^NLog|^Pomelo|^AspectCore|^Xunit|^Nito|^Npgsql|^Exceptionless|^MySqlConnector|^Anonymously Hosted|^libuv|^api-ms|^clrcompression|^clretwrc|^clrjit|^coreclr|^dbgshim|^e_sqlite3|^hostfxr|^hostpolicy|^MessagePack|^mscordaccore|^mscordbi|^mscorrc|sni|sos|SOS.NETCore|^sos_amd64|^SQLitePCLRaw|^StackExchange|^Swashbuckle|WindowsBase|ucrtbase";
 
         #region GetAssemblies(获取程序集列表)
 
@@ -29,6 +29,41 @@ namespace Bing.Reflections
         {
             LoadAssemblies(PlatformServices.Default.Application.ApplicationBasePath);
             return GetAssembliesFromCurrentAppDomain();
+        }
+
+        /// <summary>
+        /// 加载程序集到当前应用程序域
+        /// </summary>
+        /// <param name="path">目录绝对路径</param>
+        protected void LoadAssemblies(string path)
+        {
+            foreach (var file in Directory.GetFiles(path, "*.dll"))
+            {
+                if (Match(Path.GetFileName(file)) == false)
+                {
+                    continue;
+                }
+                var assemblyName = AssemblyName.GetAssemblyName(file);
+                AppDomain.CurrentDomain.Load(assemblyName);
+            }
+        }
+
+        /// <summary>
+        /// 程序集是否匹配
+        /// </summary>
+        /// <param name="assemblyName">程序集名称</param>
+        /// <returns></returns>
+        protected virtual bool Match(string assemblyName)
+        {
+            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.Views"))
+            {
+                return false;
+            }
+            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.PrecompiledViews"))
+            {
+                return false;
+            }
+            return !Regex.IsMatch(assemblyName, SkipAssemblies, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
 
         /// <summary>
@@ -51,47 +86,12 @@ namespace Bing.Reflections
         /// <summary>
         /// 程序集是否匹配
         /// </summary>
-        /// <param name="assembly"></param>
+        /// <param name="assembly">程序集</param>
         /// <returns></returns>
         private bool Match(Assembly assembly)
         {
-            return !Regex.IsMatch(assembly.FullName, SKIP_ASSEMBLIES, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            return !Regex.IsMatch(assembly.FullName, SkipAssemblies, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
-
-        /// <summary>
-        /// 加载程序集到当前应用程序域
-        /// </summary>
-        /// <param name="path">目录绝对路径</param>
-        protected void LoadAssemblies(string path)
-        {
-            foreach (var file in Directory.GetFiles(path, "*.dll"))
-            {
-                if (Match(Path.GetFileName(file)) == false)
-                {
-                    continue;
-                }
-                var assemblyName = AssemblyName.GetAssemblyName(file);
-                AppDomain.CurrentDomain.Load(assemblyName);                
-            }
-        }
-
-        /// <summary>
-        /// 程序集是否匹配
-        /// </summary>
-        /// <param name="assemblyName">程序集名称</param>
-        /// <returns></returns>
-        protected virtual bool Match(string assemblyName)
-        {
-            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.Views"))
-            {
-                return false;
-            }
-            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.PrecompiledViews"))
-            {
-                return false;
-            }
-            return !Regex.IsMatch(assemblyName, SKIP_ASSEMBLIES, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        }        
 
         #endregion
 
@@ -117,87 +117,9 @@ namespace Bing.Reflections
         public List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
             assemblies = assemblies ?? GetAssemblies();
-            var result = new List<Type>();
-            foreach (var assembly in assemblies)
-            {
-                result.AddRange(GetTypes(findType, assembly));
-            }
-            return result.Distinct().ToList();
-        }
-
-        /// <summary>
-        /// 获取类型列表
-        /// </summary>
-        /// <param name="findType">查找类型</param>
-        /// <param name="assembly">在指定的程序集列表中查找</param>
-        /// <returns></returns>
-        private List<Type> GetTypes(Type findType, Assembly assembly)
-        {
-            var result = new List<Type>();
-            Type[] types;
-            try
-            {
-                types = assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException)
-            {
-                return result;
-            }
-            if (types == null)
-            {
-                return result;
-            }
-            foreach (var type in types)
-            {
-                AddType(result, findType, type);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 添加类型
-        /// </summary>
-        /// <param name="result">类型列表</param>
-        /// <param name="findType">查找类型</param>
-        /// <param name="type">目标类型</param>
-        private void AddType(List<Type> result, Type findType, Type type)
-        {
-            if (type.IsInterface || type.IsAbstract)
-            {
-                return;
-            }
-            if (findType.IsAssignableFrom(type) == false && MatchGeneric(findType, type) == false)
-            {
-                return;
-            }
-            result.Add(type);
-        }
-
-        /// <summary>
-        /// 泛型匹配
-        /// </summary>
-        /// <param name="findType">查找类型</param>
-        /// <param name="type">目标类型</param>
-        /// <returns></returns>
-        private bool MatchGeneric(Type findType, Type type)
-        {
-            if (findType.IsGenericTypeDefinition == false)
-            {
-                return false;
-            }
-            var definition = findType.GetGenericTypeDefinition();
-            foreach (var implementedInterface in type.FindInterfaces((filter, criteria) => true, null))
-            {
-                if (implementedInterface.IsGenericType == false)
-                {
-                    continue;
-                }
-                return definition.IsAssignableFrom(implementedInterface.GetGenericTypeDefinition());
-            }
-            return false;
-        }
+            return Reflection.FindTypes(findType, assemblies.ToArray());
+        }        
 
         #endregion
-
     }
 }

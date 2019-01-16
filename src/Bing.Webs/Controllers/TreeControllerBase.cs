@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Bing.Applications;
+﻿using System.Threading.Tasks;
 using Bing.Applications.Dtos;
 using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;

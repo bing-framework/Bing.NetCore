@@ -8,7 +8,6 @@ using Bing.Utils.Json;
 using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
 
 namespace Bing.Webs.Filters
 {
