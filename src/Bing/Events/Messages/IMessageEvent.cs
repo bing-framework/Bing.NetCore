@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Events.Messages
+﻿namespace Bing.Events.Messages
 {
     /// <summary>
     /// 消息事件
@@ -10,14 +6,14 @@ namespace Bing.Events.Messages
     public interface IMessageEvent : IEvent
     {
         /// <summary>
-        /// 事件数据
+        /// 消息名称
         /// </summary>
-        object Data { get; set; }
+        string Name { get; set; }
 
         /// <summary>
-        /// 发送目标
+        /// 事件数据
         /// </summary>
-        string Target { get; set; }
+        object Data { get; set; }        
 
         /// <summary>
         /// 回调

@@ -17,6 +17,7 @@ namespace Bing.Events.Default
         public static IServiceCollection AddDefaultEventBus(this IServiceCollection services)
         {
             services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();
+            services.TryAddSingleton<ISimpleEventBus, EventBus>();
             services.TryAddSingleton<IEventBus, EventBus>();
             return services;
         }

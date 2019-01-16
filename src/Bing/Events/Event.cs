@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Bing.Utils.Timing;
 
@@ -25,7 +24,7 @@ namespace Bing.Events
         /// </summary>
         public Event()
         {
-            Id = Guid.NewGuid().ToString();
+            Id = Bing.Utils.Helpers.Id.Guid();
             Time = DateTime.Now;
         }
 
@@ -38,7 +37,7 @@ namespace Bing.Events
             StringBuilder result = new StringBuilder();
             result.AppendLine($"事件标识: {Id}");
             result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
-            result.AppendLine($"事件数据: {Bing.Utils.Json.JsonUtil.ToJson(this)}");
+            result.AppendLine($"事件数据: {this}");
             return result.ToString();
         }
     }

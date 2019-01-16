@@ -19,7 +19,7 @@ namespace Bing.Datas.UnitOfWorks
         /// </summary>
         public UnitOfWorkManager()
         {
-            _unitOfWorks=new List<IUnitOfWork>();
+            _unitOfWorks = new List<IUnitOfWork>();
         }
 
         /// <summary>

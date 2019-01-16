@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Bing.Events.Messages
 {
@@ -17,5 +14,14 @@ namespace Bing.Events.Messages
         /// <param name="event">事件</param>
         /// <returns></returns>
         Task PublishAsync<TEvent>(TEvent @event) where TEvent : IMessageEvent;
+
+        /// <summary>
+        /// 发布事件
+        /// </summary>
+        /// <param name="name">消息名称</param>
+        /// <param name="data">事件数据</param>
+        /// <param name="callback">回调名称</param>
+        /// <returns></returns>
+        Task PublishAsync(string name, object data, string callback);
     }
 }
