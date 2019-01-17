@@ -114,7 +114,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <returns></returns>
-        public string ToSql(IDialect dialect)
+        public string ToSql(IDialect dialect = null)
         {
             var table = Table.ToSql(dialect);
             return $"{JoinType} {table}{GetOn(dialect)}";

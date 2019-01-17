@@ -115,7 +115,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Conditions
                 case Boundary.Both:
                     return Operator.LessEqual;
                 default:
-                    return Operator.Greater;
+                    return Operator.Less;
             }
         }
     }
