@@ -31,14 +31,14 @@ namespace Bing.Datas.Dapper
         /// <param name="database">数据库</param>
         public SqlQuery(ISqlBuilder sqlBuilder, IDatabase database = null) : base(sqlBuilder, database)
         {
-        }        
+        }
 
         /// <summary>
         /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        protected override object ToScalar(IDbConnection connection)
+        public override object ToScalar(IDbConnection connection)
         {
             return Query((con, sql, sqlParams) => con.ExecuteScalar(sql, sqlParams), connection);
         }
@@ -48,7 +48,7 @@ namespace Bing.Datas.Dapper
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        protected override async Task<object> ToScalarAsync(IDbConnection connection)
+        public override async Task<object> ToScalarAsync(IDbConnection connection)
         {
             return await QueryAsync(async (con, sql, sqlParams) => await con.ExecuteScalarAsync(sql, sqlParams),
                 connection);

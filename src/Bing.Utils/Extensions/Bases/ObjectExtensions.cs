@@ -28,7 +28,7 @@ namespace Bing.Utils.Extensions
                 return default(T);
             }
 
-            if (typeof(T).HasAttribute<SerializableAttribute>(true))
+            if (!typeof(T).HasAttribute<SerializableAttribute>(true))
             {
                 throw new NotSupportedException($"当前对象未标记特性“{typeof(SerializableAttribute)}”，无法进行DeepClone操作");
             }
