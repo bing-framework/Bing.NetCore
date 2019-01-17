@@ -11,21 +11,32 @@ namespace Bing.Applications
         /// <summary>
         /// 日志
         /// </summary>
-        public ILog Log { get; set; }
+        private ILog _log;
+
+        /// <summary>
+        /// 日志
+        /// </summary>
+        public ILog Log => _log ?? (_log = GetLog());
 
         /// <summary>
         /// 用户会话
         /// </summary>
-        public ISession Session { get; set; }
-
+        public virtual ISession Session => Bing.Security.Sessions.Session.Instance;
 
         /// <summary>
-        /// 初始化一个<see cref="ServiceBase"/>类型的实例
+        /// 获取日志操作
         /// </summary>
-        protected ServiceBase()
+        /// <returns></returns>
+        protected virtual ILog GetLog()
         {
-            Log = Bing.Logs.Log.Null;
-            Session = Bing.Security.Sessions.Session.Null;
+            try
+            {
+                return Bing.Logs.Log.GetLog(this);
+            }
+            catch
+            {
+                return Bing.Logs.Log.Null;
+            }
         }
     }
 }
