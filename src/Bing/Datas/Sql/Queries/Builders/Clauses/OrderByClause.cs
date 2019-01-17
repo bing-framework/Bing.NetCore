@@ -11,7 +11,7 @@ using Bing.Utils.Extensions;
 namespace Bing.Datas.Sql.Queries.Builders.Clauses
 {
     /// <summary>
-    /// 排序子句
+    /// Order By子句
     /// </summary>
     public class OrderByClause:IOrderByClause
     {
@@ -47,6 +47,29 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             _dialect = dialect;
             _resolver = resolver;
             _register = register;
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="OrderByClause"/>类型的实例
+        /// </summary>
+        /// <param name="orderByClause">Order By子句</param>
+        /// <param name="register">实体别名注册器</param>
+        protected OrderByClause(OrderByClause orderByClause, IEntityAliasRegister register)
+        {
+            _dialect = orderByClause._dialect;
+            _resolver = orderByClause._resolver;
+            _register = register;
+            _items = new List<OrderByItem>(orderByClause._items);
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        public virtual IOrderByClause Clone(IEntityAliasRegister register)
+        {
+            return new OrderByClause(this, register);
         }
 
         /// <summary>

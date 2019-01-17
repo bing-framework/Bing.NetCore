@@ -37,6 +37,17 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
+        /// 初始化一个<see cref="ParameterManager"/>类型的实例
+        /// </summary>
+        /// <param name="parameterManager">参数管理器</param>
+        protected ParameterManager(ParameterManager parameterManager)
+        {
+            _params = new Dictionary<string, object>(parameterManager._params);
+            _paramIndex = parameterManager._paramIndex;
+            _dialect = parameterManager._dialect;
+        }
+
+        /// <summary>
         /// 创建参数名
         /// </summary>
         /// <returns></returns>
@@ -67,6 +78,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
                 return;
             }
             _params.Add(name, GetValue(value, @operator));
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public IParameterManager Clone()
+        {
+            return new ParameterManager(this);
         }
 
         /// <summary>

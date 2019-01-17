@@ -37,7 +37,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 分组条件
         /// </summary>
-        private string _having;
+        private string _having;        
 
         /// <summary>
         /// 是否存在分组
@@ -60,7 +60,31 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             _dialect = dialect;
             _resolver = resolver;
             _register = register;
-            _group=new List<SqlItem>();
+            _group = new List<SqlItem>();
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="GroupByClause"/>类型的实例
+        /// </summary>
+        /// <param name="groupByClause">Group By子句</param>
+        /// <param name="register">实体别名注册器</param>
+        protected GroupByClause(GroupByClause groupByClause, IEntityAliasRegister register)
+        {
+            _dialect = groupByClause._dialect;
+            _resolver = groupByClause._resolver;
+            _register = register;
+            _group = new List<SqlItem>(_group);
+            _having = groupByClause._having;
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        public virtual IGroupByClause Clone(IEntityAliasRegister register)
+        {
+            return new GroupByClause(this, register);
         }
 
         /// <summary>

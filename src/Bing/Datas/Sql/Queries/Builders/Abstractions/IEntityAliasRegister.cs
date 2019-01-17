@@ -11,7 +11,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 实体别名
         /// </summary>
-        Dictionary<Type,string> Data { get; }
+        IDictionary<Type,string> Data { get; }
 
         /// <summary>
         /// 注册实体别名
@@ -33,5 +33,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="entity">实体类型</param>
         /// <returns></returns>
         string GetAlias(Type entity);
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        IEntityAliasRegister Clone();
     }
 }

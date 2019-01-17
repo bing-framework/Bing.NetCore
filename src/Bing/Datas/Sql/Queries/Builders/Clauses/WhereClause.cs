@@ -74,6 +74,35 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 初始化一个<see cref="WhereClause"/>类型的实例
+        /// </summary>
+        /// <param name="whereClause">Where子句</param>
+        /// <param name="register">实体别名注册器</param>
+        /// <param name="parameterManager">参数管理器</param>
+        protected WhereClause(WhereClause whereClause, IEntityAliasRegister register,
+            IParameterManager parameterManager)
+        {
+            _register = register;
+            _parameterManager = parameterManager;
+            _dialect = whereClause._dialect;
+            _resolver = whereClause._resolver;
+            _condition = new SqlCondition(whereClause._condition?.GetCondition());
+            _helper = new Helper(_dialect, _resolver, _register, _parameterManager);
+            _expressionResolver = new PredicateExpressionResolver(_dialect, _resolver, _register, _parameterManager);
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <param name="parameterManager">参数管理器</param>
+        /// <returns></returns>
+        public virtual IWhereClause Clone(IEntityAliasRegister register, IParameterManager parameterManager)
+        {
+            return new WhereClause(this, register, parameterManager);
+        }
+
+        /// <summary>
         /// And连接条件
         /// </summary>
         /// <param name="condition">查询条件</param>
@@ -440,16 +469,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class
         {
             Where(expression, values, Operator.NotIn);
-        }
-
-        /// <summary>
-        /// 复制Where子句
-        /// </summary>
-        /// <returns></returns>
-        public IWhereClause Clone()
-        {
-            return new WhereClause(_dialect, _resolver, _register, _parameterManager,
-                new SqlCondition(_condition?.GetCondition()));
         }
 
         /// <summary>

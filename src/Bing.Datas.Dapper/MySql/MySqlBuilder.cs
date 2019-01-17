@@ -18,6 +18,17 @@ namespace Bing.Datas.Dapper.MySql
         public MySqlBuilder(IEntityMatedata matedata=null,IParameterManager parameterManager = null) : base(matedata, parameterManager) { }
 
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public override ISqlBuilder Clone()
+        {
+            var sqlBuilder = new MySqlBuilder();
+            sqlBuilder.Clone(this);
+            return sqlBuilder;
+        }
+
+        /// <summary>
         /// 创建Sql生成器
         /// </summary>
         /// <returns></returns>

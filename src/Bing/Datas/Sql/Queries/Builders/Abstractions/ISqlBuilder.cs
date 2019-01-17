@@ -14,15 +14,21 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
     public interface ISqlBuilder:ICondition
     {
         /// <summary>
-        /// 清空并初始化
+        /// 克隆
         /// </summary>
-        void Clear();
+        /// <returns></returns>
+        ISqlBuilder Clone();
 
         /// <summary>
         /// 创建Sql生成器
         /// </summary>
         /// <returns></returns>
         ISqlBuilder New();
+
+        /// <summary>
+        /// 清空并初始化
+        /// </summary>
+        void Clear();
 
         /// <summary>
         /// 生成调试Sql语句，Sql语句中的参数被替换为参数值

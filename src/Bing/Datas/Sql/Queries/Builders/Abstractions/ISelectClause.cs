@@ -9,6 +9,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
     public interface ISelectClause
     {
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        ISelectClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register);
+
+        /// <summary>
         /// 设置列名
         /// </summary>
         /// <param name="columns">列名</param>

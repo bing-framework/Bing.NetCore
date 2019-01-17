@@ -12,15 +12,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
         /// </summary>
-        public EntityAliasRegister()
+        public EntityAliasRegister(IDictionary<Type,string> data = null)
         {
-            Data = new Dictionary<Type, string>();
-        }
+            Data = data ?? new Dictionary<Type, string>();
+        }        
 
         /// <summary>
         /// 实体别名
         /// </summary>
-        public Dictionary<Type, string> Data { get; }
+        public IDictionary<Type, string> Data { get; }
 
         /// <summary>
         /// 注册实体别名
@@ -59,6 +59,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             }
 
             return Data.ContainsKey(entity) ? Data[entity] : null;
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public IEntityAliasRegister Clone()
+        {
+            return new EntityAliasRegister(new Dictionary<Type, string>(Data));
         }
     }
 }

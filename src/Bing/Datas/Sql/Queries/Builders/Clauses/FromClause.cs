@@ -14,22 +14,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// Sql项
         /// </summary>
-        private SqlItem _item;
+        protected SqlItem Table;
 
         /// <summary>
         /// Sql方言
         /// </summary>
-        private readonly IDialect _dialect;
+        protected readonly IDialect Dialect;
 
         /// <summary>
         /// 实体解析器
         /// </summary>
-        private readonly IEntityResolver _resolver;
+        protected readonly IEntityResolver Resolver;
 
         /// <summary>
         /// 实体别名注册器
         /// </summary>
-        private readonly IEntityAliasRegister _register;
+        protected readonly IEntityAliasRegister Register;
 
         /// <summary>
         /// 初始化一个<see cref="FromClause"/>类型的实例
@@ -39,9 +39,31 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="register">实体别名注册器</param>
         public FromClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
         {
-            _dialect = dialect;
-            _resolver = resolver;
-            _register = register;
+            Dialect = dialect;
+            Resolver = resolver;
+            Register = register;
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="FromClause"/>类型的实例
+        /// </summary>
+        /// <param name="fromClause">From子句</param>
+        protected FromClause(FromClause fromClause)
+        {
+            Dialect = fromClause.Dialect;
+            Resolver = fromClause.Resolver;
+            Register = fromClause.Register;
+            Table = fromClause.Table.Clone();
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体注册器</param>
+        /// <returns></returns>
+        public virtual IFromClause Clone(IEntityAliasRegister register)
+        {
+            return new FromClause(this);
         }
 
         /// <summary>
@@ -51,7 +73,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="alias">别名</param>
         public void From(string table, string alias = null)
         {
-            _item = CreateSqlItem(table, null, alias);
+            Table = CreateSqlItem(table, null, alias);
         }
 
         /// <summary>
@@ -75,9 +97,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
         {
             var entity = typeof(TEntity);
-            var table = _resolver.GetTableAndSchema(entity);
-            _item = CreateSqlItem(table, schema, alias);
-            _register.Register(entity, _resolver.GetAlias(entity, alias));
+            var table = Resolver.GetTableAndSchema(entity);
+            Table = CreateSqlItem(table, schema, alias);
+            Register.Register(entity, Resolver.GetAlias(entity, alias));
         }
 
         /// <summary>
@@ -86,12 +108,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="sql">Sql语句</param>
         public void AppendSql(string sql)
         {
-            if (_item != null && _item.Raw)
+            if (Table != null && Table.Raw)
             {
-                _item.Name += sql;
+                Table.Name += sql;
                 return;
             }
-            _item = new SqlItem(sql, raw: true);
+            Table = new SqlItem(sql, raw: true);
         }
 
         /// <summary>
@@ -99,7 +121,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         public void Validate()
         {
-            if (string.IsNullOrWhiteSpace(_item?.Name))
+            if (string.IsNullOrWhiteSpace(Table?.Name))
             {
                 throw new InvalidOperationException(LibraryResource.TableIsEmpty);
             }
@@ -111,7 +133,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <returns></returns>
         public string ToSql()
         {
-            var table = _item?.ToSql(_dialect);
+            var table = Table?.ToSql(Dialect);
             if (string.IsNullOrWhiteSpace(table))
             {
                 return null;

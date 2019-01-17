@@ -75,6 +75,32 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 初始化一个<see cref="JoinClause"/>类型的实例
+        /// </summary>
+        /// <param name="joinClause">Join子句</param>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="register">实体别名注册器</param>
+        protected JoinClause(JoinClause joinClause, ISqlBuilder sqlBuilder, IEntityAliasRegister register)
+        {
+            _sqlBuilder = sqlBuilder;
+            _dialect = joinClause._dialect;
+            _resolver = joinClause._resolver;
+            _register = register;
+            _params = joinClause._params.Select(t => t.Clone()).ToList();
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        public virtual IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register)
+        {
+            return new JoinClause(this, sqlBuilder, register);
+        }
+
+        /// <summary>
         /// 内连接
         /// </summary>
         /// <param name="table">表名</param>

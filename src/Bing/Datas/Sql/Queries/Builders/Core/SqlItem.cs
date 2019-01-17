@@ -64,23 +64,31 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="alias">别名</param>
         /// <param name="raw">是否使用原始值</param>
         /// <param name="isSplit">是否用句点分割名称</param>
-        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false,bool isSplit=true)
+        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false , bool isSplit = true)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 return;
             }
 
-            Prefix = prefix;
-            Alias = alias;
+            _prefix = prefix;
+            _alias = alias;
             Raw = raw;
             if (raw)
             {
-                Name = name;
+                _name = name;
                 return;
             }
 
             Resolve(name, isSplit);
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="SqlItem"/>类型的实例
+        /// </summary>
+        /// <param name="sqlItem">Sql项</param>
+        protected SqlItem(SqlItem sqlItem):this(sqlItem.Name,sqlItem.Prefix,sqlItem.Alias,sqlItem.Raw,false)
+        {
         }
 
         /// <summary>
@@ -99,7 +107,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
 
             if (list.Length == 2)
             {
-                Alias = list[1];
+                _alias = list[1];
             }
 
             if (isSplit)
@@ -108,7 +116,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
                 return;
             }
 
-            Name = name;
+            _name = name;
         }
 
         /// <summary>
@@ -120,13 +128,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             var result = new NameItem(name);
             if (string.IsNullOrWhiteSpace(result.Prefix) == false)
             {
-                Prefix = result.Prefix;
+                _prefix = result.Prefix;
             }
 
             if (string.IsNullOrWhiteSpace(result.Name) == false)
             {
-                Name = result.Name;
+                _name = result.Name;
             }
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public SqlItem Clone()
+        {
+            return new SqlItem(this);
         }
 
         /// <summary>

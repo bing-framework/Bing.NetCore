@@ -45,6 +45,17 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
+        /// 初始化一个<see cref="JoinItem"/>类型的实例
+        /// </summary>
+        /// <param name="joinItem">表连接项</param>
+        protected JoinItem(JoinItem joinItem)
+        {
+            JoinType = joinItem.JoinType;
+            Table = joinItem.Table;
+            Conditions = joinItem.Conditions.Select(t => new List<OnItem>(t)).ToList();
+        }
+
+        /// <summary>
         /// 设置连接条件
         /// </summary>
         /// <param name="left">左表列名</param>
@@ -87,6 +98,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
                 return;
             }
             Conditions.Add(items);
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public JoinItem Clone()
+        {
+            return new JoinItem(this);
         }
 
         /// <summary>

@@ -18,6 +18,17 @@ namespace Bing.Datas.Dapper.SqlServer
         public SqlServerBuilder(IEntityMatedata matedata=null,IParameterManager parameterManager = null) : base(matedata, parameterManager) { }
 
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public override ISqlBuilder Clone()
+        {
+            var sqlBuilder = new SqlServerBuilder();
+            sqlBuilder.Clone(this);
+            return sqlBuilder;
+        }
+
+        /// <summary>
         /// 创建Sql生成器
         /// </summary>
         /// <returns></returns>

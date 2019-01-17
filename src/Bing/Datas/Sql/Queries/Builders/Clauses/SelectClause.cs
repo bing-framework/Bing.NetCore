@@ -54,6 +54,32 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 初始化一个<see cref="SelectClause"/>类型的实例
+        /// </summary>
+        /// <param name="selectClause">Select子句</param>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="register">实体别名生成器</param>
+        protected SelectClause(SelectClause selectClause, ISqlBuilder sqlBuilder, IEntityAliasRegister register)
+        {
+            _sqlBuilder = sqlBuilder;
+            _register = register;
+            _dialect = selectClause._dialect;
+            _resolver = selectClause._resolver;
+            _columns = new List<ColumnCollection>(selectClause._columns);
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        public virtual ISelectClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register)
+        {
+            return new SelectClause(this, sqlBuilder, register);
+        }
+
+        /// <summary>
         /// 设置列名
         /// </summary>
         /// <param name="columns">列名</param>

@@ -6,6 +6,13 @@
     public interface IFromClause
     {
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        IFromClause Clone(IEntityAliasRegister register);
+
+        /// <summary>
         /// 设置表名
         /// </summary>
         /// <param name="table">表名</param>
@@ -35,6 +42,6 @@
         /// 输出Sql
         /// </summary>
         /// <returns></returns>
-        string ToSql();
+        string ToSql();        
     }
 }

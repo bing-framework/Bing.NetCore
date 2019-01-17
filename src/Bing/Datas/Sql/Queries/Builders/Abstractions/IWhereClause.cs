@@ -13,6 +13,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
     public interface IWhereClause:ICondition
     {
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <param name="parameterManager">参数管理器</param>
+        /// <returns></returns>
+        IWhereClause Clone(IEntityAliasRegister register, IParameterManager parameterManager);
+
+        /// <summary>
         /// And连接条件
         /// </summary>
         /// <param name="condition">查询条件</param>
@@ -336,12 +344,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="values">值集合</param>
         void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
             where TEntity : class;
-
-        /// <summary>
-        /// 复制Where子句
-        /// </summary>
-        /// <returns></returns>
-        IWhereClause Clone();
 
         /// <summary>
         /// 输出Sql

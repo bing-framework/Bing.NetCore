@@ -69,10 +69,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         private string GetTableAlias(IEntityAliasRegister register)
         {
-            if (register.Contains(Table))
+            if (register != null && register.Contains(Table))
             {
                 return register.GetAlias(Table);
             }
+
             return TableAlias;
         }
     }

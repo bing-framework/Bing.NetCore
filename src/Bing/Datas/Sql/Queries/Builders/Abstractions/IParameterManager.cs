@@ -27,5 +27,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="value">参数值</param>
         /// <param name="operator">运算符</param>
         void Add(string name, object value, Operator? @operator=null);
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        IParameterManager Clone();
     }
 }

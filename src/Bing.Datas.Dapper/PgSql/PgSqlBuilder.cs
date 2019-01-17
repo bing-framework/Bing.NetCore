@@ -18,6 +18,17 @@ namespace Bing.Datas.Dapper.PgSql
         public PgSqlBuilder(IEntityMatedata matedata = null, IParameterManager parameterManager = null) : base(matedata, parameterManager) { }
 
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public override ISqlBuilder Clone()
+        {
+            var sqlBuilder = new PgSqlBuilder();
+            sqlBuilder.Clone(this);
+            return sqlBuilder;
+        }
+
+        /// <summary>
         /// 创建Sql生成器
         /// </summary>
         /// <returns></returns>

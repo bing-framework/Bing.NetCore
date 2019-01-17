@@ -5,10 +5,17 @@ using Bing.Domains.Repositories;
 namespace Bing.Datas.Sql.Queries.Builders.Abstractions
 {
     /// <summary>
-    /// 排序子句
+    /// Order By子句
     /// </summary>
     public interface IOrderByClause
     {
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        IOrderByClause Clone(IEntityAliasRegister register);
+
         /// <summary>
         /// 排序
         /// </summary>

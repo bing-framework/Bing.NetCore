@@ -19,17 +19,76 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
     /// </summary>
     public abstract class SqlBuilderBase:ISqlBuilder
     {
+        #region 字段
+
+        /// <summary>
+        /// 参数管理器
+        /// </summary>
+        private IParameterManager _parameterManager;
+
+        /// <summary>
+        /// 方言
+        /// </summary>
+        private IDialect _dialect;
+
+        /// <summary>
+        /// Select子句
+        /// </summary>
+        private ISelectClause _selectClause;
+
+        /// <summary>
+        /// From子句
+        /// </summary>
+        private IFromClause _fromClause;
+
+        /// <summary>
+        /// Join子句
+        /// </summary>
+        private IJoinClause _joinClause;
+
+        /// <summary>
+        /// Where子句
+        /// </summary>
+        private IWhereClause _whereClause;
+
+        /// <summary>
+        /// 分组字句
+        /// </summary>
+        private IGroupByClause _groupByClause;
+
+        /// <summary>
+        /// 排序子句
+        /// </summary>
+        private IOrderByClause _orderByClause;
+
+        /// <summary>
+        /// 分页
+        /// </summary>
+        private IPager _pager;
+
+        /// <summary>
+        /// 分页跳过行数参数名
+        /// </summary>
+        private string _skipCountParam;
+
+        /// <summary>
+        /// 分页大小参数名
+        /// </summary>
+        private string _pageSizeParam;
+
+        #endregion
+
         #region 属性
 
         /// <summary>
         /// 实体元数据解析器
         /// </summary>
-        protected IEntityMatedata EntityMatedata { get; }
+        protected IEntityMatedata EntityMatedata { get; private set; }
 
         /// <summary>
         /// 实体解析器
         /// </summary>
-        protected IEntityResolver EntityResolver { get; }
+        protected IEntityResolver EntityResolver { get; private set; }
 
         /// <summary>
         /// 实体别名注册器
@@ -39,22 +98,42 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 参数管理器
         /// </summary>
-        private IParameterManager _parameterManager;
+        protected IParameterManager ParameterManager => _parameterManager ?? (_parameterManager = CreateParameterManager());
 
         /// <summary>
-        /// 参数管理器
+        /// Sql方言
         /// </summary>
-        protected IParameterManager ParameterManager =>
-            _parameterManager ?? (_parameterManager = CreateParameterManager());
+        protected IDialect Dialect => _dialect ?? (_dialect = GetDialect());
 
         /// <summary>
-        /// 创建参数管理器
+        /// Select子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual IParameterManager CreateParameterManager()
-        {
-            return new ParameterManager(GetDialect());
-        }
+        protected ISelectClause SelectClause => _selectClause ?? (_selectClause = CreateSelectClause());
+
+        /// <summary>
+        /// From子句
+        /// </summary>
+        protected IFromClause FromClause => _fromClause ?? (_fromClause = CreateFromClause());
+
+        /// <summary>
+        /// Join子句
+        /// </summary>
+        protected IJoinClause JoinClause => _joinClause ?? (_joinClause = CreateJoinClause());
+
+        /// <summary>
+        /// Where子句
+        /// </summary>
+        protected IWhereClause WhereClause => _whereClause ?? (_whereClause = CreateWhereClause());
+
+        /// <summary>
+        /// 分组子句
+        /// </summary>
+        protected IGroupByClause GroupByClause => _groupByClause ?? (_groupByClause = CreateGroupByClause());
+
+        /// <summary>
+        /// 排序子句
+        /// </summary>
+        protected IOrderByClause OrderByClause => _orderByClause ?? (_orderByClause = CreateOrderByClause());
 
         #endregion
 
@@ -71,6 +150,108 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
             _parameterManager = parameterManager;
+        }
+
+        #endregion
+
+        #region 工厂方法
+
+        /// <summary>
+        /// 创建参数管理器
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IParameterManager CreateParameterManager()
+        {
+            return new ParameterManager(Dialect);
+        }
+
+        /// <summary>
+        /// 获取Sql方言
+        /// </summary>
+        /// <returns></returns>
+        protected abstract IDialect GetDialect();
+
+        /// <summary>
+        /// 创建Select子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual ISelectClause CreateSelectClause()
+        {
+            return new SelectClause(this, Dialect, EntityResolver, AliasRegister);
+        }
+
+        /// <summary>
+        /// 创建From子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IFromClause CreateFromClause()
+        {
+            return new FromClause(Dialect, EntityResolver, AliasRegister);
+        }
+
+        /// <summary>
+        /// 创建Join子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IJoinClause CreateJoinClause()
+        {
+            return new JoinClause(this, Dialect, EntityResolver, AliasRegister);
+        }
+
+        /// <summary>
+        /// 创建Where子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IWhereClause CreateWhereClause()
+        {
+            return new WhereClause(Dialect, EntityResolver, AliasRegister, ParameterManager);
+        }
+
+        /// <summary>
+        /// 创建分组子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IGroupByClause CreateGroupByClause()
+        {
+            return new GroupByClause(Dialect, EntityResolver, AliasRegister);
+        }
+
+        /// <summary>
+        /// 创建排序子句
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IOrderByClause CreateOrderByClause()
+        {
+            return new OrderByClause(Dialect, EntityResolver, AliasRegister);
+        }
+
+        #endregion
+
+        #region Clone(克隆)
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public abstract ISqlBuilder Clone();
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="sqlBuilder">源生成器</param>
+        protected void Clone(SqlBuilderBase sqlBuilder)
+        {
+            EntityMatedata = sqlBuilder.EntityMatedata;
+            _parameterManager = sqlBuilder._parameterManager?.Clone();
+            EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMatedata);
+            AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
+            _selectClause = sqlBuilder._selectClause?.Clone(this, AliasRegister);
+            _fromClause = sqlBuilder._fromClause?.Clone(AliasRegister);
+            _joinClause = sqlBuilder._joinClause?.Clone(this, AliasRegister);
+            _whereClause = sqlBuilder._whereClause?.Clone(AliasRegister, _parameterManager);
+            _groupByClause = sqlBuilder._groupByClause?.Clone(AliasRegister);
+            _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
+            _pager = sqlBuilder._pager;
         }
 
         #endregion
@@ -93,7 +274,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             _pager = null;
             _skipCountParam = null;
             _pageSizeParam = null;
-            _where = null;
         }
 
         #endregion
@@ -352,31 +532,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region Select(设置列名)
 
         /// <summary>
-        /// Select子句
-        /// </summary>
-        private ISelectClause _selectClause;
-
-        /// <summary>
-        /// Select子句
-        /// </summary>
-        protected ISelectClause SelectClause => _selectClause ?? (_selectClause = CreateSelectClause());
-
-        /// <summary>
-        /// 创建Select子句
-        /// </summary>
-        /// <returns></returns>
-        protected virtual ISelectClause CreateSelectClause()
-        {
-            return new SelectClause(this, GetDialect(), EntityResolver, AliasRegister);
-        }
-
-        /// <summary>
-        /// 获取Sql方言
-        /// </summary>
-        /// <returns></returns>
-        protected abstract IDialect GetDialect();
-
-        /// <summary>
         /// 获取Select语句
         /// </summary>
         /// <returns></returns>
@@ -463,25 +618,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region From(设置表名)
 
         /// <summary>
-        /// From子句
-        /// </summary>
-        private IFromClause _fromClause;
-
-        /// <summary>
-        /// From子句
-        /// </summary>
-        protected IFromClause FromClause => _fromClause ?? (_fromClause = CreateFromClause());
-
-        /// <summary>
-        /// 创建From子句
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IFromClause CreateFromClause()
-        {
-            return new FromClause(GetDialect(), EntityResolver, AliasRegister);
-        }
-
-        /// <summary>
         /// 获取From语句
         /// </summary>
         /// <returns></returns>
@@ -529,25 +665,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #endregion
 
         #region Join(设置连接)
-
-        /// <summary>
-        /// Join子句
-        /// </summary>
-        private IJoinClause _joinClause;
-
-        /// <summary>
-        /// Join子句
-        /// </summary>
-        protected IJoinClause JoinClause => _joinClause ?? (_joinClause = CreateJoinClause());
-
-        /// <summary>
-        /// 创建Join子句
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IJoinClause CreateJoinClause()
-        {
-            return new JoinClause(this, GetDialect(), EntityResolver, AliasRegister);
-        }
 
         /// <summary>
         /// 获取Join语句
@@ -784,30 +901,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region Where(设置查询条件)
 
         /// <summary>
-        /// Where子句
-        /// </summary>
-        private IWhereClause _whereClause;
-
-        /// <summary>
-        /// Where语句
-        /// </summary>
-        private string _where;
-
-        /// <summary>
-        /// Where子句
-        /// </summary>
-        protected IWhereClause WhereClause => _whereClause ?? (_whereClause = CreateWhereClause());
-
-        /// <summary>
-        /// 创建Where子句
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IWhereClause CreateWhereClause()
-        {
-            return new WhereClause(GetDialect(), EntityResolver, AliasRegister, ParameterManager);
-        }
-
-        /// <summary>
         /// 获取查询条件
         /// </summary>
         /// <returns></returns>
@@ -821,16 +914,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <returns></returns>
         public virtual string GetWhere()
-        {
-            if (string.IsNullOrWhiteSpace(_where) == false)
-            {
-                return _where;
-            }
-
-            var whereClause = WhereClause.Clone();
+        {            
+            var whereClause = WhereClause.Clone(AliasRegister,ParameterManager.Clone());
             AddFilters(whereClause);
-            _where = whereClause.ToSql();
-            return _where;
+            return whereClause.ToSql();
         }
 
         /// <summary>
@@ -1563,25 +1650,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region GroupBy(分组)
 
         /// <summary>
-        /// 分组字句
-        /// </summary>
-        private IGroupByClause _groupByClause;
-
-        /// <summary>
-        /// 分组子句
-        /// </summary>
-        protected IGroupByClause GroupByClause => _groupByClause ?? (_groupByClause = CreateGroupByClause());
-
-        /// <summary>
-        /// 创建分组子句
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IGroupByClause CreateGroupByClause()
-        {
-            return new GroupByClause(GetDialect(), EntityResolver, AliasRegister);
-        }
-
-        /// <summary>
         /// 获取分组语句
         /// </summary>
         /// <returns></returns>
@@ -1643,25 +1711,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region OrderBy(设置排序)
 
         /// <summary>
-        /// 排序子句
-        /// </summary>
-        private IOrderByClause _orderByClause;
-
-        /// <summary>
-        /// 排序子句
-        /// </summary>
-        protected IOrderByClause OrderByClause => _orderByClause ?? (_orderByClause = CreateOrderByClause());
-
-        /// <summary>
-        /// 创建排序子句
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IOrderByClause CreateOrderByClause()
-        {
-            return new OrderByClause(GetDialect(), EntityResolver, AliasRegister);
-        }
-
-        /// <summary>
         /// 获取排序语句
         /// </summary>
         /// <returns></returns>
@@ -1711,11 +1760,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region Pager(设置分页)
 
         /// <summary>
-        /// 分页
-        /// </summary>
-        private IPager _pager;
-
-        /// <summary>
         /// 获取分页参数
         /// </summary>
         /// <returns></returns>
@@ -1723,11 +1767,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         {
             return _pager;
         }
-
-        /// <summary>
-        /// 分页跳过行数参数名
-        /// </summary>
-        private string _skipCountParam;
 
         /// <summary>
         /// 获取分页跳过行数的参数
@@ -1744,11 +1783,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             ParameterManager.Add(_skipCountParam, GetPager().GetSkipCount());
             return _skipCountParam;
         }
-
-        /// <summary>
-        /// 分页大小参数名
-        /// </summary>
-        private string _pageSizeParam;
 
         /// <summary>
         /// 获取分页大小的额参数

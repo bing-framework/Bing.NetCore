@@ -9,6 +9,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
     public interface IGroupByClause
     {
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="register">实体别名注册器</param>
+        /// <returns></returns>
+        IGroupByClause Clone(IEntityAliasRegister register);
+
+        /// <summary>
         /// 是否存在分组
         /// </summary>
         bool IsGroupBy { get; }
