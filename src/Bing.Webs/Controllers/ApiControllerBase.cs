@@ -23,7 +23,7 @@ namespace Bing.Webs.Controllers
         /// <summary>
         /// 日志
         /// </summary>
-        public virtual ILog Log => _log ?? (_log = GetLog());
+        public ILog Log => _log ?? (_log = GetLog());
 
         /// <summary>
         /// 会话
@@ -34,7 +34,7 @@ namespace Bing.Webs.Controllers
         /// 获取日志操作
         /// </summary>
         /// <returns></returns>
-        private ILog GetLog()
+        protected virtual ILog GetLog()
         {
             try
             {

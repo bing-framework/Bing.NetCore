@@ -104,6 +104,20 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendSelect(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendSelect(sql, condition);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region From(设置表名)
@@ -151,6 +165,20 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendFrom(sql);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendFrom(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendFrom(sql, condition);
             return sqlQuery;
         }
 
@@ -232,6 +260,20 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendJoin(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendJoin(sql, condition);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region LeftJoin(左外连接)
@@ -310,6 +352,20 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendLeftJoin(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendLeftJoin(sql, condition);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region RightJoin(右外连接)
@@ -385,6 +441,20 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendRightJoin(action, alias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendRightJoin(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendRightJoin(sql, condition);
             return sqlQuery;
         }
 
@@ -687,11 +757,7 @@ namespace Bing.Datas.Sql.Queries
         public static ISqlQuery AppendWhere(this ISqlQuery sqlQuery, string sql, bool condition)
         {
             var builder = sqlQuery.GetBuilder();
-            if (condition)
-            {
-                builder.AppendWhere(sql);
-            }
-
+            builder.AppendWhere(sql, condition);
             return sqlQuery;
         }
 
@@ -1447,6 +1513,20 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到GroupBy子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendGroupBy(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendGroupBy(sql, condition);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region OrderBy(排序)
@@ -1494,6 +1574,20 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendOrderBy(sql);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到OrderBy子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sql">Sql语句，说明：原样添加到Sql中，不会进行任何处理</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+        /// <returns></returns>
+        public static ISqlQuery AppendOrderBy(this ISqlQuery sqlQuery, string sql, bool condition)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.AppendOrderBy(sql, condition);
             return sqlQuery;
         }
 
