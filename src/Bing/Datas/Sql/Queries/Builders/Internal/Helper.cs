@@ -187,7 +187,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         private bool IsNotInCondition(Operator @operator, object value)
         {
-            if (@operator == Operator.In)
+            if (@operator == Operator.NotIn)
             {
                 return true;
             }            

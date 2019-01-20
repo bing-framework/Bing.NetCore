@@ -1,6 +1,6 @@
 using Xunit.Abstractions;
 
-namespace Bing.Tests
+namespace Bing.Datas.Test.Integration
 {
     public class TestBase
     {

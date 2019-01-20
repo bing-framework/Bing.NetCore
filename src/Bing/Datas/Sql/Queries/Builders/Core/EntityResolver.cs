@@ -101,7 +101,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public string GetColumn<TEntity>(Expression<Func<TEntity, object>> column)
         {
-            return GetExpressColumn<TEntity>(column);
+            return GetExpressionColumn<TEntity>(column);
         }
 
 
@@ -111,7 +111,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <returns></returns>
-        private string GetExpressColumn<TEntity>(Expression expression)
+        private string GetExpressionColumn<TEntity>(Expression expression)
         {
             if (expression == null)
             {
@@ -121,7 +121,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return GetExpressColumn<TEntity>(((LambdaExpression) expression).Body);
+                    return GetExpressionColumn<TEntity>(((LambdaExpression) expression).Body);
                 case ExpressionType.Convert:
                 case ExpressionType.MemberAccess:
                     return GetSingleColumn<TEntity>(expression);

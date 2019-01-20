@@ -349,7 +349,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="operator">条件运算符</param>
         public void On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal) where TLeft : class where TRight : class
         {
-            On(GetColumn(left), GetColumn(right));
+            On(GetColumn(left), GetColumn(right), @operator);
         }
 
         /// <summary>
@@ -427,7 +427,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public string ToSql()
         {
             var result = new StringBuilder();
-            _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect)}"));
+            _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect)} "));
             return result.ToString().Trim();
         }
     }

@@ -414,7 +414,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         public void IsNotEmpty(string column)
         {
             column = _helper.GetColumn(column);
-            And(new OrCondition(new IsNotNullCondition(column), new NotEqualCondition(column, "''")));
+            And(new AndCondition(new IsNotNullCondition(column), new NotEqualCondition(column, "''")));
         }
 
         /// <summary>
