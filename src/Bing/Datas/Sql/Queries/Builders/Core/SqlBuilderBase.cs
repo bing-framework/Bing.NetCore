@@ -409,7 +409,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             {
                 return;
             }
-            result.AppendLine($"{sql}");
+            result.AppendLine($"{sql} ");
         }
 
         /// <summary>
@@ -1805,7 +1805,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <param name="pager">分页参数</param>
         /// <returns></returns>
-        public virtual ISqlBuilder Pager(IPager pager)
+        public virtual ISqlBuilder Page(IPager pager)
         {
             _pager = pager;
             return this;

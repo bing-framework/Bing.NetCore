@@ -896,6 +896,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <param name="pager">分页参数</param>
         /// <returns></returns>
-        ISqlBuilder Pager(IPager pager);
+        ISqlBuilder Page(IPager pager);
     }
 }

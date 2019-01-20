@@ -149,7 +149,7 @@ namespace Bing.Datas.Dapper
         private void SetPager(IPager parameter)
         {
             Builder.OrderBy(parameter.Order);
-            Builder.Pager(parameter);
+            Builder.Page(parameter);
         }
 
         /// <summary>
