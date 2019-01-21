@@ -14,10 +14,16 @@ namespace Bing.Datas.Sql.Queries
     public interface ISqlQuery
     {
         /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        ISqlQuery Clone();
+
+        /// <summary>
         /// 配置
         /// </summary>
         /// <param name="configAction">配置操作</param>
-        void Config(Action<SqlQueryConfig> configAction);
+        void Config(Action<SqlQueryOptions> configAction);
 
         /// <summary>
         /// 获取Sql生成器

@@ -28,7 +28,7 @@ namespace Bing.Datas.Dapper
         /// <param name="action">Sql查询配置</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlQuery(this IServiceCollection services,
-            Action<SqlQueryConfig> action = null)
+            Action<SqlQueryOptions> action = null)
         {
             return AddSqlQuery(services, action, null, null);
         }
@@ -41,7 +41,7 @@ namespace Bing.Datas.Dapper
         /// <param name="action">Sql查询配置</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlQuery<TDatabase>(this IServiceCollection services,
-            Action<SqlQueryConfig> action = null) where TDatabase : class, IDatabase
+            Action<SqlQueryOptions> action = null) where TDatabase : class, IDatabase
         {
             return AddSqlQuery(services, action, typeof(TDatabase), null);
         }
@@ -55,7 +55,7 @@ namespace Bing.Datas.Dapper
         /// <param name="configAction">Sql查询配置</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlQuery<TDatabase, TEntityMatedata>(this IServiceCollection services,
-            Action<SqlQueryConfig> configAction = null) 
+            Action<SqlQueryOptions> configAction = null) 
             where TDatabase : class, IDatabase
             where TEntityMatedata : class, IEntityMatedata
         {
@@ -70,7 +70,7 @@ namespace Bing.Datas.Dapper
         /// <param name="database">数据库类型</param>
         /// <param name="entityMatedata">实体元数据解析器类型</param>
         /// <returns></returns>
-        private static IServiceCollection AddSqlQuery(IServiceCollection services, Action<SqlQueryConfig> configAction,
+        private static IServiceCollection AddSqlQuery(IServiceCollection services, Action<SqlQueryOptions> configAction,
             Type database, Type entityMatedata)
         {
             if (database != null)
@@ -85,7 +85,7 @@ namespace Bing.Datas.Dapper
                 services.TryAddScoped(typeof(IEntityMatedata), t => t.GetService(entityMatedata));
             }
 
-            var config = new SqlQueryConfig();
+            var config = new SqlQueryOptions();
             if (configAction != null)
             {
                 configAction.Invoke(config);
@@ -102,7 +102,7 @@ namespace Bing.Datas.Dapper
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="config">Sql查询配置</param>
-        private static void AddSqlBuilder(IServiceCollection services, SqlQueryConfig config)
+        private static void AddSqlBuilder(IServiceCollection services, SqlQueryOptions config)
         {
             switch (config.DatabaseType)
             {

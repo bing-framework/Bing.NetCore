@@ -1,6 +1,4 @@
-﻿using Bing.Datas.Sql.Queries.Builders.Abstractions;
-
-namespace Bing.Datas.Sql.Queries
+﻿namespace Bing.Datas.Sql.Queries
 {
     /// <summary>
     /// Sql生成器扩展

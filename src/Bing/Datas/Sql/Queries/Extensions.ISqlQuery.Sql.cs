@@ -12,6 +12,175 @@ namespace Bing.Datas.Sql.Queries
     /// </summary>
     public static partial class Extensions
     {
+        #region Distinct(过滤重复记录)
+
+        /// <summary>
+        /// 过滤重复记录
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <returns></returns>
+        public static ISqlQuery Distinct(this ISqlQuery sqlQuery)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Distinct();
+            return sqlQuery;
+        }
+
+        #endregion
+
+        #region Count(求总行数)
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Count(this ISqlQuery sqlQuery,string columnAlias=null)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Count(columnAlias);
+            return sqlQuery;
+        }
+
+        #endregion
+
+        #region Sum(求和)
+
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Sum(this ISqlQuery sqlQuery, string column, string columnAlias = null)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Sum(column, columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Sum<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+            string columnAlias = null) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Sum(expression, columnAlias);
+            return sqlQuery;
+        }
+
+        #endregion
+
+        #region Average(求平均值)
+
+        /// <summary>
+        /// 求平均值
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Average(this ISqlQuery sqlQuery, string column, string columnAlias = null)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Average(column, columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 求平均值
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Average<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+            string columnAlias = null) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Average(expression, columnAlias);
+            return sqlQuery;
+        }
+
+        #endregion
+
+        #region Max(求最大值)
+
+        /// <summary>
+        /// 求最大值
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Max(this ISqlQuery sqlQuery, string column, string columnAlias = null)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Max(column, columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 求最大值
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Max<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+            string columnAlias = null) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Max(expression, columnAlias);
+            return sqlQuery;
+        }
+
+        #endregion
+
+        #region Min(求最小值)
+
+        /// <summary>
+        /// 求最小值
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Min(this ISqlQuery sqlQuery, string column, string columnAlias = null)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Min(column, columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 求最小值
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Min<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+            string columnAlias = null) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Min(expression, columnAlias);
+            return sqlQuery;
+        }
+
+        #endregion
+
         #region Select(设置列名)
 
         /// <summary>

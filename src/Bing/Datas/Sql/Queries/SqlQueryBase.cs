@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bing.Datas.Queries;
-using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Configs;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
-using Bing.Utils;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 using Microsoft.Extensions.Options;
 
 namespace Bing.Datas.Sql.Queries
@@ -23,12 +17,12 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 数据库
         /// </summary>
-        private readonly IDatabase _database;
+        protected IDatabase Database { get; }
 
         /// <summary>
         /// Sql查询配置
         /// </summary>
-        protected SqlQueryConfig SqlQueryConfig { get; set; }
+        protected SqlQueryOptions SqlQueryOptions { get; set; }
 
         /// <summary>
         /// Sql生成器
@@ -45,20 +39,28 @@ namespace Bing.Datas.Sql.Queries
         /// </summary>
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="database">数据库</param>
-        protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null)
+        /// <param name="sqlQueryOptions">Sql查询配置</param>
+        protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null, SqlQueryOptions sqlQueryOptions=null)
         {
             Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
-            _database = database;
+            Database = database;
+            SqlQueryOptions = sqlQueryOptions;
         }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public abstract ISqlQuery Clone();
 
         /// <summary>
         /// 配置
         /// </summary>
         /// <param name="configAction">配置操作</param>
-        public void Config(Action<SqlQueryConfig> configAction)
+        public void Config(Action<SqlQueryOptions> configAction)
         {
-            SqlQueryConfig = new SqlQueryConfig();
-            configAction?.Invoke(SqlQueryConfig);
+            SqlQueryOptions = new SqlQueryOptions();
+            configAction?.Invoke(SqlQueryOptions);
         }
 
         /// <summary>
@@ -74,12 +76,12 @@ namespace Bing.Datas.Sql.Queries
         /// </summary>
         protected void ClearAfterExecution()
         {
-            if (SqlQueryConfig == null)
+            if (SqlQueryOptions == null)
             {
-                SqlQueryConfig = GetConfig();
+                SqlQueryOptions = GetConfig();
             }
 
-            if (SqlQueryConfig.IsClearAfterExecution == false)
+            if (SqlQueryOptions.IsClearAfterExecution == false)
             {
                 return;
             }
@@ -90,16 +92,16 @@ namespace Bing.Datas.Sql.Queries
         /// 获取配置
         /// </summary>
         /// <returns></returns>
-        private SqlQueryConfig GetConfig()
+        private SqlQueryOptions GetConfig()
         {
             try
             {
-                var options = Ioc.Create<IOptionsSnapshot<SqlQueryConfig>>();
+                var options = Ioc.Create<IOptionsSnapshot<SqlQueryOptions>>();
                 return options.Value;
             }
             catch
             {
-                return new SqlQueryConfig();
+                return new SqlQueryOptions();
             }
         }
 
@@ -135,14 +137,14 @@ namespace Bing.Datas.Sql.Queries
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public abstract object ToScalar(IDbConnection connection);
+        public abstract object ToScalar(IDbConnection connection = null);
 
         /// <summary>
         /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public abstract Task<object> ToScalarAsync(IDbConnection connection);
+        public abstract Task<object> ToScalarAsync(IDbConnection connection = null);
 
         /// <summary>
         /// 获取单个实体
@@ -279,7 +281,7 @@ namespace Bing.Datas.Sql.Queries
             {
                 return connection;
             }
-            connection = _database?.GetConnection();
+            connection = Database?.GetConnection();
             if (connection == null)
             {
                 throw new ArgumentNullException(nameof(connection));

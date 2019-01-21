@@ -36,6 +36,12 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Datas/Sql/Queries/Builders/Core/SqlBuilderBase.*.cs">
+      <DependentUpon>SqlBuilderBase.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\LibraryResource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

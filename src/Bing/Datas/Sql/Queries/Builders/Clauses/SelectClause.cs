@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
@@ -35,6 +36,16 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// 列名集合
         /// </summary>
         private readonly List<ColumnCollection> _columns;
+
+        /// <summary>
+        /// 是否排除重复记录
+        /// </summary>
+        protected bool _distinct;
+
+        /// <summary>
+        /// 是否聚合操作
+        /// </summary>
+        public bool IsAggregation => _columns.Any(t => t.IsAggregation);
 
         /// <summary>
         /// 初始化一个<see cref="SelectClause"/>类型的实例
@@ -80,6 +91,143 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 过滤重复记录
+        /// </summary>
+        public void Distinct()
+        {
+            _distinct = true;
+        }
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="columnAlias">列别名</param>
+        public void Count(string columnAlias = null)
+        {
+            if (string.IsNullOrWhiteSpace(columnAlias))
+            {
+                Aggregate("Count(*)");
+                return;
+            }
+
+            Aggregate($"Count(*) As {_dialect.SafeName(columnAlias)}");
+        }
+
+        /// <summary>
+        /// 聚合
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        private void Aggregate(string sql)
+        {
+            _columns.Add(new ColumnCollection(sql, isAggregation: true));
+        }
+
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Sum(string column, string columnAlias = null)
+        {
+            Aggregate("Sum", column, columnAlias);
+        }
+
+        /// <summary>
+        /// 聚合
+        /// </summary>
+        /// <param name="func">函数名</param>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        private void Aggregate(string func, string column, string columnAlias)
+        {
+            if (string.IsNullOrWhiteSpace(columnAlias))
+            {
+                Aggregate($"{func}({_dialect.SafeName(column)})");
+                return;
+            }
+
+            Aggregate($"{func}({_dialect.SafeName(column)}) As {_dialect.SafeName(columnAlias)}");
+        }
+
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        {
+            var column = _resolver.GetColumn(expression);
+            Sum(column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求平均值
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Average(string column, string columnAlias = null)
+        {
+            Aggregate("Avg", column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求平均值
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Average<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        {
+            var column = _resolver.GetColumn(expression);
+            Average(column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求最大值
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Max(string column, string columnAlias = null)
+        {
+            Aggregate("Max", column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求最大值
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        {
+            var column = _resolver.GetColumn(expression);
+            Max(column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求最小值
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Min(string column, string columnAlias = null)
+        {
+            Aggregate("Min", column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求最小值
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        {
+            var column = _resolver.GetColumn(expression);
+            Min(column, columnAlias);
+        }
+
+        /// <summary>
         /// 设置列名
         /// </summary>
         /// <param name="columns">列名</param>
@@ -106,7 +254,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
                 return;
             }
 
-            _columns.Add(new ColumnCollection(_resolver.GetColumns(expression, propertyAsAlias), table: typeof(TEntity)));
+            _columns.Add(new ColumnCollection(_resolver.GetColumns(expression, propertyAsAlias), tableType: typeof(TEntity)));
         }
 
         /// <summary>
@@ -128,7 +276,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
                 column += $" As {columnAlias}";
             }
 
-            _columns.Add(new ColumnCollection(column, table: typeof(TEntity)));
+            _columns.Add(new ColumnCollection(column, tableType: typeof(TEntity)));
         }
 
         /// <summary>
@@ -188,7 +336,21 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <returns></returns>
         public string ToSql()
         {
-            return $"Select {GetColumns()}";
+            return $"Select {GetDistinct()}{GetColumns()}";
+        }
+
+        /// <summary>
+        /// 获取Distinct
+        /// </summary>
+        /// <returns></returns>
+        private string GetDistinct()
+        {
+            if (_distinct)
+            {
+                return "Distinct ";
+            }
+
+            return null;
         }
 
         /// <summary>

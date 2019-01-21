@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bing.Datas.Sql;
 using Bing.Datas.Sql.Queries;
-using Bing.Datas.Sql.Queries.Builders.Abstractions;
+using Bing.Datas.Sql.Queries.Configs;
 using Bing.Domains.Repositories;
 using Bing.Logs;
 using Bing.Logs.Extensions;
@@ -34,11 +34,28 @@ namespace Bing.Datas.Dapper
         }
 
         /// <summary>
+        /// 初始化一个<see cref="SqlQuery"/>类型的实例
+        /// </summary>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="database">数据库</param>
+        /// <param name="sqlQueryOptions">Sql查询配置</param>
+        protected SqlQuery(ISqlBuilder sqlBuilder,IDatabase database,SqlQueryOptions sqlQueryOptions) : base(sqlBuilder, database, sqlQueryOptions) { }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public override ISqlQuery Clone()
+        {
+            return new SqlQuery(Builder.Clone(), Database, SqlQueryOptions);
+        }
+
+        /// <summary>
         /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public override object ToScalar(IDbConnection connection)
+        public override object ToScalar(IDbConnection connection = null)
         {
             return Query((con, sql, sqlParams) => con.ExecuteScalar(sql, sqlParams), connection);
         }
@@ -48,7 +65,7 @@ namespace Bing.Datas.Dapper
         /// </summary>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public override async Task<object> ToScalarAsync(IDbConnection connection)
+        public override async Task<object> ToScalarAsync(IDbConnection connection = null)
         {
             return await QueryAsync(async (con, sql, sqlParams) => await con.ExecuteScalarAsync(sql, sqlParams),
                 connection);
@@ -110,7 +127,7 @@ namespace Bing.Datas.Dapper
         public override PagerList<TResult> ToPagerList<TResult>(IPager parameter, IDbConnection connection = null)
         {
             return PagerQuery(() => ToList<TResult>(connection), parameter, connection);
-        }
+        }        
 
         /// <summary>
         /// 分页查询

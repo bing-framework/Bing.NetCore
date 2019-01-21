@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Bing.Datas.Matedatas;
+using Bing.Datas.Sql.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
 

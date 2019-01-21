@@ -5,7 +5,7 @@ namespace Bing.Datas.Sql.Queries.Configs
     /// <summary>
     /// Sql查询配置
     /// </summary>
-    public class SqlQueryConfig
+    public class SqlQueryOptions
     {
         /// <summary>
         /// 数据库类型，默认为Sql Server

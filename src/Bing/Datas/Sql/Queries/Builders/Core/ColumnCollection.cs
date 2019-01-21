@@ -31,18 +31,25 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public bool Raw { get; }
 
         /// <summary>
+        /// 是否聚合函数
+        /// </summary>
+        public bool IsAggregation { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="ColumnCollection"/>类型的实例
         /// </summary>
         /// <param name="columns">列集合</param>
         /// <param name="tableAlias">表别名</param>
-        /// <param name="table">表实体类型</param>
+        /// <param name="tableType">表实体类型</param>
         /// <param name="raw">是否使用原始值</param>
-        public ColumnCollection(string columns, string tableAlias = null, Type table = null, bool raw = false)
+        /// <param name="isAggregation">是否聚合函数</param>
+        public ColumnCollection(string columns, string tableAlias = null, Type tableType = null, bool raw = false, bool isAggregation = false)
         {
             Columns = columns;
             TableAlias = tableAlias;
-            Table = table;
+            Table = tableType;
             Raw = raw;
+            IsAggregation = isAggregation;
         }
 
         /// <summary>
@@ -54,6 +61,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public string ToSql(IDialect dialect, IEntityAliasRegister register)
         {
             if (Raw)
+            {
+                return Columns;
+            }
+
+            if (IsAggregation)
             {
                 return Columns;
             }
