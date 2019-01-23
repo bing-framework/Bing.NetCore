@@ -52,17 +52,5 @@
         /// </summary>
         /// <returns></returns>
         string ToSql();
-
-        /// <summary>
-        /// 生成获取行数调试Sql语句
-        /// </summary>
-        /// <returns></returns>
-        string ToCountDebugSql();
-
-        /// <summary>
-        /// 生成获取行数Sql语句
-        /// </summary>
-        /// <returns></returns>
-        string ToCountSql();
     }
 }

@@ -20,6 +20,12 @@ namespace Bing.Datas.Sql.Queries
         ISqlQuery Clone();
 
         /// <summary>
+        /// 清空并初始化
+        /// </summary>
+        /// <returns></returns>
+        ISqlQuery Clear();
+
+        /// <summary>
         /// 配置
         /// </summary>
         /// <param name="configAction">配置操作</param>
@@ -38,7 +44,7 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="func">查询操作</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        TResult Query<TResult>(Func<IDbConnection, string, IDictionary<string, object>, TResult> func,
+        TResult Query<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, TResult> func,
             IDbConnection connection = null);
 
         /// <summary>
@@ -48,7 +54,7 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="func">查询操作</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IDictionary<string, object>, Task<TResult>> func,
+        Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, Task<TResult>> func,
             IDbConnection connection = null);
 
         /// <summary>
@@ -124,7 +130,7 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        PagerList<TResult> ToPagerList<TResult>(IPager parameter, IDbConnection connection = null);
+        PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null);
 
         /// <summary>
         /// 获取分页列表
@@ -133,7 +139,7 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter, IDbConnection connection = null);
+        Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null);
 
         /// <summary>
         /// 获取分页列表

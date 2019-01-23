@@ -1122,7 +1122,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
 
             //执行
             var builder2 = _builder.New().AppendSelect("Count(*)").From("Test2").Where("Name", "a");
-            _builder.Select("*").AppendSelect("(").AppendSelect(builder2, "").AppendSelect(") As testCount").From("Test").Where("Age", 1);
+            _builder.Select("*").AppendSelect("(").Select(builder2, "").AppendSelect(") As testCount").From("Test").Where("Age", 1);
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
@@ -1148,7 +1148,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
 
             //执行
             var builder2 = _builder.New().AppendSelect("Count(*)").From("Test2").Where("Name", "a");
-            _builder.Select("*").AppendSelect(builder2, "testCount").From("Test").Where("Age", 1);
+            _builder.Select("*").Select(builder2, "testCount").From("Test").Where("Age", 1);
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
@@ -1174,7 +1174,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
 
             //执行
             var builder2 = _builder.New().From("Test2").Where("Name", "a");
-            _builder.Select("*").From("Test").AppendJoin(builder2, "t").Where("Age", 1);
+            _builder.Select("*").From("Test").Join(builder2, "t").Where("Age", 1);
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
@@ -1221,7 +1221,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             result.Append("Where [Age]=@_p_1");
 
             //执行
-            _builder.Select("*").AppendSelect(builder => {
+            _builder.Select("*").Select(builder => {
                 builder.AppendSelect("Count(*)").From("Test2").Where("Name", "a");
             }, "testCount")
             .From("Test").Where("Age", 1);
@@ -1249,7 +1249,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             result.Append("Where [Age]=@_p_1");
 
             //执行
-            _builder.Select("*").From("Test").AppendJoin(builder => {
+            _builder.Select("*").From("Test").Join(builder => {
                 builder.From("Test2").Where("Name", "a");
             }, "t").Where("Age", 1);
 
@@ -1273,10 +1273,10 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             result.Append("Where [Age]=@_p_0");
 
             //执行
-            _builder.From("Test").Where("Age", 1);
+            _builder.Count().From("Test").Where("Age", 1);
 
             //验证
-            Assert.Equal(result.ToString(), _builder.ToCountSql());
+            Assert.Equal(result.ToString(), _builder.ToSql());
         }
 
         /// <summary>
@@ -1299,7 +1299,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             _builder.From("Test").Where("Age", 1).GroupBy("Age");
 
             //验证
-            Assert.Equal(result.ToString(), _builder.ToCountSql());
+            Assert.Equal(result.ToString(), _builder.ToSql());
         }
     }
 }

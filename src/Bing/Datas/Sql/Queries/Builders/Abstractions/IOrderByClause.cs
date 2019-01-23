@@ -40,8 +40,8 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 验证
         /// </summary>
-        /// <param name="pager">分页</param>
-        void Validate(IPager pager);
+        /// <param name="isPage">是否分页</param>
+        void Validate(bool isPage);
 
         /// <summary>
         /// 获取Sql

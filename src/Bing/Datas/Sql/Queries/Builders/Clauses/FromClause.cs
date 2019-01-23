@@ -32,13 +32,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         protected readonly IEntityAliasRegister Register;
 
         /// <summary>
+        /// Sql生成器
+        /// </summary>
+        protected readonly ISqlBuilder Builder;
+
+        /// <summary>
         /// 初始化一个<see cref="FromClause"/>类型的实例
         /// </summary>
+        /// <param name="builder">Sql生成器</param>
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
-        public FromClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
+        public FromClause(ISqlBuilder builder,IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
         {
+            Builder = builder;
             Dialect = dialect;
             Resolver = resolver;
             Register = register;
@@ -50,6 +57,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="fromClause">From子句</param>
         protected FromClause(FromClause fromClause)
         {
+            Builder = fromClause.Builder;
             Dialect = fromClause.Dialect;
             Resolver = fromClause.Resolver;
             Register = fromClause.Register;
@@ -100,6 +108,43 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             var table = Resolver.GetTableAndSchema(entity);
             Table = CreateSqlItem(table, schema, alias);
             Register.Register(entity, Resolver.GetAlias(entity, alias));
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        public void From(ISqlBuilder builder, string alias)
+        {
+            if (builder == null)
+            {
+                return;
+            }
+
+            var result = builder.ToSql();
+            if (string.IsNullOrWhiteSpace(alias) == false)
+            {
+                result = $"({result}) As {Dialect.SafeName(alias)}";
+            }
+            AppendSql(result);
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        public void From(Action<ISqlBuilder> action, string alias)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var builder = Builder.New();
+            action(builder);
+            From(builder, alias);
         }
 
         /// <summary>

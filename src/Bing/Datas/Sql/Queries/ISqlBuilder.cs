@@ -17,6 +17,11 @@ namespace Bing.Datas.Sql.Queries
         IAggregateFunc
     {
         /// <summary>
+        /// 分页
+        /// </summary>
+        IPager Pager { get; }
+
+        /// <summary>
         /// 克隆
         /// </summary>
         /// <returns></returns>
@@ -39,7 +44,7 @@ namespace Bing.Datas.Sql.Queries
         /// 获取参数列表
         /// </summary>
         /// <returns></returns>
-        IDictionary<string, object> GetParams();        
+        IReadOnlyDictionary<string, object> GetParams();        
 
         /// <summary>
         /// 设置分页
@@ -47,5 +52,19 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="pager">分页参数</param>
         /// <returns></returns>
         ISqlBuilder Page(IPager pager);
+
+        /// <summary>
+        /// 设置跳过行数
+        /// </summary>
+        /// <param name="count">跳过的行数</param>
+        /// <returns></returns>
+        ISqlBuilder Skip(int count);
+
+        /// <summary>
+        /// 设置获取行数
+        /// </summary>
+        /// <param name="count">获取的行数</param>
+        /// <returns></returns>
+        ISqlBuilder Take(int count);
     }
 }

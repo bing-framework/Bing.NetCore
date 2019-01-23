@@ -18,12 +18,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 是否存在分组
         /// </summary>
-        bool IsGroupBy { get; }
+        bool IsGroup { get; }
 
         /// <summary>
         /// 分组列表
         /// </summary>
-        string GroupByColumns { get; }
+        string GroupColumns { get; }
 
         /// <summary>
         /// 分组

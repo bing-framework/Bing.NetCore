@@ -42,12 +42,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 是否存在分组
         /// </summary>
-        public bool IsGroupBy => _group.Count > 0;
+        public bool IsGroup => _group.Count > 0;
 
         /// <summary>
         /// 分组列表
         /// </summary>
-        public string GroupByColumns => _group.Select(t => t.ToSql(_dialect)).Join();
+        public string GroupColumns => _group.Select(t => t.ToSql(_dialect)).Join();
 
         /// <summary>
         /// 初始化一个<see cref="GroupByClause"/>类型的实例
@@ -162,7 +162,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
             }
 
             var result = new StringBuilder();
-            result.Append($"Group By {GroupByColumns}");
+            result.Append($"Group By {GroupColumns}");
             if (string.IsNullOrWhiteSpace(_having))
             {
                 return result.ToString();

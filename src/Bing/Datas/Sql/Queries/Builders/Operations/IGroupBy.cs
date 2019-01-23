@@ -9,6 +9,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
     public interface IGroupBy
     {
         /// <summary>
+        /// 是否分组
+        /// </summary>
+        bool IsGroup { get; }
+
+        /// <summary>
         /// 分组
         /// </summary>
         /// <param name="columns">分组字段，范例：a.Id,b.Name</param>

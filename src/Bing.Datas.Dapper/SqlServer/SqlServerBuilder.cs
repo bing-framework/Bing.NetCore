@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Bing.Datas.Matedatas;
+﻿using Bing.Datas.Matedatas;
 using Bing.Datas.Sql.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
@@ -41,16 +40,9 @@ namespace Bing.Datas.Dapper.SqlServer
         /// <summary>
         /// 创建分页Sql
         /// </summary>
-        /// <param name="result">Sql拼接</param>
-        protected override void CreatePagerSql(StringBuilder result)
+        protected override string CreateLimitSql()
         {
-            AppendSelect(result);
-            AppendFrom(result);
-            AppendSql(result,GetJoin());
-            AppendSql(result,GetWhere());
-            AppendSql(result, GetGroupBy());
-            AppendSql(result,GetOrderBy());
-            result.Append($"Offset {GetSkipCountParam()} Rows Fetch Next {GetPageSizeParam()} Rows Only");
+            return $"Offset {GetOffsetParam()} Rows Fetch Next {GetLimitParam()} Rows Only";
         }
 
         /// <summary>

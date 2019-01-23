@@ -18,10 +18,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// 获取参数列表
         /// </summary>
         /// <returns></returns>
-        IDictionary<string, object> GetParams();
+        IReadOnlyDictionary<string, object> GetParams();
 
         /// <summary>
-        /// 添加参数
+        /// 添加参数，如果参数已存在则替换
         /// </summary>
         /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
@@ -33,5 +33,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <returns></returns>
         IParameterManager Clone();
+
+        /// <summary>
+        /// 清空参数
+        /// </summary>
+        void Clear();
     }
 }

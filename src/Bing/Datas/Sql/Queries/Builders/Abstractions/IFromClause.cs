@@ -1,4 +1,6 @@
-﻿namespace Bing.Datas.Sql.Queries.Builders.Abstractions
+﻿using System;
+
+namespace Bing.Datas.Sql.Queries.Builders.Abstractions
 {
     /// <summary>
     /// From子句
@@ -26,6 +28,20 @@
         /// <param name="alias">别名</param>
         /// <param name="schema">架构名</param>
         void From<TEntity>(string alias = null, string schema = null) where TEntity : class;
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        void From(ISqlBuilder builder, string alias);
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        void From(Action<ISqlBuilder> action, string alias);
 
         /// <summary>
         /// 添加到From子句

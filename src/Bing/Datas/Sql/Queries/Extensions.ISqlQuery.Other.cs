@@ -51,18 +51,6 @@
         }
 
         /// <summary>
-        /// 清空并初始化。用于多次执行不同Sql语句，当执行完一个Sql语句后，清空即可继续使用
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
-        public static ISqlQuery Clear(this ISqlQuery sqlQuery)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.Clear();
-            return sqlQuery;
-        }
-
-        /// <summary>
         /// 清空Select子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>

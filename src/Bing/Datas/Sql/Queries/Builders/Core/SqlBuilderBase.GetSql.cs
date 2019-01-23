@@ -51,18 +51,21 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         public virtual string GetWhere()
         {
-            var whereClause = WhereClause.Clone(AliasRegister, ParameterManager.Clone());
-            AddFilters(whereClause);
-            return whereClause.ToSql();
+            if (_isAddFilters == false)
+            {
+                AddFilters();
+            }
+
+            return WhereClause.ToSql();
         }
 
         /// <summary>
         /// 添加过滤器列表
         /// </summary>
-        /// <param name="whereClause">Where子句</param>
-        private void AddFilters(IWhereClause whereClause)
+        private void AddFilters()
         {
-            var context = new SqlQueryContext(AliasRegister, whereClause, EntityMatedata);
+            _isAddFilters = true;
+            var context = new SqlQueryContext(AliasRegister, WhereClause, EntityMatedata);
             SqlFilterCollection.Filters.ForEach(filter => filter.Filter(context));
         }
 
@@ -112,26 +115,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             return sql;
         }
 
-        /// <summary>
-        /// 参数字面值解析器
-        /// </summary>
-        private IParamLiteralsResolver _paramLiteralsResolver;
-
-        /// <summary>
-        /// 参数字面值解析器
-        /// </summary>
-        protected IParamLiteralsResolver ParamLiteralsResolver =>
-            _paramLiteralsResolver ?? (_paramLiteralsResolver = GetParamLiteralsResolver());
-
-        /// <summary>
-        /// 获取参数字面值解析器
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IParamLiteralsResolver GetParamLiteralsResolver()
-        {
-            return new ParamLiteralsResolver();
-        }
-
         #endregion
 
         #region ToSql(生成Sql)
@@ -154,7 +137,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         public virtual void Init()
         {
-            OrderByClause.OrderBy(_pager?.Order);
+            OrderByClause.OrderBy(Pager?.Order);
         }
 
         /// <summary>
@@ -163,7 +146,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         public virtual void Validate()
         {
             FromClause.Validate();
-            OrderByClause.Validate(_pager);
+            OrderByClause.Validate(IsLimit);
         }
 
         /// <summary>
@@ -172,26 +155,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="result"></param>
         protected virtual void CreateSql(StringBuilder result)
         {
-            if (_pager == null)
-            {
-                CreateNoPagerSql(result);
-                return;
-            }
-            CreatePagerSql(result);
-        }
-
-        /// <summary>
-        /// 创建不分页Sql
-        /// </summary>
-        /// <param name="result">Sql拼接器</param>
-        protected virtual void CreateNoPagerSql(StringBuilder result)
-        {
             AppendSelect(result);
             AppendFrom(result);
             AppendSql(result, GetJoin());
             AppendSql(result, GetWhere());
             AppendSql(result, GetGroupBy());
             AppendSql(result, GetOrderBy());
+            AppendLimit(result);
         }
 
         /// <summary>
@@ -205,6 +175,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             {
                 return;
             }
+
             result.AppendLine($"{sql} ");
         }
 
@@ -239,76 +210,21 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
+        /// 添加分页Sql
+        /// </summary>
+        /// <param name="result">Sql拼接器</param>
+        private void AppendLimit(StringBuilder result)
+        {
+            if (IsLimit)
+            {
+                AppendSql(result, CreateLimitSql());
+            }
+        }
+
+        /// <summary>
         /// 创建分页Sql
         /// </summary>
-        /// <param name="result">Sql拼接</param>
-        protected abstract void CreatePagerSql(StringBuilder result);
-
-        #endregion
-
-        #region ToCountDebugSql(生成获取行数调试Sql语句)
-
-        /// <summary>
-        /// 生成获取行数调试Sql语句
-        /// </summary>
-        /// <returns></returns>
-        public virtual string ToCountDebugSql()
-        {
-            return GetDebugSql(ToCountSql());
-        }
-
-        #endregion
-
-        #region ToCountSql(生成获取行数Sql语句)
-
-        /// <summary>
-        /// 生成获取行数Sql语句
-        /// </summary>
-        /// <returns></returns>
-        public virtual string ToCountSql()
-        {
-            Init();
-            Validate();
-            var result = new StringBuilder();
-            if (GroupByClause.IsGroupBy)
-            {
-                AppendGroupCountSql(result);
-            }
-            else
-            {
-                AppendNoGroupCountSql(result);
-            }
-
-            return result.ToString().Trim();
-        }
-
-        /// <summary>
-        /// 添加未分组的获取行数Sql语句
-        /// </summary>
-        /// <param name="result">Sql拼接器</param>
-        private void AppendNoGroupCountSql(StringBuilder result)
-        {
-            result.AppendLine("Select Count(*) ");
-            AppendFrom(result);
-            AppendSql(result, GetJoin());
-            AppendSql(result, GetWhere());
-        }
-
-        /// <summary>
-        /// 添加分组的获取行数Sql语句
-        /// </summary>
-        /// <param name="result">Sql拼接器</param>
-        private void AppendGroupCountSql(StringBuilder result)
-        {
-            result.AppendLine("Select Count(*) ");
-            result.AppendLine("From (");
-            result.AppendLine($"Select {GroupByClause.GroupByColumns} ");
-            AppendFrom(result);
-            AppendSql(result, GetJoin());
-            AppendSql(result, GetWhere());
-            result.AppendLine(GetGroupBy());
-            result.Append(") As t");
-        }
+        protected abstract string CreateLimitSql();
 
         #endregion
     }

@@ -22,6 +22,24 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         ISqlBuilder Count(string columnAlias = null);
 
         /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        ISqlBuilder Count(string column, string columnAlias);
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        ISqlBuilder Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null)
+            where TEntity : class;
+
+        /// <summary>
         /// 求和
         /// </summary>
         /// <param name="column">列名</param>
@@ -45,7 +63,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        ISqlBuilder Average(string column, string columnAlias = null);
+        ISqlBuilder Avg(string column, string columnAlias = null);
 
         /// <summary>
         /// 求平均值
@@ -54,7 +72,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        ISqlBuilder Average<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class;
+        ISqlBuilder Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class;
 
         /// <summary>
         /// 求最大值

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Utils;
 using Bing.Utils.Extensions;
@@ -60,13 +61,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 获取参数列表
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, object> GetParams()
+        public IReadOnlyDictionary<string, object> GetParams()
         {
-            return _params;
+            return new ReadOnlyDictionary<string, object>(_params);
         }        
 
         /// <summary>
-        /// 添加参数
+        /// 添加参数，如果参数已存在则替换
         /// </summary>
         /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
@@ -77,16 +78,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             {
                 return;
             }
-            _params.Add(name, GetValue(value, @operator));
-        }
 
-        /// <summary>
-        /// 克隆
-        /// </summary>
-        /// <returns></returns>
-        public IParameterManager Clone()
-        {
-            return new ParameterManager(this);
+            if (_params.ContainsKey(name))
+            {
+                _params.Remove(name);
+            }
+            _params.Add(name, GetValue(value, @operator));
         }
 
         /// <summary>
@@ -112,6 +109,24 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
                 default:
                     return value;
             }
+        }
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public IParameterManager Clone()
+        {
+            return new ParameterManager(this);
+        }
+
+        /// <summary>
+        /// 清空参数
+        /// </summary>
+        public void Clear()
+        {
+            _paramIndex = 0;
+            _params.Clear();
         }
     }
 }

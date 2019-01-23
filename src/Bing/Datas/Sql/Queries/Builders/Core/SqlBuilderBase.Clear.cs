@@ -9,13 +9,13 @@
         public void Clear()
         {
             AliasRegister = new EntityAliasRegister();
-            ClearSqlParams();
             ClearSelect();
             ClearFrom();
             ClearJoin();
             ClearWhere();
             ClearGroupBy();
             ClearOrderBy();
+            ClearSqlParams();
             ClearPageParams();
         }
 
@@ -48,6 +48,7 @@
         /// </summary>
         public void ClearWhere()
         {
+            _isAddFilters = false;
             _whereClause = CreateWhereClause();
         }
 
@@ -72,7 +73,7 @@
         /// </summary>
         public void ClearSqlParams()
         {
-            _parameterManager = CreateParameterManager();
+            _parameterManager.Clear();
         }
 
         /// <summary>
@@ -80,9 +81,9 @@
         /// </summary>
         public void ClearPageParams()
         {
-            _pager = null;
-            _skipCountParam = null;
-            _pageSizeParam = null;
+            Pager = null;
+            OffsetParam = null;
+            LimitParam = null;
         }
     }
 }

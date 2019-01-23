@@ -184,7 +184,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
-        public void AppendJoin(ISqlBuilder builder, string alias)
+        public void Join(ISqlBuilder builder, string alias)
         {
             AppendJoin(JoinKey, builder, alias);
         }
@@ -205,7 +205,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
-        public void AppendJoin(Action<ISqlBuilder> action, string alias)
+        public void Join(Action<ISqlBuilder> action, string alias)
         {
             AppendJoin(JoinKey, action, alias);
         }
@@ -263,7 +263,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
-        public void AppendLeftJoin(ISqlBuilder builder, string alias)
+        public void LeftJoin(ISqlBuilder builder, string alias)
         {
             AppendJoin(LeftJoinKey, builder, alias);
         }
@@ -273,7 +273,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
-        public void AppendLeftJoin(Action<ISqlBuilder> action, string alias)
+        public void LeftJoin(Action<ISqlBuilder> action, string alias)
         {
             AppendJoin(LeftJoinKey, action, alias);
         }
@@ -313,7 +313,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
-        public void AppendRightJoin(ISqlBuilder builder, string alias)
+        public void RightJoin(ISqlBuilder builder, string alias)
         {
             AppendJoin(RightJoinKey, builder, alias);
         }
@@ -323,7 +323,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
-        public void AppendRightJoin(Action<ISqlBuilder> action, string alias)
+        public void RightJoin(Action<ISqlBuilder> action, string alias)
         {
             AppendJoin(RightJoinKey, action, alias);
         }

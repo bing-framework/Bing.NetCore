@@ -40,7 +40,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 是否排除重复记录
         /// </summary>
-        protected bool _distinct;
+        private bool _distinct;
 
         /// <summary>
         /// 是否聚合操作
@@ -114,6 +114,28 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Count(string column, string columnAlias)
+        {
+            Aggregate("Count", column, columnAlias);
+        }
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        {
+            var column = _resolver.GetColumn(expression);
+            Count(column, columnAlias);
+        }
+
+        /// <summary>
         /// 聚合
         /// </summary>
         /// <param name="sql">Sql语句</param>
@@ -166,7 +188,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="column">列</param>
         /// <param name="columnAlias">列别名</param>
-        public void Average(string column, string columnAlias = null)
+        public void Avg(string column, string columnAlias = null)
         {
             Aggregate("Avg", column, columnAlias);
         }
@@ -177,10 +199,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Average<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
         {
             var column = _resolver.GetColumn(expression);
-            Average(column, columnAlias);
+            Avg(column, columnAlias);
         }
 
         /// <summary>
@@ -282,22 +304,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 添加到Select子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
-        public void AppendSql(string sql)
-        {
-            if (string.IsNullOrWhiteSpace(sql))
-            {
-                return;
-            }
-            _columns.Add(new ColumnCollection(sql, raw: true));
-        }
-
-        /// <summary>
-        /// 添加到Select子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="columnAlias">列别名</param>
-        public void AppendSql(ISqlBuilder builder, string columnAlias)
+        public void Select(ISqlBuilder builder, string columnAlias)
         {
             if (builder == null)
             {
@@ -318,7 +327,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="columnAlias">列别名</param>
-        public void AppendSql(Action<ISqlBuilder> action, string columnAlias)
+        public void Select(Action<ISqlBuilder> action, string columnAlias)
         {
             if (action == null)
             {
@@ -327,7 +336,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
 
             var builder = _sqlBuilder.New();
             action(builder);
-            AppendSql(builder, columnAlias);
+            Select(builder, columnAlias);
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        public void AppendSql(string sql)
+        {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return;
+            }
+            _columns.Add(new ColumnCollection(sql, raw: true));
         }
 
         /// <summary>

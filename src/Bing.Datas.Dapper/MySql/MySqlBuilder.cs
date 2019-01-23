@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Bing.Datas.Matedatas;
+﻿using Bing.Datas.Matedatas;
 using Bing.Datas.Sql.Queries;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
@@ -36,21 +35,14 @@ namespace Bing.Datas.Dapper.MySql
         public override ISqlBuilder New()
         {
             return new MySqlBuilder(EntityMatedata, ParameterManager);
-        }
+        }        
 
         /// <summary>
         /// 创建分页Sql
         /// </summary>
-        /// <param name="result">Sql拼接</param>
-        protected override void CreatePagerSql(StringBuilder result)
+        protected override string CreateLimitSql()
         {
-            AppendSelect(result);
-            AppendFrom(result);
-            AppendSql(result, GetJoin());
-            AppendSql(result, GetWhere());
-            AppendSql(result, GetGroupBy());
-            AppendSql(result, GetOrderBy());
-            result.Append($"Limit {GetSkipCountParam()}, {GetPageSizeParam()}");
+            return $"Limit {GetOffsetParam()}, {GetLimitParam()}";
         }
 
         /// <summary>
@@ -68,7 +60,7 @@ namespace Bing.Datas.Dapper.MySql
         /// <returns></returns>
         protected override IFromClause CreateFromClause()
         {
-            return new MySqlFromClause(GetDialect(), EntityResolver, AliasRegister);
+            return new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister);
         }
 
         /// <summary>

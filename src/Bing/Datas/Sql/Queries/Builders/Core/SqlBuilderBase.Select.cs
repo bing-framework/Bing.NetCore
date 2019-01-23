@@ -47,23 +47,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 添加到Select子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
-        /// <returns></returns>
-        public virtual ISqlBuilder AppendSelect(string sql)
-        {
-            SelectClause.AppendSql(sql);
-            return this;
-        }
-
-        /// <summary>
-        /// 添加到Select子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendSelect(ISqlBuilder builder, string columnAlias)
+        public virtual ISqlBuilder Select(ISqlBuilder builder, string columnAlias)
         {
-            SelectClause.AppendSql(builder, columnAlias);
+            SelectClause.Select(builder, columnAlias);
             return this;
         }
 
@@ -73,9 +62,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="action">子查询操作</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendSelect(Action<ISqlBuilder> action, string columnAlias)
+        public virtual ISqlBuilder Select(Action<ISqlBuilder> action, string columnAlias)
         {
-            SelectClause.AppendSql(action, columnAlias);
+            SelectClause.Select(action, columnAlias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendSelect(string sql)
+        {
+            SelectClause.AppendSql(sql);
             return this;
         }
     }

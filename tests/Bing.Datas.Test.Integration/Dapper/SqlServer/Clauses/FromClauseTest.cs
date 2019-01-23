@@ -23,7 +23,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         /// </summary>
         public FromClauseTest(ITestOutputHelper output) : base(output)
         {
-            _clause = new FromClause(new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister());
+            _clause = new FromClause(null, new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister());
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_From_13()
         {
-            _clause = new FromClause(new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
+            _clause = new FromClause(null, new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
             _clause.From<Sample>();
             var result = _clause.ToSql();
             Assert.Equal("From [s].[t_Sample]", result);
@@ -187,7 +187,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_From_14()
         {
-            _clause = new FromClause(new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
+            _clause = new FromClause(null, new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
             _clause.From<Sample>("a");
             var result = _clause.ToSql();
             Assert.Equal("From [s].[t_Sample] As [a]", result);

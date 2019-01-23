@@ -10,7 +10,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 过滤重复记录
         /// </summary>
         /// <returns></returns>
-        public ISqlBuilder Distinct()
+        public virtual ISqlBuilder Distinct()
         {
             SelectClause.Distinct();
             return this;
@@ -21,9 +21,34 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Count(string columnAlias = null)
+        public virtual ISqlBuilder Count(string columnAlias = null)
         {
             SelectClause.Count(columnAlias);
+            return this;
+        }
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder Count(string column, string columnAlias)
+        {
+            SelectClause.Count(column, columnAlias);
+            return this;
+        }
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        {
+            SelectClause.Count(expression,columnAlias);
             return this;
         }
 
@@ -33,7 +58,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Sum(string column, string columnAlias = null)
+        public virtual ISqlBuilder Sum(string column, string columnAlias = null)
         {
             SelectClause.Sum(column, columnAlias);
             return this;
@@ -46,7 +71,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        public virtual ISqlBuilder Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
         {
             SelectClause.Sum(expression, columnAlias);
             return this;
@@ -58,9 +83,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Average(string column, string columnAlias = null)
+        public virtual ISqlBuilder Avg(string column, string columnAlias = null)
         {
-            SelectClause.Average(column, columnAlias);
+            SelectClause.Avg(column, columnAlias);
             return this;
         }
 
@@ -71,9 +96,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Average<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        public virtual ISqlBuilder Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
         {
-            SelectClause.Average(expression, columnAlias);
+            SelectClause.Avg(expression, columnAlias);
             return this;
         }
 
@@ -83,7 +108,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Max(string column, string columnAlias = null)
+        public virtual ISqlBuilder Max(string column, string columnAlias = null)
         {
             SelectClause.Max(column, columnAlias);
             return this;
@@ -96,7 +121,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        public virtual ISqlBuilder Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
         {
             SelectClause.Max(expression, columnAlias);
             return this;
@@ -108,7 +133,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Min(string column, string columnAlias = null)
+        public virtual ISqlBuilder Min(string column, string columnAlias = null)
         {
             SelectClause.Min(column, columnAlias);
             return this;
@@ -121,7 +146,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public ISqlBuilder Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
+        public virtual ISqlBuilder Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
         {
             SelectClause.Min(expression, columnAlias);
             return this;

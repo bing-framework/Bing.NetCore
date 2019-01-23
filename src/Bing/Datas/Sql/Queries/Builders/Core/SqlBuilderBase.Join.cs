@@ -33,23 +33,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 添加到内连接子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
-        /// <returns></returns>
-        public virtual ISqlBuilder AppendJoin(string sql)
-        {
-            JoinClause.AppendJoin(sql);
-            return this;
-        }
-
-        /// <summary>
-        /// 添加到内连接子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendJoin(ISqlBuilder builder, string alias)
+        public virtual ISqlBuilder Join(ISqlBuilder builder, string alias)
         {
-            JoinClause.AppendJoin(builder, alias);
+            JoinClause.Join(builder, alias);
             return this;
         }
 
@@ -59,9 +48,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendJoin(Action<ISqlBuilder> action, string alias)
+        public virtual ISqlBuilder Join(Action<ISqlBuilder> action, string alias)
         {
-            JoinClause.AppendJoin(action, alias);
+            JoinClause.Join(action, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendJoin(string sql)
+        {
+            JoinClause.AppendJoin(sql);
             return this;
         }
 
@@ -93,23 +93,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 添加到左外连接子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
-        /// <returns></returns>
-        public virtual ISqlBuilder AppendLeftJoin(string sql)
-        {
-            JoinClause.AppendLeftJoin(sql);
-            return this;
-        }
-
-        /// <summary>
-        /// 添加到左外连接子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendLeftJoin(ISqlBuilder builder, string alias)
+        public virtual ISqlBuilder LeftJoin(ISqlBuilder builder, string alias)
         {
-            JoinClause.AppendLeftJoin(builder, alias);
+            JoinClause.LeftJoin(builder, alias);
             return this;
         }
 
@@ -119,9 +108,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendLeftJoin(Action<ISqlBuilder> action, string alias)
+        public virtual ISqlBuilder LeftJoin(Action<ISqlBuilder> action, string alias)
         {
-            JoinClause.AppendLeftJoin(action, alias);
+            JoinClause.LeftJoin(action, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendLeftJoin(string sql)
+        {
+            JoinClause.AppendLeftJoin(sql);
             return this;
         }
 
@@ -153,23 +153,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <summary>
         /// 添加到右外连接子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
-        /// <returns></returns>
-        public virtual ISqlBuilder AppendRightJoin(string sql)
-        {
-            JoinClause.AppendRightJoin(sql);
-            return this;
-        }
-
-        /// <summary>
-        /// 添加到右外连接子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendRightJoin(ISqlBuilder builder, string alias)
+        public virtual ISqlBuilder RightJoin(ISqlBuilder builder, string alias)
         {
-            JoinClause.AppendRightJoin(builder, alias);
+            JoinClause.RightJoin(builder, alias);
             return this;
         }
 
@@ -179,9 +168,20 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        public virtual ISqlBuilder AppendRightJoin(Action<ISqlBuilder> action, string alias)
+        public virtual ISqlBuilder RightJoin(Action<ISqlBuilder> action, string alias)
         {
-            JoinClause.AppendRightJoin(action, alias);
+            JoinClause.RightJoin(action, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder AppendRightJoin(string sql)
+        {
+            JoinClause.AppendRightJoin(sql);
             return this;
         }
     }

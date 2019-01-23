@@ -1,4 +1,6 @@
-﻿namespace Bing.Datas.Sql.Queries.Builders.Core
+﻿using System;
+
+namespace Bing.Datas.Sql.Queries.Builders.Core
 {
     // From(设置表名)
     public partial class SqlBuilderBase
@@ -25,6 +27,30 @@
         public virtual ISqlBuilder From<TEntity>(string alias = null, string schema = null) where TEntity : class
         {
             FromClause.From<TEntity>(alias, schema);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder From(ISqlBuilder builder, string alias)
+        {
+            FromClause.From(builder, alias);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public virtual ISqlBuilder From(Action<ISqlBuilder> action, string alias)
+        {
+            FromClause.From(action, alias);
             return this;
         }
 

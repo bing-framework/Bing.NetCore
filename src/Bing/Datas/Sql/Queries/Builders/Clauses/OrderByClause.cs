@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Queries.Builders.Abstractions;
 using Bing.Datas.Sql.Queries.Builders.Core;
-using Bing.Domains.Repositories;
 using Bing.Properties;
 using Bing.Utils.Extensions;
 
@@ -151,10 +150,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 验证
         /// </summary>
-        /// <param name="pager">分页</param>
-        public void Validate(IPager pager)
+        /// <param name="isPage">是否分页</param>
+        public void Validate(bool isPage)
         {
-            if (pager == null)
+            if (isPage == false)
             {
                 return;
             }

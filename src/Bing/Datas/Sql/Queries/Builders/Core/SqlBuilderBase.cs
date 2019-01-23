@@ -54,19 +54,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         private IOrderByClause _orderByClause;
 
         /// <summary>
-        /// 分页
+        /// 参数字面值解析器
         /// </summary>
-        private IPager _pager;
+        private IParamLiteralsResolver _paramLiteralsResolver;
 
         /// <summary>
-        /// 分页跳过行数参数名
+        /// 是否已添加过滤器
         /// </summary>
-        private string _skipCountParam;
-
-        /// <summary>
-        /// 分页大小参数名
-        /// </summary>
-        private string _pageSizeParam;
+        private bool _isAddFilters;
 
         #endregion
 
@@ -127,6 +122,36 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         protected IOrderByClause OrderByClause => _orderByClause ?? (_orderByClause = CreateOrderByClause());
 
+        /// <summary>
+        /// 参数字面值解析器
+        /// </summary>
+        protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ?? (_paramLiteralsResolver = GetParamLiteralsResolver());
+
+        /// <summary>
+        /// 跳过行数参数名
+        /// </summary>
+        protected string OffsetParam { get; private set; }
+
+        /// <summary>
+        /// 限制行数参数名
+        /// </summary>
+        protected string LimitParam { get; private set; }
+
+        /// <summary>
+        /// 分页
+        /// </summary>
+        public IPager Pager { get; private set; }
+
+        /// <summary>
+        /// 是否分组
+        /// </summary>
+        public bool IsGroup => GroupByClause.IsGroup;
+
+        /// <summary>
+        /// 是否限制行数
+        /// </summary>
+        protected bool IsLimit => string.IsNullOrWhiteSpace(LimitParam) == false;
+
         #endregion
 
         #region 构造函数
@@ -178,7 +203,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         protected virtual IFromClause CreateFromClause()
         {
-            return new FromClause(Dialect, EntityResolver, AliasRegister);
+            return new FromClause(this, Dialect, EntityResolver, AliasRegister);
         }
 
         /// <summary>
@@ -217,6 +242,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             return new OrderByClause(Dialect, EntityResolver, AliasRegister);
         }
 
+        /// <summary>
+        /// 获取参数字面值解析器
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IParamLiteralsResolver GetParamLiteralsResolver()
+        {
+            return new ParamLiteralsResolver();
+        }
+
         #endregion
 
         #region Clone(克隆)
@@ -243,7 +277,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             _whereClause = sqlBuilder._whereClause?.Clone(AliasRegister, _parameterManager);
             _groupByClause = sqlBuilder._groupByClause?.Clone(AliasRegister);
             _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
-            _pager = sqlBuilder._pager;
+            Pager = sqlBuilder.Pager;
+            OffsetParam = sqlBuilder.OffsetParam;
+            LimitParam = sqlBuilder.LimitParam;
         }
 
         #endregion
@@ -278,7 +314,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 获取参数
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, object> GetParams()
+        public IReadOnlyDictionary<string, object> GetParams()
         {
             return ParameterManager.GetParams();
         }
@@ -288,44 +324,59 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         #region Pager(设置分页)
 
         /// <summary>
-        /// 获取分页参数
+        /// 设置跳过行数
         /// </summary>
+        /// <param name="count">跳过的行数</param>
         /// <returns></returns>
-        protected IPager GetPager()
+        public ISqlBuilder Skip(int count)
         {
-            return _pager;
+            var param = GetOffsetParam();
+            ParameterManager.Add(param, count);
+            return this;
         }
 
         /// <summary>
-        /// 获取分页跳过行数的参数
+        /// 获取跳过行数的参数名
         /// </summary>
         /// <returns></returns>
-        protected string GetSkipCountParam()
+        protected string GetOffsetParam()
         {
-            if (string.IsNullOrWhiteSpace(_skipCountParam) == false)
+            if (string.IsNullOrWhiteSpace(OffsetParam) == false)
             {
-                return _skipCountParam;
+                return OffsetParam;
             }
 
-            _skipCountParam = ParameterManager.GenerateName();
-            ParameterManager.Add(_skipCountParam, GetPager().GetSkipCount());
-            return _skipCountParam;
+            OffsetParam = ParameterManager.GenerateName();
+            ParameterManager.Add(OffsetParam, 0);
+            return OffsetParam;
         }
 
         /// <summary>
-        /// 获取分页大小的额参数
+        /// 设置获取行数
+        /// </summary>
+        /// <param name="count">获取的行数</param>
+        /// <returns></returns>
+        public ISqlBuilder Take(int count)
+        {
+            var param = GetLimitParam();
+            ParameterManager.Add(param, count);
+            Pager.PageSize = count;
+            return this;
+        }
+
+        /// <summary>
+        /// 获取限制行数的参数名
         /// </summary>
         /// <returns></returns>
-        protected string GetPageSizeParam()
+        protected string GetLimitParam()
         {
-            if (string.IsNullOrWhiteSpace(_pageSizeParam) == false)
+            if (string.IsNullOrWhiteSpace(LimitParam) == false)
             {
-                return _pageSizeParam;
+                return LimitParam;
             }
 
-            _pageSizeParam = ParameterManager.GenerateName();
-            ParameterManager.Add(_pageSizeParam, GetPager().PageSize);
-            return _pageSizeParam;
+            LimitParam = ParameterManager.GenerateName();
+            return LimitParam;
         }
 
         /// <summary>
@@ -333,9 +384,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <param name="pager">分页参数</param>
         /// <returns></returns>
-        public virtual ISqlBuilder Page(IPager pager)
+        public ISqlBuilder Page(IPager pager)
         {
-            _pager = pager;
+            if (pager == null)
+            {
+                return this;
+            }
+
+            Pager = pager;
+            Skip(pager.GetSkipCount()).Take(pager.PageSize);
             return this;
         }
 

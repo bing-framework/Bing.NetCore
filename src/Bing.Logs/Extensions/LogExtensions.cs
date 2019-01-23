@@ -157,15 +157,19 @@ namespace Bing.Logs.Extensions
         /// 设置Sql参数
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <param name="dictionary">字典</param>
+        /// <param name="list">键值对列表</param>
         /// <returns></returns>
-        public static ILog SqlParams(this ILog log, IDictionary<string, object> dictionary)
+        public static ILog SqlParams(this ILog log, IEnumerable<KeyValuePair<string, object>> list)
         {
-            if (dictionary == null || dictionary.Count == 0)
+            if (list == null)
             {
                 return log;
             }
-
+            var dictionary = list.ToList();
+            if (dictionary.Count == 0)
+            {
+                return log;
+            }
             var result = new StringBuilder();
             foreach (var item in dictionary)
             {

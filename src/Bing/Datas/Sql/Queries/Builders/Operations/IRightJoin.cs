@@ -27,17 +27,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <summary>
         /// 添加到右外连接子句
         /// </summary>
-        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
-        /// <returns></returns>
-        ISqlBuilder AppendRightJoin(string sql);
-
-        /// <summary>
-        /// 添加到右外连接子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        ISqlBuilder AppendRightJoin(ISqlBuilder builder, string alias);
+        ISqlBuilder RightJoin(ISqlBuilder builder, string alias);
 
         /// <summary>
         /// 添加到右外连接子句
@@ -45,6 +38,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
         /// <returns></returns>
-        ISqlBuilder AppendRightJoin(Action<ISqlBuilder> action, string alias);
+        ISqlBuilder RightJoin(Action<ISqlBuilder> action, string alias);
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
+        /// <returns></returns>
+        ISqlBuilder AppendRightJoin(string sql);
     }
 }

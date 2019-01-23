@@ -32,7 +32,7 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 参数列表
         /// </summary>
-        protected IDictionary<string, object> Params => Builder.GetParams();
+        protected IReadOnlyDictionary<string, object> Params => Builder.GetParams();
 
         /// <summary>
         /// 初始化一个<see cref="SqlQueryBase"/>类型的实例
@@ -66,9 +66,10 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 清空并初始化
         /// </summary>
-        public void Clear()
+        public ISqlQuery Clear()
         {
             Builder.Clear();
+            return this;
         }
 
         /// <summary>
@@ -185,7 +186,8 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public abstract PagerList<TResult> ToPagerList<TResult>(IPager parameter, IDbConnection connection = null);
+        public abstract PagerList<TResult> ToPagerList<TResult>(IPager parameter = null,
+            IDbConnection connection = null);
 
         /// <summary>
         /// 获取分页列表
@@ -194,7 +196,8 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public abstract Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter, IDbConnection connection = null);
+        public abstract Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null,
+            IDbConnection connection = null);
 
         /// <summary>
         /// 获取分页列表
@@ -245,7 +248,7 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="func">查询操作</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public TResult Query<TResult>(Func<IDbConnection, string, IDictionary<string, object>, TResult> func, IDbConnection connection = null)
+        public TResult Query<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, TResult> func, IDbConnection connection = null)
         {
             var sql = GetSql();
             WriteTraceLog(sql, Params, GetDebugSql());
@@ -261,7 +264,7 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="func">查询操作</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        public async Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IDictionary<string, object>, Task<TResult>> func, IDbConnection connection = null)
+        public async Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, Task<TResult>> func, IDbConnection connection = null)
         {
             var sql = GetSql();
             WriteTraceLog(sql, Params, GetDebugSql());
@@ -295,6 +298,68 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="sql">Sql语句</param>
         /// <param name="parameters">参数</param>
         /// <param name="debugSql">调试Sql语句</param>
-        protected abstract void WriteTraceLog(string sql, IDictionary<string, object> parameters, string debugSql);
+        protected abstract void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql);
+
+        /// <summary>
+        /// 获取分页参数
+        /// </summary>
+        /// <param name="parameter">分页参数</param>
+        /// <returns></returns>
+        protected IPager GetPage(IPager parameter)
+        {
+            if (parameter != null)
+            {
+                return parameter;
+            }
+
+            return Builder.Pager;
+        }
+
+        /// <summary>
+        /// 获取行数Sql生成器
+        /// </summary>
+        /// <returns></returns>
+        protected ISqlBuilder GetCountBuilder()
+        {
+            var builder = Builder.Clone();
+            ClearCountBuilder(builder);
+            if (builder.IsGroup)
+            {
+                return GetCountBuilderByGroup(builder);
+            }
+
+            return GetCountBuilderByNoGroup(builder);
+        }
+
+        /// <summary>
+        /// 清空行数Sql生成器
+        /// </summary>
+        /// <param name="builder"></param>
+        private void ClearCountBuilder(ISqlBuilder builder)
+        {
+            builder.ClearSelect();
+            builder.ClearOrderBy();
+            builder.ClearPageParams();
+        }
+
+        /// <summary>
+        /// 获取行数Sql生成器 - 分组
+        /// </summary>
+        /// <param name="countBuilder"></param>
+        /// <returns></returns>
+        private ISqlBuilder GetCountBuilderByGroup(ISqlBuilder countBuilder)
+        {
+            return countBuilder.New().Count().From(countBuilder.AppendSelect("1 As c"), "t");
+        }
+
+        /// <summary>
+        /// 获取行数Sql生成器 - 未分组
+        /// </summary>
+        /// <param name="countBuilder">Sql生成器</param>
+        /// <returns></returns>
+        private ISqlBuilder GetCountBuilderByNoGroup(ISqlBuilder countBuilder)
+        {
+            return countBuilder.Count();
+        }
     }
 }

@@ -36,10 +36,40 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public static ISqlQuery Count(this ISqlQuery sqlQuery,string columnAlias=null)
+        public static ISqlQuery Count(this ISqlQuery sqlQuery, string columnAlias = null)
         {
             var builder = sqlQuery.GetBuilder();
             builder.Count(columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="column">列名</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Count(this ISqlQuery sqlQuery, string column, string columnAlias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Count(column, columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Count<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+            string columnAlias = null) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Count(expression, columnAlias);
             return sqlQuery;
         }
 
@@ -79,7 +109,7 @@ namespace Bing.Datas.Sql.Queries
 
         #endregion
 
-        #region Average(求平均值)
+        #region Avg(求平均值)
 
         /// <summary>
         /// 求平均值
@@ -88,10 +118,10 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public static ISqlQuery Average(this ISqlQuery sqlQuery, string column, string columnAlias = null)
+        public static ISqlQuery Avg(this ISqlQuery sqlQuery, string column, string columnAlias = null)
         {
             var builder = sqlQuery.GetBuilder();
-            builder.Average(column, columnAlias);
+            builder.Avg(column, columnAlias);
             return sqlQuery;
         }
 
@@ -103,11 +133,11 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        public static ISqlQuery Average<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+        public static ISqlQuery Avg<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
             string columnAlias = null) where TEntity : class
         {
             var builder = sqlQuery.GetBuilder();
-            builder.Average(expression, columnAlias);
+            builder.Avg(expression, columnAlias);
             return sqlQuery;
         }
 
@@ -228,6 +258,34 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Select(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string columnAlias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Select(sqlBuilder, columnAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="columnAlias">列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Select(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string columnAlias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Select(action, columnAlias);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region AppendSelect(添加到Select子句)
@@ -242,34 +300,6 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendSelect(sql);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到Select子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="sqlBuilder">Sql生成器</param>
-        /// <param name="columnAlias">列别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendSelect(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string columnAlias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendSelect(sqlBuilder, columnAlias);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到Select子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="action">子查询操作</param>
-        /// <param name="columnAlias">列别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendSelect(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string columnAlias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendSelect(action, columnAlias);
             return sqlQuery;
         }
 
@@ -317,6 +347,34 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.From<TEntity>(alias, schema);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery From(this ISqlQuery sqlQuery, ISqlBuilder builder, string alias)
+        {
+            var sqlBuilder = sqlQuery.GetBuilder();
+            sqlBuilder.From(builder, alias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到From子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery From(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.From(action, alias);
             return sqlQuery;
         }
 
@@ -384,6 +442,34 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Join(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Join(sqlBuilder, alias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Join(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Join(action, alias);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region AppendJoin(添加到内连接子句)
@@ -398,34 +484,6 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendJoin(sql);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到内连接子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="sqlBuilder">Sql生成器</param>
-        /// <param name="alias">表别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendJoin(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string alias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendJoin(sqlBuilder, alias);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到内连接子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="action">子查询操作</param>
-        /// <param name="alias">表别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendJoin(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendJoin(action, alias);
             return sqlQuery;
         }
 
@@ -476,6 +534,34 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery LeftJoin(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.LeftJoin(sqlBuilder, alias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery LeftJoin(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.LeftJoin(action, alias);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region AppendLeftJoin(添加到左外连接子句)
@@ -490,34 +576,6 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendLeftJoin(sql);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到左外连接子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="sqlBuilder">Sql生成器</param>
-        /// <param name="alias">表别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendLeftJoin(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string alias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendLeftJoin(sqlBuilder, alias);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到左外连接子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="action">子查询操作</param>
-        /// <param name="alias">表别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendLeftJoin(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendLeftJoin(action, alias);
             return sqlQuery;
         }
 
@@ -568,6 +626,34 @@ namespace Bing.Datas.Sql.Queries
             return sqlQuery;
         }
 
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery RightJoin(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.RightJoin(sqlBuilder, alias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="alias">表别名</param>
+        /// <returns></returns>
+        public static ISqlQuery RightJoin(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.RightJoin(action, alias);
+            return sqlQuery;
+        }
+
         #endregion
 
         #region AppendRightJoin(添加到右外连接子句)
@@ -582,34 +668,6 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendRightJoin(sql);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到右外连接子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="sqlBuilder">Sql生成器</param>
-        /// <param name="alias">表别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendRightJoin(this ISqlQuery sqlQuery, ISqlBuilder sqlBuilder, string alias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendRightJoin(sqlBuilder, alias);
-            return sqlQuery;
-        }
-
-        /// <summary>
-        /// 添加到右外连接子句
-        /// </summary>
-        /// <param name="sqlQuery">Sql查询对象</param>
-        /// <param name="action">子查询操作</param>
-        /// <param name="alias">表别名</param>
-        /// <returns></returns>
-        public static ISqlQuery AppendRightJoin(this ISqlQuery sqlQuery, Action<ISqlBuilder> action, string alias)
-        {
-            var builder = sqlQuery.GetBuilder();
-            builder.AppendRightJoin(action, alias);
             return sqlQuery;
         }
 
@@ -1757,6 +1815,35 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = sqlQuery.GetBuilder();
             builder.AppendOrderBy(sql, condition);
+            return sqlQuery;
+        }
+
+        #endregion
+
+        #region Page(分页)
+
+        /// <summary>
+        /// 设置跳过行数
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="count">跳过的行数</param>
+        /// <returns></returns>
+        public static ISqlQuery Skip(this ISqlQuery sqlQuery, int count)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Skip(count);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 设置获取行数
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="count">获取的行数</param>
+        public static ISqlQuery Take(this ISqlQuery sqlQuery, int count)
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Take(count);
             return sqlQuery;
         }
 

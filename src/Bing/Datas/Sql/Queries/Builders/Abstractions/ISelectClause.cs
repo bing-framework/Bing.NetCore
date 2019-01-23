@@ -33,6 +33,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void Count(string columnAlias = null);
 
         /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        void Count(string column, string columnAlias);
+
+        /// <summary>
+        /// 求总行数
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null)
+            where TEntity : class;
+
+        /// <summary>
         /// 求和
         /// </summary>
         /// <param name="column">列</param>
@@ -53,7 +69,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// </summary>
         /// <param name="column">列</param>
         /// <param name="columnAlias">列别名</param>
-        void Average(string column, string columnAlias = null);
+        void Avg(string column, string columnAlias = null);
 
         /// <summary>
         /// 求平均值
@@ -61,7 +77,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        void Average<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null)
+        void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null)
             where TEntity : class;
 
         /// <summary>
@@ -123,22 +139,22 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 添加到Select子句
         /// </summary>
-        /// <param name="sql">Sql语句</param>
-        void AppendSql(string sql);
-
-        /// <summary>
-        /// 添加到Select子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="columnAlias">列别名</param>
-        void AppendSql(ISqlBuilder builder, string columnAlias);
+        void Select(ISqlBuilder builder, string columnAlias);
 
         /// <summary>
         /// 添加到Select子句
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="columnAlias">列别名</param>
-        void AppendSql(Action<ISqlBuilder> action, string columnAlias);
+        void Select(Action<ISqlBuilder> action, string columnAlias);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        void AppendSql(string sql);
 
         /// <summary>
         /// 输出Sql

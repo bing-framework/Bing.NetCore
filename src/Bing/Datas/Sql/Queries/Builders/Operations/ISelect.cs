@@ -39,17 +39,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <summary>
         /// 添加到Select子句
         /// </summary>
-        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
-        /// <returns></returns>
-        ISqlBuilder AppendSelect(string sql);
-
-        /// <summary>
-        /// 添加到Select子句
-        /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        ISqlBuilder AppendSelect(ISqlBuilder builder, string columnAlias);
+        ISqlBuilder Select(ISqlBuilder builder, string columnAlias);
 
         /// <summary>
         /// 添加到Select子句
@@ -57,6 +50,13 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <param name="action">子查询操作</param>
         /// <param name="columnAlias">列别名</param>
         /// <returns></returns>
-        ISqlBuilder AppendSelect(Action<ISqlBuilder> action, string columnAlias);
+        ISqlBuilder Select(Action<ISqlBuilder> action, string columnAlias);
+
+        /// <summary>
+        /// 添加到Select子句
+        /// </summary>
+        /// <param name="sql">Sql语句，说明：将会原样添加到Sql中，不会进行任何处理</param>
+        /// <returns></returns>
+        ISqlBuilder AppendSelect(string sql);
     }
 }
