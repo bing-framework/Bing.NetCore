@@ -176,7 +176,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         protected virtual ILoggerProvider GetLogProvider(ILog log)
         {
-            return new EfLogProvider(log, this, Config);
+            return new EfLogProvider(log, TraceId, Config);
         }
 
         #endregion

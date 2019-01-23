@@ -28,9 +28,9 @@ namespace Bing.Datas.EntityFramework.Logs
         private readonly ILog _log;
 
         /// <summary>
-        /// 工作单元
+        /// 工作单元跟踪号
         /// </summary>
-        private readonly UnitOfWorkBase _unitOfWork;
+        private readonly string _traceId;
 
         /// <summary>
         /// 日志分类
@@ -46,13 +46,13 @@ namespace Bing.Datas.EntityFramework.Logs
         /// 初始化一个<see cref="EfLog"/>类型的实例
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <param name="unitOfWork">工作单元</param>
+        /// <param name="traceId">工作单元跟踪号</param>
         /// <param name="category">日志分类</param>
         /// <param name="config">数据配置</param>
-        public EfLog(ILog log, UnitOfWorkBase unitOfWork, string category, DataConfig config)
+        public EfLog(ILog log, string traceId, string category, DataConfig config)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _traceId = traceId;
             _category = category;
             _config = config;
         }
@@ -74,7 +74,7 @@ namespace Bing.Datas.EntityFramework.Logs
             }
 
             _log.Caption($"执行EF操作：{_category}")
-                .Content($"工作单元跟踪号：{_unitOfWork.TraceId}")
+                .Content($"工作单元跟踪号：{_traceId}")
                 .Content($"事件ID：{eventId.Id}")
                 .Content($"事件名称：{eventId.Name}");
             AddContent(state);

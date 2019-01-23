@@ -17,9 +17,9 @@ namespace Bing.Datas.EntityFramework.Logs
         private readonly ILog _log;
 
         /// <summary>
-        /// 工作单元
+        /// 工作单元跟踪号
         /// </summary>
-        private readonly UnitOfWorkBase _unitOfWork;
+        private readonly string _traceId;
 
         /// <summary>
         /// 数据配置
@@ -30,12 +30,12 @@ namespace Bing.Datas.EntityFramework.Logs
         /// 初始化一个<see cref="EfLogProvider"/>类型的实例
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <param name="unitOfWork">工作单元</param>
+        /// <param name="traceId">工作单元跟踪号</param>
         /// <param name="config">数据配置</param>
-        public EfLogProvider(ILog log, UnitOfWorkBase unitOfWork, DataConfig config)
+        public EfLogProvider(ILog log, string traceId, DataConfig config)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _traceId = traceId;
             _config = config;
         }
 
@@ -54,7 +54,7 @@ namespace Bing.Datas.EntityFramework.Logs
         public ILogger CreateLogger(string categoryName)
         {
             return categoryName.StartsWith("Microsoft.EntityFrameworkCore")
-                ? new EfLog(_log, _unitOfWork, categoryName, _config)
+                ? new EfLog(_log, _traceId, categoryName, _config)
                 : NullLogger.Instance;
         }
     }
