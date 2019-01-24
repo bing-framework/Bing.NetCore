@@ -259,7 +259,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到Select子句
+        /// 设置子查询列
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="sqlBuilder">Sql生成器</param>
@@ -273,7 +273,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到Select子句
+        /// 设置子查询列
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="action">子查询操作</param>
@@ -351,7 +351,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到From子句
+        /// 设置子查询表
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="builder">Sql生成器</param>
@@ -365,7 +365,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到From子句
+        /// 设置子查询表
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="action">子查询操作</param>
@@ -443,7 +443,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到内连接子句
+        /// 内连接子查询
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="sqlBuilder">Sql生成器</param>
@@ -457,7 +457,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到内连接子句
+        /// 内连接子查询
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="action">子查询操作</param>
@@ -535,7 +535,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到左外连接子句
+        /// 左外连接子查询
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="sqlBuilder">Sql生成器</param>
@@ -549,7 +549,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到左外连接子句
+        /// 左外连接子查询
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="action">子查询操作</param>
@@ -627,7 +627,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到右外连接子句
+        /// 右外连接子查询
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="sqlBuilder">Sql生成器</param>
@@ -641,7 +641,7 @@ namespace Bing.Datas.Sql.Queries
         }
 
         /// <summary>
-        /// 添加到右外连接子句
+        /// 右外连接子查询
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="action">子查询操作</param>

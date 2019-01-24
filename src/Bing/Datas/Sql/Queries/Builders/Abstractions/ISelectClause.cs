@@ -137,14 +137,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class;
 
         /// <summary>
-        /// 添加到Select子句
+        /// 设置子查询列
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="columnAlias">列别名</param>
         void Select(ISqlBuilder builder, string columnAlias);
 
         /// <summary>
-        /// 添加到Select子句
+        /// 设置子查询列
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="columnAlias">列别名</param>

@@ -33,14 +33,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void Join<TEntity>(string alias = null, string schema = null) where TEntity : class;
 
         /// <summary>
-        /// 添加到内连接子句
+        /// 内连接子查询
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         void Join(ISqlBuilder builder, string alias);
 
         /// <summary>
-        /// 添加到内连接子句
+        /// 内连接子查询
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
@@ -68,14 +68,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void LeftJoin<TEntity>(string alias = null, string schema = null) where TEntity : class;
 
         /// <summary>
-        /// 添加到左外连接子句
+        /// 左外连接子查询
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         void LeftJoin(ISqlBuilder builder, string alias);
 
         /// <summary>
-        /// 添加到左外连接子句
+        /// 左外连接子查询
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
@@ -103,14 +103,14 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void RightJoin<TEntity>(string alias = null, string schema = null) where TEntity : class;
 
         /// <summary>
-        /// 添加到右外连接子句
+        /// 右外连接子查询
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
         void RightJoin(ISqlBuilder builder, string alias);
 
         /// <summary>
-        /// 添加到右外连接子句
+        /// 右外连接子查询
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>

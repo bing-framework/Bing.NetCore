@@ -31,7 +31,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
-        /// 添加到From子句
+        /// 设置子查询表
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="alias">表别名</param>
@@ -43,7 +43,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         }
 
         /// <summary>
-        /// 添加到From子句
+        /// 设置子查询表
         /// </summary>
         /// <param name="action">子查询操作</param>
         /// <param name="alias">表别名</param>
