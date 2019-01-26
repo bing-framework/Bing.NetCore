@@ -1,8 +1,11 @@
 ﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using System;
+using System.Linq;
 using System.Text;
+using Bing.Exceptions;
 using Bing.Logs.Properties;
+using Bing.Utils.Extensions;
 
 namespace Bing.Logs.Formats
 {
@@ -335,9 +338,19 @@ namespace Bing.Logs.Formats
             }
             AppendLine(result, content, (r, c) =>
             {
-                r.AppendLine($"{LogResource.Exception}: {GetErrorCode(content.ErrorCode)}");
-                r.Append($"   {c.Exception.Message}");
+                r.AppendLine($"{LogResource.Exception}: {GetExceptionTypes(c.Exception)} {GetErrorCode(c.ErrorCode)}");
+                r.Append($"   {Warning.GetMessage(c.Exception)}");
             }, ref line);
+        }
+
+        /// <summary>
+        /// 获取异常类型列表
+        /// </summary>
+        /// <param name="exception">异常</param>
+        /// <returns></returns>
+        private string GetExceptionTypes(Exception exception)
+        {
+            return Warning.GetExceptions(exception).Select(x => x.GetType()).Join();
         }
 
         /// <summary>

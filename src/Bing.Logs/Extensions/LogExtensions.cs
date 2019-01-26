@@ -217,7 +217,11 @@ namespace Bing.Logs.Extensions
                 return log;
             }
 
-            return Exception(log, new Warning("", errorCode, exception));
+            return log.Set<LogContent>(content =>
+            {
+                content.Exception = exception;
+                content.ErrorCode = errorCode;
+            });
         }
 
         /// <summary>
@@ -232,11 +236,8 @@ namespace Bing.Logs.Extensions
             {
                 return log;
             }
-            return log.Set<LogContent>(content =>
-            {
-                content.ErrorCode = exception.Code;
-                content.Exception = exception;
-            });
+
+            return Exception(log, exception, exception.Code);
         }
     }
 }
