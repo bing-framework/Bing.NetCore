@@ -82,12 +82,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <param name="sqlBuilder">Sql生成器</param>
+        /// <param name="builder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
         /// <returns></returns>
-        public virtual ISelectClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register)
+        public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
         {
-            return new SelectClause(this, sqlBuilder, register);
+            return new SelectClause(this, builder, register);
         }
 
         /// <summary>

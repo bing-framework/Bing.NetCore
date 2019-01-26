@@ -43,35 +43,25 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
-        public FromClause(ISqlBuilder builder,IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register)
+        /// <param name="table">表</param>
+        public FromClause(ISqlBuilder builder,IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register, SqlItem table = null)
         {
             Builder = builder;
             Dialect = dialect;
             Resolver = resolver;
             Register = register;
-        }
-
-        /// <summary>
-        /// 初始化一个<see cref="FromClause"/>类型的实例
-        /// </summary>
-        /// <param name="fromClause">From子句</param>
-        protected FromClause(FromClause fromClause)
-        {
-            Builder = fromClause.Builder;
-            Dialect = fromClause.Dialect;
-            Resolver = fromClause.Resolver;
-            Register = fromClause.Register;
-            Table = fromClause.Table.Clone();
-        }
+            Table = table;
+        }        
 
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <param name="register">实体注册器</param>
+        /// <param name="builder">Sql生成器</param>
+        /// <param name="register">实体别名注册器</param>
         /// <returns></returns>
-        public virtual IFromClause Clone(IEntityAliasRegister register)
+        public virtual IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
         {
-            return new FromClause(this);
+            return new FromClause(builder, Dialect, Resolver, register, Table);
         }
 
         /// <summary>

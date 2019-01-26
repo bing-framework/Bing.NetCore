@@ -221,7 +221,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <returns></returns>
         protected virtual IWhereClause CreateWhereClause()
         {
-            return new WhereClause(Dialect, EntityResolver, AliasRegister, ParameterManager);
+            return new WhereClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager);
         }
 
         /// <summary>
@@ -272,9 +272,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
             EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMatedata);
             AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
             _selectClause = sqlBuilder._selectClause?.Clone(this, AliasRegister);
-            _fromClause = sqlBuilder._fromClause?.Clone(AliasRegister);
+            _fromClause = sqlBuilder._fromClause?.Clone(this, AliasRegister);
             _joinClause = sqlBuilder._joinClause?.Clone(this, AliasRegister);
-            _whereClause = sqlBuilder._whereClause?.Clone(AliasRegister, _parameterManager);
+            _whereClause = sqlBuilder._whereClause?.Clone(this, AliasRegister, _parameterManager);
             _groupByClause = sqlBuilder._groupByClause?.Clone(AliasRegister);
             _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
             Pager = sqlBuilder.Pager;

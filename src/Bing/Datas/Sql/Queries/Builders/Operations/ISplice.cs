@@ -61,7 +61,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="conditions">查询条件</param>
         /// <returns></returns>
-        ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+        ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions) where TEntity : class;
 
         /// <summary>
         /// Or连接条件
@@ -69,6 +69,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="conditions">查询条件，如果表达式中的值为空，泽忽略该查询条件</param>
         /// <returns></returns>
-        ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+        ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions) where TEntity : class;
     }
 }

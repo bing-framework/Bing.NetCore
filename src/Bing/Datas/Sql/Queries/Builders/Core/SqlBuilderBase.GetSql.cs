@@ -40,7 +40,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// 获取查询条件
         /// </summary>
         /// <returns></returns>
-        public string GetCondition()
+        public virtual string GetCondition()
         {
             return WhereClause.GetCondition();
         }

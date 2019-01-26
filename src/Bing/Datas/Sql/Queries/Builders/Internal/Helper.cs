@@ -61,6 +61,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         public string GetColumn(Expression expression, Type type)
         {
+            if (expression == null)
+            {
+                return null;
+            }
             return GetColumn(_resolver.GetColumn(expression, type), type);
         }
 
@@ -72,6 +76,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         public string GetColumn<TEntity>(Expression<Func<TEntity, object>> expression)
         {
+            if (expression == null)
+            {
+                return null;
+            }
             return GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
         }
         
@@ -83,6 +91,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         public string GetColumn(string column, Type type)
         {
+            if (string.IsNullOrWhiteSpace(column))
+            {
+                return column;
+            }
             return new SqlItem(column,_register.GetAlias(type)).ToSql(_dialect);
         }
 
@@ -93,6 +105,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         public string GetColumn(string column)
         {
+            if (string.IsNullOrWhiteSpace(column))
+            {
+                return column;
+            }
             return new SqlItem(column).ToSql(_dialect);
         }
 
@@ -103,6 +119,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Internal
         /// <returns></returns>
         public object GetValue(Expression expression)
         {
+            if (expression == null)
+            {
+                return null;
+            }
+
             var result = Lambda.GetValue(expression);
             if (result == null)
             {

@@ -10,9 +10,10 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 克隆
         /// </summary>
+        /// <param name="builder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
         /// <returns></returns>
-        IFromClause Clone(IEntityAliasRegister register);
+        IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register);
 
         /// <summary>
         /// 设置表名

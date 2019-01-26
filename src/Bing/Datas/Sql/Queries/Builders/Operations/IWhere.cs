@@ -46,35 +46,44 @@ namespace Bing.Datas.Sql.Queries.Builders.Operations
         ISqlBuilder Where<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class;
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
         /// </summary>
         /// <param name="column">列名</param>
-        /// <param name="value">值</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
         /// <returns></returns>
-        ISqlBuilder WhereIf(string column, object value, bool condition, Operator @operator = Operator.Equal);
+        ISqlBuilder Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal);
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式，范例：t => t.Name</param>
-        /// <param name="value">值</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
         /// <returns></returns>
-        ISqlBuilder WhereIf<TEntity>(Expression<Func<TEntity, object>> expression, object value, bool condition,
+        ISqlBuilder Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder,
             Operator @operator = Operator.Equal) where TEntity : class;
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="operator">运算符</param>
+        /// <returns></returns>
+        ISqlBuilder Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal);
+
+        /// <summary>
+        /// 设置子查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age>1 )</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="expression">列名表达式，范例：t => t.Name</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="operator">运算符</param>
         /// <returns></returns>
-        ISqlBuilder WhereIf<TEntity>(Expression<Func<TEntity, bool>> expression, bool condition) where TEntity : class;
+        ISqlBuilder Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action,
+            Operator @operator = Operator.Equal) where TEntity : class;
 
         /// <summary>
         /// 设置查询条件

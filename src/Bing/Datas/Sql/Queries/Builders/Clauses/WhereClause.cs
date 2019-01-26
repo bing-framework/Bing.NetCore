@@ -19,24 +19,9 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
     public class WhereClause:IWhereClause
     {
         /// <summary>
-        /// 方言
+        /// Sql生成器
         /// </summary>
-        private readonly IDialect _dialect;
-
-        /// <summary>
-        /// 实体解析器
-        /// </summary>
-        private readonly IEntityResolver _resolver;
-
-        /// <summary>
-        /// 实体别名注册器
-        /// </summary>
-        private readonly IEntityAliasRegister _register;
-
-        /// <summary>
-        /// 参数管理器
-        /// </summary>
-        private readonly IParameterManager _parameterManager;
+        protected readonly ISqlBuilder Builder;
 
         /// <summary>
         /// 辅助操作
@@ -49,6 +34,16 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         private readonly PredicateExpressionResolver _expressionResolver;
 
         /// <summary>
+        /// 方言
+        /// </summary>
+        private readonly IDialect _dialect;
+
+        /// <summary>
+        /// 实体解析器
+        /// </summary>
+        private readonly IEntityResolver _resolver;     
+
+        /// <summary>
         /// 查询条件
         /// </summary>
         private ICondition _condition;
@@ -56,50 +51,34 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <summary>
         /// 初始化一个<see cref="WhereClause"/>类型的实例
         /// </summary>
+        /// <param name="builder">Sql生成器</param>
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
         /// <param name="condition">查询条件</param>
-        public WhereClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
+        public WhereClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
             IParameterManager parameterManager, ICondition condition = null)
         {
+            Builder = builder;
             _dialect = dialect;
             _resolver = resolver;
-            _register = register;
-            _parameterManager = parameterManager;
             _condition = condition;
             _helper = new Helper(dialect, resolver, register, parameterManager);
             _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager);
         }
 
         /// <summary>
-        /// 初始化一个<see cref="WhereClause"/>类型的实例
-        /// </summary>
-        /// <param name="whereClause">Where子句</param>
-        /// <param name="register">实体别名注册器</param>
-        /// <param name="parameterManager">参数管理器</param>
-        protected WhereClause(WhereClause whereClause, IEntityAliasRegister register,
-            IParameterManager parameterManager)
-        {
-            _register = register;
-            _parameterManager = parameterManager;
-            _dialect = whereClause._dialect;
-            _resolver = whereClause._resolver;
-            _condition = new SqlCondition(whereClause._condition?.GetCondition());
-            _helper = new Helper(_dialect, _resolver, _register, _parameterManager);
-            _expressionResolver = new PredicateExpressionResolver(_dialect, _resolver, _register, _parameterManager);
-        }
-
-        /// <summary>
         /// 克隆
         /// </summary>
+        /// <param name="builder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
         /// <returns></returns>
-        public virtual IWhereClause Clone(IEntityAliasRegister register, IParameterManager parameterManager)
+        public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager)
         {
-            return new WhereClause(this, register, parameterManager);
+            return new WhereClause(builder, _dialect, _resolver, register, parameterManager,
+                new SqlCondition(_condition?.GetCondition()));
         }
 
         /// <summary>
@@ -235,49 +214,64 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
         /// </summary>
         /// <param name="column">列名</param>
-        /// <param name="value">值</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
-        public void WhereIf(string column, object value, bool condition, Operator @operator = Operator.Equal)
+        public void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
         {
-            if (condition)
+            if (builder == null)
             {
-                Where(column,value,@operator);
+                return;
             }
+
+            column = _helper.GetColumn(column);
+            var sql = $"({builder.ToSql()})";
+            And(SqlConditionFactory.Create(column, sql, @operator));
         }
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
-        /// <param name="value">值</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
-        public void WhereIf<TEntity>(Expression<Func<TEntity, object>> expression, object value, bool condition, Operator @operator = Operator.Equal) where TEntity : class
+        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) where TEntity : class
         {
-            if (condition)
-            {
-                Where(expression,value,@operator);
-            }
+            Where(_helper.GetColumn(expression), builder, @operator);
         }
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="operator">运算符</param>
+        public void Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var builder = Builder.New();
+            action(builder);
+            Where(column, builder, @operator);
+        }
+
+        /// <summary>
+        /// 设置子查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">查询条件表达式</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
-        public void WhereIf<TEntity>(Expression<Func<TEntity, bool>> expression, bool condition) where TEntity : class
+        /// <param name="expression">列名表达式</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="operator">运算符</param>
+        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) where TEntity : class
         {
-            if (condition)
-            {
-                Where(expression);
-            }
-        }
+            Where(_helper.GetColumn(expression), action, @operator);
+        }        
 
         /// <summary>
         /// 设置查询条件
@@ -338,21 +332,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         }
 
         /// <summary>
-        /// 添加到Where子句
-        /// </summary>
-        /// <param name="sql">Sql语句</param>
-        public void AppendSql(string sql)
-        {
-            And(new SqlCondition(sql));
-        }        
-
-        /// <summary>
         /// 设置Is Null条件
         /// </summary>
         /// <param name="column">列名</param>
         public void IsNull(string column)
         {
-            Where(column, null);
+            And(_helper.CreateCondition(column, null, Operator.Equal));
         }
 
         /// <summary>
@@ -362,7 +347,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
         /// <param name="expression">列名表达式</param>
         public void IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
         {
-            Where(expression, null);
+            IsNull(_helper.GetColumn(expression));
         }
 
         /// <summary>
@@ -721,6 +706,15 @@ namespace Bing.Datas.Sql.Queries.Builders.Clauses
                 return Boundary.Both;
             }
             return Boundary.Left;
+        }
+
+        /// <summary>
+        /// 添加到Where子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        public void AppendSql(string sql)
+        {
+            And(new SqlCondition(sql));
         }
 
         /// <summary>

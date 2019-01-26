@@ -15,10 +15,11 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <summary>
         /// 克隆
         /// </summary>
+        /// <param name="builder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
         /// <returns></returns>
-        IWhereClause Clone(IEntityAliasRegister register, IParameterManager parameterManager);
+        IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager);
 
         /// <summary>
         /// And连接条件
@@ -78,32 +79,40 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         void Where<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class;
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
         /// </summary>
         /// <param name="column">列名</param>
-        /// <param name="value">值</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
-        void WhereIf(string column, object value, bool condition, Operator @operator = Operator.Equal);
+        void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal);
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
-        /// <param name="value">值</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
+        /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
-        void WhereIf<TEntity>(Expression<Func<TEntity, object>> expression, object value, bool condition,
+        void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder,
             Operator @operator = Operator.Equal) where TEntity : class;
 
         /// <summary>
-        /// 设置查询条件
+        /// 设置子查询条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="operator">运算符</param>
+        void Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal);
+
+        /// <summary>
+        /// 设置子查询条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="expression">查询条件表达式</param>
-        /// <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
-        void WhereIf<TEntity>(Expression<Func<TEntity, bool>> expression, bool condition) where TEntity : class;
+        /// <param name="expression">列名表达式</param>
+        /// <param name="action">子查询操作</param>
+        /// <param name="operator">运算符</param>
+        void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action,
+            Operator @operator = Operator.Equal) where TEntity : class;       
 
         /// <summary>
         /// 设置查询条件
@@ -129,12 +138,6 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">查询条件表达式，如果参数值为空，则忽略该查询条件</param>
         void WhereIfNotEmpty<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class;
-
-        /// <summary>
-        /// 添加到Where子句
-        /// </summary>
-        /// <param name="sql">Sql语句</param>
-        void AppendSql(string sql);
 
         /// <summary>
         /// 添加范围查询条件
@@ -344,6 +347,12 @@ namespace Bing.Datas.Sql.Queries.Builders.Abstractions
         /// <param name="values">值集合</param>
         void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
             where TEntity : class;
+
+        /// <summary>
+        /// 添加到Where子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        void AppendSql(string sql);
 
         /// <summary>
         /// 输出Sql

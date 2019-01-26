@@ -54,7 +54,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <param name="condition">查询条件</param>
         /// <returns></returns>
-        public ISqlBuilder And(ICondition condition)
+        public virtual ISqlBuilder And(ICondition condition)
         {
             WhereClause.And(condition);
             return this;
@@ -65,7 +65,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// </summary>
         /// <param name="condition">查询条件</param>
         /// <returns></returns>
-        public ISqlBuilder Or(ICondition condition)
+        public virtual ISqlBuilder Or(ICondition condition)
         {
             WhereClause.Or(condition);
             return this;
@@ -77,7 +77,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="conditions">查询条件</param>
         /// <returns></returns>
-        public ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        public virtual ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions) where TEntity:class
         {
             WhereClause.Or(conditions);
             return this;
@@ -89,7 +89,7 @@ namespace Bing.Datas.Sql.Queries.Builders.Core
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="conditions">查询条件，如果表达式中的值为空，泽忽略该查询条件</param>
         /// <returns></returns>
-        public ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
+        public virtual ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions) where TEntity:class
         {
             WhereClause.OrIfNotEmpty(conditions);
             return this;
