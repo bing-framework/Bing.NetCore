@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
+﻿using Bing.Datas.Queries.Internal;
 using Bing.Domains.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bing.Datas.EntityFramework.Extensions
 {
@@ -12,6 +12,43 @@ namespace Bing.Datas.EntityFramework.Extensions
     /// </summary>
     public static partial class QueryableExtensions
     {
+        #region Page(分页，包含排序)
+
+        /// <summary>
+        /// 分页，包含排序
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="query">数据源</param>
+        /// <param name="pager">分页对象</param>
+        /// <returns></returns>
+        public static async Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager)
+        {
+            if (query == null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+            if (pager == null)
+            {
+                throw new ArgumentNullException(nameof(pager));
+            }
+
+            Helper.InitOrder(query, pager);
+            if (pager.TotalCount <= 0)
+            {
+                pager.TotalCount = await query.CountAsync();
+            }
+
+            var orderedQueryable = Helper.GetOrderedQueryable(query, pager);
+            if (orderedQueryable == null)
+            {
+                throw new ArgumentException("必须设置排序字段");
+            }
+
+            return orderedQueryable.Skip(pager.GetSkipCount()).Take(pager.PageSize);
+        }
+
+        #endregion
+
         #region ToPagerListAsync(转换为分页列表)
 
         /// <summary>
@@ -32,32 +69,9 @@ namespace Bing.Datas.EntityFramework.Extensions
             {
                 throw new ArgumentNullException(nameof(pager));
             }
-            return new PagerList<TEntity>(pager,await query.Page(pager).ToListAsync());
-        }
 
-        #endregion
-
-        #region Between(范围查询)
-
-        /// <summary>
-        /// 范围查询
-        /// </summary>
-        /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <param name="queryable">查询源</param>
-        /// <param name="keySelector">键选择器</param>
-        /// <param name="begin">开始范围</param>
-        /// <param name="end">结束范围</param>
-        /// <returns></returns>
-        public static IQueryable<TEntity> Between<TEntity, TKey>(this IQueryable<TEntity> queryable,
-            Expression<Func<TEntity, TKey>> keySelector, TKey begin, TKey end) where TKey : IComparable<TKey>
-        {
-            Expression key = Expression.Invoke(keySelector, keySelector.Parameters.ToArray());
-            Expression beginBound=Expression.GreaterThanOrEqual(key,Expression.Constant(begin));
-            Expression endBound = Expression.LessThanOrEqual(key, Expression.Constant(end));
-            Expression and = Expression.AndAlso(beginBound, endBound);
-            Expression<Func<TEntity, bool>> lambda = Expression.Lambda<Func<TEntity, bool>>(and, keySelector.Parameters);
-            return queryable.Where(lambda.Compile()).AsQueryable();
+            query = await query.PageAsync(pager);
+            return new PagerList<TEntity>(pager, await query.ToListAsync());
         }
 
         #endregion

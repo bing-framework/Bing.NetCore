@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
+using Bing.Datas.UnitOfWorks;
+using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Bing.Datas.EntityFramework.Logs
@@ -23,41 +26,6 @@ namespace Bing.Datas.EntityFramework.Logs
         public const string TraceLogName = "EfTraceLog";
 
         /// <summary>
-        /// 日志操作
-        /// </summary>
-        private readonly ILog _log;
-
-        /// <summary>
-        /// 工作单元跟踪号
-        /// </summary>
-        private readonly string _traceId;
-
-        /// <summary>
-        /// 日志分类
-        /// </summary>
-        private readonly string _category;
-
-        /// <summary>
-        /// 数据配置
-        /// </summary>
-        private readonly DataConfig _config;
-
-        /// <summary>
-        /// 初始化一个<see cref="EfLog"/>类型的实例
-        /// </summary>
-        /// <param name="log">日志操作</param>
-        /// <param name="traceId">工作单元跟踪号</param>
-        /// <param name="category">日志分类</param>
-        /// <param name="config">数据配置</param>
-        public EfLog(ILog log, string traceId, string category, DataConfig config)
-        {
-            _log = log ?? throw new ArgumentNullException(nameof(log));
-            _traceId = traceId;
-            _category = category;
-            _config = config;
-        }
-
-        /// <summary>
         /// 日志记录
         /// </summary>
         /// <typeparam name="TState">状态类型</typeparam>
@@ -66,34 +34,88 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <param name="state">状态</param>
         /// <param name="exception">异常</param>
         /// <param name="formatter">日志内容</param>
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
+            Func<TState, Exception, string> formatter)
         {
-            if (IsEnabled(eventId) == false)
+            var config = GetConfig();
+            var log = GetLog();
+            if (IsEnabled(eventId, config) == false)
             {
                 return;
             }
 
-            _log.Caption($"执行EF操作：{_category}")
-                .Content($"工作单元跟踪号：{_traceId}")
+            log.Caption($"执行EF操作：")
+                .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
                 .Content($"事件ID：{eventId.Id}")
                 .Content($"事件名称：{eventId.Name}");
-            AddContent(state);
-            _log.Exception(exception).Trace();
+            AddContent(state, config, log);
+            log.Exception(exception).Trace();
+        }
+
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        /// <returns></returns>
+        private DataConfig GetConfig()
+        {
+            try
+            {
+                var options = Ioc.Create<IOptionsSnapshot<DataConfig>>();
+                return options.Value;
+            }
+            catch
+            {
+                return new DataConfig() {LogLevel = DataLogLevel.Sql};
+            }
+        }
+
+        /// <summary>
+        /// 获取日志操作
+        /// </summary>
+        /// <returns></returns>
+        protected virtual ILog GetLog()
+        {
+            try
+            {
+                return Bing.Logs.Log.GetLog(TraceLogName);
+            }
+            catch
+            {
+                return Bing.Logs.Log.Null;
+            }
+        }
+
+        /// <summary>
+        /// 获取工作单元
+        /// </summary>
+        /// <returns></returns>
+        protected virtual UnitOfWorkBase GetUnitOfWork()
+        {
+            try
+            {
+                var unitOfWork = Ioc.Create<IUnitOfWork>();
+                return unitOfWork as UnitOfWorkBase;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>
         /// 是否启用EF日志
         /// </summary>
         /// <param name="eventId">事件ID</param>
+        /// <param name="config">数据配置</param>
         /// <returns></returns>
-        private bool IsEnabled(EventId eventId)
+        private bool IsEnabled(EventId eventId, DataConfig config)
         {
-            if (_config.LogLevel == DataLogLevel.Off)
+            if (config.LogLevel == DataLogLevel.Off)
             {
                 return false;
             }
 
-            if (_config.LogLevel == DataLogLevel.All)
+            if (config.LogLevel == DataLogLevel.All)
             {
                 return true;
             }
@@ -109,13 +131,11 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <summary>
         /// 添加日志内容
         /// </summary>
-        /// <typeparam name="TState"></typeparam>
-        /// <param name="state"></param>
-        private void AddContent<TState>(TState state)
+        private void AddContent<TState>(TState state, DataConfig config, ILog log)
         {
-            if (_config.LogLevel == DataLogLevel.All)
+            if (config.LogLevel == DataLogLevel.All)
             {
-                _log.Content("事件内容：").Content(state.SafeString());
+                log.Content("事件内容：").Content(state.SafeString());
             }
 
             if (!(state is IEnumerable list))
@@ -124,23 +144,25 @@ namespace Bing.Datas.EntityFramework.Logs
             }
 
             var dictionary = new Dictionary<string, string>();
-            foreach (KeyValuePair<string,object> item in list)
+            foreach (KeyValuePair<string, object> item in list)
             {
-                dictionary.Add(item.Key,item.Value.SafeString());
+                dictionary.Add(item.Key, item.Value.SafeString());
             }
-            AddDictionary(dictionary);
+
+            AddDictionary(dictionary, log);
         }
 
         /// <summary>
         /// 添加字典内容
         /// </summary>
         /// <param name="dictionary">字典</param>
-        private void AddDictionary(IDictionary<string, string> dictionary)
+        /// <param name="log">日志操作</param>
+        private void AddDictionary(IDictionary<string, string> dictionary, ILog log)
         {
-            AddElapsed(GetValue(dictionary,"elapsed"));
+            AddElapsed(GetValue(dictionary,"elapsed"), log);
             var sqlParams = GetValue(dictionary, "parameters");
-            AddSql(GetValue(dictionary, "commandText"));
-            AddSqlParams(sqlParams);
+            AddSql(GetValue(dictionary, "commandText"), log);
+            AddSqlParams(sqlParams, log);
         }
 
         /// <summary>
@@ -163,42 +185,45 @@ namespace Bing.Datas.EntityFramework.Logs
         /// 添加执行时间
         /// </summary>
         /// <param name="value">值</param>
-        private void AddElapsed(string value)
+        /// <param name="log">日志操作</param>
+        private void AddElapsed(string value, ILog log)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 return;
             }
 
-            _log.Content($"执行时间：{value} 毫秒");
+            log.Content($"执行时间：{value} 毫秒");
         }
 
         /// <summary>
         /// 添加Sql
         /// </summary>
         /// <param name="sql">Sql语句</param>
-        private void AddSql(string sql)
+        /// <param name="log">日志操作</param>
+        private void AddSql(string sql, ILog log)
         {
             if (string.IsNullOrWhiteSpace(sql))
             {
                 return;
             }
 
-            _log.Sql($"{sql}{Common.Line}");
+            log.Sql($"{sql}{Common.Line}");
         }
 
         /// <summary>
         /// 添加Sql参数
         /// </summary>
         /// <param name="value">Sql参数</param>
-        private void AddSqlParams(string value)
+        /// <param name="log">日志操作</param>
+        private void AddSqlParams(string value, ILog log)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 return;
             }
 
-            _log.SqlParams(value);
+            log.SqlParams(value);
         }
 
         /// <summary>

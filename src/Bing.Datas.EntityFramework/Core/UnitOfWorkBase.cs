@@ -40,6 +40,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         private static readonly ConcurrentDictionary<Type, IEnumerable<IMap>> Maps;
 
+        /// <summary>
+        /// 日志工厂
+        /// </summary>
+        private static readonly ILoggerFactory LoggerFactory;
+
         #endregion
 
         #region 属性
@@ -54,11 +59,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         public ISession Session { get; set; }
 
-        /// <summary>
-        /// 数据配置
-        /// </summary>
-        public DataConfig Config { get; }
-
         #endregion
 
         #region 静态构造函数
@@ -69,6 +69,7 @@ namespace Bing.Datas.EntityFramework.Core
         static UnitOfWorkBase()
         {
             Maps = new ConcurrentDictionary<Type, IEnumerable<IMap>>();
+            LoggerFactory = new LoggerFactory(new[] {new EfLogProvider(),});
         }
 
         #endregion
@@ -85,24 +86,6 @@ namespace Bing.Datas.EntityFramework.Core
             manager?.Register(this);
             TraceId = Guid.NewGuid().ToString();
             Session = Bing.Security.Sessions.Session.Instance;
-            Config = GetConfig();
-        }
-
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <returns></returns>
-        private DataConfig GetConfig()
-        {
-            try
-            {
-                var options = Ioc.Create<IOptionsSnapshot<DataConfig>>();
-                return options.Value;
-            }
-            catch
-            {
-                return new DataConfig() {LogLevel = DataLogLevel.Sql};
-            }
         }
 
         #endregion
@@ -130,7 +113,8 @@ namespace Bing.Datas.EntityFramework.Core
                 return;
             }
             builder.EnableSensitiveDataLogging();
-            builder.UseLoggerFactory(new LoggerFactory(new[] { GetLogProvider(log) }));
+            builder.EnableDetailedErrors();
+            builder.UseLoggerFactory(LoggerFactory);
         }
 
         /// <summary>
@@ -156,7 +140,8 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         private bool IsEnabled(ILog log)
         {
-            if (Config.LogLevel == DataLogLevel.Off)
+            var config = GetConfig();
+            if (config.LogLevel == DataLogLevel.Off)
             {
                 return false;
             }
@@ -170,13 +155,20 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         /// <summary>
-        /// 获取日志提供器
+        /// 获取配置
         /// </summary>
-        /// <param name="log">日志操作</param>
         /// <returns></returns>
-        protected virtual ILoggerProvider GetLogProvider(ILog log)
+        private DataConfig GetConfig()
         {
-            return new EfLogProvider(log, TraceId, Config);
+            try
+            {
+                var options = Ioc.Create<IOptionsSnapshot<DataConfig>>();
+                return options.Value;
+            }
+            catch
+            {
+                return new DataConfig() { LogLevel = DataLogLevel.Sql };
+            }
         }
 
         #endregion

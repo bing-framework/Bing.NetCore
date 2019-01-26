@@ -1,15 +1,18 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using Bing.Domains.Repositories;
 using Bing.Properties;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using System;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 
 namespace Bing.Datas.Queries.Internal
 {
     /// <summary>
     /// 查询工具类
     /// </summary>
-    internal static class Helper
+    public static class Helper
     {
         /// <summary>
         /// 获取查询条件表达式
@@ -35,6 +38,44 @@ namespace Bing.Datas.Queries.Internal
                 return null;
             }
             return predicate;
+        }
+
+        /// <summary>
+        /// 初始化排序
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="source">查询对象</param>
+        /// <param name="pager">分页</param>
+        public static void InitOrder<TEntity>(IQueryable<TEntity> source, IPager pager)
+        {
+            if (string.IsNullOrWhiteSpace(pager.Order) == false)
+            {
+                return;
+            }
+
+            if (source.Expression.SafeString().Contains(".OrderBy("))
+            {
+                return;
+            }
+
+            pager.Order = "Id";
+        }
+
+        /// <summary>
+        /// 获取排序查询对象
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="source">查询对象</param>
+        /// <param name="pager">分页</param>
+        /// <returns></returns>
+        public static IOrderedQueryable<TEntity> GetOrderedQueryable<TEntity>(IQueryable<TEntity> source, IPager pager)
+        {
+            if (string.IsNullOrWhiteSpace(pager.Order))
+            {
+                return source as IOrderedQueryable<TEntity>;
+            }
+
+            return source.OrderBy(pager.Order);
         }
     }
 }

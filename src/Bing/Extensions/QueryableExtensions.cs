@@ -5,8 +5,6 @@ using Bing.Datas.Queries;
 using Bing.Datas.Queries.Criterias;
 using Bing.Datas.Queries.Internal;
 using Bing.Domains.Repositories;
-using System.Linq.Dynamic.Core;
-using Bing.Utils.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing
@@ -35,53 +33,20 @@ namespace Bing
             {
                 throw new ArgumentNullException(nameof(pager));
             }
-            InitOrder(query, pager);            
+
+            Helper.InitOrder(query, pager);
             if (pager.TotalCount <= 0)
             {
                 pager.TotalCount = query.Count();
             }
-            var orderedQueryable = GetOrderedQueryable(query, pager);
+
+            var orderedQueryable = Helper.GetOrderedQueryable(query, pager);
             if (orderedQueryable == null)
             {
                 throw new ArgumentException("必须设置排序字段");
             }
+
             return orderedQueryable.Skip(pager.GetSkipCount()).Take(pager.PageSize);
-        }
-
-        /// <summary>
-        /// 初始化排序
-        /// </summary>
-        /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="query">数据源</param>
-        /// <param name="pager">分页对象</param>
-        private static void InitOrder<TEntity>(this IQueryable<TEntity> query, IPager pager)
-        {
-            if (string.IsNullOrWhiteSpace(pager.Order) == false)
-            {
-                return;
-            }
-            if (query.Expression.SafeString().Contains(".OrderBy("))
-            {
-                return;
-            }
-            pager.Order = "Id";
-        }
-
-        /// <summary>
-        /// 获取排序查询对象
-        /// </summary>
-        /// <typeparam name="TEntity">实体类型</typeparam>
-        /// <param name="query">数据源</param>
-        /// <param name="pager">分页对象</param>
-        /// <returns></returns>
-        private static IOrderedQueryable<TEntity> GetOrderedQueryable<TEntity>(this IQueryable<TEntity> query,
-            IPager pager)
-        {
-            if (string.IsNullOrWhiteSpace(pager.Order))
-            {
-                return query as IOrderedQueryable<TEntity>;
-            }
-            return query.OrderBy(pager.Order);
         }
 
         #endregion
