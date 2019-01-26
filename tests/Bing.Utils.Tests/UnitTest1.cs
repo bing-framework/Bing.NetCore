@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bing.Utils.IdGenerators.Core;
 using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
@@ -112,6 +113,16 @@ namespace Bing.Utils.Tests
             }
             Regex regex=new Regex(@"(http|https)://(?<domain>[^(:|/]*)", RegexOptions.IgnoreCase);
             return regex.Match(url, 0).Value;
+        }
+
+        [Fact]
+        public void Test_Id()
+        {
+            for (int i = 0; i < 1000; i++)
+            {
+                var id = SequentialGuidGenerator.Current.Create();
+                Output.WriteLine($"{id}");
+            }
         }
     }
 }

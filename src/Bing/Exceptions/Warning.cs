@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Bing.Properties;
+using Bing.Utils.Extensions;
 
 namespace Bing.Exceptions
 {
@@ -11,61 +13,21 @@ namespace Bing.Exceptions
     public class Warning : Exception
     {
         #region 属性
-        /// <summary>
-        /// 错误消息
-        /// </summary>
-        private readonly string _message;
 
         /// <summary>
         /// 错误码
         /// </summary>
         public string Code { get; set; }
 
-        /// <summary>
-        /// 错误消息
-        /// </summary>
-        public override string Message
-        {
-            get
-            {
-                if (Data.Count == 0)
-                {
-                    return _message;
-                }
-                StringBuilder result = new StringBuilder();
-                result.AppendLine(_message);
-                AppendData(result, this);
-                return result.ToString();
-            }
-        }
-
-        /// <summary>
-        /// 堆栈跟踪
-        /// </summary>
-        public override string StackTrace
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(base.StackTrace))
-                {
-                    return base.StackTrace;
-                }
-                if (base.InnerException == null)
-                {
-                    return string.Empty;
-                }
-                return base.InnerException.StackTrace;
-            }
-        }
-
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化一个<see cref="Warning"/>类型的实例
         /// </summary>
         /// <param name="message">错误消息</param>
-        public Warning(string message) : this(message, "")
+        public Warning(string message) : this(message, null)
         {
         }
 
@@ -73,7 +35,7 @@ namespace Bing.Exceptions
         /// 初始化一个<see cref="Warning"/>类型的实例
         /// </summary>
         /// <param name="exception">异常</param>
-        public Warning(Exception exception) : this("", "", exception)
+        public Warning(Exception exception) : this(null, null, exception)
         {
         }
 
@@ -95,68 +57,86 @@ namespace Bing.Exceptions
         public Warning(string message, string code, Exception exception) : base(message ?? "", exception)
         {
             Code = code;
-            _message = GetMessage();
         }
+
         #endregion
 
         /// <summary>
         /// 获取错误消息
         /// </summary>
         /// <returns></returns>
-        private string GetMessage()
+        public string GetMessage()
+        {
+            return GetMessage(this);
+        }
+
+        /// <summary>
+        /// 获取错误消息
+        /// </summary>
+        /// <param name="ex">异常</param>
+        /// <returns></returns>
+        public static string GetMessage(Exception ex)
         {
             var result = new StringBuilder();
-            AppendSelfMessage(result);
-            AppendInnerMessage(result, InnerException);
-            return result.ToString().TrimEnd(Environment.NewLine.ToCharArray());
-        }
-
-        /// <summary>
-        /// 添加外层异常消息
-        /// </summary>
-        /// <param name="result">字符串拼接</param>
-        private void AppendSelfMessage(StringBuilder result)
-        {
-            if (string.IsNullOrWhiteSpace(base.Message))
+            var list = GetExceptions(ex);
+            foreach (var exception in list)
             {
-                return;
+                AppendMessage(result, exception);
             }
-            result.AppendLine(base.Message);
+
+            return result.ToString().RemoveEnd(Environment.NewLine);
         }
 
         /// <summary>
-        /// 添加内部异常消息
+        /// 添加异常消息
         /// </summary>
-        /// <param name="result">字符串拼接</param>
+        /// <param name="result">字符串拼接器</param>
         /// <param name="exception">异常</param>
-        private void AppendInnerMessage(StringBuilder result, Exception exception)
+        private static void AppendMessage(StringBuilder result, Exception exception)
         {
             if (exception == null)
             {
                 return;
             }
-            if (exception is Warning)
-            {
-                result.AppendLine(exception.Message);
-                return;
-            }
+
             result.AppendLine(exception.Message);
-            AppendData(result, exception);
-            AppendInnerMessage(result, exception.InnerException);
         }
 
         /// <summary>
-        /// 添加额外数据
+        /// 获取异常列表
         /// </summary>
-        /// <param name="result">字符串拼接</param>
-        /// <param name="ex">异常</param>
-        private void AppendData(StringBuilder result, Exception ex)
+        /// <returns></returns>
+        public IList<Exception> GetExceptions()
         {
-            foreach (System.Collections.DictionaryEntry data in ex.Data)
-            {
-                result.AppendFormat("{0}:{1}{2}", data.Key, data.Value, Environment.NewLine);
-            }
+            return GetExceptions(this);
         }
+
+        /// <summary>
+        /// 获取异常列表
+        /// </summary>
+        /// <param name="ex">异常</param>
+        /// <returns></returns>
+        public static IList<Exception> GetExceptions(Exception ex)
+        {
+            var result = new List<Exception>();
+            AddException(result, ex);
+            return result;
+        }
+
+        /// <summary>
+        /// 添加内部异常
+        /// </summary>
+        /// <param name="result">异常列表</param>
+        /// <param name="exception">异常</param>
+        private static void AddException(List<Exception> result, Exception exception)
+        {
+            if (exception == null)
+            {
+                return;
+            }
+            result.Add(exception);
+            AddException(result, exception.InnerException);
+        }        
 
         /// <summary>
         /// 获取友好提示
