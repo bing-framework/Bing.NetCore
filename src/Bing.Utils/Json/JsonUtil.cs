@@ -23,6 +23,10 @@ namespace Bing.Utils.Json
         /// <returns></returns>
         public static string JsonDateTimeFormat(string json)
         {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return json;
+            }
             json = Regex.Replace(json, @"\\/Date\((\d+)\)\\/", match =>
             {
                 DateTime dt = new DateTime(1970, 1, 1);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -9,6 +10,8 @@ namespace Bing.Utils.Helpers
     /// </summary>
     public static class Url
     {
+        #region Combine(合并Url)
+
         /// <summary>
         /// 合并Url
         /// </summary>
@@ -18,6 +21,10 @@ namespace Bing.Utils.Helpers
         {
             return Path.Combine(urls).Replace(@"\", "/");
         }
+
+        #endregion
+
+        #region Join(连接Url)
 
         /// <summary>
         /// 连接Url，范例：Url.Join( "http://a.com","b=1" ),返回 "http://a.com?b=1"
@@ -104,6 +111,39 @@ namespace Bing.Utils.Helpers
             }
             return new Uri(Join(url.AbsoluteUri, parameters));
         }
+
+        #endregion
+
+        #region GetMainDomain(获取主域名)
+
+        /// <summary>
+        /// 获取主域名
+        /// </summary>
+        /// <param name="url">Url地址</param>
+        /// <returns></returns>
+        public static string GetMainDomain(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return url;
+            }
+            var array = url.Split('.');
+
+            if (array.Length != 3)
+            {
+                return url;
+            }
+
+            var tok = new List<string>(array);
+            var remove = array.Length - 2;
+            tok.RemoveRange(0, remove);
+            return tok[0] + "." + tok[1];
+        }
+
+        #endregion
+
+
+
 
     }
 }

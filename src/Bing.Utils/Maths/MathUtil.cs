@@ -7,6 +7,8 @@ namespace Bing.Utils.Maths
     /// </summary>
     public static class MathUtil
     {
+        #region GetDistance(获取两点之间的距离)
+
         /// <summary>
         /// 获取两点之间的距离
         /// </summary>
@@ -19,5 +21,8 @@ namespace Bing.Utils.Maths
         {
             return Math.Sqrt(Math.Pow((x1 - x2), 2) + Math.Pow((y1 - y2), 2));
         }
+
+        #endregion
+
     }
 }
