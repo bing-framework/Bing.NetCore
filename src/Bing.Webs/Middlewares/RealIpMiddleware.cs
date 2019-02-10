@@ -30,16 +30,32 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         /// <param name="context">Http上下文</param>
         /// <returns></returns>
-        public Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
             var headers = context.Request.Headers;
-            if (headers.ContainsKey("X-Forwarded-For"))
+            try
             {
-                context.Connection.RemoteIpAddress = IPAddress.Parse(headers["X-Forwarded-For"].ToString()
-                    .Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)[0]);
+                if (headers.ContainsKey("X-Forwarded-For"))
+                {
+                    context.Connection.RemoteIpAddress = IPAddress.Parse(headers["X-Forwarded-For"].ToString()
+                        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                }
             }
-
-            return _next(context);
+            finally
+            {
+                await _next(context);
+            }
         }
+    }
+
+    /// <summary>
+    /// 真实IP配置
+    /// </summary>
+    public class RealIpOptions
+    {
+        /// <summary>
+        /// 请求头键名
+        /// </summary>
+        public string HeaderKey { get; set; }
     }
 }
