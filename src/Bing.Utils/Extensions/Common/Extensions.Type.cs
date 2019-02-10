@@ -175,6 +175,8 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
+        #region CanUseForDb(能否用于数据库存储)
+
         /// <summary>
         /// 能否用于数据库存储
         /// </summary>
@@ -200,5 +202,7 @@ namespace Bing.Utils.Extensions
                    || type.GetTypeInfo().IsEnum
                    || Nullable.GetUnderlyingType(type) != null && CanUseForDb(Nullable.GetUnderlyingType(type));
         }
+
+        #endregion
     }
 }

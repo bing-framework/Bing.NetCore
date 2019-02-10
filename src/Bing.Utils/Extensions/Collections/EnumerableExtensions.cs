@@ -7,7 +7,7 @@ using System.Text;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// <see cref="IEnumerable{T}"/> 扩展
+    /// 可枚举类型<see cref="IEnumerable{T}"/> 扩展
     /// </summary>
     public static class EnumerableExtensions
     {
