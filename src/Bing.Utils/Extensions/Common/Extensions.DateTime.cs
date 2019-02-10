@@ -225,7 +225,7 @@ namespace Bing.Utils.Extensions
             {
                 return result.ToString();
             }
-            return $"{span.TotalMilliseconds * 1000}毫秒";
+            return $"{span.TotalSeconds * 1000}毫秒";
         }
         #endregion
     }
