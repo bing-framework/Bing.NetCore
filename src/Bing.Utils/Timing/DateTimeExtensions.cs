@@ -680,5 +680,35 @@ namespace Bing.Utils.Timing
         }
 
         #endregion
+
+        #region AddWeeks(添加星期)
+
+        /// <summary>
+        /// 添加星期
+        /// </summary>
+        /// <param name="dateTime">时间</param>
+        /// <param name="weeks">周</param>
+        /// <returns></returns>
+        public static DateTime AddWeeks(this DateTime dateTime, int weeks)
+        {
+            return dateTime.AddDays(weeks * 7);
+        }
+
+        #endregion
+
+        #region ConvertToTimeZone(将当前时间转换为特定时区的时间)
+
+        /// <summary>
+        /// 将当前时间转换为特定时区的时间
+        /// </summary>
+        /// <param name="dateTime">时间</param>
+        /// <param name="timeZone">时区</param>
+        /// <returns></returns>
+        public static DateTime ConvertToTimeZone(this DateTime dateTime, TimeZoneInfo timeZone)
+        {
+            return TimeZoneInfo.ConvertTime(dateTime, timeZone);
+        }
+
+        #endregion
     }
 }

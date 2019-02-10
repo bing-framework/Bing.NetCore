@@ -24,4 +24,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Timing\" />
+  </ItemGroup>
+
 </Project>

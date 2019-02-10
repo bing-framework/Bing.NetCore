@@ -58,7 +58,7 @@ namespace Bing.Utils.Extensions
             if (combineWith != default(T[]) && arrayToCombine != default(T[]))
             {
                 int initialSize = combineWith.Length;
-                Array.Resize(ref combineWith,initialSize+arrayToCombine.Length);
+                Array.Resize(ref combineWith, initialSize + arrayToCombine.Length);
                 Array.Copy(arrayToCombine, arrayToCombine.GetLowerBound(0), combineWith, initialSize,
                     arrayToCombine.Length);
             }
@@ -78,7 +78,7 @@ namespace Bing.Utils.Extensions
         {
             if (source != null)
             {
-                Array.Clear(source,0,source.Length);
+                Array.Clear(source, 0, source.Length);
             }
 
             return source;

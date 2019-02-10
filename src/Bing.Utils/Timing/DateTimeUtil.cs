@@ -50,7 +50,7 @@ namespace Bing.Utils.Timing
         /// <param name="toDate">结束时间</param>
         /// <returns></returns>
         public static int GetDays(DateTime fromDate, DateTime toDate)
-        {
+        {            
             return Convert.ToInt32(toDate.Subtract(fromDate).TotalDays);
         }
 
