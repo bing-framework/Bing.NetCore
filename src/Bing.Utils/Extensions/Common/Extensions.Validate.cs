@@ -12,7 +12,25 @@ namespace Bing.Utils.Extensions
     /// </summary>
     public static partial class Extensions
     {
+        #region CheckNull(检查对象是否为null)
+
+        /// <summary>
+        /// 检查对象是否为null，为null则抛出<see cref="ArgumentNullException"/>异常
+        /// </summary>
+        /// <param name="obj">对象</param>
+        /// <param name="parameterName">参数名</param>
+        public static void CheckNull(this object obj, string parameterName)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(parameterName);
+            }
+        }
+
+        #endregion
+
         #region IsEmpty(是否为空)
+
         /// <summary>
         /// 判断 字符串 是否为空、null或空白字符串
         /// </summary>
@@ -28,9 +46,9 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">数据</param>
         /// <returns></returns>
-        public static bool IsEmpty(this Guid? value)
+        public static bool IsEmpty(this Guid value)
         {
-            return value == null || IsEmpty(value.Value);
+            return value == Guid.Empty;
         }
 
         /// <summary>
@@ -38,9 +56,9 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">数据</param>
         /// <returns></returns>
-        public static bool IsEmpty(this Guid value)
+        public static bool IsEmpty(this Guid? value)
         {
-            return value == Guid.Empty;
+            return value == null || IsEmpty(value.Value);
         }
 
         /// <summary>
