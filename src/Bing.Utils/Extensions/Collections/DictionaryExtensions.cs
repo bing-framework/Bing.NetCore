@@ -177,7 +177,8 @@ namespace Bing.Utils.Extensions
             {
                 return string.Empty;
             }
-            StringBuilder sb=new StringBuilder();
+
+            StringBuilder sb = new StringBuilder();
             foreach (var item in dictionary)
             {
                 sb.Append($"{item.Key.ToString()}={item.Value.ToString()}&");
