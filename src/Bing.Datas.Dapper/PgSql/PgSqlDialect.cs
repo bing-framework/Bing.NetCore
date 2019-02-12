@@ -1,4 +1,4 @@
-﻿using Bing.Datas.Sql.Queries.Builders.Core;
+﻿using Bing.Datas.Sql.Builders.Core;
 
 namespace Bing.Datas.Dapper.PgSql
 {

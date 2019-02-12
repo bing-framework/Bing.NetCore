@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Bing.Datas.Sql.Queries.Builders.Abstractions;
+using Bing.Datas.Sql.Builders;
 using Bing.Datas.Test.Integration.Samples;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;

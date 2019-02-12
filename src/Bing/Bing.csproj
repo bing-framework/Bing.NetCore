@@ -56,7 +56,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
 
   <ItemGroup>
     <EmbeddedResource Update="Properties\LibraryResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>LibraryResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Properties\R.resx">

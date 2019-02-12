@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql.Queries.Builders.Clauses;
-using Bing.Datas.Sql.Queries.Builders.Core;
+using Bing.Datas.Sql.Builders.Clauses;
+using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Test.Integration.Dapper.SqlServer.Samples;
 using Bing.Datas.Test.Integration.Samples;
 using Xunit;

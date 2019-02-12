@@ -208,7 +208,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-Offices", "03-Offices", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz.Payments", "src\Bing.Biz.Payments\Bing.Biz.Payments.csproj", "{1E0E74FA-91EA-4421-9C56-5650B4C8C7B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.Test.Integration", "tests\Bing.Datas.Test.Integration\Bing.Datas.Test.Integration.csproj", "{C6D71A66-22A2-4832-8BB8-9C45A769EDD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Test.Integration", "tests\Bing.Datas.Test.Integration\Bing.Datas.Test.Integration.csproj", "{C6D71A66-22A2-4832-8BB8-9C45A769EDD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

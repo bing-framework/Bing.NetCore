@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Bing.Datas.Sql.Queries.Builders.Conditions;
+using Bing.Datas.Sql.Builders.Conditions;
 using Xunit;
 using Xunit.Abstractions;
 

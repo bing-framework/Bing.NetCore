@@ -22,7 +22,7 @@ namespace Bing.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class LibraryResource {
+    public class LibraryResource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Bing.Properties {
         ///   返回此类使用的缓存的 ResourceManager 实例。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bing.Properties.LibraryResource", typeof(LibraryResource).Assembly);
@@ -51,7 +51,7 @@ namespace Bing.Properties {
         ///   重写当前线程的 CurrentUICulture 属性。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Bing.Properties {
         /// <summary>
         ///   查找类似 当前操作的数据已被其他人修改，请刷新后重试 的本地化字符串。
         /// </summary>
-        internal static string ConcurrencyExceptionMessage {
+        public static string ConcurrencyExceptionMessage {
             get {
                 return ResourceManager.GetString("ConcurrencyExceptionMessage", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Bing.Properties {
         /// <summary>
         ///   查找类似 不允许将节点移动到自己或子节点下 的本地化字符串。
         /// </summary>
-        internal static string NotSupportMoveToChildren {
+        public static string NotSupportMoveToChildren {
             get {
                 return ResourceManager.GetString("NotSupportMoveToChildren", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Bing.Properties {
         /// <summary>
         ///   查找类似 仅允许添加一个条件,条件：{0} 的本地化字符串。
         /// </summary>
-        internal static string OnlyOnePredicate {
+        public static string OnlyOnePredicate {
             get {
                 return ResourceManager.GetString("OnlyOnePredicate", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Bing.Properties {
         /// <summary>
         ///   查找类似 分页必须设置排序字段 的本地化字符串。
         /// </summary>
-        internal static string OrderIsEmptyForPage {
+        public static string OrderIsEmptyForPage {
             get {
                 return ResourceManager.GetString("OrderIsEmptyForPage", resourceCulture);
             }
@@ -99,18 +99,9 @@ namespace Bing.Properties {
         /// <summary>
         ///   查找类似 必须设置表名 的本地化字符串。
         /// </summary>
-        internal static string TableIsEmpty {
+        public static string TableIsEmpty {
             get {
                 return ResourceManager.GetString("TableIsEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 必须设置表名 的本地化字符串。
-        /// </summary>
-        internal static string TableIsEmpty1 {
-            get {
-                return ResourceManager.GetString("TableIsEmpty1", resourceCulture);
             }
         }
     }

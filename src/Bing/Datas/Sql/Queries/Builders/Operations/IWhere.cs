@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Bing.Datas.Sql.Queries.Builders.Abstractions;
+using Bing.Datas.Sql.Builders;
 using Bing.Utils;
 
 namespace Bing.Datas.Sql.Queries.Builders.Operations

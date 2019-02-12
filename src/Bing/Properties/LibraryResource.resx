@@ -132,7 +132,4 @@
   <data name="TableIsEmpty" xml:space="preserve">
     <value>必须设置表名</value>
   </data>
-  <data name="TableIsEmpty1" xml:space="preserve">
-    <value>必须设置表名</value>
-  </data>
 </root>

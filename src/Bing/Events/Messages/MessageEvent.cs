@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Bing.Utils.Timing;
+using Bing.Utils.Extensions;
 
 namespace Bing.Events.Messages
 {

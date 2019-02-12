@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Bing.Datas.Sql.Queries.Configs;
+using Bing.Datas.Sql.Builders;
+using Bing.Datas.Sql.Configs;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
 using Microsoft.Extensions.Options;
@@ -12,7 +13,7 @@ namespace Bing.Datas.Sql.Queries
     /// <summary>
     /// Sql查询对象基类
     /// </summary>
-    public abstract class SqlQueryBase:ISqlQuery
+    public abstract class SqlQueryBase:ISqlQuery,IClauseAccessor
     {
         /// <summary>
         /// 数据库
@@ -28,6 +29,36 @@ namespace Bing.Datas.Sql.Queries
         /// Sql生成器
         /// </summary>
         protected ISqlBuilder Builder { get; }
+
+        /// <summary>
+        /// Select子句
+        /// </summary>
+        public ISelectClause SelectClause => ((IClauseAccessor)Builder).SelectClause;
+
+        /// <summary>
+        /// From子句
+        /// </summary>
+        public IFromClause FromClause => ((IClauseAccessor)Builder).FromClause;
+
+        /// <summary>
+        /// Join子句
+        /// </summary>
+        public IJoinClause JoinClause => ((IClauseAccessor)Builder).JoinClause;
+
+        /// <summary>
+        /// Where子句
+        /// </summary>
+        public IWhereClause WhereClause => ((IClauseAccessor)Builder).WhereClause;
+
+        /// <summary>
+        /// GroupBy子句
+        /// </summary>
+        public IGroupByClause GroupByClause => ((IClauseAccessor)Builder).GroupByClause;
+
+        /// <summary>
+        /// OrderBy子句
+        /// </summary>
+        public IOrderByClause OrderByClause => ((IClauseAccessor)Builder).OrderByClause;
 
         /// <summary>
         /// 参数列表
@@ -323,7 +354,7 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = Builder.Clone();
             ClearCountBuilder(builder);
-            if (builder.IsGroup)
+            if (IsGroup(builder))
             {
                 return GetCountBuilderByGroup(builder);
             }
@@ -340,6 +371,21 @@ namespace Bing.Datas.Sql.Queries
             builder.ClearSelect();
             builder.ClearOrderBy();
             builder.ClearPageParams();
+        }
+
+        /// <summary>
+        /// 是否分组
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        /// <returns></returns>
+        private bool IsGroup(ISqlBuilder builder)
+        {
+            if (builder is IClauseAccessor accessor)
+            {
+                return accessor.GroupByClause.IsGroup;
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using Bing.Datas.Sql.Queries.Builders.Core;
+﻿using Bing.Datas.Sql.Builders.Core;
 using Bing.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;

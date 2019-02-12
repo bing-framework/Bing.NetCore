@@ -13,7 +13,7 @@ using Bing.Domains.Repositories;
 using Bing.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
-using Bing.Datas.Sql.Queries;
+using Bing.Datas.Sql;
 using Bing.Helpers;
 
 namespace Bing.Datas.EntityFramework.Core
@@ -481,7 +481,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             if (predicate == null)
             {
-                return Set.Count();
+                return Queryable.Count(Set);
             }
 
             return Set.Count(predicate);
@@ -527,7 +527,7 @@ namespace Bing.Datas.EntityFramework.Core
                 return queryable;
             }
 
-            return queryable.OrderBy(order);
+            return DynamicQueryableExtensions.OrderBy(queryable, order);
         }
 
         /// <summary>

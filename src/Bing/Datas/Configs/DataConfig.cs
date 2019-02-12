@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Datas.Sql.Queries.Configs;
+using Bing.Datas.Sql.Configs;
 
 namespace Bing.Datas.Configs
 {

@@ -1,7 +1,8 @@
-﻿using Bing.Datas.Sql.Queries;
-using Bing.Datas.Sql.Queries.Builders.Abstractions;
-using Bing.Datas.Sql.Queries.Builders.Clauses;
-using Bing.Datas.Sql.Queries.Builders.Core;
+﻿using Bing.Datas.Sql;
+using Bing.Datas.Sql.Builders;
+using Bing.Datas.Sql.Builders.Clauses;
+using Bing.Datas.Sql.Builders.Core;
+
 
 namespace Bing.Datas.Dapper.MySql
 {
