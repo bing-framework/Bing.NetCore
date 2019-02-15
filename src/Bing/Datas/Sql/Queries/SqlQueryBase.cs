@@ -14,7 +14,7 @@ namespace Bing.Datas.Sql.Queries
     /// <summary>
     /// Sql查询对象基类
     /// </summary>
-    public abstract class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor
+    public abstract class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor
     {
         #region 属性
 
@@ -76,7 +76,12 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 联合操作项集合
         /// </summary>
-        public List<UnionItem> UnionItems => ((IUnionAccessor)Builder).UnionItems;
+        public List<BuilderItem> UnionItems => ((IUnionAccessor)Builder).UnionItems;
+
+        /// <summary>
+        /// 公用表表达式CTE集合
+        /// </summary>
+        public List<BuilderItem> CteItems => ((ICteAccessor) Builder).CteItems;
 
         #endregion
 
@@ -96,7 +101,6 @@ namespace Bing.Datas.Sql.Queries
         }
 
         #endregion
-
 
         /// <summary>
         /// 克隆

@@ -7,7 +7,7 @@ namespace Bing.Datas.Sql
     /// <summary>
     /// Sql生成器
     /// </summary>
-    public interface ISqlBuilder : ICondition, ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion
+    public interface ISqlBuilder : ICondition, ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
     {
         /// <summary>
         /// 分页参数
@@ -87,6 +87,11 @@ namespace Bing.Datas.Sql
         /// 清空联合操作项
         /// </summary>
         void ClearUnionBuilders();
+
+        /// <summary>
+        /// 清空公用表表达式
+        /// </summary>
+        void ClearCte();
 
         /// <summary>
         /// 添加Sql参数

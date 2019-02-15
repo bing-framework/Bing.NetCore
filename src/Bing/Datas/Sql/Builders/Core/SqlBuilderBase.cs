@@ -7,13 +7,15 @@ using Bing.Datas.Matedatas;
 using Bing.Datas.Sql.Builders.Clauses;
 using Bing.Datas.Sql.Builders.Filters;
 using Bing.Domains.Repositories;
+using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
     /// <summary>
     /// Sql生成器基类
     /// </summary>
-    public abstract class SqlBuilderBase:ISqlBuilder, IClauseAccessor, IUnionAccessor
+    public abstract class SqlBuilderBase:ISqlBuilder, IClauseAccessor, IUnionAccessor, ICteAccessor
     {
         #region 字段
 
@@ -164,7 +166,12 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 联合操作项集合
         /// </summary>
-        public List<UnionItem> UnionItems { get; private set; }
+        public List<BuilderItem> UnionItems { get; private set; }
+
+        /// <summary>
+        /// 公用表表达式CTE集合
+        /// </summary>
+        public List<BuilderItem> CteItems { get; private set; }
 
         #endregion
 
@@ -182,7 +189,8 @@ namespace Bing.Datas.Sql.Builders.Core
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
             Pager = new Pager();
-            UnionItems = new List<UnionItem>();
+            UnionItems = new List<BuilderItem>();
+            CteItems = new List<BuilderItem>();
         }
 
         #endregion
@@ -296,7 +304,8 @@ namespace Bing.Datas.Sql.Builders.Core
             Pager = sqlBuilder.Pager;
             OffsetParam = sqlBuilder.OffsetParam;
             LimitParam = sqlBuilder.LimitParam;
-            UnionItems = sqlBuilder.UnionItems.Select(t => new UnionItem(t.Operation, t.Builder.Clone())).ToList();
+            UnionItems = sqlBuilder.UnionItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
+            CteItems = sqlBuilder.CteItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
         }
 
         #endregion
@@ -318,6 +327,7 @@ namespace Bing.Datas.Sql.Builders.Core
             ClearSqlParams();
             ClearPageParams();
             ClearUnionBuilders();
+            ClearCte();
         }
 
         /// <summary>
@@ -392,7 +402,15 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         public void ClearUnionBuilders()
         {
-            UnionItems = new List<UnionItem>();
+            UnionItems = new List<BuilderItem>();
+        }
+
+        /// <summary>
+        /// 清空公用表表达式
+        /// </summary>
+        public void ClearCte()
+        {
+            CteItems = new List<BuilderItem>();
         }
 
         #endregion
@@ -475,6 +493,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="result">Sql拼接</param>
         protected virtual void CreateSql(StringBuilder result)
         {
+            CreateCte(result);
             if (IsUnion)
             {
                 CreateSqlByUnion(result);
@@ -482,6 +501,28 @@ namespace Bing.Datas.Sql.Builders.Core
             }
 
             CreateSqlByNoUnion(result);
+        }
+
+        /// <summary>
+        /// 创建CTE
+        /// </summary>
+        /// <param name="result">Sql拼接</param>
+        protected void CreateCte(StringBuilder result)
+        {
+            if (CteItems.Count == 0)
+            {
+                return;
+            }
+
+            var cte = new StringBuilder();
+            cte.Append("With ");
+            foreach (var item in CteItems)
+            {
+                cte.AppendLine($"{Dialect.SafeName(item.Name)} ");
+                cte.AppendLine($"As ({item.Builder.ToSql()}),");
+            }
+
+            result.AppendLine(cte.ToString().RemoveEnd($",{Common.Line}"));
         }
 
         /// <summary>
@@ -499,7 +540,7 @@ namespace Bing.Datas.Sql.Builders.Core
             AppendSql(result, ")");
             foreach (var operation in UnionItems)
             {
-                AppendSql(result, operation.Operation);
+                AppendSql(result, operation.Name);
                 AppendSql(result, $"({operation.Builder.ToSql()})");
                 AppendSql(result, ")");
             }

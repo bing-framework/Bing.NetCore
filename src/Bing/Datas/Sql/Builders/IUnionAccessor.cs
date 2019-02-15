@@ -16,6 +16,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 联合操作项集合
         /// </summary>
-        List<UnionItem> UnionItems { get; }
+        List<BuilderItem> UnionItems { get; }
     }
 }
