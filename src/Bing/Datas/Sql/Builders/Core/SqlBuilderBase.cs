@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Bing.Datas.Matedatas;
@@ -12,7 +13,7 @@ namespace Bing.Datas.Sql.Builders.Core
     /// <summary>
     /// Sql生成器基类
     /// </summary>
-    public abstract class SqlBuilderBase:ISqlBuilder, IClauseAccessor
+    public abstract class SqlBuilderBase:ISqlBuilder, IClauseAccessor, IUnionAccessor
     {
         #region 字段
 
@@ -155,6 +156,16 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         protected bool IsLimit => string.IsNullOrWhiteSpace(LimitParam) == false;
 
+        /// <summary>
+        /// 是否包含联合操作
+        /// </summary>
+        public bool IsUnion => UnionItems.Count > 0;
+
+        /// <summary>
+        /// 联合操作项集合
+        /// </summary>
+        public List<UnionItem> UnionItems { get; private set; }
+
         #endregion
 
         #region 构造函数
@@ -171,6 +182,7 @@ namespace Bing.Datas.Sql.Builders.Core
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
             Pager = new Pager();
+            UnionItems = new List<UnionItem>();
         }
 
         #endregion
@@ -284,6 +296,7 @@ namespace Bing.Datas.Sql.Builders.Core
             Pager = sqlBuilder.Pager;
             OffsetParam = sqlBuilder.OffsetParam;
             LimitParam = sqlBuilder.LimitParam;
+            UnionItems = sqlBuilder.UnionItems.Select(t => new UnionItem(t.Operation, t.Builder.Clone())).ToList();
         }
 
         #endregion
@@ -304,6 +317,7 @@ namespace Bing.Datas.Sql.Builders.Core
             ClearOrderBy();
             ClearSqlParams();
             ClearPageParams();
+            ClearUnionBuilders();
         }
 
         /// <summary>
@@ -371,6 +385,14 @@ namespace Bing.Datas.Sql.Builders.Core
             Pager = null;
             OffsetParam = null;
             LimitParam = null;
+        }
+
+        /// <summary>
+        /// 清空联合操作项
+        /// </summary>
+        public void ClearUnionBuilders()
+        {
+            UnionItems = new List<UnionItem>();
         }
 
         #endregion
@@ -450,8 +472,47 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 创建Sql语句
         /// </summary>
-        /// <param name="result"></param>
+        /// <param name="result">Sql拼接</param>
         protected virtual void CreateSql(StringBuilder result)
+        {
+            if (IsUnion)
+            {
+                CreateSqlByUnion(result);
+                return;
+            }
+
+            CreateSqlByNoUnion(result);
+        }
+
+        /// <summary>
+        /// 创建Sql语句 - 联合
+        /// </summary>
+        /// <param name="result">Sql拼接</param>
+        protected void CreateSqlByUnion(StringBuilder result)
+        {
+            result.Append("(");
+            AppendSelect(result);
+            AppendFrom(result);
+            AppendSql(result, JoinClause.ToSql());
+            AppendSql(result, GetWhere());
+            AppendSql(result, GroupByClause.ToSql());
+            AppendSql(result, ")");
+            foreach (var operation in UnionItems)
+            {
+                AppendSql(result, operation.Operation);
+                AppendSql(result, $"({operation.Builder.ToSql()})");
+                AppendSql(result, ")");
+            }
+
+            AppendSql(result, OrderByClause.ToSql());
+            AppendLimit(result);
+        }
+
+        /// <summary>
+        /// 创建Sql语句
+        /// </summary>
+        /// <param name="result">Sql拼接</param>
+        protected void CreateSqlByNoUnion(StringBuilder result)
         {
             AppendSelect(result);
             AppendFrom(result);

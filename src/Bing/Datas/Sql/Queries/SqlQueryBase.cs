@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Bing.Datas.Sql.Builders;
+using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Configs;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
@@ -13,8 +14,10 @@ namespace Bing.Datas.Sql.Queries
     /// <summary>
     /// Sql查询对象基类
     /// </summary>
-    public abstract class SqlQueryBase:ISqlQuery,IClauseAccessor
+    public abstract class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor
     {
+        #region 属性
+
         /// <summary>
         /// 数据库
         /// </summary>
@@ -66,17 +69,34 @@ namespace Bing.Datas.Sql.Queries
         protected IReadOnlyDictionary<string, object> Params => Builder.GetParams();
 
         /// <summary>
+        /// 是否包含联合操作
+        /// </summary>
+        public bool IsUnion => ((IUnionAccessor)Builder).IsUnion;
+
+        /// <summary>
+        /// 联合操作项集合
+        /// </summary>
+        public List<UnionItem> UnionItems => ((IUnionAccessor)Builder).UnionItems;
+
+        #endregion
+
+        #region 构造函数
+
+        /// <summary>
         /// 初始化一个<see cref="SqlQueryBase"/>类型的实例
         /// </summary>
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="database">数据库</param>
         /// <param name="sqlQueryOptions">Sql查询配置</param>
-        protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null, SqlQueryOptions sqlQueryOptions=null)
+        protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null, SqlQueryOptions sqlQueryOptions = null)
         {
             Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
             Database = database;
             SqlQueryOptions = sqlQueryOptions;
         }
+
+        #endregion
+
 
         /// <summary>
         /// 克隆
@@ -354,12 +374,16 @@ namespace Bing.Datas.Sql.Queries
         {
             var builder = Builder.Clone();
             ClearCountBuilder(builder);
+            if (IsUnion)
+            {
+                return GetCountBuilderByUnion(builder);
+            }
             if (IsGroup(builder))
             {
                 return GetCountBuilderByGroup(builder);
             }
 
-            return GetCountBuilderByNoGroup(builder);
+            return GetCountBuilder(builder);
         }
 
         /// <summary>
@@ -368,9 +392,18 @@ namespace Bing.Datas.Sql.Queries
         /// <param name="builder"></param>
         private void ClearCountBuilder(ISqlBuilder builder)
         {
-            builder.ClearSelect();
             builder.ClearOrderBy();
             builder.ClearPageParams();
+        }
+
+        /// <summary>
+        /// 获取行数Sql生成器 - 联合
+        /// </summary>
+        /// <param name="countBuilder">行数Sql生成器</param>
+        /// <returns></returns>
+        private ISqlBuilder GetCountBuilderByUnion(ISqlBuilder countBuilder)
+        {
+            return countBuilder.New().Count().From(countBuilder, "t");
         }
 
         /// <summary>
@@ -395,16 +428,18 @@ namespace Bing.Datas.Sql.Queries
         /// <returns></returns>
         private ISqlBuilder GetCountBuilderByGroup(ISqlBuilder countBuilder)
         {
+            countBuilder.ClearSelect();
             return countBuilder.New().Count().From(countBuilder.AppendSelect("1 As c"), "t");
         }
 
         /// <summary>
-        /// 获取行数Sql生成器 - 未分组
+        /// 获取行数Sql生成器
         /// </summary>
         /// <param name="countBuilder">Sql生成器</param>
         /// <returns></returns>
-        private ISqlBuilder GetCountBuilderByNoGroup(ISqlBuilder countBuilder)
+        private ISqlBuilder GetCountBuilder(ISqlBuilder countBuilder)
         {
+            countBuilder.ClearSelect();
             return countBuilder.Count();
         }
     }

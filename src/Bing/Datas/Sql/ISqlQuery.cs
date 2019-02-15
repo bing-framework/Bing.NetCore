@@ -11,7 +11,7 @@ namespace Bing.Datas.Sql
     /// <summary>
     /// Sql查询对象
     /// </summary>
-    public interface ISqlQuery: ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy
+    public interface ISqlQuery: ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion
     {
         /// <summary>
         /// 克隆
