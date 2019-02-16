@@ -1,4 +1,8 @@
-﻿using Bing.Utils.Extensions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -46,18 +50,50 @@ namespace Bing.Datas.Sql.Builders.Core
                 return;
             }
 
-            var list = name.Split('.');
-            if (list.Length == 1)
+            var list = IsComplex(name) ? ResolveByPattern(name) : ResolveSplit(name);
+            if (list.Count == 1)
             {
                 Name = list[0];
                 return;
             }
 
-            if (list.Length == 2)
+            if (list.Count == 2)
             {
                 Prefix = list[0];
                 Name = list[1];
             }
+        }
+
+        /// <summary>
+        /// 是否复杂名称。包含多个句点的名称为复杂名称
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns></returns>
+        private bool IsComplex(string name)
+        {
+            return name.IndexOf(".", StringComparison.CurrentCulture) !=
+                   name.LastIndexOf(".", StringComparison.CurrentCulture);
+        }
+
+        /// <summary>
+        /// 分割句点
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns></returns>
+        private List<string> ResolveSplit(string name)
+        {
+            return name.Split('.').ToList();
+        }
+
+        /// <summary>
+        /// 通过正则表达式进行解析
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns></returns>
+        private List<string> ResolveByPattern(string name)
+        {
+            var pattern = "^([\\[`\"]\\S+[\\]`\"]).([\\[`\"]\\S+[\\]`\"])$";
+            return Regexs.GetValues(name, pattern, new[] {"$1", "$2"}).Select(t => t.Value).ToList();
         }
 
         /// <summary>

@@ -8,15 +8,6 @@ namespace Bing.Datas.Dapper.SqlServer
     public class SqlServerDialect:DialectBase
     {
         /// <summary>
-        /// 获取参数前缀
-        /// </summary>
-        /// <returns></returns>
-        public override string GetPrefix()
-        {
-            return "@";
-        }
-
-        /// <summary>
         /// 闭合字符-开
         /// </summary>
         public override char OpenQuote => '[';

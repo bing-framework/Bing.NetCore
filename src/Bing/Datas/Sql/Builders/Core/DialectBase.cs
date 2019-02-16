@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="name">名称</param>
         /// <returns></returns>
-        public string SafeName(string name)
+        public virtual string SafeName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -20,7 +20,27 @@
             {
                 return name;
             }
-            name = name.Trim().TrimStart(OpenQuote).TrimEnd(CloseQuote);
+
+            return GetSafeName(FilterName(name));
+        }
+
+        /// <summary>
+        /// 过滤名称
+        /// </summary>
+        /// <param name="name">明后才能</param>
+        /// <returns></returns>
+        protected string FilterName(string name)
+        {
+            return name.Trim().TrimStart('[').TrimEnd(']').TrimStart('`').TrimEnd('`').TrimStart('"').TrimEnd('"');
+        }
+
+        /// <summary>
+        /// 获取安全名称
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <returns></returns>
+        protected virtual string GetSafeName(string name)
+        {
             return $"{OpenQuote}{name}{CloseQuote}";
         }
 
@@ -28,7 +48,10 @@
         /// 获取参数前缀
         /// </summary>
         /// <returns></returns>
-        public abstract string GetPrefix();
+        public virtual string GetPrefix()
+        {
+            return "@";
+        }
 
         /// <summary>
         /// 闭合字符-开

@@ -8,7 +8,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bing.Utils.Extensions;
+using Bing.Utils.Files;
 using Bing.Utils.Helpers;
+using FileInfo = System.IO.FileInfo;
 
 namespace Bing.Utils.IO
 {
@@ -708,6 +710,39 @@ namespace Bing.Utils.IO
                     return result;
                 }
             }
+        }
+
+        #endregion
+
+        #region GetFileSize(获取文件大小)
+
+        /// <summary>
+        /// 获取文件大小
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <returns></returns>
+        public static FileSize GetFileSize(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+
+            return GetFileSize(new FileInfo(filePath));
+        }
+
+        /// <summary>
+        /// 获取文件大小
+        /// </summary>
+        /// <param name="fileInfo">文件信息</param>
+        /// <returns></returns>
+        public static FileSize GetFileSize(FileInfo fileInfo)
+        {
+            if (fileInfo == null)
+            {
+                throw new ArgumentNullException(nameof(fileInfo));
+            }
+            return new FileSize(fileInfo.Length);
         }
 
         #endregion

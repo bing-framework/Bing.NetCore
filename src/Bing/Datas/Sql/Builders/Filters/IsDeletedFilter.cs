@@ -18,18 +18,19 @@ namespace Bing.Datas.Sql.Builders.Filters
         {
             foreach (var item in context.EntityAliasRegister.Data)
             {
-                Filter(context.Matedata, context.WhereClause, item.Key, item.Value);
+                Filter(context.Dialect, context.Matedata, context.WhereClause, item.Key, item.Value);
             }
         }
 
         /// <summary>
         /// 过滤
         /// </summary>
+        /// <param name="dialect">Sql方言</param>
         /// <param name="matedata">实体元数据解析器</param>
         /// <param name="whereClause">Where子句</param>
         /// <param name="type">类型</param>
         /// <param name="alias">表别名</param>
-        private void Filter(IEntityMatedata matedata,IWhereClause whereClause, Type type, string alias)
+        private void Filter(IDialect dialect, IEntityMatedata matedata,IWhereClause whereClause, Type type, string alias)
         {
             if (type == null)
             {
@@ -43,7 +44,7 @@ namespace Bing.Datas.Sql.Builders.Filters
 
             if (typeof(IDelete).IsAssignableFrom(type))
             {
-                whereClause.Where($"{alias}.{matedata.GetColumn(type, "IsDeleted")}", false);
+                whereClause.Where($"{dialect.SafeName(alias)}.{dialect.SafeName(matedata.GetColumn(type, "IsDeleted"))}", false);
             }
         }
     }

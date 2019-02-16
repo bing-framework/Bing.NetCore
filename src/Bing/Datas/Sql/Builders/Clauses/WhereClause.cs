@@ -441,6 +441,17 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="builder">Sql生成器</param>
         public void In(string column, ISqlBuilder builder)
         {
+            AppendSqlBuilder("In", column, builder);
+        }
+
+        /// <summary>
+        /// 添加子查询
+        /// </summary>
+        /// <param name="operation">操作符</param>
+        /// <param name="column">列名</param>
+        /// <param name="builder">Sql生成器</param>
+        private void AppendSqlBuilder(string operation, string column, ISqlBuilder builder)
+        {
             if (string.IsNullOrWhiteSpace(column))
             {
                 return;
@@ -451,7 +462,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
                 return;
             }
 
-            var result = $"{_helper.GetColumn(column)} In ({builder.ToSql()})";
+            var result = $"{_helper.GetColumn(column)} {operation} ({builder.ToSql()})";
             AppendSql(result);
         }
 
@@ -522,18 +533,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="builder">Sql生成器</param>
         public void NotIn(string column, ISqlBuilder builder)
         {
-            if (string.IsNullOrWhiteSpace(column))
-            {
-                return;
-            }
-
-            if (builder == null)
-            {
-                return;
-            }
-
-            var result = $"{_helper.GetColumn(column)} Not In ({builder.ToSql()})";
-            AppendSql(result);
+            AppendSqlBuilder("Not In", column, builder);
         }
 
         /// <summary>
@@ -573,6 +573,68 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action)
         {
             NotIn(_helper.GetColumn(expression), action);
+        }
+
+        /// <summary>
+        /// 设置Exists条件
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        public void Exists(ISqlBuilder builder)
+        {
+            if (builder == null)
+            {
+                return;
+            }
+
+            var result = $"Exists ({builder.ToSql()})";
+            AppendSql(result);
+        }
+
+        /// <summary>
+        /// 设置Exists条件
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        public void Exists(Action<ISqlBuilder> action)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var builder = Builder.New();
+            action(builder);
+            Exists(builder);
+        }
+
+        /// <summary>
+        /// 设置Not Exists条件
+        /// </summary>
+        /// <param name="builder">Sql生成器</param>
+        public void NotExists(ISqlBuilder builder)
+        {
+            if (builder == null)
+            {
+                return;
+            }
+
+            var result = $"Not Exists ({builder.ToSql()})";
+            AppendSql(result);
+        }
+
+        /// <summary>
+        /// 设置Not Exists条件
+        /// </summary>
+        /// <param name="action">子查询操作</param>
+        public void NotExists(Action<ISqlBuilder> action)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var builder = Builder.New();
+            action(builder);
+            NotExists(builder);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -275,6 +276,23 @@ namespace Bing.Utils.Extensions
             }
 
             return dictionary.ToDictionary(x => x.Value, x => x.Key);
+        }
+
+        #endregion
+
+        #region AsReadOnly(转换成只读字典)
+
+        /// <summary>
+        /// 转换成只读字典
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <returns></returns>
+        public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(
+            this IDictionary<TKey, TValue> dictionary)
+        {
+            return new ReadOnlyDictionary<TKey, TValue>(dictionary);
         }
 
         #endregion

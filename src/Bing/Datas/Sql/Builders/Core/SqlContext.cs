@@ -24,16 +24,23 @@ namespace Bing.Datas.Sql.Builders.Core
         public IEntityMatedata Matedata { get; }
 
         /// <summary>
+        /// Sql方言
+        /// </summary>
+        public IDialect Dialect { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="SqlContext"/>类型的实例
         /// </summary>
         /// <param name="entityAliasRegister">实体别名注册器</param>
         /// <param name="whereClause">Where子句</param>
         /// <param name="matedata">实体元数据解析器</param>
-        public SqlContext(IEntityAliasRegister entityAliasRegister, IWhereClause whereClause, IEntityMatedata matedata)
+        /// <param name="dialect">Sql方言</param>
+        public SqlContext(IEntityAliasRegister entityAliasRegister, IWhereClause whereClause, IEntityMatedata matedata, IDialect dialect)
         {
             EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
             WhereClause = whereClause ?? throw new ArgumentNullException(nameof(whereClause));
             Matedata = matedata;
+            Dialect = dialect;
         }
     }
 }
