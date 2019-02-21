@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing.Biz.Payments\Bing.Biz.Payments.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.Log4Net\Bing.Logs.Log4Net.csproj" />

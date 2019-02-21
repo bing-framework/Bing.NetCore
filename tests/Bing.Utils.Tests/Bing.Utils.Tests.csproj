@@ -27,6 +27,7 @@
   <ItemGroup>
     <Folder Include="Json\" />
     <Folder Include="Timing\" />
+    <Folder Include="XUnitHelpers\" />
   </ItemGroup>
 
 </Project>

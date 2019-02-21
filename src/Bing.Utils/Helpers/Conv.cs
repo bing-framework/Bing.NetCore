@@ -13,7 +13,7 @@ namespace Bing.Utils.Helpers
         #region ToByte(转换为byte)
 
         /// <summary>
-        /// 转换为8位可空整型
+        /// 转换为8位整型
         /// </summary>
         /// <param name="input">输入值</param>
         /// <returns></returns>
@@ -23,7 +23,7 @@ namespace Bing.Utils.Helpers
         }
 
         /// <summary>
-        /// 转换为8位可空整型
+        /// 转换为8位整型
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="defaultValue">默认值</param>
@@ -40,13 +40,26 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static byte? ToByteOrNull(object input)
         {
-            byte result;
-            var success = byte.TryParse(input.SafeString(), out result);
+            var success = byte.TryParse(input.SafeString(), out var result);
             if (success)
             {
                 return result;
             }
-            return null;
+
+            try
+            {
+                var temp = ToDoubleOrNull(input, 0);
+                if (temp == null)
+                {
+                    return null;
+                }
+
+                return Convert.ToByte(temp);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         #endregion
@@ -81,8 +94,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static char? ToCharOrNull(object input)
         {
-            char result;
-            var success = char.TryParse(input.SafeString(), out result);
+            var success = char.TryParse(input.SafeString(), out var result);
             if (success)
             {
                 return result;
@@ -122,13 +134,26 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static short? ToShortOrNull(object input)
         {
-            short result;
-            var success = short.TryParse(input.SafeString(), out result);
+            var success = short.TryParse(input.SafeString(), out var result);
             if (success)
             {
                 return result;
             }
-            return null;
+
+            try
+            {
+                var temp = ToDoubleOrNull(input, 0);
+                if (temp == null)
+                {
+                    return null;
+                }
+
+                return Convert.ToInt16(temp);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         #endregion
@@ -162,8 +187,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static int? ToIntOrNull(object input)
         {
-            int result;
-            var success = int.TryParse(input.SafeString(), out result);
+            var success = int.TryParse(input.SafeString(), out var result);
             if (success)
             {
                 return result;

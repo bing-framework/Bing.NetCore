@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using Bing.AutoMapper;
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Extensions;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
@@ -58,11 +59,11 @@ namespace Bing.Samples.Api
             services.AddLog4NetWithFactory();
             services.AddNLogWithFactory();
             services.AddSerilogWithFactory();
-            services.AddExceptionlessWithFactory(options =>
-            {
-                options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
-                options.ServerUrl = "";
-            });
+            //services.AddExceptionlessWithFactory(options =>
+            //{
+            //    options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
+            //    options.ServerUrl = "";
+            //});
 
             //services.AddExceptionless(options =>
             //{
@@ -70,6 +71,8 @@ namespace Bing.Samples.Api
             //    options.ServerUrl = "";
             //});
             //services.AddSerilog();
+
+            services.AddAutoMapper();
             services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new Info() {Title = "Bing.Samples.Api", Version = "v1"});
