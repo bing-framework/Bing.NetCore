@@ -125,7 +125,7 @@ namespace Bing.AutoMapper.Tests
         /// 测试忽略特性
         /// </summary>
         [Fact]
-        public void TestMapTo_Ignore()
+        public void Test_MapTo_Ignore()
         {
             DtoSample sample2 = new DtoSample { Name = "a", IgnoreValue = "b" };
             EntitySample sample = sample2.MapTo<EntitySample>();
@@ -140,7 +140,7 @@ namespace Bing.AutoMapper.Tests
         /// 测试Castle代理类
         /// </summary>
         [Fact]
-        public void TestMapTo_CastleProxy()
+        public void Test_MapTo_CastleProxy()
         {
             Castle.DynamicProxy.ProxyGenerator proxyGenerator = new Castle.DynamicProxy.ProxyGenerator();
             var proxy = proxyGenerator.CreateClassProxy<DtoSample>();

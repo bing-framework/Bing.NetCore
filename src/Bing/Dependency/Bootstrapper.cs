@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using AspectCore.Configuration;
 using Autofac;
-using Bing.Contexts;
 using Bing.Events.Handlers;
 using Bing.Helpers;
 using Bing.Reflections;

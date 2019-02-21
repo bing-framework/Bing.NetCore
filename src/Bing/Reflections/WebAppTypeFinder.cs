@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using Microsoft.Extensions.PlatformAbstractions;
-
-namespace Bing.Reflections
+﻿namespace Bing.Reflections
 {
     /// <summary>
     /// Web应用类型查找器
