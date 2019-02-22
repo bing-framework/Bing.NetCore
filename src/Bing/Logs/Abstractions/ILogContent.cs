@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using Bing.Exceptions;
 
 namespace Bing.Logs.Abstractions
 {

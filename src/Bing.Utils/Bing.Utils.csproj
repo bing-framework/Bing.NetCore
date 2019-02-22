@@ -15,6 +15,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\output\release\</OutputPath>
     <DocumentationFile>..\..\output\release\netstandard2.0\Bing.Utils.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

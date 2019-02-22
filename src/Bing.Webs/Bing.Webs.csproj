@@ -22,6 +22,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Applications\Bing.Applications.csproj" />
+    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

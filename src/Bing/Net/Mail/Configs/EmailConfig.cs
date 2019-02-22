@@ -13,7 +13,7 @@
         /// <summary>
         /// 端口号
         /// </summary>
-        public int Port { get; set; }
+        public int Port { get; set; } = 25;
 
         /// <summary>
         /// 用户名

@@ -11,7 +11,7 @@ namespace Bing.MailKit.Extensions
         /// <summary>
         /// 电子邮件配置
         /// </summary>
-        public EmailConfig EmailConfig { get; set; }=new EmailConfig();
+        public EmailConfig EmailConfig { get; set; } = new EmailConfig();
 
         /// <summary>
         /// MailKit 配置

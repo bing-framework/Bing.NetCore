@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Text.RegularExpressions;
 
-namespace Bing.Utils.Medias.Images
+namespace Bing.Utils.Drawing
 {
     /// <summary>
     /// 图片操作辅助类 - 加载
@@ -46,25 +47,7 @@ namespace Bing.Utils.Medias.Images
         /// <returns></returns>
         public static Image FromBytes(byte[] bytes)
         {
-            using (var stream = new MemoryStream(bytes))
-            {
-                return FromStream(stream);
-            }
-        }
-
-        #endregion
-
-        #region FromBase64(从Base64字符串创建图片)
-
-        /// <summary>
-        /// 从Base64字符串创建图片
-        /// </summary>
-        /// <param name="base64">Base64字符串</param>
-        /// <returns></returns>
-        public static Image FromBase64(string base64)
-        {
-            byte[] bytes = Convert.FromBase64String(base64);
-            using (MemoryStream ms=new MemoryStream(bytes))
+            using (var ms = new MemoryStream(bytes))
             {
                 return Image.FromStream(ms);
             }
@@ -72,18 +55,33 @@ namespace Bing.Utils.Medias.Images
 
         #endregion
 
-        #region FromBase64Url(从URL格式的Base64字符串创建图片)
+        #region FromBase64String(从指定Base64字符串创建图片)
 
         /// <summary>
-        /// 从URL格式的Base64字符串创建图片。
+        /// 从指定Base64字符串创建图片
+        /// </summary>
+        /// <param name="base64String">Base64字符串</param>
+        /// <returns></returns>
+        public static Image FromBase64String(string base64String)
+        {
+            byte[] bytes = Convert.FromBase64String(GetBase64String(base64String));
+            using (var ms = new MemoryStream(bytes))
+            {
+                return Image.FromStream(ms);
+            }
+        }
+
+        /// <summary>
+        /// 获取真正的图片Base64数据。
         /// 即去掉data:image/jpg;base64,这样的格式
         /// </summary>
-        /// <param name="base64Url">带前缀的Base64图片字符串</param>
+        /// <param name="base64String">带前缀的Base64图片字符串</param>
         /// <returns></returns>
-        public static Image FromBase64Url(string base64Url)
+        private static string GetBase64String(string base64String)
         {
-            string base64 = GetBase64String(base64Url);
-            return FromBase64(base64);
+            string parttern = "^(data:image/.*?;base64,).*?$";
+            var match = Regex.Match(base64String, parttern);
+            return base64String.Replace(match.Groups[1].ToString(), "");
         }
 
         #endregion

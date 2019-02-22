@@ -80,6 +80,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services
                 .Add("nonceStr", Id.Guid())
                 .Package($"prepay_id{result.GetPrepayId()}")
                 .Add("signType", config.SignType.Description())
+                .Add("paySign", result.GetSign())
                 .ToJson();
         }
     }
