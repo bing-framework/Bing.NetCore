@@ -19,11 +19,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToDateTimeString(this DateTime dateTime, bool isRemoveSecond = false)
         {
-            if (isRemoveSecond)
-            {
-                return dateTime.ToString("yyyy-MM-dd HH:mm");
-            }
-            return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+            return dateTime.ToString(isRemoveSecond ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm:ss");
         }
 
         /// <summary>
@@ -34,11 +30,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToDateTimeString(this DateTime? dateTime, bool isRemoveSecond = false)
         {
-            if (dateTime == null)
-            {
-                return string.Empty;
-            }
-            return ToDateTimeString(dateTime.Value, isRemoveSecond);
+            return dateTime == null ? string.Empty : ToDateTimeString(dateTime.Value, isRemoveSecond);
         }
 
         #endregion
@@ -62,11 +54,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToDateString(this DateTime? dateTime)
         {
-            if (dateTime == null)
-            {
-                return string.Empty;
-            }
-            return ToDateString(dateTime.Value);
+            return dateTime == null ? string.Empty : ToDateString(dateTime.Value);
         }
 
         #endregion
@@ -90,11 +78,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToTimeString(this DateTime? dateTime)
         {
-            if (dateTime == null)
-            {
-                return string.Empty;
-            }
-            return ToTimeString(dateTime.Value);
+            return dateTime == null ? string.Empty : ToTimeString(dateTime.Value);
         }
 
         #endregion
@@ -118,11 +102,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToMillisecondString(this DateTime? dateTime)
         {
-            if (dateTime == null)
-            {
-                return string.Empty;
-            }
-            return ToMillisecondString(dateTime.Value);
+            return dateTime == null ? string.Empty : ToMillisecondString(dateTime.Value);
         }
 
         #endregion
@@ -136,7 +116,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToChineseDateString(this DateTime dateTime)
         {
-            return string.Format("{0}年{1}月{2}日", dateTime.Year, dateTime.Month, dateTime.Day);
+            return $"{dateTime.Year}年{dateTime.Month}月{dateTime.Day}日";
         }
 
         /// <summary>
@@ -146,11 +126,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToChineseDateString(this DateTime? dateTime)
         {
-            if (dateTime == null)
-            {
-                return string.Empty;
-            }
-            return ToChineseDateString(dateTime.Value);
+            return dateTime == null ? string.Empty : ToChineseDateString(dateTime.Value);
         }
 
         #endregion
@@ -165,13 +141,14 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToChineseDateTimeString(this DateTime dateTime, bool isRemoveSecond = false)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             result.AppendFormat("{0}年{1}月{2}日", dateTime.Year, dateTime.Month, dateTime.Day);
             result.AppendFormat(" {0}时{1}分", dateTime.Hour, dateTime.Minute);
             if (isRemoveSecond == false)
             {
                 result.AppendFormat("{0}秒", dateTime.Second);
             }
+
             return result.ToString();
         }
 
@@ -183,16 +160,13 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToChineseDateTimeString(this DateTime? dateTime, bool isRemoveSecond = false)
         {
-            if (dateTime == null)
-            {
-                return string.Empty;
-            }
-            return ToChineseDateTimeString(dateTime.Value, isRemoveSecond);
+            return dateTime == null ? string.Empty : ToChineseDateTimeString(dateTime.Value, isRemoveSecond);
         }
 
         #endregion
 
         #region Description(获取描述)
+
         /// <summary>
         /// 获取描述
         /// </summary>
@@ -200,33 +174,40 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string Description(this TimeSpan span)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             if (span.Days > 0)
             {
                 result.AppendFormat("{0}天", span.Days);
             }
+
             if (span.Hours > 0)
             {
                 result.AppendFormat("{0}小时", span.Hours);
             }
+
             if (span.Minutes > 0)
             {
                 result.AppendFormat("{0}分", span.Minutes);
             }
+
             if (span.Seconds > 0)
             {
                 result.AppendFormat("{0}秒", span.Seconds);
             }
+
             if (span.Milliseconds > 0)
             {
                 result.AppendFormat("{0}毫秒", span.Milliseconds);
             }
+
             if (result.Length > 0)
             {
                 return result.ToString();
             }
+
             return $"{span.TotalSeconds * 1000}毫秒";
         }
+
         #endregion
     }
 }

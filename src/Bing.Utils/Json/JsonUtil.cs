@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace Bing.Utils.Json
@@ -26,6 +27,7 @@ namespace Bing.Utils.Json
             {
                 return json;
             }
+
             json = Regex.Replace(json, @"\\/Date\((\d+)\)\\/", match =>
             {
                 DateTime dt = new DateTime(1970, 1, 1);
@@ -38,6 +40,7 @@ namespace Bing.Utils.Json
         #endregion
 
         #region ToObject(将Json字符串转换为对象)
+
         /// <summary>
         /// 将Json字符串转换为对象
         /// </summary>
@@ -50,6 +53,7 @@ namespace Bing.Utils.Json
             {
                 return default(T);
             }
+
             return JsonConvert.DeserializeObject<T>(json);
         }
 
@@ -63,6 +67,17 @@ namespace Bing.Utils.Json
         {
             return JsonConvert.DeserializeObject(json, type);
         }
+
+        /// <summary>
+        /// 将Json字符串转换为对象
+        /// </summary>
+        /// <param name="json">Json字符串</param>
+        /// <returns></returns>
+        public static object ToObject(string json)
+        {
+            return JsonConvert.DeserializeObject(json);
+        }
+
         #endregion
 
         #region ToJson(将对象转换为Json字符串)
@@ -75,28 +90,34 @@ namespace Bing.Utils.Json
         /// <param name="camelCase">是否驼峰式命名</param>
         /// <param name="indented">是否缩进</param>
         /// <returns></returns>
-        public static string ToJson(object target, bool isConvertToSingleQuotes = false, bool camelCase = false, bool indented = false)
+        public static string ToJson(object target, bool isConvertToSingleQuotes = false, bool camelCase = false,
+            bool indented = false)
         {
             if (target == null)
             {
                 return "{}";
             }
+
             var options = new JsonSerializerSettings();
             if (camelCase)
             {
                 options.ContractResolver = new CamelCasePropertyNamesContractResolver();
             }
+
             if (indented)
             {
                 options.Formatting = Formatting.Indented;
             }
+
             var result = JsonConvert.SerializeObject(target, options);
             if (isConvertToSingleQuotes)
             {
                 result = result.Replace("\"", "'");
             }
+
             return result;
         }
+
         #endregion
 
         #region SerializableToFile(将对象序列化到Json文件)
@@ -169,9 +190,30 @@ namespace Bing.Utils.Json
                 {
                     sb.Append(dk[j]);
                 }
+
                 dicData.Add(dk[0], sb.ToString());
             }
+
             return dicData.ToJson();
+        }
+
+        #endregion
+
+        #region ToJObject(将Json字符串转换为Linq对象)
+
+        /// <summary>
+        /// 将Json字符串转换为Linq对象
+        /// </summary>
+        /// <param name="json">Json字符串</param>
+        /// <returns></returns>
+        public static JObject ToJObject(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return JObject.Parse("{}");
+            }
+
+            return JObject.Parse(json.Replace("&nbsp;", ""));
         }
 
         #endregion

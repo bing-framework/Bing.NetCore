@@ -1,4 +1,6 @@
-﻿namespace Bing.Utils.Json
+﻿using Newtonsoft.Json.Linq;
+
+namespace Bing.Utils.Json
 {
     /// <summary>
     /// Json辅助扩展操作
@@ -6,6 +8,7 @@
     public static class JsonExtensions
     {
         #region ToObject(将Json字符串转换为对象)
+
         /// <summary>
         /// 将Json字符串转换为对象
         /// </summary>
@@ -16,6 +19,17 @@
         {
             return JsonUtil.ToObject<T>(json);
         }
+
+        /// <summary>
+        /// 将Json字符串转换为独享
+        /// </summary>
+        /// <param name="json">Json字符串</param>
+        /// <returns></returns>
+        public static object ToObject(this string json)
+        {
+            return JsonUtil.ToObject(json);
+        }
+
         #endregion
 
         #region ToJson(将对象转换为Json字符串)
@@ -28,10 +42,26 @@
         /// <param name="camelCase">是否驼峰式命名</param>
         /// <param name="indented">是否缩进</param>
         /// <returns></returns>
-        public static string ToJson(this object target, bool isConvertToSingleQuotes = false, bool camelCase = false, bool indented = false)
+        public static string ToJson(this object target, bool isConvertToSingleQuotes = false, bool camelCase = false,
+            bool indented = false)
         {
             return JsonUtil.ToJson(target, isConvertToSingleQuotes, camelCase, indented);
         }
+
+        #endregion
+
+        #region ToJObject(将Json字符串转换为Linq对象)
+
+        /// <summary>
+        /// 将Json字符串转换为Linq对象
+        /// </summary>
+        /// <param name="json">Json字符串</param>
+        /// <returns></returns>
+        public static JObject ToJObject(this string json)
+        {
+            return JsonUtil.ToJObject(json);
+        }
+
         #endregion
     }
 }
