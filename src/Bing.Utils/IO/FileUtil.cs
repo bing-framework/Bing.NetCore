@@ -31,6 +31,7 @@ namespace Bing.Utils.IO
             {
                 return;
             }
+
             File.Create(fileName);
         }
 
@@ -60,10 +61,12 @@ namespace Bing.Utils.IO
             {
                 return;
             }
+
             if (File.Exists(filePath))
             {
                 return;
             }
+
             File.Delete(filePath);
         }
 
@@ -100,6 +103,7 @@ namespace Bing.Utils.IO
                         {
                             break;
                         }
+
                         if (randomData)
                         {
                             Random randomByte = new Random();
@@ -112,6 +116,7 @@ namespace Bing.Utils.IO
                                 rowDataBuffer[i] = Convert.ToByte(Convert.ToChar(deleteCount));
                             }
                         }
+
                         //写新内容到文件
                         for (int i = 0; i < deleteCount; i++)
                         {
@@ -119,10 +124,12 @@ namespace Bing.Utils.IO
                             stream.Write(rowDataBuffer, 0, iNumOfDataRead);
                             ;
                         }
+
                         offset += iNumOfDataRead;
                         count -= iNumOfDataRead;
                     }
                 }
+
                 //每一个文件名字符代替随机数从0到9
                 string newName = "";
                 do
@@ -136,8 +143,10 @@ namespace Bing.Utils.IO
                     {
                         newName += random.Next(9).ToString();
                     }
+
                     newName = dirName + "\\" + newName;
                 } while (File.Exists(newName));
+
                 //重命名文件的新随机的名字
                 File.Move(fileName, newName);
                 File.Delete(newName);
@@ -147,7 +156,7 @@ namespace Bing.Utils.IO
                 //可能其他原因删除失败，使用我们自己的方法强制删除
                 try
                 {
-                    string filename = fileName;//要检查被哪个进程占用的文件
+                    string filename = fileName; //要检查被哪个进程占用的文件
                     Process tool = new Process()
                     {
                         StartInfo =
@@ -167,6 +176,7 @@ namespace Bing.Utils.IO
                         //结束掉所有正在使用这个文件的程序
                         Process.GetProcessById(int.Parse(match.Value)).Kill();
                     }
+
                     File.Delete(filename);
                 }
                 catch
@@ -175,6 +185,7 @@ namespace Bing.Utils.IO
                     ret = false;
                 }
             }
+
             return ret;
         }
 
@@ -195,6 +206,7 @@ namespace Bing.Utils.IO
             {
                 throw new FileNotFoundException("要设置属性的文件不存在。", fileName);
             }
+
             if (isSet)
             {
                 fi.Attributes = fi.Attributes | attribute;
@@ -221,6 +233,7 @@ namespace Bing.Utils.IO
                 FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(fileName);
                 return fvi.FileVersion;
             }
+
             return null;
         }
 
@@ -250,17 +263,20 @@ namespace Bing.Utils.IO
                 {
                     readSize = fs.Length - offset;
                 }
-                fs.Read(buffer, 0, (int)readSize);
+
+                fs.Read(buffer, 0, (int) readSize);
                 if (offset + readSize < fs.Length)
                 {
-                    md5.TransformBlock(buffer, 0, (int)readSize, buffer, 0);
+                    md5.TransformBlock(buffer, 0, (int) readSize, buffer, 0);
                 }
                 else
                 {
-                    md5.TransformFinalBlock(buffer, 0, (int)readSize);
+                    md5.TransformFinalBlock(buffer, 0, (int) readSize);
                 }
+
                 offset += bufferSize;
             }
+
             fs.Close();
             byte[] result = md5.Hash;
             md5.Clear();
@@ -269,12 +285,14 @@ namespace Bing.Utils.IO
             {
                 sb.Append(b.ToString("X2"));
             }
+
             return sb.ToString();
         }
 
         #endregion
 
         #region GetEncoding(获取文件编码)
+
         /// <summary>
         /// 获取文件编码
         /// </summary>
@@ -284,6 +302,7 @@ namespace Bing.Utils.IO
         {
             return GetEncoding(filePath, Encoding.Default);
         }
+
         /// <summary>
         /// 获取文件编码
         /// </summary>
@@ -310,21 +329,26 @@ namespace Bing.Utils.IO
                     {
                         targetEncoding = Encoding.BigEndianUnicode;
                     }
+
                     if (buffer[0] == 0xFF && buffer[1] == 0xFE)
                     {
                         targetEncoding = Encoding.Unicode;
                     }
+
                     if (buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF)
                     {
                         targetEncoding = Encoding.UTF8;
                     }
                 }
             }
+
             return targetEncoding;
         }
+
         #endregion
 
         #region GetAllFiles(获取目录中全部文件列表)
+
         /// <summary>
         /// 获取目录中全部文件列表，包括子目录
         /// </summary>
@@ -334,9 +358,11 @@ namespace Bing.Utils.IO
         {
             return Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories).ToList();
         }
+
         #endregion
 
         #region GetContentType(根据扩展名获取文件内容类型)
+
         /// <summary>
         /// 根据扩展名获取文件内容类型
         /// </summary>
@@ -351,6 +377,7 @@ namespace Bing.Utils.IO
             {
                 ext = "." + ext;
             }
+
             dict.TryGetValue(ext, out contentType);
             return contentType;
         }
@@ -381,6 +408,7 @@ namespace Bing.Utils.IO
             {
                 return string.Empty;
             }
+
             using (StreamReader reader = new StreamReader(filePath, encoding))
             {
                 return reader.ReadToEnd();
@@ -390,6 +418,7 @@ namespace Bing.Utils.IO
         #endregion
 
         #region ReadToBytes(将文件读取到字节流中)
+
         /// <summary>
         /// 将文件读取到字节流中
         /// </summary>
@@ -401,13 +430,15 @@ namespace Bing.Utils.IO
             {
                 return null;
             }
+
             FileInfo fileInfo = new FileInfo(filePath);
-            int fileSize = (int)fileInfo.Length;
+            int fileSize = (int) fileInfo.Length;
             using (BinaryReader reader = new BinaryReader(fileInfo.Open(FileMode.Open)))
             {
                 return reader.ReadBytes(fileSize);
             }
         }
+
         #endregion
 
         #region Write(将字节流写入文件)
@@ -433,10 +464,12 @@ namespace Bing.Utils.IO
             {
                 return;
             }
+
             if (bytes == null)
             {
                 return;
             }
+
             File.WriteAllBytes(filePath, bytes);
         }
 
@@ -466,6 +499,7 @@ namespace Bing.Utils.IO
             {
                 return string.Empty;
             }
+
             return encoding.GetString(data);
         }
 
@@ -487,7 +521,7 @@ namespace Bing.Utils.IO
 
             if (encoding == null)
             {
-                encoding=Encoding.UTF8;
+                encoding = Encoding.UTF8;
             }
 
             if (stream.CanRead == false)
@@ -520,7 +554,8 @@ namespace Bing.Utils.IO
         /// <param name="bufferSize">缓冲区大小</param>
         /// <param name="isCloseStream">读取完成是否释放流，默认为true</param>
         /// <returns></returns>
-        public static async Task<string> ToStringAsync(Stream stream, Encoding encoding = null, int bufferSize = 1024 * 2,
+        public static async Task<string> ToStringAsync(Stream stream, Encoding encoding = null,
+            int bufferSize = 1024 * 2,
             bool isCloseStream = true)
         {
             if (stream == null)
@@ -558,6 +593,7 @@ namespace Bing.Utils.IO
         #endregion
 
         #region ToStream(转换成流)
+
         /// <summary>
         /// 字符串转换成流
         /// </summary>
@@ -580,12 +616,14 @@ namespace Bing.Utils.IO
             {
                 return Stream.Null;
             }
+
             return new MemoryStream(ToBytes(data, encoding));
         }
 
         #endregion
 
         #region ToBytes(转换成字节数组)
+
         /// <summary>
         /// 将字符串转换成字节数组
         /// </summary>
@@ -608,6 +646,7 @@ namespace Bing.Utils.IO
             {
                 return new byte[] { };
             }
+
             return encoding.GetBytes(data);
         }
 
@@ -627,6 +666,7 @@ namespace Bing.Utils.IO
         #endregion
 
         #region ToInt(转换成整数)
+
         /// <summary>
         /// 字节数组转换成整数
         /// </summary>
@@ -638,10 +678,12 @@ namespace Bing.Utils.IO
             {
                 return 0;
             }
+
             var buffer = new byte[4];
             Buffer.BlockCopy(data, 0, buffer, 0, 4);
             return BitConverter.ToInt32(buffer, 0);
         }
+
         #endregion
 
         #region JoinPath(连接基路径和子路径)
@@ -687,7 +729,7 @@ namespace Bing.Utils.IO
                 return string.Empty;
             }
 
-            using (var memoryStream=new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
                 using (var reader = new StreamReader(memoryStream, encoding))
                 {
@@ -695,6 +737,7 @@ namespace Bing.Utils.IO
                     {
                         stream.Seek(0, SeekOrigin.Begin);
                     }
+
                     stream.CopyTo(memoryStream);
                     if (memoryStream.CanSeek)
                     {
@@ -742,6 +785,7 @@ namespace Bing.Utils.IO
             {
                 throw new ArgumentNullException(nameof(fileInfo));
             }
+
             return new FileSize(fileInfo.Length);
         }
 

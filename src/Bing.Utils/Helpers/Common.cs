@@ -45,7 +45,7 @@ namespace Bing.Utils.Helpers
                 return string.Empty;
             }
 
-            var rootPath = Web.WebRootPath;
+            var rootPath = Web.RootPath;
             if (string.IsNullOrWhiteSpace(rootPath))
             {
                 return Path.GetFullPath(relativePath);
