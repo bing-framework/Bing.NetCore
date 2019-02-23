@@ -105,8 +105,48 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region ClearAt(清空数组中指定的内容)
+        #region ClearAt(清除数组中指定索引的内容)
 
+        /// <summary>
+        /// 清除数组中指定索引的内容
+        /// </summary>
+        /// <param name="array">数组</param>
+        /// <param name="index">索引</param>
+        /// <returns></returns>
+        public static Array ClearAt(this Array array, int index)
+        {
+            if (array != null)
+            {
+                var arrayIndex = index.GetArrayIndex();
+                if (arrayIndex.IsIndexInArray(array))
+                {
+                    Array.Clear(array, arrayIndex, 1);
+                }
+            }
+
+            return array;
+        }
+
+        /// <summary>
+        /// 清除数组中指定索引的内容
+        /// </summary>
+        /// <typeparam name="T">数组类型</typeparam>
+        /// <param name="array">数组</param>
+        /// <param name="index">索引</param>
+        /// <returns></returns>
+        public static T[] ClearAt<T>(this T[] array, int index)
+        {
+            if (array != null)
+            {
+                var arrayIndex = index.GetArrayIndex();
+                if (arrayIndex.IsIndexInArray(array))
+                {
+                    array[arrayIndex] = default(T);
+                }
+            }
+
+            return array;
+        }
 
         #endregion
 
@@ -174,23 +214,6 @@ namespace Bing.Utils.Extensions
             {
                 yield return source.BlockCopy(i, length, padToLength);
             }
-        }
-
-        #endregion
-
-        #region Copy(复制一份二维数组的副本)
-
-        /// <summary>
-        /// 复制一份二维数组的副本
-        /// </summary>
-        /// <param name="bytes">二维数组</param>
-        /// <returns></returns>
-        public static byte[,] Copy(this byte[,] bytes)
-        {
-            int width = bytes.GetLength(0), height = bytes.GetLength(1);
-            byte[,] newBytes = new byte[width, height];
-            Array.Copy(bytes, newBytes, bytes.Length);
-            return newBytes;
         }
 
         #endregion

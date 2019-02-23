@@ -11,6 +11,7 @@ namespace Bing.Utils.Extensions
     public static partial class Extensions
     {
         #region SafeString(安全转换为字符串)
+
         /// <summary>
         /// 安全转换为字符串，去除两端空格，当值为null时返回""
         /// </summary>
@@ -20,9 +21,11 @@ namespace Bing.Utils.Extensions
         {
             return input == null ? string.Empty : input.ToString().Trim();
         }
+
         #endregion
 
         #region ToBool(转换为bool)
+
         /// <summary>
         /// 转换为bool
         /// </summary>
@@ -42,9 +45,11 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.ToBoolOrNull(obj);
         }
+
         #endregion
 
         #region ToInt(转换为int)
+
         /// <summary>
         /// 转换为int
         /// </summary>
@@ -64,9 +69,11 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.ToIntOrNull(obj);
         }
+
         #endregion
 
         #region ToLong(转换为long)
+
         /// <summary>
         /// 转换为long
         /// </summary>
@@ -86,6 +93,7 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.ToLongOrNull(obj);
         }
+
         #endregion
 
         #region ToDouble(转换为double)
@@ -109,6 +117,7 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.ToDoubleOrNull(obj);
         }
+
         #endregion
 
         #region ToDecimal(转换为decimal)
@@ -132,9 +141,11 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.ToDecimalOrNull(obj);
         }
+
         #endregion
 
         #region ToDate(转换为日期)
+
         /// <summary>
         /// 转换为日期
         /// </summary>
@@ -154,6 +165,7 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.ToDateOrNull(obj);
         }
+
         #endregion
 
         #region ToGuid(转换为Guid)
@@ -199,8 +211,10 @@ namespace Bing.Utils.Extensions
             {
                 return new List<Guid>();
             }
+
             return obj.Select(t => t.ToGuid()).ToList();
         }
+
         #endregion
 
         #region ToSnakeCase(将字符串转换为蛇形策略)

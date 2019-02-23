@@ -99,6 +99,7 @@ namespace Bing.Utils.Helpers
             {
                 return result;
             }
+
             return null;
         }
 
@@ -159,6 +160,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region ToInt(转换为int)
+
         /// <summary>
         /// 转换为32位整型
         /// </summary>
@@ -192,6 +194,7 @@ namespace Bing.Utils.Helpers
             {
                 return result;
             }
+
             try
             {
                 var temp = ToDoubleOrNull(input, 0);
@@ -199,6 +202,7 @@ namespace Bing.Utils.Helpers
                 {
                     return null;
                 }
+
                 return System.Convert.ToInt32(temp);
             }
             catch
@@ -206,9 +210,11 @@ namespace Bing.Utils.Helpers
                 return null;
             }
         }
+
         #endregion
 
         #region ToLong(转换为long)
+
         /// <summary>
         /// 转换为64位整型
         /// </summary>
@@ -237,12 +243,12 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static long? ToLongOrNull(object input)
         {
-            long result;
-            var success = long.TryParse(input.SafeString(), out result);
+            var success = long.TryParse(input.SafeString(), out var result);
             if (success)
             {
                 return result;
             }
+
             try
             {
                 var temp = ToDecimalOrNull(input, 0);
@@ -250,6 +256,7 @@ namespace Bing.Utils.Helpers
                 {
                     return null;
                 }
+
                 return System.Convert.ToInt64(temp);
             }
             catch
@@ -257,9 +264,11 @@ namespace Bing.Utils.Helpers
                 return null;
             }
         }
+
         #endregion
 
         #region ToFloat(转换为float)
+
         /// <summary>
         /// 转换为32位浮点型，并按指定小数位舍入
         /// </summary>
@@ -291,21 +300,24 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static float? ToFloatOrNull(object input, int? digits = null)
         {
-            float result;
-            var success = float.TryParse(input.SafeString(), out result);
+            var success = float.TryParse(input.SafeString(), out var result);
             if (!success)
             {
                 return null;
             }
+
             if (digits == null)
             {
                 return result;
             }
-            return (float)Math.Round(result, digits.Value);
+
+            return (float) Math.Round(result, digits.Value);
         }
+
         #endregion
 
         #region ToDouble(转换为double)
+
         /// <summary>
         /// 转换为64位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
         /// </summary>
@@ -337,17 +349,19 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static double? ToDoubleOrNull(object input, int? digits = null)
         {
-            double result;
-            var success = double.TryParse(input.SafeString(), out result);
+            var success = double.TryParse(input.SafeString(), out var result);
             if (!success)
             {
                 return null;
             }
+
             return digits == null ? result : Math.Round(result, digits.Value);
         }
+
         #endregion
 
         #region ToDecimal(转换为decimal)
+
         /// <summary>
         /// 转换为128位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
         /// </summary>
@@ -384,15 +398,14 @@ namespace Bing.Utils.Helpers
             {
                 return null;
             }
-            if (digits == null)
-            {
-                return result;
-            }
-            return Math.Round(result, digits.Value);
+
+            return digits == null ? result : Math.Round(result, digits.Value);
         }
+
         #endregion
 
         #region ToBool(转换为bool)
+
         /// <summary>
         /// 转换为布尔值
         /// </summary>
@@ -426,7 +439,8 @@ namespace Bing.Utils.Helpers
             {
                 return value.Value;
             }
-            return bool.TryParse(input.SafeString(), out var result) ? (bool?)result : null;
+
+            return bool.TryParse(input.SafeString(), out var result) ? (bool?) result : null;
         }
 
         /// <summary>
@@ -453,9 +467,11 @@ namespace Bing.Utils.Helpers
                     return null;
             }
         }
+
         #endregion
 
         #region ToDate(转换为DateTime)
+
         /// <summary>
         /// 转换为日期
         /// </summary>
@@ -473,12 +489,13 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static DateTime? ToDateOrNull(object input)
         {
-            DateTime result;
-            return DateTime.TryParse(input.SafeString(), out result) ? (DateTime?)result : null;
+            return DateTime.TryParse(input.SafeString(), out var result) ? (DateTime?) result : null;
         }
+
         #endregion
 
         #region ToGuid(转换为Guid)
+
         /// <summary>
         /// 转换为Guid
         /// </summary>
@@ -496,8 +513,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static Guid? ToGuidOrNull(object input)
         {
-            Guid result;
-            return Guid.TryParse(input.SafeString(), out result) ? (Guid?)result : null;
+            return Guid.TryParse(input.SafeString(), out var result) ? (Guid?) result : null;
         }
 
         /// <summary>
@@ -509,9 +525,11 @@ namespace Bing.Utils.Helpers
         {
             return ToList<Guid>(input);
         }
+
         #endregion
 
         #region ToList(泛型集合转换)
+
         /// <summary>
         /// 泛型集合转换
         /// </summary>
@@ -525,10 +543,12 @@ namespace Bing.Utils.Helpers
             {
                 return result;
             }
+
             var array = input.Split(',');
             result.AddRange(from each in array where !string.IsNullOrWhiteSpace(each) select To<T>(each));
             return result;
         }
+
         #endregion
 
         #region ToEnum(转换为枚举)
@@ -564,18 +584,19 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static T? ToEnumOrNull<T>(object input) where T : struct
         {
-            T result;
-            var success = System.Enum.TryParse(input.SafeString(), true, out result);
+            var success = System.Enum.TryParse(input.SafeString(), true, out T result);
             if (success)
             {
                 return result;
             }
+
             return null;
         }
 
         #endregion
 
         #region To(通用泛型转换)
+
         /// <summary>
         /// 通用泛型转换
         /// </summary>
@@ -588,37 +609,44 @@ namespace Bing.Utils.Helpers
             {
                 return default(T);
             }
+
             if (input is string && string.IsNullOrWhiteSpace(input.ToString()))
             {
                 return default(T);
             }
+
             Type type = Common.GetType<T>();
             var typeName = type.Name.ToLower();
             try
             {
                 if (typeName == "string")
                 {
-                    return (T)(object)input.ToString();
+                    return (T) (object) input.ToString();
                 }
+
                 if (typeName == "guid")
                 {
-                    return (T)(object)new Guid(input.ToString());
+                    return (T) (object) new Guid(input.ToString());
                 }
+
                 if (type.IsEnum)
                 {
                     return Enum.Parse<T>(input);
                 }
+
                 if (input is IConvertible)
                 {
-                    return (T)System.Convert.ChangeType(input, type);
+                    return (T) System.Convert.ChangeType(input, type);
                 }
-                return (T)input;
+
+                return (T) input;
             }
             catch
             {
                 return default(T);
             }
         }
+
         #endregion
     }
 }
