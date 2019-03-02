@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Bing.Biz.OAuthLogin.QQ.Configs;
 
-namespace Bing.Biz.Tests.Intergration.OAuthLogin.QQ.Configs
+namespace Bing.Biz.Tests.Intergration.OAuthLogin.Configs
 {
     /// <summary>
-    /// QQ测试授权配置提供器
+    /// QQ测试授权配置提供提供程序
     /// </summary>
     public class TestQQAuthorizationConfigProvider: IQQAuthorizationConfigProvider
     {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.QQ.Configs;
-using Bing.Utils.Extensions;
 using Bing.Utils.Json;
 
 namespace Bing.Biz.OAuthLogin.QQ
@@ -11,40 +10,45 @@ namespace Bing.Biz.OAuthLogin.QQ
     /// <summary>
     /// QQ授权提供程序
     /// </summary>
-    public class QQAuthorizationProvider : AuthorizationProviderBase, IQQAuthorizationProvider
+    public class QQAuthorizationProvider : AuthorizationProviderBase<IQQAuthorizationConfigProvider, QQAuthorizationConfig>, IQQAuthorizationProvider
     {
         /// <summary>
-        /// 配置提供器
+        /// PC端授权地址
         /// </summary>
-        protected readonly IQQAuthorizationConfigProvider ConfigProvider;
+        internal const string PcAuthorizationUrl = "https://graph.qq.com/oauth2.0/authorize";
+
+        /// <summary>
+        /// PC端获取访问令牌地址
+        /// </summary>
+        internal const string PcAccessTokenUrl = "https://graph.qq.com/oauth2.0/token";
+
+        /// <summary>
+        /// 跟踪日志名
+        /// </summary>
+        internal const string TraceLogName = "QQTraceLog";
 
         /// <summary>
         /// 初始化一个<see cref="QQAuthorizationProvider"/>类型的实例
         /// </summary>
-        /// <param name="provider">QQ授权配置提供器</param>
-        public QQAuthorizationProvider(IQQAuthorizationConfigProvider provider)
+        /// <param name="provider">QQ授权配置提供程序</param>
+        public QQAuthorizationProvider(IQQAuthorizationConfigProvider provider) : base(provider)
         {
-            provider.CheckNotNull(nameof(provider));
-            ConfigProvider = provider;
         }
 
         /// <summary>
-        /// 生成授权地址
+        /// 配置
         /// </summary>
+        /// <param name="builder">授权参数生成器</param>
         /// <param name="param">授权参数</param>
-        /// <returns></returns>
-        public override async Task<string> GenerateUrlAsync(AuthorizationParam param)
-        {            
-            var config = await ConfigProvider.GetConfigAsync();
-            Validate(config, param);
-            var builder = new AuthorizationParameterBuilder();
-            builder.GatewayUrl(QQConst.PcAuthorizationUrl)
+        /// <param name="config">授权配置</param>
+        protected override void Config(AuthorizationParameterBuilder builder, AuthorizationParam param, QQAuthorizationConfig config)
+        {
+            builder.GatewayUrl(PcAuthorizationUrl)
                 .ClientId(config.AppId)
                 .ResponseType(param.ResponseType)
                 .State(param.State)
                 .RedirectUri(string.IsNullOrWhiteSpace(param.RedirectUri) ? config.CallbackUrl : param.RedirectUri);
-            return builder.ToString();
-        }
+        }        
 
         /// <summary>
         /// 获取访问令牌
@@ -56,7 +60,7 @@ namespace Bing.Biz.OAuthLogin.QQ
             var config = await ConfigProvider.GetConfigAsync();
             Validate(config, param);
             var builder = new AuthorizationParameterBuilder();
-            builder.GatewayUrl(QQConst.PcAccessTokenUrl)
+            builder.GatewayUrl(PcAccessTokenUrl)
                 .GrantType(OAuthConst.AuthorizationCode)
                 .ClientId(config.AppId)
                 .ClientSecret(config.AppKey)
@@ -80,7 +84,7 @@ namespace Bing.Biz.OAuthLogin.QQ
             var config = await ConfigProvider.GetConfigAsync();
             Validate(config);
             var builder = new AuthorizationParameterBuilder();
-            builder.GatewayUrl(QQConst.PcAccessTokenUrl)
+            builder.GatewayUrl(PcAccessTokenUrl)
                 .GrantType(OAuthConst.RefreshToken)
                 .ClientId(config.AppId)
                 .ClientSecret(config.AppKey)
@@ -114,27 +118,18 @@ namespace Bing.Biz.OAuthLogin.QQ
         /// </summary>
         /// <param name="request">QQ授权请求</param>
         /// <returns></returns>
-        public async Task<string> GenerateUrlAsync(QQAuthorizationRequest request)
-        {
-            return await GenerateUrlAsync(request.ToParam());
-        }
+        public async Task<string> GenerateUrlAsync(QQAuthorizationRequest request) => await GenerateUrlAsync(request.ToParam());
 
         /// <summary>
         /// 获取跟踪日志名
         /// </summary>
         /// <returns></returns>
-        protected override string GetTraceLogName()
-        {
-            return QQConst.TraceLogName;
-        }
+        protected override string GetTraceLogName() => TraceLogName;
 
         /// <summary>
-        /// 授权方式
+        /// 获取授权方式
         /// </summary>
         /// <returns></returns>
-        protected override OAuthWay GetOAuthWay()
-        {
-            return OAuthWay.QQ;
-        }
+        protected override OAuthWay GetOAuthWay() => OAuthWay.QQ;
     }
 }

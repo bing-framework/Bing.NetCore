@@ -5,20 +5,19 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 授权访问令牌提供程序
     /// </summary>
-    public interface IAccessTokenProvider
+    /// <typeparam name="TAccessTokenResult">访问令牌结果类型</typeparam>
+    public interface IAccessTokenProvider<TAccessTokenResult> where TAccessTokenResult:AccessTokenResult
     {
         /// <summary>
         /// 获取访问令牌
         /// </summary>
         /// <param name="param">访问令牌参数</param>
         /// <returns></returns>
-        Task<AccessTokenResult> GetTokenAsync(AccessTokenParam param);
-
-        /// <summary>
-        /// 刷新访问令牌
-        /// </summary>
-        /// <param name="token">刷新令牌</param>
-        /// <returns></returns>
-        Task<AccessTokenResult> RefreshTokenAsync(string token);
+        Task<TAccessTokenResult> GetTokenAsync(AccessTokenParam param);
     }
+
+    /// <summary>
+    /// 授权访问令牌提供程序
+    /// </summary>
+    public interface IAccessTokenProvider : IAccessTokenProvider<AccessTokenResult> { }
 }

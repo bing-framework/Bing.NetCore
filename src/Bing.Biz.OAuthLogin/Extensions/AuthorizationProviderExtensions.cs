@@ -35,7 +35,7 @@ namespace Bing.Biz.OAuthLogin.Extensions
         public static async Task<AccessTokenResult> RefreshTokenAsync(this IAuthorizationProvider provider,
             string token)
         {
-            if (provider is IAccessTokenProvider accessTokenProvider)
+            if (provider is IRefreshTokenProvider accessTokenProvider)
             {
                 return await accessTokenProvider.RefreshTokenAsync(token);
             }

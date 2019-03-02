@@ -1,17 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using Bing.Biz.OAuthLogin.Core;
 
 namespace Bing.Biz.OAuthLogin.QQ.Configs
 {
     /// <summary>
-    /// QQ授权配置提供器
+    /// QQ授权配置提供程序
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public interface IQQAuthorizationConfigProvider
+    public interface IQQAuthorizationConfigProvider:IAuthorizationConfigProvider<QQAuthorizationConfig>
     {
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <returns></returns>
-        Task<QQAuthorizationConfig> GetConfigAsync();
     }
 }

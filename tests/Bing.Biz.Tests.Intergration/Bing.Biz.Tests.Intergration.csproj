@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing.Biz.OAuthLogin\Bing.Biz.OAuthLogin.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Biz.Payments\Bing.Biz.Payments.csproj" />
     <ProjectReference Include="..\..\src\Bing.Biz\Bing.Biz.csproj" />
   </ItemGroup>
 

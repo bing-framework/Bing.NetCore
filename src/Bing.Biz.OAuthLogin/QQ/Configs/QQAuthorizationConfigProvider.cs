@@ -1,33 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using Bing.Biz.OAuthLogin.Core;
 
 namespace Bing.Biz.OAuthLogin.QQ.Configs
 {
     /// <summary>
-    /// QQ授权配置提供器
+    /// QQ 授权配置提供程序
     /// </summary>
-    public class QQAuthorizationConfigProvider : IQQAuthorizationConfigProvider
+    public class QQAuthorizationConfigProvider : AuthorizationConfigProviderBase<QQAuthorizationConfig>, IQQAuthorizationConfigProvider
     {
-        /// <summary>
-        /// 配置
-        /// </summary>
-        private readonly QQAuthorizationConfig _config;
-
         /// <summary>
         /// 初始化一个<see cref="QQAuthorizationConfigProvider"/>类型的实例
         /// </summary>
-        /// <param name="config">QQ授权配置</param>
-        public QQAuthorizationConfigProvider(QQAuthorizationConfig config)
+        /// <param name="config">QQ 授权配置</param>
+        public QQAuthorizationConfigProvider(QQAuthorizationConfig config) : base(config)
         {
-            _config = config;
-        }
-
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <returns></returns>
-        public Task<QQAuthorizationConfig> GetConfigAsync()
-        {
-            return Task.FromResult(_config);
         }
     }
 }

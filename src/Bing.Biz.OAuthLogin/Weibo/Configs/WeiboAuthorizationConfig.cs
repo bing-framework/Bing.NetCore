@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Bing.Biz.OAuthLogin.Core;
 
-namespace Bing.Biz.OAuthLogin.QQ.Configs
+namespace Bing.Biz.OAuthLogin.Weibo.Configs
 {
     /// <summary>
-    /// QQ 授权配置
+    /// 微博授权配置
     /// </summary>
-    // ReSharper disable once InconsistentNaming
-    public class QQAuthorizationConfig: AuthorizationConfigBase
+    public class WeiboAuthorizationConfig: AuthorizationConfigBase
     {
         /// <summary>
         /// 应用标识

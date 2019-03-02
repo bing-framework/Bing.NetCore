@@ -21,6 +21,16 @@
         public const string RefreshToken = "refresh_token";
 
         /// <summary>
+        /// 应用ID
+        /// </summary>
+        public const string AppId = "appid";
+
+        /// <summary>
+        /// 密钥
+        /// </summary>
+        public const string Secret = "secret";
+
+        /// <summary>
         /// 客户端ID
         /// </summary>
         public const string ClientId = "client_id";

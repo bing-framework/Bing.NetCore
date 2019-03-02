@@ -9,20 +9,73 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 授权提供程序基类
     /// </summary>
-    public abstract class AuthorizationProviderBase : IAuthorizationProvider
+    public abstract class AuthorizationProviderBase<TAuthorizationConfigProvider, TAuthorizationConfig> : IAuthorizationProvider
+        where TAuthorizationConfigProvider : class, IAuthorizationConfigProvider<TAuthorizationConfig>
+        where TAuthorizationConfig : class, IAuthorizationConfig
     {
+        /// <summary>
+        /// 配置提供程序
+        /// </summary>
+        protected readonly TAuthorizationConfigProvider ConfigProvider;
+
+        protected AuthorizationProviderBase(TAuthorizationConfigProvider provider)
+        {
+            provider.CheckNotNull(nameof(provider));
+            ConfigProvider = provider;
+        }
+
         /// <summary>
         /// 生成授权地址
         /// </summary>
         /// <param name="param">授权参数</param>
         /// <returns></returns>
-        public abstract Task<string> GenerateUrlAsync(AuthorizationParam param);
+        public virtual async Task<string> GenerateUrlAsync(AuthorizationParam param)
+        {
+            var config = await ConfigProvider.GetConfigAsync();
+            Validate(config, param);
+            var builder = new AuthorizationParameterBuilder();
+            Config(builder, param, config);
+            return HandlerUrl(builder);
+        }
 
         /// <summary>
         /// 验证
         /// </summary>
         /// <param name="config">授权配置</param>
-        protected void Validate(IAuthorizationConfig config)
+        /// <param name="param">授权参数</param>
+        protected void Validate(TAuthorizationConfig config, AuthorizationParam param)
+        {
+            param.CheckNotNull(nameof(param));
+            param.Validate();
+            Validate(config);
+            ValidateParam(param);
+        }
+
+        /// <summary>
+        /// 配置
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="param">授权参数</param>
+        /// <param name="config">授权配置</param>
+        protected virtual void Config(AuthorizationParameterBuilder builder, AuthorizationParam param, TAuthorizationConfig config)
+        {
+        }
+
+        /// <summary>
+        /// 处理授权地址
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <returns></returns>
+        protected virtual string HandlerUrl(AuthorizationParameterBuilder builder)
+        {
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// 验证
+        /// </summary>
+        /// <param name="config">授权配置</param>
+        protected void Validate(TAuthorizationConfig config)
         {
             config.CheckNotNull(nameof(config));
             config.Validate();
@@ -32,27 +85,20 @@ namespace Bing.Biz.OAuthLogin.Core
         /// 验证
         /// </summary>
         /// <param name="config">授权配置</param>
-        /// <param name="param">授权参数</param>
-        protected void Validate(IAuthorizationConfig config, AuthorizationParam param)
-        {            
-            param.CheckNotNull(nameof(param));
-            param.Validate();
-            Validate(config);
-            ValidateParam(param);
-        }
-
-        /// <summary>
-        /// 验证
-        /// </summary>
-        /// <param name="config">授权配置</param>
         /// <param name="param">访问令牌参数</param>
-        protected void Validate(IAuthorizationConfig config, AccessTokenParam param)
+        protected void Validate(TAuthorizationConfig config, AccessTokenParam param)
         {
             param.CheckNotNull(nameof(param));
             param.Validate();
             Validate(config);
             ValidateParam(param);
         }
+
+        //protected virtual async Task<AuthorizationResult> RequestResult(IAuthorizationConfig config,
+        //    AuthorizationParameterBuilder builder)
+        //{
+
+        //}
 
         /// <summary>
         /// 发送请求
@@ -68,13 +114,17 @@ namespace Bing.Biz.OAuthLogin.Core
         /// 验证参数
         /// </summary>
         /// <param name="param">授权参数</param>
-        protected virtual void ValidateParam(AuthorizationParam param) { }
+        protected virtual void ValidateParam(AuthorizationParam param)
+        {
+        }
 
         /// <summary>
         /// 验证参数
         /// </summary>
         /// <param name="param">访问令牌参数</param>
-        protected virtual void ValidateParam(AccessTokenParam param) { }
+        protected virtual void ValidateParam(AccessTokenParam param)
+        {
+        }
 
         /// <summary>
         /// 获取跟踪日志名
@@ -111,6 +161,7 @@ namespace Bing.Biz.OAuthLogin.Core
             {
                 return;
             }
+
             log.Class(GetType().FullName)
                 .Caption("OAuth授权登录")
                 .Content($"授权渠道 : {GetOAuthWay().Description()}")
@@ -120,5 +171,10 @@ namespace Bing.Biz.OAuthLogin.Core
                 .Content("返回结果:")
                 .Trace();
         }
+
+        //protected virtual string GetResult()
+        //{
+
+        //}
     }
 }

@@ -39,6 +39,28 @@ namespace Bing.Biz.OAuthLogin.Core
         }
 
         /// <summary>
+        /// 设置应用ID
+        /// </summary>
+        /// <param name="appId">应用ID</param>
+        /// <returns></returns>
+        public AuthorizationParameterBuilder AppId(string appId)
+        {
+            _builder.Add(OAuthConst.AppId, appId);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置应用密钥
+        /// </summary>
+        /// <param name="secret">应用密钥</param>
+        /// <returns></returns>
+        public AuthorizationParameterBuilder Secret(string secret)
+        {
+            _builder.Add(OAuthConst.Secret, secret);
+            return this;
+        }
+
+        /// <summary>
         /// 设置客户端ID
         /// </summary>
         /// <param name="clientId">客户端ID</param>

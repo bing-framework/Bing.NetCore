@@ -2,14 +2,14 @@
 using Bing.AutoMapper;
 using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.QQ;
-using Bing.Biz.Tests.Intergration.OAuthLogin.QQ.Configs;
+using Bing.Biz.Tests.Intergration.OAuthLogin.Configs;
 using Bing.Mapping;
 using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Biz.Tests.Intergration.OAuthLogin.QQ
+namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
 {
     /// <summary>
     /// QQ授权提供程序测试
@@ -70,7 +70,7 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.QQ
         /// 测试获取访问令牌
         /// </summary>
         /// <returns></returns>
-        [Fact]
+        //[Fact]
         public async Task Test_GetTokenAsync()
         {
             var param = new AccessTokenParam();
@@ -85,7 +85,7 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.QQ
         /// 测试刷新令牌
         /// </summary>
         /// <returns></returns>
-        [Fact]
+        //[Fact]
         public async Task Test_RefreshTokenAsync()
         {
             var refreshToken = "303F6BF38E7B03C4A3CD11CA1FCA6635";

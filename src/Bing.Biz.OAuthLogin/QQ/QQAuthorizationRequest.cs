@@ -3,7 +3,7 @@
 namespace Bing.Biz.OAuthLogin.QQ
 {
     /// <summary>
-    /// QQ授权请求
+    /// QQ 授权请求
     /// </summary>
     public class QQAuthorizationRequest : AuthorizationParamBase
     {
