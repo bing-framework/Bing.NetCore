@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="SkyWalking.AspNetCore" Version="0.3.0" />
   </ItemGroup>
 
 </Project>

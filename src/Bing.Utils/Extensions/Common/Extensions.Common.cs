@@ -12,6 +12,7 @@ namespace Bing.Utils.Extensions
     public static partial class Extensions
     {
         #region SafeValue(安全获取值)
+
         /// <summary>
         /// 安全获取值，当值为null时，不会抛出异常
         /// </summary>
@@ -22,9 +23,11 @@ namespace Bing.Utils.Extensions
         {
             return value ?? default(T);
         }
+
         #endregion
 
         #region Value(获取枚举值)
+
         /// <summary>
         /// 获取枚举值
         /// </summary>
@@ -45,9 +48,11 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Conv.To<TResult>(Value(instance));
         }
+
         #endregion
 
         #region Description(获取枚举描述)
+
         /// <summary>
         /// 获取枚举描述，使用<see cref="DescriptionAttribute"/>特性设置描述
         /// </summary>
@@ -57,6 +62,7 @@ namespace Bing.Utils.Extensions
         {
             return Utils.Helpers.Enum.GetDescription(instance.GetType(), instance);
         }
+
         #endregion
 
         #region Join(转换为用分隔符连接的字符串)
@@ -77,6 +83,7 @@ namespace Bing.Utils.Extensions
         #endregion
 
         #region IsMatch(是否匹配正则表达式)
+
         /// <summary>
         /// 确定所指定的正则表达式在指定的输入字符串中是否找到了匹配项
         /// </summary>
@@ -89,8 +96,10 @@ namespace Bing.Utils.Extensions
             {
                 return false;
             }
+
             return Regex.IsMatch(value, pattern);
         }
+
         /// <summary>
         /// 确定所指定的正则表达式在指定的输入字符串中找到匹配项
         /// </summary>
@@ -104,11 +113,14 @@ namespace Bing.Utils.Extensions
             {
                 return false;
             }
+
             return Regex.IsMatch(value, pattern, options);
         }
+
         #endregion
 
         #region GetMatch(获取匹配项)
+
         /// <summary>
         /// 在指定的输入字符串中搜索指定的正则表达式的第一个匹配项
         /// </summary>
@@ -121,6 +133,7 @@ namespace Bing.Utils.Extensions
             {
                 return string.Empty;
             }
+
             return Regex.Match(value, pattern).Value;
         }
 
@@ -136,6 +149,7 @@ namespace Bing.Utils.Extensions
             {
                 return new string[] { };
             }
+
             return GetMatchingValues(value, pattern, RegexOptions.None);
         }
 

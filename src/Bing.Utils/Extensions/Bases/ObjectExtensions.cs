@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Dynamic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -72,6 +69,21 @@ namespace Bing.Utils.Extensions
 
         //    return (ExpandoObject) expando;
         //}
+
+        #endregion
+
+        #region ToNullable(将指定值转换为对应的可空类型)
+
+        /// <summary>
+        /// 将指定值转换为对应的可空类型
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static T? ToNullable<T>(this T value) where T : struct
+        {
+            return value.IsNull() ? null : (T?) value;
+        }
 
         #endregion
     }

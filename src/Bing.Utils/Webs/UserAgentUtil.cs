@@ -164,4 +164,46 @@
 
         #endregion
     }
+
+    /// <summary>
+    /// 用户代理信息
+    /// 参考地址：https://github.com/mumuy/browser/blob/master/Browser.js
+    /// </summary>
+    public class UserAgentInfo
+    {
+        /// <summary>
+        /// 浏览器
+        /// </summary>
+        public string Browser { get; set; }
+
+        /// <summary>
+        /// 版本号
+        /// </summary>
+        public string Version { get; set; }
+
+        /// <summary>
+        /// 内核
+        /// </summary>
+        public string Engine { get; set; }
+
+        /// <summary>
+        /// 操作系统
+        /// </summary>
+        public string Os { get; set; }
+
+        /// <summary>
+        /// 操作系统版本号
+        /// </summary>
+        public string OsVersion { get; set; }
+
+        /// <summary>
+        /// 设备
+        /// </summary>
+        public string Device { get; set; }
+
+        /// <summary>
+        /// 语言
+        /// </summary>
+        public string Language { get; set; }
+    }
 }

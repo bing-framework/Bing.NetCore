@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+    <ProjectReference Include="..\Bing\Bing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Wechat\" />
+    <Folder Include="Factories\" />
+    <Folder Include="Weibo\" />
+    <Folder Include="Taobao\" />
+    <Folder Include="Microsoft\" />
+    <Folder Include="Github\" />
+    <Folder Include="Facebook\" />
+    <Folder Include="Kakao\" />
+    <Folder Include="Youzan\" />
+    <Folder Include="Jd\" />
+    <Folder Include="Alibaba\" />
+    <Folder Include="MeiliShuo\" />
+  </ItemGroup>
+
+</Project>

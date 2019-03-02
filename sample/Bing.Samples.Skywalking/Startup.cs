@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.AspNetCore;
+//using SkyWalking.AspNetCore;
 
 namespace Bing.Samples.Skywalking
 {
@@ -18,11 +18,11 @@ namespace Bing.Samples.Skywalking
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().AddControllersAsServices();
-            services.AddSkyWalking(option =>
-            {
-                option.ApplicationCode = "BingSamplesSkywalking";
-                option.DirectServers = "192.168.205.129:11800";
-            });
+            //services.AddSkyWalking(option =>
+            //{
+            //    option.ApplicationCode = "BingSamplesSkywalking";
+            //    option.DirectServers = "192.168.205.129:11800";
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
