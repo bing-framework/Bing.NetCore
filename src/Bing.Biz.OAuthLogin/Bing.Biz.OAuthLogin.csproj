@@ -11,19 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Alibaba\Configs\" />
-    <Folder Include="Baidu\Configs\" />
-    <Folder Include="Coding\Configs\" />
-    <Folder Include="Csdn\Configs\" />
-    <Folder Include="Facebook\Configs\" />
     <Folder Include="Factories\Configs\" />
-    <Folder Include="Gitee\Configs\" />
-    <Folder Include="Jd\Configs\" />
-    <Folder Include="Kakao\Configs\" />
-    <Folder Include="MeiliShuo\Configs\" />
-    <Folder Include="OsChina\Configs\" />
-    <Folder Include="Taobao\Configs\" />
-    <Folder Include="Youzan\Configs\" />
   </ItemGroup>
 
 </Project>

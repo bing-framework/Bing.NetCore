@@ -19,5 +19,10 @@
         /// 显示样式
         /// </summary>
         public string Display { get; set; }
+
+        /// <summary>
+        /// 授权站点
+        /// </summary>
+        public string Site { get; set; }
     }
 }

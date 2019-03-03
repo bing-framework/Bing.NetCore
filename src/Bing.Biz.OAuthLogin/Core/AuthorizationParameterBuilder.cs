@@ -160,6 +160,29 @@ namespace Bing.Biz.OAuthLogin.Core
         }
 
         /// <summary>
+        /// 设置浏览器页面样式
+        /// </summary>
+        /// <param name="view">浏览器页面样式</param>
+        /// <returns></returns>
+        public AuthorizationParameterBuilder View(string view)
+        {
+            _builder.Add(OAuthConst.View, view);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加参数
+        /// </summary>
+        /// <param name="name">参数名</param>
+        /// <param name="value">参数值</param>
+        /// <returns></returns>
+        public AuthorizationParameterBuilder Add(string name, string value)
+        {
+            _builder.Add(name, value);
+            return this;
+        }
+
+        /// <summary>
         /// 输出结果
         /// </summary>
         /// <returns></returns>

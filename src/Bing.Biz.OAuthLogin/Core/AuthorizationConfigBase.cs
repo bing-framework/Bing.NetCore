@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Bing.Exceptions;
 using Bing.Validations;
 
@@ -9,6 +10,24 @@ namespace Bing.Biz.OAuthLogin.Core
     /// </summary>
     public abstract class AuthorizationConfigBase:IAuthorizationConfig
     {
+        /// <summary>
+        /// 应用标识
+        /// </summary>
+        [Required(ErrorMessage = "应用标识[AppId]不能为空")]
+        public virtual string AppId { get; set; }
+
+        /// <summary>
+        /// 应用密钥
+        /// </summary>
+        [Required(ErrorMessage = "应用密钥[AppKey]不能为空")]
+        public virtual string AppKey { get; set; }
+
+        /// <summary>
+        /// 回调地址
+        /// </summary>
+        [Required(ErrorMessage = "回调地址[CallbackUrl]不能为空")]
+        public virtual string CallbackUrl { get; set; }
+
         /// <summary>
         /// 验证
         /// </summary>

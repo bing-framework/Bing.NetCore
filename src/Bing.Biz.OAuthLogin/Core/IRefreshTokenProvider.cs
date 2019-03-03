@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Bing.Biz.OAuthLogin.Core;
 
-namespace Bing.Biz.OAuthLogin
+namespace Bing.Biz.OAuthLogin.Core
 {
     /// <summary>
     /// 刷新访问令牌提供程序

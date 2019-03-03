@@ -44,11 +44,6 @@ namespace Bing.Biz.OAuthLogin.Core
         [Description("Facebook")]
         Facebook,
         /// <summary>
-        /// Kakao
-        /// </summary>
-        [Description("Kakao")]
-        Kakao,
-        /// <summary>
         /// 有赞
         /// </summary>
         [Description("有赞")]
@@ -68,5 +63,30 @@ namespace Bing.Biz.OAuthLogin.Core
         /// </summary>
         [Description("美丽说")]
         MeiliShuo,
+        /// <summary>
+        /// 百度
+        /// </summary>
+        [Description("百度")]
+        Baidu,
+        /// <summary>
+        /// Coding.NET
+        /// </summary>
+        [Description("Coding.NET")]
+        Coding,
+        /// <summary>
+        /// 码云
+        /// </summary>
+        [Description("码云")]
+        Gitee,
+        /// <summary>
+        /// 开源中国
+        /// </summary>
+        [Description("开源中国")]
+        OsChina,
+        /// <summary>
+        /// 钉钉
+        /// </summary>
+        [Description("钉钉")]
+        DingTalk,
     }
 }
