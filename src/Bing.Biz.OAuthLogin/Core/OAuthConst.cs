@@ -74,5 +74,15 @@
         /// 视图
         /// </summary>
         public const string View = "view";
+
+        /// <summary>
+        /// 访问令牌
+        /// </summary>
+        public const string AccessToken = "access_token";
+
+        /// <summary>
+        /// 用户OpenId
+        /// </summary>
+        public const string OpenId = "openid";
     }
 }

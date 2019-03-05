@@ -43,10 +43,10 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
         {
             var request = new GithubAuthorizationRequest();
             request.Init();
-            request.Scope = "123";
+            request.Scope = "user:email";
             var result = await _provider.GenerateUrlAsync(request);
             _output.WriteLine(result);
-            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope=123&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}", result);
+            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope={request.Scope}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}", result);
         }
 
         /// <summary>
@@ -58,11 +58,11 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
         {
             var request = new GithubAuthorizationRequest();
             request.Init();
-            request.Scope = "123";
+            request.Scope = "user:email";
             request.RedirectUri = TestSampleConfig.GithubCallbackUrl;
             var result = await _provider.GenerateUrlAsync(request);
             _output.WriteLine(result);
-            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope=123&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}", result);
+            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope={request.Scope}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}", result);
         }
     }
 }

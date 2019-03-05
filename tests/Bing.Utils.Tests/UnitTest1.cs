@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bing.Utils.Helpers;
 using Bing.Utils.IdGenerators.Core;
 using Bing.Utils.Json;
 using Xunit;
@@ -123,6 +124,16 @@ namespace Bing.Utils.Tests
                 var id = SequentialGuidGenerator.Current.Create();
                 Output.WriteLine($"{id}");
             }
+        }
+
+        [Fact]
+        public void Test_GetJson()
+        {
+            string jsonp = @"jsonp({""a"":""1234"",""b"":9999})";
+            var json = "{\"a\":\"1234\",\"b\":9999}";
+            var result = Regexs.GetValue(jsonp, @"^\w+\((\{[^()]+\})\)$","$1");
+            Output.WriteLine(result);
+            Assert.Equal(json,result);
         }
     }
 }

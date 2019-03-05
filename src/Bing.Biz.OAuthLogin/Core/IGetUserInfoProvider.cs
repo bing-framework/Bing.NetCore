@@ -6,13 +6,21 @@ namespace Bing.Biz.OAuthLogin.Core
     /// 获取用户信息提供程序
     /// </summary>
     /// <typeparam name="TUserInfoResult">授权用户信息结果</typeparam>
-    public interface IGetUserInfoProvider<TUserInfoResult> where TUserInfoResult : AuthorizationUserInfoResult
+    /// <typeparam name="TAuthorizationUserParam">授权用户参数</typeparam>
+    public interface IGetUserInfoProvider<TUserInfoResult, in TAuthorizationUserParam>
+        where TUserInfoResult : AuthorizationUserInfoResult 
+        where TAuthorizationUserParam : AuthorizationUserParam
     {
-        Task<TUserInfoResult> GetUserInfo();
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="param">授权用户参数</param>
+        /// <returns></returns>
+        Task<TUserInfoResult> GetUserInfoAsync(TAuthorizationUserParam param);
     }
 
     /// <summary>
     /// 获取用户信息提供程序
     /// </summary>
-    public interface IGetUserInfoProvider : IGetUserInfoProvider<AuthorizationUserInfoResult> { }
+    public interface IGetUserInfoProvider : IGetUserInfoProvider<AuthorizationUserInfoResult,AuthorizationUserParam> { }
 }

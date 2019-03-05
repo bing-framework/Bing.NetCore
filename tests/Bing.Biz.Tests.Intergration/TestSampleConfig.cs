@@ -9,13 +9,13 @@
         /// QQ应用ID
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public const string QQAppId = "123456";
+        public const string QQAppId = "101391164";
 
         /// <summary>
         /// QQ应用密钥
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public const string QQAppKey = "key123456";
+        public const string QQAppKey = "";
 
         /// <summary>
         /// QQ回调地址
@@ -56,22 +56,22 @@
         /// <summary>
         /// Github应用ID
         /// </summary>
-        public const string GithubAppId = "123456";
+        public const string GithubAppId = "f190ab77f0fc78af241c";
 
         /// <summary>
         /// Github应用密钥
         /// </summary>
-        public const string GithubAppKey = "key123456";
+        public const string GithubAppKey = "2b52a9dca0f1cbafbcaf0d511b11627df796a160";
 
         /// <summary>
         /// Github回调地址
         /// </summary>
-        public const string GithubCallbackUrl = "http://www.x.com/test";
+        public const string GithubCallbackUrl = "http://www.jcebing.com/test";
 
         /// <summary>
         /// Github应用名称
         /// </summary>
-        public const string GithubApplicationName = "Test";
+        public const string GithubApplicationName = "BingDemo";
 
         /// <summary>
         /// Microsoft应用ID

@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.QQ
     /// QQ授权提供程序。
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public interface IQQAuthorizationProvider : IAuthorizationUrlProvider<QQAuthorizationRequest>, IAccessTokenProvider, IRefreshTokenProvider
+    public interface IQQAuthorizationProvider : IAuthorizationUrlProvider<QQAuthorizationRequest>, IAccessTokenProvider, IRefreshTokenProvider, IGetOpenIdProvider, IGetUserInfoProvider<QQAuthorizationUserInfoResult, QQAuthorizationUserRequest>
     {
     }
 }

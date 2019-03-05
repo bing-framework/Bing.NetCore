@@ -15,7 +15,7 @@ namespace Bing.Biz.OAuthLogin.Extensions
         /// <param name="provider">授权提供程序</param>
         /// <param name="param">访问令牌参数</param>
         /// <returns></returns>
-        public static async Task<AccessTokenResult> GetTokenAsync(this IAuthorizationProvider provider,
+        public static async Task<AuthorizationResult> GetTokenAsync(this IAuthorizationProvider provider,
             AccessTokenParam param)
         {
             if (provider is IAccessTokenProvider accessTokenProvider)
@@ -32,7 +32,7 @@ namespace Bing.Biz.OAuthLogin.Extensions
         /// <param name="provider">授权提供程序</param>
         /// <param name="token">刷新令牌</param>
         /// <returns></returns>
-        public static async Task<AccessTokenResult> RefreshTokenAsync(this IAuthorizationProvider provider,
+        public static async Task<AuthorizationResult> RefreshTokenAsync(this IAuthorizationProvider provider,
             string token)
         {
             if (provider is IRefreshTokenProvider accessTokenProvider)

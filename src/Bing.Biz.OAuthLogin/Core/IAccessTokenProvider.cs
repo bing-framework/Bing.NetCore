@@ -19,5 +19,13 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 授权访问令牌提供程序
     /// </summary>
-    public interface IAccessTokenProvider : IAccessTokenProvider<AccessTokenResult> { }
+    public interface IAccessTokenProvider
+    {
+        /// <summary>
+        /// 获取访问令牌
+        /// </summary>
+        /// <param name="param">访问令牌参数</param>
+        /// <returns></returns>
+        Task<AuthorizationResult> GetTokenAsync(AccessTokenParam param);
+    }
 }

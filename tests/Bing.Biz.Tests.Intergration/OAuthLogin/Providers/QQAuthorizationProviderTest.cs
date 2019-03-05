@@ -70,11 +70,11 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
         /// 测试获取访问令牌
         /// </summary>
         /// <returns></returns>
-        //[Fact]
+        [Fact]
         public async Task Test_GetTokenAsync()
         {
             var param = new AccessTokenParam();
-            param.Code = "AF38F162625993BFCCBE1A079525BAAE";
+            param.Code = "";
             param.RedirectUri = TestSampleConfig.QQCallbackUrl;
             var result = await _provider.GetTokenAsync(param);
             _output.WriteLine(result.ToJson());
@@ -85,11 +85,40 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
         /// 测试刷新令牌
         /// </summary>
         /// <returns></returns>
-        //[Fact]
+        [Fact]
         public async Task Test_RefreshTokenAsync()
         {
-            var refreshToken = "303F6BF38E7B03C4A3CD11CA1FCA6635";
+            var refreshToken = "";
             var result = await _provider.RefreshTokenAsync(refreshToken);
+            _output.WriteLine(result.ToJson());
+            Assert.NotNull(result);
+        }
+
+        /// <summary>
+        /// 测试获取用户OpenId
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_GetOpenIdAsync()
+        {
+            var token = "";
+            var result = await _provider.GetOpenIdAsync(token);
+            _output.WriteLine(result);
+            Assert.NotNull(result);
+        }
+
+        /// <summary>
+        /// 测试获取用户信息
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_GetUserInfoAsync()
+        {
+            var result = await _provider.GetUserInfoAsync(new QQAuthorizationUserRequest()
+            {
+                AccessToken = "",
+                OpenId = ""
+            });
             _output.WriteLine(result.ToJson());
             Assert.NotNull(result);
         }

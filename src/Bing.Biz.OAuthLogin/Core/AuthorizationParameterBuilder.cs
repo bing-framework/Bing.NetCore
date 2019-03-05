@@ -183,6 +183,28 @@ namespace Bing.Biz.OAuthLogin.Core
         }
 
         /// <summary>
+        /// 设置访问令牌
+        /// </summary>
+        /// <param name="token">访问令牌</param>
+        /// <returns></returns>
+        public AuthorizationParameterBuilder AccessToken(string token)
+        {
+            _builder.Add(OAuthConst.AccessToken, token);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置用户OpenId
+        /// </summary>
+        /// <param name="openid">用户OpenId</param>
+        /// <returns></returns>
+        public AuthorizationParameterBuilder OpenId(string openid)
+        {
+            _builder.Add(OAuthConst.OpenId, openid);
+            return this;
+        }
+
+        /// <summary>
         /// 输出结果
         /// </summary>
         /// <returns></returns>

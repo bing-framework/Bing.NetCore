@@ -14,7 +14,7 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Configs
         /// <returns></returns>
         public Task<QQAuthorizationConfig> GetConfigAsync()
         {
-            var config=new QQAuthorizationConfig()
+            var config = new QQAuthorizationConfig()
             {
                 AppId = TestSampleConfig.QQAppId,
                 AppKey = TestSampleConfig.QQAppKey,

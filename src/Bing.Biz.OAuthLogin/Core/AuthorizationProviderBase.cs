@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using Bing.Utils.Parameters.Parsers;
 
 namespace Bing.Biz.OAuthLogin.Core
 {
@@ -24,6 +26,8 @@ namespace Bing.Biz.OAuthLogin.Core
             ConfigProvider = provider;
         }
 
+        #region GenerateUrlAsync(生成授权地址)
+
         /// <summary>
         /// 生成授权地址
         /// </summary>
@@ -34,9 +38,63 @@ namespace Bing.Biz.OAuthLogin.Core
             var config = await ConfigProvider.GetConfigAsync();
             Validate(config, param);
             var builder = new AuthorizationParameterBuilder();
-            Config(builder, param, config);
+            ConfigGenerateUrl(builder, param, config);
             return HandlerUrl(builder);
         }
+
+        /// <summary>
+        /// 处理授权地址
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <returns></returns>
+        protected virtual string HandlerUrl(AuthorizationParameterBuilder builder)
+        {
+            return builder.ToString();
+        }
+
+        #endregion
+
+        #region GetTokenAsync(获取访问令牌)
+
+        /// <summary>
+        /// 获取访问令牌
+        /// </summary>
+        /// <param name="param">访问令牌参数</param>
+        /// <returns></returns>
+        public virtual async Task<AuthorizationResult> GetTokenAsync(AccessTokenParam param)
+        {
+            var config = await ConfigProvider.GetConfigAsync();
+            Validate(config, param);
+            var builder = new AuthorizationParameterBuilder();
+            ConfigGetToken(builder, param, config);
+            return await RequestResult(config, builder, ParameterParserType.Url, Success);
+        }
+
+        #endregion
+
+        #region RefreshTokenAsync(刷新令牌)
+
+        /// <summary>
+        /// 刷新令牌
+        /// </summary>
+        /// <param name="token">刷新令牌</param>
+        /// <returns></returns>
+        public virtual async Task<AuthorizationResult> RefreshTokenAsync(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                throw new ArgumentNullException(nameof(token));
+            }
+            var config = await ConfigProvider.GetConfigAsync();
+            Validate(config);
+            var builder = new AuthorizationParameterBuilder();
+            ConfigRefreshToken(builder, token, config);
+            return await RequestResult(config, builder, ParameterParserType.Url, Success);
+        }
+
+        #endregion
+
+        #region Validate(验证)
 
         /// <summary>
         /// 验证
@@ -49,26 +107,6 @@ namespace Bing.Biz.OAuthLogin.Core
             param.Validate();
             Validate(config);
             ValidateParam(param);
-        }
-
-        /// <summary>
-        /// 配置
-        /// </summary>
-        /// <param name="builder">授权参数生成器</param>
-        /// <param name="param">授权参数</param>
-        /// <param name="config">授权配置</param>
-        protected virtual void Config(AuthorizationParameterBuilder builder, AuthorizationParam param, TAuthorizationConfig config)
-        {
-        }
-
-        /// <summary>
-        /// 处理授权地址
-        /// </summary>
-        /// <param name="builder">授权参数生成器</param>
-        /// <returns></returns>
-        protected virtual string HandlerUrl(AuthorizationParameterBuilder builder)
-        {
-            return builder.ToString();
         }
 
         /// <summary>
@@ -94,20 +132,17 @@ namespace Bing.Biz.OAuthLogin.Core
             ValidateParam(param);
         }
 
-        //protected virtual async Task<AuthorizationResult> RequestResult(IAuthorizationConfig config,
-        //    AuthorizationParameterBuilder builder)
-        //{
-
-        //}
-
         /// <summary>
-        /// 发送请求
+        /// 验证
         /// </summary>
-        /// <param name="builder">授权参数生成器</param>
-        /// <returns></returns>
-        protected virtual async Task<string> Request(AuthorizationParameterBuilder builder)
+        /// <param name="config">授权配置</param>
+        /// <param name="param">授权用户参数</param>
+        protected void Validate(TAuthorizationConfig config, AuthorizationUserParam param)
         {
-            return await Web.Client().Get(builder.ToString()).ResultAsync();
+            param.CheckNotNull(nameof(param));
+            param.Validate();
+            Validate(config);
+            ValidateParam(param);
         }
 
         /// <summary>
@@ -125,6 +160,123 @@ namespace Bing.Biz.OAuthLogin.Core
         protected virtual void ValidateParam(AccessTokenParam param)
         {
         }
+
+        /// <summary>
+        /// 验证参数
+        /// </summary>
+        /// <param name="param">授权用户参数</param>
+        protected virtual void ValidateParam(AuthorizationUserParam param)
+        {
+        }
+
+        #endregion
+
+        #region Config(配置)
+
+        /// <summary>
+        /// 配置生成授权地址
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="param">授权参数</param>
+        /// <param name="config">授权配置</param>
+        protected virtual void ConfigGenerateUrl(AuthorizationParameterBuilder builder, AuthorizationParam param,
+            TAuthorizationConfig config)
+        {
+            builder.GatewayUrl(config.AuthorizationUrl)
+                .ClientId(config.AppId)
+                .ResponseType(param.ResponseType)
+                .State(param.State)
+                .RedirectUri(string.IsNullOrWhiteSpace(param.RedirectUri) ? config.CallbackUrl : param.RedirectUri);
+        }
+
+        /// <summary>
+        /// 配置获取访问令牌
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="param">访问令牌参数</param>
+        /// <param name="config">授权配置</param>
+        protected virtual void ConfigGetToken(AuthorizationParameterBuilder builder, AccessTokenParam param,
+            TAuthorizationConfig config)
+        {
+            builder.GatewayUrl(config.AccessTokenUrl)
+                .GrantType(OAuthConst.AuthorizationCode)
+                .ClientId(config.AppId)
+                .ClientSecret(config.AppKey)
+                .Code(param.Code)
+                .RedirectUri(string.IsNullOrWhiteSpace(param.RedirectUri) ? config.CallbackUrl : param.RedirectUri);
+        }
+
+        /// <summary>
+        /// 配置刷新令牌
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="token">访问令牌参数</param>
+        /// <param name="config">授权配置</param>
+        protected virtual void ConfigRefreshToken(AuthorizationParameterBuilder builder, string token,
+            TAuthorizationConfig config)
+        {
+            builder.GatewayUrl(config.AccessTokenUrl)
+                .GrantType(OAuthConst.RefreshToken)
+                .ClientId(config.AppId)
+                .ClientSecret(config.AppKey)
+                .RefreshToken(token);
+        }
+
+        #endregion
+
+        #region Request(请求)
+
+        /// <summary>
+        /// 请求结果
+        /// </summary>
+        /// <param name="config">授权配置</param>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="type">参数解析器类型</param>
+        /// <param name="success">请求成功条件</param>
+        /// <returns></returns>
+        protected virtual async Task<AuthorizationResult> RequestResult(TAuthorizationConfig config,
+            AuthorizationParameterBuilder builder, ParameterParserType type,Func<AuthorizationResult,bool> success)
+        {
+            var result = new AuthorizationResult(await Request(builder), success, type);
+            result.Parameter = builder.ToString();
+            result.Message = GetMessage(result);
+            WriteLog(config, builder, result);
+            return result;
+        }
+
+        /// <summary>
+        /// 发送请求
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <returns></returns>
+        protected virtual async Task<string> Request(AuthorizationParameterBuilder builder)
+        {
+            return await Web.Client().Get(builder.ToString()).ResultAsync();
+        }
+
+        /// <summary>
+        /// 授权结果是否成功
+        /// </summary>
+        /// <param name="result">授权结果</param>
+        /// <returns></returns>
+        protected virtual bool Success(AuthorizationResult result)
+        {
+            return result.HasKey("access_token");
+        }
+
+        /// <summary>
+        /// 获取错误消息
+        /// </summary>
+        /// <param name="result">授权结果</param>
+        /// <returns></returns>
+        protected virtual string GetMessage(AuthorizationResult result)
+        {
+            return result.Success ? string.Empty : result.Raw;
+        }
+
+        #endregion
+
+        #region Log(日志)
 
         /// <summary>
         /// 获取跟踪日志名
@@ -154,7 +306,14 @@ namespace Bing.Biz.OAuthLogin.Core
             }
         }
 
-        protected void WriteLog(AuthorizationParameterBuilder builder)
+        /// <summary>
+        /// 写日志
+        /// </summary>
+        /// <param name="config">授权配置</param>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="result">授权结果</param>
+        protected void WriteLog(TAuthorizationConfig config, AuthorizationParameterBuilder builder,
+            AuthorizationResult result)
         {
             var log = GetLog();
             if (log.IsTraceEnabled == false)
@@ -169,12 +328,12 @@ namespace Bing.Biz.OAuthLogin.Core
                 .Content(builder.ToString())
                 .Content()
                 .Content("返回结果:")
+                .Content(result.GetDictionary())
+                .Content("原始响应：")
+                .Content(result.Raw)
                 .Trace();
         }
 
-        //protected virtual string GetResult()
-        //{
-
-        //}
+        #endregion
     }
 }

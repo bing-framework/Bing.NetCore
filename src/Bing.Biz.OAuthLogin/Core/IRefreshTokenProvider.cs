@@ -19,5 +19,8 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 刷新访问令牌提供程序
     /// </summary>
-    public interface IRefreshTokenProvider : IRefreshTokenProvider<AccessTokenResult> { }
+    public interface IRefreshTokenProvider
+    {
+        Task<AuthorizationResult> RefreshTokenAsync(string token);
+    }
 }

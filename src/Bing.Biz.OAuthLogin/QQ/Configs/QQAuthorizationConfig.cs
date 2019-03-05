@@ -8,23 +8,14 @@ namespace Bing.Biz.OAuthLogin.QQ.Configs
     /// </summary>
     // ReSharper disable once InconsistentNaming
     public class QQAuthorizationConfig: AuthorizationConfigBase
-    {
+    {        
         /// <summary>
-        /// 应用标识
+        /// 初始化一个<see cref="QQAuthorizationConfig"/>类型的实例
         /// </summary>
-        [Required(ErrorMessage = "应用标识[AppId]不能为空")]
-        public string AppId { get; set; }
-
-        /// <summary>
-        /// 应用密钥
-        /// </summary>
-        [Required(ErrorMessage = "应用密钥[AppKey]不能为空")]
-        public string AppKey { get; set; }
-
-        /// <summary>
-        /// 回调地址
-        /// </summary>
-        [Required(ErrorMessage = "回调地址[CallbackUrl]不能为空")]
-        public string CallbackUrl { get; set; }
+        public QQAuthorizationConfig()
+        {
+            AuthorizationUrl = "https://graph.qq.com/oauth2.0/authorize";
+            AccessTokenUrl = "https://graph.qq.com/oauth2.0/token";
+        }
     }
 }

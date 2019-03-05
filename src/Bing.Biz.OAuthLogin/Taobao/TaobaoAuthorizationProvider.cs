@@ -38,7 +38,7 @@ namespace Bing.Biz.OAuthLogin.Taobao
         /// <param name="builder">授权参数生成器</param>
         /// <param name="param">授权参数</param>
         /// <param name="config">授权配置</param>
-        protected override void Config(AuthorizationParameterBuilder builder, AuthorizationParam param, TaobaoAuthorizationConfig config)
+        protected override void ConfigGenerateUrl(AuthorizationParameterBuilder builder, AuthorizationParam param, TaobaoAuthorizationConfig config)
         {
             builder.GatewayUrl(PcAuthorizationUrl)
                 .ResponseType(param.ResponseType)

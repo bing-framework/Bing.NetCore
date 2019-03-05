@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Bing.Biz.OAuthLogin.Core;
+using Newtonsoft.Json;
 
-namespace Bing.Biz.OAuthLogin.QQ.Results
+namespace Bing.Biz.OAuthLogin.QQ
 {
     /// <summary>
-    /// QQ用户信息结果
+    /// QQ授权用户信息结果
     /// </summary>
-    // ReSharper disable once InconsistentNaming
-    public class QQUserInfoResult
+    public class QQAuthorizationUserInfoResult: AuthorizationUserInfoResult
     {
         /// <summary>
         /// 返回状态码
@@ -51,17 +51,38 @@ namespace Bing.Biz.OAuthLogin.QQ.Results
         public string YellowVipLevel { get; set; }
 
         /// <summary>
-        /// QQ头像
+        /// QQ头像。40 x 40像素
         /// </summary>
         [JsonProperty("figureurl_qq_1")]
         // ReSharper disable once InconsistentNaming
-        public string QQAvatar { get; set; }
+        public string QQAvatarx40 { get; set; }
 
         /// <summary>
-        /// QQ空间头像
+        /// QQ头像。100 x 100像素
+        /// </summary>
+        [JsonProperty("figureurl_qq_2")]
+        // ReSharper disable once InconsistentNaming
+        public string QQAvatarx100 { get; set; }
+
+        /// <summary>
+        /// QQ空间头像。30 x 30像素
+        /// </summary>
+        [JsonProperty("figureurl")]
+        // ReSharper disable once InconsistentNaming
+        public string QQZoneAvatarx30 { get; set; }
+
+        /// <summary>
+        /// QQ空间头像。50 x 50像素
         /// </summary>
         [JsonProperty("figureurl_1")]
         // ReSharper disable once InconsistentNaming
-        public string QQZoneAvatar { get; set; }
+        public string QQZoneAvatarx50 { get; set; }
+
+        /// <summary>
+        /// QQ空间头像。100 x 100像素
+        /// </summary>
+        [JsonProperty("figureurl_2")]
+        // ReSharper disable once InconsistentNaming
+        public string QQZoneAvatarx100 { get; set; }
     }
 }

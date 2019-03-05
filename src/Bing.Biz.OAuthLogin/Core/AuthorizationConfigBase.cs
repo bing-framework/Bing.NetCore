@@ -29,6 +29,18 @@ namespace Bing.Biz.OAuthLogin.Core
         public virtual string CallbackUrl { get; set; }
 
         /// <summary>
+        /// 授权地址
+        /// </summary>
+        [Required(ErrorMessage = "授权地址[AuthorizationUrl]不能为空")]
+        public string AuthorizationUrl { get; set; }
+
+        /// <summary>
+        /// 获取授权令牌地址
+        /// </summary>
+        [Required(ErrorMessage = "获取授权令牌地址[AccessTokenUrl]不能为空")]
+        public string AccessTokenUrl { get; set; }
+
+        /// <summary>
         /// 验证
         /// </summary>
         public virtual void Validate()
