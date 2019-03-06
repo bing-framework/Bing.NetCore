@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.QQ
     /// <summary>
     /// QQ授权用户请求
     /// </summary>
-    public class QQAuthorizationUserRequest: AuthorizationUserParam
+    public class QQAuthorizationUserRequest: AuthorizationUserParamBase
     {
         /// <summary>
         /// 用户OpenId

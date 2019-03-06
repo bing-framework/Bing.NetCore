@@ -1,9 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Bing.AutoMapper;
+using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Weibo;
 using Bing.Biz.Tests.Intergration.OAuthLogin.Configs;
 using Bing.Mapping;
 using Bing.Utils.Helpers;
+using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -45,7 +47,7 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             request.Init();
             var result = await _provider.GenerateUrlAsync(request);
             _output.WriteLine(result);
-            Assert.Equal($"https://api.weibo.com/oauth2/authorize?client_id={TestSampleConfig.WeiboAppId}&response_type={request.ResponseType}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.WeiboCallbackUrl)}", result);
+            Assert.Equal($"https://api.weibo.com/oauth2/authorize?client_id={TestSampleConfig.WeiboAppId}&response_type={request.ResponseType}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.WeiboCallbackUrl)}&forcelogin=false", result);
         }
 
         /// <summary>
@@ -60,7 +62,38 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             request.RedirectUri = TestSampleConfig.WeiboCallbackUrl;
             var result = await _provider.GenerateUrlAsync(request);
             _output.WriteLine(result);
-            Assert.Equal($"https://api.weibo.com/oauth2/authorize?client_id={TestSampleConfig.WeiboAppId}&response_type={request.ResponseType}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.WeiboCallbackUrl)}", result);
+            Assert.Equal($"https://api.weibo.com/oauth2/authorize?client_id={TestSampleConfig.WeiboAppId}&response_type={request.ResponseType}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.WeiboCallbackUrl)}&forcelogin=false", result);
+        }
+
+        /// <summary>
+        /// 测试获取访问令牌
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_GetTokenAsync()
+        {
+            var param = new AccessTokenParam();
+            param.Code = "";
+            param.RedirectUri = TestSampleConfig.WeiboCallbackUrl;
+            var result = await _provider.GetTokenAsync(param);
+            _output.WriteLine(result.ToJson());
+            Assert.NotNull(result);
+        }
+
+        /// <summary>
+        /// 测试获取用户信息
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_GetUserInfoAsync()
+        {
+            var result = await _provider.GetUserInfoAsync(new WeiboAuthorizationUserRequest()
+            {
+                AccessToken = "",
+                UnionId = "",
+            });
+            _output.WriteLine(result.ToJson());
+            Assert.NotNull(result);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Net.Http;
 
 namespace Bing.Utils.Webs.Clients.Parameters
 {

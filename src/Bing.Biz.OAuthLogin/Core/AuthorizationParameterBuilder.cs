@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web;
+using Bing.Utils.Json;
 using Bing.Utils.Parameters;
 
 namespace Bing.Biz.OAuthLogin.Core
@@ -130,10 +132,11 @@ namespace Bing.Biz.OAuthLogin.Core
         /// 设置重定向地址
         /// </summary>
         /// <param name="url">重定向地址</param>
+        /// <param name="urlEncode">是否进行UrlEncode</param>
         /// <returns></returns>
-        public AuthorizationParameterBuilder RedirectUri(string url)
+        public AuthorizationParameterBuilder RedirectUri(string url,bool urlEncode = true)
         {
-            _builder.Add(OAuthConst.RedirectUri, HttpUtility.UrlEncode(url));
+            _builder.Add(OAuthConst.RedirectUri, urlEncode ? HttpUtility.UrlEncode(url) : url);
             return this;
         }
 
@@ -202,6 +205,24 @@ namespace Bing.Biz.OAuthLogin.Core
         {
             _builder.Add(OAuthConst.OpenId, openid);
             return this;
+        }
+
+        /// <summary>
+        /// 获取网关地址
+        /// </summary>
+        /// <returns></returns>
+        public string GetGatewayUrl()
+        {
+            return _gatewayUrl;
+        }
+
+        /// <summary>
+        /// 获取字典
+        /// </summary>
+        /// <returns></returns>
+        public IDictionary<string, object> GetDictionary()
+        {
+            return _builder.GetDictionary();
         }
 
         /// <summary>

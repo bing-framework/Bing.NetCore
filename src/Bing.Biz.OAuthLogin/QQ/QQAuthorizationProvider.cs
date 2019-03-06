@@ -86,7 +86,7 @@ namespace Bing.Biz.OAuthLogin.QQ
         public async Task<QQAuthorizationUserInfoResult> GetUserInfoAsync(QQAuthorizationUserRequest param)
         {
             var config = await ConfigProvider.GetConfigAsync();
-            Validate(config, param);
+            Validate(config, param.ToParam());
             var builder = new AuthorizationParameterBuilder();
             builder.GatewayUrl(GetUserInfoUrl)
                 .AccessToken(param.AccessToken)

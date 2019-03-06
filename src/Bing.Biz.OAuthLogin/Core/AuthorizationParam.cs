@@ -24,5 +24,15 @@
         /// 授权站点
         /// </summary>
         public string Site { get; set; }
+
+        /// <summary>
+        /// 是否强制用户重新登录
+        /// </summary>
+        public bool Forcelogin { get; set; }
+
+        /// <summary>
+        /// 授权页语言
+        /// </summary>
+        public string Language { get; set; }
     }
 }

@@ -9,21 +9,12 @@ namespace Bing.Biz.OAuthLogin.Weibo.Configs
     public class WeiboAuthorizationConfig: AuthorizationConfigBase
     {
         /// <summary>
-        /// 应用标识
+        /// 初始化一个<see cref="WeiboAuthorizationConfig"/>类型的实例
         /// </summary>
-        [Required(ErrorMessage = "应用标识[AppId]不能为空")]
-        public string AppId { get; set; }
-
-        /// <summary>
-        /// 应用密钥
-        /// </summary>
-        [Required(ErrorMessage = "应用密钥[AppKey]不能为空")]
-        public string AppKey { get; set; }
-
-        /// <summary>
-        /// 回调地址
-        /// </summary>
-        [Required(ErrorMessage = "回调地址[CallbackUrl]不能为空")]
-        public string CallbackUrl { get; set; }
+        public WeiboAuthorizationConfig()
+        {
+            AuthorizationUrl = "https://api.weibo.com/oauth2/authorize";
+            AccessTokenUrl = "https://api.weibo.com/oauth2/access_token";
+        }
     }
 }

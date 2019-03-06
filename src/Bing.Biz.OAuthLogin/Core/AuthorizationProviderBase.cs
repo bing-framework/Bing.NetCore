@@ -245,6 +245,24 @@ namespace Bing.Biz.OAuthLogin.Core
         }
 
         /// <summary>
+        /// Post请求结果
+        /// </summary>
+        /// <param name="config">授权配置</param>
+        /// <param name="builder">授权参数生成器</param>
+        /// <param name="type">参数解析器类型</param>
+        /// <param name="success">请求成功条件</param>
+        /// <returns></returns>
+        protected virtual async Task<AuthorizationResult> PostRequestResult(TAuthorizationConfig config,
+            AuthorizationParameterBuilder builder, ParameterParserType type, Func<AuthorizationResult, bool> success)
+        {
+            var result = new AuthorizationResult(await PostRequest(builder), success, type);
+            result.Parameter = builder.ToString();
+            result.Message = GetMessage(result);
+            WriteLog(config, builder, result);
+            return result;
+        }
+
+        /// <summary>
         /// 发送请求
         /// </summary>
         /// <param name="builder">授权参数生成器</param>
@@ -252,6 +270,16 @@ namespace Bing.Biz.OAuthLogin.Core
         protected virtual async Task<string> Request(AuthorizationParameterBuilder builder)
         {
             return await Web.Client().Get(builder.ToString()).ResultAsync();
+        }
+
+        /// <summary>
+        /// 发送Post请求
+        /// </summary>
+        /// <param name="builder">授权参数生成器</param>
+        /// <returns></returns>
+        protected virtual async Task<string> PostRequest(AuthorizationParameterBuilder builder)
+        {
+            return await Web.Client().Post(builder.GetGatewayUrl()).Data(builder.GetDictionary()).ResultAsync();
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <typeparam name="TAuthorizationUserParam">授权用户参数</typeparam>
     public interface IGetUserInfoProvider<TUserInfoResult, in TAuthorizationUserParam>
         where TUserInfoResult : AuthorizationUserInfoResult 
-        where TAuthorizationUserParam : AuthorizationUserParam
+        where TAuthorizationUserParam : AuthorizationUserParamBase
     {
         /// <summary>
         /// 获取用户信息

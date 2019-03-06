@@ -11,18 +11,18 @@ namespace Bing.Biz.OAuthLogin.Core
         /// 访问令牌
         /// </summary>
         [JsonProperty("access_token")]
-        public string AccessToken { get; set; }
+        public virtual string AccessToken { get; set; }
 
         /// <summary>
         /// 有效期。单位：秒
         /// </summary>
         [JsonProperty("expires_in")]
-        public string ExpiresIn { get; set; }
+        public virtual string ExpiresIn { get; set; }
 
         /// <summary>
         /// 刷新令牌
         /// </summary>
         [JsonProperty("refresh_token")]
-        public string RefreshToken { get; set; }
+        public virtual string RefreshToken { get; set; }
     }
 }

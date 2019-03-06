@@ -141,7 +141,7 @@ namespace Bing.Biz.OAuthLogin.Wechat
         public async Task<WechatAuthorizationUserInfoResult> GetUserInfoAsync(WechatAuthorizationUserRequest param)
         {
             var config = await ConfigProvider.GetConfigAsync();
-            Validate(config, param);
+            Validate(config, param.ToParam());
             var builder = new AuthorizationParameterBuilder();
             builder.GatewayUrl(GetUserInfoUrl)
                 .AccessToken(param.AccessToken)

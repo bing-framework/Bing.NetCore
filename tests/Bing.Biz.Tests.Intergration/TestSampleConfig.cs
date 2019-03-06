@@ -56,17 +56,17 @@
         /// <summary>
         /// Github应用ID
         /// </summary>
-        public const string GithubAppId = "f190ab77f0fc78af241c";
+        public const string GithubAppId = "123456";
 
         /// <summary>
         /// Github应用密钥
         /// </summary>
-        public const string GithubAppKey = "2b52a9dca0f1cbafbcaf0d511b11627df796a160";
+        public const string GithubAppKey = "key123456";
 
         /// <summary>
         /// Github回调地址
         /// </summary>
-        public const string GithubCallbackUrl = "http://www.jcebing.com/test";
+        public const string GithubCallbackUrl = "http://www.x.com/test";
 
         /// <summary>
         /// Github应用名称
