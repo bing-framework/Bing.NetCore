@@ -11,5 +11,10 @@ namespace Bing.Biz.OAuthLogin.Github
         /// 申请的权限范围
         /// </summary>
         public string Scope { get; set; }
+
+        /// <summary>
+        /// 是否为未经身份验证的用户提供在OAuth流程期间注册Github的选项
+        /// </summary>
+        public bool AllowSignup { get; set; } = true;
     }
 }

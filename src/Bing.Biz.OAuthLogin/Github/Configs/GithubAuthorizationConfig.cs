@@ -9,27 +9,18 @@ namespace Bing.Biz.OAuthLogin.Github.Configs
     public class GithubAuthorizationConfig:AuthorizationConfigBase
     {
         /// <summary>
-        /// 应用标识
-        /// </summary>
-        [Required(ErrorMessage = "应用标识[AppId]不能为空")]
-        public string AppId { get; set; }
-
-        /// <summary>
-        /// 应用密钥
-        /// </summary>
-        [Required(ErrorMessage = "应用密钥[AppKey]不能为空")]
-        public string AppKey { get; set; }
-
-        /// <summary>
-        /// 回调地址
-        /// </summary>
-        [Required(ErrorMessage = "回调地址[CallbackUrl]不能为空")]
-        public string CallbackUrl { get; set; }
-
-        /// <summary>
         /// 应用名称
         /// </summary>
         [Required(ErrorMessage = "应用名称[ApplicationName]不能为空")]
         public string ApplicationName { get; set; }
+
+        /// <summary>
+        /// 初始化一个<see cref="GithubAuthorizationConfig"/>类型的实例
+        /// </summary>
+        public GithubAuthorizationConfig()
+        {
+            AuthorizationUrl = "https://github.com/login/oauth/authorize";
+            AccessTokenUrl = "https://github.com/login/oauth/access_token";
+        }
     }
 }

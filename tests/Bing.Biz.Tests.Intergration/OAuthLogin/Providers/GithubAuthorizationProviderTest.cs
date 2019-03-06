@@ -1,9 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Bing.AutoMapper;
+using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Github;
 using Bing.Biz.Tests.Intergration.OAuthLogin.Configs;
 using Bing.Mapping;
 using Bing.Utils.Helpers;
+using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -46,7 +48,7 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             request.Scope = "user:email";
             var result = await _provider.GenerateUrlAsync(request);
             _output.WriteLine(result);
-            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope={request.Scope}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}", result);
+            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope={request.Scope}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}&allow_signup=true", result);
         }
 
         /// <summary>
@@ -62,7 +64,37 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             request.RedirectUri = TestSampleConfig.GithubCallbackUrl;
             var result = await _provider.GenerateUrlAsync(request);
             _output.WriteLine(result);
-            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope={request.Scope}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}", result);
+            Assert.Equal($"https://github.com/login/oauth/authorize?client_id={TestSampleConfig.GithubAppId}&scope={request.Scope}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GithubCallbackUrl)}&allow_signup=true", result);
+        }
+
+        /// <summary>
+        /// 测试获取访问令牌
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_GetTokenAsync()
+        {
+            var param = new AccessTokenParam();
+            param.Code = "";
+            param.RedirectUri = TestSampleConfig.GithubCallbackUrl;
+            var result = await _provider.GetTokenAsync(param);
+            _output.WriteLine(result.ToJson());
+            Assert.NotNull(result);
+        }
+
+        /// <summary>
+        /// 测试获取用户信息
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task Test_GetUserInfoAsync()
+        {
+            var result = await _provider.GetUserInfoAsync(new GithubAuthorizationUserRequest()
+            {
+                AccessToken = "",
+            });
+            _output.WriteLine(result.ToJson());
+            Assert.NotNull(result);
         }
     }
 }
