@@ -88,5 +88,24 @@
         /// </summary>
         public const string MicrosoftCallbackUrl = "http://www.x.com/test";
 
+        /// <summary>
+        /// Gitee应用ID
+        /// </summary>
+        public const string GiteeAppId = "123456";
+
+        /// <summary>
+        /// Gitee应用密钥
+        /// </summary>
+        public const string GiteeAppKey = "key123456";
+
+        /// <summary>
+        /// Gitee回调地址
+        /// </summary>
+        public const string GiteeCallbackUrl = "http://www.x.com";
+
+        /// <summary>
+        /// Gitee应用名称
+        /// </summary>
+        public const string GiteeApplicationName = "BingDemo";
     }
 }

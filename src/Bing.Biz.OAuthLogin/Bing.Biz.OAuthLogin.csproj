@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Factories\Configs\" />
+    <Folder Include="Factories\" />
   </ItemGroup>
 
 </Project>
