@@ -107,5 +107,25 @@
         /// Gitee应用名称
         /// </summary>
         public const string GiteeApplicationName = "BingDemo";
+
+        /// <summary>
+        /// Coding.NET应用ID
+        /// </summary>
+        public const string CodingAppId = "7081902f67f1bae2fd99ebd80d07fe68";
+
+        /// <summary>
+        /// Coding.NET应用密钥
+        /// </summary>
+        public const string CodingAppKey = "bc928107544811cad577da4f1ace1e7f4f9e8fe4";
+
+        /// <summary>
+        /// Coding.NET回调地址
+        /// </summary>
+        public const string CodingCallbackUrl = "http://www.jcebing.com";
+
+        /// <summary>
+        /// Coding.NET应用名称
+        /// </summary>
+        public const string CodingApplicationName = "BingDemo";
     }
 }
