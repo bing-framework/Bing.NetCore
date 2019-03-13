@@ -130,5 +130,32 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region IsMatch(验证输入与模式是否匹配)
+
+        /// <summary>
+        /// 验证输入与模式是否匹配
+        /// </summary>
+        /// <param name="input">输入字符串</param>
+        /// <param name="pattern">模式字符串</param>
+        /// <returns></returns>
+        public static bool IsMatch(string input, string pattern)
+        {
+            return IsMatch(input, pattern, RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// 验证输入与模式是否匹配
+        /// </summary>
+        /// <param name="input">输入的字符串</param>
+        /// <param name="pattern">模式字符串</param>
+        /// <param name="options">选项</param>
+        /// <returns></returns>
+        public static bool IsMatch(string input, string pattern, RegexOptions options)
+        {
+            return Regex.IsMatch(input, pattern, options);
+        }
+
+        #endregion
     }
 }

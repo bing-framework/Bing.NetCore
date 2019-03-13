@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects.Base;
@@ -11,7 +9,7 @@ namespace Bing.Validations.Aspects
     /// <summary>
     /// 验证拦截器
     /// </summary>
-    public class ValidAttribute:ParameterInterceptorBase
+    public class ValidAttribute : ParameterInterceptorBase
     {
         /// <summary>
         /// 执行

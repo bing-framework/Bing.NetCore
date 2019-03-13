@@ -70,6 +70,24 @@ namespace Bing.Properties {
         }
         
         /// <summary>
+        ///   查找类似 身份证不正确 的本地化字符串。
+        /// </summary>
+        public static string InvalidIdCard {
+            get {
+                return ResourceManager.GetString("InvalidIdCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 手机号不正确 的本地化字符串。
+        /// </summary>
+        public static string InvalidMobilePhone {
+            get {
+                return ResourceManager.GetString("InvalidMobilePhone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 不允许将节点移动到自己或子节点下 的本地化字符串。
         /// </summary>
         public static string NotSupportMoveToChildren {

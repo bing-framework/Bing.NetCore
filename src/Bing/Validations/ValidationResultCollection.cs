@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace Bing.Validations
 {
     /// <summary>
     /// 验证结果集合
     /// </summary>
-    public class ValidationResultCollection:IEnumerable<ValidationResult>
+    public class ValidationResultCollection : IEnumerable<ValidationResult>
     {
         #region 字段
 

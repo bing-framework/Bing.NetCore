@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Bing.Configurations;
-using Bing.Exceptions;
 
 namespace Bing.Validations.Handlers
 {
     /// <summary>
     /// 验证失败，抛出异常 - 默认验证处理器
     /// </summary>
-    public class ThrowHandler:IValidationHandler
+    public class ThrowHandler : IValidationHandler
     {
         /// <summary>
         /// 处理验证错误

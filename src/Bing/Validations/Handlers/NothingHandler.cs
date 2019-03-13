@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Validations.Handlers
+﻿namespace Bing.Validations.Handlers
 {
     /// <summary>
     /// 验证失败，不做任何处理
     /// </summary>
-    public class NothingHandler:IValidationHandler
+    public class NothingHandler : IValidationHandler
     {
         /// <summary>
         /// 处理验证错误

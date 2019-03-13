@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Validations
+﻿namespace Bing.Validations
 {
     /// <summary>
     /// 验证操作
