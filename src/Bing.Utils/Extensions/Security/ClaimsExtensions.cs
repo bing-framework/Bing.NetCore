@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 
+// ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
 {
     /// <summary>
