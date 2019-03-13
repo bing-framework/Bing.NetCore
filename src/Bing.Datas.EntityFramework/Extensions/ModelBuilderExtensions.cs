@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Bing.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -37,6 +39,26 @@ namespace Bing.Datas.EntityFramework.Extensions
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
+            return modelBuilder;
+        }
+
+        /// <summary>
+        /// 全局逻辑删除查询过滤器
+        /// </summary>
+        /// <param name="modelBuilder">实体生成器</param>
+        /// <returns></returns>
+        public static ModelBuilder HasGlobalDeleteQueryFilter(this ModelBuilder modelBuilder)
+        {
+            modelBuilder.Model.GetEntityTypes().Where(entityType=>typeof(IDelete).IsAssignableFrom(entityType.ClrType))
+                .ToList().ForEach(x =>
+                {
+                    modelBuilder.Entity(x.ClrType).Property<bool>("IsDeleted");
+                    var parameter = Expression.Parameter(x.ClrType, "e");
+                    var body = Expression.Equal(
+                        Expression.Call(typeof(EF), nameof(EF.Property), new[] {typeof(bool)}, parameter,
+                            Expression.Constant("IsDeleted")), Expression.Constant(false));
+                    modelBuilder.Entity(x.ClrType).HasQueryFilter(Expression.Lambda(body, parameter));
+                });
             return modelBuilder;
         }
     }
