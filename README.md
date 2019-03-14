@@ -25,12 +25,9 @@ Bing 框架Nuget包分布
 |Bing.Applications|[![NuGet Badge](https://buildstats.info/nuget/Bing.Applications?includePreReleases=true)](https://www.nuget.org/packages/Bing.Applications)|
 |Bing.Webs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Webs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Webs)|
 |Bing.Extensions.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.AutoMapper)|
-|Bing.Extensions.Swashbuckle|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.Swashbuckle?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.Swashbuckle)|
 |Bing.Biz|[![NuGet Badge](https://buildstats.info/nuget/Bing.Biz?includePreReleases=true)](https://www.nuget.org/packages/Bing.Biz)|
 |Bing.MailKit|[![NuGet Badge](https://buildstats.info/nuget/Bing.MailKit?includePreReleases=true)](https://www.nuget.org/packages/Bing.MailKit)|
 |Bing.Geetest|[![NuGet Badge](https://buildstats.info/nuget/Bing.Geetest?includePreReleases=true)](https://www.nuget.org/packages/Bing.Geetest)|
-|Bing.Encryption|[![NuGet Badge](https://buildstats.info/nuget/Bing.Encryption?includePreReleases=true)](https://www.nuget.org/packages/Bing.Encryption)|
-|Bing.ElasticSearch|[![NuGet Badge](https://buildstats.info/nuget/Bing.ElasticSearch?includePreReleases=true)](https://www.nuget.org/packages/Bing.ElasticSearch)|
 |Bing.Sequence|[![NuGet Badge](https://buildstats.info/nuget/Bing.Sequence?includePreReleases=true)](https://www.nuget.org/packages/Bing.Sequence)|
 
 
