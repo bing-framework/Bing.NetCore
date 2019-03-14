@@ -30,7 +30,6 @@ REM dotnet pack ./src/Bing.Extensions.Swashbuckle/Bing.Extensions.Swashbuckle.cs
 dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 REM dotnet pack ./src/Bing.Geetest/Bing.Geetest.csproj
-REM dotnet pack ./src/Bing.ElasticSearch/Bing.ElasticSearch.csproj
 REM dotnet pack ./src/Bing.Sequence/Bing.Sequence.csproj
 dotnet pack ./src/Bing.Caching.InMemory/Bing.Caching.InMemory.csproj
 dotnet pack ./src/Bing.Caching.Redis/Bing.Caching.Redis.csproj
