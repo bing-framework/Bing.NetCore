@@ -146,6 +146,15 @@ namespace Bing.Utils.Tests
                 Output.WriteLine(word.SpaceOnUpper());
             }
         }
+
+        [Fact]
+        public void Test_RemoveStrat()
+        {
+            string path = "/Pages/Home/Index/Pages";
+            var index = path.IndexOf(path, StringComparison.OrdinalIgnoreCase);
+            var result = path.Remove(index, "/Paegs".Length).Insert(index, "/typings/app");
+            Output.WriteLine(result);
+        }
     }
 }
 

@@ -60,4 +60,11 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
     </Compile>
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Compile Update="Extensions/Bases/StringExtensions.*.cs">
+      <DependentUpon>StringExtensions.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
