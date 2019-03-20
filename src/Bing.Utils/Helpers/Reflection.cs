@@ -20,10 +20,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <returns></returns>
-        public static string GetDescription<T>()
-        {
-            return GetDescription(Common.GetType<T>());
-        }
+        public static string GetDescription<T>() => GetDescription(Common.GetType<T>());
 
         /// <summary>
         /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述
@@ -31,10 +28,7 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">类型</typeparam>
         /// <param name="memberName">成员名称</param>
         /// <returns></returns>
-        public static string GetDescription<T>(string memberName)
-        {
-            return GetDescription(Common.GetType<T>(), memberName);
-        }
+        public static string GetDescription<T>(string memberName) => GetDescription(Common.GetType<T>(), memberName);
 
         /// <summary>
         /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述
@@ -77,10 +71,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <returns></returns>
-        public static string GetDisplayName<T>()
-        {
-            return GetDisplayName(Common.GetType<T>());
-        }        
+        public static string GetDisplayName<T>() => GetDisplayName(Common.GetType<T>());
 
         /// <summary>
         /// 获取类型成员显示名称，，使用<see cref="DisplayNameAttribute"/>或<see cref="DisplayAttribute"/>设置显示名称
@@ -271,10 +262,7 @@ namespace Bing.Utils.Helpers
         /// <param name="type">类型</param>
         /// <param name="parameters">传递给构造函数的参数</param>
         /// <returns></returns>
-        public static T CreateInstance<T>(Type type, params object[] parameters)
-        {
-            return Utils.Helpers.Conv.To<T>(Activator.CreateInstance(type, parameters));
-        }
+        public static T CreateInstance<T>(Type type, params object[] parameters) => Conv.To<T>(Activator.CreateInstance(type, parameters));
 
         /// <summary>
         /// 动态创建实例
@@ -296,10 +284,8 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="assemblyName">程序集名称</param>
         /// <returns></returns>
-        public static Assembly GetAssembly(string assemblyName)
-        {
-            return Assembly.Load(new AssemblyName(assemblyName));
-        }
+        public static Assembly GetAssembly(string assemblyName) => Assembly.Load(new AssemblyName(assemblyName));
+
         #endregion
 
         #region GetAssemblies(从目录获取所有程序集)
@@ -593,14 +579,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="type">类型</param>
         /// <returns></returns>
-        public static bool IsCollection(Type type)
-        {
-            if (type.IsArray)
-            {
-                return true;
-            }
-            return IsGenericCollection(type);
-        }
+        public static bool IsCollection(Type type) => type.IsArray || IsGenericCollection(type);
 
         #endregion
 
@@ -676,6 +655,104 @@ namespace Bing.Utils.Helpers
             }
 
             return GetTopBaseType(type.BaseType);
+        }
+
+        #endregion
+
+        #region IsDeriveClassFrom(判断当前类型是否可由指定类型派生)
+
+        /// <summary>
+        /// 判断当前类型是否可由指定类型派生
+        /// </summary>
+        /// <typeparam name="TBaseType">基类型</typeparam>
+        /// <param name="type">当前类型</param>
+        /// <param name="canAbstract">能否是抽象类</param>
+        /// <returns></returns>
+        public static bool IsDeriveClassFrom<TBaseType>(Type type, bool canAbstract = false) => IsDeriveClassFrom(type, typeof(TBaseType), canAbstract);
+
+        /// <summary>
+        /// 判断当前类型是否可由指定类型派生
+        /// </summary>
+        /// <param name="type">当前类型</param>
+        /// <param name="baseType">基类型</param>
+        /// <param name="canAbstract">能否是抽象类</param>
+        /// <returns></returns>
+        public static bool IsDeriveClassFrom(Type type, Type baseType, bool canAbstract = false)
+        {
+            Check.NotNull(type, nameof(type));
+            Check.NotNull(baseType, nameof(baseType));
+
+            return type.IsClass && (!canAbstract && !type.IsAbstract) && type.IsBaseOn(baseType);
+        }
+
+        #endregion
+
+        #region IsBaseOn(返回当前类型是否是指定基类的派生类)
+
+        /// <summary>
+        /// 返回当前类型是否是指定基类的派生类
+        /// </summary>
+        /// <typeparam name="TBaseType">基类型</typeparam>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsBaseOn<TBaseType>(Type type) => IsBaseOn(type, typeof(TBaseType));
+
+        /// <summary>
+        /// 返回当前类型是否是指定基类的派生类
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="baseType"></param>
+        /// <returns></returns>
+        public static bool IsBaseOn(Type type, Type baseType) => baseType.IsGenericTypeDefinition
+            ? baseType.IsGenericAssignableFrom(type)
+            : baseType.IsAssignableFrom(type);
+
+        #endregion
+
+        #region IsGenericAssignableFrom(判断当前泛型类型是否可由指定类型的实例填充)
+
+        /// <summary>
+        /// 判断当前泛型类型是否可由指定类型的实例填充
+        /// </summary>
+        /// <param name="genericType">泛型类型</param>
+        /// <param name="type">指定类型</param>
+        /// <returns></returns>
+        public static bool IsGenericAssignableFrom(Type genericType, Type type)
+        {
+            Check.NotNull(genericType, nameof(genericType));
+            Check.NotNull(type, nameof(type));
+
+            if (!genericType.IsGenericType)
+            {
+                throw new ArgumentException("该功能只支持泛型类型的调用，非泛型类型可使用 IsAssignableFrom 方法。");
+            }
+
+            List<Type> allOthers = new List<Type>() {type};
+            if (genericType.IsInterface)
+            {
+                allOthers.AddRange(type.GetInterfaces());
+            }
+
+            foreach (var other in allOthers)
+            {
+                Type cur = other;
+                while (cur!=null)
+                {
+                    if (cur.IsGenericType)
+                    {
+                        cur = cur.GetGenericTypeDefinition();
+                    }
+
+                    if (cur.IsSubclassOf(genericType) || cur == genericType)
+                    {
+                        return true;
+                    }
+
+                    cur = cur.BaseType;
+                }
+            }
+
+            return false;
         }
 
         #endregion

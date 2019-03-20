@@ -42,7 +42,7 @@ namespace Bing.Utils.Drawing
         /// <returns></returns>
         public static byte[] ToBytes(Image image)
         {
-            using (var ms=new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 ImageFormat format = image.RawFormat;
                 if (ImageFormat.MemoryBmp.Equals(format))

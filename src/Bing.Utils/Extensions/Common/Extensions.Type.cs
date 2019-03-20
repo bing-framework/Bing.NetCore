@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Bing.Utils.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
@@ -202,6 +203,60 @@ namespace Bing.Utils.Extensions
                    || type.GetTypeInfo().IsEnum
                    || Nullable.GetUnderlyingType(type) != null && CanUseForDb(Nullable.GetUnderlyingType(type));
         }
+
+        #endregion
+
+        #region IsDeriveClassFrom(判断当前类型是否可由指定类型派生)
+
+        /// <summary>
+        /// 判断当前类型是否可由指定类型派生
+        /// </summary>
+        /// <typeparam name="TBaseType">基类型</typeparam>
+        /// <param name="type">当前类型</param>
+        /// <param name="canAbstract">能否是抽象类</param>
+        /// <returns></returns>
+        public static bool IsDeriveClassFrom<TBaseType>(this Type type, bool canAbstract = false) => Reflection.IsDeriveClassFrom<TBaseType>(type, canAbstract);
+
+        /// <summary>
+        /// 判断当前类型是否可由指定类型派生
+        /// </summary>
+        /// <param name="type">当前类型</param>
+        /// <param name="baseType">基类型</param>
+        /// <param name="canAbstract">能否是抽象类</param>
+        /// <returns></returns>
+        public static bool IsDeriveClassFrom(this Type type, Type baseType, bool canAbstract = false) => Reflection.IsDeriveClassFrom(type, baseType, canAbstract);
+
+        #endregion
+
+        #region IsBaseOn(返回当前类型是否是指定基类的派生类)
+
+        /// <summary>
+        /// 返回当前类型是否是指定基类的派生类
+        /// </summary>
+        /// <typeparam name="TBaseType">基类型</typeparam>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsBaseOn<TBaseType>(this Type type) => Reflection.IsBaseOn<TBaseType>(type);
+
+        /// <summary>
+        /// 返回当前类型是否是指定基类的派生类
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="baseType"></param>
+        /// <returns></returns>
+        public static bool IsBaseOn(this Type type, Type baseType) => Reflection.IsBaseOn(type, baseType);
+
+        #endregion
+
+        #region IsGenericAssignableFrom(判断当前泛型类型是否可由指定类型的实例填充)
+
+        /// <summary>
+        /// 判断当前泛型类型是否可由指定类型的实例填充
+        /// </summary>
+        /// <param name="genericType">泛型类型</param>
+        /// <param name="type">指定类型</param>
+        /// <returns></returns>
+        public static bool IsGenericAssignableFrom(this Type genericType, Type type) => Reflection.IsGenericAssignableFrom(genericType, type);
 
         #endregion
     }

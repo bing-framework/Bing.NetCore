@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.IdGenerators.Core;
 using Bing.Utils.Json;
@@ -134,6 +135,16 @@ namespace Bing.Utils.Tests
             var result = Regexs.GetValue(jsonp, @"^\w+\((\{[^()]+\})\)$","$1");
             Output.WriteLine(result);
             Assert.Equal(json,result);
+        }
+
+        [Fact]
+        public void Test_SpaceOnUpper()
+        {
+            var words = new[] {"StringExtensions", "AA", "AbC", "Cad"};
+            foreach (var word in words)
+            {
+                Output.WriteLine(word.SpaceOnUpper());
+            }
         }
     }
 }

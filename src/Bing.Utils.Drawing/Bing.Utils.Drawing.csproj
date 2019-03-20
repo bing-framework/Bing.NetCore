@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../build/version.props"></Import>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Bing.Utils.Drawing是Bing应用框架的图片操作类库。
+Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\output\release\</OutputPath>
+    <DocumentationFile>..\..\output\release\netstandard2.0\Bing.Utils.Drawing.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\output\release\</OutputPath>
+    <DocumentationFile>..\..\output\release\netstandard2.0\Bing.Utils.Drawing.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="ImageUtil.*.cs">
+      <DependentUpon>ImageUtil.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
