@@ -822,5 +822,88 @@ namespace Bing.Utils.Extensions
         }
         #endregion
 
+        #region ReplaceFirst(替换字符串-首匹配)
+
+        /// <summary>
+        /// 替换字符串-首匹配
+        /// </summary>
+        /// <param name="this">当前值</param>
+        /// <param name="oldValue">旧值</param>
+        /// <param name="newValue">新值</param>
+        /// <returns></returns>
+        public static string ReplaceFirst(this string @this, string oldValue, string newValue)
+        {
+            var startIndex = @this.IndexOf(oldValue, StringComparison.Ordinal);
+            if (startIndex == -1)
+            {
+                return @this;
+            }
+
+            return @this.Remove(startIndex, oldValue.Length).Insert(startIndex, newValue);
+        }
+
+        /// <summary>
+        /// 替换字符串-首匹配
+        /// </summary>
+        /// <param name="this">当前值</param>
+        /// <param name="number">替换数</param>
+        /// <param name="oldValue">旧值</param>
+        /// <param name="newValue">新值</param>
+        /// <returns></returns>
+        public static string ReplaceFirst(this string @this, int number, string oldValue, string newValue)
+        {
+            List<string> list = @this.Split(oldValue).ToList();
+            var old = number + 1;
+            IEnumerable<string> listStart = list.Take(old);
+            IEnumerable<string> listEnd = list.Skip(old);
+
+            return string.Join(newValue, listStart) 
+                   + (listEnd.Any() ? oldValue : "") 
+                   + string.Join(oldValue, listEnd);
+        }
+
+        #endregion
+
+        #region ReplaceLast(替换字符串-尾匹配)
+
+        /// <summary>
+        /// 替换字符串-尾匹配
+        /// </summary>
+        /// <param name="this">当前值</param>
+        /// <param name="oldValue">旧值</param>
+        /// <param name="newValue">新值</param>
+        /// <returns></returns>
+        public static string ReplaceLast(this string @this, string oldValue, string newValue)
+        {
+            var startIndex = @this.LastIndexOf(oldValue, StringComparison.Ordinal);
+            if (startIndex == -1)
+            {
+                return @this;
+            }
+
+            return @this.Remove(startIndex, oldValue.Length).Insert(startIndex, newValue);
+        }
+
+        /// <summary>
+        /// 替换字符串-尾匹配
+        /// </summary>
+        /// <param name="this">当前值</param>
+        /// <param name="number">替换数</param>
+        /// <param name="oldValue">旧值</param>
+        /// <param name="newValue">新值</param>
+        /// <returns></returns>
+        public static string ReplaceLast(this string @this, int number, string oldValue, string newValue)
+        {
+            List<string> list = @this.Split(oldValue).ToList();
+            var old = Math.Max(0, list.Count - number - 1);
+            IEnumerable<string> listStart = list.Take(old);
+            IEnumerable<string> listEnd = list.Skip(old);
+
+            return string.Join(oldValue, listStart)
+                   + (old > 0 ? oldValue : "")
+                   + string.Join(newValue, listEnd);
+        }
+
+        #endregion
     }
 }

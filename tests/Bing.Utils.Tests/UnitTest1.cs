@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.IdGenerators.Core;
+using Bing.Utils.IO;
 using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
@@ -154,6 +157,188 @@ namespace Bing.Utils.Tests
             var index = path.IndexOf(path, StringComparison.OrdinalIgnoreCase);
             var result = path.Remove(index, "/Paegs".Length).Insert(index, "/typings/app");
             Output.WriteLine(result);
+        }
+
+        /// <summary>
+        /// 生成测试数据
+        /// </summary>
+        [Fact]
+        private void Test_GenerateTestData()
+        {
+            var dirPath = "D:\\TestData";
+            DirectoryUtil.CreateIfNotExists(dirPath);
+            FileSplit("D:\\iTestRunner_R1.txt", dirPath, 2048, false, -1);
+        }
+
+        /// <summary>
+        /// 合并文件
+        /// </summary>
+        [Fact]
+        public void Test_CombineFile()
+        {
+            var soureMd5 = FileUtil.GetFileMd5("D:\\iTestRunner_R1.txt");
+            var files = FileUtil.GetAllFiles("D:\\TestData");
+            var outputFilePath = "D:\\iTestRunner_R1_combine_result.txt";
+            FileCombine(files, outputFilePath, false, -1);
+            var outputMd5 = FileUtil.GetFileMd5(outputFilePath);
+            Output.WriteLine($"old-md5:{soureMd5}");
+            Output.WriteLine($"new-md5:{outputMd5}");
+        }
+
+        /// <summary>
+        /// 文件切割
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="outPutPath">输出文件路径</param>
+        /// <param name="kbLength">单个子文件最大长度。单位：KB</param>
+        /// <param name="delete">标识文件分割完成后是否删除原文件</param>
+        /// <param name="change">加密密钥</param>
+        private void FileSplit(string filePath,string outPutPath, int kbLength, bool delete, int change)
+        {
+            if (filePath == null || !File.Exists(filePath))
+            {
+                return;
+            }
+
+            //// 加密初始化
+            //short sign = 1;
+            //int num = 0, tmp;
+            //if (change < 0)
+            //{
+            //    sign = -1;
+            //    change = -change;
+            //}
+
+            var fileName = Path.GetFileNameWithoutExtension(filePath);
+            var fileSize = FileUtil.GetFileSize(filePath);
+            var total = Conv.ToInt(fileSize.GetSizeByK() / kbLength);
+            using (FileStream readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                byte[] data = new byte[1024];// 流读取，缓存空间
+                int len = 0, i = 1;// 记录子文件累积读取的KB大小，分割的子文件序号
+                int readLen = 0;// 每次实际读取的字节大小
+                FileStream writeStream = null;
+                // 读取数据
+                while (readLen > 0 || (readLen = readStream.Read(data, 0, data.Length)) > 0)
+                {                    
+                    // 创建分割后的子文件，已有则覆盖
+                    if (len == 0 || writeStream == null)
+                    {
+                        writeStream = new FileStream($"{outPutPath}\\{fileName}.{i++}.{total}.bin", FileMode.Create);
+                    }
+
+                    //// 加密逻辑，对data的首字节进行逻辑偏移加密
+                    //if (num == 0)
+                    //{
+                    //    num = change;
+                    //}
+
+                    //tmp = data[0] + sign * (num % 3 + 3);
+                    //if (tmp > 255)
+                    //{
+                    //    tmp -= 255;
+                    //}
+                    //else if(tmp<0)
+                    //{
+                    //    tmp += 255;
+                    //}
+
+                    //data[0] = (byte) tmp;
+                    //num /= 3;
+
+                    // 输出，缓存数据写入子文件
+                    writeStream.Write(data, 0, readLen);
+                    writeStream.Flush();
+                    // 预读下一轮缓存数据
+                    readLen = readStream.Read(data, 0, data.Length);
+                    if (++len >= kbLength || readLen == 0) //子文件达到指定大小，或文件已读完
+                    {
+                        writeStream.Close();// 关闭当前输出流
+                        len = 0;
+                    }
+                }
+            }
+
+            if (delete)
+            {
+                FileUtil.Delete(filePath);
+            }
+        }
+
+        /// <summary>
+        /// 文件合并
+        /// </summary>
+        /// <param name="filePaths"></param>
+        /// <param name="outFileName"></param>
+        /// <param name="delete"></param>
+        /// <param name="change"></param>
+        private void FileCombine(IList<string> filePaths,string outFileName, bool delete, int change)
+        {
+            if (filePaths == null || filePaths.Count == 0)
+            {
+                return;
+            }
+
+            short sign = 1;
+            //int num = 0, tmp;
+            //if (change < 0)
+            //{
+            //    sign = -1;
+            //    change = -change;
+            //}
+
+            var keys = Path.GetFileName(filePaths[0]).Split('.');
+            var total = keys[2].ToInt();
+
+            using (FileStream writeStream = new FileStream(outFileName, FileMode.Create))
+            {
+                filePaths.Sort();
+                
+                foreach (var filePath in filePaths)
+                {
+                    if (filePath == null || !File.Exists(filePath))
+                    {
+                        continue;
+                    }
+
+                    FileStream readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                    byte[] data=new byte[1024];// 流读取，缓存空间
+                    int readLen = 0;// 每次实际读取的字节大小
+
+                    // 读取数据
+                    while ((readLen=readStream.Read(data,0,data.Length))>0)
+                    {
+                        //// 解密逻辑，对data的首字节进行逻辑偏移解密
+                        //if (num == 0)
+                        //{
+                        //    num = change;
+                        //}
+
+                        //tmp = data[0] + sign * (num % 3 + 3);
+                        //if (tmp > 255)
+                        //{
+                        //    tmp -= 255;
+                        //}
+                        //else if(tmp<0)
+                        //{
+                        //    tmp += 255;
+                        //}
+
+                        //data[0] = (byte) tmp;
+                        //num /= 3;
+
+                        writeStream.Write(data, 0, readLen);
+                        writeStream.Flush();
+                    }
+
+                    readStream.Close();
+
+                    if (delete)
+                    {
+                        FileUtil.Delete(filePath);
+                    }
+                }
+            }
         }
     }
 }

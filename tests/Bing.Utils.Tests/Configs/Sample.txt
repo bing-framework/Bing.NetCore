@@ -1,0 +1,23 @@
+﻿{
+  "name":        jack  ,
+  "ag e ":23,
+  "friends":[{
+  "name" : "Andrea",
+  
+  
+  
+  "age" : 31,
+  "gender" : "Male",
+  "skilled" : true
+}, {
+  "name" : "Eva",
+  "age" : 27,
+  "gender" : "Female",
+  "skilled" : true
+}, {
+  "name" : "Daniele",
+  "age" : 26,
+  "gender" : "Male",
+  "skilled" : false
+}]
+}

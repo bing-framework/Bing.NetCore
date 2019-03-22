@@ -6,6 +6,21 @@
     public interface IDialect
     {
         /// <summary>
+        /// 起始转义标识符
+        /// </summary>
+        char OpeningIdentifier { get; }
+
+        /// <summary>
+        /// 结束转义标识符
+        /// </summary>
+        char ClosingIdentifier { get; }
+
+        /// <summary>
+        /// 批量操作分隔符
+        /// </summary>
+        char BatchSeperator { get; }
+
+        /// <summary>
         /// 安全名称
         /// </summary>
         /// <param name="name">名称</param>
@@ -17,20 +32,5 @@
         /// </summary>
         /// <returns></returns>
         string GetPrefix();
-
-        /// <summary>
-        /// 闭合字符-开
-        /// </summary>
-        char OpenQuote { get; }
-
-        /// <summary>
-        /// 闭合字符-闭
-        /// </summary>
-        char CloseQuote { get; }
-
-        /// <summary>
-        /// 批量操作分隔符
-        /// </summary>
-        char BatchSeperator { get; }
     }
 }

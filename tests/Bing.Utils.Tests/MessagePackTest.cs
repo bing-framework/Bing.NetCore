@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security;
 using System.Text;
+using Bing.Utils.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;
 using MessagePack;
@@ -172,6 +173,69 @@ namespace Bing.Utils.Tests
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+        }
+
+        [Fact]
+        public void Test_JsonCompress()
+        {
+            var result = FileUtil.Read(Directory.GetCurrentDirectory() + "/Configs/Sample.txt");
+            result = ChangeUTF8Space(result);
+            Output.WriteLine(JsonCompress(result));
+        }
+
+        private static string JsonCompress(string json)
+        {
+            if (json == null)
+            {
+                return null;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            bool skip = true;// true允许拦截(表示未进入string双引号)
+            bool escaped = false;// 转义符
+            for (int i = 0; i < json.Length; i++)
+            {
+                char c = json[i];
+                if (!escaped && c == '\\')
+                {
+                    escaped = true;
+                }
+                else
+                {
+                    escaped = false;
+                }
+
+                if (skip)
+                {
+                    if (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+                    {
+                        continue;
+                    }
+                }
+
+                sb.Append(c);
+                if (c == '"' && !escaped)
+                {
+                    skip = !skip;
+                }
+            }
+            return sb.ToString().Replace("\r\n", "\\\\r\\\\n");
+        }
+
+        private static string ChangeUTF8Space(string targetStr)
+        {
+            try
+            {
+                string currentStr = string.Empty;
+                byte[] utf8Space = new byte[] { 0xc2, 0xa0 };
+                string tempSpace = Encoding.GetEncoding("UTF-8").GetString(utf8Space);
+                currentStr = targetStr.Replace(tempSpace, " ");
+                return currentStr;
+            }
+            catch (Exception ex)
+            {
+                return targetStr;
             }
         }
     }

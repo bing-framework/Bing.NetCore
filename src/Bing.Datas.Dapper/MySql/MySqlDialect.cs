@@ -8,18 +8,13 @@ namespace Bing.Datas.Dapper.MySql
     public class MySqlDialect:DialectBase
     {
         /// <summary>
-        /// 闭合字符-开
+        /// 起始转义标识符
         /// </summary>
-        public override char OpenQuote => '`';
+        public override char OpeningIdentifier => '`';
 
         /// <summary>
-        /// 闭合字符-闭
+        /// 结束转义标识符
         /// </summary>
-        public override char CloseQuote => '`';
-
-        /// <summary>
-        /// 批量操作分隔符
-        /// </summary>
-        public override char BatchSeperator => ';';
+        public override char ClosingIdentifier => '`';
     }
 }

@@ -6,6 +6,21 @@
     public abstract class DialectBase:IDialect
     {
         /// <summary>
+        /// 起始转义标识符
+        /// </summary>
+        public virtual char OpeningIdentifier { get; } = '[';
+
+        /// <summary>
+        /// 结束转义标识符
+        /// </summary>
+        public virtual char ClosingIdentifier { get; } = ']';
+
+        /// <summary>
+        /// 批量操作分隔符
+        /// </summary>
+        public virtual char BatchSeperator { get; } = ';';
+
+        /// <summary>
         /// 安全名称
         /// </summary>
         /// <param name="name">名称</param>
@@ -41,7 +56,7 @@
         /// <returns></returns>
         protected virtual string GetSafeName(string name)
         {
-            return $"{OpenQuote}{name}{CloseQuote}";
+            return $"{OpeningIdentifier}{name}{ClosingIdentifier}";
         }
 
         /// <summary>
@@ -53,19 +68,6 @@
             return "@";
         }
 
-        /// <summary>
-        /// 闭合字符-开
-        /// </summary>
-        public abstract char OpenQuote { get; }
-
-        /// <summary>
-        /// 闭合字符-闭
-        /// </summary>
-        public abstract char CloseQuote { get; }
-
-        /// <summary>
-        /// 批量操作分隔符
-        /// </summary>
-        public abstract char BatchSeperator { get; }
+        
     }
 }

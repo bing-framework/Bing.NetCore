@@ -7,19 +7,5 @@ namespace Bing.Datas.Dapper.SqlServer
     /// </summary>
     public class SqlServerDialect:DialectBase
     {
-        /// <summary>
-        /// 闭合字符-开
-        /// </summary>
-        public override char OpenQuote => '[';
-
-        /// <summary>
-        /// 闭合字符-闭
-        /// </summary>
-        public override char CloseQuote => ']';
-
-        /// <summary>
-        /// 批量操作分隔符
-        /// </summary>
-        public override char BatchSeperator => ';';
     }
 }
