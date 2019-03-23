@@ -10,7 +10,7 @@ dotnet build Bing.NetCore.sln -c Release
 
 rem pack
 dotnet pack ./src/Bing.Utils/Bing.Utils.csproj
-dotnet pack ./src/Bing/Bing.csproj
+rem dotnet pack ./src/Bing/Bing.csproj
 dotnet pack ./src/Bing.Security/Bing.Security.csproj
 dotnet pack ./src/Bing.Logs/Bing.Logs.csproj
 dotnet pack ./src/Bing.Logs.Exceptionless/Bing.Logs.Exceptionless.csproj

@@ -1,20 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../build/version.props"></Import>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Bing.Core是Bing应用框架的核心类库。
-Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
+    <Description>
+      Bing.Core是Bing应用框架的核心类库。
+      Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。
+    </Description>
     <PackageId>Bing.Core</PackageId>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\output\release\</OutputPath>
-    <DocumentationFile>..\..\output\release\netstandard2.0\Bing.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\output\release\</OutputPath>
-    <DocumentationFile>..\..\output\release\netstandard2.0\Bing.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -63,10 +54,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>R.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Configurations\Startup\" />
   </ItemGroup>
 
 </Project>
