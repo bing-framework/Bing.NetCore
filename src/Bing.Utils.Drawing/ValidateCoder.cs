@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Bing.Utils.Drawing
 {
@@ -16,6 +18,13 @@ namespace Bing.Utils.Drawing
         /// 随机数
         /// </summary>
         private static readonly Random Random = new Random();
+
+        /// <summary>
+        /// 生成种子
+        /// </summary>
+        private const string Seed = "2,3,4,5,6,7,8,9," + 
+                                    "A,B,C,D,E,F,G,H,J,K,M,N,P,Q,R,S,T,U,V,W,X,Y,Z," +
+                                    "a,b,c,d,e,f,g,h,k,m,n,p,q,r,s,t,u,v,w,x,y,z";
 
         #endregion
 
@@ -100,6 +109,66 @@ namespace Bing.Utils.Drawing
 
         #endregion
 
+        #region GetCode(获取指定长度的验证码字符串)
+
+        /// <summary>
+        /// 获取指定长度的验证码字符串
+        /// </summary>
+        /// <param name="length">长度</param>
+        /// <param name="codeType">验证码类型</param>
+        /// <returns></returns>
+        public string GetCode(int length, ValidateCodeType codeType = ValidateCodeType.NumberAndLetter)
+        {
+            if (length <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
+            }
+
+            switch (codeType)
+            {
+                case ValidateCodeType.Number:
+                    return GetRandomNumbers(length);
+                case ValidateCodeType.ChineseChar:
+                    return GetRandomChinese(length);
+                default:
+                    return GetRandomNumbersAndLetters(length);
+            }
+        }
+
+        /// <summary>
+        /// 获取随机数字的字符串
+        /// </summary> 
+        /// <param name="length">长度</param>
+        /// <returns></returns>
+        private static string GetRandomNumbers(int length)
+        {
+            StringBuilder result = new StringBuilder();
+            for (var i = 0; i < length; i++)
+            {
+                result.Append(Random.Next(0, 9));
+            }
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// 获取随机数字与字母的字符串
+        /// </summary>
+        /// <param name="length">长度</param>
+        /// <returns></returns>
+        private static string GetRandomNumbersAndLetters(int length)
+        {
+            var allChars = Seed.Split(',');
+            StringBuilder result = new StringBuilder();
+            for (var i = 0; i < length; i++)
+            {
+                var index = Random.Next(allChars.Length);
+                result.Append(allChars[index]);
+            }
+
+            return result.ToString();
+        }
+
         /// <summary>
         /// 获取随机汉字的字符串
         /// </summary>
@@ -149,5 +218,153 @@ namespace Bing.Utils.Drawing
             byte[] bs = { b1, b2 };
             return encoding.GetString(bs);
         }
+
+        #endregion
+
+        #region CreateImage(创建指定长度的验证码图片)
+
+        /// <summary>
+        /// 创建指定字符串的验证码图片
+        /// </summary>
+        /// <param name="code">验证码</param>
+        /// <returns></returns>
+        public Bitmap CreateImage(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentNullException(nameof(code));
+            }
+
+            var width = FontWidth * code.Length + FontWidth;
+            var height = FontSize + FontSize / 2;
+            const int flag = 255 / 2;
+            bool isBgLight = (Background.R + Background.G + Background.B) / 3 > flag;
+
+            Bitmap image = new Bitmap(width, height);
+            Graphics graphics = Graphics.FromImage(image);
+            graphics.Clear(Background);
+            Brush brush = new SolidBrush(Color.FromArgb(255 - Background.R, 255 - Background.G, 255 - Background.B));
+            int x, y = 3;
+            if (HasBorder)
+            {
+                graphics.DrawRectangle(new Pen(Color.Silver), 0, 0, image.Width - 1, image.Height - 1);
+            }
+
+            Random rnd = Random;
+
+            // 绘制干扰线
+            for (var i = 0; i < RandomLineCount; i++)
+            {
+                x = rnd.Next(image.Width);
+                y = rnd.Next(image.Height);
+                int m = rnd.Next(image.Width);
+                int n = rnd.Next(image.Height);
+                Color lineColor = !RandomColor
+                    ? Color.FromArgb(90, 90, 90)
+                    : isBgLight
+                        ? Color.FromArgb(rnd.Next(130, 200), rnd.Next(130, 200), rnd.Next(130, 200))
+                        : Color.FromArgb(rnd.Next(70, 150), rnd.Next(70, 150), rnd.Next(70, 150));
+                Pen pen = new Pen(lineColor, 2);
+                graphics.DrawLine(pen, x, y, m, n);
+            }
+
+            // 绘制干扰点
+            for (var i = 0; i < (int)(image.Width * image.Height * RandomPointPercent / 100); i++)
+            {
+                x = rnd.Next(image.Width);
+                y = rnd.Next(image.Height);
+                Color pointColor = isBgLight
+                    ? Color.FromArgb(rnd.Next(30, 80), rnd.Next(30, 80), rnd.Next(30, 80))
+                    : Color.FromArgb(rnd.Next(150, 200), rnd.Next(150, 200), rnd.Next(150, 200));
+                image.SetPixel(x, y, pointColor);
+            }
+
+            // 绘制文字
+            for (var i = 0; i < code.Length; i++)
+            {
+                rnd = Random;
+                x = FontWidth / 4 + FontWidth * i;
+                if (RandomPosition)
+                {
+                    x = rnd.Next(FontWidth / 4) + FontWidth * i;
+                    y = rnd.Next(image.Flags / 5);
+                }
+
+                PointF point = new PointF(x, y);
+                if (RandomColor)
+                {
+                    int r, g, b;
+                    if (!isBgLight)
+                    {
+                        r = rnd.Next(255 - Background.R);
+                        g = rnd.Next(255 - Background.G);
+                        b = rnd.Next(255 - Background.B);
+                        if ((r + g + b) / 3 < flag)
+                        {
+                            r = 255 - r;
+                            g = 255 - g;
+                            b = 255 - b;
+                        }
+                    }
+                    else
+                    {
+                        r = rnd.Next(Background.R);
+                        g = rnd.Next(Background.G);
+                        b = rnd.Next(Background.B);
+                        if ((r + g + b) / 3 > flag)
+                        {
+                            r = 255 - r;
+                            g = 255 - g;
+                            b = 255 - b;
+                        }
+                    }
+
+                    brush = new SolidBrush(Color.FromArgb(r, g, b));
+                }
+
+                var fontName = Regex.IsMatch(code, @"[\u4e00-\u9fa5]+", RegexOptions.IgnoreCase)
+                    ? FontNamesForChinese[rnd.Next(FontNamesForChinese.Count)]
+                    : FontNames[rnd.Next(FontNames.Count)];
+                var font = new Font(fontName, FontSize, FontStyle.Bold);
+                if (RandomItalic)
+                {
+                    graphics.TranslateTransform(0, 0);
+                    Matrix transform = graphics.Transform;
+                    transform.Shear(Convert.ToSingle(rnd.Next(2, 9) / 10d - 0.5), 0.001f);
+                    graphics.Transform = transform;
+                }
+
+                graphics.DrawString(code.Substring(i, 1), font, brush, point);
+                graphics.ResetTransform();
+            }
+
+            return image;
+        }
+
+        /// <summary>
+        /// 获取指定长度的验证码图片
+        /// </summary>
+        /// <param name="length">长度</param>
+        /// <param name="code">验证码</param>
+        /// <param name="codeType">验证码类型</param>
+        /// <returns></returns>
+        public Bitmap CreateImage(int length, out string code,
+            ValidateCodeType codeType = ValidateCodeType.NumberAndLetter)
+        {
+            if (length <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
+            }
+            length = length < 1 ? 1 : length;
+            code = GetCode(length, codeType);
+            if (code.Length > length)
+            {
+                code = code.Substring(0, length);
+            }
+
+            return CreateImage(code);
+        }
+
+        #endregion
     }
 }
