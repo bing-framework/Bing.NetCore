@@ -8,11 +8,13 @@ branches:
     - master
 skip_branch_with_pr: true
 configuration: Release
-before_build:
-  - cmd: dotnet restore
+#before_build:
+#  - cmd: dotnet restore
 build:
   verbosity: minimal
   parallel: true
+build_script:
+  - cmd: dotnet build -c Release
 artifacts:
   - path: '**\*.nupkg'
 nuget:
