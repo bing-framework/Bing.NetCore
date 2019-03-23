@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj" />
     <ProjectReference Include="..\..\src\Bing.Utils\Bing.Utils.csproj" />
   </ItemGroup>
 

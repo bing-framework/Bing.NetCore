@@ -3,7 +3,7 @@
     /// <summary>
     /// 验证码类型
     /// </summary>
-    public enum ValidateCodeType
+    public enum CaptchaType
     {
         /// <summary>
         /// 纯数值
