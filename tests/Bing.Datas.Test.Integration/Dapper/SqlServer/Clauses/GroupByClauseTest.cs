@@ -59,7 +59,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_GroupBy_2()
         {
-            _clause.GroupBy("a.B,c.[D]");
+            _clause.GroupBy("a.B,c.D");
             Assert.Equal("Group By [a].[B],[c].[D]", GetSql());
         }
 

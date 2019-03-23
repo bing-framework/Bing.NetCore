@@ -39,7 +39,7 @@ namespace Bing.Datas.Dapper
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="database">数据库</param>
         /// <param name="sqlQueryOptions">Sql查询配置</param>
-        protected SqlQuery(ISqlBuilder sqlBuilder,IDatabase database,SqlQueryOptions sqlQueryOptions) : base(sqlBuilder, database, sqlQueryOptions) { }
+        protected SqlQuery(ISqlBuilder sqlBuilder,IDatabase database,SqlOptions sqlQueryOptions) : base(sqlBuilder, database, sqlQueryOptions) { }
 
         /// <summary>
         /// 克隆
@@ -47,7 +47,7 @@ namespace Bing.Datas.Dapper
         /// <returns></returns>
         public override ISqlQuery Clone()
         {
-            return new SqlQuery(Builder.Clone(), Database, SqlQueryOptions);
+            return new SqlQuery(Builder.Clone(), Database, SqlOptions);
         }
 
         /// <summary>
@@ -115,6 +115,18 @@ namespace Bing.Datas.Dapper
         {
             return await QueryAsync(
                 async (con, sql, sqlParams) => (await con.QueryAsync<TResult>(sql, sqlParams)).ToList(), connection);
+        }
+
+        /// <summary>
+        /// 获取列表
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public override async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null)
+        {
+            return (await GetConnection(connection).QueryAsync<TResult>(sql, Params)).ToList();
         }
 
         /// <summary>
@@ -240,6 +252,21 @@ namespace Bing.Datas.Dapper
         public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null)
         {
             return await ToPagerListAsync<TResult>(new Pager(page, pageSize), connection);
+        }
+
+        /// <summary>
+        /// 获取分页列表
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="page">页数</param>
+        /// <param name="pageSize">每页显示行数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(string sql, int page, int pageSize, IDbConnection connection = null)
+        {
+            var result = await ToListAsync<TResult>(sql, connection);
+            return new PagerList<TResult>(new Pager(page, pageSize), result);
         }
 
         /// <summary>

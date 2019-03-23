@@ -327,11 +327,33 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
+        /// <param name="condition">连接条件</param>
+        /// <returns></returns>
+        public static T On<T>(this T source, ICondition condition) where T : IJoin
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (source is IClauseAccessor accessor)
+            {
+                accessor.JoinClause.On(condition);
+            }
+
+            return source;
+        }
+
+        /// <summary>
+        /// 设置连接条件
+        /// </summary>
+        /// <typeparam name="T">源类型</typeparam>
+        /// <param name="source">源</param>
         /// <param name="left">左表列名</param>
-        /// <param name="right">右表列名</param>
+        /// <param name="value">值</param>
         /// <param name="operator">条件运算符</param>
         /// <returns></returns>
-        public static T On<T>(this T source, string left, string right, Operator @operator = Operator.Equal)
+        public static T On<T>(this T source, string left, object value, Operator @operator = Operator.Equal)
             where T : IJoin
         {
             if (source == null)
@@ -341,7 +363,29 @@ namespace Bing.Datas.Sql
 
             if (source is IClauseAccessor accessor)
             {
-                accessor.JoinClause.On(left, right, @operator);
+                accessor.JoinClause.On(left, value, @operator);
+            }
+
+            return source;
+        }
+
+        /// <summary>
+        /// 添加到On子句
+        /// </summary>
+        /// <typeparam name="T">源类型</typeparam>
+        /// <param name="source">源</param>
+        /// <param name="sql">Sql语句</param>
+        /// <returns></returns>
+        public static T AppendOn<T>(this T source, string sql) where T : IJoin
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (source is IClauseAccessor accessor)
+            {
+                accessor.JoinClause.AppendOn(sql);
             }
 
             return source;

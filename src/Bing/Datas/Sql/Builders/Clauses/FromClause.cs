@@ -1,6 +1,8 @@
 ﻿using System;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Extensions;
+using Bing.Datas.Sql.Builders.Internal;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Properties;
 
 namespace Bing.Datas.Sql.Builders.Clauses
@@ -36,21 +38,28 @@ namespace Bing.Datas.Sql.Builders.Clauses
         protected readonly ISqlBuilder Builder;
 
         /// <summary>
+        /// 表数据库
+        /// </summary>
+        protected ITableDatabase TableDatabase;
+
+        /// <summary>
         /// 初始化一个<see cref="FromClause"/>类型的实例
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
+        /// <param name="tableDatabase">表数据库</param>
         /// <param name="table">表</param>
-        public FromClause(ISqlBuilder builder,IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register, SqlItem table = null)
+        public FromClause(ISqlBuilder builder,IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,ITableDatabase tableDatabase, SqlItem table = null)
         {
             Builder = builder;
             Dialect = dialect;
             Resolver = resolver;
             Register = register;
+            TableDatabase = tableDatabase;
             Table = table;
-        }        
+        }
 
         /// <summary>
         /// 克隆
@@ -60,7 +69,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <returns></returns>
         public virtual IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
         {
-            return new FromClause(builder, Dialect, Resolver, register, Table);
+            if (register != null)
+            {
+                register.FromType = Register.FromType;
+            }
+
+            return new FromClause(builder, Dialect, Resolver, register, TableDatabase, Table);
         }
 
         /// <summary>
@@ -93,10 +107,11 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="schema">架构名</param>
         public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
         {
-            var entity = typeof(TEntity);
-            var table = Resolver.GetTableAndSchema(entity);
+            var type = typeof(TEntity);
+            var table = Resolver.GetTableAndSchema(type);
             Table = CreateSqlItem(table, schema, alias);
-            Register.Register(entity, Resolver.GetAlias(entity, alias));
+            Register.Register(type, Resolver.GetAlias(type, alias));
+            Register.FromType = type;
         }
 
         /// <summary>
@@ -142,6 +157,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="sql">Sql语句</param>
         public void AppendSql(string sql)
         {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return;
+            }
+
+            sql = Helper.ResolveSql(sql, Dialect);
             if (Table != null && Table.Raw)
             {
                 Table = new SqlItem($"{Table.Name}{sql}", raw: true);
@@ -167,12 +188,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <returns></returns>
         public string ToSql()
         {
-            var table = Table?.ToSql(Dialect);
-            if (string.IsNullOrWhiteSpace(table))
-            {
-                return null;
-            }
-            return $"From {table}";
+            var table = Table?.ToSql(Dialect, TableDatabase);
+            return string.IsNullOrWhiteSpace(table) ? null : $"From {table}";
         }
     }
 }

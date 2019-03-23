@@ -184,5 +184,10 @@ namespace Bing.Datas.Test.Integration.Samples
         {
             return new Sample { StringValue = "B" };
         }
+
+        /// <summary>
+        /// 是否删除
+        /// </summary>
+        public bool IsDeleted { get; set; }
     }
 }

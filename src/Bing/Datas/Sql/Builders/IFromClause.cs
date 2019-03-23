@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Datas.Sql.Queries;
 
 namespace Bing.Datas.Sql.Builders
 {

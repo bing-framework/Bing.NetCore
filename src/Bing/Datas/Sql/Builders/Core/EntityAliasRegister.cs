@@ -8,18 +8,33 @@ namespace Bing.Datas.Sql.Builders.Core
     /// </summary>
     public class EntityAliasRegister:IEntityAliasRegister
     {
+        #region 属性
+
         /// <summary>
-        /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
+        /// From子句设置的实体类型
         /// </summary>
-        public EntityAliasRegister(IDictionary<Type,string> data = null)
-        {
-            Data = data ?? new Dictionary<Type, string>();
-        }        
+        public Type FromType { get; set; }
 
         /// <summary>
         /// 实体别名
         /// </summary>
         public IDictionary<Type, string> Data { get; }
+
+        #endregion
+
+        #region 构造函数
+
+        /// <summary>
+        /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
+        /// </summary>
+        public EntityAliasRegister(IDictionary<Type, string> data = null)
+        {
+            Data = data ?? new Dictionary<Type, string>();
+        }
+
+        #endregion
+
+        #region Register(注册实体别名)
 
         /// <summary>
         /// 注册实体别名
@@ -35,6 +50,10 @@ namespace Bing.Datas.Sql.Builders.Core
             Data[entity] = alias;
         }
 
+        #endregion
+
+        #region Contains(是否包含实体)
+
         /// <summary>
         /// 是否包含实体
         /// </summary>
@@ -44,6 +63,10 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             return entity != null && Data.ContainsKey(entity);
         }
+
+        #endregion
+
+        #region GetAlias(获取实体别名)
 
         /// <summary>
         /// 获取实体别名
@@ -60,6 +83,10 @@ namespace Bing.Datas.Sql.Builders.Core
             return Data.ContainsKey(entity) ? Data[entity] : null;
         }
 
+        #endregion
+
+        #region Clone(克隆)
+
         /// <summary>
         /// 克隆
         /// </summary>
@@ -68,5 +95,7 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             return new EntityAliasRegister(new Dictionary<Type, string>(Data));
         }
+
+        #endregion
     }
 }

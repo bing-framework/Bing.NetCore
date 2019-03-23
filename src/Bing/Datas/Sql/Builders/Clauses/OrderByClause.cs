@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Datas.Sql.Builders.Internal;
 using Bing.Properties;
 using Bing.Utils.Extensions;
 
@@ -130,10 +131,16 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <summary>
         /// 添加到OrderBy子句
         /// </summary>
-        /// <param name="order">排序列表</param>
-        public void AppendSql(string order)
+        /// <param name="sql">Sql语句</param>
+        public void AppendSql(string sql)
         {
-            _items.Add(new OrderByItem(order, raw: true));
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return;
+            }
+
+            sql = Helper.ResolveSql(sql, _dialect);
+            _items.Add(new OrderByItem(sql, raw: true));
         }
 
         /// <summary>

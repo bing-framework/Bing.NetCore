@@ -185,7 +185,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_Select_15()
         {
-            _clause.Select("t.[a]    As     [e]      ,        b aS          f ", "d");
+            _clause.Select("t.a    As     [e]      ,        b aS          f ", "d");
             Assert.Equal("Select [t].[a] As [e],[d].[b] As [f]", GetSql());
         }
 
@@ -205,7 +205,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_Select_17()
         {
-            _clause.Select("a.[b],c,[d]", "o");
+            _clause.Select("a.b,c,d", "o");
             _clause.AppendSql("e=1,");
             _clause.Select("f");
             _clause.AppendSql("g");
@@ -323,6 +323,26 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
             copy.Select("b");
             Assert.Equal("Select [a]", GetSql());
             Assert.Equal("Select [a],[b]", copy.ToSql());
+        }
+
+        /// <summary>
+        /// 添加select子句
+        /// </summary>
+        [Fact]
+        public void Test_AppendSql_1()
+        {
+            _clause.AppendSql("a");
+            Assert.Equal("Select a", GetSql());
+        }
+
+        /// <summary>
+        /// 添加select子句 - 带方括号
+        /// </summary>
+        [Fact]
+        public void Test_AppendSql_2()
+        {
+            _clause.AppendSql("[a].[b]");
+            Assert.Equal("Select [a].[b]", GetSql());
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Bing.Datas.Sql.Builders.Internal
     /// <summary>
     /// Sql生成器辅助操作
     /// </summary>
-    internal class Helper
+    public class Helper
     {
         /// <summary>
         /// Sql方言
@@ -163,6 +163,12 @@ namespace Bing.Datas.Sql.Builders.Internal
             {
                 throw new ArgumentNullException(nameof(column));
             }
+
+            if (_parameterManager == null)
+            {
+                return null;
+            }
+
             column = GetColumn(column);
             if (IsInCondition(@operator, value))
             {
@@ -253,6 +259,11 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// <returns></returns>
         public string GenerateParamName(object value, Operator @operator)
         {
+            if (_parameterManager == null)
+            {
+                return string.Empty;
+            }
+
             var result = _parameterManager.GenerateName();
             if (value != null)
             {
@@ -293,5 +304,15 @@ namespace Bing.Datas.Sql.Builders.Internal
             return new SegmentCondition(column, minParamName, maxParamName, boundary);
         }
 
+        /// <summary>
+        /// 解析Sql
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="dialect">Sql方言</param>
+        /// <returns></returns>
+        public static string ResolveSql(string sql, IDialect dialect)
+        {
+            return sql?.Replace('[', dialect.OpeningIdentifier).Replace(']', dialect.ClosingIdentifier);
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Datas.Sql.Builders.Internal;
 using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Clauses
@@ -136,6 +137,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
             {
                 return;
             }
+
+            sql = Helper.ResolveSql(sql, _dialect);
             _group.Add(new SqlItem(sql, raw: true));
         }
 
@@ -145,7 +148,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <returns></returns>
         public string ToSql()
         {
-            if (_group.Count == 0)
+            if (IsGroup == false)
             {
                 return null;
             }

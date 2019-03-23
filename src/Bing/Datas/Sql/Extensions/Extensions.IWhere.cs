@@ -64,10 +64,11 @@ namespace Bing.Datas.Sql
         /// <param name="predicate">条件</param>
         /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
         /// <returns></returns>
-        public static T Or<T>(this T source, ICondition predicate, bool condition) where T : IWhere
+        public static T OrIf<T>(this T source, ICondition predicate, bool condition) where T : IWhere
         {
             return condition ? Or(source, predicate) : source;
         }
+
 
         /// <summary>
         /// 设置查询条件

@@ -10,6 +10,8 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Samples
     /// </summary>
     public class TestEntityAliasRegister : IEntityAliasRegister
     {
+        public Type FromType { get; set; }
+
         /// <summary>
         /// 实体别名
         /// </summary>

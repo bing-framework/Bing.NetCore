@@ -9,6 +9,8 @@ namespace Bing.Datas.Sql.Builders.Core
     /// </summary>
     public class ColumnCollection
     {
+        #region 属性
+
         /// <summary>
         /// 列集合
         /// </summary>
@@ -22,7 +24,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 表实体类型
         /// </summary>
-        public Type Table { get; }
+        public Type TableType { get; }
 
         /// <summary>
         /// 是否使用原始值
@@ -33,6 +35,10 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 是否聚合函数
         /// </summary>
         public bool IsAggregation { get; }
+
+        #endregion
+
+        #region 构造函数
 
         /// <summary>
         /// 初始化一个<see cref="ColumnCollection"/>类型的实例
@@ -46,10 +52,14 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             Columns = columns;
             TableAlias = tableAlias;
-            Table = tableType;
+            TableType = tableType;
             Raw = raw;
             IsAggregation = isAggregation;
         }
+
+        #endregion
+
+        #region ToSql(获取列名列表)
 
         /// <summary>
         /// 获取列名列表
@@ -80,12 +90,14 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <returns></returns>
         private string GetTableAlias(IEntityAliasRegister register)
         {
-            if (register != null && register.Contains(Table))
+            if (register != null && register.Contains(TableType))
             {
-                return register.GetAlias(Table);
+                return register.GetAlias(TableType);
             }
 
             return TableAlias;
         }
+
+        #endregion
     }
 }

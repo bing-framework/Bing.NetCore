@@ -162,7 +162,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_OrderBy_12()
         {
-            _clause.OrderBy("a.[b] DESC");
+            _clause.OrderBy("a.b DESC");
             _clause.OrderBy<Sample>(t => t.Email, true);
             _clause.OrderBy("c,D.e desc");
             _clause.AppendSql("f");

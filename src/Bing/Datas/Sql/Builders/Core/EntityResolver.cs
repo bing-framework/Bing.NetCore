@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Bing.Datas.Matedatas;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 
@@ -63,12 +63,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias)
         {
             var names = Lambda.GetLastNames(columns);
-            if (_matedata == null)
-            {
-                return names.Join();
-            }
-
-            return GetColumns<TEntity>(names, propertyAsAlias);
+            return _matedata == null ? names.Join() : GetColumns<TEntity>(names, propertyAsAlias);
         }
 
         /// <summary>

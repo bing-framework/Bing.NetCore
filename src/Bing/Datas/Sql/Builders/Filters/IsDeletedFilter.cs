@@ -1,6 +1,6 @@
 ﻿using System;
-using Bing.Datas.Matedatas;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Domains.Entities;
 
 namespace Bing.Datas.Sql.Builders.Filters
@@ -18,7 +18,8 @@ namespace Bing.Datas.Sql.Builders.Filters
         {
             foreach (var item in context.EntityAliasRegister.Data)
             {
-                Filter(context.Dialect, context.Matedata, context.WhereClause, item.Key, item.Value);
+                Filter(context.Dialect, context.Matedata, context.EntityAliasRegister,
+                    context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
             }
         }
 
@@ -27,10 +28,12 @@ namespace Bing.Datas.Sql.Builders.Filters
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="matedata">实体元数据解析器</param>
-        /// <param name="whereClause">Where子句</param>
+        /// <param name="register">实体别名注册器</param>
+        /// <param name="join">Join子句</param>
+        /// <param name="where">Where子句</param>
         /// <param name="type">类型</param>
         /// <param name="alias">表别名</param>
-        private void Filter(IDialect dialect, IEntityMatedata matedata,IWhereClause whereClause, Type type, string alias)
+        private void Filter(IDialect dialect, IEntityMatedata matedata,IEntityAliasRegister register,IJoinClause join,IWhereClause where, Type type, string alias)
         {
             if (type == null)
             {
@@ -42,10 +45,19 @@ namespace Bing.Datas.Sql.Builders.Filters
                 return;
             }
 
-            if (typeof(IDelete).IsAssignableFrom(type))
+            if (typeof(IDelete).IsAssignableFrom(type) == false)
             {
-                whereClause.Where($"{dialect.SafeName(alias)}.{dialect.SafeName(matedata.GetColumn(type, "IsDeleted"))}", false);
+                return;
             }
+
+            var isDeleted = $"{dialect.SafeName(alias)}.{dialect.SafeName(matedata.GetColumn(type, "IsDeleted"))}";
+            if (register.FromType == type)
+            {
+                where.Where(isDeleted,false);
+                return;
+            }
+
+            join.Find(type)?.On(isDeleted, false);
         }
     }
 }

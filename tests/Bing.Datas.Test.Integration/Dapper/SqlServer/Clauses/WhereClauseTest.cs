@@ -26,6 +26,17 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         /// 参数管理器
         /// </summary>
         private readonly ParameterManager _parameterManager;
+
+        /// <summary>
+        /// 表数据库
+        /// </summary>
+        private readonly TestTableDatabase _database;
+
+        /// <summary>
+        /// Sql生成器
+        /// </summary>
+        private readonly SqlServerBuilder _builder;
+
         /// <summary>
         /// Where子句
         /// </summary>
@@ -38,7 +49,9 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         public WhereClauseTest(ITestOutputHelper output) : base(output)
         {
             _parameterManager = new ParameterManager(new SqlServerDialect());
-            _clause = new WhereClause(null, new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister(),
+            _database = new TestTableDatabase();
+            _builder = new SqlServerBuilder(new TestEntityMatedata(), null, _parameterManager);
+            _clause = new WhereClause(_builder, new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister(),
                 _parameterManager);
         }
 

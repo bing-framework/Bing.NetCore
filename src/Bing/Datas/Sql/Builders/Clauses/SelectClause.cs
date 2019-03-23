@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Datas.Sql.Builders.Internal;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {
@@ -328,6 +329,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
             {
                 return;
             }
+
+            sql = Helper.ResolveSql(sql, _dialect);
             _columns.Add(new ColumnCollection(sql, raw: true));
         }
 

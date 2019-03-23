@@ -21,7 +21,7 @@ namespace Bing.Tests.Datas.Sql
             item.On("a.A", "b.B", Operator.Equal);
 
             // 复制一份
-            var copy = item.Clone();
+            var copy = item.Clone(null);
             Assert.Equal("join b On a.A=b.B", item.ToSql());
             Assert.Equal("join b On a.A=b.B", copy.ToSql());
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Datas.Matedatas;
+using Bing.Datas.Sql.Matedatas;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -9,38 +9,45 @@ namespace Bing.Datas.Sql.Builders.Core
     public class SqlContext
     {
         /// <summary>
-        /// 实体别名注册器
-        /// </summary>
-        public IEntityAliasRegister EntityAliasRegister { get; }
-
-        /// <summary>
-        /// Where子句
-        /// </summary>
-        public IWhereClause WhereClause { get; }
-
-        /// <summary>
-        /// 实体元数据解析器
-        /// </summary>
-        public IEntityMatedata Matedata { get; }
-
-        /// <summary>
         /// Sql方言
         /// </summary>
         public IDialect Dialect { get; }
 
         /// <summary>
+        /// 实体别名注册器
+        /// </summary>
+        public IEntityAliasRegister EntityAliasRegister { get; }        
+
+        /// <summary>
+        /// 实体元数据解析器
+        /// </summary>
+        public IEntityMatedata Matedata { get; }
+        
+        /// <summary>
+        /// 参数管理器
+        /// </summary>
+        public IParameterManager ParameterManager { get; }
+
+        /// <summary>
+        /// Sql子句访问器
+        /// </summary>
+        public IClauseAccessor ClauseAccessor { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="SqlContext"/>类型的实例
         /// </summary>
-        /// <param name="entityAliasRegister">实体别名注册器</param>
-        /// <param name="whereClause">Where子句</param>
-        /// <param name="matedata">实体元数据解析器</param>
         /// <param name="dialect">Sql方言</param>
-        public SqlContext(IEntityAliasRegister entityAliasRegister, IWhereClause whereClause, IEntityMatedata matedata, IDialect dialect)
+        /// <param name="entityAliasRegister">实体别名注册器</param>
+        /// <param name="matedata">实体原始数据解析器</param>
+        /// <param name="parameterManager">参数管理器</param>
+        /// <param name="clause">Sql子句访问器</param>
+        public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMatedata matedata, IParameterManager parameterManager, IClauseAccessor clause)
         {
             EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
-            WhereClause = whereClause ?? throw new ArgumentNullException(nameof(whereClause));
-            Matedata = matedata;
+            Matedata = matedata ?? new DefaultEntityMatedata();
             Dialect = dialect;
+            ParameterManager = parameterManager;
+            ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));
         }
     }
 }

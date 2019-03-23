@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Bing.Datas.Matedatas;
 using Bing.Datas.Sql.Builders.Clauses;
 using Bing.Datas.Sql.Builders.Filters;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Domains.Repositories;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
@@ -77,6 +77,11 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 实体元数据解析器
         /// </summary>
         protected IEntityMatedata EntityMatedata { get; private set; }
+
+        /// <summary>
+        /// 表数据库
+        /// </summary>
+        protected ITableDatabase TableDatabase { get; private set; }
 
         /// <summary>
         /// 实体解析器
@@ -181,10 +186,12 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 初始化一个<see cref="SqlBuilderBase"/>类型的实例
         /// </summary>
         /// <param name="matedata">实体元数据解析器</param>
+        /// <param name="tableDatabase">表数据库</param>
         /// <param name="parameterManager">参数管理器</param>
-        protected SqlBuilderBase(IEntityMatedata matedata = null, IParameterManager parameterManager = null)
+        protected SqlBuilderBase(IEntityMatedata matedata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null)
         {
             EntityMatedata = matedata;
+            TableDatabase = tableDatabase;
             _parameterManager = parameterManager;
             EntityResolver = new EntityResolver(matedata);
             AliasRegister = new EntityAliasRegister();
@@ -227,7 +234,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <returns></returns>
         protected virtual IFromClause CreateFromClause()
         {
-            return new FromClause(this, Dialect, EntityResolver, AliasRegister);
+            return new FromClause(this, Dialect, EntityResolver, AliasRegister, TableDatabase);
         }
 
         /// <summary>
@@ -236,7 +243,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <returns></returns>
         protected virtual IJoinClause CreateJoinClause()
         {
-            return new JoinClause(this, Dialect, EntityResolver, AliasRegister);
+            return new JoinClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager, TableDatabase);
         }
 
         /// <summary>
@@ -297,7 +304,7 @@ namespace Bing.Datas.Sql.Builders.Core
             AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
             _selectClause = sqlBuilder._selectClause?.Clone(this, AliasRegister);
             _fromClause = sqlBuilder._fromClause?.Clone(this, AliasRegister);
-            _joinClause = sqlBuilder._joinClause?.Clone(this, AliasRegister);
+            _joinClause = sqlBuilder._joinClause?.Clone(this, AliasRegister, _parameterManager);
             _whereClause = sqlBuilder._whereClause?.Clone(this, AliasRegister, _parameterManager);
             _groupByClause = sqlBuilder._groupByClause?.Clone(AliasRegister);
             _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
@@ -315,7 +322,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 清空并初始化
         /// </summary>
-        public void Clear()
+        public ISqlBuilder Clear()
         {
             AliasRegister = new EntityAliasRegister();
             ClearSelect();
@@ -328,89 +335,100 @@ namespace Bing.Datas.Sql.Builders.Core
             ClearPageParams();
             ClearUnionBuilders();
             ClearCte();
+            return this;
         }
 
         /// <summary>
         /// 清空Select子句
         /// </summary>
-        public void ClearSelect()
+        public ISqlBuilder ClearSelect()
         {
             _selectClause = CreateSelectClause();
+            return this;
         }
 
         /// <summary>
         /// 清空From子句
         /// </summary>
-        public void ClearFrom()
+        public ISqlBuilder ClearFrom()
         {
             _fromClause = CreateFromClause();
+            return this;
         }
 
         /// <summary>
         /// 清空Join子句
         /// </summary>
-        public void ClearJoin()
+        public ISqlBuilder ClearJoin()
         {
             _joinClause = CreateJoinClause();
+            return this;
         }
 
         /// <summary>
         /// 清空Where子句
         /// </summary>
-        public void ClearWhere()
+        public ISqlBuilder ClearWhere()
         {
             _isAddFilters = false;
             _whereClause = CreateWhereClause();
+            return this;
         }
 
         /// <summary>
         /// 清空GroupBy子句
         /// </summary>
-        public void ClearGroupBy()
+        public ISqlBuilder ClearGroupBy()
         {
             _groupByClause = CreateGroupByClause();
+            return this;
         }
 
         /// <summary>
         /// 清空OrderBy子句
         /// </summary>
-        public void ClearOrderBy()
+        public ISqlBuilder ClearOrderBy()
         {
             _orderByClause = CreateOrderByClause();
+            return this;
         }
 
         /// <summary>
         /// 清空Sql参数
         /// </summary>
-        public void ClearSqlParams()
+        public ISqlBuilder ClearSqlParams()
         {
             _parameterManager.Clear();
+            return this;
         }
 
         /// <summary>
         /// 清空分页参数
         /// </summary>
-        public void ClearPageParams()
+        public ISqlBuilder ClearPageParams()
         {
             Pager = null;
             OffsetParam = null;
             LimitParam = null;
+            return this;
         }
 
         /// <summary>
         /// 清空联合操作项
         /// </summary>
-        public void ClearUnionBuilders()
+        public ISqlBuilder ClearUnionBuilders()
         {
             UnionItems = new List<BuilderItem>();
+            return this;
         }
 
         /// <summary>
         /// 清空公用表表达式
         /// </summary>
-        public void ClearCte()
+        public ISqlBuilder ClearCte()
         {
             CteItems = new List<BuilderItem>();
+            return this;
         }
 
         #endregion
@@ -494,12 +512,15 @@ namespace Bing.Datas.Sql.Builders.Core
         protected virtual void CreateSql(StringBuilder result)
         {
             CreateCte(result);
+            if (_isAddFilters == false)
+            {
+                AddFilters();
+            }
             if (IsUnion)
             {
                 CreateSqlByUnion(result);
                 return;
             }
-
             CreateSqlByNoUnion(result);
         }
 
@@ -535,13 +556,13 @@ namespace Bing.Datas.Sql.Builders.Core
             AppendSelect(result);
             AppendFrom(result);
             AppendSql(result, JoinClause.ToSql());
-            AppendSql(result, GetWhere());
+            AppendSql(result, WhereClause.ToSql());
             AppendSql(result, GroupByClause.ToSql());
             AppendSql(result, ")");
             foreach (var operation in UnionItems)
             {
                 AppendSql(result, operation.Name);
-                AppendSql(result, $"({operation.Builder.ToSql()})");
+                AppendSql(result, $"({operation.Builder.ToSql()}");
                 AppendSql(result, ")");
             }
 
@@ -558,7 +579,7 @@ namespace Bing.Datas.Sql.Builders.Core
             AppendSelect(result);
             AppendFrom(result);
             AppendSql(result, JoinClause.ToSql());
-            AppendSql(result, GetWhere());
+            AppendSql(result, WhereClause.ToSql());
             AppendSql(result, GroupByClause.ToSql());
             AppendSql(result, OrderByClause.ToSql());
             AppendLimit(result);
@@ -608,28 +629,14 @@ namespace Bing.Datas.Sql.Builders.Core
 
             AppendSql(result, sql);
         }
-
-        /// <summary>
-        /// 获取Where语句
-        /// </summary>
-        /// <returns></returns>
-        public virtual string GetWhere()
-        {
-            if (_isAddFilters == false)
-            {
-                AddFilters();
-            }
-
-            return WhereClause.ToSql();
-        }
-
+        
         /// <summary>
         /// 添加过滤器列表
         /// </summary>
         private void AddFilters()
         {
             _isAddFilters = true;
-            var context = new SqlContext(AliasRegister, WhereClause, EntityMatedata, Dialect);
+            var context = new SqlContext(Dialect, AliasRegister, EntityMatedata, ParameterManager, this);
             SqlFilterCollection.Filters.ForEach(filter => filter.Filter(context));
         }
 
@@ -659,9 +666,10 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
-        public void AddParam(string name, object value)
+        public ISqlBuilder AddParam(string name, object value)
         {
             ParameterManager.Add(name, value);
+            return this;
         }
 
         #endregion

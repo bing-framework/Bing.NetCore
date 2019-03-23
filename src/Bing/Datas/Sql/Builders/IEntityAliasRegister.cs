@@ -9,6 +9,11 @@ namespace Bing.Datas.Sql.Builders
     public interface IEntityAliasRegister
     {
         /// <summary>
+        /// From子句设置的实体类型
+        /// </summary>
+        Type FromType { get; set; }
+
+        /// <summary>
         /// 实体别名
         /// </summary>
         IDictionary<Type,string> Data { get; }

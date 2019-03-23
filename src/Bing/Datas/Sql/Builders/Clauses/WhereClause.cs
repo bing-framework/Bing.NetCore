@@ -895,6 +895,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="sql">Sql语句</param>
         public void AppendSql(string sql)
         {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return;
+            }
+
+            sql = Helper.ResolveSql(sql, _dialect);
             And(new SqlCondition(sql));
         }
 

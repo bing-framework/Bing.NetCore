@@ -1,27 +1,31 @@
 ﻿using System;
-using Bing.Aspects;
 
-namespace Bing.Datas.Matedatas
+namespace Bing.Datas.Sql.Matedatas
 {
     /// <summary>
     /// 实体元数据
     /// </summary>
-    [Ignore]
-    public interface IEntityMatedata
+    public class DefaultEntityMatedata: IEntityMatedata
     {
         /// <summary>
-        /// 获取表名 
+        /// 获取表名
         /// </summary>
         /// <param name="type">实体类型</param>
         /// <returns></returns>
-        string GetTable(Type type);
+        public string GetTable(Type type)
+        {
+            return type?.FullName;
+        }
 
         /// <summary>
         /// 获取架构
         /// </summary>
         /// <param name="type">实体类型</param>
         /// <returns></returns>
-        string GetSchema(Type type);
+        public string GetSchema(Type type)
+        {
+            return string.Empty;
+        }
 
         /// <summary>
         /// 获取列名
@@ -29,6 +33,9 @@ namespace Bing.Datas.Matedatas
         /// <param name="type">实体类型</param>
         /// <param name="property">属性名</param>
         /// <returns></returns>
-        string GetColumn(Type type, string property);
+        public string GetColumn(Type type, string property)
+        {
+            return property;
+        }
     }
 }

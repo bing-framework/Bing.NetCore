@@ -1,7 +1,7 @@
-﻿using Bing.Datas.Matedatas;
-using Bing.Datas.Sql;
+﻿using Bing.Datas.Sql;
 using Bing.Datas.Sql.Builders;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Datas.Sql.Matedatas;
 
 namespace Bing.Datas.Dapper.MySql
 {
@@ -14,8 +14,9 @@ namespace Bing.Datas.Dapper.MySql
         /// 初始化一个<see cref="MySqlBuilder"/>类型的实例
         /// </summary>
         /// <param name="matedata">实体元数据解析器</param>
+        /// <param name="tableDatabase">表数据库</param>
         /// <param name="parameterManager">参数管理器</param>
-        public MySqlBuilder(IEntityMatedata matedata=null,IParameterManager parameterManager = null) : base(matedata, parameterManager) { }
+        public MySqlBuilder(IEntityMatedata matedata=null,ITableDatabase tableDatabase = null,IParameterManager parameterManager=null) : base(matedata, tableDatabase,parameterManager) { }
 
         /// <summary>
         /// 克隆
@@ -34,15 +35,7 @@ namespace Bing.Datas.Dapper.MySql
         /// <returns></returns>
         public override ISqlBuilder New()
         {
-            return new MySqlBuilder(EntityMatedata, ParameterManager);
-        }        
-
-        /// <summary>
-        /// 创建分页Sql
-        /// </summary>
-        protected override string CreateLimitSql()
-        {
-            return $"Limit {GetOffsetParam()}, {GetLimitParam()}";
+            return new MySqlBuilder(EntityMatedata, TableDatabase, ParameterManager);
         }
 
         /// <summary>
@@ -60,7 +53,7 @@ namespace Bing.Datas.Dapper.MySql
         /// <returns></returns>
         protected override IFromClause CreateFromClause()
         {
-            return new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister);
+            return new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister, TableDatabase);
         }
 
         /// <summary>
@@ -69,7 +62,16 @@ namespace Bing.Datas.Dapper.MySql
         /// <returns></returns>
         protected override IJoinClause CreateJoinClause()
         {
-            return new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister);
+            return new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
+                TableDatabase);
+        }
+
+        /// <summary>
+        /// 创建分页Sql
+        /// </summary>
+        protected override string CreateLimitSql()
+        {
+            return $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
         }
     }
 }

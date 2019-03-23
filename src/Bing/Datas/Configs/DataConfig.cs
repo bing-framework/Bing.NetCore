@@ -16,7 +16,7 @@ namespace Bing.Datas.Configs
         /// <summary>
         /// Sql查询配置
         /// </summary>
-        public SqlQueryOptions SqlQuery { get; set; }
+        public SqlOptions SqlOptions { get; set; }
 
         /// <summary>
         /// 自动提交，默认禁用
@@ -43,7 +43,7 @@ namespace Bing.Datas.Configs
         /// </summary>
         public DataConfig()
         {
-            SqlQuery = new SqlQueryOptions();
+            SqlOptions = new SqlOptions();
         }
     }
 }

@@ -19,11 +19,18 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         private FromClause _clause;
 
         /// <summary>
+        /// 表数据库
+        /// </summary>
+        private readonly TestTableDatabase _database;
+
+        /// <summary>
         /// 测试初始化
         /// </summary>
         public FromClauseTest(ITestOutputHelper output) : base(output)
         {
-            _clause = new FromClause(null, new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister());
+            _database = new TestTableDatabase();
+            _clause = new FromClause(null, new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister(),
+                null);
         }
 
         /// <summary>
@@ -38,7 +45,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         /// <summary>
         /// 默认输出空
         /// </summary>
-        [Fact]
+        [Fact] 
         public void Test_Default()
         {
             Assert.Null(GetSql());
@@ -175,7 +182,8 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_From_13()
         {
-            _clause = new FromClause(null, new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
+            _clause = new FromClause(null, new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister(),
+                null);
             _clause.From<Sample>();
             var result = _clause.ToSql();
             Assert.Equal("From [s].[t_Sample]", result);
@@ -187,7 +195,8 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         [Fact]
         public void Test_From_14()
         {
-            _clause = new FromClause(null, new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
+            _clause = new FromClause(null, new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister(),
+                null);
             _clause.From<Sample>("a");
             var result = _clause.ToSql();
             Assert.Equal("From [s].[t_Sample] As [a]", result);
@@ -197,7 +206,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         /// 测试复制副本
         /// </summary>
         [Fact]
-        public void Test_From_15()
+        public void Test_Clone()
         {
             _clause.From("a","b");
             var copy = _clause.Clone(null,null);

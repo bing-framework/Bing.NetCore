@@ -14,22 +14,23 @@ namespace Bing.Datas.Sql
     public interface ISqlQuery: ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
     {
         /// <summary>
+        /// 设置数据库连接
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        ISqlQuery SetConnection(IDbConnection connection);
+
+        /// <summary>
         /// 克隆
         /// </summary>
         /// <returns></returns>
         ISqlQuery Clone();
-
-        /// <summary>
-        /// 清空并初始化
-        /// </summary>
-        /// <returns></returns>
-        ISqlQuery Clear();
-
+        
         /// <summary>
         /// 配置
         /// </summary>
         /// <param name="configAction">配置操作</param>
-        void Config(Action<SqlQueryOptions> configAction);
+        void Config(Action<SqlOptions> configAction);
 
         /// <summary>
         /// 获取Sql生成器
@@ -124,6 +125,15 @@ namespace Bing.Datas.Sql
         Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null);
 
         /// <summary>
+        /// 获取列表
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null);
+
+        /// <summary>
         /// 获取分页列表
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
@@ -159,6 +169,18 @@ namespace Bing.Datas.Sql
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
         /// <returns></returns>
-        Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);
+        Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);        
+
+        /// <summary>
+        /// 获取分页列表
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="page">页数</param>
+        /// <param name="pageSize">每页显示行数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        Task<PagerList<TResult>> ToPagerListAsync<TResult>(string sql, int page, int pageSize,
+            IDbConnection connection = null);
     }
 }

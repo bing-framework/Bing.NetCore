@@ -24,9 +24,14 @@ namespace Bing.Datas.Sql.Queries
         protected IDatabase Database { get; }
 
         /// <summary>
-        /// Sql查询配置
+        /// 数据库连接
         /// </summary>
-        protected SqlQueryOptions SqlQueryOptions { get; set; }
+        protected IDbConnection Connection { get; private set; }
+
+        /// <summary>
+        /// Sql配置
+        /// </summary>
+        protected SqlOptions SqlOptions { get; set; }
 
         /// <summary>
         /// Sql生成器
@@ -92,15 +97,73 @@ namespace Bing.Datas.Sql.Queries
         /// </summary>
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="database">数据库</param>
-        /// <param name="sqlQueryOptions">Sql查询配置</param>
-        protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null, SqlQueryOptions sqlQueryOptions = null)
+        /// <param name="sqlOptions">Sql配置</param>
+        protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null, SqlOptions sqlOptions = null)
         {
             Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
             Database = database;
-            SqlQueryOptions = sqlQueryOptions;
+            Connection = database?.GetConnection();
+            SqlOptions = sqlOptions ?? GetOptions();
+        }
+
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        /// <returns></returns>
+        private SqlOptions GetOptions()
+        {
+            try
+            {
+                var options = Ioc.Create<IOptionsSnapshot<SqlOptions>>();
+                return options == null ? new SqlOptions() : options.Value;
+            }
+            catch
+            {
+                return new SqlOptions();
+            }
         }
 
         #endregion
+
+        #region SetConnection(设置数据库连接)
+
+        /// <summary>
+        /// 设置数据库连接
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public ISqlQuery SetConnection(IDbConnection connection)
+        {
+            Connection = connection;
+            return this;
+        }
+
+
+        #endregion
+
+        #region GetConnection(获取数据库连接)
+
+        /// <summary>
+        /// 获取数据库连接
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        protected IDbConnection GetConnection(IDbConnection connection)
+        {
+            if (connection != null)
+            {
+                return connection;
+            }
+            if (Connection == null)
+            {
+                throw new ArgumentNullException(nameof(Connection));
+            }
+            return Connection;
+        }
+
+        #endregion
+
+        #region Clone(克隆)
 
         /// <summary>
         /// 克隆
@@ -108,57 +171,31 @@ namespace Bing.Datas.Sql.Queries
         /// <returns></returns>
         public abstract ISqlQuery Clone();
 
+        #endregion
+
+        #region Config(配置)
+
         /// <summary>
         /// 配置
         /// </summary>
         /// <param name="configAction">配置操作</param>
-        public void Config(Action<SqlQueryOptions> configAction)
+        public void Config(Action<SqlOptions> configAction)
         {
-            SqlQueryOptions = new SqlQueryOptions();
-            configAction?.Invoke(SqlQueryOptions);
+            configAction?.Invoke(SqlOptions);
         }
 
-        /// <summary>
-        /// 清空并初始化
-        /// </summary>
-        public ISqlQuery Clear()
-        {
-            Builder.Clear();
-            return this;
-        }
+        #endregion
 
         /// <summary>
         /// 在执行之后清空Sql和参数
         /// </summary>
         protected void ClearAfterExecution()
         {
-            if (SqlQueryOptions == null)
-            {
-                SqlQueryOptions = GetConfig();
-            }
-
-            if (SqlQueryOptions.IsClearAfterExecution == false)
+            if (SqlOptions.IsClearAfterExecution == false)
             {
                 return;
             }
-            Clear();
-        }
-
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <returns></returns>
-        private SqlQueryOptions GetConfig()
-        {
-            try
-            {
-                var options = Ioc.Create<IOptionsSnapshot<SqlQueryOptions>>();
-                return options.Value;
-            }
-            catch
-            {
-                return new SqlQueryOptions();
-            }
+            Builder.Clear();
         }
 
         /// <summary>
@@ -235,6 +272,15 @@ namespace Bing.Datas.Sql.Queries
         public abstract Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null);
 
         /// <summary>
+        /// 获取列表
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public abstract Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null);
+
+        /// <summary>
         /// 获取分页列表
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
@@ -297,6 +343,17 @@ namespace Bing.Datas.Sql.Queries
         public abstract Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);
 
         /// <summary>
+        /// 获取分页列表
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型</typeparam>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="page">页数</param>
+        /// <param name="pageSize">每页显示行数</param>
+        /// <param name="connection">数据库连接</param>
+        /// <returns></returns>
+        public abstract Task<PagerList<TResult>> ToPagerListAsync<TResult>(string sql, int page, int pageSize, IDbConnection connection = null);
+
+        /// <summary>
         /// 查询
         /// </summary>
         /// <typeparam name="TResult">实体类型</typeparam>
@@ -326,25 +383,6 @@ namespace Bing.Datas.Sql.Queries
             var result = await func(GetConnection(connection), sql, Params);
             ClearAfterExecution();
             return result;
-        }        
-
-        /// <summary>
-        /// 获取数据库连接
-        /// </summary>
-        /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
-        protected IDbConnection GetConnection(IDbConnection connection)
-        {
-            if (connection != null)
-            {
-                return connection;
-            }
-            connection = Database?.GetConnection();
-            if (connection == null)
-            {
-                throw new ArgumentNullException(nameof(connection));
-            }
-            return connection;
         }        
 
         /// <summary>

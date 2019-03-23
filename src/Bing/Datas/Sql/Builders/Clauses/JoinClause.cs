@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Extensions;
+using Bing.Datas.Sql.Builders.Internal;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Utils;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
@@ -16,10 +19,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
     /// </summary>
     public class JoinClause:IJoinClause
     {
-        /// <summary>
-        /// Sql生成器
-        /// </summary>
-        private readonly ISqlBuilder _sqlBuilder;
+        #region 字段
 
         /// <summary>
         /// Join关键字
@@ -37,6 +37,11 @@ namespace Bing.Datas.Sql.Builders.Clauses
         private const string RightJoinKey = "Right Join";
 
         /// <summary>
+        /// Sql生成器
+        /// </summary>
+        private readonly ISqlBuilder _sqlBuilder;
+
+        /// <summary>
         /// Sql方言
         /// </summary>
         private readonly IDialect _dialect;
@@ -52,9 +57,28 @@ namespace Bing.Datas.Sql.Builders.Clauses
         private readonly IEntityAliasRegister _register;
 
         /// <summary>
+        /// 参数管理器
+        /// </summary>
+        private readonly IParameterManager _parameterManager;
+
+        /// <summary>
+        /// 表数据库
+        /// </summary>
+        protected ITableDatabase TableDatabase;
+
+        /// <summary>
+        /// 辅助操作
+        /// </summary>
+        private readonly Helper _helper;
+
+        /// <summary>
         /// 连接参数
         /// </summary>
         private readonly List<JoinItem> _params;
+
+        #endregion
+
+        #region 构造函数
 
         /// <summary>
         /// 初始化一个<see cref="JoinClause"/>类型的实例
@@ -63,27 +87,57 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="dialect">Sql方言</param>
         /// <param name="resolver">实体解析器</param>
         /// <param name="register">实体别名注册器</param>
+        /// <param name="parameterManager">参数管理器</param>
+        /// <param name="tableDatabase">表数据库</param>
         /// <param name="joinItems">连接参数列表</param>
         public JoinClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
-            IEntityAliasRegister register, List<JoinItem> joinItems = null)
+            IEntityAliasRegister register,IParameterManager parameterManager,ITableDatabase tableDatabase, List<JoinItem> joinItems = null)
         {
             _sqlBuilder = sqlBuilder;
             _dialect = dialect;
             _resolver = resolver;
             _register = register;
+            _parameterManager = parameterManager;
+            TableDatabase = tableDatabase;
+            _helper = new Helper(dialect, resolver, register, parameterManager);
             _params = joinItems ?? new List<JoinItem>();
         }
+
+        #endregion
+
+        #region Clone(克隆)
 
         /// <summary>
         /// 克隆
         /// </summary>
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
+        /// <param name="parameterManager">参数管理器</param>
         /// <returns></returns>
-        public virtual IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register)
+        public IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager)
         {
-            return new JoinClause(sqlBuilder, _dialect, _resolver, register, _params.Select(t => t.Clone()).ToList());
+            var helper = new Helper(_dialect, _resolver, register, parameterManager);
+            return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager, TableDatabase,
+                _params.Select(t => t.Clone(helper)).ToList());
         }
+
+        #endregion
+
+        #region Find(查找连接项)
+
+        /// <summary>
+        /// 查找连接项
+        /// </summary>
+        /// <param name="type">表实体类型</param>
+        /// <returns></returns>
+        public IJoinOn Find(Type type)
+        {
+            return _params.Find(t => t.Type == type);
+        }
+
+        #endregion
+
+        #region Join(内连接)
 
         /// <summary>
         /// 内连接
@@ -103,7 +157,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="alias">别名</param>
         private void Join(string joinType, string table, string alias)
         {
-            _params.Add(CreateJoinItem(joinType, table, null, alias));
+            var item = CreateJoinItem(joinType, table, null, alias);
+            AddItem(item);
         }
 
         /// <summary>
@@ -113,10 +168,21 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="table">表名</param>
         /// <param name="schema">架构名</param>
         /// <param name="alias">别名</param>
+        /// <param name="type">类型</param>
         /// <returns></returns>
-        protected virtual JoinItem CreateJoinItem(string joinType, string table, string schema, string alias)
+        protected virtual JoinItem CreateJoinItem(string joinType, string table, string schema, string alias,Type type = null)
         {
-            return new JoinItem(joinType, table, schema, alias);
+            return new JoinItem(joinType, table, schema, alias, type: type);
+        }
+
+        /// <summary>
+        /// 添加连接项
+        /// </summary>
+        /// <param name="item"></param>
+        private void AddItem(JoinItem item)
+        {
+            item.SetDependency(_helper);
+            _params.Add(item);
         }
 
         /// <summary>
@@ -139,29 +205,11 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="schema">架构名</param>
         private void Join<TEntity>(string joinType, string alias, string schema)
         {
-            var entity = typeof(TEntity);
-            var table = _resolver.GetTableAndSchema(entity);
-            _params.Add(CreateJoinItem(joinType, table, schema, alias));
-            _register.Register(entity, _resolver.GetAlias(entity, alias));
-        }
-
-        /// <summary>
-        /// 添加到内连接子句
-        /// </summary>
-        /// <param name="sql">Sql语句</param>
-        public void AppendJoin(string sql)
-        {
-            AppendJoin(JoinKey, sql);
-        }
-
-        /// <summary>
-        /// 添加到连接子句
-        /// </summary>
-        /// <param name="joinType">连接类型</param>
-        /// <param name="sql">Sql语句</param>
-        private void AppendJoin(string joinType, string sql)
-        {
-            _params.Add(new JoinItem(joinType, sql, raw: true));
+            var type = typeof(TEntity);
+            var table = _resolver.GetTableAndSchema(type);
+            var item = CreateJoinItem(joinType, table, schema, alias, type);
+            AddItem(item);
+            _register.Register(type, _resolver.GetAlias(type, alias));
         }
 
         /// <summary>
@@ -213,6 +261,40 @@ namespace Bing.Datas.Sql.Builders.Clauses
             AppendJoin(joinType, builder, alias);
         }
 
+        #endregion
+
+        #region AppendJoin(添加到内连接子句)
+
+        /// <summary>
+        /// 添加到内连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        public void AppendJoin(string sql)
+        {
+            AppendJoin(JoinKey, sql);
+        }
+
+        /// <summary>
+        /// 添加到连接子句
+        /// </summary>
+        /// <param name="joinType">连接类型</param>
+        /// <param name="sql">Sql语句</param>
+        private void AppendJoin(string joinType, string sql)
+        {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return;
+            }
+
+            sql = Helper.ResolveSql(sql, _dialect);
+            var item = new JoinItem(joinType, sql, raw: true);
+            AddItem(item);
+        }
+
+        #endregion
+
+        #region LeftJoin(左外连接)
+
         /// <summary>
         /// 左外连接
         /// </summary>
@@ -220,7 +302,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="alias">别名</param>
         public void LeftJoin(string table, string alias = null)
         {
-            Join(LeftJoinKey,table,alias);
+            Join(LeftJoinKey, table, alias);
         }
 
         /// <summary>
@@ -232,15 +314,6 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void LeftJoin<TEntity>(string alias = null, string schema = null) where TEntity : class
         {
             Join<TEntity>(LeftJoinKey, alias, schema);
-        }
-
-        /// <summary>
-        /// 添加到左外连接子句
-        /// </summary>
-        /// <param name="sql">Sql语句</param>
-        public void AppendLeftJoin(string sql)
-        {
-            AppendJoin(LeftJoinKey,sql);
         }
 
         /// <summary>
@@ -263,6 +336,23 @@ namespace Bing.Datas.Sql.Builders.Clauses
             AppendJoin(LeftJoinKey, action, alias);
         }
 
+        #endregion
+
+        #region AppendLeftJoin(添加到左外连接子句)
+
+        /// <summary>
+        /// 添加到左外连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        public void AppendLeftJoin(string sql)
+        {
+            AppendJoin(LeftJoinKey, sql);
+        }
+
+        #endregion
+
+        #region RightJoin(右外连接)
+
         /// <summary>
         /// 右外连接
         /// </summary>
@@ -270,7 +360,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="alias">别名</param>
         public void RightJoin(string table, string alias = null)
         {
-            Join(RightJoinKey,table,alias);
+            Join(RightJoinKey, table, alias);
         }
 
         /// <summary>
@@ -281,16 +371,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="schema">架构名</param>
         public void RightJoin<TEntity>(string alias = null, string schema = null) where TEntity : class
         {
-            Join<TEntity>(RightJoinKey,alias,schema);
-        }
-
-        /// <summary>
-        /// 添加到右外连接子句
-        /// </summary>
-        /// <param name="sql">Sql语句</param>
-        public void AppendRightJoin(string sql)
-        {
-            AppendJoin(RightJoinKey,sql);
+            Join<TEntity>(RightJoinKey, alias, schema);
         }
 
         /// <summary>
@@ -313,15 +394,41 @@ namespace Bing.Datas.Sql.Builders.Clauses
             AppendJoin(RightJoinKey, action, alias);
         }
 
+        #endregion
+
+        #region AppendRightJoin(添加到右外连接子句)
+
+        /// <summary>
+        /// 添加到右外连接子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        public void AppendRightJoin(string sql)
+        {
+            AppendJoin(RightJoinKey, sql);
+        }
+
+        #endregion
+
+        #region On(设置连接条件)
+
         /// <summary>
         /// 设置连接条件
         /// </summary>
-        /// <param name="left">左表列名</param>
-        /// <param name="right">右表列名</param>
-        /// <param name="operator">条件运算符</param>
-        public void On(string left, string right, Operator @operator = Operator.Equal)
+        /// <param name="condition">连接条件</param>
+        public void On(ICondition condition)
         {
-            _params.LastOrDefault()?.On(left, right, @operator);
+            _params.LastOrDefault()?.On(condition);
+        }
+
+        /// <summary>
+        /// 设置连接条件
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="value">值</param>
+        /// <param name="operator">运算符</param>
+        public void On(string column, object value, Operator @operator = Operator.Equal)
+        {
+            _params.LastOrDefault()?.On(column, value, @operator);
         }
 
         /// <summary>
@@ -334,7 +441,10 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="operator">条件运算符</param>
         public void On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal) where TLeft : class where TRight : class
         {
-            On(GetColumn(left), GetColumn(right), @operator);
+            var leftColumn = new SqlItem(GetColumn(left)).ToSql(_dialect);
+            var rightColumn = new SqlItem(GetColumn(right)).ToSql(_dialect);
+            var condition = SqlConditionFactory.Create(leftColumn, rightColumn, @operator);
+            AppendOn(condition.GetCondition());
         }
 
         /// <summary>
@@ -373,18 +483,19 @@ namespace Bing.Datas.Sql.Builders.Clauses
             }
 
             var expressions = Lambda.GetGroupPredicates(expression);
-            expressions.ForEach(On);
+            var items = expressions.Select(GetOnItems).ToList();
+            _params.LastOrDefault()?.On(items,_dialect);
         }
 
         /// <summary>
         /// 设置连接条件组
         /// </summary>
         /// <param name="group">条件组</param>
-        private void On(List<Expression> group)
+        private List<OnItem> GetOnItems(List<Expression> group)
         {
-            var items = group.Select(expression => new OnItem(GetColumn(expression, false), GetColumn(expression, true),
-                Lambda.GetOperator(expression).SafeValue())).ToList();
-            _params.LastOrDefault()?.On(items);
+            return group.Select(expression => new OnItem(
+                GetColumn(expression, false), GetColumn(expression, true), Lambda.GetOperator(expression).SafeValue()
+            )).ToList();
         }
 
         /// <summary>
@@ -399,11 +510,30 @@ namespace Bing.Datas.Sql.Builders.Clauses
             var column = _resolver.GetColumn(expression, type, right);
             if (string.IsNullOrWhiteSpace(column))
             {
-                return new SqlItem(Lambda.GetValue(expression).SafeString(), raw: true);
+                var name = _parameterManager.GenerateName();
+                _parameterManager.Add(name,Lambda.GetValue(expression));
+                return new SqlItem(name, raw: true);
             }
 
             return new SqlItem(GetColumn(type, column));
         }
+
+        #endregion
+
+        #region AppendOn(添加到On子句)
+
+        /// <summary>
+        /// 添加到On子句
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        public void AppendOn(string sql)
+        {
+            _params.LastOrDefault()?.AppendOn(sql, _dialect);
+        }
+
+        #endregion
+
+        #region ToSql(输出Sql)
 
         /// <summary>
         /// 输出Sql
@@ -412,8 +542,10 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public string ToSql()
         {
             var result = new StringBuilder();
-            _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect)} "));
+            _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect, TableDatabase)} "));
             return result.ToString().Trim();
         }
+
+        #endregion
     }
 }

@@ -4,9 +4,9 @@ using Bing.Datas.Dapper.MySql;
 using Bing.Datas.Dapper.PgSql;
 using Bing.Datas.Dapper.SqlServer;
 using Bing.Datas.Enums;
-using Bing.Datas.Matedatas;
 using Bing.Datas.Sql;
 using Bing.Datas.Sql.Configs;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Utils.Extensions;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +26,7 @@ namespace Bing.Datas.Dapper
         /// <param name="action">Sql查询配置</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlQuery(this IServiceCollection services,
-            Action<SqlQueryOptions> action = null)
+            Action<SqlOptions> action = null)
         {
             return AddSqlQuery(services, action, null, null);
         }
@@ -39,7 +39,7 @@ namespace Bing.Datas.Dapper
         /// <param name="action">Sql查询配置</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlQuery<TDatabase>(this IServiceCollection services,
-            Action<SqlQueryOptions> action = null) where TDatabase : class, IDatabase
+            Action<SqlOptions> action = null) where TDatabase : class, IDatabase
         {
             return AddSqlQuery(services, action, typeof(TDatabase), null);
         }
@@ -53,7 +53,7 @@ namespace Bing.Datas.Dapper
         /// <param name="configAction">Sql查询配置</param>
         /// <returns></returns>
         public static IServiceCollection AddSqlQuery<TDatabase, TEntityMatedata>(this IServiceCollection services,
-            Action<SqlQueryOptions> configAction = null) 
+            Action<SqlOptions> configAction = null) 
             where TDatabase : class, IDatabase
             where TEntityMatedata : class, IEntityMatedata
         {
@@ -68,28 +68,28 @@ namespace Bing.Datas.Dapper
         /// <param name="database">数据库类型</param>
         /// <param name="entityMatedata">实体元数据解析器类型</param>
         /// <returns></returns>
-        private static IServiceCollection AddSqlQuery(IServiceCollection services, Action<SqlQueryOptions> configAction,
+        private static IServiceCollection AddSqlQuery(IServiceCollection services, Action<SqlOptions> configAction,
             Type database, Type entityMatedata)
         {
-            if (database != null)
-            {
-                services.TryAddScoped(database);
-                services.TryAddScoped(typeof(IDatabase), t => t.GetService(database));
-            }
-
-            services.TryAddScoped<ISqlQuery, SqlQuery>();
-            if (entityMatedata != null)
-            {
-                services.TryAddScoped(typeof(IEntityMatedata), t => t.GetService(entityMatedata));
-            }
-
-            var config = new SqlQueryOptions();
+            var config = new SqlOptions();
             if (configAction != null)
             {
                 configAction.Invoke(config);
                 services.Configure(configAction);
             }
 
+            if (entityMatedata != null)
+            {
+                services.TryAddScoped(typeof(IEntityMatedata), t => t.GetService(entityMatedata));
+            }
+
+            if (database != null)
+            {
+                services.TryAddScoped(database);
+                services.TryAddScoped(typeof(IDatabase), t => t.GetService(database));
+            }
+            services.TryAddScoped<ISqlQuery, SqlQuery>();
+            services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
             AddSqlBuilder(services, config);
             RegisterTypeHandlers();
             return services;
@@ -100,7 +100,7 @@ namespace Bing.Datas.Dapper
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="config">Sql查询配置</param>
-        private static void AddSqlBuilder(IServiceCollection services, SqlQueryOptions config)
+        private static void AddSqlBuilder(IServiceCollection services, SqlOptions config)
         {
             switch (config.DatabaseType)
             {

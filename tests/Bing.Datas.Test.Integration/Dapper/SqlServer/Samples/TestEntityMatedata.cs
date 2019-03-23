@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Datas.Matedatas;
+using Bing.Datas.Sql.Matedatas;
 
 namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Samples
 {
