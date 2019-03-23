@@ -1,11 +1,6 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <VersionMajor>0</VersionMajor>
     <VersionMinor>0</VersionMinor>
     <VersionPatch>1</VersionPatch>
