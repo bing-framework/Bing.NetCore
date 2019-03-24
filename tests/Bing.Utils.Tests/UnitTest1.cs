@@ -167,7 +167,7 @@ namespace Bing.Utils.Tests
         {
             var dirPath = "D:\\TestData";
             DirectoryUtil.CreateIfNotExists(dirPath);
-            FileSplit("D:\\iTestRunner_R1.txt", dirPath, 2048, false, -1);
+            FileUtil.Split("D:\\iTestRunner_R1.txt",dirPath);
         }
 
         /// <summary>
@@ -179,11 +179,11 @@ namespace Bing.Utils.Tests
             var soureMd5 = FileUtil.GetFileMd5("D:\\iTestRunner_R1.txt");
             var files = FileUtil.GetAllFiles("D:\\TestData");
             var outputFilePath = "D:\\iTestRunner_R1_combine_result.txt";
-            FileCombine(files, outputFilePath, false, -1);
+            FileUtil.Combine(files,outputFilePath);
             var outputMd5 = FileUtil.GetFileMd5(outputFilePath);
             Output.WriteLine($"old-md5:{soureMd5}");
             Output.WriteLine($"new-md5:{outputMd5}");
-        }
+        }        
 
         /// <summary>
         /// ÎÄ¼þÇÐ¸î
