@@ -63,7 +63,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Webs", "src\Bing.Webs\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-document", "00-document", "{90546346-497C-49F1-9A70-5DAD35DBE180}"
 	ProjectSection(SolutionItems) = preProject
+		build\pack.bat = build\pack.bat
 		README.md = README.md
+		build\version.props = build\version.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Events", "src\Bing.Events\Bing.Events.csproj", "{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}"

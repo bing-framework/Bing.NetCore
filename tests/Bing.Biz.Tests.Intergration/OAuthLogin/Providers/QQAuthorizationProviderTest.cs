@@ -66,61 +66,61 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             Assert.Equal($"https://graph.qq.com/oauth2.0/authorize?client_id={TestSampleConfig.QQAppId}&response_type={request.ResponseType}&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.QQCallbackUrl)}", result);
         }
 
-        /// <summary>
-        /// 测试获取访问令牌
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_GetTokenAsync()
-        {
-            var param = new AccessTokenParam();
-            param.Code = "";
-            param.RedirectUri = TestSampleConfig.QQCallbackUrl;
-            var result = await _provider.GetTokenAsync(param);
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取访问令牌
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_GetTokenAsync()
+        //{
+        //    var param = new AccessTokenParam();
+        //    param.Code = "";
+        //    param.RedirectUri = TestSampleConfig.QQCallbackUrl;
+        //    var result = await _provider.GetTokenAsync(param);
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
 
-        /// <summary>
-        /// 测试刷新令牌
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_RefreshTokenAsync()
-        {
-            var refreshToken = "";
-            var result = await _provider.RefreshTokenAsync(refreshToken);
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试刷新令牌
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_RefreshTokenAsync()
+        //{
+        //    var refreshToken = "";
+        //    var result = await _provider.RefreshTokenAsync(refreshToken);
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
 
-        /// <summary>
-        /// 测试获取用户OpenId
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_GetOpenIdAsync()
-        {
-            var token = "";
-            var result = await _provider.GetOpenIdAsync(token);
-            _output.WriteLine(result);
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取用户OpenId
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_GetOpenIdAsync()
+        //{
+        //    var token = "";
+        //    var result = await _provider.GetOpenIdAsync(token);
+        //    _output.WriteLine(result);
+        //    Assert.NotNull(result);
+        //}
 
-        /// <summary>
-        /// 测试获取用户信息
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_GetUserInfoAsync()
-        {
-            var result = await _provider.GetUserInfoAsync(new QQAuthorizationUserRequest()
-            {
-                AccessToken = "",
-                OpenId = ""
-            });
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取用户信息
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_GetUserInfoAsync()
+        //{
+        //    var result = await _provider.GetUserInfoAsync(new QQAuthorizationUserRequest()
+        //    {
+        //        AccessToken = "",
+        //        OpenId = ""
+        //    });
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
     }
 }

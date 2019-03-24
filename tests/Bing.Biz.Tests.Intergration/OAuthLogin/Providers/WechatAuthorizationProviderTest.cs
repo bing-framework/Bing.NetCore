@@ -65,48 +65,48 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             Assert.Equal($"https://open.weixin.qq.com/connect/qrconnect?appid={TestSampleConfig.WechatAppId}&redirect_uri={Web.UrlEncode(TestSampleConfig.WechatCallbackUrl)}&response_type={request.ResponseType}&scope={request.Scope}&state={request.State}#wechat_redirect", result);
         }
 
-        /// <summary>
-        /// 测试获取访问令牌
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_GetTokenAsync()
-        {
-            var param = new AccessTokenParam();
-            param.Code = "";
-            param.RedirectUri = TestSampleConfig.WechatCallbackUrl;
-            var result = await _provider.GetTokenAsync(param);
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取访问令牌
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_GetTokenAsync()
+        //{
+        //    var param = new AccessTokenParam();
+        //    param.Code = "";
+        //    param.RedirectUri = TestSampleConfig.WechatCallbackUrl;
+        //    var result = await _provider.GetTokenAsync(param);
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
 
-        /// <summary>
-        /// 测试刷新令牌
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_RefreshTokenAsync()
-        {
-            var refreshToken = "";
-            var result = await _provider.RefreshTokenAsync(refreshToken);
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试刷新令牌
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_RefreshTokenAsync()
+        //{
+        //    var refreshToken = "";
+        //    var result = await _provider.RefreshTokenAsync(refreshToken);
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
 
-        /// <summary>
-        /// 测试获取用户信息
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task GetUserInfoAsync()
-        {
-            var result = await _provider.GetUserInfoAsync(new WechatAuthorizationUserRequest()
-            {
-                AccessToken = "",
-                OpenId = ""
-            });
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取用户信息
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task GetUserInfoAsync()
+        //{
+        //    var result = await _provider.GetUserInfoAsync(new WechatAuthorizationUserRequest()
+        //    {
+        //        AccessToken = "",
+        //        OpenId = ""
+        //    });
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
     }
 }

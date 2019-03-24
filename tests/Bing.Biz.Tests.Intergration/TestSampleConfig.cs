@@ -9,13 +9,13 @@
         /// QQ应用ID
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public const string QQAppId = "101391164";
+        public const string QQAppId = "123456";
 
         /// <summary>
         /// QQ应用密钥
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public const string QQAppKey = "";
+        public const string QQAppKey = "key123456";
 
         /// <summary>
         /// QQ回调地址
