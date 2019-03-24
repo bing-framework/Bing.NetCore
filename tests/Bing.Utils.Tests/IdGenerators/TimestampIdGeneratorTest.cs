@@ -12,12 +12,12 @@ namespace Bing.Utils.Tests.IdGenerators
     {
         public TimestampIdGeneratorTest(ITestOutputHelper output) : base(output)
         {
+            CodeTimer.Initialize();
         }
 
         [Fact]
         public void Test_Create()
         {
-            CodeTimer.Initialize();
             CodeTimer.CodeExecuteTime(() =>
             {
                 var result = TimestampIdGenerator.Current.Create();
@@ -28,7 +28,6 @@ namespace Bing.Utils.Tests.IdGenerators
         [Fact]
         public void Test_Create_100()
         {
-            CodeTimer.Initialize();
             CodeTimer.CodeExecuteTime(() =>
             {
                 for (int i = 0; i < 100; i++)
@@ -42,7 +41,6 @@ namespace Bing.Utils.Tests.IdGenerators
         [Fact]
         public void Test_Create_1000()
         {
-            CodeTimer.Initialize();
             CodeTimer.CodeExecuteTime(() =>
             {
                 for (int i = 0; i < 1000; i++)
@@ -56,7 +54,6 @@ namespace Bing.Utils.Tests.IdGenerators
         [Fact]
         public void Test_Create_10000()
         {
-            CodeTimer.Initialize();
             CodeTimer.CodeExecuteTime(() =>
             {
                 for (int i = 0; i < 10000; i++)
@@ -89,7 +86,6 @@ namespace Bing.Utils.Tests.IdGenerators
 
         private void Create(long length)
         {
-            CodeTimer.Initialize();
             CodeTimer.CodeExecuteTime(() =>
             {
                 for (int i = 0; i < length; i++)

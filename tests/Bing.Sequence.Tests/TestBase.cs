@@ -1,6 +1,5 @@
 ﻿using Bing.Sequence.Abstractions;
 using Bing.Sequence.Snowflake;
-using Bing.Utils.Develops;
 using Xunit.Abstractions;
 
 namespace Bing.Sequence.Tests
@@ -12,9 +11,6 @@ namespace Bing.Sequence.Tests
         public TestBase(ITestOutputHelper output)
         {
             Output = output;
-            UnitTester.WriteLine = Output.WriteLine;
-            CodeRamer.WriteLine = Output.WriteLine;
-            CodeTimer.WriteLine = Output.WriteLine;
         }
 
         /// <summary>

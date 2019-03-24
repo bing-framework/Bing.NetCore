@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Utils.Develops;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Bing.Utils.Tests
 {
@@ -13,9 +9,6 @@ namespace Bing.Utils.Tests
         public TestBase(ITestOutputHelper output)
         {
             Output = output;
-            UnitTester.WriteLine = Output.WriteLine;
-            CodeRamer.WriteLine = Output.WriteLine;
-            CodeTimer.WriteLine = Output.WriteLine;
         }
     }
 }

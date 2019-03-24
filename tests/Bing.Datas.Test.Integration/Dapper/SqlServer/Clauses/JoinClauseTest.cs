@@ -582,6 +582,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
         {
             _clause.Join("a");
             _clause.LeftJoin("b");
+            Output.WriteLine(GetSql());
             Assert.Equal("Join [a] \r\nLeft Join [b]", GetSql());
         }
 
