@@ -29,6 +29,7 @@ dotnet pack ./src/Bing.Webs/Bing.Webs.csproj
 dotnet pack ./src/Bing.Extensions.AutoMapper/Bing.Extensions.AutoMapper.csproj
 dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
+dotnet pack ./src/Bing.Biz.OAuthLogin/Bing.Biz.OAuthLogin.csproj
 
 rem push
 for %%i in (output\release\*.nupkg) do dotnet nuget push %%i -k %1 -s https://www.nuget.org/api/v2/package

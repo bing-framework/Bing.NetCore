@@ -400,5 +400,127 @@ namespace Bing.Utils.IO
         }
 
         #endregion
+
+        #region Combine(合并文件)
+
+        /// <summary>
+        /// 合并文件
+        /// </summary>
+        /// <param name="files">文件路径列表</param>
+        /// <param name="fileName">生成文件名</param>
+        /// <param name="delete">合并后是否删除源文件</param>
+        /// <param name="encrypt">是否加密</param>
+        /// <param name="sign">签名</param>
+        public static void Combine(IList<string> files, string fileName, bool delete = false, bool encrypt = false, int sign = 0)
+        {
+            if (files == null || files.Count == 0)
+            {
+                return;
+            }
+
+            files.Sort();
+            using (var ws = new FileStream(fileName, FileMode.Create))
+            {
+                foreach (var file in files)
+                {
+                    if (file == null || !File.Exists(file))
+                    {
+                        continue;
+                    }
+
+                    var rs = new FileStream(file, FileMode.Open, FileAccess.Read);
+                    var data = new byte[1024];
+                    var readLen = 0;
+                    while ((readLen = rs.Read(data, 0, data.Length)) > 0)
+                    {
+                        ws.Write(data, 0, readLen);
+                        ws.Flush();
+                    }
+
+                    rs.Close();
+                    if (delete)
+                    {
+                        Delete(file);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Split(分割文件)
+
+        /// <summary>
+        /// 分割文件
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="dirPath">生成文件路径。不含文件名</param>
+        /// <param name="suffix">后缀名</param>
+        /// <param name="size">分割大小。单位：KB</param>
+        /// <param name="delete">分割后是否删除源文件</param>
+        /// <param name="encrypt">是否加密</param>
+        /// <param name="sign">签名</param>
+        public static void Split(string file, string dirPath,string suffix = "bin", int size = 2048, bool delete = false, bool encrypt = false,
+            int sign = 0)
+        {
+            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+            {
+                return;
+            }
+
+            var fileName = Path.GetFileNameWithoutExtension(file);
+            var fileSize = GetFileSize(file);
+            var total = GetSplitFileTotal(fileSize.GetSize(), size);
+            using (var rs=new FileStream(file, FileMode.Open,FileAccess.Read))
+            {
+                var data = new byte[1024];
+                int len = 0, i = 1;
+                int readLen = 0;
+                FileStream ws = null;
+                while (readLen>0||(readLen=rs.Read(data,0,data.Length))>0)
+                {
+                    if (len == 0 || ws == null)
+                    {
+                        ws = new FileStream($"{dirPath}\\{fileName}.{i++}.{total}.{suffix}", FileMode.Create);
+                    }
+
+                    // 输出，缓存数据写入子文件
+                    ws.Write(data, 0, readLen);
+                    ws.Flush();
+                    // 预读下一轮缓存数据
+                    readLen = rs.Read(data, 0, data.Length);
+                    // 子文件达到指定大小或者文件已读完
+                    if (++len >= size || readLen == 0)
+                    {
+                        ws.Close();
+                        len = 0;
+                    }
+                }
+            }
+
+            if (delete)
+            {
+                Delete(file);
+            }
+        }
+
+        /// <summary>
+        /// 获取分割文件数量
+        /// </summary>
+        /// <param name="fileSize">文件大小</param>
+        /// <param name="splitSize">分割大小。单位：字节</param>
+        /// <returns></returns>
+        private static int GetSplitFileTotal(int fileSize, int splitSize)
+        {
+            fileSize = fileSize / 1024;
+            if (fileSize % splitSize == 0)
+            {
+                return fileSize / splitSize;
+            }
+
+            return fileSize / splitSize + 1;
+        }
+
+        #endregion
     }
 }
