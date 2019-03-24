@@ -65,35 +65,35 @@ namespace Bing.Biz.Tests.Intergration.OAuthLogin.Providers
             Assert.Equal($"https://gitee.com/oauth/authorize?client_id={TestSampleConfig.GiteeAppId}&response_type=code&state={request.State}&redirect_uri={Web.UrlEncode(TestSampleConfig.GiteeCallbackUrl)}", result);
         }
 
-        /// <summary>
-        /// 测试获取访问令牌
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_GetTokenAsync()
-        {
-            var param = new AccessTokenParam();
-            param.Code = "";
-            param.RedirectUri = TestSampleConfig.GiteeCallbackUrl;
-            var result = await _provider.GetTokenAsync(param);
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取访问令牌
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_GetTokenAsync()
+        //{
+        //    var param = new AccessTokenParam();
+        //    param.Code = "";
+        //    param.RedirectUri = TestSampleConfig.GiteeCallbackUrl;
+        //    var result = await _provider.GetTokenAsync(param);
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
 
-        /// <summary>
-        /// 测试获取用户信息
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task Test_GetUserInfoAsync()
-        {
-            var result = await _provider.GetUserInfoAsync(new GiteeAuthorizationUserRequest()
-            {
-                AccessToken = "",
-            });
-            _output.WriteLine(result.ToJson());
-            Assert.NotNull(result);
-        }
+        ///// <summary>
+        ///// 测试获取用户信息
+        ///// </summary>
+        ///// <returns></returns>
+        //[Fact]
+        //public async Task Test_GetUserInfoAsync()
+        //{
+        //    var result = await _provider.GetUserInfoAsync(new GiteeAuthorizationUserRequest()
+        //    {
+        //        AccessToken = "",
+        //    });
+        //    _output.WriteLine(result.ToJson());
+        //    Assert.NotNull(result);
+        //}
 
     }
 }

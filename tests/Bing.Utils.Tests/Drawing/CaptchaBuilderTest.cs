@@ -42,6 +42,7 @@ namespace Bing.Utils.Tests.Drawing
             var code = "";
             _coder.RandomPointPercent = 5;
             _coder.Height = 50;
+            _coder.RandomColor = true;
             using (var image = _coder.CreateImage(4, out code,CaptchaType.ChineseChar))
             {
                 image.Save("D:\\test.png");

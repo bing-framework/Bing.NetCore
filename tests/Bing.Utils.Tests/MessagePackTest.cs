@@ -22,38 +22,38 @@ namespace Bing.Utils.Tests
             
         }
 
-        [Fact]
-        public void Test_JsonToBytes()
-        {
-            MessagePackSerializer.SetDefaultResolver(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-            var json = FileUtil.Read("D:\\iTestRunner_R1.txt");
-            var bytes = MessagePackSerializer.FromJson(json);
-            FileUtil.Write("D:\\compression_result.txt", bytes);
-        }
+        //[Fact]
+        //public void Test_JsonToBytes()
+        //{
+        //    MessagePackSerializer.SetDefaultResolver(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+        //    var json = FileUtil.Read("D:\\iTestRunner_R1.txt");
+        //    var bytes = MessagePackSerializer.FromJson(json);
+        //    FileUtil.Write("D:\\compression_result.txt", bytes);
+        //}
 
-        [Fact]
-        public void Test_StringFormat()
-        {
-            var json = FileUtil.Read("D:\\iTestRunner_R1.txt");
-            var bytes = JsonUtil.ToObject(json).ToJson();
-            FileUtil.Write("D:\\iTestRunner_R1_format.txt", bytes);
-        }
+        //[Fact]
+        //public void Test_StringFormat()
+        //{
+        //    var json = FileUtil.Read("D:\\iTestRunner_R1.txt");
+        //    var bytes = JsonUtil.ToObject(json).ToJson();
+        //    FileUtil.Write("D:\\iTestRunner_R1_format.txt", bytes);
+        //}
 
-        [Fact]
-        public void Test_StringCompress()
-        {
-            var json = FileUtil.Read("D:\\iTestRunner_R1_format.txt");
-            var bytes = CompressString(json);
-            FileUtil.Write("D:\\compression_result.txt", bytes);
-        }
+        //[Fact]
+        //public void Test_StringCompress()
+        //{
+        //    var json = FileUtil.Read("D:\\iTestRunner_R1_format.txt");
+        //    var bytes = CompressString(json);
+        //    FileUtil.Write("D:\\compression_result.txt", bytes);
+        //}
 
-        [Fact]
-        public void Test_StringDecompress()
-        {
-            var json = FileUtil.Read("D:\\compression_result.txt");
-            var bytes = DecompressString(json);
-            FileUtil.Write("D:\\decompression_result.txt", bytes);
-        }
+        //[Fact]
+        //public void Test_StringDecompress()
+        //{
+        //    var json = FileUtil.Read("D:\\compression_result.txt");
+        //    var bytes = DecompressString(json);
+        //    FileUtil.Write("D:\\decompression_result.txt", bytes);
+        //}
 
         [Fact]
         public void Test_JsonH()
@@ -73,21 +73,21 @@ namespace Bing.Utils.Tests
             Output.WriteLine(JSONH.unpack(JSONH.pack(unpacked, 0).ToJson().ToObject<List<List<object>>>()).ToJson());
         }
 
-        [Fact]
-        public void Test_JsonH_StringCompress()
-        {
-            var json = FileUtil.Read("D:\\iTestRunner_R1.txt");
-            List<Dictionary<string, object>> unpacked = json.ToObject<List<Dictionary<string, object>>>();
-            Output.WriteLine(JSONH.pack(unpacked, 0).ToJson());
-        }
+        //[Fact]
+        //public void Test_JsonH_StringCompress()
+        //{
+        //    var json = FileUtil.Read("D:\\iTestRunner_R1.txt");
+        //    List<Dictionary<string, object>> unpacked = json.ToObject<List<Dictionary<string, object>>>();
+        //    Output.WriteLine(JSONH.pack(unpacked, 0).ToJson());
+        //}
 
-        [Fact]
-        public void Test_LzString_StringCompress()
-        {
-            var json = FileUtil.Read("D:\\iTestRunner_R1_format.txt");
-            var bytes = LZString.Compress(json);
-            FileUtil.Write("D:\\compression_result.txt", bytes);
-        }
+        //[Fact]
+        //public void Test_LzString_StringCompress()
+        //{
+        //    var json = FileUtil.Read("D:\\iTestRunner_R1_format.txt");
+        //    var bytes = LZString.Compress(json);
+        //    FileUtil.Write("D:\\compression_result.txt", bytes);
+        //}
 
         /// <summary>
         /// 对字符串进行压缩
@@ -176,13 +176,13 @@ namespace Bing.Utils.Tests
             }
         }
 
-        [Fact]
-        public void Test_JsonCompress()
-        {
-            var result = FileUtil.Read(Directory.GetCurrentDirectory() + "/Configs/Sample.txt");
-            result = ChangeUTF8Space(result);
-            Output.WriteLine(JsonCompress(result));
-        }
+        //[Fact]
+        //public void Test_JsonCompress()
+        //{
+        //    var result = FileUtil.Read(Directory.GetCurrentDirectory() + "/Configs/Sample.txt");
+        //    result = ChangeUTF8Space(result);
+        //    Output.WriteLine(JsonCompress(result));
+        //}
 
         private static string JsonCompress(string json)
         {

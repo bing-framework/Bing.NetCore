@@ -57,7 +57,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Webs", "src\Bing.Webs\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-document", "00-document", "{90546346-497C-49F1-9A70-5DAD35DBE180}"
 	ProjectSection(SolutionItems) = preProject
+		build\pack.bat = build\pack.bat
 		README.md = README.md
+		build\version.props = build\version.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Events", "src\Bing.Events\Bing.Events.csproj", "{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}"
@@ -222,9 +224,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-Biz", "04-Biz", "{295D45
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz.Tests.Intergration", "tests\Bing.Biz.Tests.Intergration\Bing.Biz.Tests.Intergration.csproj", "{4E2B1503-1937-4FA1-8E7E-FD4129BFF7BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.GraphQL", "sample\Bing.Samples.GraphQL\Bing.Samples.GraphQL.csproj", "{C3A7D208-C0D8-48AC-BB23-9138EF850768}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.GraphQL", "sample\Bing.Samples.GraphQL\Bing.Samples.GraphQL.csproj", "{C3A7D208-C0D8-48AC-BB23-9138EF850768}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Utils.Drawing", "src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj", "{3F28BFCB-B1C7-4A7C-BA58-8BEA9998F0A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Drawing", "src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj", "{3F28BFCB-B1C7-4A7C-BA58-8BEA9998F0A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
