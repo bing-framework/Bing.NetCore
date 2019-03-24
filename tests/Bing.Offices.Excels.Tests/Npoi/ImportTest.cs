@@ -25,13 +25,13 @@ namespace Bing.Offices.Excels.Tests.Npoi
         [Fact]
         public void Test_Import()
         {
-            var result = ImportFactory.CreateExcel2007Import(@"D:\Test_Data\Npoi_Demo.xlsx")
-                .GetResult<SimpleImprotModel>();
+            //var result = ImportFactory.CreateExcel2007Import(@"D:\Test_Data\Npoi_Demo.xlsx")
+            //    .GetResult<SimpleImprotModel>();
 
-            foreach (var item in result)
-            {
-                Output.WriteLine($"标识:{item.Id},名称:{item.Name},城市:{item.City}");
-            }
+            //foreach (var item in result)
+            //{
+            //    Output.WriteLine($"标识:{item.Id},名称:{item.Name},城市:{item.City}");
+            //}
         }
     }
 }
