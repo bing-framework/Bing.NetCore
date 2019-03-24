@@ -43,8 +43,8 @@ namespace Bing.Tools.ExpressDelivery.Tests.Kdniao
                 ShipperCode = "YTO",
             };
 
-            var result = await _client.TracKAsync(request);
-            Output.WriteLine(JsonConvert.SerializeObject(result));
+            //var result = await _client.TracKAsync(request);
+            //Output.WriteLine(JsonConvert.SerializeObject(result));
         }
     }
 }
