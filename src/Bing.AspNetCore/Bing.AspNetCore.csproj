@@ -1,18 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../build/version.props"></Import>
+
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Bing.AspNetCore 组件，提供AspNetCore的服务端功能的封装</Description>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\output\release\</OutputPath>
-    <DocumentationFile>..\..\output\release\netstandard2.0\Bing.AspNetCore.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\output\release\</OutputPath>
-    <DocumentationFile>..\..\output\release\netstandard2.0\Bing.AspNetCore.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

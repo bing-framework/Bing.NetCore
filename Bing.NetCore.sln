@@ -1,15 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28714.193
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing", "src\Bing\Bing.csproj", "{B4159996-5640-4757-AE7F-B18989C7E5E1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{4A869F5F-6D49-458C-84C7-C202182BF4A6}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{1ABB6E15-A36C-4667-B6C8-CCE8D5DB4B39}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{CD2ACEBC-5B5D-4754-A638-916F2D071721}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-sample", "03-sample", "{474AB182-21D2-44C4-A99C-31FC31E469CB}"
 EndProject
@@ -227,6 +233,17 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.GraphQL", "sample\Bing.Samples.GraphQL\Bing.Samples.GraphQL.csproj", "{C3A7D208-C0D8-48AC-BB23-9138EF850768}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Drawing", "src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj", "{3F28BFCB-B1C7-4A7C-BA58-8BEA9998F0A4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_SolutionItems", "{268C9D9A-9655-4A48-8A5F-27815D05D224}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		.travis.yml = .travis.yml
+		appveyor.yml = appveyor.yml
+		Directory.Build.targets = Directory.Build.targets
+		LICENSE = LICENSE
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
