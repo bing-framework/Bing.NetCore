@@ -1,0 +1,22 @@
+language: csharp
+sudo: true
+mono: none
+dotnet: 2.2
+dist: xenial
+os:
+#- osx
+- linux
+branches:
+  only:
+  - master
+script:
+- dotnet restore
+- dotnet build -c Release
+- dotnet test -c Release -v n
+#deploy:
+#  skip_cleanup: true
+#  provider: script
+#  script: dotnet nuget push ${TRAVIS_BUILD_DIR}/output/release/*.nupkg -k ${NUGET_API_KEY}
+#  on:
+#    branch: master
+#    os: linux
