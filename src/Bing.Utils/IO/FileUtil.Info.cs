@@ -50,7 +50,7 @@ namespace Bing.Utils.IO
                 throw new ArgumentNullException(nameof(filePath));
             }
 
-            return GetFileSize(new System.IO.FileInfo(filePath));
+            return GetFileSize(new FileInfo(filePath));
         }
 
         /// <summary>
@@ -81,63 +81,11 @@ namespace Bing.Utils.IO
         {
             if (File.Exists(fileName))
             {
-                FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(fileName);
+                var fvi = FileVersionInfo.GetVersionInfo(fileName);
                 return fvi.FileVersion;
             }
 
             return null;
-        }
-
-        #endregion
-
-        #region GetFileMd5(获取文件的MD5值)
-
-        /// <summary>
-        /// 获取文件的MD5值
-        /// </summary>
-        /// <param name="fileName">文件名</param>
-        /// <returns></returns>
-        public static string GetFileMd5(string fileName)
-        {
-            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            const int bufferSize = 1024 * 1024;
-            byte[] buffer = new byte[bufferSize];
-
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-            md5.Initialize();
-
-            long offset = 0;
-            while (offset < fs.Length)
-            {
-                long readSize = bufferSize;
-                if (offset + readSize > fs.Length)
-                {
-                    readSize = fs.Length - offset;
-                }
-
-                fs.Read(buffer, 0, (int)readSize);
-                if (offset + readSize < fs.Length)
-                {
-                    md5.TransformBlock(buffer, 0, (int)readSize, buffer, 0);
-                }
-                else
-                {
-                    md5.TransformFinalBlock(buffer, 0, (int)readSize);
-                }
-
-                offset += bufferSize;
-            }
-
-            fs.Close();
-            byte[] result = md5.Hash;
-            md5.Clear();
-            StringBuilder sb = new StringBuilder();
-            foreach (var b in result)
-            {
-                sb.Append(b.ToString("X2"));
-            }
-
-            return sb.ToString();
         }
 
         #endregion
@@ -162,14 +110,14 @@ namespace Bing.Utils.IO
         /// <returns></returns>
         public static Encoding GetEncoding(string filePath, Encoding defaultEncoding)
         {
-            Encoding targetEncoding = defaultEncoding;
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4))
+            var targetEncoding = defaultEncoding;
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4))
             {
                 if (fs != null && fs.Length >= 2)
                 {
-                    long pos = fs.Position;
+                    var pos = fs.Position;
                     fs.Position = 0;
-                    int[] buffer = new int[4];
+                    var buffer = new int[4];
                     buffer[0] = fs.ReadByte();
                     buffer[1] = fs.ReadByte();
                     buffer[2] = fs.ReadByte();
@@ -194,6 +142,96 @@ namespace Bing.Utils.IO
             }
 
             return targetEncoding;
+        }
+
+        #endregion
+
+        #region GetMd5(获取文件的MD5值)
+
+        /// <summary>
+        /// 获取文件的MD5值
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <returns></returns>
+        public static string GetMd5(string file)
+        {
+            return HashFile(file, "md5");
+        }
+
+        /// <summary>
+        /// 计算文件的哈希值
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="algName">算法名。例如：md5,sha1</param>
+        /// <returns></returns>
+        private static string HashFile(string file, string algName)
+        {
+            if (!File.Exists(file))
+            {
+                return string.Empty;
+            }
+
+            using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+            {
+                var bytes = HashData(fs, algName);
+                return ToHexString(bytes);
+            }
+        }
+
+        /// <summary>
+        /// 计算哈希值
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <param name="algName">算法名。例如：md5,sha1</param>
+        /// <returns></returns>
+        private static byte[] HashData(Stream stream, string algName)
+        {
+            if (string.IsNullOrWhiteSpace(algName))
+            {
+                throw new ArgumentNullException(nameof(algName));
+            }
+
+            HashAlgorithm algorithm;
+            if (string.Compare(algName, "sha1", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                algorithm = SHA1.Create();
+            }
+            else if (string.Compare(algName, "md5", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                algorithm = MD5.Create();
+            }
+            else
+            {
+                throw new ArgumentException($"{nameof(algName)} 只能使用 sha1 或 md5.");
+            }
+
+            var bytes = algorithm.ComputeHash(stream);
+            algorithm.Dispose();
+            return bytes;
+        }
+
+        /// <summary>
+        /// 将字节数组转换为16进制表示的字符在
+        /// </summary>
+        /// <param name="bytes">字节数组</param>
+        /// <returns></returns>
+        private static string ToHexString(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+        #endregion
+
+        #region GetSha1(获取文件的SHA1值)
+
+        /// <summary>
+        /// 获取文件的SHA1值
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <returns></returns>
+        public static string GetSha1(string file)
+        {
+            return HashFile(file, "sha1");
         }
 
         #endregion

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -59,7 +60,7 @@ namespace Bing.Utils.IO
                 return;
             }
 
-            if (File.Exists(filePath))
+            if (!File.Exists(filePath))
             {
                 return;
             }
@@ -250,7 +251,7 @@ namespace Bing.Utils.IO
                 return string.Empty;
             }
 
-            using (StreamReader reader = new StreamReader(filePath, encoding))
+            using (var reader = new StreamReader(filePath, encoding))
             {
                 return reader.ReadToEnd();
             }
@@ -288,7 +289,7 @@ namespace Bing.Utils.IO
             }
 
             int fileSize = (int)fileInfo.Length;
-            using (BinaryReader reader = new BinaryReader(fileInfo.Open(FileMode.Open)))
+            using (var reader = new BinaryReader(fileInfo.Open(FileMode.Open)))
             {
                 return reader.ReadBytes(fileSize);
             }
@@ -428,16 +429,16 @@ namespace Bing.Utils.IO
                         continue;
                     }
 
-                    var rs = new FileStream(file, FileMode.Open, FileAccess.Read);
-                    var data = new byte[1024];
-                    var readLen = 0;
-                    while ((readLen = rs.Read(data, 0, data.Length)) > 0)
+                    using (var rs = new FileStream(file, FileMode.Open, FileAccess.Read))
                     {
-                        ws.Write(data, 0, readLen);
-                        ws.Flush();
+                        var data = new byte[1024];
+                        var readLen = 0;
+                        while ((readLen = rs.Read(data, 0, data.Length)) > 0)
+                        {
+                            ws.Write(data, 0, readLen);
+                            ws.Flush();
+                        }
                     }
-
-                    rs.Close();
                     if (delete)
                     {
                         Delete(file);
@@ -481,6 +482,7 @@ namespace Bing.Utils.IO
                 {
                     if (len == 0 || ws == null)
                     {
+                        ws?.Dispose();
                         ws = new FileStream($"{dirPath}\\{fileName}.{i++}.{total}.{suffix}", FileMode.Create);
                     }
 
@@ -519,6 +521,101 @@ namespace Bing.Utils.IO
             }
 
             return fileSize / splitSize + 1;
+        }
+
+        #endregion
+
+        #region Compress(压缩)
+
+        /// <summary>
+        /// 压缩
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="saveFile">保存文件</param>
+        /// <returns></returns>
+        public static bool Compress(string file, string saveFile)
+        {
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(saveFile))
+            {
+                return false;
+            }
+
+            if (!File.Exists(file))
+            {
+                return false;
+            }
+
+            try
+            {
+                using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                {
+                    using (var ws = new FileStream(saveFile, FileMode.Create))
+                    {
+                        using (var zip = new GZipStream(ws, CompressionMode.Compress))
+                        {
+                            fs.CopyTo(zip);
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            
+        }
+
+        #endregion
+
+        #region Decompress(解压缩)
+
+        /// <summary>
+        /// 解压缩
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="saveFile">保存文件</param>
+        /// <returns></returns>
+        public static bool Decompress(string file, string saveFile)
+        {
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(saveFile))
+            {
+                return false;
+            }
+
+            if (!File.Exists(file))
+            {
+                return false;
+            }
+
+            try
+            {
+                using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                {
+                    using (var ws = new FileStream(saveFile, FileMode.Create))
+                    {
+                        using (var zip = new GZipStream(fs, CompressionMode.Decompress))
+                        {
+                            zip.CopyTo(ws);
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         #endregion

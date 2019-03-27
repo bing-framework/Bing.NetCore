@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -160,7 +160,7 @@ namespace Bing.Utils.Tests
         }
 
         /// <summary>
-        /// Éú³É²âÊÔÊı¾İ
+        /// ç”Ÿæˆæµ‹è¯•æ•°æ®
         /// </summary>
         [Fact]
         private void Test_GenerateTestData()
@@ -171,28 +171,29 @@ namespace Bing.Utils.Tests
         }
 
         /// <summary>
-        /// ºÏ²¢ÎÄ¼ş
+        /// åˆå¹¶æ–‡ä»¶
         /// </summary>
         [Fact]
         public void Test_CombineFile()
         {
-            var soureMd5 = FileUtil.GetFileMd5("D:\\iTestRunner_R1.txt");
-            var files = FileUtil.GetAllFiles("D:\\TestData");
-            var outputFilePath = "D:\\iTestRunner_R1_combine_result.txt";
-            FileUtil.Combine(files,outputFilePath);
-            var outputMd5 = FileUtil.GetFileMd5(outputFilePath);
-            Output.WriteLine($"old-md5:{soureMd5}");
-            Output.WriteLine($"new-md5:{outputMd5}");
+            var tempMd5 = FileUtil.GetMd5("D:\\iTestRunner_R1.txt");
+            //var files = FileUtil.GetAllFiles("D:\\TestData");
+            //var outputFilePath = "D:\\iTestRunner_R1_combine_result.txt";
+            //FileUtil.Combine(files,outputFilePath);
+            //var outputMd5 = FileUtil.GetFileMd5(outputFilePath);
+
+            Output.WriteLine($"temp-md5:{tempMd5}");
+            //Output.WriteLine($"new-md5:{outputMd5}");
         }        
 
         /// <summary>
-        /// ÎÄ¼şÇĞ¸î
+        /// æ–‡ä»¶åˆ‡å‰²
         /// </summary>
-        /// <param name="filePath">ÎÄ¼şÂ·¾¶</param>
-        /// <param name="outPutPath">Êä³öÎÄ¼şÂ·¾¶</param>
-        /// <param name="kbLength">µ¥¸ö×ÓÎÄ¼ş×î´ó³¤¶È¡£µ¥Î»£ºKB</param>
-        /// <param name="delete">±êÊ¶ÎÄ¼ş·Ö¸îÍê³ÉºóÊÇ·ñÉ¾³ıÔ­ÎÄ¼ş</param>
-        /// <param name="change">¼ÓÃÜÃÜÔ¿</param>
+        /// <param name="filePath">æ–‡ä»¶è·¯å¾„</param>
+        /// <param name="outPutPath">è¾“å‡ºæ–‡ä»¶è·¯å¾„</param>
+        /// <param name="kbLength">å•ä¸ªå­æ–‡ä»¶æœ€å¤§é•¿åº¦ã€‚å•ä½ï¼šKB</param>
+        /// <param name="delete">æ ‡è¯†æ–‡ä»¶åˆ†å‰²å®Œæˆåæ˜¯å¦åˆ é™¤åŸæ–‡ä»¶</param>
+        /// <param name="change">åŠ å¯†å¯†é’¥</param>
         private void FileSplit(string filePath,string outPutPath, int kbLength, bool delete, int change)
         {
             if (filePath == null || !File.Exists(filePath))
@@ -200,7 +201,7 @@ namespace Bing.Utils.Tests
                 return;
             }
 
-            //// ¼ÓÃÜ³õÊ¼»¯
+            //// åŠ å¯†åˆå§‹åŒ–
             //short sign = 1;
             //int num = 0, tmp;
             //if (change < 0)
@@ -214,20 +215,20 @@ namespace Bing.Utils.Tests
             var total = Conv.ToInt(fileSize.GetSizeByK() / kbLength);
             using (FileStream readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                byte[] data = new byte[1024];// Á÷¶ÁÈ¡£¬»º´æ¿Õ¼ä
-                int len = 0, i = 1;// ¼ÇÂ¼×ÓÎÄ¼şÀÛ»ı¶ÁÈ¡µÄKB´óĞ¡£¬·Ö¸îµÄ×ÓÎÄ¼şĞòºÅ
-                int readLen = 0;// Ã¿´ÎÊµ¼Ê¶ÁÈ¡µÄ×Ö½Ú´óĞ¡
+                byte[] data = new byte[1024];// æµè¯»å–ï¼Œç¼“å­˜ç©ºé—´
+                int len = 0, i = 1;// è®°å½•å­æ–‡ä»¶ç´¯ç§¯è¯»å–çš„KBå¤§å°ï¼Œåˆ†å‰²çš„å­æ–‡ä»¶åºå·
+                int readLen = 0;// æ¯æ¬¡å®é™…è¯»å–çš„å­—èŠ‚å¤§å°
                 FileStream writeStream = null;
-                // ¶ÁÈ¡Êı¾İ
+                // è¯»å–æ•°æ®
                 while (readLen > 0 || (readLen = readStream.Read(data, 0, data.Length)) > 0)
                 {                    
-                    // ´´½¨·Ö¸îºóµÄ×ÓÎÄ¼ş£¬ÒÑÓĞÔò¸²¸Ç
+                    // åˆ›å»ºåˆ†å‰²åçš„å­æ–‡ä»¶ï¼Œå·²æœ‰åˆ™è¦†ç›–
                     if (len == 0 || writeStream == null)
                     {
                         writeStream = new FileStream($"{outPutPath}\\{fileName}.{i++}.{total}.bin", FileMode.Create);
                     }
 
-                    //// ¼ÓÃÜÂß¼­£¬¶ÔdataµÄÊ××Ö½Ú½øĞĞÂß¼­Æ«ÒÆ¼ÓÃÜ
+                    //// åŠ å¯†é€»è¾‘ï¼Œå¯¹dataçš„é¦–å­—èŠ‚è¿›è¡Œé€»è¾‘åç§»åŠ å¯†
                     //if (num == 0)
                     //{
                     //    num = change;
@@ -246,14 +247,14 @@ namespace Bing.Utils.Tests
                     //data[0] = (byte) tmp;
                     //num /= 3;
 
-                    // Êä³ö£¬»º´æÊı¾İĞ´Èë×ÓÎÄ¼ş
+                    // è¾“å‡ºï¼Œç¼“å­˜æ•°æ®å†™å…¥å­æ–‡ä»¶
                     writeStream.Write(data, 0, readLen);
                     writeStream.Flush();
-                    // Ô¤¶ÁÏÂÒ»ÂÖ»º´æÊı¾İ
+                    // é¢„è¯»ä¸‹ä¸€è½®ç¼“å­˜æ•°æ®
                     readLen = readStream.Read(data, 0, data.Length);
-                    if (++len >= kbLength || readLen == 0) //×ÓÎÄ¼ş´ïµ½Ö¸¶¨´óĞ¡£¬»òÎÄ¼şÒÑ¶ÁÍê
+                    if (++len >= kbLength || readLen == 0) //å­æ–‡ä»¶è¾¾åˆ°æŒ‡å®šå¤§å°ï¼Œæˆ–æ–‡ä»¶å·²è¯»å®Œ
                     {
-                        writeStream.Close();// ¹Ø±Õµ±Ç°Êä³öÁ÷
+                        writeStream.Close();// å…³é—­å½“å‰è¾“å‡ºæµ
                         len = 0;
                     }
                 }
@@ -266,7 +267,7 @@ namespace Bing.Utils.Tests
         }
 
         /// <summary>
-        /// ÎÄ¼şºÏ²¢
+        /// æ–‡ä»¶åˆå¹¶
         /// </summary>
         /// <param name="filePaths"></param>
         /// <param name="outFileName"></param>
@@ -302,13 +303,13 @@ namespace Bing.Utils.Tests
                     }
 
                     FileStream readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                    byte[] data=new byte[1024];// Á÷¶ÁÈ¡£¬»º´æ¿Õ¼ä
-                    int readLen = 0;// Ã¿´ÎÊµ¼Ê¶ÁÈ¡µÄ×Ö½Ú´óĞ¡
+                    byte[] data=new byte[1024];// æµè¯»å–ï¼Œç¼“å­˜ç©ºé—´
+                    int readLen = 0;// æ¯æ¬¡å®é™…è¯»å–çš„å­—èŠ‚å¤§å°
 
-                    // ¶ÁÈ¡Êı¾İ
+                    // è¯»å–æ•°æ®
                     while ((readLen=readStream.Read(data,0,data.Length))>0)
                     {
-                        //// ½âÃÜÂß¼­£¬¶ÔdataµÄÊ××Ö½Ú½øĞĞÂß¼­Æ«ÒÆ½âÃÜ
+                        //// è§£å¯†é€»è¾‘ï¼Œå¯¹dataçš„é¦–å­—èŠ‚è¿›è¡Œé€»è¾‘åç§»è§£å¯†
                         //if (num == 0)
                         //{
                         //    num = change;

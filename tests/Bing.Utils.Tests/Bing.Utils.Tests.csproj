@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ComponentAce.Compression.Libs.zlib" Version="1.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj" />
     <ProjectReference Include="..\..\src\Bing.Utils\Bing.Utils.csproj" />
   </ItemGroup>
@@ -16,6 +20,10 @@
     <Content Update="Configs\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
   </ItemGroup>
 
 </Project>

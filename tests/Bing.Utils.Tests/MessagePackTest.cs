@@ -8,6 +8,7 @@ using System.Text;
 using Bing.Utils.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;
+using ComponentAce.Compression.Libs.zlib;
 using MessagePack;
 using Newtonsoft.Json;
 using Xunit;
@@ -88,6 +89,82 @@ namespace Bing.Utils.Tests
         //    var bytes = LZString.Compress(json);
         //    FileUtil.Write("D:\\compression_result.txt", bytes);
         //}
+
+        //[Fact]
+        //public void Test_Zlib_StringCompress()
+        //{
+        //    var json = FileUtil.Read("D:\\iTestRunner_R1_format.txt");
+        //    var bytes = CompressByZlib(json);
+        //    var result = Convert.ToBase64String(bytes);
+        //    FileUtil.Write("D:\\compression_result.txt", bytes);
+        //}
+
+        //[Fact]
+        //public void Test_Zlib_StringCompress_2()
+        //{
+        //    var json = FileUtil.Read("D:\\compression_result.txt");
+        //    var bytes = CompressByZlib(json);
+        //    var result = Convert.ToBase64String(bytes);
+        //    FileUtil.Write("D:\\compression_result_1.txt", bytes);
+        //}
+
+        //[Fact]
+        //public void Test_Zlib_StringCompress_3()
+        //{
+        //    var json = FileUtil.Read("D:\\compression_result_1.txt");
+        //    var bytes = CompressByZlib(json);
+        //    var result = Convert.ToBase64String(bytes);
+        //    FileUtil.Write("D:\\compression_result_2.txt", bytes);
+        //}
+
+        //[Fact]
+        //public void Test_Zlib_StringCompress_4()
+        //{            
+        //    var json = FileUtil.Read("D:\\compression_result_2.txt");
+        //    var bytes = CompressByZlib(json);
+        //    var result = Convert.ToBase64String(bytes);
+        //    FileUtil.Write("D:\\compression_result_3.txt", bytes);
+        //}
+
+        public static byte[] CompressByZlib(string source)
+        {
+            var bytes = Encoding.UTF8.GetBytes(source);
+            using (var ms=new MemoryStream(bytes))
+            {
+                using (var compressedStream=new MemoryStream())
+                {
+                    using (ZOutputStream outZStream=new ZOutputStream(compressedStream,zlibConst.Z_BEST_COMPRESSION))
+                    {
+                        try
+                        {
+                            CopyStream(ms, outZStream);
+                            outZStream.finish();
+                            return compressedStream.ToArray();
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 拷贝流
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        private static void CopyStream(Stream input, Stream output)
+        {
+            byte[] buffer = new byte[2000];
+            int len;
+            while ((len = input.Read(buffer, 0, 2000)) > 0)
+            {
+                output.Write(buffer, 0, len);
+            }
+            output.Flush();
+        }
 
         /// <summary>
         /// 对字符串进行压缩
