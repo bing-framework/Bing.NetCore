@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Bing.Utils.Extensions;
 
 namespace Bing.Utils.IO
@@ -15,15 +17,16 @@ namespace Bing.Utils.IO
         /// 获取指定目录中的文件列表
         /// </summary>
         /// <param name="directoryPath">目录的绝对路径</param>
+        /// <param name="pattern">通配符</param>
         /// <returns></returns>
-        public static string[] GetFileNames(string directoryPath)
+        public static string[] GetFileNames(string directoryPath, string pattern = "*")
         {
             if (!Directory.Exists(directoryPath))
             {
                 throw new FileNotFoundException();
             }
 
-            return Directory.GetFiles(directoryPath);
+            return Directory.GetFiles(directoryPath, pattern);
         }
 
         /// <summary>

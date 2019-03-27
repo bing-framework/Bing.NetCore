@@ -29,7 +29,6 @@ namespace Bing.Utils.IO
             {
                 return;
             }
-
             File.Create(fileName);
         }
 
@@ -65,6 +64,8 @@ namespace Bing.Utils.IO
                 return;
             }
 
+            // 设置文件的属性为正常（如果文件为只读的话直接删除会报错）
+            File.SetAttributes(filePath, FileAttributes.Normal);
             File.Delete(filePath);
         }
 
@@ -535,12 +536,7 @@ namespace Bing.Utils.IO
         /// <returns></returns>
         public static bool Compress(string file, string saveFile)
         {
-            if (string.IsNullOrWhiteSpace(file))
-            {
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(saveFile))
+            if (string.IsNullOrWhiteSpace(file)|| string.IsNullOrWhiteSpace(saveFile))
             {
                 return false;
             }
@@ -615,6 +611,108 @@ namespace Bing.Utils.IO
             catch
             {
                 return false;
+            }
+        }
+
+        #endregion
+
+        #region CompressMulti(多文件压缩)
+
+        /// <summary>
+        /// 多文件压缩。（生成的压缩包和第三方的压缩文件解压不兼容）
+        /// </summary>
+        /// <param name="sourceFileList">文件列表</param>
+        /// <param name="saveFullPath">压缩包全路径</param>
+        public static void CompressMulti(string[] sourceFileList, string saveFullPath)
+        {
+            if (sourceFileList == null || sourceFileList.Length == 0 || string.IsNullOrWhiteSpace(saveFullPath))
+            {
+                return;
+            }
+
+            using (var ms = new MemoryStream())
+            {
+                foreach (var filePath in sourceFileList)
+                {
+                    if (!File.Exists(filePath))
+                    {
+                        continue;
+                    }
+
+                    string fileName = Path.GetFileName(filePath);
+                    byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileName);
+                    byte[] sizeBytes = BitConverter.GetBytes(fileNameBytes.Length);
+                    ms.Write(sizeBytes, 0, sizeBytes.Length);
+                    ms.Write(fileNameBytes, 0, fileNameBytes.Length);
+                    byte[] fileContentBytes = File.ReadAllBytes(filePath);
+                    ms.Write(BitConverter.GetBytes(fileContentBytes.Length), 0, 4);
+                    ms.Write(fileContentBytes, 0, fileContentBytes.Length);
+                }
+
+                ms.Flush();
+                ms.Position = 0;
+
+                using (var fs = File.Create(saveFullPath))
+                {
+                    using (var zipStream=new GZipStream(fs,CompressionMode.Compress))
+                    {
+                        ms.Position = 0;
+                        ms.CopyTo(zipStream);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region DecompressMulti(多文件解压缩)
+
+        /// <summary>
+        /// 多文件解压缩
+        /// </summary>
+        /// <param name="zipPath">压缩文件路径</param>
+        /// <param name="targetPath">解压目录</param>
+        public static void DecompressMulti(string zipPath,string targetPath)
+        {
+            if (string.IsNullOrWhiteSpace(zipPath) || string.IsNullOrWhiteSpace(targetPath))
+            {
+                return;
+            }
+
+            byte[] fileSize = new byte[4];
+            if (!File.Exists(zipPath))
+            {
+                return;
+            }
+
+            using (var fs=File.Open(zipPath,FileMode.Open))
+            {
+                using (var ms=new MemoryStream())
+                {
+                    using (var zipStream=new GZipStream(fs,CompressionMode.Decompress))
+                    {
+                        zipStream.CopyTo(ms);
+                    }
+
+                    ms.Position = 0;
+                    while (ms.Position!=ms.Length)
+                    {
+                        ms.Read(fileSize, 0, fileSize.Length);
+                        var fileNameLength = BitConverter.ToInt32(fileSize, 0);
+                        var fileNameBytes = new byte[fileNameLength];
+                        ms.Read(fileNameBytes, 0, fileNameBytes.Length);
+                        var fileName = Encoding.UTF8.GetString(fileNameBytes);
+                        var fileFullName = targetPath + fileName;
+                        ms.Read(fileSize, 0, 4);
+                        var fileContentLength = BitConverter.ToInt32(fileSize, 0);
+                        var fileContentBytes = new byte[fileContentLength];
+                        ms.Read(fileContentBytes, 0, fileContentBytes.Length);
+                        using (var childFileStream=File.Create(fileFullName))
+                        {
+                            childFileStream.Write(fileContentBytes, 0, fileContentBytes.Length);
+                        }
+                    }
+                }
             }
         }
 

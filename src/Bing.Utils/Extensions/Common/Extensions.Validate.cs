@@ -62,16 +62,6 @@ namespace Bing.Utils.Extensions
         }
 
         /// <summary>
-        /// 判断 数组 是否为空
-        /// </summary>
-        /// <param name="array">数据</param>
-        /// <returns></returns>
-        public static bool IsEmpty(this Array array)
-        {
-            return array == null || array.Length == 0;
-        }
-
-        /// <summary>
         /// 判断 可变字符串 是否为空
         /// </summary>
         /// <param name="sb">数据</param>
