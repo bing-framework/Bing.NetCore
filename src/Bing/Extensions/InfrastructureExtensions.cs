@@ -3,7 +3,6 @@ using System.Text;
 using AspectCore.Configuration;
 using Bing.Configurations;
 using Bing.Dependency;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -40,21 +39,6 @@ namespace Bing
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             services.TryAddSingleton<IConfigurationAccessor>(DefaultConfigurationAccessor.Empty);
             return Bootstrapper.Run(services, configs, aopConfigAction);
-        }
-
-        /// <summary>
-        /// 注册默认Http上下文
-        /// </summary>
-        /// <param name="services">服务集合</param>
-        /// <returns></returns>
-        public static IServiceCollection AddHttpContextAccessor(this IServiceCollection services)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-            services.TryAddSingleton<IHttpContextAccessor,HttpContextAccessor>();
-            return services;
         }
     }
 }

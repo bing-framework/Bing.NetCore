@@ -171,6 +171,67 @@ namespace Bing.Utils.Tests
         }
 
         /// <summary>
+        /// 按前缀分组
+        /// </summary>
+        [Fact]
+        public void Test_GroupByPrefix()
+        {
+            Dictionary<string, List<string>> dict = new Dictionary<string, List<string>>();
+            dict.Add("001", new List<string>());
+            dict.Add("002", new List<string>());
+            dict.Add("003", new List<string>());
+            dict.Add("004", new List<string>());
+            dict.Add("005", new List<string>());
+            dict.Add("006", new List<string>());
+            dict.Add("007", new List<string>());
+            List<string> list = new List<string>()
+            {
+                "001.8.desc.json",
+                "001.1.desc.json",
+                "001.2.desc.json",
+                "001.3.desc.json",
+                "001.4.desc.json",
+                "001.5.desc.json",
+                "001.6.desc.json",
+                "001.7.desc.json",
+                "002.1.desc.json",
+                "002.2.desc.json",
+                "002.3.desc.json",
+                "002.4.desc.json",
+                "002.5.desc.json",
+                "002.6.desc.json",
+                "002.7.desc.json",
+                "002.8.desc.json",
+                "003.10.desc.json",
+                "003.1.desc.json",
+                "003.2.desc.json",
+                "003.3.desc.json",
+                "003.4.desc.json",
+                "003.5.desc.json",
+                "003.6.desc.json",
+                "003.7.desc.json",
+                "003.8.desc.json",
+                "003.9.desc.json",
+                "004.4.desc.json",
+                "005.5.desc.json",
+                "006.6.desc.json",
+                "007.7.desc.json",
+            };            
+
+            foreach (var item in list)
+            {
+                var keys = item.Split('.');
+                dict[keys[0]].Add(item);
+            }
+
+            foreach (var keyValue in dict)
+            {
+                var item = keyValue.Value.Max();
+                Output.WriteLine($"{keyValue.Key},{item}");
+            }
+        }
+
+        /// <summary>
         /// 合并文件
         /// </summary>
         [Fact]
@@ -184,7 +245,7 @@ namespace Bing.Utils.Tests
 
             Output.WriteLine($"temp-md5:{tempMd5}");
             //Output.WriteLine($"new-md5:{outputMd5}");
-        }        
+        }
 
         /// <summary>
         /// 文件切割

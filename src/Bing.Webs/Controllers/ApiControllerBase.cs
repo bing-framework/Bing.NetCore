@@ -10,7 +10,7 @@ namespace Bing.Webs.Controllers
     /// WebApi控制器基类
     /// </summary>
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ErrorLog]
     [TraceLog]
     public abstract class ApiControllerBase:Controller

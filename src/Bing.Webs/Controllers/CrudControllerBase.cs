@@ -83,6 +83,7 @@ namespace Bing.Webs.Controllers
         /// </remarks>
         /// <param name="request">创建参数</param>
         /// <returns></returns>
+        [HttpPost]
         public virtual async Task<IActionResult> CreateAsync([FromBody] TCreateRequest request)
         {
             if (request == null)
