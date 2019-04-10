@@ -112,7 +112,7 @@ namespace Bing.Domains.Repositories
         /// <param name="data">数据</param>
         public PagerList(int page, int pageSize, int totalCount, string order, IEnumerable<T> data = null)
         {
-            Data = new List<T>();
+            Data = data?.ToList() ?? new List<T>();
             var pager = new Pager(page, pageSize, totalCount);
             TotalCount = pager.TotalCount;
             PageCount = pager.GetPageCount();
