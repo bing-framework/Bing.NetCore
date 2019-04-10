@@ -270,7 +270,7 @@ namespace Bing.Utils.Helpers
         #region FullPinYin(获取汉字的全拼)
 
         /// <summary>
-        /// 将汉字转换成拼硬(全拼)
+        /// 将汉字转换成拼音(全拼)
         /// </summary>
         /// <param name="text">汉字字符串</param>
         /// <returns></returns>

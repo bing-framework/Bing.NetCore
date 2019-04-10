@@ -59,7 +59,7 @@ namespace Bing.Webs.Controllers
         /// <param name="query">查询参数</param>
         /// <returns></returns>
         [HttpGet]
-        public virtual async Task<IActionResult> PagerQueryAsync(TQuery query)
+        public virtual async Task<IActionResult> PagerQueryAsync([FromQuery]TQuery query)
         {
             PagerQueryBefore(query);
             var result = await _service.PagerQueryAsync(query);
@@ -95,7 +95,7 @@ namespace Bing.Webs.Controllers
         /// <param name="query">查询参数</param>
         /// <returns></returns>
         [HttpGet("Query")]
-        public virtual async Task<IActionResult> QueryAsync(TQuery query)
+        public virtual async Task<IActionResult> QueryAsync([FromQuery]TQuery query)
         {
             QueryBefore(query);
             var result = await _service.QueryAsync(query);

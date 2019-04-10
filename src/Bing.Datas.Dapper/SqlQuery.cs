@@ -47,7 +47,9 @@ namespace Bing.Datas.Dapper
         /// <returns></returns>
         public override ISqlQuery Clone()
         {
-            return new SqlQuery(Builder.Clone(), Database, SqlOptions);
+            var result = new SqlQuery(Builder.Clone(), Database, SqlOptions);
+            result.SetConnection(Connection);
+            return result;
         }
 
         /// <summary>
