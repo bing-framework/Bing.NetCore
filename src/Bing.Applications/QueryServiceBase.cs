@@ -9,7 +9,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
-using Bing.Extensions.AutoMapper;
+using Bing.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Applications

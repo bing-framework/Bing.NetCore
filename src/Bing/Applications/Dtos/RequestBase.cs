@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Runtime.Serialization;
 using Bing.Exceptions;
 using Bing.Validations;
 
@@ -8,7 +7,6 @@ namespace Bing.Applications.Dtos
     /// <summary>
     /// 请求对象
     /// </summary>
-    [DataContract]
     public abstract class RequestBase:IRequest
     {
         /// <summary>

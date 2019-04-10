@@ -1,6 +1,4 @@
-﻿using Bing;
-using Bing.Extensions.AutoMapper;
-using Bing.Domains.Repositories;
+﻿using Bing.Domains.Repositories;
 using Bing.Datas.Queries;
 using Bing.Applications;
 using Bing.DbDesigner.Data;

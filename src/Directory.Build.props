@@ -4,7 +4,7 @@
     <VersionMajor>0</VersionMajor>
     <VersionMinor>0</VersionMinor>
     <VersionPatch>1</VersionPatch>
-    <VersionQuality>20190410-1</VersionQuality>
+    <VersionQuality>20190410-2</VersionQuality>
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
     <VersionSuffix>preview-$(VersionQuality)</VersionSuffix>
   </PropertyGroup>

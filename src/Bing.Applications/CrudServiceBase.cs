@@ -5,7 +5,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
-using Bing.Extensions.AutoMapper;
+using Bing.Mapping;
 
 namespace Bing.Applications
 {
