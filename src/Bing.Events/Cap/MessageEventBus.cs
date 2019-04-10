@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Bing.Datas.Transactions;
 using Bing.Events.Messages;
+using Bing.Logs;
+using Bing.Logs.Extensions;
 using DotNetCore.CAP;
 
 namespace Bing.Events.Cap
@@ -50,16 +52,45 @@ namespace Bing.Events.Cap
         /// <param name="data">事件数据</param>
         /// <param name="callback">回调名称</param>
         /// <returns></returns>
-        public Task PublishAsync(string name, object data, string callback)
+        public Task PublishAsync(string name, object data, string callback = null)
         {
             TransactionActionManager.Register(async transaction =>
             {
                 Publisher.Transaction.DbTransaction = transaction;
                 Publisher.Transaction.AutoCommit = false;
                 await Publisher.PublishAsync(name, data, callback);
+                WriteLog(name);
             });
 
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 写日志
+        /// </summary>
+        /// <param name="name"></param>
+        private void WriteLog(string name)
+        {
+            GetLog()
+                .Caption("Cap已发送事件")
+                .Content($"消息名称:{name}")
+                .Trace();
+        }
+
+        /// <summary>
+        /// 获取日志
+        /// </summary>
+        /// <returns></returns>
+        private ILog GetLog()
+        {
+            try
+            {
+                return Log.GetLog(this);
+            }
+            catch
+            {
+                return Log.Null;
+            }
         }
     }
 }
