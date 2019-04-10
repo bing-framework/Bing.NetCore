@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Datas.UnitOfWorks;
 using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,8 +16,8 @@ namespace Bing.Datas.EntityFramework.SqlServer
         /// 初始化一个<see cref="UnitOfWork"/>类型的实例
         /// </summary>
         /// <param name="options">配置</param>
-        /// <param name="manager">工作单元管理器</param>
-        protected UnitOfWork(DbContextOptions options, IUnitOfWorkManager manager) : base(options, manager)
+        /// <param name="serviceProvider">服务提供器</param>
+        protected UnitOfWork(DbContextOptions options, IServiceProvider serviceProvider = null) : base(options, serviceProvider)
         {
         }
 

@@ -21,7 +21,7 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 数据库
         /// </summary>
-        protected IDatabase Database { get; }
+        protected IDatabase Database { get; private set; }
 
         /// <summary>
         /// 数据库连接

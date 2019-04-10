@@ -45,6 +45,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         private static readonly ILoggerFactory LoggerFactory;
 
+        /// <summary>
+        /// 服务提供器
+        /// </summary>
+        private IServiceProvider _serviceProvider;
+
         #endregion
 
         #region 属性
@@ -80,12 +85,38 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化一个<see cref="UnitOfWorkBase"/>类型的实例
         /// </summary>
         /// <param name="options">配置</param>
-        /// <param name="manager">工作单元管理器</param>
-        protected UnitOfWorkBase(DbContextOptions options, IUnitOfWorkManager manager):base(options)
+        /// <param name="serviceProvider">服务提供器</param>
+        protected UnitOfWorkBase(DbContextOptions options,IServiceProvider serviceProvider):base(options)
         {
-            manager?.Register(this);
             TraceId = Guid.NewGuid().ToString();
             Session = Bing.Security.Sessions.Session.Instance;
+            _serviceProvider = serviceProvider ?? Ioc.Create<IServiceProvider>();
+            RegisterToManager();
+        }
+
+        /// <summary>
+        /// 注册到工作单元管理器
+        /// </summary>
+        private void RegisterToManager()
+        {
+            var manager = Create<IUnitOfWorkManager>();
+            manager?.Register(this);
+        }
+
+        /// <summary>
+        /// 创建实例
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <returns></returns>
+        private T Create<T>()
+        {
+            var result = _serviceProvider.GetService(typeof(T));
+            if (result == null)
+            {
+                return default(T);
+            }
+
+            return (T)result;
         }
 
         #endregion
@@ -162,7 +193,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
-                var options = Ioc.Create<IOptionsSnapshot<DataConfig>>();
+                var options = Create<IOptionsSnapshot<DataConfig>>();
                 return options.Value;
             }
             catch
@@ -377,7 +408,7 @@ namespace Bing.Datas.EntityFramework.Core
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             SaveChangesBefore();
-            var transactionActionManager = Ioc.Create<ITransactionActionManager>();
+            var transactionActionManager = Create<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
             {
                 return await base.SaveChangesAsync(cancellationToken);
@@ -497,7 +528,7 @@ namespace Bing.Datas.EntityFramework.Core
             }
             catch
             {
-                return entity.Name;
+                return null;
             }
         }
 

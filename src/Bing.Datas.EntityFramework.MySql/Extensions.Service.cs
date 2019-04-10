@@ -20,7 +20,7 @@ namespace Bing.Datas.EntityFramework.MySql
         /// <typeparam name="TService">工作单元接口类型</typeparam>
         /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
         /// <param name="services">服务集合</param>
-        /// <param name="connection">连接字符串你</param>
+        /// <param name="connection">连接字符串</param>
         /// <param name="level">日志级别</param>
         /// <returns></returns>
         public static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(
@@ -38,7 +38,7 @@ namespace Bing.Datas.EntityFramework.MySql
         /// <typeparam name="TService">工作单元接口类型</typeparam>
         /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
         /// <param name="services">服务集合</param>
-        /// <param name="connection">连接字符串你</param>
+        /// <param name="connection">连接字符串</param>
         /// <param name="dataConfigAction">数据配置操作</param>
         /// <returns></returns>
         public static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(
@@ -56,7 +56,7 @@ namespace Bing.Datas.EntityFramework.MySql
         /// <typeparam name="TService">工作单元接口类型</typeparam>
         /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
         /// <param name="services">服务集合</param>
-        /// <param name="connection">连接字符串你</param>
+        /// <param name="connection">连接字符串</param>
         /// <param name="configuration">配置</param>
         /// <returns></returns>
         public static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(

@@ -262,3 +262,5 @@ __pycache__/
 /sample/Bing.Samples.Api/Properties/PublishProfiles
 /templates/CodeSmith/CodeGenerator/02-Result
 *.DotSettings
+/bus
+/output/netstandard2.0

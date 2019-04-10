@@ -10,7 +10,8 @@ dotnet build Bing.NetCore.sln -c Release
 
 rem pack
 dotnet pack ./src/Bing.Utils/Bing.Utils.csproj
-rem dotnet pack ./src/Bing/Bing.csproj
+dotnet pack ./src/Bing/Bing.csproj
+dotnet pack ./src/Bing.AspNetCore/Bing.AspNetCore.csproj
 dotnet pack ./src/Bing.Security/Bing.Security.csproj
 dotnet pack ./src/Bing.Logs/Bing.Logs.csproj
 dotnet pack ./src/Bing.Logs.Exceptionless/Bing.Logs.Exceptionless.csproj
@@ -39,4 +40,4 @@ rem dotnet pack ./src/Bing.Offices/Bing.Offices.csproj
 rem dotnet pack ./src/Bing.Offices.Npoi/Bing.Offices.Npoi.csproj
 
 rem push
-for %%i in (output\release\*.nupkg) do dotnet nuget push %%i -k %1 -s https://www.nuget.org/api/v2/package
+for %%i in (output\*.nupkg) do dotnet nuget push %%i -k %1 -s https://www.nuget.org/api/v2/package

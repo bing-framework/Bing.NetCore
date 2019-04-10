@@ -40,7 +40,7 @@ namespace Bing.Datas.Sql.Builders.Core
             }
 
             var result = _matedata.GetTable(entity);
-            return string.IsNullOrWhiteSpace(result) ? entity.Namespace : result;
+            return string.IsNullOrWhiteSpace(result) ? entity.Name : result;
         }
 
         /// <summary>
