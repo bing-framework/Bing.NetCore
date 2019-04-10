@@ -29,7 +29,8 @@ namespace <%=Namespace%>.Data.Mappings.<%= Entity.TableSchema %>.MySql {
         /// 映射表
         /// </summary>
         protected override void MapTable( EntityTypeBuilder<<%= SafeClassName %>> builder ) {
-            builder.ToTable( "<%= Entity.TableName %>", "<%= Entity.TableSchema %>" );
+            <% if(!string.IsNullOrWhiteSpace(Entity.TableSchema)) %>
+            builder.ToTable( "<%= Entity.TableSchema %>.<%= Entity.TableName %>" );
         }
         
         /// <summary>

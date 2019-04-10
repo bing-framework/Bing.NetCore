@@ -278,8 +278,8 @@ namespace Bing.Samples.Api
             app.UseSwagger(config => { });
             app.UseSwaggerUI(config =>
             {
-                config.IndexStream = () =>
-                    GetType().GetTypeInfo().Assembly.GetManifestResourceStream("Bing.Samples.Api.Swagger.index.html");
+                //config.IndexStream = () =>
+                //    GetType().GetTypeInfo().Assembly.GetManifestResourceStream("Bing.Samples.Api.Swagger.index.html");
                 config.ShowExtensions();
                 config.SwaggerEndpoint("/swagger/v1/swagger.json", "Bing.Samples.Api v1");                
             });
