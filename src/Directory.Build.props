@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>bing;applicationframework;dotnetcore;aspnetcore;</PackageTags>
     <PackageReleaseNotes>Bing应用框架以MIT开源发布，可随意使用</PackageReleaseNotes>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
