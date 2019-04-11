@@ -170,8 +170,8 @@ namespace Bing.Datas.Dapper
         {
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
-            WriteTraceLog(sql, Params, Builder.ToDebugSql());
-            var result = GetConnection(connection).ExecuteScalar(sql, Params);
+            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
+            var result = GetConnection(connection).ExecuteScalar(sql, builder.GetParams());
             return Conv.ToInt(result);
         }
 
@@ -238,8 +238,8 @@ namespace Bing.Datas.Dapper
         {
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
-            WriteTraceLog(sql, Params, Builder.ToDebugSql());
-            var result = await GetConnection(connection).ExecuteScalarAsync(sql, Params);
+            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
+            var result = await GetConnection(connection).ExecuteScalarAsync(sql, builder.GetParams());
             return Conv.ToInt(result);
         }
 

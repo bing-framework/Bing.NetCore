@@ -21,8 +21,8 @@ namespace Bing.Datas.Dapper.MySql
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="table">表</param>
         public MySqlFromClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver,
-            IEntityAliasRegister register,ITableDatabase tableDatabase, SqlItem table = null) : base(
-            builder, dialect, resolver, register,tableDatabase, table)
+            IEntityAliasRegister register, ITableDatabase tableDatabase, SqlItem table = null) : base(
+            builder, dialect, resolver, register, tableDatabase, table)
         {
         }
 
@@ -46,6 +46,11 @@ namespace Bing.Datas.Dapper.MySql
         /// <returns></returns>
         public override IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
         {
+            if (register != null)
+            {
+                register.FromType = Register.FromType;
+            }
+
             return new MySqlFromClause(builder, Dialect, Resolver, register, TableDatabase, Table);
         }
     }

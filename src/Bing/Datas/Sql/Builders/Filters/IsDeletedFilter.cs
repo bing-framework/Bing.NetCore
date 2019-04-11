@@ -33,7 +33,8 @@ namespace Bing.Datas.Sql.Builders.Filters
         /// <param name="where">Where子句</param>
         /// <param name="type">类型</param>
         /// <param name="alias">表别名</param>
-        private void Filter(IDialect dialect, IEntityMatedata matedata,IEntityAliasRegister register,IJoinClause join,IWhereClause where, Type type, string alias)
+        private void Filter(IDialect dialect, IEntityMatedata matedata, IEntityAliasRegister register, IJoinClause join,
+            IWhereClause where, Type type, string alias)
         {
             if (type == null)
             {
@@ -53,7 +54,7 @@ namespace Bing.Datas.Sql.Builders.Filters
             var isDeleted = $"{dialect.SafeName(alias)}.{dialect.SafeName(matedata.GetColumn(type, "IsDeleted"))}";
             if (register.FromType == type)
             {
-                where.Where(isDeleted,false);
+                where.Where(isDeleted, false);
                 return;
             }
 

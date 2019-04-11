@@ -27,7 +27,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
         /// </summary>
-        public EntityAliasRegister(IDictionary<Type, string> data = null)
+        public EntityAliasRegister(IDictionary<Type, string> data = null, Type fromType = null)
         {
             Data = data ?? new Dictionary<Type, string>();
         }

@@ -16,7 +16,7 @@ namespace Bing.Datas.Dapper.MySql
         /// <param name="matedata">实体元数据解析器</param>
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="parameterManager">参数管理器</param>
-        public MySqlBuilder(IEntityMatedata matedata=null,ITableDatabase tableDatabase = null,IParameterManager parameterManager=null) : base(matedata, tableDatabase,parameterManager) { }
+        public MySqlBuilder(IEntityMatedata matedata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(matedata, tableDatabase, parameterManager) { }
 
         /// <summary>
         /// 克隆
