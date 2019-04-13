@@ -32,7 +32,7 @@ namespace Bing.Webs.Filters
 
                 if (nullArguments.Any())
                 {
-                    context.Result=new BadRequestObjectResult(nullArguments);
+                    context.Result = new BadRequestObjectResult(nullArguments);
                     return;
                 }
             }
@@ -47,7 +47,7 @@ namespace Bing.Webs.Filters
                         Message = e.Value.Errors.First().ErrorMessage
                     }).ToArray();
 
-                context.Result=new BadRequestObjectResult(errors);
+                context.Result = new BadRequestObjectResult(errors);
             }
         }
 

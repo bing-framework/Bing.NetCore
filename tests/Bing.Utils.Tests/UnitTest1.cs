@@ -231,6 +231,24 @@ namespace Bing.Utils.Tests
             }
         }
 
+        public enum TestEnum
+        {
+            A=0,
+            B=1,
+            C=2
+        }
+
+        [Fact]
+        public void Test_StringToEnums()
+        {
+            var enumsStr = "1,2";
+            var enums = Conv.ToList<TestEnum>(enumsStr);
+            foreach (var item in enums)
+            {
+                Output.WriteLine(item.ToString());
+            }
+        }
+
         /// <summary>
         /// 合并文件
         /// </summary>
