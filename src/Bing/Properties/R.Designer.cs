@@ -79,6 +79,15 @@ namespace Bing.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Id不能为空 的本地化字符串。
+        /// </summary>
+        public static string IdIsEmpty {
+            get {
+                return ResourceManager.GetString("IdIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 MapperExtensions.Mapper不能为空，请先设置值 的本地化字符串。
         /// </summary>
         public static string Map_MapperIsNull {

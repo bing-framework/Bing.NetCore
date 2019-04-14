@@ -1,5 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Bing.Helpers;
+using Bing.Properties;
+using Bing.Sessions;
 using Bing.Utils.Extensions;
 using Bing.Validations;
 
@@ -31,9 +34,13 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 标识
         /// </summary>
-        [Required(ErrorMessage = "Id不能为空")]
         [Key]
         public TKey Id { get; private set; }
+
+        /// <summary>
+        /// 用户会话
+        /// </summary>
+        protected virtual ISession Session => Ioc.Create<ISession>();
 
         /// <summary>
         /// 初始化一个<see cref="EntityBase{TEntity,TKey}"/>类型的实例
@@ -106,6 +113,19 @@ namespace Bing.Domains.Entities
         /// </summary>
         public virtual void Init()
         {
+            InitId();
+        }
+
+        /// <summary>
+        /// 初始化标识
+        /// </summary>
+        protected virtual void InitId()
+        {
+            if (typeof(TKey) == typeof(int) || typeof(TKey) == typeof(long))
+            {
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(Id.SafeString()) || Id.Equals(default(TKey)))
             {
                 Id = CreateId();
@@ -127,9 +147,23 @@ namespace Bing.Domains.Entities
         /// <param name="results">验证结果集合</param>
         protected override void Validate(ValidationResultCollection results)
         {
-            if (Id == null || Id.Equals(default(TKey)))
+            ValidateId(results);
+        }
+
+        /// <summary>
+        /// 验证标识
+        /// </summary>
+        /// <param name="results">验证结果集合</param>
+        protected virtual void ValidateId(ValidationResultCollection results)
+        {
+            if (typeof(TKey) == typeof(int) || typeof(TKey) == typeof(long))
             {
-                results.Add(new ValidationResult("Id不能为空"));
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Id.SafeString()) || Id.Equals(default(TKey)))
+            {
+                results.Add(new ValidationResult(R.IdIsEmpty));
             }
         }
     }
