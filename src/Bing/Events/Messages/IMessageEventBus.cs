@@ -21,7 +21,8 @@ namespace Bing.Events.Messages
         /// <param name="name">消息名称</param>
         /// <param name="data">事件数据</param>
         /// <param name="callback">回调名称</param>
+        /// <param name="send">是否立即发送消息</param>
         /// <returns></returns>
-        Task PublishAsync(string name, object data, string callback);
+        Task PublishAsync(string name, object data, string callback, bool send = false);
     }
 }
