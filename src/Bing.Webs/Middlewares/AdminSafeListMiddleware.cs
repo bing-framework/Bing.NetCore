@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Bing.Logs;
 using Microsoft.AspNetCore.Http;
-using IMiddleware = Bing.AspNetCore.IMiddleware;
 
 namespace Bing.Webs.Middlewares
 {

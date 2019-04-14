@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace Bing.AspNetCore
+namespace Bing.Webs.Middlewares
 {
     /// <summary>
     /// 定义AspNetCore中间件

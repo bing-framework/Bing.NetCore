@@ -255,6 +255,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "02-Utopa.Tms.Data", "bus\Ut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utopa.Tms", "bus\Utopa.Tms\Utopa.Tms.csproj", "{6E0638A3-7449-4162-9251-7F673B5EE886}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Identity", "sample\Bing.Samples.Identity\Bing.Samples.Identity.csproj", "{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -557,6 +559,10 @@ Global
 		{6E0638A3-7449-4162-9251-7F673B5EE886}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E0638A3-7449-4162-9251-7F673B5EE886}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E0638A3-7449-4162-9251-7F673B5EE886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -671,6 +677,7 @@ Global
 		{C6C23117-D05D-4EBB-BC53-7EDF1341B8F7} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 		{DA43EECF-CD52-43FA-B4CD-EE2B80549D21} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 		{6E0638A3-7449-4162-9251-7F673B5EE886} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
+		{BE9D370F-C77A-4F7D-AE07-5D097F9A724C} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

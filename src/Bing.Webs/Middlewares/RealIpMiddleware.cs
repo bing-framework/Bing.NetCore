@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.Webs.Middlewares

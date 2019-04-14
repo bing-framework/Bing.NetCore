@@ -11,10 +11,27 @@ namespace Bing.Utils.Parameters
     /// </summary>
     public class UrlParameterBuilder
     {
+        #region 属性
+
         /// <summary>
         /// 参数生成器
         /// </summary>
         private ParameterBuilder ParameterBuilder { get; }
+
+        /// <summary>
+        /// 索引器
+        /// </summary>
+        /// <param name="name">参数名</param>
+        /// <returns></returns>
+        public object this[string name]
+        {
+            get => GetValue(name);
+            set => Add(name, value);
+        }
+
+        #endregion
+
+        #region 构造函数
 
         /// <summary>
         /// 初始化一个<see cref="UrlParameterBuilder"/>类型的实例
@@ -48,6 +65,10 @@ namespace Bing.Utils.Parameters
             LoadUrl(url);
         }
 
+        #endregion
+
+        #region LoadUrl(加载Url)
+
         /// <summary>
         /// 加载Url
         /// </summary>
@@ -71,6 +92,10 @@ namespace Bing.Utils.Parameters
             }
         }
 
+        #endregion
+
+        #region LoadForm(从Request加载表单参数)
+
         /// <summary>
         /// 从Request加载表单参数
         /// </summary>
@@ -90,6 +115,10 @@ namespace Bing.Utils.Parameters
                 }
             }
         }
+
+        #endregion
+
+        #region LoadQuery(从Request加载查询参数)
 
         /// <summary>
         /// 从Request加载查询参数
@@ -111,6 +140,10 @@ namespace Bing.Utils.Parameters
             }
         }
 
+        #endregion
+
+        #region Add(添加参数)
+
         /// <summary>
         /// 添加参数
         /// </summary>
@@ -123,6 +156,10 @@ namespace Bing.Utils.Parameters
             return this;
         }
 
+        #endregion
+
+        #region GetValue(获取值)
+
         /// <summary>
         /// 获取值
         /// </summary>
@@ -133,16 +170,9 @@ namespace Bing.Utils.Parameters
             return ParameterBuilder.GetValue(name);
         }
 
-        /// <summary>
-        /// 索引器
-        /// </summary>
-        /// <param name="name">参数名</param>
-        /// <returns></returns>
-        public object this[string name]
-        {
-            get => GetValue(name);
-            set => Add(name, value);
-        }
+        #endregion
+
+        #region GetDictionary(获取字典)
 
         /// <summary>
         /// 获取字典
@@ -157,6 +187,10 @@ namespace Bing.Utils.Parameters
             return ParameterBuilder.GetDictionary(isSort, isUrlEncode, encoding);
         }
 
+        #endregion
+
+        #region GetKeyValuePairs(获取键值对集合)
+
         /// <summary>
         /// 获取键值对集合
         /// </summary>
@@ -165,6 +199,10 @@ namespace Bing.Utils.Parameters
         {
             return ParameterBuilder.GetKeyValuePairs();
         }
+
+        #endregion
+
+        #region Result(获取结果)
 
         /// <summary>
         /// 获取结果，格式：参数名=参数值&amp;参数名=参数值
@@ -178,6 +216,10 @@ namespace Bing.Utils.Parameters
             return ParameterBuilder.Result(UrlParameterFormat.Instance, isSort, isUrlEncode, encoding);
         }
 
+        #endregion
+
+        #region JoinUrl(连接Url)
+
         /// <summary>
         /// 连接Url
         /// </summary>
@@ -188,6 +230,10 @@ namespace Bing.Utils.Parameters
             return Url.Join(url, Result());
         }
 
+        #endregion
+
+        #region Clear(清空)
+
         /// <summary>
         /// 清空
         /// </summary>
@@ -195,6 +241,10 @@ namespace Bing.Utils.Parameters
         {
             ParameterBuilder.Clear();
         }
+
+        #endregion
+
+        #region Remove(移除参数)
 
         /// <summary>
         /// 移除参数
@@ -205,5 +255,8 @@ namespace Bing.Utils.Parameters
         {
             return ParameterBuilder.Remove(key);
         }
+
+        #endregion
+
     }
 }
