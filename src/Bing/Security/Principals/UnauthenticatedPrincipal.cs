@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Principal;
-using System.Text;
 
 namespace Bing.Security.Principals
 {
@@ -24,6 +21,6 @@ namespace Bing.Security.Principals
         /// <summary>
         /// 未认证安全主体
         /// </summary>
-        public static readonly UnauthenticatedPrincipal Instance=new UnauthenticatedPrincipal();
+        public static readonly UnauthenticatedPrincipal Instance = new UnauthenticatedPrincipal();
     }
 }

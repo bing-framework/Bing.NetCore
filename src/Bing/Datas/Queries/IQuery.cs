@@ -133,9 +133,9 @@ namespace Bing.Datas.Queries
         /// <summary>
         /// 或连接
         /// </summary>
-        /// <param name="predicate">查询条件</param>
+        /// <param name="predicates">查询条件</param>
         /// <returns></returns>
-        IQuery<TEntity, TKey> Or(Expression<Func<TEntity, bool>> predicate);
+        IQuery<TEntity, TKey> Or(params Expression<Func<TEntity, bool>>[] predicates);
 
         /// <summary>
         /// 或连接

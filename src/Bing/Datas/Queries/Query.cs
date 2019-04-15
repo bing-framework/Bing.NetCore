@@ -260,11 +260,25 @@ namespace Bing.Datas.Queries
         /// <summary>
         /// 或连接
         /// </summary>
-        /// <param name="predicate">查询条件</param>
+        /// <param name="predicates">查询条件</param>
         /// <returns></returns>
-        public IQuery<TEntity, TKey> Or(Expression<Func<TEntity, bool>> predicate)
+        public IQuery<TEntity, TKey> Or(params Expression<Func<TEntity, bool>>[] predicates)
         {
-            _predicate = _predicate.Or(predicate);
+            if (predicates == null)
+            {
+                return this;
+            }
+
+            foreach (var item in predicates)
+            {
+                var predicate = Helper.GetWhereIfNotEmptyExpression(item);
+                if (predicate == null)
+                {
+                    continue;
+                }
+
+                _predicate = _predicate.Or(predicate);
+            }
             return this;
         }
 

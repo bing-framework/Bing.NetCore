@@ -41,7 +41,7 @@ namespace Bing.Security.Identity.Models
         /// </summary>
         [DisplayName("备注")]
         [StringLength(500, ErrorMessage = "备注输入过长，不能超过500位")]
-        public string Comment { get; set; }
+        public string Note { get; set; }
         /// <summary>
         /// 启用
         /// </summary>
@@ -89,7 +89,7 @@ namespace Bing.Security.Identity.Models
             AddDescription(t => t.Id);
             AddDescription(t => t.Code);
             AddDescription(t => t.Name);
-            AddDescription(t => t.Comment);
+            AddDescription(t => t.Note);
             AddDescription(t => t.Enabled);
             AddDescription(t => t.RegisterEnabled);
             AddDescription(t => t.CreationTime);
@@ -106,7 +106,7 @@ namespace Bing.Security.Identity.Models
             AddChange(t => t.Id, other.Id);
             AddChange(t => t.Code, other.Code);
             AddChange(t => t.Name, other.Name);
-            AddChange(t => t.Comment, other.Comment);
+            AddChange(t => t.Note, other.Note);
             AddChange(t => t.Enabled, other.Enabled);
             AddChange(t => t.RegisterEnabled, other.RegisterEnabled);
             AddChange(t => t.CreationTime, other.CreationTime);
