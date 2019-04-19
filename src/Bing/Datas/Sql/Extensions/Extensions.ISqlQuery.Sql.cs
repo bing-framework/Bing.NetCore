@@ -121,6 +121,20 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+        /// <returns></returns>
+        public static ISqlQuery Select<TEntity>(this ISqlQuery sqlQuery, bool propertyAsAlias) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.Select<TEntity>(propertyAsAlias);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 设置列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
         /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>

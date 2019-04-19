@@ -14,7 +14,7 @@ namespace Bing.Datas.Sql.Matedatas
         /// <returns></returns>
         public string GetTable(Type type)
         {
-            return type?.FullName;
+            return type?.Name;
         }
 
         /// <summary>

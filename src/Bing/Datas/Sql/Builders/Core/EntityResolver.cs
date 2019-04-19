@@ -57,6 +57,19 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 获取列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+        /// <returns></returns>
+        public string GetColumns<TEntity>(bool propertyAsAlias)
+        {
+            var type = typeof(TEntity);
+            var propertyies = type.GetProperties().Select(t => t.Name).ToList();
+            return GetColumns<TEntity>(propertyies, propertyAsAlias);
+        }
+
+        /// <summary>
+        /// 获取列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="columns">列名表达式</param>
         /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         /// <returns></returns>

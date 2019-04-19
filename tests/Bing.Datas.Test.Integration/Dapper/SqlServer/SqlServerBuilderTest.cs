@@ -23,7 +23,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
         /// <summary>
         /// Sql Server Sql生成器
         /// </summary>
-        private readonly SqlServerBuilder _builder;
+        private SqlServerBuilder _builder;
 
         /// <summary>
         /// 测试初始化

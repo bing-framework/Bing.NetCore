@@ -1,4 +1,7 @@
-﻿using Bing.Datas.Sql;
+﻿using System;
+using Bing.Datas.Dapper.SqlServer;
+using Bing.Datas.Sql;
+using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.Test.Integration.Samples;
 using Bing.Utils.Helpers;
 using Xunit;
@@ -373,6 +376,25 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             Assert.Equal(2, _builder.GetParams().Count);
             Assert.Equal("a", _builder.GetParams()["@_p_0"]);
             Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        }
+
+        /// <summary>
+        /// 将类型上所有属性设置为列名
+        /// </summary>
+        [Fact]
+        public void TestSelect_8()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select [s].[StringValue],[s].[IsDeleted] ");
+            result.Append("From [Sample3] As [s]");
+
+            //执行
+            _builder = new SqlServerBuilder(new DefaultEntityMatedata());
+            _builder.Select<Sample3>().From<Sample3>("s");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
         }
     }
 }

@@ -12,5 +12,10 @@ namespace Bing.Datas.Test.Integration.Samples
         /// string值
         /// </summary>
         public string StringValue { get; set; }
+
+        /// <summary>
+        /// 是否删除
+        /// </summary>
+        public bool IsDeleted { get; set; }
     }
 }
