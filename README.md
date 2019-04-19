@@ -26,7 +26,7 @@ Bing 框架Nuget包分布
 |Bing.Events|[![NuGet Badge](https://buildstats.info/nuget/Bing.Events?includePreReleases=true)](https://www.nuget.org/packages/Bing.Events)|
 |Bing.Applications|[![NuGet Badge](https://buildstats.info/nuget/Bing.Applications?includePreReleases=true)](https://www.nuget.org/packages/Bing.Applications)|
 |Bing.Webs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Webs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Webs)|
-|Bing.Extensions.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Extensions.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Extensions.AutoMapper)|
+|Bing.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.AutoMapper)|
 |Bing.Biz|[![NuGet Badge](https://buildstats.info/nuget/Bing.Biz?includePreReleases=true)](https://www.nuget.org/packages/Bing.Biz)|
 |Bing.MailKit|[![NuGet Badge](https://buildstats.info/nuget/Bing.MailKit?includePreReleases=true)](https://www.nuget.org/packages/Bing.MailKit)|
 |Bing.Geetest|[![NuGet Badge](https://buildstats.info/nuget/Bing.Geetest?includePreReleases=true)](https://www.nuget.org/packages/Bing.Geetest)|

@@ -59,7 +59,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-document", "00-document"
 	ProjectSection(SolutionItems) = preProject
 		build\pack.bat = build\pack.bat
 		README.md = README.md
-		build\version.props = build\version.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Events", "src\Bing.Events\Bing.Events.csproj", "{B55867B3-E6FE-410D-A27F-55A7C63B8F2E}"
@@ -255,7 +254,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "02-Utopa.Tms.Data", "bus\Ut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utopa.Tms", "bus\Utopa.Tms\Utopa.Tms.csproj", "{6E0638A3-7449-4162-9251-7F673B5EE886}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Identity", "sample\Bing.Samples.Identity\Bing.Samples.Identity.csproj", "{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Identity", "sample\Bing.Samples.Identity\Bing.Samples.Identity.csproj", "{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
