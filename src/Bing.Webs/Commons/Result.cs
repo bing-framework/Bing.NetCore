@@ -63,25 +63,13 @@ namespace Bing.Webs.Commons
         /// </summary>
         public override Task ExecuteResultAsync(ActionContext context)
         {
-            if (Data != null)
+            this.Value = new
             {
-                this.Value = new
-                {
-                    Code = Code,
-                    Message = Message,
-                    OperationTime = OperationTime,
-                    Data = Data
-                };
-            }
-            else
-            {
-                this.Value = new
-                {
-                    Code = Code,
-                    Message = Message,
-                    OperationTime = OperationTime,
-                };
-            }            
+                Code = Code,
+                Message = Message,
+                OperationTime = OperationTime,
+                Data = Data
+            };
             return base.ExecuteResultAsync(context);
         }
     }
