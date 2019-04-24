@@ -1,4 +1,6 @@
-﻿using Bing.Webs.Commons;
+﻿using Bing.Exceptions;
+using Bing.Utils.Helpers;
+using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.Webs.Filters
@@ -16,6 +18,10 @@ namespace Bing.Webs.Filters
         {
             context.ExceptionHandled = true;
             context.HttpContext.Response.StatusCode = 200;
+            if (context.Exception is Warning warning && !string.IsNullOrWhiteSpace(warning.Code))
+            {
+                context.Result = new Result(Conv.ToInt(warning.Code), context.Exception.Message);
+            }
             context.Result = new Result(StateCode.Fail, context.Exception.Message);
         }
     }

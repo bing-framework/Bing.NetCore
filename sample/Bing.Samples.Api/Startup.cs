@@ -38,7 +38,7 @@ namespace Bing.Samples.Api
         {
             services.AddMvc(options =>
                 {
-                    options.Filters.Add<ValidationAttribute>();
+                    options.Filters.Add<ValidationModelAttribute>();
                     options.Filters.Add<ResultHandlerAttribute>();
                     options.Filters.Add<ExceptionHandlerAttribute>();
                 })

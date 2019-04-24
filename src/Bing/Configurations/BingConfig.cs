@@ -16,7 +16,7 @@ namespace Bing.Configurations
         /// <summary>
         /// 对象锁
         /// </summary>
-        private static object _lockObj=new object();
+        private static object _lockObj = new object();
 
         /// <summary>
         /// 当前框架配置
@@ -29,7 +29,7 @@ namespace Bing.Configurations
                 {
                     lock (_lockObj)
                     {
-                        _instance=new BingConfig();
+                        _instance = new BingConfig();
                     }
                 }
 
@@ -56,9 +56,5 @@ namespace Bing.Configurations
         /// 是否启用跟踪日志
         /// </summary>
         public bool EnabledTrace { get; set; } = true;
-
-
-
-        
     }
 }

@@ -1,13 +1,14 @@
 ﻿using System.Linq;
+using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.Webs.Filters
 {
     /// <summary>
-    /// 验证过滤器
+    /// 验证实体过滤器
     /// </summary>
-    public class ValidationAttribute:ActionFilterAttribute
+    public class ValidationModelAttribute: IActionFilter
     {
         /// <summary>
         /// 允许空值
@@ -15,24 +16,29 @@ namespace Bing.Webs.Filters
         public bool AllowNulls { get; set; }
 
         /// <summary>
-        /// 重写OnActionExecuting()，进行值过滤
+        /// 允许多个结果
         /// </summary>
-        /// <param name="context"></param>
-        public override void OnActionExecuting(ActionExecutingContext context)
+        public bool AllowMultipleResult { get; set; } = true;
+
+        /// <summary>
+        /// 操作执行
+        /// </summary>
+        /// <param name="context">操作执行上下文</param>
+        public void OnActionExecuting(ActionExecutingContext context)
         {
             if (!AllowNulls)
             {
                 var nullArguments = context.ActionArguments
                     .Where(arg => arg.Value == null)
-                    .Select(arg => new Error()
+                    .Select(arg => new ValidationError()
                     {
                         Name = arg.Key,
                         Message = "值不能为空"
-                    }).ToArray();
+                    }).ToList();
 
                 if (nullArguments.Any())
                 {
-                    context.Result = new BadRequestObjectResult(nullArguments);
+                    context.Result = new ValidationFailedResult(nullArguments) { AllowMultipleResult = AllowMultipleResult };
                     return;
                 }
             }
@@ -41,30 +47,22 @@ namespace Bing.Webs.Filters
             {
                 var errors = context.ModelState
                     .Where(e => e.Value.Errors.Count > 0)
-                    .Select(e => new Error()
+                    .Select(e => new ValidationError()
                     {
                         Name = e.Key,
                         Message = e.Value.Errors.First().ErrorMessage
-                    }).ToArray();
+                    }).ToList();
 
-                context.Result = new BadRequestObjectResult(errors);
+                context.Result = new ValidationFailedResult(errors){ AllowMultipleResult = AllowMultipleResult };
             }
         }
 
         /// <summary>
-        /// 错误
+        /// 操作执行完毕
         /// </summary>
-        private class Error
+        /// <param name="context">操作执行完毕上下文</param>
+        public void OnActionExecuted(ActionExecutedContext context)
         {
-            /// <summary>
-            /// 属性名
-            /// </summary>
-            public string Name { get; set; }
-
-            /// <summary>
-            /// 错误消息
-            /// </summary>
-            public string Message { get; set; }
         }
     }
 }

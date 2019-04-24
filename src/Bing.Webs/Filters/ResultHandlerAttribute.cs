@@ -34,6 +34,14 @@ namespace Bing.Webs.Filters
                 }
             }
 
+            if (context.Result is ValidationFailedResult validationFailedResult)
+            {
+                context.Result = new Result(StateCode.Fail,
+                    validationFailedResult.AllowMultipleResult
+                        ? validationFailedResult.Errors.FirstOrDefault()?.Message
+                        : "验证数据失败!", validationFailedResult.AllowMultipleResult ? validationFailedResult.Errors : null);
+            }
+
             if (context.Result is Result result)
             {
                 return;

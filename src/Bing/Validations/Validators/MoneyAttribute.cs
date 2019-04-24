@@ -63,7 +63,9 @@ namespace System.ComponentModel.DataAnnotations
                 return ValidationResult.Success;
             }
 
-            return new ValidationResult(FormatErrorMessage(string.Empty));
+            return new ValidationResult(FormatErrorMessage(string.IsNullOrWhiteSpace(validationContext.DisplayName)
+                ? validationContext.MemberName
+                : validationContext.DisplayName));
         }
     }
 }
