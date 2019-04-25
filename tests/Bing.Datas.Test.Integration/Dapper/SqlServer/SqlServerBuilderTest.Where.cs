@@ -784,7 +784,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             result.Append("Where [a].[Email]<>@_p_0");
 
             //执行
-            _builder.Select<Sample>(t => new object[] { t.Email })
+            _builder.Select<Sample>(t => new object[] {t.Email})
                 .From<Sample>("a")
                 .WhereIfNotEmpty<Sample>(t => t.Url, "")
                 .WhereIfNotEmpty<Sample>(t => t.Email, "abc", Operator.NotEqual);

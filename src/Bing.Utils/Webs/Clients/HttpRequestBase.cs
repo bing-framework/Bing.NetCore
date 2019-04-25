@@ -550,6 +550,12 @@ namespace Bing.Utils.Webs.Clients
             {
                 content.Add(new StreamContent(file.GetFileStream()), file.GetName(), file.GetFileName());
             }
+
+            foreach (var item in _params)
+            {
+                content.Add(new StringContent(item.Value.SafeString()), item.Key);
+            }
+            
             return content;
         }
 
