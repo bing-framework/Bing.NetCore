@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Serialization;
@@ -11,6 +13,35 @@ namespace Bing.Utils.Helpers
     /// </summary>
     public static class Serialize
     {
+        #region 二进制序列化
+
+        /// <summary>
+        /// 将对象序列化为byte[]。此方法不需要源类型标记可<see cref="SerializableAttribute"/>
+        /// </summary>
+        /// <param name="data">数据</param>
+        /// <returns></returns>
+        public static byte[] ToBytes(object data)
+        {
+            var bytes = new byte[Marshal.SizeOf(data)];
+            var ptr = Marshal.UnsafeAddrOfPinnedArrayElement(bytes, 0);
+            Marshal.StructureToPtr(data, ptr, true);
+            return bytes;
+        }
+
+        /// <summary>
+        /// 将byte[]反序列化为对象。此方法不需要源类型标记可<see cref="SerializableAttribute"/>
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="bytes">二进制数组</param>
+        /// <returns></returns>
+        public static T FromBytes<T>(byte[] bytes)
+        {
+            var type = typeof(T);
+            var ptr = Marshal.UnsafeAddrOfPinnedArrayElement(bytes, 0);
+            var obj = Marshal.PtrToStructure(ptr, type);
+            return (T)obj;
+        }
+
         /// <summary>
         /// 将数据序列化为二进制数组
         /// </summary>
@@ -19,9 +50,9 @@ namespace Bing.Utils.Helpers
         public static byte[] ToBinary(object data)
         {
             data.CheckNotNull(nameof(data));
-            using (MemoryStream ms=new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                BinaryFormatter formatter=new BinaryFormatter();
+                var formatter = new BinaryFormatter();
                 formatter.Serialize(ms, data);
                 ms.Seek(0, SeekOrigin.Begin);
                 return ms.ToArray();
@@ -37,10 +68,10 @@ namespace Bing.Utils.Helpers
         public static T FromBinary<T>(byte[] bytes)
         {
             bytes.CheckNotNullOrEmpty(nameof(bytes));
-            using (MemoryStream ms=new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                BinaryFormatter formatter=new BinaryFormatter();
-                return (T) formatter.Deserialize(ms);
+                var formatter = new BinaryFormatter();
+                return (T)formatter.Deserialize(ms);
             }
         }
 
@@ -53,9 +84,9 @@ namespace Bing.Utils.Helpers
         {
             fileName.CheckNotNull(nameof(fileName));
             data.CheckNotNull(nameof(data));
-            using (FileStream fs=new FileStream(fileName,FileMode.Create))
+            using (var fs = new FileStream(fileName, FileMode.Create))
             {
-                BinaryFormatter formatter=new BinaryFormatter();
+                var formatter = new BinaryFormatter();
                 formatter.Serialize(fs, data);
             }
         }
@@ -69,12 +100,16 @@ namespace Bing.Utils.Helpers
         public static T FromBinaryFile<T>(string fileName)
         {
             fileName.CheckFileExists(nameof(fileName));
-            using (FileStream fs=new FileStream(fileName,FileMode.Open))
+            using (var fs = new FileStream(fileName, FileMode.Open))
             {
-                BinaryFormatter formatter=new BinaryFormatter();
-                return (T) formatter.Deserialize(fs);
+                var formatter = new BinaryFormatter();
+                return (T)formatter.Deserialize(fs);
             }
         }
+
+        #endregion
+
+        #region Xml序列化
 
         /// <summary>
         /// 将数据序列化为Xml形式
@@ -84,9 +119,9 @@ namespace Bing.Utils.Helpers
         public static string ToXml(object data)
         {
             data.CheckNotNull(nameof(data));
-            using (MemoryStream ms=new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                XmlSerializer serializer=new XmlSerializer(data.GetType());
+                var serializer = new XmlSerializer(data.GetType());
                 serializer.Serialize(ms, data);
                 ms.Seek(0, SeekOrigin.Begin);
                 return Encoding.Default.GetString(ms.ToArray());
@@ -103,10 +138,10 @@ namespace Bing.Utils.Helpers
         {
             xml.CheckNotNull(nameof(xml));
             byte[] bytes = Encoding.Default.GetBytes(xml);
-            using (MemoryStream ms=new MemoryStream())
+            using (var ms = new MemoryStream(bytes))
             {
-                XmlSerializer serializer=new XmlSerializer(typeof(T));
-                return (T) serializer.Deserialize(ms);
+                var serializer = new XmlSerializer(typeof(T));
+                return (T)serializer.Deserialize(ms);
             }
         }
 
@@ -119,10 +154,10 @@ namespace Bing.Utils.Helpers
         {
             fileName.CheckNotNull(nameof(fileName));
             data.CheckNotNull(nameof(data));
-            using (FileStream fs=new FileStream(fileName,FileMode.Create))
+            using (var fs = new FileStream(fileName, FileMode.Create))
             {
-                XmlSerializer serializer=new XmlSerializer(data.GetType());
-                serializer.Serialize(fs,data);
+                var serializer = new XmlSerializer(data.GetType());
+                serializer.Serialize(fs, data);
             }
         }
 
@@ -135,11 +170,13 @@ namespace Bing.Utils.Helpers
         public static T FromXmlFile<T>(string fileName)
         {
             fileName.CheckFileExists(nameof(fileName));
-            using (FileStream fs=new FileStream(fileName,FileMode.Open))
+            using (var fs = new FileStream(fileName, FileMode.Open))
             {
-                XmlSerializer serializer=new XmlSerializer(typeof(T));
-                return (T) serializer.Deserialize(fs);
+                var serializer = new XmlSerializer(typeof(T));
+                return (T)serializer.Deserialize(fs);
             }
         }
+
+        #endregion
     }
 }
