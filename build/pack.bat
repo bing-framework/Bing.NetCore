@@ -10,6 +10,8 @@ dotnet build Bing.NetCore.sln -c Release
 
 rem pack
 dotnet pack ./src/Bing.Utils/Bing.Utils.csproj
+dotnet pack ./src/Bing.Utils.Drawing/Bing.Utils.Drawing.csproj
+
 dotnet pack ./src/Bing/Bing.csproj
 dotnet pack ./src/Bing.AspNetCore/Bing.AspNetCore.csproj
 dotnet pack ./src/Bing.Security/Bing.Security.csproj
@@ -26,9 +28,8 @@ dotnet pack ./src/Bing.Datas.EntityFramework.PgSql/Bing.Datas.EntityFramework.Pg
 dotnet pack ./src/Bing.Datas.EntityFramework.SqlServer/Bing.Datas.EntityFramework.SqlServer.csproj
 dotnet pack ./src/Bing.Applications/Bing.Applications.csproj
 dotnet pack ./src/Bing.Webs/Bing.Webs.csproj
-REM dotnet pack ./src/Bing.Extensions.AutoMapper/Bing.Extensions.AutoMapper.csproj
-REM dotnet pack ./src/Bing.Extensions.Swashbuckle/Bing.Extensions.Swashbuckle.csproj
 dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
+dotnet pack ./src/Bing.AutoMapper/Bing.AutoMapper.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 REM dotnet pack ./src/Bing.Geetest/Bing.Geetest.csproj
 REM dotnet pack ./src/Bing.Sequence/Bing.Sequence.csproj

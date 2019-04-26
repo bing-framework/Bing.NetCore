@@ -6,33 +6,32 @@
 Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装，第三方业务接口封装等组成。
 
 ## Nuget Packages
-Bing 框架Nuget包分布
 
-|Nuget|版本号|说明|
+|包名称|Nuget版本|下载数|
 |---|---|---|
-|Bing.Utils|[![NuGet Badge](https://buildstats.info/nuget/Bing.Utils?includePreReleases=true)](https://www.nuget.org/packages/Bing.Utils)|
-|Bing.Core|[![NuGet Badge](https://buildstats.info/nuget/Bing.Core?includePreReleases=true)](https://www.nuget.org/packages/Bing.Core)|
-|Bing.Security|[![NuGet Badge](https://buildstats.info/nuget/Bing.Security?includePreReleases=true)](https://www.nuget.org/packages/Bing.Security)|
-|Bing.Logs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs)|
-|Bing.Logs.Exceptionless|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.Exceptionless?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.Exceptionless)|
-|Bing.Logs.Log4Net|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.Log4Net?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.Log4Net)|
-|Bing.Logs.NLog|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.NLog?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.NLog)|
-|Bing.Logs.Serilog|[![NuGet Badge](https://buildstats.info/nuget/Bing.Logs.Serilog?includePreReleases=true)](https://www.nuget.org/packages/Bing.Logs.Serilog)|
-|Bing.Datas.Dapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.Dapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.Dapper)|
-|Bing.Datas.EntityFramework|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework)|
-|Bing.Datas.EntityFramework.MySql|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework.MySql?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.MySql)|
-|Bing.Datas.EntityFramework.PgSql|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework.PgSql?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.PgSql)|
-|Bing.Datas.EntityFramework.SqlServer|[![NuGet Badge](https://buildstats.info/nuget/Bing.Datas.EntityFramework.SqlServer?includePreReleases=true)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.SqlServer)|
-|Bing.Events|[![NuGet Badge](https://buildstats.info/nuget/Bing.Events?includePreReleases=true)](https://www.nuget.org/packages/Bing.Events)|
-|Bing.Applications|[![NuGet Badge](https://buildstats.info/nuget/Bing.Applications?includePreReleases=true)](https://www.nuget.org/packages/Bing.Applications)|
-|Bing.Webs|[![NuGet Badge](https://buildstats.info/nuget/Bing.Webs?includePreReleases=true)](https://www.nuget.org/packages/Bing.Webs)|
-|Bing.AutoMapper|[![NuGet Badge](https://buildstats.info/nuget/Bing.AutoMapper?includePreReleases=true)](https://www.nuget.org/packages/Bing.AutoMapper)|
-|Bing.Biz|[![NuGet Badge](https://buildstats.info/nuget/Bing.Biz?includePreReleases=true)](https://www.nuget.org/packages/Bing.Biz)|
-|Bing.MailKit|[![NuGet Badge](https://buildstats.info/nuget/Bing.MailKit?includePreReleases=true)](https://www.nuget.org/packages/Bing.MailKit)|
-|Bing.Geetest|[![NuGet Badge](https://buildstats.info/nuget/Bing.Geetest?includePreReleases=true)](https://www.nuget.org/packages/Bing.Geetest)|
-|Bing.Sequence|[![NuGet Badge](https://buildstats.info/nuget/Bing.Sequence?includePreReleases=true)](https://www.nuget.org/packages/Bing.Sequence)|
-
-
+|Bing.Utils|[![Bing.Utils](https://img.shields.io/nuget/v/Bing.Utils.svg)](https://www.nuget.org/packages/Bing.Utils/)|[![Bing.Utils](https://img.shields.io/nuget/dt/Bing.Utils.svg)](https://www.nuget.org/packages/Bing.Utils/)|
+|Bing.Core|[![Bing.Core](https://img.shields.io/nuget/v/Bing.Core.svg)](https://www.nuget.org/packages/Bing.Core/)|[![Bing.Core](https://img.shields.io/nuget/dt/Bing.Core.svg)](https://www.nuget.org/packages/Bing.Core/)|
+|Bing.AspNetCore|[![Bing.AspNetCore](https://img.shields.io/nuget/v/Bing.AspNetCore.svg)](https://www.nuget.org/packages/Bing.AspNetCore/)|[![Bing.AspNetCore](https://img.shields.io/nuget/dt/Bing.AspNetCore.svg)](https://www.nuget.org/packages/Bing.AspNetCore/)|
+|Bing.Security|[![Bing.Security](https://img.shields.io/nuget/v/Bing.Security.svg)](https://www.nuget.org/packages/Bing.Security/)|[![Bing.Security](https://img.shields.io/nuget/dt/Bing.Security.svg)](https://www.nuget.org/packages/Bing.Security/)|
+|Bing.Logs|[![Bing.Logs](https://img.shields.io/nuget/v/Bing.Logs.svg)](https://www.nuget.org/packages/Bing.Logs/)|[![Bing.Logs](https://img.shields.io/nuget/dt/Bing.Logs.svg)](https://www.nuget.org/packages/Bing.Logs/)|
+|Bing.Logs.Exceptionless|[![Bing.Logs.Exceptionless](https://img.shields.io/nuget/v/Bing.Logs.Exceptionless.svg)](https://www.nuget.org/packages/Bing.Logs.Exceptionless/)|[![Bing.Logs.Exceptionless](https://img.shields.io/nuget/dt/Bing.Logs.Exceptionless.svg)](https://www.nuget.org/packages/Bing.Logs.Exceptionless/)|
+|Bing.Logs.Log4Net|[![Bing.Logs.Log4Net](https://img.shields.io/nuget/v/Bing.Logs.Log4Net.svg)](https://www.nuget.org/packages/Bing.Logs.Log4Net/)|[![Bing.Logs.Log4Net](https://img.shields.io/nuget/dt/Bing.Logs.Log4Net.svg)](https://www.nuget.org/packages/Bing.Logs.Log4Net/)|
+|Bing.Logs.NLog|[![Bing.Logs.NLog](https://img.shields.io/nuget/v/Bing.Logs.NLog.svg)](https://www.nuget.org/packages/Bing.Logs.NLog/)|[![Bing.Logs.NLog](https://img.shields.io/nuget/dt/Bing.Logs.NLog.svg)](https://www.nuget.org/packages/Bing.Logs.NLog/)|
+|Bing.Logs.Serilog|[![Bing.Serilog](https://img.shields.io/nuget/v/Bing.Logs.Serilog.svg)](https://www.nuget.org/packages/Bing.Logs.Serilog/)|[![Bing.Logs.Serilog](https://img.shields.io/nuget/dt/Bing.Logs.Serilog.svg)](https://www.nuget.org/packages/Bing.Logs.Serilog/)|
+|Bing.Datas.Dapper|[![Bing.Datas.Dapper](https://img.shields.io/nuget/v/Bing.Datas.Dapper.svg)](https://www.nuget.org/packages/Bing.Datas.Dapper/)|[![Bing.Datas.Dapper](https://img.shields.io/nuget/dt/Bing.Datas.Dapper.svg)](https://www.nuget.org/packages/Bing.Datas.Dapper/)|
+|Bing.Datas.EntityFramework|[![Bing.Datas.EntityFramework](https://img.shields.io/nuget/v/Bing.Datas.EntityFramework.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework/)|[![Bing.Datas.EntityFramework](https://img.shields.io/nuget/dt/Bing.Datas.EntityFramework.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework/)|
+|Bing.Datas.EntityFramework.MySql|[![Bing.Datas.EntityFramework.MySql](https://img.shields.io/nuget/v/Bing.Datas.EntityFramework.MySql.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.MySql/)|[![Bing.Datas.EntityFramework.MySql](https://img.shields.io/nuget/dt/Bing.Datas.EntityFramework.MySql.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.MySql/)|
+|Bing.Datas.EntityFramework.PgSql|[![Bing.Datas.EntityFramework.PgSql](https://img.shields.io/nuget/v/Bing.Datas.EntityFramework.PgSql.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.PgSql/)|[![Bing.Datas.EntityFramework.PgSql](https://img.shields.io/nuget/dt/Bing.Datas.EntityFramework.PgSql.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.PgSql/)|
+|Bing.Datas.EntityFramework.SqlServer|[![Bing.Datas.EntityFramework.SqlServer](https://img.shields.io/nuget/v/Bing.Datas.EntityFramework.SqlServer.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.SqlServer/)|[![Bing.Datas.EntityFramework.SqlServer](https://img.shields.io/nuget/dt/Bing.Datas.EntityFramework.SqlServer.svg)](https://www.nuget.org/packages/Bing.Datas.EntityFramework.SqlServer/)|
+|Bing.Events|[![Bing.Events](https://img.shields.io/nuget/v/Bing.Events.svg)](https://www.nuget.org/packages/Bing.Events/)|[![Bing.Events](https://img.shields.io/nuget/dt/Bing.Events.svg)](https://www.nuget.org/packages/Bing.Events/)|
+|Bing.Applications|[![Bing.Applications](https://img.shields.io/nuget/v/Bing.Applications.svg)](https://www.nuget.org/packages/Bing.Applications/)|[![Bing.Applications](https://img.shields.io/nuget/dt/Bing.Applications.svg)](https://www.nuget.org/packages/Bing.Applications/)|
+|Bing.Webs|[![Bing.Webs](https://img.shields.io/nuget/v/Bing.Webs.svg)](https://www.nuget.org/packages/Bing.Webs/)|[![Bing.Webs](https://img.shields.io/nuget/dt/Bing.Webs.svg)](https://www.nuget.org/packages/Bing.Webs/)|
+|Bing.AutoMapper|[![Bing.AutoMapper](https://img.shields.io/nuget/v/Bing.AutoMapper.svg)](https://www.nuget.org/packages/Bing.AutoMapper/)|[![Bing.AutoMapper](https://img.shields.io/nuget/dt/Bing.AutoMapper.svg)](https://www.nuget.org/packages/Bing.AutoMapper/)|
+|Bing.Biz|[![Bing.Biz](https://img.shields.io/nuget/v/Bing.Biz.svg)](https://www.nuget.org/packages/Bing.Biz/)|[![Bing.Biz](https://img.shields.io/nuget/dt/Bing.Biz.svg)](https://www.nuget.org/packages/Bing.Biz/)|
+|Bing.Biz.Payments|[![Bing.Biz.Payments](https://img.shields.io/nuget/v/Bing.Biz.Payments.svg)](https://www.nuget.org/packages/Bing.Biz.Payments/)|[![Bing.Biz.Payments](https://img.shields.io/nuget/dt/Bing.Biz.Payments.svg)](https://www.nuget.org/packages/Bing.Biz.Payments/)|
+|Bing.MailKit|[![Bing.MailKit](https://img.shields.io/nuget/v/Bing.MailKit.svg)](https://www.nuget.org/packages/Bing.MailKit/)|[![Bing.MailKit](https://img.shields.io/nuget/dt/Bing.MailKit.svg)](https://www.nuget.org/packages/Bing.MailKit/)|
+|Bing.Geetest|[![Bing.Geetest](https://img.shields.io/nuget/v/Bing.Geetest.svg)](https://www.nuget.org/packages/Bing.Geetest/)|[![Bing.Geetest](https://img.shields.io/nuget/dt/Bing.Geetest.svg)](https://www.nuget.org/packages/Bing.Geetest/)|
+|Bing.Sequence|[![Bing.Sequence](https://img.shields.io/nuget/v/Bing.Sequence.svg)](https://www.nuget.org/packages/Bing.Sequence/)|[![Bing.Sequence](https://img.shields.io/nuget/dt/Bing.Sequence.svg)](https://www.nuget.org/packages/Bing.Sequence/)|
 
 ## 开发环境以及类库依赖
 
