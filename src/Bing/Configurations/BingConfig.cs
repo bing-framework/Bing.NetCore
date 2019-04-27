@@ -43,11 +43,6 @@ namespace Bing.Configurations
         public Action<string> ValidationHandler = (message) => throw new Warning(message);
 
         /// <summary>
-        /// 是否启用用户名，用于设置审计创建人以及修改人
-        /// </summary>
-        public bool EnabledUserName { get; set; } = false;
-
-        /// <summary>
         /// 是否启用调试日志
         /// </summary>
         public bool EnabledDebug { get; set; } = true;

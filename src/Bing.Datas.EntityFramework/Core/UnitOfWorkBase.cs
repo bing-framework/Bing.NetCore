@@ -17,6 +17,7 @@ using Bing.Domains.Entities.Auditing;
 using Bing.Exceptions;
 using Bing.Helpers;
 using Bing.Logs;
+using Bing.Security.Extensions;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
@@ -127,10 +128,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 配置
         /// </summary>
         /// <param name="builder">配置生成器</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder builder)
-        {
-            EnableLog(builder);
-        }
+        protected override void OnConfiguring(DbContextOptionsBuilder builder) => EnableLog(builder);
 
         /// <summary>
         /// 启用日志
@@ -355,46 +353,47 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化创建审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitCreationAudited(EntityEntry entry)
+        private void InitCreationAudited(EntityEntry entry) => CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+
+        /// <summary>
+        /// 获取用户标识
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetUserId() => GetSession().UserId;
+
+        /// <summary>
+        /// 获取用户名称
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetUserName()
         {
-            CreationAuditedInitializer.Init(entry.Entity, GetSession());
+            var name = GetSession().GetFullName();
+            return string.IsNullOrEmpty(name) ? GetSession().GetUserName() : name;
         }
 
         /// <summary>
         /// 获取用户会话
         /// </summary>
         /// <returns></returns>
-        protected virtual ISession GetSession()
-        {
-            return Session;
-        }
+        protected virtual ISession GetSession() => Session;
 
         /// <summary>
         /// 初始化修改审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitModificationAudited(EntityEntry entry)
-        {
-            ModificationAuditedInitializer.Init(entry.Entity, GetSession());
-        }
+        private void InitModificationAudited(EntityEntry entry) => ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
 
         /// <summary>
         /// 拦截修改操作
         /// </summary>
         /// <param name="entry">输入实体</param>
-        protected virtual void InterceptModifiedOperation(EntityEntry entry)
-        {
-            InitModificationAudited(entry);
-        }
+        protected virtual void InterceptModifiedOperation(EntityEntry entry) => InitModificationAudited(entry);
 
         /// <summary>
         /// 拦截删除操作
         /// </summary>
         /// <param name="entry">输入实体</param>
-        protected virtual void InterceptDeletedOperation(EntityEntry entry)
-        {
-            DeletionAuditedInitializer.Init(entry.Entity,GetSession());
-        }
+        protected virtual void InterceptDeletedOperation(EntityEntry entry) => DeletionAuditedInitializer.Init(entry.Entity,GetUserId(),GetUserName());
 
         #endregion
 

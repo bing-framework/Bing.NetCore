@@ -1,6 +1,4 @@
 ﻿using System;
-using Bing.Configurations;
-using Bing.Sessions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Domains.Entities.Auditing
@@ -16,36 +14,43 @@ namespace Bing.Domains.Entities.Auditing
         private readonly object _entity;
 
         /// <summary>
-        /// 用户会话
+        /// 用户标识
         /// </summary>
-        private readonly ISession _session;
+        private readonly string _userId;
+
+        /// <summary>
+        /// 用户名称
+        /// </summary>
+        private readonly string _userName;
 
         /// <summary>
         /// 初始化一个<see cref="DeletionAuditedInitializer"/>类型的实例
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <param name="session">用户会话</param>
-        private DeletionAuditedInitializer(object entity, ISession session)
+        /// <param name="userId">用户标识</param>
+        /// <param name="userName">用户名称</param>
+        private DeletionAuditedInitializer(object entity, string userId, string userName)
         {
             _entity = entity;
-            _session = session;
+            _userId = userId;
+            _userName = userName;
         }
 
         /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <param name="session">用户会话</param>
-        public static void Init(object entity, ISession session)
-        {
-            new DeletionAuditedInitializer(entity, session).Init();
-        }
+        /// <param name="userId">用户标识</param>
+        /// <param name="userName">用户名称</param>
+        public static void Init(object entity, string userId, string userName) => new DeletionAuditedInitializer(entity, userId, userName).Init();
 
         /// <summary>
         /// 初始化
         /// </summary>
         public void Init()
         {
+            InitDeletionTime();
+            InitDeleter();
             if (_entity is IDeletionAudited<Guid>)
             {
                 InitGuid();
@@ -84,13 +89,34 @@ namespace Bing.Domains.Entities.Auditing
         }
 
         /// <summary>
+        /// 初始化删除时间
+        /// </summary>
+        private void InitDeletionTime()
+        {
+            if (_entity is IDeletionTime result)
+            {
+                result.DeletionTime = DateTime.Now;
+            }
+        }
+
+        /// <summary>
+        /// 初始化删除人
+        /// </summary>
+        private void InitDeleter()
+        {
+            if (_entity is IDeleter result)
+            {
+                result.Deleter = _userName;
+            }
+        }
+
+        /// <summary>
         /// 初始化Guid
         /// </summary>
         private void InitGuid()
         {
             var result = (IDeletionAudited<Guid>)_entity;
-            result.DeletionTime = DateTime.Now;
-            result.DeleterId = _session.UserId.ToGuid();
+            result.DeleterId = _userId.ToGuid();
         }
 
         /// <summary>
@@ -99,8 +125,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitNullableGuid()
         {
             var result = (IDeletionAudited<Guid?>)_entity;
-            result.DeletionTime = DateTime.Now;
-            result.DeleterId = _session.UserId.ToGuidOrNull();
+            result.DeleterId = _userId.ToGuidOrNull();
         }
 
         /// <summary>
@@ -109,8 +134,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitInt()
         {
             var result = (IDeletionAudited<int>)_entity;
-            result.DeletionTime = DateTime.Now;
-            result.DeleterId = _session.UserId.ToInt();
+            result.DeleterId = _userId.ToInt();
         }
 
         /// <summary>
@@ -119,8 +143,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitNullableInt()
         {
             var result = (IDeletionAudited<int?>)_entity;
-            result.DeletionTime = DateTime.Now;
-            result.DeleterId = _session.UserId.ToIntOrNull();
+            result.DeleterId = _userId.ToIntOrNull();
         }
 
         /// <summary>
@@ -129,8 +152,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitLong()
         {
             var result = (IDeletionAudited<long>)_entity;
-            result.DeletionTime = DateTime.Now;
-            result.DeleterId = _session.UserId.ToLong();
+            result.DeleterId = _userId.ToLong();
         }
 
         /// <summary>
@@ -139,8 +161,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitNullableLong()
         {
             var result = (IDeletionAudited<long?>)_entity;
-            result.DeletionTime = DateTime.Now;
-            result.DeleterId = _session.UserId.ToLongOrNull();
+            result.DeleterId = _userId.ToLongOrNull();
         }
 
         /// <summary>
@@ -149,13 +170,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitString()
         {
             var result = (IDeletionAudited<string>)_entity;
-            result.DeletionTime = DateTime.Now;
-            if (result.DeleterId.IsEmpty())
-            {
-                result.DeleterId = BingConfig.Current.EnabledUserName
-                    ? _session.UserName.SafeString()
-                    : _session.UserId.SafeString();
-            }
+            result.DeleterId = _userId.SafeString();
         }
     }
 }
