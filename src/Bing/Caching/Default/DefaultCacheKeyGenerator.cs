@@ -10,7 +10,7 @@ namespace Bing.Caching.Default
     /// <summary>
     /// 默认缓存键生成器
     /// </summary>
-    public class DefaultCacheKeyGenerator:ICacheKeyGenerator
+    public class DefaultCacheKeyGenerator
     {
         /// <summary>
         /// 连接符
