@@ -47,7 +47,7 @@ namespace Bing.Domains.Entities.Trees
         /// <summary>
         /// 级数
         /// </summary>
-        public int Level { get; private set; }
+        public virtual int Level { get; private set; }
 
         /// <summary>
         /// 排序号

@@ -62,7 +62,7 @@ namespace Bing.Domains.Entities.Trees
 
             var parent = await _repository.FindAsync(entity.ParentId);
             entity.InitPath(parent);
-            await UpdateChildrenPath(entity, children);
+            await UpdateChildrenPathAsync(entity, children);
             await _repository.UpdateAsync(children);
         }
 
@@ -72,7 +72,7 @@ namespace Bing.Domains.Entities.Trees
         /// <param name="parent">父节点</param>
         /// <param name="children">子节点</param>
         /// <returns></returns>
-        private async Task UpdateChildrenPath(TEntity parent, List<TEntity> children)
+        private async Task UpdateChildrenPathAsync(TEntity parent, List<TEntity> children)
         {
             if (parent == null || children == null)
             {
@@ -83,7 +83,7 @@ namespace Bing.Domains.Entities.Trees
             foreach (var child in list)
             {
                 child.InitPath(parent);
-                await UpdateChildrenPath(child, children);
+                await UpdateChildrenPathAsync(child, children);
             }
         }
     }
