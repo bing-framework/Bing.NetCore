@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Applications.Operations
+﻿namespace Bing.Applications.Operations
 {
     /// <summary>
     /// 删除操作

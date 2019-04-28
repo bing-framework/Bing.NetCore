@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Applications.Aspects;
+﻿using Bing.Applications.Aspects;
 using Bing.Applications.Dtos;
 using Bing.Validations.Aspects;
 

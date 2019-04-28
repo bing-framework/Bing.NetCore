@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Bing.Applications.Aspects;
-using Bing.Applications.Dtos;
+﻿using Bing.Applications.Dtos;
 using Bing.Applications.Operations;
 using Bing.Datas.Queries;
-using Bing.Validations.Aspects;
 
 namespace Bing.Applications
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Applications.Aspects
+﻿namespace Bing.Applications.Aspects
 {
     /// <summary>
     /// 提交工作单元后操作
