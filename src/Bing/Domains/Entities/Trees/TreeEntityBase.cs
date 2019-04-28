@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Bing.Utils.Extensions;
 
@@ -41,13 +40,12 @@ namespace Bing.Domains.Entities.Trees
         /// <summary>
         /// 路径
         /// </summary>
-        [Required]
-        public virtual string Path { get; private set; }
+        public string Path { get; protected set; }
 
         /// <summary>
         /// 级数
         /// </summary>
-        public virtual int Level { get; private set; }
+        public int Level { get; protected set; }
 
         /// <summary>
         /// 排序号
@@ -65,7 +63,7 @@ namespace Bing.Domains.Entities.Trees
         /// <param name="id">标识</param>
         /// <param name="path">路径</param>
         /// <param name="level">级数</param>
-        protected TreeEntityBase(TKey id,string path,int level) : base(id)
+        protected TreeEntityBase(TKey id, string path, int level) : base(id)
         {
             Path = path;
             Level = level;
@@ -117,6 +115,4 @@ namespace Bing.Domains.Entities.Trees
             return result.Select(Bing.Utils.Helpers.Conv.To<TKey>).ToList();
         }
     }
-
-   
 }
