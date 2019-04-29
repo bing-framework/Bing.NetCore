@@ -12,6 +12,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// Serilog日志测试控制器
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class SerilogLogTestController:ApiControllerBase
     {
         /// <summary>

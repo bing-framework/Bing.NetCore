@@ -1,30 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using Bing.AutoMapper;
-using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Extensions;
+using Bing.EasyCaching;
+using Bing.Extensions.Swashbuckle.Configs;
+using Bing.Extensions.Swashbuckle.Core;
+using Bing.Extensions.Swashbuckle.Extensions;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
-using Bing.Logs.Exceptionless;
 using Bing.Logs.Log4Net;
 using Bing.Logs.NLog;
 using Bing.Logs.Serilog;
 using Bing.Samples.Api.OAuths;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
+using EasyCaching.Core;
+using EasyCaching.CSRedis;
+using EasyCaching.Serialization.Json;
 using IdentityModel;
-using IdentityServer4;
 using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -36,12 +38,18 @@ namespace Bing.Samples.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            // 添加MVC服务
             services.AddMvc(options =>
                 {
                     options.Filters.Add<ValidationModelAttribute>();
                     options.Filters.Add<ResultHandlerAttribute>();
                     options.Filters.Add<ExceptionHandlerAttribute>();
                 })
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
 
             services.AddPay(x =>
@@ -53,12 +61,13 @@ namespace Bing.Samples.Api
                 x.AlipayOptions.PublicKey =
                     "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn7Oopue3a2x44FgJlWGM3S3QBTz6mBrCRqcvTeX5qH5StlvbF68J34oV3wt+QPn0YIskIgJMC9YwsDKUCPG1k9SjnlKy6hAbHeiAyt2boW9PfoTPYEV36ZH54jzZDGG7k34ZD1EbB3LZnvqpqLwGXQFglg5Xq52eUK6St2wysNzqHlx/WFt6m3OVfKg55udkF1RzBujy1B8Ym8+7YQmD/Ruty+eszBQUOC4nfqq8DsJ3LDMU7AX0J9leuQnReFLq+wCErJSQw/1fplCt3S7iETG7VrCNNRQ5evL8UcaNkDwT0SC+qukhX07Se6Tte61Wur3d6t8IkaeuS1oMQv04qwIDAQAB";
             });
+            // 添加NLog日志操作
             services.AddNLog();
 
             // 多日志输出
-            services.AddLog4NetWithFactory();
-            services.AddNLogWithFactory();
-            services.AddSerilogWithFactory();
+            //services.AddLog4NetWithFactory();
+            //services.AddNLogWithFactory();
+            //services.AddSerilogWithFactory();
             //services.AddExceptionlessWithFactory(options =>
             //{
             //    options.ApiKey = "YDTOG4uvUuEd5BY7uQozsUjaZcPyGz99OE6jNLmp";
@@ -73,28 +82,8 @@ namespace Bing.Samples.Api
             //services.AddSerilog();
 
             services.AddAutoMapper();
-            services.AddSwaggerGen(config =>
-            {
-                config.SwaggerDoc("v1", new Info() {Title = "Bing.Samples.Api", Version = "v1"});
-                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-                var xmlPath = Path.Combine(basePath, "Bing.Samples.Api.xml");
-                config.IncludeXmlComments(xmlPath);
-
-                config.OperationFilter<AddRequestHeaderOperationFilter>();
-                config.OperationFilter<AddResponseHeadersOperationFilter>();
-                config.OperationFilter<AddFileParameterOperationFilter>();
-
-                // 授权组合
-                config.OperationFilter<AddSecurityRequirementsOperationFilter>();
-                config.OperationFilter<AddAppendAuthorizeToSummaryOperationFilter>();
-                config.AddSecurityDefinition("oauth2", new ApiKeyScheme()
-                {
-                    Description = "Token令牌",
-                    In = "header",
-                    Name = "Authorization",
-                    Type = "apiKey",
-                });
-            });
+            // 添加swagger
+            services.AddSwaggerCustom(CurrentSwaggerOptions);
 
             services.AddAuthentication(options =>
                 {
@@ -135,8 +124,23 @@ namespace Bing.Samples.Api
             //    });
             //});
 
-            //services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");            
+            //services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
             ConfigureIdentityServer4(services);
+
+            // 添加缓存
+            services.AddCaching(options =>
+            {
+                options.UseCSRedis(config =>
+                {
+                    config.DBConfig = new CSRedisDBOptions()
+                    {
+                        ConnectionStrings = new List<string>()
+                        {
+                            "127.0.0.1:6379,defaultDatabase=1,poolsize=10"
+                        }
+                    };
+                }).WithJson();
+            });
 
             return services.AddBing();
         }
@@ -274,15 +278,7 @@ namespace Bing.Samples.Api
             }
 
             CommonConfig(app);
-
-            app.UseSwagger(config => { });
-            app.UseSwaggerUI(config =>
-            {
-                //config.IndexStream = () =>
-                //    GetType().GetTypeInfo().Assembly.GetManifestResourceStream("Bing.Samples.Api.Swagger.index.html");
-                config.ShowExtensions();
-                config.SwaggerEndpoint("/swagger/v1/swagger.json", "Bing.Samples.Api v1");                
-            });
+            app.UseSwaggerCustom(CurrentSwaggerOptions);
         }
 
         /// <summary>
@@ -296,6 +292,7 @@ namespace Bing.Samples.Api
             app.UseRequestLog();
             app.UseIdentityServer();// 启用 IdentityServer4 服务
             app.UseAuthentication();
+            app.UseEasyCaching();
             ConfigRoute(app);
         }
 
@@ -311,5 +308,52 @@ namespace Bing.Samples.Api
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
+
+        /// <summary>
+        /// 项目接口文档配置
+        /// </summary>
+        private CustomSwaggerOptions CurrentSwaggerOptions = new CustomSwaggerOptions()
+        {
+            ProjectName = "Bing.Samples.Api 在线文档调试",
+            UseCustomIndex = true,
+            RoutePrefix = "swagger",
+            ApiVersions = new List<string>() { "v1" },
+            SwaggerAuthorizations = new List<CustomSwaggerAuthorization>()
+            {
+            },
+            AddSwaggerGenAction = config =>
+            {
+                config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Samples.Api.xml"), true);
+
+                config.OperationFilter<RequestHeaderOperationFilter>();
+                config.OperationFilter<ResponseHeadersOperationFilter>();
+                config.OperationFilter<FileParameterOperationFilter>();
+
+                // 授权组合
+                config.OperationFilter<SecurityRequirementsOperationFilter>();
+                config.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
+                config.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>()
+                    {{"oauth2", new string[] { }}});
+
+                config.AddSecurityDefinition("oauth2", new ApiKeyScheme()
+                {
+                    Description = "Token令牌",
+                    In = "header",
+                    Name = "Authorization",
+                    Type = "apiKey",
+                });
+                // 设置所有参数为驼峰式命名
+                config.DescribeAllParametersInCamelCase();
+            },
+            UseSwaggerAction = config =>
+            {
+            },
+            UseSwaggerUIAction = config =>
+            {
+                config.InjectJavascript("/swagger/resources/jquery");
+                config.InjectStylesheet("/swagger/resources/swagger-common");
+                config.UseDefaultSwaggerUI();
+            }
+        };
     }
 }

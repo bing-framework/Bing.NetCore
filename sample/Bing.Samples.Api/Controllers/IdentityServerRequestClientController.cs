@@ -12,6 +12,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// IdentityServer 请求客户端相关操作
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class IdentityServerRequestClientController:ApiControllerBase
     {
         /// <summary>
@@ -26,7 +27,7 @@ namespace Bing.Samples.Api.Controllers
         /// <param name="client">客户端名称</param>
         /// <param name="password">密码</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("ClientLogin")]
         public async Task<IActionResult> ClientLogin(string scope, string client, string password)
         {
             // 从元数据发现端口
@@ -51,7 +52,7 @@ namespace Bing.Samples.Api.Controllers
         /// <param name="clientPassword">客户端密码</param>
         /// <param name="scope">作用域</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("ResourceOwnerPasswordLogin")]
         public async Task<IActionResult> ResourceOwnerPasswordLogin(string username, string password, string client,
             string clientPassword, string scope)
         {

@@ -6,12 +6,12 @@ namespace Bing.Locks.Default
     /// <summary>
     /// 业务锁
     /// </summary>
-    public class DefaultLock:ILock
+    public class DefaultLock : ILock
     {
         /// <summary>
         /// 缓存提供程序
         /// </summary>
-        private readonly ICacheProvider _cache;
+        private readonly ICache _cache;
 
         /// <summary>
         /// 锁定标识
@@ -27,7 +27,7 @@ namespace Bing.Locks.Default
         /// 初始化一个<see cref="DefaultLock"/>类型的实例
         /// </summary>
         /// <param name="cache">缓存提供程序</param>
-        public DefaultLock(ICacheProvider cache)
+        public DefaultLock(ICache cache)
         {
             _cache = cache;
         }
@@ -46,8 +46,8 @@ namespace Bing.Locks.Default
             {
                 return false;
             }
-            _cache.Set(key, 1, expiration ?? TimeSpan.FromHours(12));
-            return true;
+
+            return _cache.TryAdd(key, 1, expiration);
         }
 
         /// <summary>

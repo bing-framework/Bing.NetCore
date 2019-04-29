@@ -12,6 +12,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// Swagger测试信息
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class SwaggerTestController : ApiControllerBase
     {
         private readonly IAntiforgery _antiforgery;

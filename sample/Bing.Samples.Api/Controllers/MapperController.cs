@@ -11,6 +11,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// 对象映射 控制器
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class MapperController:ApiControllerBase
     {
         /// <summary>

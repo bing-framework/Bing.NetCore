@@ -25,7 +25,7 @@ namespace Bing.Samples.Api.Controllers
         }
 
         [Authorize(Roles = "admin,customer")]
-        [HttpGet]
+        [HttpGet("{id}")]
         public string GetInfo(int id)
         {
             return id.ToString();

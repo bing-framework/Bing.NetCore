@@ -11,6 +11,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// 支付控制器
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class PayController:ApiControllerBase
     {
         private readonly IPayFactory _payFactory;

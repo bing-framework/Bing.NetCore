@@ -13,6 +13,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// 日志工厂
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class LogFactoryController:ApiControllerBase
     {
         /// <summary>

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Bing.Caching
+﻿namespace Bing.Caching
 {
     /// <summary>
     /// 缓存键生成器

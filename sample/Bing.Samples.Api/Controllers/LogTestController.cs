@@ -14,6 +14,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// 日志测试控制器
     /// </summary>
+    [Route("api/[controller]/[action]")]
     public class LogTestController:ApiControllerBase
     {
         /// <summary>
