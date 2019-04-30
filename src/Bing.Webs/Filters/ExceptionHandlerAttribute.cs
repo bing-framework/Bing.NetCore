@@ -18,11 +18,16 @@ namespace Bing.Webs.Filters
         {
             context.ExceptionHandled = true;
             context.HttpContext.Response.StatusCode = 200;
-            if (context.Exception is Warning warning && !string.IsNullOrWhiteSpace(warning.Code))
+            if (context.Exception is Warning warning)
             {
-                context.Result = new Result(Conv.ToInt(warning.Code), context.Exception.Message);
+                context.Result = !string.IsNullOrWhiteSpace(warning.Code)
+                    ? new Result(Conv.ToInt(warning.Code), warning.GetPrompt())
+                    : new Result(StateCode.Fail, warning.GetPrompt());
             }
-            context.Result = new Result(StateCode.Fail, context.Exception.Message);
+            else
+            {
+                context.Result = new Result(StateCode.Fail, context.Exception.GetPrompt());
+            }
         }
     }
 }
