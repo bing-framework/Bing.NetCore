@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -175,7 +177,7 @@ namespace Bing.Utils.Helpers
                 var result = HttpContext?.Connection?.RemoteIpAddress.SafeString();
                 if (string.IsNullOrWhiteSpace(result) || list.Contains(result))
                 {
-                    result = GetLanIP();
+                    result = Sys.IsOsx ? GetLanIP(NetworkInterfaceType.Ethernet) : GetLanIP();
                 }
                 return result;
             }
@@ -195,6 +197,46 @@ namespace Bing.Utils.Helpers
                     return hostAddress.ToString();
                 }
             }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 获取局域网IP。
+        /// 参考地址：https://stackoverflow.com/questions/6803073/get-local-ip-address/28621250#28621250
+        /// 解决OSX下获取IP地址产生"Device not configured"的问题
+        /// </summary>
+        /// <param name="type">网络接口类型</param>
+        /// <returns></returns>
+        // ReSharper disable once InconsistentNaming
+        private static string GetLanIP(NetworkInterfaceType type)
+        {
+            try
+            {
+                foreach (var item in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (item.NetworkInterfaceType != type || item.OperationalStatus != OperationalStatus.Up)
+                    {
+                        continue;
+                    }
+                    var ipProperties = item.GetIPProperties();
+                    if (ipProperties.GatewayAddresses.FirstOrDefault() == null)
+                    {
+                        continue;
+                    }
+                    foreach (var ip in ipProperties.UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            return ip.Address.ToString();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return string.Empty;
+            }
+
             return string.Empty;
         }
 
