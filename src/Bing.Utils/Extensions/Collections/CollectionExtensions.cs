@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Bing.Utils.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
@@ -10,40 +11,115 @@ namespace Bing.Utils.Extensions
     /// </summary>
     public static class CollectionExtensions
     {
-        #region AddIfNotExist(添加项。如果不存在，则添加)
+        #region AddIfNotContains(添加项。如果未包含，则添加)
 
         /// <summary>
-        /// 添加项。如果不存在，则添加
+        /// 添加项。如果未包含，则添加
         /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="collection">集合</param>
-        /// <param name="value">值</param>
-        public static void AddIfNotExist<T>(this ICollection<T> collection, T value)
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="source">集合</param>
+        /// <param name="item">项</param>
+        public static bool AddIfNotContains<T>(this ICollection<T> source, T item)
         {
-            collection.CheckNotNull(nameof(collection));
-            if (!collection.Contains(value))
+            Check.NotNull(source, nameof(source));
+
+            if (source.Contains(item))
             {
-                collection.Add(value);
+                return false;
             }
+            source.Add(item);
+            return true;
+        }
+
+        /// <summary>
+        /// 添加项集合。如果未包含，则添加
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="source">集合</param>
+        /// <param name="items">项集合</param>
+        public static IEnumerable<T> AddIfNotContains<T>(this ICollection<T> source, IEnumerable<T> items)
+        {
+            Check.NotNull(source, nameof(source));
+
+            var addedItems = new List<T>();
+
+            foreach (var item in items)
+            {
+                if (source.Contains(item))
+                {
+                    continue;
+                }
+
+                source.Add(item);
+                addedItems.Add(item);
+            }
+
+            return addedItems;
+        }
+
+        /// <summary>
+        /// 添加项。如果未包含
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="source">集合</param>
+        /// <param name="predicate">条件</param>
+        /// <param name="itemFactory">获取项函数</param>
+        /// <returns></returns>
+        public static bool AddIfNotContains<T>(this ICollection<T> source, Func<T, bool> predicate, Func<T> itemFactory)
+        {
+            Check.NotNull(source, nameof(source));
+            Check.NotNull(predicate, nameof(predicate));
+            Check.NotNull(itemFactory, nameof(itemFactory));
+
+            if (source.Any(predicate))
+            {
+                return false;
+            }
+
+            source.Add(itemFactory());
+            return true;
         }
 
         #endregion
 
-        #region AddRangeIfNotExist(添加批量项。如果不存在，则添加)
+        #region RemoveAll(移除项)
 
         /// <summary>
-        /// 添加批量项。如果不存在，则添加
+        /// 移除项。指定集合
         /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="collection">集合</param>
-        /// <param name="values">值</param>
-        public static void AddRangeIfNotExist<T>(this ICollection<T> collection, IEnumerable<T> values)
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="source">集合</param>
+        /// <param name="items">集合项</param>
+        public static void RemoveAll<T>(this ICollection<T> source, IEnumerable<T> items)
         {
-            collection.CheckNotNull(nameof(collection));
-            foreach (var value in values)
+            Check.NotNull(source,nameof(source));
+            Check.NotNull(items, nameof(items));
+
+            foreach (var item in items)
             {
-                collection.AddIfNotExist(value);
+                source.Remove(item);
             }
+        }
+
+        /// <summary>
+        /// 移除项。按条件移除
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="source">集合</param>
+        /// <param name="predicate">条件</param>
+        /// <returns></returns>
+        public static IList<T> RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
+        {
+            Check.NotNull(source, nameof(source));
+            Check.NotNull(predicate, nameof(predicate));
+            
+            var items = source.Where(predicate).ToList();
+            foreach (var item in items)
+            {
+                source.Remove(item);
+            }
+
+            return items;
         }
 
         #endregion
@@ -66,66 +142,6 @@ namespace Bing.Utils.Extensions
             foreach (var value in values)
             {
                 collection.Add(value);
-            }
-        }
-
-        #endregion
-
-        #region AddIfNotNull(添加项。如果不为空，则添加)
-
-        /// <summary>
-        /// 添加项。如果不为空，则添加
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="collection">集合</param>
-        /// <param name="value">值</param>
-        public static void AddIfNotNull<T>(this ICollection<T> collection, T value) where T : class
-        {
-            collection.CheckNotNull(nameof(collection));
-            if (value != null)
-            {
-                collection.Add(value);
-            }
-        }
-
-        #endregion
-
-        #region RemoveRange(移除批量项)
-
-        /// <summary>
-        /// 移除批量项
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="collection">集合</param>
-        /// <param name="values">值</param>
-        public static void RemoveRange<T>(this ICollection<T> collection, IEnumerable<T> values)
-        {
-            collection.CheckNotNull(nameof(collection));
-            values.CheckNotNull(nameof(values));
-
-            foreach (var value in values)
-            {
-                collection.Remove(value);
-            }
-        }
-
-        #endregion
-
-        #region RemoveIf(移除项。如果符合条件，则移除)
-
-        /// <summary>
-        /// 移除项。如果符合条件，则移除
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="collection">集合</param>
-        /// <param name="condition">移除条件</param>
-        public static void RemoveIf<T>(this ICollection<T> collection, Func<T, bool> condition)
-        {
-            var itemsToRemove = collection.Where(condition).ToList();
-
-            foreach (var item in itemsToRemove)
-            {
-                collection.Remove(item);
             }
         }
 
