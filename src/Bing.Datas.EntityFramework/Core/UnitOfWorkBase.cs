@@ -461,7 +461,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected void InitVersion(EntityEntry entry)
         {
-            if (!(entry.Entity is IAggregateRoot entity))
+            if (!(entry.Entity is IVersion entity))
             {
                 return;
             }
