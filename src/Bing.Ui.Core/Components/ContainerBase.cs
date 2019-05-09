@@ -28,7 +28,6 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 准备渲染器
         /// </summary>
-        /// <returns></returns>
         public TWrapper Begin()
         {
             if (Writer == null)
@@ -42,7 +41,6 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 获取容器包装器
         /// </summary>
-        /// <returns></returns>
         protected abstract TWrapper GetWrapper();
 
         /// <summary>

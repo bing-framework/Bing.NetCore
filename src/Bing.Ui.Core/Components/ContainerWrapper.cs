@@ -6,7 +6,7 @@ namespace Bing.Ui.Components
     /// <summary>
     /// 容器包装器
     /// </summary>
-    public class ContainerWrapper:IDisposable
+    public class ContainerWrapper : IDisposable
     {
         /// <summary>
         /// 容器
