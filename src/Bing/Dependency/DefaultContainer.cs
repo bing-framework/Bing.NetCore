@@ -19,14 +19,6 @@ namespace Bing.Dependency
         private Autofac.IContainer _container;
 
         /// <summary>
-        /// 释放容器
-        /// </summary>
-        public void Dispose()
-        {
-            _container.Dispose();
-        }
-
-        /// <summary>
         /// 创建集合
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
@@ -182,6 +174,14 @@ namespace Bing.Dependency
             }
 
             return builder;
+        }
+
+        /// <summary>
+        /// 释放容器
+        /// </summary>
+        public void Dispose()
+        {
+            _container.Dispose();
         }
     }
 }

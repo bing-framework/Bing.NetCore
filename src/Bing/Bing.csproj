@@ -12,7 +12,7 @@
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="1.1.0" />
     <PackageReference Include="AspectCore.Extensions.Autofac" Version="1.1.0" />
     <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="1.1.0" />
-    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="Autofac" Version="4.9.2" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
