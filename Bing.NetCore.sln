@@ -218,7 +218,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utopa.Tms", "bus\Utopa.Tms\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Identity", "sample\Bing.Samples.Identity\Bing.Samples.Identity.csproj", "{BE9D370F-C77A-4F7D-AE07-5D097F9A724C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.EasyCaching", "src\Bing.EasyCaching\Bing.EasyCaching.csproj", "{2D9D0F7E-543F-42BB-8595-B1DD93FEFE69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EasyCaching", "src\Bing.EasyCaching\Bing.EasyCaching.csproj", "{2D9D0F7E-543F-42BB-8595-B1DD93FEFE69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

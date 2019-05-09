@@ -15,7 +15,7 @@ namespace Bing.Webs.Filters
     /// 跟踪日志过滤器
     /// </summary>
     [AttributeUsage(AttributeTargets.Class|AttributeTargets.Method)]
-    public class TraceLogAttribute:ActionFilterAttribute
+    public class TraceLogAttribute : ActionFilterAttribute
     {
         /// <summary>
         /// 日志名
@@ -90,7 +90,7 @@ namespace Bing.Webs.Filters
                 return;
             }
 
-            await WriteLog(context, log);
+            await WriteLogAsync(context, log);
         }
 
         /// <summary>
@@ -98,12 +98,12 @@ namespace Bing.Webs.Filters
         /// </summary>
         /// <param name="context">操作执行上下文</param>
         /// <param name="log">日志</param>
-        private async Task WriteLog(ActionExecutingContext context, ILog log)
+        private async Task WriteLogAsync(ActionExecutingContext context, ILog log)
         {
             log.Caption("WebApi跟踪-准备执行操作")
                 .Class(context.Controller.SafeString())
                 .Method(context.ActionDescriptor.DisplayName);
-            await AddRequestInfo(context, log);
+            await AddRequestInfoAsync(context, log);
             log.Trace();
         }
 
@@ -112,7 +112,7 @@ namespace Bing.Webs.Filters
         /// </summary>
         /// <param name="context">操作执行上下文</param>
         /// <param name="log">日志</param>
-        private async Task AddRequestInfo(ActionExecutingContext context, ILog log)
+        private async Task AddRequestInfoAsync(ActionExecutingContext context, ILog log)
         {
             var request = context.HttpContext.Request;
             log.Params("Http请求方式", request.Method);
@@ -121,8 +121,24 @@ namespace Bing.Webs.Filters
                 log.Params("ContentType", request.ContentType);
             }
 
-            await AddFormParams(request, log);
+            AddHeaders(request, log);
+            await AddFormParamsAsync(request, log);
             AddCookie(request, log);
+        }
+
+        /// <summary>
+        /// 添加请求头
+        /// </summary>
+        /// <param name="request">Http请求</param>
+        /// <param name="log">日志</param>
+        private void AddHeaders(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
+        {
+            if (request.Headers == null || request.Headers.Count == 0)
+            {
+                return;
+            }
+
+            log.Params("Headers:").Params(JsonUtil.ToJson(request.Headers));
         }
 
         /// <summary>
@@ -130,7 +146,7 @@ namespace Bing.Webs.Filters
         /// </summary>
         /// <param name="request">Http请求</param>
         /// <param name="log">日志</param>
-        private async Task AddFormParams(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
+        private async Task AddFormParamsAsync(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
         {
             if (IsMultipart(request.ContentType))
             {

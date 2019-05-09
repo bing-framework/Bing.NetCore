@@ -736,6 +736,24 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer.Clauses
             Assert.Equal(result.ToString(), GetSql());
         }
 
+        /// <summary>
+        /// 设置In条件 - 枚举数组
+        /// </summary>
+        [Fact]
+        public void Test_In_4()
+        {
+            //结果
+            var result = new Str();
+            result.Append("Where [user].[Email] In (@_p_0,@_p_1,@_p_2)");
+
+            //执行
+            var list = new object[] {SampleEnum.One, SampleEnum.Two, SampleEnum.Three};
+            _clause.In("user.Email", list);
+
+            //验证
+            Assert.Equal(result.ToString(), GetSql());
+        }
+
         #endregion
 
         #region NotIn
