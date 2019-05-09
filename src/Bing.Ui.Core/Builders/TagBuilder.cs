@@ -10,7 +10,7 @@ namespace Bing.Ui.Builders
     /// <summary>
     /// 标签生成器，注意：已禁用Html编码
     /// </summary>
-    public class TagBuilder:IHtmlContent
+    public class TagBuilder : IHtmlContent
     {
         /// <summary>
         /// 标签生成器
@@ -61,8 +61,7 @@ namespace Bing.Ui.Builders
         /// 添加class属性
         /// </summary>
         /// <param name="class">class属性值</param>
-        /// <returns></returns>
-        public TagBuilder Class(string @class)
+        public virtual TagBuilder Class(string @class)
         {
             if (string.IsNullOrWhiteSpace(@class))
             {
@@ -83,8 +82,7 @@ namespace Bing.Ui.Builders
         /// <param name="name">属性名</param>
         /// <param name="value">属性值</param>
         /// <param name="replaceExisting">是否替换已存在的属性</param>
-        /// <returns></returns>
-        public TagBuilder Attribute(string name, string value, bool replaceExisting = false)
+        public virtual TagBuilder Attribute(string name, string value, bool replaceExisting = false)
         {
             _tagBuilder.MergeAttribute(name, value, replaceExisting);
             return this;
@@ -96,8 +94,7 @@ namespace Bing.Ui.Builders
         /// <param name="name">属性名</param>
         /// <param name="value">属性值</param>
         /// <param name="ignoreIfValueIsEmpty">当值为空时忽略</param>
-        /// <returns></returns>
-        public TagBuilder AddAttribute(string name, string value, bool ignoreIfValueIsEmpty = true)
+        public virtual TagBuilder AddAttribute(string name, string value, bool ignoreIfValueIsEmpty = true)
         {
             if (ignoreIfValueIsEmpty && string.IsNullOrWhiteSpace(value))
             {
@@ -121,8 +118,7 @@ namespace Bing.Ui.Builders
         /// 添加内容
         /// </summary>
         /// <param name="content">内容</param>
-        /// <returns></returns>
-        public TagBuilder AppendContent(string content)
+        public virtual TagBuilder AppendContent(string content)
         {
             _tagBuilder.InnerHtml.AppendHtml(content);
             return this;
@@ -132,8 +128,7 @@ namespace Bing.Ui.Builders
         /// 添加内容
         /// </summary>
         /// <param name="content">内容</param>
-        /// <returns></returns>
-        public TagBuilder AppendContent(IHtmlContent content)
+        public virtual TagBuilder AppendContent(IHtmlContent content)
         {
             _tagBuilder.InnerHtml.AppendHtml(content);
             return this;
@@ -143,8 +138,7 @@ namespace Bing.Ui.Builders
         /// 添加内容
         /// </summary>
         /// <param name="tagBuilder">标签生成器</param>
-        /// <returns></returns>
-        public TagBuilder AppendContent(TagBuilder tagBuilder)
+        public virtual TagBuilder AppendContent(TagBuilder tagBuilder)
         {
             AppendContent(tagBuilder.GetTagBuilder());
             return this;
@@ -154,8 +148,7 @@ namespace Bing.Ui.Builders
         /// 设置内容
         /// </summary>
         /// <param name="content">内容</param>
-        /// <returns></returns>
-        public TagBuilder SetContent(string content)
+        public virtual TagBuilder SetContent(string content)
         {
             _tagBuilder.InnerHtml.SetHtmlContent(content);
             return this;
@@ -165,8 +158,7 @@ namespace Bing.Ui.Builders
         /// 设置内容
         /// </summary>
         /// <param name="content">内容</param>
-        /// <returns></returns>
-        public TagBuilder SetContent(IHtmlContent content)
+        public virtual TagBuilder SetContent(IHtmlContent content)
         {
             _tagBuilder.InnerHtml.SetHtmlContent(content);
             return this;
@@ -176,10 +168,9 @@ namespace Bing.Ui.Builders
         /// 设置内容
         /// </summary>
         /// <param name="tagBuilder">标签生成器</param>
-        /// <returns></returns>
-        public TagBuilder SetContent(TagBuilder tagBuilder)
+        public virtual TagBuilder SetContent(TagBuilder tagBuilder)
         {
-            _tagBuilder.InnerHtml.SetHtmlContent(tagBuilder.GetTagBuilder());
+            SetContent(tagBuilder.GetTagBuilder());
             return this;
         }
 
@@ -190,7 +181,7 @@ namespace Bing.Ui.Builders
         /// <param name="encoder">编码</param>
         public virtual void WriteTo(TextWriter writer, HtmlEncoder encoder)
         {
-            _tagBuilder.WriteTo(writer, encoder);
+            _tagBuilder.WriteTo(writer, NullHtmlEncoder.Default);
         }
 
         /// <summary>
@@ -226,7 +217,7 @@ namespace Bing.Ui.Builders
         /// <returns></returns>
         public override string ToString()
         {
-            using (var writer=new StringWriter())
+            using (var writer = new StringWriter())
             {
                 _tagBuilder.WriteTo(writer, NullHtmlEncoder.Default);
                 return writer.ToString();

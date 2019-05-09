@@ -5,7 +5,7 @@ namespace Bing.Ui.Components
     /// <summary>
     /// 容器
     /// </summary>
-    public interface IContainer:IOption
+    public interface IContainer :  IOption
     {
     }
 

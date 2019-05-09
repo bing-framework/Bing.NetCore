@@ -8,6 +8,8 @@
         /// <summary>
         /// 初始化一个<see cref="SpanBuilder"/>类型的实例
         /// </summary>
-        public SpanBuilder() : base("span") { }
+        public SpanBuilder() : base("span")
+        {
+        }
     }
 }

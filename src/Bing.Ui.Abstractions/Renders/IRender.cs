@@ -6,7 +6,7 @@ namespace Bing.Ui.Renders
     /// <summary>
     /// 渲染器
     /// </summary>
-    public interface IRender:IHtmlContent
+    public interface IRender : IHtmlContent
     {
         /// <summary>
         /// 渲染起始标签
