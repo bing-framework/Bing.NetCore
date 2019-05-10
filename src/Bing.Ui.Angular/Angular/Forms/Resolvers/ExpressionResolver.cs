@@ -1,17 +1,14 @@
 ﻿using System.Reflection;
-using Bing.Ui.Angular.Enums;
 using Bing.Ui.Configs;
 using Bing.Ui.Extensions;
-using Bing.Ui.Internal;
-using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace Bing.Ui.Angular.Resolvers
+namespace Bing.Ui.Angular.Forms.Resolvers
 {
     /// <summary>
-    /// 标签表达式解析器
+    /// 表达式解析器
     /// </summary>
-    public class LabelExpressionResolver
+    public class ExpressionResolver
     {
         /// <summary>
         /// 属性表达式
@@ -29,11 +26,11 @@ namespace Bing.Ui.Angular.Resolvers
         private readonly MemberInfo _memberInfo;
 
         /// <summary>
-        /// 初始化一个<see cref="LabelExpressionResolver"/>类型的实例
+        /// 初始化一个<see cref="ExpressionResolver"/>类型的实例
         /// </summary>
         /// <param name="expression">属性表达式</param>
         /// <param name="config">配置</param>
-        private LabelExpressionResolver(ModelExpression expression, IConfig config)
+        private ExpressionResolver(ModelExpression expression, IConfig config)
         {
             if (expression == null || config == null)
             {
@@ -52,7 +49,7 @@ namespace Bing.Ui.Angular.Resolvers
         /// <param name="config">配置</param>
         public static void Init(ModelExpression expression, IConfig config)
         {
-            new LabelExpressionResolver(expression, config).Init();
+            new ExpressionResolver(expression,config).Init();
         }
 
         /// <summary>
@@ -60,23 +57,7 @@ namespace Bing.Ui.Angular.Resolvers
         /// </summary>
         private void Init()
         {
-            _config.SetAttribute(AngularConst.BindText, Helper.GetModel(_expression, _memberInfo));
-            InitType();
-        }
-
-        /// <summary>
-        /// 根据类型初始化
-        /// </summary>
-        private void InitType()
-        {
-            if (Reflection.IsBool(_memberInfo))
-            {
-                _config.SetAttribute(UiConst.Type, LabelType.Bool);
-            }
-            else if (Reflection.IsDate(_memberInfo))
-            {
-                _config.SetAttribute(UiConst.Type, LabelType.Date);
-            }
+            Internal.Helper.Init(_config, _expression, _memberInfo);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Bing.Ui.TagHelpers;
 
-namespace Bing.Ui.Angular.TagHelpers
+namespace Bing.Ui.Angular.Base
 {
     /// <summary>
     /// Angular TagHelper基类

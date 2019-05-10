@@ -1,17 +1,17 @@
 ﻿namespace Bing.Ui.Angular.Enums
 {
     /// <summary>
-    /// 标签类型
+    /// 排序方向
     /// </summary>
-    public enum LabelType
+    public enum SortDirection
     {
         /// <summary>
-        /// 布尔
+        /// 升序
         /// </summary>
-        Bool,
+        Asc,
         /// <summary>
-        /// 日期
+        /// 降序
         /// </summary>
-        Date
+        Desc
     }
 }

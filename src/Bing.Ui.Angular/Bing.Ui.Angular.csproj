@@ -6,11 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="Controllers\" />
-    <Folder Include="FlexLayout\" />
-    <Folder Include="Alain\" />
-    <Folder Include="Zorro\Buttons\Builders\" />
+    <Compile Remove="Alain\**" />
+    <Compile Remove="Controllers\**" />
+    <Compile Remove="FlexLayout\**" />
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Alain\**" />
+    <EmbeddedResource Remove="Controllers\**" />
+    <EmbeddedResource Remove="FlexLayout\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Alain\**" />
+    <None Remove="Controllers\**" />
+    <None Remove="FlexLayout\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,18 +9,23 @@ namespace Bing.Ui.Extensions
     /// </summary>
     public static partial class Extensions
     {
+        #region Angular(添加 Angular 指令)
+
         /// <summary>
         /// 添加 Angular 指令
         /// </summary>
         /// <typeparam name="TBuilder">生成器类型</typeparam>
         /// <param name="builder">生成器实例</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TBuilder Angular<TBuilder>(this TBuilder builder, IConfig config) where TBuilder : TagBuilder
         {
             builder.NgIf(config).NgFor(config).NgClass(config);
             return builder;
         }
+
+        #endregion
+
+        #region NgIf(添加 NgIf 指令)
 
         /// <summary>
         /// 添加 NgIf 指令
@@ -28,12 +33,15 @@ namespace Bing.Ui.Extensions
         /// <typeparam name="TBuilder">生成器类型</typeparam>
         /// <param name="builder">生成器实例</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TBuilder NgIf<TBuilder>(this TBuilder builder, IConfig config) where TBuilder : TagBuilder
         {
             builder.AddAttribute("*ngIf", config.GetValue(AngularConst.NgIf));
             return builder;
         }
+
+        #endregion
+
+        #region NgFor(添加 NgFor 指令)
 
         /// <summary>
         /// 添加 NgFor 指令
@@ -41,12 +49,15 @@ namespace Bing.Ui.Extensions
         /// <typeparam name="TBuilder">生成器类型</typeparam>
         /// <param name="builder">生成器实例</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TBuilder NgFor<TBuilder>(this TBuilder builder, IConfig config) where TBuilder : TagBuilder
         {
             builder.AddAttribute("*ngFor", config.GetValue(AngularConst.NgFor));
             return builder;
         }
+
+        #endregion
+
+        #region NgClass(添加 NgClass 指令)
 
         /// <summary>
         /// 添加 NgClass 指令
@@ -54,12 +65,15 @@ namespace Bing.Ui.Extensions
         /// <typeparam name="TBuilder">生成器类型</typeparam>
         /// <param name="builder">生成器实例</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TBuilder NgClass<TBuilder>(this TBuilder builder, IConfig config) where TBuilder : TagBuilder
         {
             builder.AddAttribute("[ngClass]", config.GetValue(AngularConst.NgClass));
             return builder;
         }
+
+        #endregion
+
+        #region Link(添加 路由链接 指令)
 
         /// <summary>
         /// 添加 路由链接 指令
@@ -83,6 +97,10 @@ namespace Bing.Ui.Extensions
             return builder;
         }
 
+        #endregion
+
+        #region OnClick(添加 click 指令)
+
         /// <summary>
         /// 添加 click 指令
         /// </summary>
@@ -95,5 +113,7 @@ namespace Bing.Ui.Extensions
             builder.AddAttribute("(click)", config.GetValue(UiConst.OnClick));
             return builder;
         }
+
+        #endregion
     }
 }

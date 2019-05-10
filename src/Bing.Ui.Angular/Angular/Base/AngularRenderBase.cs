@@ -3,7 +3,7 @@ using Bing.Ui.Configs;
 using Bing.Ui.Extensions;
 using Bing.Ui.Renders;
 
-namespace Bing.Ui.Angular.Renders
+namespace Bing.Ui.Angular.Base
 {
     /// <summary>
     /// Angular 渲染器基类
