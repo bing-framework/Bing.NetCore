@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bing.Logs;
 using Bing.Logs.Extensions;
+using Bing.Utils.Helpers;
 using Bing.Webs.Controllers;
 using Exceptionless;
 using Microsoft.AspNetCore.Mvc;
@@ -102,6 +103,12 @@ namespace Bing.Samples.Api.Controllers
             ExceptionlessClient _client = ExceptionlessClient.Default;
             _client.CreateLog("测试日志1",LogLevel.Info).Submit();
             _client.CreateLog("测试日志2",LogLevel.Trace).Submit();
+        }
+
+        [HttpGet("testGuid")]
+        public async Task TestGuid(Guid id)
+        {
+            var result = id;
         }
     }
 }

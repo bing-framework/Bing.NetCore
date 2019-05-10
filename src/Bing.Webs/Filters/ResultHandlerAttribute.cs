@@ -10,7 +10,7 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 响应结果处理过滤器
     /// </summary>
-    public class ResultHandlerAttribute: ResultFilterAttribute
+    public class ResultHandlerAttribute : ResultFilterAttribute
     {
         /// <summary>
         /// 结果处理
@@ -40,13 +40,25 @@ namespace Bing.Webs.Filters
                     validationFailedResult.AllowMultipleResult
                         ? validationFailedResult.Errors.FirstOrDefault()?.Message
                         : "验证数据失败!", validationFailedResult.AllowMultipleResult ? validationFailedResult.Errors : null);
+                return;
             }
 
             if (context.Result is Result result)
             {
                 return;
             }
-            if (context.Result is ObjectResult objectResult)
+
+            if (context.Result is BadRequestObjectResult badRequestObjectResult)
+            {
+                if (badRequestObjectResult.Value is ValidationProblemDetails details)
+                {
+                    context.Result = new Result(StateCode.Fail, "无效输入参数", details);
+                    return;
+                }
+
+                context.Result = new Result(StateCode.Fail, "无效请求");
+            }
+            else if (context.Result is ObjectResult objectResult)
             {
                 context.Result = new Result(StateCode.Ok, string.Empty, objectResult.Value);
             }
