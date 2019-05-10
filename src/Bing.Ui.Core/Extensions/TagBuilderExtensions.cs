@@ -14,7 +14,6 @@ namespace Bing.Ui.Extensions
         /// </summary>
         /// <param name="builder">标签生成器</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TagBuilder AddOutputAttributes(this TagBuilder builder, IConfig config)
         {
             foreach (var attribute in config.OutputAttributes)
@@ -30,7 +29,6 @@ namespace Bing.Ui.Extensions
         /// </summary>
         /// <param name="builder">标签生成器</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TagBuilder Style(this TagBuilder builder, IConfig config)
         {
             if (config.Contains(UiConst.Style))
@@ -46,7 +44,6 @@ namespace Bing.Ui.Extensions
         /// </summary>
         /// <param name="builder">标签生成器</param>
         /// <param name="config">配置</param>
-        /// <returns></returns>
         public static TagBuilder Class(this TagBuilder builder, IConfig config)
         {
             if (config.Contains(UiConst.Class))

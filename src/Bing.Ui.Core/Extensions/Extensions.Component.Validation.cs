@@ -10,24 +10,29 @@ namespace Bing.Ui.Extensions
     /// </summary>
     public static partial class Extensions
     {
+        #region Required(必填项)
+
         /// <summary>
         /// 必填项
         /// </summary>
         /// <typeparam name="TComponent">组件类型</typeparam>
         /// <param name="component">组件实例</param>
         /// <param name="message">错误消息</param>
-        /// <returns></returns>
         public static TComponent Required<TComponent>(this TComponent component, string message = null)
             where TComponent : IRequired
         {
             var option = component as IOptionConfig;
             option?.Config<Config>(config =>
             {
-                config.SetAttribute(UiConst.Required,true);
+                config.SetAttribute(UiConst.Required, true);
                 config.SetAttribute(UiConst.RequiredMessage, message);
             });
             return component;
         }
+
+        #endregion
+
+        #region MinLength(最小长度)
 
         /// <summary>
         /// 最小长度
@@ -36,9 +41,8 @@ namespace Bing.Ui.Extensions
         /// <param name="component">组件实例</param>
         /// <param name="minLength">最小长度</param>
         /// <param name="message">错误消息</param>
-        /// <returns></returns>
-        public static TComponent MinLength<TComponent>(this TComponent component,int minLength, string message = null)
-            where TComponent : IComponent,IMinLength
+        public static TComponent MinLength<TComponent>(this TComponent component, int minLength, string message = null)
+            where TComponent : IComponent, IMinLength
         {
             var option = component as IOptionConfig;
             option?.Config<Config>(config =>
@@ -49,6 +53,10 @@ namespace Bing.Ui.Extensions
             return component;
         }
 
+        #endregion
+
+        #region MaxLength(最大长度)
+
         /// <summary>
         /// 最大长度
         /// </summary>
@@ -56,7 +64,6 @@ namespace Bing.Ui.Extensions
         /// <param name="component">组件实例</param>
         /// <param name="maxLength">最大长度</param>
         /// <param name="message">错误消息</param>
-        /// <returns></returns>
         public static TComponent MaxLength<TComponent>(this TComponent component, int maxLength, string message = null)
             where TComponent : IComponent, IMaxLength
         {
@@ -64,10 +71,14 @@ namespace Bing.Ui.Extensions
             option?.Config<Config>(config =>
             {
                 config.SetAttribute(UiConst.MaxLength, maxLength);
-                config.SetAttribute(UiConst.MaxMessage, message);
+                //config.SetAttribute(UiConst.MaxMessage, message);
             });
             return component;
         }
+
+        #endregion
+
+        #region Min(最小值)
 
         /// <summary>
         /// 最小值
@@ -76,7 +87,6 @@ namespace Bing.Ui.Extensions
         /// <param name="component">组件实例</param>
         /// <param name="min">最小值</param>
         /// <param name="message">错误消息</param>
-        /// <returns></returns>
         public static TComponent Min<TComponent>(this TComponent component, int min, string message = null)
             where TComponent : IComponent, IMin
         {
@@ -89,6 +99,10 @@ namespace Bing.Ui.Extensions
             return component;
         }
 
+        #endregion
+
+        #region Max(最大值)
+
         /// <summary>
         /// 最大值
         /// </summary>
@@ -96,7 +110,6 @@ namespace Bing.Ui.Extensions
         /// <param name="component">组件实例</param>
         /// <param name="max">最大值</param>
         /// <param name="message">错误消息</param>
-        /// <returns></returns>
         public static TComponent Max<TComponent>(this TComponent component, int max, string message = null)
             where TComponent : IComponent, IMax
         {
@@ -109,6 +122,10 @@ namespace Bing.Ui.Extensions
             return component;
         }
 
+        #endregion
+
+        #region Regex(正则表达式验证)
+
         /// <summary>
         /// 正则表达式验证
         /// </summary>
@@ -116,8 +133,7 @@ namespace Bing.Ui.Extensions
         /// <param name="component">组件实例</param>
         /// <param name="pattern">正则表达式</param>
         /// <param name="message">验证失败消息</param>
-        /// <returns></returns>
-        public static TComponent Max<TComponent>(this TComponent component, string pattern, string message)
+        public static TComponent Regex<TComponent>(this TComponent component, string pattern, string message)
             where TComponent : IComponent, IRegex
         {
             var option = component as IOptionConfig;
@@ -128,5 +144,9 @@ namespace Bing.Ui.Extensions
             });
             return component;
         }
+
+        #endregion
+
+
     }
 }

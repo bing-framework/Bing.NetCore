@@ -53,7 +53,6 @@ namespace Bing.Ui.TagHelpers
         /// </summary>
         /// <typeparam name="T">返回类型</typeparam>
         /// <param name="key">键</param>
-        /// <returns></returns>
         public T GetValueFromItems<T>(object key)
         {
             return TagHelperContext.GetValueFromItems<T>(key);

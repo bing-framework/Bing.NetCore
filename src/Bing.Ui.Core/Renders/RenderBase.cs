@@ -2,6 +2,7 @@
 using System.Text.Encodings.Web;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;
+using Bing.Ui.Extensions;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Bing.Ui.Renders
@@ -84,7 +85,6 @@ namespace Bing.Ui.Renders
         /// <summary>
         /// 输出组件Html
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             var validateMessage = _config.Validate();
@@ -98,10 +98,10 @@ namespace Bing.Ui.Renders
         /// <summary>
         /// 配置内容
         /// </summary>
-        /// <param name="builder"></param>
+        /// <param name="builder">标签生成器</param>
         protected virtual void ConfigContent(TagBuilder builder)
         {
-            if (_config.Content == null || _config.Content.IsEmptyOrWhiteSpace)
+            if (_config.Content.IsEmpty())
             {
                 return;
             }

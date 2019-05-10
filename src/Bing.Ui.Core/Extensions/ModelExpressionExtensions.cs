@@ -13,7 +13,6 @@ namespace Bing.Ui.Extensions
         /// 获取成员
         /// </summary>
         /// <param name="expression">模型表达式</param>
-        /// <returns></returns>
         public static MemberInfo GetMemberInfo(this ModelExpression expression)
         {
             var members = expression.Metadata.ContainerType.GetMember(expression.Metadata.PropertyName);

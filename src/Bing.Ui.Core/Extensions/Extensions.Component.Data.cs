@@ -10,13 +10,14 @@ namespace Bing.Ui.Extensions
     /// </summary>
     public static partial class Extensions
     {
+        #region Url(设置Url)
+
         /// <summary>
         /// 设置Url
         /// </summary>
         /// <typeparam name="TComponent">组件类型</typeparam>
         /// <param name="component">组件实例</param>
         /// <param name="url">Url</param>
-        /// <returns></returns>
         public static TComponent Url<TComponent>(this TComponent component, string url)
             where TComponent : IComponent, IUrl
         {
@@ -25,13 +26,16 @@ namespace Bing.Ui.Extensions
             return component;
         }
 
+        #endregion
+
+        #region DataSource(设置数据源)
+
         /// <summary>
         /// 设置数据源
         /// </summary>
         /// <typeparam name="TComponent">组件类型</typeparam>
         /// <param name="component">组件实例</param>
         /// <param name="dataSource">数据源</param>
-        /// <returns></returns>
         public static TComponent DataSource<TComponent>(this TComponent component, string dataSource)
             where TComponent : IComponent, IDataSource
         {
@@ -39,5 +43,9 @@ namespace Bing.Ui.Extensions
             option?.Config<Config>(config => { config.SetAttribute(UiConst.DataSource, dataSource); });
             return component;
         }
+
+        #endregion
+
+
     }
 }
