@@ -14,7 +14,7 @@ namespace Bing.Utils.Tests.Configs
         [Fact]
         public void Test_GetJsonConfig()
         {
-            var config = ConfigUtil.GetJsonConfig("sampleConfig.json", "Configs")
+            var config = ConfigHelper.GetJsonConfig("sampleConfig.json", "Configs")
                 .GetSection("Sample")
                 .Get<SampleConfig>();
             Assert.Equal("TestSample",config.StringValue);

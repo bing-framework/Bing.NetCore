@@ -5,7 +5,7 @@ namespace Bing.Utils.Maths
     /// <summary>
     /// 数据计算操作辅助类
     /// </summary>
-    public static class MathUtil
+    public static class MathHelper
     {
         #region GetDistance(获取两点之间的距离)
 

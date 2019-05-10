@@ -17,7 +17,7 @@ namespace Bing.Utils.Json
         /// <returns></returns>
         public static T ToObject<T>(this string json)
         {
-            return JsonUtil.ToObject<T>(json);
+            return JsonHelper.ToObject<T>(json);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Bing.Utils.Json
         /// <returns></returns>
         public static object ToObject(this string json)
         {
-            return JsonUtil.ToObject(json);
+            return JsonHelper.ToObject(json);
         }
 
         #endregion
@@ -45,7 +45,7 @@ namespace Bing.Utils.Json
         public static string ToJson(this object target, bool isConvertToSingleQuotes = false, bool camelCase = false,
             bool indented = false)
         {
-            return JsonUtil.ToJson(target, isConvertToSingleQuotes, camelCase, indented);
+            return JsonHelper.ToJson(target, isConvertToSingleQuotes, camelCase, indented);
         }
 
         #endregion
@@ -59,7 +59,7 @@ namespace Bing.Utils.Json
         /// <returns></returns>
         public static JObject ToJObject(this string json)
         {
-            return JsonUtil.ToJObject(json);
+            return JsonHelper.ToJObject(json);
         }
 
         #endregion

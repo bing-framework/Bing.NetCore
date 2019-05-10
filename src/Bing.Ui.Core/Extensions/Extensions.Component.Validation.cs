@@ -64,7 +64,7 @@ namespace Bing.Ui.Extensions
             option?.Config<Config>(config =>
             {
                 config.SetAttribute(UiConst.MaxLength, maxLength);
-                config.SetAttribute(UiConst.MaxLengthMessage, message);
+                config.SetAttribute(UiConst.MaxMessage, message);
             });
             return component;
         }

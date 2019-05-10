@@ -9,7 +9,7 @@ namespace Bing.Utils.IO
     /// <summary>
     /// 文件队列工具
     /// </summary>
-    public class FileQueueUtil
+    public class FileQueueHelper
     {
         /// <summary>
         /// 将文件加入到本地队列
@@ -156,7 +156,7 @@ namespace Bing.Utils.IO
 
                     if (!string.IsNullOrWhiteSpace(content))
                     {
-                        t = JsonUtil.ToObject<T>(content);
+                        t = JsonHelper.ToObject<T>(content);
                     }
 
                     fs.Close();

@@ -8,7 +8,7 @@ namespace Bing.Utils.Drawing
     /// <summary>
     /// 图片操作辅助类 - 加载
     /// </summary>
-    public static partial class ImageUtil
+    public static partial class ImageHelper
     {
         #region FromFile(从指定文件创建图片)
 

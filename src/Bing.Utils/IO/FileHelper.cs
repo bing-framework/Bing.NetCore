@@ -15,7 +15,7 @@ namespace Bing.Utils.IO
     /// <summary>
     /// 文件操作辅助类
     /// </summary>
-    public static partial class FileUtil
+    public static partial class FileHelper
     {
         #region CreateIfNotExists(创建文件，如果文件不存在)
 

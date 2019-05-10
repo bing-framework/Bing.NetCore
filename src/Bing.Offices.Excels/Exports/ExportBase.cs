@@ -362,7 +362,7 @@ namespace Bing.Offices.Excels.Exports
         /// <returns></returns>
         private string GetFilePath(string directory, string fileName)
         {
-            return FileUtil.JoinPath(directory, GetFileName(fileName));
+            return FileHelper.JoinPath(directory, GetFileName(fileName));
         }
 
         /// <summary>

@@ -73,7 +73,7 @@ namespace Bing.Utils.Webs.Clients
         /// <returns></returns>
         public async Task<TResult> ResultFromJsonAsync<TResult>()
         {
-            return JsonUtil.ToObject<TResult>(await ResultAsync());
+            return JsonHelper.ToObject<TResult>(await ResultAsync());
         }
     }
 
@@ -165,7 +165,7 @@ namespace Bing.Utils.Webs.Clients
             }
             if (contentType.SafeString().ToLower() == "application/json")
             {
-                return JsonUtil.ToObject<TResult>(result);
+                return JsonHelper.ToObject<TResult>(result);
             }
             return null;
         }
@@ -176,7 +176,7 @@ namespace Bing.Utils.Webs.Clients
         /// <returns></returns>
         public async Task<TResult> ResultFromJsonAsync()
         {
-            return JsonUtil.ToObject<TResult>(await ResultAsync());
+            return JsonHelper.ToObject<TResult>(await ResultAsync());
         }
     }
 }

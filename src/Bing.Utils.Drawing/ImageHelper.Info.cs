@@ -9,7 +9,7 @@ namespace Bing.Utils.Drawing
     /// <summary>
     /// 图片操作辅助类 - 信息
     /// </summary>
-    public static partial class ImageUtil
+    public static partial class ImageHelper
     {
         #region GetImageExtensions(获取图片扩展名)
 

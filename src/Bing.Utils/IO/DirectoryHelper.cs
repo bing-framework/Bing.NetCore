@@ -9,7 +9,7 @@ namespace Bing.Utils.IO
     /// <summary>
     /// 目录操作辅助类
     /// </summary>
-    public static class DirectoryUtil
+    public static class DirectoryHelper
     {
         #region GetFileNames(获取指定目录中的文件列表)
 

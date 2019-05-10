@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Reflection;
 
 namespace Bing.Utils.Medias.Images
 {
     /// <summary>
     /// 图片操作辅助类
     /// </summary>
-    public static partial class ImageUtil
+    public static partial class ImageHelper
     {
         #region BrightnessHandle(亮度处理)
 

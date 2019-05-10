@@ -12,7 +12,7 @@ namespace Bing.Utils.Json
     /// <summary>
     /// Json操作辅助类
     /// </summary>
-    public static class JsonUtil
+    public static class JsonHelper
     {
         #region JsonDateTimeFormat(Json时间格式化)
 

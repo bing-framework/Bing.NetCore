@@ -12,7 +12,7 @@ namespace Bing.Utils.IO
     /// <summary>
     /// 文件操作辅助类 - 信息
     /// </summary>
-    public static partial class FileUtil
+    public static partial class FileHelper
     {
         #region GetContentType(根据扩展名获取文件内容类型)
 

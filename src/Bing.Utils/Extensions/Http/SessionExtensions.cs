@@ -21,7 +21,7 @@ namespace Bing.Utils.Extensions.Http
             {
                 return;
             }
-            session.Set(key, JsonUtil.ToJson(value));
+            session.Set(key, JsonHelper.ToJson(value));
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Bing.Utils.Extensions.Http
         public static T Get<T>(this ISession session, string key)
         {
             var value = session.GetString(key);
-            return string.IsNullOrWhiteSpace(value) ? default(T) : JsonUtil.ToObject<T>(value);
+            return string.IsNullOrWhiteSpace(value) ? default(T) : JsonHelper.ToObject<T>(value);
         }
     }
 }

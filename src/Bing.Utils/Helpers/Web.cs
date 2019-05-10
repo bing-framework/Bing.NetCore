@@ -122,7 +122,7 @@ namespace Bing.Utils.Helpers
             get
             {
                 Request.EnableRewind();
-                return FileUtil.ToString(Request.Body, isCloseStream: false);
+                return FileHelper.ToString(Request.Body, isCloseStream: false);
             }
         }
 
@@ -553,7 +553,7 @@ namespace Bing.Utils.Helpers
         public static async Task<string> GetBodyAsync()
         {
             Request.EnableRewind();
-            return await FileUtil.ToStringAsync(Request.Body, isCloseStream: false);
+            return await FileHelper.ToStringAsync(Request.Body, isCloseStream: false);
         }
 
         #endregion

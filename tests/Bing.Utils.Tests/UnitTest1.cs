@@ -166,8 +166,8 @@ namespace Bing.Utils.Tests
         private void Test_GenerateTestData()
         {
             var dirPath = "D:\\TestData";
-            DirectoryUtil.CreateIfNotExists(dirPath);
-            FileUtil.Split("D:\\iTestRunner_R1.txt",dirPath);
+            DirectoryHelper.CreateIfNotExists(dirPath);
+            FileHelper.Split("D:\\iTestRunner_R1.txt",dirPath);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace Bing.Utils.Tests
         [Fact]
         public void Test_CombineFile()
         {
-            var tempMd5 = FileUtil.GetMd5("D:\\iTestRunner_R1.txt");
+            var tempMd5 = FileHelper.GetMd5("D:\\iTestRunner_R1.txt");
             //var files = FileUtil.GetAllFiles("D:\\TestData");
             //var outputFilePath = "D:\\iTestRunner_R1_combine_result.txt";
             //FileUtil.Combine(files,outputFilePath);
@@ -290,7 +290,7 @@ namespace Bing.Utils.Tests
             //}
 
             var fileName = Path.GetFileNameWithoutExtension(filePath);
-            var fileSize = FileUtil.GetFileSize(filePath);
+            var fileSize = FileHelper.GetFileSize(filePath);
             var total = Conv.ToInt(fileSize.GetSizeByK() / kbLength);
             using (FileStream readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
@@ -341,7 +341,7 @@ namespace Bing.Utils.Tests
 
             if (delete)
             {
-                FileUtil.Delete(filePath);
+                FileHelper.Delete(filePath);
             }
         }
 
@@ -415,7 +415,7 @@ namespace Bing.Utils.Tests
 
                     if (delete)
                     {
-                        FileUtil.Delete(filePath);
+                        FileHelper.Delete(filePath);
                     }
                 }
             }

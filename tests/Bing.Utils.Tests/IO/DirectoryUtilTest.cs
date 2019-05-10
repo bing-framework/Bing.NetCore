@@ -17,7 +17,7 @@ namespace Bing.Utils.Tests.IO
         [Fact]
         public void Test_GetFileNames()
         {
-            var result = DirectoryUtil.GetFileNames(Directory.GetCurrentDirectory());
+            var result = DirectoryHelper.GetFileNames(Directory.GetCurrentDirectory());
             foreach (var item in result)
             {
                 Output.WriteLine(item);

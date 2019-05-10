@@ -17,12 +17,12 @@ namespace Bing.Utils.Tests
             var compressCount = 4;
             for (int i = 0; i <= compressCount; i++)
             {
-                var json = FileUtil.Read(i == 0
+                var json = FileHelper.Read(i == 0
                     ? "D:\\iTestRunner_R1_format.txt"
                     : $"D:\\test_compression_result_{i - 1}.txt");
                 var initBytes = Encoding.UTF8.GetBytes(json);
                 var result = ZlibHelper.CompressBytes(initBytes, zlibConst.Z_BEST_COMPRESSION);
-                FileUtil.Write($"D:\\test_compression_result_{i}.txt", result);
+                FileHelper.Write($"D:\\test_compression_result_{i}.txt", result);
             }
         }
 
@@ -45,11 +45,11 @@ namespace Bing.Utils.Tests
             var compressCount = 4;
             for (int i = compressCount; i >= 0; i--)
             {
-                var json = FileUtil.ReadToBytes(i == compressCount
+                var json = FileHelper.ReadToBytes(i == compressCount
                     ? $"D:\\test_compression_result_{i}.txt"
                     : $"D:\\test_decompress_result_{i + 1}.txt");
                 var result = ZlibHelper.DeCompressBytes(json);
-                FileUtil.Write($"D:\\test_decompress_result_{i}.txt", result);
+                FileHelper.Write($"D:\\test_decompress_result_{i}.txt", result);
             }
         }
 

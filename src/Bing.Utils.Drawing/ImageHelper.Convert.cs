@@ -8,7 +8,7 @@ namespace Bing.Utils.Drawing
     /// <summary>
     /// 图片操作辅助类 - 转换
     /// </summary>
-    public static partial class ImageUtil
+    public static partial class ImageHelper
     {
         #region ToBytes(转换为字节数组)
 

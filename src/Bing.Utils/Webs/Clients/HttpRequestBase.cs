@@ -311,7 +311,7 @@ namespace Bing.Utils.Webs.Clients
         public TRequest JsonData<T>(T value)
         {
             ContentType(HttpContentType.Json);
-            _data = JsonUtil.ToJson(value);
+            _data = JsonHelper.ToJson(value);
             return This();
         }
 
@@ -524,7 +524,7 @@ namespace Bing.Utils.Webs.Clients
         {
             if (string.IsNullOrWhiteSpace(_data))
             {
-                _data = JsonUtil.ToJson(_params);
+                _data = JsonHelper.ToJson(_params);
             }
             return new StringContent(_data, _encoding, "application/json");
         }

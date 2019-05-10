@@ -3,7 +3,7 @@
     /// <summary>
     /// UserAgent操作辅助类
     /// </summary>
-    public static class UserAgentUtil
+    public static class UserAgentHelper
     {
         #region GetOperatingSystemName(根据 UserAgent 获取操作系统名称)
 

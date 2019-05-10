@@ -6,7 +6,7 @@ namespace Bing.Utils.Timing
     /// <summary>
     /// 时间操作辅助类
     /// </summary>
-    public class DateTimeUtil
+    public class DateTimeHelper
     {
         #region GetDays(获取总天数)
 

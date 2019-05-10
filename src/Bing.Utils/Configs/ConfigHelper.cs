@@ -7,7 +7,7 @@ namespace Bing.Utils.Configs
     /// <summary>
     /// 配置文件 操作辅助类
     /// </summary>
-    public static class ConfigUtil
+    public static class ConfigHelper
     {
         #region GetJsonConfig(获取Json配置文件)
 

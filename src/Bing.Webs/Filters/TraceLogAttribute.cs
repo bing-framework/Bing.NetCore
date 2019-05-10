@@ -138,7 +138,7 @@ namespace Bing.Webs.Filters
                 return;
             }
 
-            log.Params("Headers:").Params(JsonUtil.ToJson(request.Headers));
+            log.Params("Headers:").Params(JsonHelper.ToJson(request.Headers));
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Bing.Webs.Filters
             }
 
             request.EnableRewind();
-            var result = await FileUtil.ToStringAsync(request.Body, isCloseStream: false);
+            var result = await FileHelper.ToStringAsync(request.Body, isCloseStream: false);
             if (string.IsNullOrWhiteSpace(result))
             {
                 return;
@@ -252,7 +252,7 @@ namespace Bing.Webs.Filters
 
             log.Content($"响应消息: {result.Message}")
                 .Content("响应结果:")
-                .Content($"{JsonUtil.ToJson(result.Data)}");
+                .Content($"{JsonHelper.ToJson(result.Data)}");
         }
     }
 }
