@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Bing.Ui</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Ui.Angular\Bing.Ui.Angular.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Data\" />
+    <Folder Include="Viser\" />
+    <Folder Include="Zorro\Forms\" />
+    <Folder Include="Zorro\Tables\" />
+    <Folder Include="Zorro\Trees\" />
+  </ItemGroup>
+
+</Project>
