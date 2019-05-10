@@ -1,9 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <!--阻止ts自动编译-->
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <AssemblyName>Bing.Samples.Angular.AntDesign</AssemblyName>
+    <TypeScriptToolsVersion>3.1</TypeScriptToolsVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,5 +18,23 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Ui.Angular.AntDesign\Bing.Ui.Angular.AntDesign.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Typings\" />
+    <Folder Include="Pages\" />
+  </ItemGroup>
+  
+  <!-- Debug调试模式打包第三方框架 -->
+  <Target Name="Debug_RunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">
+    <!-- 打包 -->
+    <Message Importance="high" Text="Webpack开始打包..." />
+    <!--<Exec Command="npm run dev" />-->
+  </Target>
+
+  <!-- 发布阶段打包 -->
+  <Target Name="Publish_RunWebpack" AfterTargets="ComputeFilesToPublish">
+    <Message Importance="high" Text="Webpack开始打包..." />
+    <!--<Exec Command="npm run prod" />-->
+  </Target>
 
 </Project>
