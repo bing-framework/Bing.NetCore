@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Data\" />
     <Folder Include="Viser\" />
     <Folder Include="Zorro\Forms\" />
     <Folder Include="Zorro\Tables\" />
