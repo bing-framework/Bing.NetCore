@@ -35,6 +35,12 @@ namespace Bing.Webs.Middlewares
         /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
+            if (!ExecuteInterception(context))
+            {
+                await _next(context);
+                return;
+            }
+
             var originalBodyStream = context.Response.Body;
             using (var responseBody = new MemoryStream())
             {
@@ -43,9 +49,24 @@ namespace Bing.Webs.Middlewares
                 sw.Start();
                 await _next(context);
                 sw.Stop();
-                await WriteLog(context, sw);
+                await WriteLogAsync(context, sw);
                 await responseBody.CopyToAsync(originalBodyStream);
             }
+        }
+
+        /// <summary>
+        /// 是否执行拦截
+        /// </summary>
+        /// <param name="context">Http上下文</param>
+        /// <returns></returns>
+        protected virtual bool ExecuteInterception(HttpContext context)
+        {
+            if (context.Request.Path.Value.Contains("swagger"))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -53,8 +74,7 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         /// <param name="context">Http上下文</param>
         /// <param name="stopwatch">计时器</param>
-        /// <returns></returns>
-        private async Task WriteLog(HttpContext context, Stopwatch stopwatch)
+        private async Task WriteLogAsync(HttpContext context, Stopwatch stopwatch)
         {
             if (context == null)
             {
@@ -71,18 +91,17 @@ namespace Bing.Webs.Middlewares
                 },
                 {"IP", context.Connection.RemoteIpAddress.ToString()},
                 {"请求耗时", $"{stopwatch.Elapsed.TotalMilliseconds} 毫秒"},
-                {"请求内容", await FormatRequest(context.Request)},
-                {"响应内容", await FormatResponse(context.Response)}
+                {"请求内容", await FormatRequestAsync(context.Request)},
+                {"响应内容", await FormatResponseAsync(context.Response)}
             });
-            log.Info();
+            log.Trace();
         }
 
         /// <summary>
         /// 格式化请求内容
         /// </summary>
         /// <param name="request">Http请求</param>
-        /// <returns></returns>
-        private async Task<string> FormatRequest(HttpRequest request)
+        private async Task<string> FormatRequestAsync(HttpRequest request)
         {
             request.EnableRewind();
             request.Body.Seek(0, SeekOrigin.Begin);
@@ -95,8 +114,7 @@ namespace Bing.Webs.Middlewares
         /// 格式化响应内容
         /// </summary>
         /// <param name="response">Http响应</param>
-        /// <returns></returns>
-        private async Task<string> FormatResponse(HttpResponse response)
+        private async Task<string> FormatResponseAsync(HttpResponse response)
         {
             if (response.HasStarted)
             {
