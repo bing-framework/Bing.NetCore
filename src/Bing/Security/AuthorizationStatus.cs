@@ -8,7 +8,7 @@ namespace Bing.Security
     public enum AuthorizationStatus
     {
         /// <summary>
-        /// 权限价差通过
+        /// 权限检查通过
         /// </summary>
         [Description("权限检查通过")]
         Ok = 200,
