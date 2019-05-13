@@ -766,6 +766,11 @@
         public const string Limit = "limit";
 
         /// <summary>
+        /// 总量限制
+        /// </summary>
+        public const string TotalLimit = "total-limit";
+
+        /// <summary>
         /// 文件列表
         /// </summary>
         public const string FileList = "file-list";
@@ -809,5 +814,10 @@
         /// 展开事件
         /// </summary>
         public const string OnExpand = "on-expand";
+
+        /// <summary>
+        /// 显示按钮
+        /// </summary>
+        public const string ShowButton = "show-button";
     }
 }

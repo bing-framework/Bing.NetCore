@@ -995,6 +995,20 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        /// <summary>
+        /// 是否数字
+        /// </summary>
+        /// <param name="input">输入值</param>        
+        public static bool IsNumber(string input)
+        {
+            if (input.IsEmpty())
+            {
+                return false;
+            }
+            const string pattern = @"^(-?\d*)(\.\d+)?$";
+            return Regex.IsMatch(input, pattern);
+        }
+
         #region 日期类型
 
         #region IsTime(是否时间格式)

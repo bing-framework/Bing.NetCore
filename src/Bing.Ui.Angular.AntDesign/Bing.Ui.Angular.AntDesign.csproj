@@ -12,8 +12,7 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Viser\" />
-    <Folder Include="Zorro\Forms\" />
-    <Folder Include="Zorro\Tables\" />
+    <Folder Include="Zorro\Tables\Renders\" />
     <Folder Include="Zorro\Trees\" />
   </ItemGroup>
 
