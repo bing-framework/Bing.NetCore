@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 
 namespace Bing.Utils.Drawing
 {
@@ -199,6 +200,69 @@ namespace Bing.Utils.Drawing
         //    coords.Add(y);
         //    return coords;
         //}
+
+        #endregion
+
+        #region DeleteCoordinate(删除图片中的经纬度信息)
+
+        /// <summary>
+        /// 删除图片中的经纬度信息，覆盖原图像
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        public static void DeleteCoordinate(string filePath)
+        {
+            using (var ms = new MemoryStream(File.ReadAllBytes(filePath)))
+            {
+                using (var image = Image.FromStream(ms))
+                {
+                    DeleteCoordinate(image);
+                    image.Save(filePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除图片中的经纬度信息，并另存为
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="savePath">保存文件路径</param>
+        public static void DeleteCoordinate(string filePath, string savePath)
+        {
+            using (var ms = new MemoryStream(File.ReadAllBytes(filePath)))
+            {
+                using (var image = Image.FromStream(ms))
+                {
+                    DeleteCoordinate(image);
+                    image.Save(savePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除图片中的经纬度信息
+        /// </summary>
+        /// <param name="image">图片</param>
+        public static void DeleteCoordinate(Image image)
+        {
+            /*PropertyItem 中对应属性
+             * ID	Property tag
+               0x0000	PropertyTagGpsVer
+               0x0001	PropertyTagGpsLatitudeRef
+               0x0002	PropertyTagGpsLatitude
+               0x0003	PropertyTagGpsLongitudeRef
+               0x0004	PropertyTagGpsLongitude
+               0x0005	PropertyTagGpsAltitudeRef
+               0x0006	PropertyTagGpsAltitude
+             */
+            var ids = new[] {0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006};
+            foreach (var id in ids)
+            {
+                if (image.PropertyIdList.Contains(id))
+                {
+                    image.RemovePropertyItem(id);
+                }
+            }
+        }
 
         #endregion
     }
