@@ -48,7 +48,6 @@ namespace Bing.Webs.Filters
         /// </summary>
         /// <param name="context">操作执行上下文</param>
         /// <param name="next">委托</param>
-        /// <returns></returns>
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             if (context == null)
@@ -167,7 +166,6 @@ namespace Bing.Webs.Filters
         /// 是否multipart内容类型
         /// </summary>
         /// <param name="contentType">内容类型</param>
-        /// <returns></returns>
         private static bool IsMultipart(string contentType)
         {
             return !string.IsNullOrEmpty(contentType) && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
