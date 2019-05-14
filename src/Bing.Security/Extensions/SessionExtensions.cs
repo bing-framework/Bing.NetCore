@@ -51,7 +51,10 @@ namespace Bing.Security.Extensions
         /// <returns></returns>
         public static string GetFullName(this ISession session)
         {
-            return WebIdentity.Identity.GetValue(ClaimTypes.FullName);
+            var result = WebIdentity.Identity.GetValue(ClaimTypes.FullName);
+            return string.IsNullOrWhiteSpace(result)
+                ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Surname)
+                : result;
         }
 
         /// <summary>
