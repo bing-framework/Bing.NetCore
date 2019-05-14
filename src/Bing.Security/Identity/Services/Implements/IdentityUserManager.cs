@@ -44,7 +44,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="token">令牌</param>
         /// <param name="newPassword">新密码</param>
         /// <returns></returns>
-        public async Task<IdentityResult> ResetPasswordAsync(TUser user, string tokenProvider, string token,
+        public virtual async Task<IdentityResult> ResetPasswordAsync(TUser user, string tokenProvider, string token,
             string newPassword)
         {
             ThrowIfDisposed();

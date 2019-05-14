@@ -46,7 +46,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
         /// <param name="applicationCode">应用程序编码</param>
         /// <returns></returns>
-        public async Task<SignInResult> SignInAsync(string account, string password, bool isPersistent = false, bool lockoutOnFailure = true,
+        public virtual async Task<SignInResult> SignInAsync(string account, string password, bool isPersistent = false, bool lockoutOnFailure = true,
             string applicationCode = "")
         {
             var user = await GetUser(account);
@@ -135,7 +135,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
         /// <param name="applicationCode">应用程序编码</param>
         /// <returns></returns>
-        public async Task<SignInResult> SignInByUserNameAsync(string userName, string password, bool isPersistent = false, bool lockoutOnFailure = true,
+        public virtual async Task<SignInResult> SignInByUserNameAsync(string userName, string password, bool isPersistent = false, bool lockoutOnFailure = true,
             string applicationCode = "")
         {
             var user = await UserManager.FindByNameAsync(userName);
@@ -160,7 +160,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
         /// <param name="applicationCode">应用程序编码</param>
         /// <returns></returns>
-        public async Task<SignInResult> SignInByEmailAsync(string email, string password, bool isPersistent = false, bool lockoutOnFailure = true,
+        public virtual async Task<SignInResult> SignInByEmailAsync(string email, string password, bool isPersistent = false, bool lockoutOnFailure = true,
             string applicationCode = "")
         {
             var user = await UserManager.FindByEmailAsync(email);
@@ -185,7 +185,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
         /// <param name="applicationCode">应用程序编码</param>
         /// <returns></returns>
-        public async Task<SignInResult> SignInByPhoneAsync(string phone, string password, bool isPersistent = false, bool lockoutOnFailure = true,
+        public virtual async Task<SignInResult> SignInByPhoneAsync(string phone, string password, bool isPersistent = false, bool lockoutOnFailure = true,
             string applicationCode = "")
         {
             var user = await UserManager.FindByPhoneAsync(phone);
@@ -205,7 +205,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// 退出登录
         /// </summary>
         /// <returns></returns>
-        public async Task SignOutAsync()
+        public virtual async Task SignOutAsync()
         {
             await IdentitySignInManager.SignOutAsync();
         }

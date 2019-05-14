@@ -18,7 +18,7 @@ namespace Bing.Security.Identity.Services.Implements
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public class UserManager<TUser,TKey>:DomainServiceBase,IUserManager<TUser,TKey> where TUser:User<TUser,TKey>,new()
+    public class UserManager<TUser,TKey> : DomainServiceBase, IUserManager<TUser,TKey> where TUser : User<TUser,TKey> ,new()
     {
         /// <summary>
         /// Identity用户服务
@@ -57,7 +57,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="user">用户</param>
         /// <param name="password">密码</param>
         /// <returns></returns>
-        public async Task CreateAsync(TUser user, string password)
+        public virtual async Task CreateAsync(TUser user, string password)
         {
             if (user == null)
             {
@@ -81,7 +81,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="application">应用程序</param>
         /// <param name="provider">令牌提供器</param>
         /// <returns></returns>
-        public async Task<string> GenerateTokenAsync(string phone, string purpose, string application = "", string provider = "")
+        public virtual async Task<string> GenerateTokenAsync(string phone, string purpose, string application = "", string provider = "")
         {
             var user = await GetUserOrDefault(phone);
             return await GenerateTokenAsync(user, purpose, application, provider);
@@ -123,7 +123,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="application">应用程序</param>
         /// <param name="provider">令牌提供器</param>
         /// <returns></returns>
-        public async Task<string> GenerateTokenAsync(TUser user, string purpose, string application = "", string provider = "")
+        public virtual async Task<string> GenerateTokenAsync(TUser user, string purpose, string application = "", string provider = "")
         {
             user.CheckNotNull(nameof(user));
             purpose = GetPurpose(purpose, application);
@@ -158,7 +158,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="application">应用程序</param>
         /// <param name="provider">令牌提供器</param>
         /// <returns></returns>
-        public async Task<bool> VerifyTokenAsync(string phone, string purpose, string token, string application = "", string provider = "")
+        public virtual async Task<bool> VerifyTokenAsync(string phone, string purpose, string token, string application = "", string provider = "")
         {
             var user = await GetUserOrDefault(phone);
             return await VerifyTokenAsync(user, purpose, token, application, provider);
@@ -173,7 +173,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="application">应用程序</param>
         /// <param name="provider">令牌提供器</param>
         /// <returns></returns>
-        public async Task<bool> VerifyTokenAsync(TUser user, string purpose, string token, string application = "", string provider = "")
+        public virtual async Task<bool> VerifyTokenAsync(TUser user, string purpose, string token, string application = "", string provider = "")
         {
             user.CheckNotNull(nameof(user));
             purpose = GetPurpose(purpose, application);
@@ -194,7 +194,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="phone">手机号</param>
         /// <param name="application">应用程序</param>
         /// <returns></returns>
-        public async Task<string> GenerateRegisterTokenAsync(string phone, string application = "")
+        public virtual async Task<string> GenerateRegisterTokenAsync(string phone, string application = "")
         {
             return await GenerateTokenAsync(phone, TokenPurpose.PhoneRegister, application);
         }
@@ -206,7 +206,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="token">令牌</param>
         /// <param name="application">应用程序</param>
         /// <returns></returns>
-        public async Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "")
+        public virtual async Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "")
         {
             return await VerifyTokenAsync(phone, TokenPurpose.PhoneRegister, token, application);
         }
@@ -220,7 +220,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="user">用户</param>
         /// <returns></returns>
-        public async Task<string> GenerateEmailConfirmationTokenAsync(TUser user)
+        public virtual async Task<string> GenerateEmailConfirmationTokenAsync(TUser user)
         {
             return await Manager.GenerateEmailConfirmationTokenAsync(user);
         }
@@ -231,7 +231,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="user">用户</param>
         /// <param name="token">令牌</param>
         /// <returns></returns>
-        public async Task ConfirmEmailAsync(TUser user, string token)
+        public virtual async Task ConfirmEmailAsync(TUser user, string token)
         {
             var result = await Manager.ConfirmEmailAsync(user, token);
             result.ThrowIfError();
@@ -246,7 +246,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="user">用户</param>
         /// <returns></returns>
-        public async Task<string> GenerateEmailPasswordResetTokenAsync(TUser user)
+        public virtual async Task<string> GenerateEmailPasswordResetTokenAsync(TUser user)
         {
             return await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider,
                 UserManager<TUser>.ResetPasswordTokenPurpose);
@@ -259,7 +259,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="token">令牌</param>
         /// <param name="newPassword">新密码</param>
         /// <returns></returns>
-        public async Task ResetPasswordByEmailAsync(TUser user, string token, string newPassword)
+        public virtual async Task ResetPasswordByEmailAsync(TUser user, string token, string newPassword)
         {
             var result = await Manager.ResetPasswordAsync(user, TokenOptions.DefaultEmailProvider, token, newPassword);
             result.ThrowIfError();
@@ -274,7 +274,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="user">用户</param>
         /// <returns></returns>
-        public async Task<string> GeneratePhonePasswordResetTokenAsync(TUser user)
+        public virtual async Task<string> GeneratePhonePasswordResetTokenAsync(TUser user)
         {
             return await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultPhoneProvider,
                 UserManager<TUser>.ResetPasswordTokenPurpose);
@@ -287,7 +287,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="token">令牌</param>
         /// <param name="newPassword">新密码</param>
         /// <returns></returns>
-        public async Task ResetPasswordByPhoneAsync(TUser user, string token, string newPassword)
+        public virtual async Task ResetPasswordByPhoneAsync(TUser user, string token, string newPassword)
         {
             var result = await Manager.ResetPasswordAsync(user, TokenOptions.DefaultPhoneProvider, token, newPassword);
             result.ThrowIfError();
@@ -304,7 +304,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="currentPassword">当前密码</param>
         /// <param name="newPassword">新密码</param>
         /// <returns></returns>
-        public async Task ChangePasswordAsync(TUser user, string currentPassword, string newPassword)
+        public virtual async Task ChangePasswordAsync(TUser user, string currentPassword, string newPassword)
         {
             var result = await Manager.ChangePasswordAsync(user, currentPassword, newPassword);
             result.ThrowIfError();
@@ -319,7 +319,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="userName">用户名</param>
         /// <returns></returns>
-        public async Task<TUser> FindByNameAsync(string userName)
+        public virtual async Task<TUser> FindByNameAsync(string userName)
         {
             return await Manager.FindByNameAsync(userName);
         }
@@ -329,7 +329,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="email">电子邮件</param>
         /// <returns></returns>
-        public async Task<TUser> FindByEmailAsync(string email)
+        public virtual async Task<TUser> FindByEmailAsync(string email)
         {
             return await Manager.FindByEmailAsync(email);
         }
@@ -339,7 +339,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="phone">手机号</param>
         /// <returns></returns>
-        public async Task<TUser> FindByPhoneAsync(string phone)
+        public virtual async Task<TUser> FindByPhoneAsync(string phone)
         {
             return await UserRepository.SingleAsync(t => t.PhoneNumber == phone);
         }
