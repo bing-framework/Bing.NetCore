@@ -8,7 +8,7 @@ namespace Bing.Security.Identity.Repositories
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public interface IUserRepository<TUser,in TKey>:IRepository<TUser,TKey> where TUser:User<TUser,TKey>
+    public interface IUserRepository<TUser, in TKey> : IRepository<TUser,TKey> where TUser : User<TUser,TKey>
     {
     }
 }

@@ -13,7 +13,7 @@ namespace Bing.Security.Identity.Services.Implements
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public class IdentityUserManager<TUser,TKey>:AspNetUserManager<TUser> where TUser:User<TUser,TKey>
+    public class IdentityUserManager<TUser,TKey> : AspNetUserManager<TUser> where TUser : User<TUser,TKey>
     {
         /// <summary>
         /// 初始化一个<see cref="IdentityUserManager{TUser,TKey}"/>类型的实例
@@ -43,7 +43,6 @@ namespace Bing.Security.Identity.Services.Implements
         /// <param name="tokenProvider">令牌提供程序</param>
         /// <param name="token">令牌</param>
         /// <param name="newPassword">新密码</param>
-        /// <returns></returns>
         public virtual async Task<IdentityResult> ResetPasswordAsync(TUser user, string tokenProvider, string token,
             string newPassword)
         {
@@ -57,6 +56,21 @@ namespace Bing.Security.Identity.Services.Implements
                 return IdentityResult.Failed(ErrorDescriber.InvalidToken());
             }
             var result = await UpdatePasswordHash(user, newPassword, true);
+            if (!result.Succeeded)
+            {
+                return result;
+            }
+            return await UpdateUserAsync(user);
+        }
+
+        /// <summary>
+        /// 更新密码
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="newPassword">新密码</param>
+        public virtual async Task<IdentityResult> UpdatePasswordAsync(TUser user, string newPassword)
+        {
+            var result = await this.UpdatePasswordHash(user, newPassword, false);
             if (!result.Succeeded)
             {
                 return result;

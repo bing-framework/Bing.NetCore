@@ -8,7 +8,7 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 异常处理过滤器
     /// </summary>
-    public class ExceptionHandlerAttribute:ExceptionFilterAttribute
+    public class ExceptionHandlerAttribute : ExceptionFilterAttribute
     {
         /// <summary>
         /// 异常处理
