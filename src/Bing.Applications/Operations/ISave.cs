@@ -8,7 +8,7 @@ namespace Bing.Applications.Operations
     /// 保存操作
     /// </summary>
     /// <typeparam name="TRequest">参数类型</typeparam>
-    public interface ISave<in TRequest> where TRequest:IRequest,IKey,new()
+    public interface ISave<in TRequest> where TRequest : IRequest, IKey, new()
     {
         /// <summary>
         /// 保存

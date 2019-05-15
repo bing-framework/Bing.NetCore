@@ -10,7 +10,7 @@ namespace Bing.Applications.Aspects
     /// <summary>
     /// 工作单元拦截器
     /// </summary>
-    public class UnitOfWorkAttribute:InterceptorBase,IScopeInterceptor
+    public class UnitOfWorkAttribute : InterceptorBase, IScopeInterceptor
     {
         /// <summary>
         /// 作用域，当嵌套使用工作单元拦截器时，设置为Scope.Aspect，只有最外层工作单元拦截器生效
@@ -34,6 +34,6 @@ namespace Bing.Applications.Aspects
             {
                 service.CommitAfter();
             }
-        }        
+        }
     }
 }

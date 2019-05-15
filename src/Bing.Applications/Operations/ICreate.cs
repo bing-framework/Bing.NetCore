@@ -8,7 +8,7 @@ namespace Bing.Applications.Operations
     /// 创建操作
     /// </summary>
     /// <typeparam name="TCreateRequest">创建参数类型</typeparam>
-    public interface ICreate<in TCreateRequest> where TCreateRequest:IRequest,new()
+    public interface ICreate<in TCreateRequest> where TCreateRequest : IRequest, new()
     {
         /// <summary>
         /// 创建

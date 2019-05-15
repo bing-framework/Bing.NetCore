@@ -8,7 +8,7 @@ namespace Bing.Applications.Operations
     /// 修改操作
     /// </summary>
     /// <typeparam name="TUpdateRequest">修改参数类型</typeparam>
-    public interface IUpdate<in TUpdateRequest> where TUpdateRequest:IRequest,new()
+    public interface IUpdate<in TUpdateRequest> where TUpdateRequest : IRequest, new()
     {
         /// <summary>
         /// 修改

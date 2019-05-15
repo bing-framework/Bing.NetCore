@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Bing.Applications.Dtos;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Datas.Queries;
 using Bing.Datas.Stores;
@@ -22,7 +21,7 @@ namespace Bing.Applications
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     public abstract class QueryServiceBase<TEntity, TDto, TQueryParameter> : QueryServiceBase<TEntity, TDto, TQueryParameter, Guid>
         where TEntity : class, IKey<Guid>, IVersion
-        where TDto : IResponse, new()
+        where TDto : new()
         where TQueryParameter : IQueryParameter
     {
         /// <summary>
@@ -41,9 +40,9 @@ namespace Bing.Applications
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
-    public abstract class QueryServiceBase<TEntity, TDto, TQueryParameter, TKey> :ServiceBase, IQueryService<TDto, TQueryParameter>
-        where TEntity : class, IKey<TKey>,IVersion
-        where TDto : IResponse, new()
+    public abstract class QueryServiceBase<TEntity, TDto, TQueryParameter, TKey> : ServiceBase, IQueryService<TDto, TQueryParameter>
+        where TEntity : class, IKey<TKey>, IVersion
+        where TDto : new()
         where TQueryParameter : IQueryParameter
     {
         /// <summary>
@@ -69,7 +68,6 @@ namespace Bing.Applications
         /// 转换为数据传输对象
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected virtual TDto ToDto(TEntity entity)
         {
             return entity.MapTo<TDto>();
@@ -80,7 +78,6 @@ namespace Bing.Applications
         /// <summary>
         /// 获取全部
         /// </summary>
-        /// <returns></returns>
         public virtual List<TDto> GetAll()
         {
             return _store.FindAll().Select(ToDto).ToList();
@@ -89,7 +86,6 @@ namespace Bing.Applications
         /// <summary>
         /// 获取全部
         /// </summary>
-        /// <returns></returns>
         public virtual async Task<List<TDto>> GetAllAsync()
         {
             var entities = await _store.FindAllAsync();
@@ -104,7 +100,6 @@ namespace Bing.Applications
         /// 通过编号获取
         /// </summary>
         /// <param name="id">实体编号</param>
-        /// <returns></returns>
         public virtual TDto GetById(object id)
         {
             var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
@@ -115,7 +110,6 @@ namespace Bing.Applications
         /// 通过编号获取
         /// </summary>
         /// <param name="id">实体编号</param>
-        /// <returns></returns>
         public virtual async Task<TDto> GetByIdAsync(object id)
         {
             var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
@@ -130,7 +124,6 @@ namespace Bing.Applications
         /// 通过编号列表获取
         /// </summary>
         /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
-        /// <returns></returns>
         public virtual List<TDto> GetByIds(string ids)
         {
             return _store.FindByIds(ids).Select(ToDto).ToList();
@@ -140,7 +133,6 @@ namespace Bing.Applications
         /// 通过编号列表获取
         /// </summary>
         /// <param name="ids">用逗号分隔带额Id列表，范例："1,2"</param>
-        /// <returns></returns>
         public virtual async Task<List<TDto>> GetByIdsAsync(string ids)
         {
             var entities = await _store.FindByIdsAsync(ids);
@@ -155,7 +147,6 @@ namespace Bing.Applications
         /// 查询
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         public virtual List<TDto> Query(TQueryParameter parameter)
         {
             if (parameter == null)
@@ -170,7 +161,6 @@ namespace Bing.Applications
         /// 查询
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         public virtual async Task<List<TDto>> QueryAsync(TQueryParameter parameter)
         {
             if (parameter == null)
@@ -185,7 +175,6 @@ namespace Bing.Applications
         /// 执行查询
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         private IQueryable<TEntity> ExecuteQuery(TQueryParameter parameter)
         {
             var query = CreateQuery(parameter);
@@ -199,7 +188,6 @@ namespace Bing.Applications
         /// 创建查询对象
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         protected virtual IQueryBase<TEntity> CreateQuery(TQueryParameter parameter)
         {
             return new Query<TEntity>(parameter);
@@ -209,7 +197,6 @@ namespace Bing.Applications
         /// 过滤
         /// </summary>
         /// <param name="query">查询条件</param>
-        /// <returns></returns>
         private IQueryable<TEntity> Filter(IQueryBase<TEntity> query)
         {
             return IsTracking ? _store.Find().Where(query) : _store.FindAsNoTracking().Where(query);
@@ -220,7 +207,6 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         protected virtual IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter)
         {
             return queryable;
@@ -234,7 +220,6 @@ namespace Bing.Applications
         /// 分页查询
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         public virtual PagerList<TDto> PagerQuery(TQueryParameter parameter)
         {
             if (parameter == null)
@@ -251,7 +236,6 @@ namespace Bing.Applications
         /// 分页查询
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         public virtual async Task<PagerList<TDto>> PagerQueryAsync(TQueryParameter parameter)
         {
             if (parameter == null)

@@ -220,9 +220,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Identity", "sa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EasyCaching", "src\Bing.EasyCaching\Bing.EasyCaching.csproj", "{2D9D0F7E-543F-42BB-8595-B1DD93FEFE69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ui.Angular.AntDesign", "src\Bing.Ui.Angular.AntDesign\Bing.Ui.Angular.AntDesign.csproj", "{6292569E-40C5-455E-AE61-20C54EC84202}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ui.Angular.AntDesign", "src\Bing.Ui.Angular.AntDesign\Bing.Ui.Angular.AntDesign.csproj", "{6292569E-40C5-455E-AE61-20C54EC84202}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Angular.AntDesign", "sample\Bing.Samples.Angular.AntDesign\Bing.Samples.Angular.AntDesign.csproj", "{C71C21D1-DCAE-4F93-AE52-D680C8FDE8D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Angular.AntDesign", "sample\Bing.Samples.Angular.AntDesign\Bing.Samples.Angular.AntDesign.csproj", "{C71C21D1-DCAE-4F93-AE52-D680C8FDE8D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

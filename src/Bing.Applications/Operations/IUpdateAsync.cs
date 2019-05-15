@@ -15,7 +15,6 @@ namespace Bing.Applications.Operations
         /// 修改
         /// </summary>
         /// <param name="request">请求参数</param>
-        /// <returns></returns>
         [UnitOfWork]
         Task UpdateAsync([Valid] TUpdateRequest request);
     }

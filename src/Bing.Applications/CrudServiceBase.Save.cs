@@ -85,7 +85,6 @@ namespace Bing.Applications
         /// 创建实体
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected async Task CreateAsync(TEntity entity)
         {
             CreateBefore(entity);
@@ -100,7 +99,6 @@ namespace Bing.Applications
         /// 创建前操作
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected virtual Task CreateBeforeAsync(TEntity entity)
         {
             return Task.CompletedTask;
@@ -110,7 +108,6 @@ namespace Bing.Applications
         /// 创建后操作
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected virtual Task CreateAfterAsync(TEntity entity)
         {
             return Task.CompletedTask;
@@ -159,7 +156,6 @@ namespace Bing.Applications
         /// 查找旧实体
         /// </summary>
         /// <param name="id">标识</param>
-        /// <returns></returns>
         protected virtual TEntity FindOldEntity(TKey id)
         {
             return _repository.Find(id);
@@ -197,7 +193,6 @@ namespace Bing.Applications
         /// 修改
         /// </summary>
         /// <param name="request">修改参数</param>
-        /// <returns></returns>
         public virtual async Task UpdateAsync(TUpdateRequest request)
         {
             if (request == null)
@@ -217,7 +212,6 @@ namespace Bing.Applications
         /// 修改实体
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected async Task UpdateAsync(TEntity entity)
         {
             var oldEntity = await FindOldEntityAsync(entity.Id);
@@ -237,7 +231,6 @@ namespace Bing.Applications
         /// 修改前操作
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected virtual Task UpdateBeforeAsync(TEntity entity)
         {
             return Task.CompletedTask;
@@ -248,7 +241,6 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        /// <returns></returns>
         protected virtual Task UpdateAfterAsync(TEntity entity, ChangeValueCollection changeValues)
         {
             return Task.CompletedTask;
@@ -289,7 +281,6 @@ namespace Bing.Applications
         /// 保存
         /// </summary>
         /// <param name="request">请求参数</param>
-        /// <returns></returns>
         public virtual async Task SaveAsync(TRequest request)
         {
             if (request == null)
@@ -326,7 +317,6 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="request">请求参数</param>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected virtual bool IsNew(TRequest request, TEntity entity)
         {
             return string.IsNullOrWhiteSpace(request.Id) || entity.Id.Equals(default(TKey));

@@ -42,7 +42,7 @@ namespace Bing.Webs.Controllers
         /// <param name="id">标识</param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public virtual async Task<IActionResult> GetAsync(object id)
+        public virtual async Task<IActionResult> GetAsync(string id)
         {
             var result = await _service.GetByIdAsync(id);
             return Success(result);

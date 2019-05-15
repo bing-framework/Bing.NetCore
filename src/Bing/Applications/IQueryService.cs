@@ -1,5 +1,4 @@
-﻿using Bing.Applications.Dtos;
-using Bing.Applications.Operations;
+﻿using Bing.Applications.Operations;
 using Bing.Datas.Queries;
 
 namespace Bing.Applications
@@ -12,8 +11,8 @@ namespace Bing.Applications
     public interface IQueryService<TDto, in TQueryParameter> : IService,
         IGetAll<TDto>, IGetById<TDto>,
         IGetAllAsync<TDto>, IGetByIdAsync<TDto>,
-        IPagerQuery<TDto, TQueryParameter>, IPagerQueryAsync<TDto, TQueryParameter>
-        where TDto : IResponse, new()
+        IPageQuery<TDto, TQueryParameter>, IPageQueryAsync<TDto, TQueryParameter>
+        where TDto : new()
         where TQueryParameter : IQueryParameter
     {
     }
