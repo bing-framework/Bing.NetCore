@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
+using Bing.Domains.Repositories;
 using Bing.Exceptions;
 using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -10,35 +11,35 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bing.Webs.Controllers.Trees
 {
     /// <summary>
-    /// 树型控制器基类
+    /// 树型表格控制器
     /// </summary>
     /// <typeparam name="TTreeResult">树型结果</typeparam>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">父标识类型</typeparam>
-    public abstract class TreeControllerBase<TTreeResult, TDto, TQuery> : TreeControllerBase<TTreeResult, TDto, TQuery, Guid?>
+    public abstract class TreeTableControllerBase<TTreeResult, TDto, TQuery> : TreeTableControllerBase<TTreeResult, TDto, TQuery, Guid?>
         where TTreeResult : class, new()
         where TDto : class, ITreeNode, new()
         where TQuery : class, ITreeQueryParameter, new()
     {
         /// <summary>
-        /// 初始化一个<see cref="TreeControllerBase{TTreeResult,TDto,TQuery}"/>类型的实例
+        /// 初始化一个<see cref="TreeTableControllerBase{TTreeResult,TDto,TQuery}"/>类型的实例
         /// </summary>
         /// <param name="service">树型服务</param>
-        protected TreeControllerBase(ITreeService<TDto, TQuery, Guid?> service) : base(service)
+        protected TreeTableControllerBase(ITreeService<TDto, TQuery, Guid?> service) : base(service)
         {
         }
     }
 
     /// <summary>
-    /// 树型控制器基类
+    /// 树型表格控制器
     /// </summary>
     /// <typeparam name="TTreeResult">树型结果</typeparam>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
-    public abstract class TreeControllerBase<TTreeResult, TDto, TQuery, TParentId> : ControllerBase<TDto, TQuery, TParentId>
+    public abstract class TreeTableControllerBase<TTreeResult, TDto, TQuery, TParentId> : ControllerBase<TDto, TQuery, TParentId>
         where TTreeResult : class, new()
-        where TDto : class, ITreeNode, new() 
+        where TDto : class, ITreeNode, new()
         where TQuery : class, ITreeQueryParameter<TParentId>, new()
     {
         /// <summary>
@@ -47,10 +48,10 @@ namespace Bing.Webs.Controllers.Trees
         private readonly ITreeService<TDto, TQuery, TParentId> _service;
 
         /// <summary>
-        /// 初始化一个<see cref="TreeControllerBase{TTreeResult,TDto,TQuery,TParentId}"/>类型的实例
+        /// 初始化一个<see cref="TreeTableControllerBase{TTreeResult,TDto,TQuery,TParentId}"/>类型的实例
         /// </summary>
         /// <param name="service">树型服务</param>
-        protected TreeControllerBase(ITreeService<TDto, TQuery, TParentId> service) : base(service)
+        protected TreeTableControllerBase(ITreeService<TDto, TQuery, TParentId> service) : base(service)
         {
             _service = service;
         }
@@ -73,7 +74,7 @@ namespace Bing.Webs.Controllers.Trees
             }
             QueryBefore(query);
             InitParam(query);
-            TTreeResult result;
+            PagerList<TTreeResult> result;
             switch (GetOperation(query))
             {
                 case LoadOperation.FirstLoad:
@@ -135,7 +136,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 首次加载
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> FirstLoad(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> FirstLoad(TQuery query)
         {
             if (GetLoadMode() == LoadMode.Sync)
             {
@@ -149,7 +150,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 同步首次查询
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> SyncFirstLoad(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> SyncFirstLoad(TQuery query)
         {
             var data = await Query(query);
             return ToResult(data);
@@ -180,24 +181,25 @@ namespace Bing.Webs.Controllers.Trees
         /// </summary>
         /// <param name="data">数据列表</param>
         /// <param name="async">是否异步</param>
-        protected abstract TTreeResult ToResult(List<TDto> data, bool async = false);
+        protected abstract PagerList<TTreeResult> ToResult(List<TDto> data, bool async = false);
 
         /// <summary>
         /// 异步首次加载
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> AsyncFirstLoad(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> AsyncFirstLoad(TQuery query)
         {
             query.Level = 1;
-            var data = await Query(query);
-            return ToResult(data, true);
+            var data = await _service.PagerQueryAsync(query);
+            ProcessData(data.Data, query);
+            return ToResult(data.Data, true);
         }
 
         /// <summary>
         /// 加载子节点
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> LoadChildren(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> LoadChildren(TQuery query)
         {
             if (query.ParentId == null)
             {
@@ -216,7 +218,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 异步加载子节点
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> AsyncLoadChildren(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> AsyncLoadChildren(TQuery query)
         {
             var queryParam = await GetAsyncLoadChildrenQuery(query);
             var data = await Query(queryParam);
@@ -238,7 +240,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 同步加载子节点
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> SyncLoadChildren(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> SyncLoadChildren(TQuery query)
         {
             var parentId = query.ParentId.SafeString();
             var queryParam = await GetSyncLoadChildrenQuery(query);
@@ -265,7 +267,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 搜索
         /// </summary>
         /// <param name="query">查询参数</param>
-        protected virtual async Task<TTreeResult> Search(TQuery query)
+        protected virtual async Task<PagerList<TTreeResult>> Search(TQuery query)
         {
             var data = await _service.QueryAsync(query);
             var ids = data.GetMissingParentIds();
