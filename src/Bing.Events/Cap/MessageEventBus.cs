@@ -11,7 +11,7 @@ namespace Bing.Events.Cap
     /// <summary>
     /// Cap消息事件总线
     /// </summary>
-    public class MessageEventBus:IMessageEventBus
+    public class MessageEventBus : IMessageEventBus
     {
         /// <summary>
         /// 事件发布器
