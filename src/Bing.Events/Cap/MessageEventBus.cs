@@ -85,7 +85,7 @@ namespace Bing.Events.Cap
         /// <summary>
         /// 写日志
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">消息名称</param>
         private void WriteLog(string name)
         {
             var log = GetLog();

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Bing.Webs.Commons;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.Webs.Filters
