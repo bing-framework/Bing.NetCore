@@ -420,6 +420,239 @@ namespace Bing.Utils.Tests
                 }
             }
         }
+
+        [Fact]
+        public void Test_Split()
+        {
+            var source =
+                @"1. Trace: SqlQueryLog >> 跟踪号: 0HLMQ0R8CFGAN:00000001-2    操作时间: 2019-05-17 09:34:47.728    已执行: 1毫秒    
+2. IP: ::ffff:172.18.107.80   主机: lebazer01   线程号: 35   
+3. 浏览器: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36   
+4. Url: http://172.18.107.84:8101/api/Permission/GetPermissionMenus?t=1558056887443
+5. 操作人编号: efa31fb6-d94e-429a-b1fe-6502df67b245   操作人: 超级管理员   
+6. 应用程序: 后台管理系统   
+7. 类名: Bing.Datas.Dapper.SqlQuery   
+8. 标题: SqlQuery查询调试:
+9. Sql语句:
+原始Sql:
+Select `b`.*,`b`.`ResourceId` As `Id` 
+From `Systems.Permission` As `a` 
+Join `Systems.Resource` As `b` On `a`.`ResourceId`=`b`.`ResourceId` And `b`.`IsDeleted`=@_p_3 
+Where `a`.`IsDeny`=@_p_0 And `b`.`ApplicationId`=@_p_1 And `a`.`IsDeleted`=@_p_2
+调试Sql:
+Select `b`.*,`b`.`ResourceId` As `Id` 
+From `Systems.Permission` As `a` 
+Join `Systems.Resource` As `b` On `a`.`ResourceId`=`b`.`ResourceId` And `b`.`IsDeleted`=0 
+Where `a`.`IsDeny`=1 And `b`.`ApplicationId`='79c3c002-1474-4b3f-bf83-b17aa173a2bb' And `a`.`IsDeleted`=0
+10. Sql参数:
+    @_p_0 : 1 : System.Boolean,
+    @_p_1 : '79c3c002-1474-4b3f-bf83-b17aa173a2bb' : System.Guid,
+    @_p_2 : 0 : System.Boolean,
+    @_p_3 : 0 : System.Boolean".Trim();
+            //var array = Regexs.Split(source, @"(\d{1,2})\.\s");
+            var array = Regex.Split(source, @"\d{1,2}\.\s", RegexOptions.None).Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToList();
+           Output.WriteLine(array.Count.ToString());
+            var result = Format(array);
+            Output.WriteLine(result.ToJson());
+        }
+
+        private BingLogModel Format(List<string> array)
+        {
+            var logModel = new BingLogModel();
+            FormatLine1(array, logModel);
+            return logModel;
+        }
+
+        private void FormatLine1(List<string> array, BingLogModel model)
+        {
+            if (array.Count < 1)
+            {
+                return;
+            }
+
+            var line = array[0];
+            var levelAndLogName = line.Split(">>");
+            SetLogLevelAndLogName(levelAndLogName[0], model);
+            var tempArray = levelAndLogName[1].Split(": ");
+            if (tempArray.Length == 4)
+            {
+                model.TraceId = tempArray[1].Trim();
+                model.OperationTime = tempArray[3].Trim();
+            }
+
+            if (tempArray.Length == 6)
+            {
+                model.Duration = tempArray[5].Trim();
+            }
+        }
+
+        private void SetLogLevelAndLogName(string item,BingLogModel model)
+        {
+            var firstSplit = Split(item);
+            model.Level = firstSplit.Item1;
+            model.LogName = firstSplit.Item2;
+        }
+
+        private Tuple<string, string> Split(string content)
+        {
+            var result = content.Trim().Split(": ");
+            if (result.Length == 2)
+            {
+                return new Tuple<string, string>(result[0].Trim(), result[1].Trim());
+            }
+
+            if (result.Length == 1)
+            {
+                return new Tuple<string, string>(result[0].Trim(), string.Empty);
+            }
+
+            return null;
+        }
+
+    }
+
+    public class BingLogModel
+    {
+        public int Id { get; set; }
+        public DateTime LongDate { get; set; }
+        public string Logger { get; set; }
+        public string Message { get; set; }
+
+        /// <summary>
+        /// 日志名称
+        /// </summary>
+        public string LogName { get; set; }
+
+        /// <summary>
+        /// 日志级别
+        /// </summary>
+        public string Level { get; set; }
+
+        /// <summary>
+        /// 跟踪号
+        /// </summary>
+        public string TraceId { get; set; }
+
+        /// <summary>
+        /// 操作时间
+        /// </summary>
+        public string OperationTime { get; set; }
+
+        /// <summary>
+        /// 执行时间
+        /// </summary>
+        public string Duration { get; set; }
+
+        /// <summary>
+        /// IP
+        /// </summary>
+        public string Ip { get; set; }
+
+        /// <summary>
+        /// 主机
+        /// </summary>
+        public string Host { get; set; }
+
+        /// <summary>
+        /// 线程号
+        /// </summary>
+        public string ThreadId { get; set; }
+
+        /// <summary>
+        /// 浏览器
+        /// </summary>
+        public string Browser { get; set; }
+
+        /// <summary>
+        /// 请求地址
+        /// </summary>
+        public string Url { get; set; }
+
+        /// <summary>
+        /// 业务编号
+        /// </summary>
+        public string BussinessId { get; set; }
+
+        /// <summary>
+        /// 租户
+        /// </summary>
+        public string Tenant { get; set; }
+
+        /// <summary>
+        /// 应用程序
+        /// </summary>
+        public string Application { get; set; }
+
+        /// <summary>
+        /// 模块
+        /// </summary>
+        public string Module { get; set; }
+
+        /// <summary>
+        /// 类名
+        /// </summary>
+        public string Class { get; set; }
+
+        /// <summary>
+        /// 方法
+        /// </summary>
+        public string Method { get; set; }
+
+        /// <summary>
+        /// 参数
+        /// </summary>
+        public string Params { get; set; }
+
+        /// <summary>
+        /// 操作人编号
+        /// </summary>
+        public string UserId { get; set; }
+
+        /// <summary>
+        /// 操作人
+        /// </summary>
+        public string Operator { get; set; }
+
+        /// <summary>
+        /// 操作人角色
+        /// </summary>
+        public string Role { get; set; }
+
+        /// <summary>
+        /// 标题
+        /// </summary>
+        public string Caption { get; set; }
+
+        /// <summary>
+        /// 内容
+        /// </summary>
+        public string Content { get; set; }
+
+        /// <summary>
+        /// Sql语句
+        /// </summary>
+        public string Sql { get; set; }
+
+        /// <summary>
+        /// Sql参数
+        /// </summary>
+        public string SqlParams { get; set; }
+
+        /// <summary>
+        /// 错误码
+        /// </summary>
+        public string ErrorCode { get; set; }
+
+        /// <summary>
+        /// 异常
+        /// </summary>
+        public string Exception { get; set; }
+
+        /// <summary>
+        /// 排序
+        /// </summary>
+        public int Order { get; set; }
     }
 }
 

@@ -195,6 +195,6 @@ namespace Bing.Logs
             {
                 return Security.Sessions.Session.Instance;
             }
-        }        
+        }
     }
 }

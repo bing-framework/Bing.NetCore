@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.Exceptions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Properties;
 using Bing.Utils;
