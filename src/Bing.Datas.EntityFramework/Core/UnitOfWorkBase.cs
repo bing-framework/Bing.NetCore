@@ -353,7 +353,15 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化创建审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitCreationAudited(EntityEntry entry) => CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        private void InitCreationAudited(EntityEntry entry)
+        {
+            if (GetUserId().IsEmpty())
+            {
+                return;
+            }
+
+            CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
 
         /// <summary>
         /// 获取用户标识
@@ -381,7 +389,15 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化修改审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitModificationAudited(EntityEntry entry) => ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        private void InitModificationAudited(EntityEntry entry)
+        {
+            if (GetUserId().IsEmpty())
+            {
+                return;
+            }
+
+            ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
 
         /// <summary>
         /// 拦截修改操作
