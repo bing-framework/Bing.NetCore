@@ -409,7 +409,14 @@ namespace Bing.Datas.EntityFramework.Core
         /// 拦截删除操作
         /// </summary>
         /// <param name="entry">输入实体</param>
-        protected virtual void InterceptDeletedOperation(EntityEntry entry) => DeletionAuditedInitializer.Init(entry.Entity,GetUserId(),GetUserName());
+        protected virtual void InterceptDeletedOperation(EntityEntry entry)
+        {
+            if (GetUserId().IsEmpty())
+            {
+                return;
+            }
+            DeletionAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
 
         #endregion
 
