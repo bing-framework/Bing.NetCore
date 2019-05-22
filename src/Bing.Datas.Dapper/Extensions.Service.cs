@@ -88,7 +88,7 @@ namespace Bing.Datas.Dapper
                 services.TryAddScoped(database);
                 services.TryAddScoped(typeof(IDatabase), t => t.GetService(database));
             }
-            services.TryAddScoped<ISqlQuery, SqlQuery>();
+            services.AddTransient<ISqlQuery, SqlQuery>();
             services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
             AddSqlBuilder(services, config);
             RegisterTypeHandlers();
@@ -105,13 +105,13 @@ namespace Bing.Datas.Dapper
             switch (config.DatabaseType)
             {
                 case DatabaseType.SqlServer:
-                    services.TryAddScoped<ISqlBuilder, SqlServerBuilder>();
+                    services.AddTransient<ISqlBuilder, SqlServerBuilder>();
                     return;
                 case DatabaseType.MySql:
-                    services.TryAddScoped<ISqlBuilder, MySqlBuilder>();
+                    services.AddTransient<ISqlBuilder, MySqlBuilder>();
                     return;
                 case DatabaseType.PgSql:
-                    services.TryAddScoped<ISqlBuilder, PgSqlBuilder>();
+                    services.AddTransient<ISqlBuilder, PgSqlBuilder>();
                     return;
                 default:
                     throw new NotImplementedException($"Sql生成器未实现 {config.DatabaseType.Description()} 数据库");
