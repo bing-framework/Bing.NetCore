@@ -58,11 +58,11 @@ namespace Bing.AutoMapper
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                return default(TDestination);
             }
             if (destination == null)
             {
-                throw new ArgumentNullException(nameof(destination));
+                return default(TDestination);
             }
             var sourceType = GetType(source);
             var destinationType = GetType(destination);

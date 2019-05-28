@@ -149,23 +149,25 @@ namespace Bing.Utils.IO
         #region ToBytes(转换成字节数组)
 
         /// <summary>
+        /// 字符串转换为字节数组
+        /// </summary>
+        /// <param name="data">数据。默认字符编码：utf-8</param>
+        public static byte[] ToBytes(string data)
+        {
+            return ToBytes(data, Encoding.UTF8);
+        }
+
+        /// <summary>
         /// 字符串转换成字节数组
         /// </summary>
         /// <param name="data">数据</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
-        public static byte[] ToBytes(string data, Encoding encoding = null)
+        public static byte[] ToBytes(string data, Encoding encoding)
         {
             if (string.IsNullOrWhiteSpace(data))
             {
                 return new byte[] { };
             }
-
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
-
             return encoding.GetBytes(data);
         }
 
@@ -173,12 +175,23 @@ namespace Bing.Utils.IO
         /// 流转换成字节流
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
         public static byte[] ToBytes(Stream stream)
         {
             stream.Seek(0, SeekOrigin.Begin);
             var buffer = new byte[stream.Length];
             stream.Read(buffer, 0, buffer.Length);
+            return buffer;
+        }
+
+        /// <summary>
+        /// 流转换成字节流
+        /// </summary>
+        /// <param name="stream">流</param>
+        public static async Task<byte[]> ToBytesAsync(Stream stream)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            var buffer = new byte[stream.Length];
+            await stream.ReadAsync(buffer, 0, buffer.Length);
             return buffer;
         }
 

@@ -13,7 +13,7 @@ namespace Bing.Webs.Controllers
     [Route("api/[controller]")]
     [ErrorLog]
     [TraceLog]
-    public abstract class ApiControllerBase:Controller
+    public abstract class ApiControllerBase : Controller
     {
         /// <summary>
         /// 日志

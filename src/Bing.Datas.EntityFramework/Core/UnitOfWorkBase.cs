@@ -355,11 +355,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         private void InitCreationAudited(EntityEntry entry)
         {
-            if (GetUserId().IsEmpty())
-            {
-                return;
-            }
-
             CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
         }
 
@@ -391,11 +386,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         private void InitModificationAudited(EntityEntry entry)
         {
-            if (GetUserId().IsEmpty())
-            {
-                return;
-            }
-
             ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
         }
 
@@ -411,10 +401,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void InterceptDeletedOperation(EntityEntry entry)
         {
-            if (GetUserId().IsEmpty())
-            {
-                return;
-            }
             DeletionAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
         }
 

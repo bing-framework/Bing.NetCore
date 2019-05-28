@@ -150,16 +150,25 @@ namespace Bing.Domains.Repositories
         }
 
         /// <summary>
-        /// 转换分页集合的元素类型
+        /// 转换为分页集合
         /// </summary>
         /// <typeparam name="TResult">目标元素类型</typeparam>
         /// <param name="converter">转换方法</param>
-        /// <returns></returns>
         public PagerList<TResult> Convert<TResult>(Func<T, TResult> converter)
         {
             var result = new PagerList<TResult>(Page, PageSize, TotalCount, Order);
             result.AddRange(this.Data.Select(converter));
             return result;
+        }
+
+        /// <summary>
+        /// 转换为分页集合
+        /// </summary>
+        /// <typeparam name="TResult">目标元素类型</typeparam>
+        /// <param name="data">数据</param>
+        public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data)
+        {
+            return new PagerList<TResult>(Page, PageSize, TotalCount, Order, data);
         }
     }
 }

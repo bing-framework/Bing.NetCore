@@ -21,7 +21,7 @@ namespace Bing.Webs.Controllers
         /// 初始化一个<see cref="CrudControllerBase{TDto, TQuery}"/>类型的实例
         /// </summary>
         /// <param name="service">Crud服务</param>
-        protected CrudControllerBase(ICrudService<TDto, TDto, TDto, TDto, TQuery> service) : base(service)
+        protected CrudControllerBase(ICrudService<TDto, TQuery> service) : base(service)
         {
         }
     }
@@ -41,7 +41,7 @@ namespace Bing.Webs.Controllers
         /// 初始化一个<see cref="CrudControllerBase{TDto, TRequest, TQuery}"/>类型的实例
         /// </summary>
         /// <param name="service">Crud服务</param>
-        protected CrudControllerBase(ICrudService<TDto, TRequest, TRequest, TRequest, TQuery> service) : base(service)
+        protected CrudControllerBase(ICrudService<TDto, TRequest, TQuery> service) : base(service)
         {
         }
     }

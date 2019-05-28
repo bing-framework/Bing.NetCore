@@ -49,8 +49,16 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         public void Init()
         {
+            if (_entity == null)
+            {
+                return;
+            }
             InitCreationTime();
             InitCreator();
+            if (string.IsNullOrWhiteSpace(_userId))
+            {
+                return;
+            }
             if (_entity is ICreationAudited<Guid>)
             {
                 InitGuid();
@@ -104,6 +112,10 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitCreator()
         {
+            if (string.IsNullOrWhiteSpace(_userName))
+            {
+                return;
+            }
             if (_entity is ICreator result)
             {
                 result.Creator = _userName;
