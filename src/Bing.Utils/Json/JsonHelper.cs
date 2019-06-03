@@ -95,7 +95,7 @@ namespace Bing.Utils.Json
         {
             if (target == null)
             {
-                return "{}";
+                return string.Empty;
             }
 
             var options = new JsonSerializerSettings();

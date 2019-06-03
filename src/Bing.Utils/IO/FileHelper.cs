@@ -232,7 +232,17 @@ namespace Bing.Utils.IO
 
         #endregion
 
-        #region Read(读取文件到字符串)        
+        #region Read(读取文件到字符串)
+
+        /// <summary>
+        /// 读取文件到字符串
+        /// </summary>
+        /// <param name="filePath">文件的绝对路径</param>
+        /// <returns></returns>
+        public static string Read(string filePath)
+        {
+            return Read(filePath, Encoding.UTF8);
+        }
 
         /// <summary>
         /// 读取文件到字符串
@@ -240,7 +250,7 @@ namespace Bing.Utils.IO
         /// <param name="filePath">文件的绝对路径</param>
         /// <param name="encoding">字符编码</param>
         /// <returns></returns>
-        public static string Read(string filePath, Encoding encoding = null)
+        public static string Read(string filePath, Encoding encoding)
         {
             if (encoding == null)
             {
@@ -357,7 +367,6 @@ namespace Bing.Utils.IO
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public static async Task<string> CopyToStringAsync(Stream stream, Encoding encoding = null)
         {
             if (stream == null)
@@ -717,5 +726,20 @@ namespace Bing.Utils.IO
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// 文件写入类型
+    /// </summary>
+    public enum WriteType
+    {
+        /// <summary>
+        /// 追加
+        /// </summary>
+        Append = 1,
+        /// <summary>
+        /// 覆盖
+        /// </summary>
+        Covered = 2
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -324,6 +325,45 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region IsLocal(是否本地请求)
+
+        /// <summary>
+        /// 是否本地请求
+        /// </summary>
+        public static bool IsLocal
+        {
+            get
+            {
+                var connection = HttpContext?.Request?.HttpContext?.Connection;
+                if (connection == null)
+                {
+                    throw new ArgumentNullException(nameof(connection));
+                }
+
+                if (connection.RemoteIpAddress.IsSet())
+                {
+                    return connection.LocalIpAddress.IsSet()
+                        ? connection.RemoteIpAddress.Equals(connection.LocalIpAddress)
+                        : IPAddress.IsLoopback(connection.RemoteIpAddress);
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 空IP地址
+        /// </summary>
+        private const string NullIpAddress = "::1";
+
+        /// <summary>
+        /// 是否已设置IP地址
+        /// </summary>
+        /// <param name="address">IP地址</param>
+        private static bool IsSet(this IPAddress address) => address != null && address.ToString() != NullIpAddress;
+
+        #endregion
+
         #endregion
 
         #region 构造函数
@@ -369,7 +409,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static List<IFormFile> GetFiles()
         {
-            var result=new List<IFormFile>();
+            var result = new List<IFormFile>();
             var files = HttpContext.Request.Form.Files;
             if (files == null || files.Count == 0)
             {

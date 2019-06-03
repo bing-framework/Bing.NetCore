@@ -99,24 +99,13 @@ namespace Bing.Domains.Repositories
         /// 获取跳过的行数
         /// </summary>
         /// <returns></returns>
-        public int GetSkipCount()
-        {
-            if (Page > GetPageCount())
-            {
-                Page = GetPageCount();
-            }
-
-            return PageSize * (Page - 1);
-        }
+        public int GetSkipCount() => PageSize * (Page - 1);
 
         /// <summary>
         /// 获取起始行数
         /// </summary>
         /// <returns></returns>
-        public int GetStartNumber()
-        {
-            return (Page - 1) * PageSize + 1;
-        }
+        public int GetStartNumber() => (Page - 1) * PageSize + 1;
 
         /// <summary>
         /// 获取结束行数

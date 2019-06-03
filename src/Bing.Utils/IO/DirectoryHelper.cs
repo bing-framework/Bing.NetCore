@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Bing.Utils.Extensions;
 
 namespace Bing.Utils.IO

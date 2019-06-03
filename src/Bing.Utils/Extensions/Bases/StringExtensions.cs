@@ -170,7 +170,7 @@ namespace Bing.Utils.Extensions
         /// <returns>当前字符串的长度，每个汉字长度为2个字节</returns>
         public static int GetTextLength(this string value)
         {
-            ASCIIEncoding ascii = new ASCIIEncoding();
+            var ascii = new ASCIIEncoding();
             int tempLen = 0;
             byte[] bytes = ascii.GetBytes(value);
             foreach (byte b in bytes)
