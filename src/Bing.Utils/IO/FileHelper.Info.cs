@@ -14,6 +14,27 @@ namespace Bing.Utils.IO
     /// </summary>
     public static partial class FileHelper
     {
+        #region GetExtension(获取文件扩展名)
+
+        /// <summary>
+        /// 获取文件扩展名。例如：a.txt => txt
+        /// </summary>
+        /// <param name="fileNameWithExtension">文件名。包含扩展名</param>
+        public static string GetExtension(string fileNameWithExtension)
+        {
+            Check.NotNull(fileNameWithExtension, nameof(fileNameWithExtension));
+
+            var lastDotIndex = fileNameWithExtension.LastIndexOf('.');
+            if (lastDotIndex < 0)
+            {
+                return string.Empty;
+            }
+
+            return fileNameWithExtension.Substring(lastDotIndex + 1);
+        }
+
+        #endregion
+
         #region GetContentType(根据扩展名获取文件内容类型)
 
         /// <summary>

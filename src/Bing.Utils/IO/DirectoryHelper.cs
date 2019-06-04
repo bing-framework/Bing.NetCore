@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Utils.IO
 {
@@ -9,6 +10,89 @@ namespace Bing.Utils.IO
     /// </summary>
     public static class DirectoryHelper
     {
+        #region CreateIfNotExists(创建文件夹，如果不存在)
+
+        /// <summary>
+        /// 创建文件夹，如果不存在
+        /// </summary>
+        /// <param name="directory">要创建的文件夹路径</param>
+        public static void CreateIfNotExists(string directory)
+        {
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                return;
+            }
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+
+        #endregion
+
+        #region IsSubDirectoryOf(是否指定父目录路径的子目录)
+
+        /// <summary>
+        /// 是否指定父目录路径的子目录
+        /// </summary>
+        /// <param name="parentDirectoryPath">父目录路径</param>
+        /// <param name="childDirectoryPath">子目录路径</param>
+        public static bool IsSubDirectoryOf(string parentDirectoryPath, string childDirectoryPath)
+        {
+            Check.NotNull(parentDirectoryPath, nameof(parentDirectoryPath));
+            Check.NotNull(childDirectoryPath, nameof(childDirectoryPath));
+
+            return IsSubDirectoryOf(new DirectoryInfo(parentDirectoryPath), new DirectoryInfo(childDirectoryPath));
+        }
+
+        /// <summary>
+        /// 是否指定父目录路径的子目录
+        /// </summary>
+        /// <param name="parentDirectory">父目录</param>
+        /// <param name="childDirectory">子目录</param>
+        public static bool IsSubDirectoryOf(DirectoryInfo parentDirectory, DirectoryInfo childDirectory)
+        {
+            Check.NotNull(parentDirectory, nameof(parentDirectory));
+            Check.NotNull(childDirectory, nameof(childDirectory));
+
+            if (parentDirectory.FullName == childDirectory.FullName)
+            {
+                return true;
+            }
+
+            var parentOfChild = childDirectory.Parent;
+            if (parentOfChild == null)
+            {
+                return false;
+            }
+
+            return IsSubDirectoryOf(parentDirectory, parentOfChild);
+        }
+
+        #endregion
+
+        #region ChangeCurrentDirectory(更改当前目录)
+
+        /// <summary>
+        /// 更改当前目录
+        /// </summary>
+        /// <param name="targetDirectory">目标目录</param>
+        public static IDisposable ChangeCurrentDirectory(string targetDirectory)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            if (currentDirectory.Equals(targetDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                return NullDisposable.Instance;
+            }
+
+            Directory.SetCurrentDirectory(targetDirectory);
+
+            return new DisposeAction(() => { Directory.SetCurrentDirectory(currentDirectory); });
+        }
+
+        #endregion
+
         #region GetFileNames(获取指定目录中的文件列表)
 
         /// <summary>
@@ -120,27 +204,6 @@ namespace Bing.Utils.IO
             catch
             {
                 return true;
-            }
-        }
-
-        #endregion
-
-        #region CreateIfNotExists(创建文件夹，如果不存在)
-
-        /// <summary>
-        /// 创建文件夹，如果不存在
-        /// </summary>
-        /// <param name="directory">要创建的文件夹路径</param>
-        public static void CreateIfNotExists(string directory)
-        {
-            if (string.IsNullOrWhiteSpace(directory))
-            {
-                return;
-            }
-
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
             }
         }
 
