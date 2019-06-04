@@ -180,7 +180,10 @@ namespace Bing.Security.Extensions
         /// <returns></returns>
         public static List<T> GetRoleIds<T>(this ISession session)
         {
-            return Conv.ToList<T>(WebIdentity.Identity.GetValue(ClaimTypes.RoleIds));
+            var result = WebIdentity.Identity.GetValue(ClaimTypes.RoleIds);
+            return string.IsNullOrWhiteSpace(result)
+                ? Conv.ToList<T>(WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Role))
+                : Conv.ToList<T>(result);
         }
 
         /// <summary>
