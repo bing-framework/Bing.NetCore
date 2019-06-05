@@ -43,11 +43,16 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="IO/FileHelper.*.cs">
+      <DependentUpon>FileHelper.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Medias/Images/ImageUtil.*.cs">
       <DependentUpon>ImageUtil.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-
 
   <ItemGroup>
     <Compile Update="Extensions/Bases/StringExtensions.*.cs">

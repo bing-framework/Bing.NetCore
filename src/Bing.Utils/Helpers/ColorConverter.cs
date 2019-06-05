@@ -55,7 +55,7 @@ namespace Bing.Utils.Helpers
                 throw new ArgumentNullException(nameof(cssColour));
             }
 
-            Match m1 = Regex.Match(cssColour, @"^#?([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})?",
+            var m1 = Regex.Match(cssColour, @"^#?([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})([A-F\d]{2})?",
                 RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);// #FFFFFF
             if (m1.Success && m1.Groups.Count == 5)
             {
