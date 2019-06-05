@@ -510,6 +510,12 @@ Where `a`.`IsDeny`=1 And `b`.`ApplicationId`='79c3c002-1474-4b3f-bf83-b17aa173a2
             return null;
         }
 
+        [Fact]
+        public void Test_Format()
+        {
+            var result = $"{1000.01877:0.##}";
+            Output.WriteLine(result);
+        }
     }
 
     public class BingLogModel

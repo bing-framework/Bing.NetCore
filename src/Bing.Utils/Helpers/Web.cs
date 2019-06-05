@@ -639,7 +639,7 @@ namespace Bing.Utils.Helpers
         /// <param name="encoding">字符编码</param>
         public static async Task DownloadAsync(Stream stream, string fileName, Encoding encoding)
         {
-            await DownloadAsync(FileHelper.ToBytes(stream), fileName, encoding);
+            await DownloadAsync(await FileHelper.ToBytesAsync(stream), fileName, encoding);
         }
 
         /// <summary>
