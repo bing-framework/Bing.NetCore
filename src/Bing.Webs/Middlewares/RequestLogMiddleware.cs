@@ -79,7 +79,13 @@ namespace Bing.Webs.Middlewares
             if (context == null)
             {
                 return;
-            }            
+            }
+
+            if (IgnoreOctetStream(context.Response))
+            {
+                context.Response.Body.Seek(0, SeekOrigin.Begin);
+                return;
+            }
 
             var log = Log.GetLog(this).Caption("请求日志中间件");
             log.Content(new Dictionary<string, string>()
@@ -115,12 +121,7 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         /// <param name="response">Http响应</param>
         private async Task<string> FormatResponseAsync(HttpResponse response)
-        {
-            if (IgnoreOctetStream(response))
-            {
-                return string.Empty;
-            }
-
+        {            
             if (response.HasStarted)
             {
                 return string.Empty;
@@ -137,14 +138,6 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         /// <param name="response">Http响应</param>
         /// <returns></returns>
-        private bool IgnoreOctetStream(HttpResponse response)
-        {
-            if (response.ContentType == "application/octet-stream")
-            {
-                return true;
-            }
-
-            return false;
-        }
+        private bool IgnoreOctetStream(HttpResponse response) => response.ContentType == "application/octet-stream";
     }
 }
