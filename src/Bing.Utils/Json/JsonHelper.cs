@@ -217,5 +217,19 @@ namespace Bing.Utils.Json
         }
 
         #endregion
+
+        #region IsJson(判断字符串是否为Json格式)
+
+        /// <summary>
+        /// 判断字符串是否为Json格式。为效率考虑，仅做了开始和结束字符的验证
+        /// </summary>
+        /// <param name="json">json字符串</param>
+        public static bool IsJson(string json)
+        {
+            json = json.Trim();
+            return json.StartsWith("{") && json.EndsWith("}") || json.StartsWith("[") && json.EndsWith("]");
+        }
+
+        #endregion
     }
 }

@@ -131,5 +131,9 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region NotEmpty(是否非空)
+
+        #endregion
     }
 }
