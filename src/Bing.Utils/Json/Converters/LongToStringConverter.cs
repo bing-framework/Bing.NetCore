@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Data;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Bing.Utils.Json.Converters
 {
     /// <summary>
-    /// DataSet 转换器
+    /// 长整型转字符串转换器
     /// </summary>
-    public class DataSetConverter : JsonConverter
+    public class LongToStringConverter : JsonConverter
     {
         /// <summary>
         /// 写入JSON对象
@@ -17,17 +17,7 @@ namespace Bing.Utils.Json.Converters
         /// <param name="serializer">JSON序列化器</param>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            DataSet dataSet = value as DataSet;
-            DataTableConverter dataTableConverter = new DataTableConverter();
-            writer.WriteStartObject();
-            writer.WritePropertyName("Tables");
-            writer.WriteStartArray();
-            foreach (DataTable table in dataSet.Tables)
-            {
-                dataTableConverter.WriteJson(writer, table, serializer);
-            }
-            writer.WriteEndArray();
-            writer.WriteEndObject();
+            serializer.Serialize(writer, value.ToString());
         }
 
         /// <summary>
@@ -39,7 +29,7 @@ namespace Bing.Utils.Json.Converters
         /// <param name="serializer">JSON序列化器</param>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            return JToken.ReadFrom(reader).Value<long>();
         }
 
         /// <summary>
@@ -48,7 +38,7 @@ namespace Bing.Utils.Json.Converters
         /// <param name="objectType">对象类型</param>
         public override bool CanConvert(Type objectType)
         {
-            return typeof(DataSet).IsAssignableFrom(objectType);
+            return typeof(long) == objectType;
         }
     }
 }
