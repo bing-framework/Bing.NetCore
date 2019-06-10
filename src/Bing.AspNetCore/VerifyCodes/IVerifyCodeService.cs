@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Bing.AspNetCore
+namespace Bing.AspNetCore.VerifyCodes
 {
     /// <summary>
     /// 验证码服务
