@@ -306,6 +306,15 @@ namespace Bing.Utils.Helpers
         }
         #endregion
 
+        #region GetCurrentAssemblyName(获取当前程序集名称)
+
+        /// <summary>
+        /// 获取当前程序集名称
+        /// </summary>
+        public static string GetCurrentAssemblyName() => Assembly.GetCallingAssembly().GetName().Name;
+
+        #endregion
+
         #region GetAttribute(获取特性信息)
 
         /// <summary>
