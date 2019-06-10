@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Bing.AspNetCore.Uploads.Params;
 using Bing.Webs.Controllers;
@@ -18,11 +19,17 @@ namespace Bing.Samples.Api.Controllers
         private IFileUploadService _fileUploadService;
 
         /// <summary>
+        /// Api接口服务
+        /// </summary>
+        private IApiInterfaceService _apiInterfaceService;
+
+        /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
         /// </summary>
-        public TestController(IFileUploadService fileUploadService)
+        public TestController(IFileUploadService fileUploadService, IApiInterfaceService apiInterfaceService)
         {
             _fileUploadService = fileUploadService;
+            _apiInterfaceService = apiInterfaceService;
         }
 
         /// <summary>
@@ -42,6 +49,24 @@ namespace Bing.Samples.Api.Controllers
             var result = await _fileUploadService.UploadAsync(param);
 
             return Success(result);
+        }
+
+        /// <summary>
+        /// 获取所有控制器
+        /// </summary>
+        [HttpGet("getAllController")]
+        public Task<IActionResult> GetAllControllerAsync()
+        {
+            return Task.FromResult(Success(_apiInterfaceService.GetAllController()));
+        }
+
+        /// <summary>
+        /// 获取所有操作
+        /// </summary>
+        [HttpGet("getAllAction")]
+        public Task<IActionResult> GetAllActionAsync()
+        {
+            return Task.FromResult(Success(_apiInterfaceService.GetAllAction()));
         }
     }
 }

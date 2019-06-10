@@ -144,6 +144,7 @@ namespace Bing.Samples.Api
             });
 
             services.AddUploadService();
+            services.AddApiInterfaceService();
 
             return services.AddBing();
         }
