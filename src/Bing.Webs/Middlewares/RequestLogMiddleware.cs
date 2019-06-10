@@ -67,7 +67,7 @@ namespace Bing.Webs.Middlewares
             }
 
             return true;
-        }        
+        }
 
         /// <summary>
         /// 记录请求日志
