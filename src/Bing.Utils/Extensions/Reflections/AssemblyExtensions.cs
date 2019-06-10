@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// 程序集(Assembly)扩展
+    /// 程序集(<see cref="Assembly"/>) 扩展
     /// </summary>
     public static class AssemblyExtensions
     {

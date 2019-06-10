@@ -234,12 +234,12 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region GetInstancesByInterface(获取实现了接口的所有实例)
+
         /// <summary>
         /// 获取实现了接口的所有实例
         /// </summary>
         /// <typeparam name="TInterface">接口类型</typeparam>
         /// <param name="assembly">在该程序集中查找</param>
-        /// <returns></returns>
         public static List<TInterface> GetInstancesByInterface<TInterface>(Assembly assembly)
         {
             var typeInterface = typeof(TInterface);
@@ -252,16 +252,17 @@ namespace Bing.Utils.Helpers
                     .Select(t => CreateInstance<TInterface>(t))
                     .ToList();
         }
+
         #endregion
 
         #region CreateInstance(动态创建实例)
+
         /// <summary>
         /// 动态创建实例
         /// </summary>
         /// <typeparam name="T">目标类型</typeparam>
         /// <param name="type">类型</param>
         /// <param name="parameters">传递给构造函数的参数</param>
-        /// <returns></returns>
         public static T CreateInstance<T>(Type type, params object[] parameters) => Conv.To<T>(Activator.CreateInstance(type, parameters));
 
         /// <summary>
@@ -270,12 +271,12 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">目标类型</typeparam>
         /// <param name="className">类名，包括命名空间,如果类型不处于当前执行程序集中，需要包含程序集名，范例：Test.Core.Test2,Test.Core</param>
         /// <param name="parameters">传递给构造函数的参数</param>
-        /// <returns></returns>
         public static T CreateInstance<T>(string className, params object[] parameters)
         {
-            Type type = Type.GetType(className) ?? Assembly.GetCallingAssembly().GetType(className);
+            var type = Type.GetType(className) ?? Assembly.GetCallingAssembly().GetType(className);
             return CreateInstance<T>(type, parameters);
         }
+
         #endregion
 
         #region GetAssembly(获取程序集)
@@ -667,7 +668,6 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="TBaseType">基类型</typeparam>
         /// <param name="type">当前类型</param>
         /// <param name="canAbstract">能否是抽象类</param>
-        /// <returns></returns>
         public static bool IsDeriveClassFrom<TBaseType>(Type type, bool canAbstract = false) => IsDeriveClassFrom(type, typeof(TBaseType), canAbstract);
 
         /// <summary>
@@ -676,7 +676,6 @@ namespace Bing.Utils.Helpers
         /// <param name="type">当前类型</param>
         /// <param name="baseType">基类型</param>
         /// <param name="canAbstract">能否是抽象类</param>
-        /// <returns></returns>
         public static bool IsDeriveClassFrom(Type type, Type baseType, bool canAbstract = false)
         {
             Check.NotNull(type, nameof(type));
@@ -693,16 +692,14 @@ namespace Bing.Utils.Helpers
         /// 返回当前类型是否是指定基类的派生类
         /// </summary>
         /// <typeparam name="TBaseType">基类型</typeparam>
-        /// <param name="type"></param>
-        /// <returns></returns>
+        /// <param name="type">类型</param>
         public static bool IsBaseOn<TBaseType>(Type type) => IsBaseOn(type, typeof(TBaseType));
 
         /// <summary>
         /// 返回当前类型是否是指定基类的派生类
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="baseType"></param>
-        /// <returns></returns>
+        /// <param name="type">类型</param>
+        /// <param name="baseType">基类类型</param>
         public static bool IsBaseOn(Type type, Type baseType) => baseType.IsGenericTypeDefinition
             ? baseType.IsGenericAssignableFrom(type)
             : baseType.IsAssignableFrom(type);
@@ -716,7 +713,6 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="genericType">泛型类型</param>
         /// <param name="type">指定类型</param>
-        /// <returns></returns>
         public static bool IsGenericAssignableFrom(Type genericType, Type type)
         {
             Check.NotNull(genericType, nameof(genericType));
@@ -727,7 +723,7 @@ namespace Bing.Utils.Helpers
                 throw new ArgumentException("该功能只支持泛型类型的调用，非泛型类型可使用 IsAssignableFrom 方法。");
             }
 
-            List<Type> allOthers = new List<Type>() {type};
+            var allOthers = new List<Type>() {type};
             if (genericType.IsInterface)
             {
                 allOthers.AddRange(type.GetInterfaces());
@@ -735,7 +731,7 @@ namespace Bing.Utils.Helpers
 
             foreach (var other in allOthers)
             {
-                Type cur = other;
+                var cur = other;
                 while (cur!=null)
                 {
                     if (cur.IsGenericType)
