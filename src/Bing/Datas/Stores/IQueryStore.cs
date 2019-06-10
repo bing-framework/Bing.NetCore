@@ -9,7 +9,7 @@ namespace Bing.Datas.Stores
     /// 查询存储器
     /// </summary>
     /// <typeparam name="TEntity">对象类型</typeparam>
-    public interface IQueryStore<TEntity>:IQueryStore<TEntity,Guid> where TEntity : class, IKey<Guid> { }
+    public interface IQueryStore<TEntity> : IQueryStore<TEntity,Guid> where TEntity : class, IKey<Guid> { }
 
     /// <summary>
     /// 查询存储器

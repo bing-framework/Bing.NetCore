@@ -14,7 +14,7 @@ namespace Bing.AutoMapper
     /// <summary>
     /// AutoMapper映射类
     /// </summary>
-    public class AutoMapperMapper:IMapper
+    public class AutoMapperMapper : IMapper
     {
         /// <summary>
         /// 同步锁
@@ -28,7 +28,6 @@ namespace Bing.AutoMapper
         /// </summary>
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
-        /// <returns></returns>
         public TDestination MapTo<TDestination>(object source) where TDestination : new()
         {
             return MapTo(source, new TDestination());
@@ -41,7 +40,6 @@ namespace Bing.AutoMapper
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        /// <returns></returns>
         public TDestination MapTo<TSource, TDestination>(TSource source, TDestination destination)
         {
             return MapTo<TDestination>(source, destination);
@@ -53,7 +51,6 @@ namespace Bing.AutoMapper
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        /// <returns></returns>
         private static TDestination MapTo<TDestination>(object source, TDestination destination)
         {
             if (source == null)
@@ -88,7 +85,6 @@ namespace Bing.AutoMapper
         /// </summary>
         /// <param name="sourceType">源类型</param>
         /// <param name="destinationType">目标类型</param>
-        /// <returns></returns>
         private static TypeMap GetMap(Type sourceType, Type destinationType)
         {
             try
@@ -116,7 +112,6 @@ namespace Bing.AutoMapper
         /// 获取类型
         /// </summary>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
         private static Type GetType(object obj)
         {
             var type = obj.GetType();
@@ -178,7 +173,6 @@ namespace Bing.AutoMapper
         /// </summary>
         /// <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
         /// <param name="source">源集合</param>
-        /// <returns></returns>
         public List<TDestination> MapToList<TDestination>(IEnumerable source)
         {
             return MapTo<List<TDestination>>(source);

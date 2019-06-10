@@ -8,4 +8,8 @@
     <PackageReference Include="Mapster" Version="4.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.csproj" />
+  </ItemGroup>
+
 </Project>
