@@ -32,7 +32,6 @@ dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.AutoMapper/Bing.AutoMapper.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 dotnet pack ./src/Bing.EasyCaching/Bing.EasyCaching.csproj
-REM dotnet pack ./src/Bing.Sequence/Bing.Sequence.csproj
 rem dotnet pack ./src/Bing.Offices/Bing.Offices.csproj
 rem dotnet pack ./src/Bing.Offices.Npoi/Bing.Offices.Npoi.csproj
 
