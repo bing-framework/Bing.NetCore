@@ -39,7 +39,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
 
   <ItemGroup>
     <Folder Include="Extensions\Configuration\" />
-    <Folder Include="Extensions\Datas\" />
   </ItemGroup>
 
   <ItemGroup>

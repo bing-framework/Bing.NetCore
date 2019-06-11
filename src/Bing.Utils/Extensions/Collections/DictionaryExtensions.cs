@@ -296,5 +296,41 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region EqualsTo(判断两个字典中的元素是否相等)
+
+        /// <summary>
+        /// 判断两个字典中的元素是否相等
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="sourceDict">源字典</param>
+        /// <param name="targetDict">目标字典</param>
+        /// <exception cref="ArgumentNullException">源字典对象为空、目标字典对象为空</exception>
+        public static bool EqualsTo<TKey, TValue>(this IDictionary<TKey, TValue> sourceDict,
+            IDictionary<TKey, TValue> targetDict)
+        {
+            if (sourceDict == null)
+                throw new ArgumentNullException(nameof(sourceDict), $@"源字典对象不可为空！");
+            if (targetDict == null)
+                throw new ArgumentNullException(nameof(sourceDict), $@"目标字典对象不可为空！");
+            // 长度对比
+            if (sourceDict.Count != targetDict.Count)
+                return false;
+            if (!sourceDict.Any() && !targetDict.Any())
+                return true;
+            // 深度对比
+            var sourceKeyValues = sourceDict.OrderBy(x => x.Key).ToArray();
+            var targetKeyValues = targetDict.OrderBy(x => x.Key).ToArray();
+            var sourceKeys = sourceKeyValues.Select(x => x.Key);
+            var targetKeys = targetKeyValues.Select(x => x.Key);
+            var sourceValues = sourceKeyValues.Select(x => x.Value);
+            var targetValues = targetKeyValues.Select(x => x.Value);
+            if (sourceKeys.EqualsTo(targetKeys) && sourceValues.EqualsTo(targetValues))
+                return true;
+            return false;
+        }
+
+        #endregion
     }
 }

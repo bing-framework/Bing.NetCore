@@ -131,18 +131,15 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="collection">集合</param>
-        /// <param name="values">值</param>
-        public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> values)
+        /// <param name="enumerable">元素集合</param>
+        /// <exception cref="ArgumentNullException">源集合对象为空、添加的集合项为空</exception>
+        public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> enumerable)
         {
-            collection.CheckNotNull(nameof(collection));
-            if (values == null)
-            {
-                return;
-            }
-            foreach (var value in values)
-            {
-                collection.Add(value);
-            }
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection), $@"源{typeof(T).Name}集合对象不可为空！");
+            if(enumerable==null)
+                throw new ArgumentNullException(nameof(enumerable), $@"要添加的{typeof(T).Name}集合项不可为空！");
+            enumerable.ForEach(collection.Add);
         }
 
         #endregion
