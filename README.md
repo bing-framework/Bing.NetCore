@@ -30,7 +30,6 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
 |Bing.Biz|[![Bing.Biz](https://img.shields.io/nuget/v/Bing.Biz.svg)](https://www.nuget.org/packages/Bing.Biz/)|[![Bing.Biz](https://img.shields.io/nuget/dt/Bing.Biz.svg)](https://www.nuget.org/packages/Bing.Biz/)|
 |Bing.Biz.Payments|[![Bing.Biz.Payments](https://img.shields.io/nuget/v/Bing.Biz.Payments.svg)](https://www.nuget.org/packages/Bing.Biz.Payments/)|[![Bing.Biz.Payments](https://img.shields.io/nuget/dt/Bing.Biz.Payments.svg)](https://www.nuget.org/packages/Bing.Biz.Payments/)|
 |Bing.MailKit|[![Bing.MailKit](https://img.shields.io/nuget/v/Bing.MailKit.svg)](https://www.nuget.org/packages/Bing.MailKit/)|[![Bing.MailKit](https://img.shields.io/nuget/dt/Bing.MailKit.svg)](https://www.nuget.org/packages/Bing.MailKit/)|
-|Bing.Geetest|[![Bing.Geetest](https://img.shields.io/nuget/v/Bing.Geetest.svg)](https://www.nuget.org/packages/Bing.Geetest/)|[![Bing.Geetest](https://img.shields.io/nuget/dt/Bing.Geetest.svg)](https://www.nuget.org/packages/Bing.Geetest/)|
 |Bing.Sequence|[![Bing.Sequence](https://img.shields.io/nuget/v/Bing.Sequence.svg)](https://www.nuget.org/packages/Bing.Sequence/)|[![Bing.Sequence](https://img.shields.io/nuget/dt/Bing.Sequence.svg)](https://www.nuget.org/packages/Bing.Sequence/)|
 |Bing.EasyCaching|[![Bing.EasyCaching](https://img.shields.io/nuget/v/Bing.EasyCaching.svg)](https://www.nuget.org/packages/Bing.EasyCaching/)|[![Bing.EasyCaching](https://img.shields.io/nuget/dt/Bing.EasyCaching.svg)](https://www.nuget.org/packages/Bing.EasyCaching/)|
 
