@@ -286,7 +286,7 @@ namespace Bing.Ui.Zorro.Forms.Renders
         /// <summary>
         /// 获取枚举接受列表
         /// </summary>
-        private List<string> GetAccepts<TEnum>()
+        private List<string> GetAccepts<TEnum>() where TEnum : struct 
         {
             var names = Bing.Utils.Helpers.Enum.GetNames<TEnum>();
             return names.Select(FileTypeHelper.GetExtensions).ToList();
@@ -361,7 +361,7 @@ namespace Bing.Ui.Zorro.Forms.Renders
         /// <summary>
         /// 获取枚举文件类型限制列表
         /// </summary>
-        private List<string> GetFileTypes<TEnum>()
+        private List<string> GetFileTypes<TEnum>() where TEnum : struct 
         {
             var items = Enum.GetItems<TEnum>();
             return items.Select(t => t.Text.SafeString()).ToList();

@@ -51,14 +51,10 @@ namespace Bing.Utils.Helpers
         /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述
         /// </summary>
         /// <param name="member">成员</param>
-        /// <returns></returns>
         public static string GetDescription(MemberInfo member)
         {
             if (member == null)
-            {
                 return string.Empty;
-            }
-
             return member.GetCustomAttribute<DescriptionAttribute>() is DescriptionAttribute attribute
                 ? attribute.Description
                 : member.Name;
