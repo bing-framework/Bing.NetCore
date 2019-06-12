@@ -134,5 +134,89 @@ namespace Bing.Utils.Extensions
         public static bool NotEmpty(this StringBuilder sb) => sb != null && sb.Length != 0 && sb.ToString().NotEmpty();
 
         #endregion
+
+        #region IsZeroOrMinus(是否为0或负数)
+
+        /// <summary>
+        /// 判断 short 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this short value) => value <= 0;
+
+        /// <summary>
+        /// 判断 int 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this int value) => value <= 0;
+
+        /// <summary>
+        /// 判断 long 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this long value) => value <= 0;
+
+        /// <summary>
+        /// 判断 float 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this float value) => value <= 0;
+
+        /// <summary>
+        /// 判断 double 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this double value) => value <= 0;
+
+        /// <summary>
+        /// 判断 decimal 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this decimal value) => value <= 0;
+
+        #endregion
+
+        #region IsPercentage(是否为百分数)
+
+        /// <summary>
+        /// 判断 float 是否为百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsPercentage(this float value) => value > 0 && value <= 1;
+
+        /// <summary>
+        /// 判断 double 是否为百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsPercentage(this double value) => value > 0 && value <= 1;
+
+        /// <summary>
+        /// 判断 decimal 是否为百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsPercentage(this decimal value) => value > 0 && value <= 1;
+
+        #endregion
+
+        #region IsZeroOrPercentage(是否为0或百分数)
+
+        /// <summary>
+        /// 判断 float 是否为0或百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrPercentage(this float value) => value.IsPercentage() || value.Equals(0f);
+
+        /// <summary>
+        /// 判断 double 是否为0或百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrPercentage(this double value) => value.IsPercentage() || value.Equals(0d);
+
+        /// <summary>
+        /// 判断 decimal 是否为0或百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrPercentage(this decimal value) => value.IsPercentage() || value.Equals(0m);
+
+        #endregion
     }
 }
