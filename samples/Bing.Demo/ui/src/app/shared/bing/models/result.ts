@@ -19,7 +19,7 @@ export class Result<T> {
     /**
      * 数据
      */
-    date: T;
+    data: T;
 }
 
 /**
