@@ -95,6 +95,7 @@
         "header"
       ],
       "kebab-case"
-    ]
+    ],
+    "object-literal-shorthand": false
   }
 }
