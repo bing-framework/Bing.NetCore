@@ -51,6 +51,7 @@
     "moment": "^2.24.0",
     "ng-alain": "^7.6.1",
     "ng-zorro-antd": "^7.5.0",
+    "oidc-client": "^1.7.1",
     "prettier": "^1.16.1",
     "prettier-stylelint": "^0.4.2",
     "rxjs": "~6.3.3",

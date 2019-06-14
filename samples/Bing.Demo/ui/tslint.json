@@ -96,6 +96,7 @@
       ],
       "kebab-case"
     ],
-    "object-literal-shorthand": false
+    "object-literal-shorthand": false,
+    "no-unused-expression": false
   }
 }
