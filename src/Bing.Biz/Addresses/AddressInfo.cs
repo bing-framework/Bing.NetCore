@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Bing.Domains.Entities;
 
@@ -10,7 +8,7 @@ namespace Bing.Biz.Addresses
     /// 地址信息 - 可变
     /// </summary>
     [DataContract]
-    public class AddressInfo:ValueObjectBase<AddressInfo>
+    public class AddressInfo : ValueObjectBase<AddressInfo>
     {
         /// <summary>
         /// 省份编号

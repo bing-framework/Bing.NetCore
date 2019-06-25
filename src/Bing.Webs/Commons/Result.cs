@@ -8,7 +8,7 @@ namespace Bing.Webs.Commons
     /// <summary>
     /// 返回结果
     /// </summary>
-    public class Result:JsonResult
+    public class Result : JsonResult
     {
         /// <summary>
         /// 状态码
