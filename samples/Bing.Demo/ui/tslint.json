@@ -17,7 +17,7 @@
     "max-classes-per-file": false,
     "max-line-length": [
       true,
-      140
+      300
     ],
     "member-access": false,
     "member-ordering": [
@@ -95,6 +95,8 @@
         "header"
       ],
       "kebab-case"
-    ]
+    ],
+    "object-literal-shorthand": false,
+    "no-unused-expression": false
   }
 }

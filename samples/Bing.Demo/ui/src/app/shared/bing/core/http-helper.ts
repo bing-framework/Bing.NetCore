@@ -10,7 +10,60 @@ import { formatDate } from '../common/helper';
  * Http操作
  */
 export class HttpHelper {
+    /**
+     * 发送请求
+     * @param url 请求地址
+     * @param httpMethod http方法
+     * @param data 数据
+     */
+    static send<T>(url: string, httpMethod: HttpMethod, data?): HttpRequest<T> {
+        switch (httpMethod) {
+            case HttpMethod.Get:
+                return this.get<T>(url).param(data);
+            case HttpMethod.Post:
+                return this.post<T>(url, data);
+            case HttpMethod.Put:
+                return this.put<T>(url, data);
+            case HttpMethod.Delete:
+                return this.delete<T>(url).param(data);
+            default:
+                return this.get<T>(url).param(data);
+        }
+    }
 
+    /**
+     * get请求
+     * @param url 请求地址
+     */
+    static get<T>(url: string): HttpRequest<T> {
+        return new HttpRequest<T>(HttpMethod.Get, url);
+    }
+
+    /**
+     * post请求
+     * @param url 请求地址
+     * @param body Http主体
+     */
+    static post<T>(url: string, body?): HttpRequest<T> {
+        return new HttpRequest<T>(HttpMethod.Post, url, body);
+    }
+
+    /**
+     * put请求
+     * @param url 请求地址
+     * @param body Http主体
+     */
+    static put<T>(url: string, body?): HttpRequest<T> {
+        return new HttpRequest<T>(HttpMethod.Put, body);
+    }
+
+    /**
+     * delete请求
+     * @param url 请求地址
+     */
+    static delete<T>(url: string): HttpRequest<T> {
+        return new HttpRequest<T>(HttpMethod.Delete, url);
+    }
 }
 
 /**
@@ -109,6 +162,96 @@ export class HttpRequest<T> {
         if (item instanceof Date)
             return formatDate(item);
         return item;
+    }
+
+    /**
+     * 处理响应
+     * @param handler 响应处理函数
+     * @param errorHandler 错误处理函数
+     * @param beforeHandler 发送前处理函数，返回false则取消发送
+     * @param completeHandler 请求完成处理函数
+     */
+    handle(handler: (value: T) => void, errorHandler?: (error: HttpErrorResponse) => void, beforeHandler?: () => boolean, completeHandler?: () => void) {
+        if (beforeHandler && beforeHandler() === false)
+            return;
+        this.request().subscribe(handler, errorHandler, completeHandler);
+    }
+
+    /**
+     * 处理响应
+     * @param handler 响应处理函数
+     * @param errorHandler 错误处理函数
+     * @param beforeHandler 发送前处理函数，返回false则取消发送
+     * @param completeHandler 请求完成处理函数
+     */
+    async handleAsync(handler: (value: T) => void, errorHandler?: (error: HttpErrorResponse) => void, beforeHandler?: () => boolean, completeHandler?: () => void): Promise<void> {
+        if (beforeHandler && beforeHandler() === false)
+            return;
+        return await this.request().toPromise().then(handler).catch(errorHandler).then(completeHandler);
+    }
+
+    /**
+     * 发送请求
+     */
+    private request() {
+        this.setContentType();
+        const httpClient = ioc.get<HttpClient>(HttpClient);
+        const options = { headers: this.headers, params: this.parameters };
+        switch (this.httpMethod) {
+            case HttpMethod.Get:
+                return httpClient.get<T>(this.url, options);
+            case HttpMethod.Post:
+                return httpClient.post<T>(this.url, this.getBody(), options);
+            case HttpMethod.Put:
+                return httpClient.put<T>(this.url, this.getBody(), options);
+            case HttpMethod.Delete:
+                return httpClient.delete<T>(this.url, options);
+            default:
+                return httpClient.get<T>(this.url, options);
+        }
+    }
+
+    /**
+     * 获取body
+     */
+    private getBody() {
+        if (typeof this.body === 'string')
+            return JSON.stringify(this.body);
+        this.processBody();
+        return this.body;
+    }
+
+    /**
+     * 对body进行处理
+     */
+    private processBody() {
+        for (const key in this.body) {
+            if (this.body.hasOwnProperty(key)) {
+                this.body[key] = this.getValue(this.body[key]);
+            }
+        }
+    }
+
+    /**
+     * 设置内容类型
+     */
+    private setContentType() {
+        return this.header('Content-Type', this.getContentType(this.httpContentType));
+    }
+
+    /**
+     * 获取内容类型
+     * @param contentType 内容类型
+     */
+    private getContentType(contentType: HttpContentType) {
+        switch (contentType) {
+            case HttpContentType.FormUrlEncoded:
+                return 'application/x-www-form-urlencoded';
+            case HttpContentType.Json:
+                return 'application/json';
+            default:
+                return 'application/json';
+        }
     }
 }
 
