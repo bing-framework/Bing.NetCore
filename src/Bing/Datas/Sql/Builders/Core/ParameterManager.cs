@@ -63,7 +63,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public IReadOnlyDictionary<string, object> GetParams()
         {
             return new ReadOnlyDictionary<string, object>(_params);
-        }        
+        }
 
         /// <summary>
         /// 添加参数，如果参数已存在则替换
@@ -71,17 +71,14 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
         /// <param name="operator">运算符</param>
-        public void Add(string name, object value, Operator? @operator=null)
+        public void Add(string name, object value, Operator? @operator = null)
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
                 return;
-            }
-
+            name = _dialect.GetParamName(name);
+            value = _dialect.GetParamValue(value);
             if (_params.ContainsKey(name))
-            {
                 _params.Remove(name);
-            }
             _params.Add(name, GetValue(value, @operator));
         }
 

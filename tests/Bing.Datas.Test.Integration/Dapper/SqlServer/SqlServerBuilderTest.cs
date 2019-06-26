@@ -28,7 +28,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
         /// <summary>
         /// 测试初始化
         /// </summary>
-        public SqlServerBuilderTest(ITestOutputHelper output)
+        public SqlServerBuilderTest(ITestOutputHelper output) : base(output)
         {
             _output = output;
             _builder = new SqlServerBuilder();

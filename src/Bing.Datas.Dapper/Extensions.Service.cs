@@ -92,7 +92,7 @@ namespace Bing.Datas.Dapper
             services.AddTransient<ISqlQuery, SqlQuery>();
             services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
             AddSqlBuilder(services, config);
-            RegisterTypeHandlers();
+            RegisterTypeHandlers(config);
             return services;
         }
 
@@ -125,9 +125,11 @@ namespace Bing.Datas.Dapper
         /// <summary>
         /// 注册类型处理器
         /// </summary>
-        private static void RegisterTypeHandlers()
+        private static void RegisterTypeHandlers(SqlOptions config)
         {
             SqlMapper.AddTypeHandler(typeof(string), new StringTypeHandler());
+            if(config.DatabaseType==DatabaseType.Oracle)
+                SqlMapper.AddTypeHandler(new GuidTypeHandler());
         }
     }
 }

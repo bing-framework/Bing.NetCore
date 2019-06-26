@@ -61,5 +61,11 @@
         /// </summary>
         /// <param name="paramName">参数名</param>
         public virtual string GetParamName(string paramName) => paramName;
+
+        /// <summary>
+        /// 获取参数值
+        /// </summary>
+        /// <param name="paramValue">参数值</param>
+        public virtual object GetParamValue(object paramValue) => paramValue;
     }
 }

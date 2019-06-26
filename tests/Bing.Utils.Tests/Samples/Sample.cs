@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Bing.Logs;
 
-namespace Bing.Datas.Test.Integration.Samples
+namespace Bing.Utils.Tests.Samples
 {
     public interface ISample
     {
@@ -22,6 +21,7 @@ namespace Bing.Datas.Test.Integration.Samples
         public Sample()
         {
             StringList = new List<string>();
+            StringArray = StringList.ToArray();
         }
 
         /// <summary>
@@ -103,6 +103,14 @@ namespace Bing.Datas.Test.Integration.Samples
         /// </summary>
         public bool? NullableBoolValue { get; set; }
         /// <summary>
+        /// Enum值
+        /// </summary>
+        public EnumSample EnumValue { get; set; }
+        /// <summary>
+        /// 可空Enum值
+        /// </summary>
+        public EnumSample? NullableEnumValue { get; set; }
+        /// <summary>
         /// DateTime值
         /// </summary>
         public DateTime DateValue { get; set; }
@@ -110,14 +118,6 @@ namespace Bing.Datas.Test.Integration.Samples
         /// 可空DateTime值
         /// </summary>
         public DateTime? NullableDateValue { get; set; }
-        /// <summary>
-        /// 不可空枚举值
-        /// </summary>
-        public LogLevel LogLevel { get; set; }
-        /// <summary>
-        /// 可空枚举值
-        /// </summary>
-        public LogLevel? NullableLogLevel { get; set; }
         /// <summary>
         /// int值
         /// </summary>
@@ -147,16 +147,14 @@ namespace Bing.Datas.Test.Integration.Samples
         /// 字符串列表
         /// </summary>
         public List<string> StringList { get; set; }
-
+        /// <summary>
+        /// 字符串数据
+        /// </summary>
+        public string[] StringArray { get; set; }
         /// <summary>
         /// Guid值
         /// </summary>
         public Guid GuidValue { get; set; }
-
-        /// <summary>
-        /// 可空Guid值
-        /// </summary>
-        public Guid? NullableGuidValue { get; set; }
 
         /// <summary>
         /// 测试2
@@ -166,12 +164,18 @@ namespace Bing.Datas.Test.Integration.Samples
         /// <summary>
         /// 静态属性
         /// </summary>
-        public static string StaticString => "TestStaticString";
+        public static string StaticString
+        {
+            get { return "TestStaticString"; }
+        }
 
         /// <summary>
         /// 静态对象
         /// </summary>
-        public static Sample2 StaticSample => new Sample2() { StringValue = "TestStaticSample" };
+        public static Sample2 StaticSample
+        {
+            get { return new Sample2() { StringValue = "TestStaticSample" }; }
+        }
 
         /// <summary>
         /// 创建测试实例1
@@ -188,10 +192,5 @@ namespace Bing.Datas.Test.Integration.Samples
         {
             return new Sample { StringValue = "B" };
         }
-
-        /// <summary>
-        /// 是否删除
-        /// </summary>
-        public bool IsDeleted { get; set; }
     }
 }

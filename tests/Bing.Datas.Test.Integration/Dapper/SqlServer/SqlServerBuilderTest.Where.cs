@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Bing.Datas.Sql;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Test.Integration.Samples;
@@ -12,7 +13,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
     /// <summary>
     /// Sql Server Sql生成器测试 - Where子句
     /// </summary>
-    public partial class SqlServerBuilderTest
+    public partial class SqlServerBuilderTest : TestBase
     {
 
         #region And
@@ -538,6 +539,79 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
             Assert.Equal(4, _builder.GetParams()["@_p_0"]);
+        }
+
+        /// <summary>
+        /// 设置条件 - Guid -参数对象属性为Guid
+        /// </summary>
+        [Fact]
+        public void TestWhere_16()
+        {
+            // 结果
+            var result = new Str();
+            result.AppendLine("Select * ");
+            result.AppendLine("From [Sample] As [s] ");
+            result.Append("Where [s].[GuidValue]=@_p_0");
+
+            // 执行
+            var sample = new Sample { GuidValue = Guid.Empty };
+            _builder.From<Sample>("s").Where<Sample>(t => t.GuidValue == sample.GuidValue);
+
+            // 验证
+            Output.WriteLine(_builder.ToSql());
+            Assert.Equal(result.ToString(), _builder.ToSql());
+            Assert.Equal(Guid.Empty, _builder.GetParams()["@_p_0"]);
+        }
+
+        /// <summary>
+        /// 设置条件 - Guid -参数对象属性为Guid
+        /// </summary>
+        [Fact]
+        public void TestWhere_17()
+        {
+            // 结果
+            var result = new Str();
+            result.AppendLine("Select * ");
+            result.AppendLine("From [Sample] As [s] ");
+            result.Append("Where [s].[GuidValue]=@_p_0");
+
+            // 执行
+            var sample = new Sample { NullableGuidValue = Guid.Empty };
+            _builder.From<Sample>("s").Where<Sample>(t => t.NullableGuidValue == sample.GuidValue);
+
+            // 验证
+            Output.WriteLine(_builder.ToSql());
+            Assert.Equal(result.ToString(), _builder.ToSql());
+            Assert.Equal(Guid.Empty, _builder.GetParams()["@_p_0"]);
+        }
+
+        /// <summary>
+        /// 设置条件 - Guid -参数对象属性为Guid
+        /// </summary>
+        [Fact]
+        public void TestWhere_18()
+        {
+            // 结果
+            var result = new Str();
+            result.AppendLine("Select [s].[GuidValue] ");
+            result.AppendLine("From [Sample] As [s] ");
+            result.Append("Where [s].[GuidValue]=@_p_0");
+
+            // 执行
+            var guid = new Guid("03453704-45f3-47b8-ac1c-aecbdcb6b42b");
+           
+            GetSql(guid);
+
+            // 验证
+            Output.WriteLine(_builder.ToDebugSql());
+            Assert.Equal(result.ToString(), _builder.ToSql());
+            Assert.Equal(guid, _builder.GetParams()["@_p_0"]);
+        }
+
+        private void GetSql(Guid id)
+        {
+            _builder.Select<Sample>(x => new object[] { x.GuidValue }, true).From<Sample>("s")
+                .Where<Sample>(t => t.GuidValue == id);
         }
 
         #endregion
