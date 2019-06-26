@@ -1,6 +1,7 @@
 ﻿using System;
 using Bing.Datas.Dapper.Handlers;
 using Bing.Datas.Dapper.MySql;
+using Bing.Datas.Dapper.Oracle;
 using Bing.Datas.Dapper.PgSql;
 using Bing.Datas.Dapper.SqlServer;
 using Bing.Datas.Enums;
@@ -112,6 +113,9 @@ namespace Bing.Datas.Dapper
                     return;
                 case DatabaseType.PgSql:
                     services.AddTransient<ISqlBuilder, PgSqlBuilder>();
+                    return;
+                case DatabaseType.Oracle:
+                    services.AddTransient<ISqlBuilder, OracleBuilder>();
                     return;
                 default:
                     throw new NotImplementedException($"Sql生成器未实现 {config.DatabaseType.Description()} 数据库");

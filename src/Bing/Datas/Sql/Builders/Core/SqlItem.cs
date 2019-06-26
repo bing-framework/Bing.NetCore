@@ -49,7 +49,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 别名，范例：t.a As b，值为 b
         /// </summary>
-        public string Alias=> _alias.SafeString();
+        public string Alias => _alias.SafeString();
 
         /// <summary>
         /// 数据库名称
@@ -71,9 +71,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true)
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
                 return;
-            }
             _prefix = prefix;
             _alias = alias;
             Raw = raw;
@@ -82,7 +80,6 @@ namespace Bing.Datas.Sql.Builders.Core
                 _name = name;
                 return;
             }
-
             Resolve(name, isSplit);
         }
 
@@ -96,21 +93,14 @@ namespace Bing.Datas.Sql.Builders.Core
             var pattern = @"\s+[aA][sS]\s+";
             var list = Regexs.Split(name, pattern);
             if (list == null || list.Length == 0)
-            {
                 return;
-            }
-
             if (list.Length == 2)
-            {
                 _alias = list[1];
-            }
-
             if (isSplit)
             {
                 SplitName(list[0]);
                 return;
             }
-
             _name = name;
         }
 
@@ -122,19 +112,11 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             var result = new NameItem(name);
             if (string.IsNullOrWhiteSpace(result.Name) == false)
-            {
                 _name = result.Name;
-            }
-
             if (string.IsNullOrWhiteSpace(result.Prefix) == false)
-            {
                 _prefix = result.Prefix;
-            }
-
             if (string.IsNullOrWhiteSpace(result.DatabaseName) == false)
-            {
                 DatabaseName = result.DatabaseName;
-            }
         }
 
         #endregion
@@ -144,11 +126,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
-        public SqlItem Clone()
-        {
-            return new SqlItem(Name,Prefix,Alias,Raw,false);
-        }
+        public SqlItem Clone() => new SqlItem(Name, Prefix, Alias, Raw, false);
 
         #endregion
 
@@ -159,20 +137,15 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="tableDatabase">表数据库</param>
-        /// <returns></returns>
-        public string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null)
+        public virtual string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null)
         {
             if (string.IsNullOrWhiteSpace(Name))
-            {
                 return null;
-            }
-
             if (Raw)
-            {
                 return Name;
-            }
-
-            return string.IsNullOrWhiteSpace(Alias) ? GetColumn(dialect, tableDatabase) : $"{GetColumn(dialect,tableDatabase)} As {GetSafeName(dialect, Alias)}";
+            return string.IsNullOrWhiteSpace(Alias)
+                ? GetColumn(dialect, tableDatabase)
+                : GetColumnAlias(dialect, tableDatabase);
         }
 
         /// <summary>
@@ -180,26 +153,16 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="tableDatabase">表数据库</param>
-        /// <returns></returns>
-        private string GetColumn(IDialect dialect, ITableDatabase tableDatabase)
+        protected string GetColumn(IDialect dialect, ITableDatabase tableDatabase)
         {
             var result = new StringBuilder();
             var database = DatabaseName;
             if (string.IsNullOrWhiteSpace(DatabaseName) && tableDatabase != null)
-            {
                 database = tableDatabase.GetDatabase(GetName());
-            }
-
             if (string.IsNullOrWhiteSpace(database) == false)
-            {
                 result.Append($"{GetSafeName(dialect, database)}.");
-            }
-
             if (string.IsNullOrWhiteSpace(Prefix) == false)
-            {
                 result.Append($"{GetSafeName(dialect, Prefix)}.");
-            }
-
             result.Append(GetSafeName(dialect, Name));
             return result.ToString();
         }
@@ -207,31 +170,21 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取名称
         /// </summary>
-        /// <returns></returns>
-        private string GetName()
-        {
-            if (string.IsNullOrWhiteSpace(Prefix))
-            {
-                return Name;
-            }
-
-            return $"{Prefix}.{Name}";
-        }
+        protected string GetName() => string.IsNullOrWhiteSpace(Prefix) ? Name : $"{Prefix}.{Name}";
 
         /// <summary>
         /// 获取安全名称
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="name">名称</param>
-        /// <returns></returns>
-        private string GetSafeName(IDialect dialect, string name)
-        {
-            if (dialect == null)
-            {
-                return name;
-            }
-            return dialect.SafeName(name);
-        }
+        protected string GetSafeName(IDialect dialect, string name) => dialect == null ? name : dialect.SafeName(name);
+
+        /// <summary>
+        /// 获取列名和别名
+        /// </summary>
+        /// <param name="dialect">Sql方言</param>
+        /// <param name="tableDatabase">表数据库</param>
+        protected virtual string GetColumnAlias(IDialect dialect, ITableDatabase tableDatabase) => $"{GetColumn(dialect, tableDatabase)} As {GetSafeName(dialect, Alias)}";
 
         #endregion
     }

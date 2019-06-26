@@ -24,13 +24,23 @@
         /// 安全名称
         /// </summary>
         /// <param name="name">名称</param>
-        /// <returns></returns>
         string SafeName(string name);
 
         /// <summary>
         /// 获取参数前缀
         /// </summary>
-        /// <returns></returns>
         string GetPrefix();
+
+        /// <summary>
+        /// 生成参数名
+        /// </summary>
+        /// <param name="paramIndex">参数索引</param>
+        string GenerateName(int paramIndex);
+
+        /// <summary>
+        /// 获取参数名
+        /// </summary>
+        /// <param name="paramName">参数名</param>
+        string GetParamName(string paramName);
     }
 }

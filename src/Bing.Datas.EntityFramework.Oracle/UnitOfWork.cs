@@ -2,23 +2,23 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Bing.Datas.EntityFramework.PgSql
+namespace Bing.Datas.EntityFramework.Oracle
 {
     /// <summary>
-    /// PgSql 工作单元
+    /// Oracle工作单元
     /// </summary>
-    public abstract class UnitOfWork:UnitOfWorkBase
+    public abstract class UnitOfWork : UnitOfWorkBase
     {
         /// <summary>
         /// 初始化一个<see cref="UnitOfWork"/>类型的实例
         /// </summary>
         /// <param name="options">配置</param>
         /// <param name="serviceProvider">服务提供器</param>
-        protected UnitOfWork(DbContextOptions options, IServiceProvider serviceProvider = null) : base(options, serviceProvider)
+        protected UnitOfWork(DbContextOptions options, IServiceProvider serviceProvider = null) : base(options,
+            serviceProvider)
         {
         }
 
@@ -34,9 +34,9 @@ namespace Bing.Datas.EntityFramework.PgSql
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
+        protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Bing.Utils.Helpers.Reflection.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

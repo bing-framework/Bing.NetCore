@@ -21,7 +21,6 @@ namespace Bing.Datas.Dapper.PgSql
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
         public override ISqlBuilder Clone()
         {
             var sqlBuilder = new PgSqlBuilder();
@@ -32,36 +31,21 @@ namespace Bing.Datas.Dapper.PgSql
         /// <summary>
         /// 创建Sql生成器
         /// </summary>
-        /// <returns></returns>
-        public override ISqlBuilder New()
-        {
-            return new PgSqlBuilder(EntityMatedata, TableDatabase, ParameterManager);
-        }
+        public override ISqlBuilder New() => new PgSqlBuilder(EntityMatedata, TableDatabase, ParameterManager);
 
         /// <summary>
         /// 获取Sql方言
         /// </summary>
-        /// <returns></returns>
-        protected override IDialect GetDialect()
-        {
-            return new PgSqlDialect();
-        }
+        protected override IDialect GetDialect() => new PgSqlDialect();
 
         /// <summary>
         /// 获取参数字面值解析器
         /// </summary>
-        /// <returns></returns>
-        protected override IParamLiteralsResolver GetParamLiteralsResolver()
-        {
-            return new PgSqlParamLiteralsResolver();
-        }
+        protected override IParamLiteralsResolver GetParamLiteralsResolver() => new PgSqlParamLiteralsResolver();
 
         /// <summary>
         /// 创建分页Sql
         /// </summary>
-        protected override string CreateLimitSql()
-        {
-            return $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
-        }
+        protected override string CreateLimitSql() => $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
     }
 }
