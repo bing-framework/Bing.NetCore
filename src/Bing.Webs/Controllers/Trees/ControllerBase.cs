@@ -33,10 +33,7 @@ namespace Bing.Webs.Controllers.Trees
         /// <summary>
         /// 获取加载模式
         /// </summary>
-        protected virtual LoadMode GetLoadMode()
-        {
-            return LoadMode.Sync;
-        }
+        protected virtual LoadMode GetLoadMode() => LoadMode.Sync;
 
         /// <summary>
         /// 获取单个实例
@@ -126,10 +123,7 @@ namespace Bing.Webs.Controllers.Trees
         {
             var idList = ids.ToGuidList();
             if (idList.Count < 2)
-            {
                 return Fail("交换排序失败");
-            }
-
             await _service.SwapSortAsync(idList[0], idList[1]);
             return Success();
         }
@@ -142,10 +136,7 @@ namespace Bing.Webs.Controllers.Trees
         public virtual async Task<IActionResult> FixAsync([FromBody] TQuery parameter)
         {
             if (parameter == null)
-            {
                 return Fail("查询参数不能为空");
-            }
-
             await _service.FixSortIdAsync(parameter);
             return Success();
         }

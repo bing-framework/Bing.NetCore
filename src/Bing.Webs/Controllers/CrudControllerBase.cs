@@ -87,9 +87,7 @@ namespace Bing.Webs.Controllers
         public virtual async Task<IActionResult> CreateAsync([FromBody] TCreateRequest request)
         {
             if (request == null)
-            {
                 return Fail(WebResource.CreateRequestIsEmpty);
-            }
             CreateBefore(request);
             var id = await _service.CreateAsync(request);
             var result = await _service.GetByIdAsync(id);
@@ -117,19 +115,11 @@ namespace Bing.Webs.Controllers
         public virtual async Task<IActionResult> UpdateAsync(string id, [FromBody] TUpdateRequest request)
         {
             if (request == null)
-            {
                 return Fail(WebResource.UpdateRequestIsEmpty);
-            }
-
             if (id.IsEmpty() && request.Id.IsEmpty())
-            {
-                throw new Warning(WebResource.IdIsEmpty);
-            }
-
+                return Fail(WebResource.IdIsEmpty);
             if (request.Id.IsEmpty())
-            {
                 request.Id = id;
-            }
             UpdateBefore(request);
             await _service.UpdateAsync(request);
             var result = await _service.GetByIdAsync(request.Id);

@@ -55,10 +55,7 @@ namespace Bing.Webs.Controllers
         protected virtual IActionResult Success(dynamic data = null, string message = null)
         {
             if (message == null)
-            {
                 message = Bing.Properties.R.Success;
-            }
-
             return new Result(StateCode.Ok, message, data);
         }
 
@@ -67,9 +64,6 @@ namespace Bing.Webs.Controllers
         /// </summary>
         /// <param name="message">消息</param>
         /// <returns></returns>
-        protected IActionResult Fail(string message)
-        {
-            return new Result(StateCode.Fail,message);
-        }
+        protected IActionResult Fail(string message) => new Result(StateCode.Fail,message);
     }
 }

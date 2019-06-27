@@ -80,10 +80,7 @@ namespace Bing.Webs.Controllers
         /// 转换分页查询结果
         /// </summary>
         /// <param name="result">分页查询结果</param>
-        protected virtual dynamic ToPagerQueryResult(PagerList<TDto> result)
-        {
-            return result;
-        }
+        protected virtual dynamic ToPagerQueryResult(PagerList<TDto> result) => result;
 
         /// <summary>
         /// 查询
@@ -114,10 +111,7 @@ namespace Bing.Webs.Controllers
         /// 转换查询结果
         /// </summary>
         /// <param name="result">查询结果</param>
-        protected virtual dynamic ToQueryResult(List<TDto> result)
-        {
-            return result;
-        }
+        protected virtual dynamic ToQueryResult(List<TDto> result) => result;
 
         /// <summary>
         /// 获取项列表
@@ -127,15 +121,9 @@ namespace Bing.Webs.Controllers
         public virtual async Task<IActionResult> GetItemsAsync([FromQuery]TQuery query)
         {
             if (query == null)
-            {
                 return Fail(WebResource.QueryIsEmpty);
-            }
-
             if (query.Order.IsEmpty())
-            {
                 query.Order = "CreationTime Desc";
-            }
-
             var list = await _service.PagerQueryAsync(query);
             var result = list.Data.Select(ToItem);
             return Success(result);
