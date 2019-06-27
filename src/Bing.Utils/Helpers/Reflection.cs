@@ -15,11 +15,11 @@ namespace Bing.Utils.Helpers
     public static class Reflection
     {
         #region GetDescription(获取类型描述)
+
         /// <summary>
         /// 获取类型描述，使用<see cref="DescriptionAttribute"/>设置描述
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
-        /// <returns></returns>
         public static string GetDescription<T>() => GetDescription(Common.GetType<T>());
 
         /// <summary>
@@ -27,7 +27,6 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="memberName">成员名称</param>
-        /// <returns></returns>
         public static string GetDescription<T>(string memberName) => GetDescription(Common.GetType<T>(), memberName);
 
         /// <summary>
@@ -35,13 +34,10 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="type">类型</param>
         /// <param name="memberName">成员名称</param>
-        /// <returns></returns>
         public static string GetDescription(Type type, string memberName)
         {
             if (type == null)
-            {
                 return string.Empty;
-            }
             return memberName.IsEmpty()
                 ? string.Empty
                 : GetDescription(type.GetTypeInfo().GetMember(memberName).FirstOrDefault());
@@ -584,7 +580,6 @@ namespace Bing.Utils.Helpers
         /// 是否集合
         /// </summary>
         /// <param name="type">类型</param>
-        /// <returns></returns>
         public static bool IsCollection(Type type) => type.IsArray || IsGenericCollection(type);
 
         #endregion
@@ -594,13 +589,10 @@ namespace Bing.Utils.Helpers
         /// 是否泛型集合
         /// </summary>
         /// <param name="type">类型</param>
-        /// <returns></returns>
         public static bool IsGenericCollection(Type type)
         {
             if (!type.IsGenericType)
-            {
                 return false;
-            }
             var typeDefinition = type.GetGenericTypeDefinition();
             return typeDefinition == typeof(IEnumerable<>)
                    || typeDefinition == typeof(IReadOnlyCollection<>)
@@ -617,7 +609,6 @@ namespace Bing.Utils.Helpers
         /// 获取公共属性列表
         /// </summary>
         /// <param name="instance">实例</param>
-        /// <returns></returns>
         public static List<Item> GetPublicProperties(object instance)
         {
             var properties = instance.GetType().GetProperties();

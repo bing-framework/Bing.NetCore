@@ -15,20 +15,13 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="color">颜色</param>
         /// <returns></returns>
-        public static string ToHex(Color color)
-        {
-            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-        }
+        public static string ToHex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
         /// <summary>
         /// 转换为RGB颜色
         /// </summary>
         /// <param name="color">颜色</param>
-        /// <returns></returns>
-        public static string ToRgb(Color color)
-        {
-            return $"RGB({color.R.ToString()},{color.G.ToString()},{color.B.ToString()})";
-        }
+        public static string ToRgb(Color color) => $"RGB({color.R},{color.G},{color.B})";
 
         /// <summary>
         /// RGB格式转换为16进制颜色
@@ -36,18 +29,12 @@ namespace Bing.Utils.Helpers
         /// <param name="r">红色</param>
         /// <param name="g">绿色</param>
         /// <param name="b">蓝色</param>
-        /// <returns></returns>
-        public static string RgbToHex(int r, int g, int b)
-        {
-            Color color = Color.FromArgb(r, g, b);
-            return ToHex(color);
-        }
+        public static string RgbToHex(int r, int g, int b) => ToHex(Color.FromArgb(r, g, b));
 
         /// <summary>
         /// 从样式颜色中获取系统颜色
         /// </summary>
         /// <param name="cssColour">样式颜色</param>
-        /// <returns></returns>
         public static Color GetColorFromCssString(string cssColour)
         {
             if (string.IsNullOrWhiteSpace(cssColour))
@@ -173,7 +160,6 @@ namespace Bing.Utils.Helpers
         /// <param name="saturation"></param>
         /// <param name="lightness"></param>
         /// <param name="alpha"></param>
-        /// <returns></returns>
         public static Color HslaToRgba(short hue, byte saturation, byte lightness, byte alpha = 255)
         {
             double h = hue / 360.0f;
@@ -240,7 +226,6 @@ namespace Bing.Utils.Helpers
         /// 格式化RGB
         /// </summary>
         /// <param name="input"></param>
-        /// <returns></returns>
         private static byte ParseRgb(string input)
         {
             string parseString = input.Trim();
@@ -258,7 +243,6 @@ namespace Bing.Utils.Helpers
         /// <param name="input"></param>
         /// <param name="maxValue"></param>
         /// <param name="minValue"></param>
-        /// <returns></returns>
         private static double ParseClamp(string input, double maxValue, double minValue = 0)
         {
             if (double.TryParse(input, out var parsedValue))
@@ -282,7 +266,6 @@ namespace Bing.Utils.Helpers
         /// 格式化Float
         /// </summary>
         /// <param name="input"></param>
-        /// <returns></returns>
         private static byte ParseFloat(string input)
         {
             string parseString = input.Trim();
@@ -298,7 +281,6 @@ namespace Bing.Utils.Helpers
         /// 格式化Hue
         /// </summary>
         /// <param name="input"></param>
-        /// <returns></returns>
         private static short ParseHue(string input)
         {
             string parseString = input.Trim();

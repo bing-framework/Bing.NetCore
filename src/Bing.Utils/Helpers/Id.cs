@@ -33,53 +33,31 @@ namespace Bing.Utils.Helpers
         /// 设置Id
         /// </summary>
         /// <param name="id">Id</param>
-        public static void SetId(string id)
-        {
-            _id = id;
-        }
+        public static void SetId(string id) => _id = id;
 
         /// <summary>
         /// 重置Id
         /// </summary>
-        public static void Reset()
-        {
-            _id = null;
-        }
+        public static void Reset() => _id = null;
 
         /// <summary>
         /// 用Guid创建标识，去掉分隔符
         /// </summary>
-        /// <returns></returns>
-        public static string Guid()
-        {
-            return string.IsNullOrWhiteSpace(_id) ? System.Guid.NewGuid().ToString("N") : _id;
-        }
+        public static string Guid() => string.IsNullOrWhiteSpace(_id) ? System.Guid.NewGuid().ToString("N") : _id;
 
         /// <summary>
         /// 创建 Guid ID
         /// </summary>
-        /// <returns></returns>
-        public static Guid GetGuid()
-        {
-            return GuidGenerator.Create();
-        }
+        public static Guid NewGuid() => GuidGenerator.Create();
 
         /// <summary>
         /// 创建 Long ID
         /// </summary>
-        /// <returns></returns>
-        public static long GetLong()
-        {
-            return LongGenerator.Create();
-        }
+        public static long NewLong() => LongGenerator.Create();
 
         /// <summary>
         /// 创建 String ID
         /// </summary>
-        /// <returns></returns>
-        public static string GetString()
-        {
-            return StringGenerator.Create();
-        }
+        public static string NewString() => StringGenerator.Create();
     }
 }
