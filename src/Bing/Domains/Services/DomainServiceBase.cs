@@ -7,7 +7,7 @@ namespace Bing.Domains.Services
     /// <summary>
     /// 领域服务抽象基类
     /// </summary>
-    public abstract class DomainServiceBase:IDomainService
+    public abstract class DomainServiceBase : IDomainService
     {
         /// <summary>
         /// 初始化一个<see cref="DomainServiceBase"/>类型的实例

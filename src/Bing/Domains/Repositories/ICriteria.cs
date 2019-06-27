@@ -12,7 +12,6 @@ namespace Bing.Domains.Repositories
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         Expression<Func<TEntity, bool>> GetPredicate();
     }
 }

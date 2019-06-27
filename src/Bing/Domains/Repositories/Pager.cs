@@ -6,7 +6,7 @@ namespace Bing.Domains.Repositories
     /// <summary>
     /// 分页参数
     /// </summary>
-    public class Pager:IPager
+    public class Pager : IPager
     {
         /// <summary>
         /// 页索引，级第几页，从1开始
@@ -21,14 +21,12 @@ namespace Bing.Domains.Repositories
         /// <summary>
         /// 页索引，即第几页，从1开始
         /// </summary>
-        public int Page {
+        public int Page
+        {
             get
             {
                 if (_pageIndex <= 0)
-                {
                     _pageIndex = 1;
-                }
-
                 return _pageIndex;
             }
             set => _pageIndex = value;
@@ -62,7 +60,7 @@ namespace Bing.Domains.Repositories
         /// <param name="page">页索引</param>
         /// <param name="pageSize">每页显示行数，默认20</param>
         /// <param name="order">排序条件</param>
-        public Pager(int page, int pageSize, string order):this(page,pageSize,0,order)
+        public Pager(int page, int pageSize, string order) : this(page, pageSize, 0, order)
         {
         }
 
@@ -84,33 +82,26 @@ namespace Bing.Domains.Repositories
         /// <summary>
         /// 获取总页数
         /// </summary>
-        /// <returns></returns>
         public int GetPageCount()
         {
             if ((TotalCount % PageSize) == 0)
-            {
                 return TotalCount / PageSize;
-            }
-
             return (TotalCount / PageSize) + 1;
         }
 
         /// <summary>
         /// 获取跳过的行数
         /// </summary>
-        /// <returns></returns>
         public int GetSkipCount() => PageSize * (Page - 1);
 
         /// <summary>
         /// 获取起始行数
         /// </summary>
-        /// <returns></returns>
         public int GetStartNumber() => (Page - 1) * PageSize + 1;
 
         /// <summary>
         /// 获取结束行数
         /// </summary>
-        /// <returns></returns>
         public int GetEndNumber()
         {
             return Page * PageSize;
@@ -119,7 +110,6 @@ namespace Bing.Domains.Repositories
         /// <summary>
         /// 重写 生成字符串
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             _description = new StringBuilder();

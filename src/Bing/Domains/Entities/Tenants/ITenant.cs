@@ -14,7 +14,7 @@
     /// <summary>
     /// 租户
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TKey">类型</typeparam>
     public interface ITenant<TKey>
     {
         /// <summary>

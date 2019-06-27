@@ -72,10 +72,7 @@ namespace Bing.Domains.Entities.Trees
         /// <summary>
         /// 初始化路径
         /// </summary>
-        public virtual void InitPath()
-        {
-            InitPath(default(TEntity));
-        }
+        public virtual void InitPath() => InitPath(default(TEntity));
 
         /// <summary>
         /// 初始化路径
@@ -98,20 +95,13 @@ namespace Bing.Domains.Entities.Trees
         /// 从路径中获取所有上级节点编号
         /// </summary>
         /// <param name="excludeSelf">是否排除当前节点，默认排除自身</param>
-        /// <returns></returns>
         public List<TKey> GetParentIdsFromPath(bool excludeSelf = true)
         {
             if (string.IsNullOrWhiteSpace(Path))
-            {
                 return new List<TKey>();
-            }
-
             var result = Path.Split(',').Where(id => !string.IsNullOrWhiteSpace(id) && id != ",").ToList();
             if (excludeSelf)
-            {
                 result = result.Where(id => id.SafeString().ToLower() != Id.SafeString().ToLower()).ToList();
-            }
-
             return result.Select(Bing.Utils.Helpers.Conv.To<TKey>).ToList();
         }
     }

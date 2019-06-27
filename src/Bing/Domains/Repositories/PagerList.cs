@@ -47,7 +47,6 @@ namespace Bing.Domains.Repositories
         /// 索引器
         /// </summary>
         /// <param name="index">索引</param>
-        /// <returns></returns>
         public T this[int index]
         {
             get => Data[index];
@@ -78,7 +77,7 @@ namespace Bing.Domains.Repositories
         /// </summary>
         /// <param name="totalCount">总行数</param>
         /// <param name="data">数据</param>
-        public PagerList(int totalCount, IEnumerable<T> data = null) : this(1, 20, totalCount,data)
+        public PagerList(int totalCount, IEnumerable<T> data = null) : this(1, 20, totalCount, data)
         {
         }
 
@@ -89,7 +88,7 @@ namespace Bing.Domains.Repositories
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="totalCount">总行数</param>
         /// <param name="data">数据</param>
-        public PagerList(int page, int pageSize, int totalCount, IEnumerable<T> data = null) : this(page, pageSize, totalCount, "",data)
+        public PagerList(int page, int pageSize, int totalCount, IEnumerable<T> data = null) : this(page, pageSize, totalCount, "", data)
         {
         }
 
@@ -98,7 +97,7 @@ namespace Bing.Domains.Repositories
         /// </summary>
         /// <param name="pager">查询对象</param>
         /// <param name="data">数据</param>
-        public PagerList(IPager pager, IEnumerable<T> data = null) : this(pager.Page, pager.PageSize, pager.TotalCount, pager.Order,data)
+        public PagerList(IPager pager, IEnumerable<T> data = null) : this(pager.Page, pager.PageSize, pager.TotalCount, pager.Order, data)
         {
         }
 

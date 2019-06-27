@@ -15,7 +15,6 @@ namespace Bing.Domains.Repositories
         /// <summary>
         /// 获取工作单元
         /// </summary>
-        /// <returns></returns>
         IUnitOfWork GetUnitOfWork();
 
         #endregion

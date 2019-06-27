@@ -61,9 +61,7 @@ namespace Bing.Domains.Entities
         public void SetValidationHandler(IValidationHandler handler)
         {
             if (handler == null)
-            {
                 return;
-            }
             _handler = handler;
         }
 
@@ -78,13 +76,9 @@ namespace Bing.Domains.Entities
         public void AddValidationRules(IEnumerable<IValidationRule> rules)
         {
             if (rules == null)
-            {
                 return;
-            }
             foreach (var rule in rules)
-            {
                 AddValidationRule(rule);
-            }
         }
 
         #endregion
@@ -98,9 +92,7 @@ namespace Bing.Domains.Entities
         public void AddValidationRule(IValidationRule rule)
         {
             if (rule == null)
-            {
                 return;
-            }
             _rules.Add(rule);
         }
 
@@ -111,7 +103,6 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public virtual ValidationResultCollection Validate()
         {
             var result = GetValidationResults();
@@ -122,15 +113,12 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 获取验证结果
         /// </summary>
-        /// <returns></returns>
         private ValidationResultCollection GetValidationResults()
         {
             var result = DataAnnotationValidation.Validate(this);
             Validate(result);
             foreach (var rule in _rules)
-            {
                 result.Add(rule.Validate());
-            }
             return result;
         }
 
@@ -149,9 +137,7 @@ namespace Bing.Domains.Entities
         private void HandleValidationResults(ValidationResultCollection results)
         {
             if (results.IsValid)
-            {
                 return;
-            }
             _handler.Handle(results);
         }
 
@@ -163,14 +149,11 @@ namespace Bing.Domains.Entities
         /// 获取变更属性
         /// </summary>
         /// <param name="newEntity">新对象</param>
-        /// <returns></returns>
         public ChangeValueCollection GetChanges(T newEntity)
         {
             _changeValues = new ChangeValueCollection();
             if (Equals(newEntity, null))
-            {
                 return _changeValues;
-            }
             AddChanges(newEntity);
             return _changeValues;
         }
@@ -208,15 +191,11 @@ namespace Bing.Domains.Entities
         protected void AddChange<TValue>(string propertyName, string description, TValue oldValue, TValue newValue)
         {
             if (Equals(oldValue, newValue))
-            {
                 return;
-            }
-            string oldValueString = oldValue.SafeString().ToLower().Trim();
-            string newValueString = newValue.SafeString().ToLower().Trim();
+            var oldValueString = oldValue.SafeString().ToLower().Trim();
+            var newValueString = newValue.SafeString().ToLower().Trim();
             if (oldValueString == newValueString)
-            {
                 return;
-            }
             _changeValues.Add(propertyName, description, oldValueString, newValueString);
         }
 
@@ -230,13 +209,9 @@ namespace Bing.Domains.Entities
             where TDomainObject : IDomainObject
         {
             if (Equals(oldObject, null))
-            {
                 return;
-            }
             if (Equals(newObject, null))
-            {
                 return;
-            }
             _changeValues.AddRange(oldObject.GetChanges(newObject));
         }
 
@@ -250,21 +225,15 @@ namespace Bing.Domains.Entities
             IEnumerable<TDomainObject> newObjects) where TDomainObject : IDomainObject
         {
             if (Equals(oldObjects, null))
-            {
                 return;
-            }
             if (Equals(newObjects, null))
-            {
                 return;
-            }
             var oldList = oldObjects.ToList();
             var newList = newObjects.ToList();
-            for (int i = 0; i < oldList.Count; i++)
+            for (var i = 0; i < oldList.Count; i++)
             {
                 if (newList.Count <= i)
-                {
                     return;
-                }
                 AddChange(oldList[i], newList[i]);
             }
         }
@@ -287,9 +256,7 @@ namespace Bing.Domains.Entities
         protected void AddDescription(string description)
         {
             if (string.IsNullOrWhiteSpace(description))
-            {
                 return;
-            }
             _description.Append(description);
         }
 
@@ -302,9 +269,7 @@ namespace Bing.Domains.Entities
         protected void AddDescription<TValue>(string name, TValue value)
         {            
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return;
-            }
             _description.AppendFormat("{0}:{1},", name, value);
         }
 
@@ -319,10 +284,7 @@ namespace Bing.Domains.Entities
             var description = Utils.Helpers.Reflection.GetDisplayNameOrDescription(member);
             var value = member.GetPropertyValue(this);
             if (Utils.Helpers.Reflection.IsBool(member))
-            {
                 value = Utils.Helpers.Conv.ToBool(value).Description();
-            }
-
             AddDescription(description, value);
         }
         #endregion
@@ -332,7 +294,6 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 输出对象状态
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             _description = new StringBuilder();

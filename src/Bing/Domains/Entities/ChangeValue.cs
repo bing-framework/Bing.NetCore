@@ -53,7 +53,6 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 输出变更信息
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             var result = new StringBuilder();

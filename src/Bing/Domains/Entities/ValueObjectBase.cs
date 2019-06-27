@@ -14,38 +14,25 @@ namespace Bing.Domains.Entities
         /// 相等性比较
         /// </summary>
         /// <param name="other">值对象</param>
-        /// <returns></returns>
-        public bool Equals(TValueObject other)
-        {
-            return this == other;
-        }
+        public bool Equals(TValueObject other) => this == other;
 
         /// <summary>
         /// 相等性比较
         /// </summary>
         /// <param name="other">值对象</param>
-        /// <returns></returns>
-        public override bool Equals(object other)
-        {
-            return Equals(other as TValueObject);
-        }
+        public override bool Equals(object other) => Equals(other as TValueObject);
 
         /// <summary>
         /// 相等性比较
         /// </summary>
         /// <param name="left">值对象</param>
         /// <param name="right">值对象</param>
-        /// <returns></returns>
         public static bool operator ==(ValueObjectBase<TValueObject> left, ValueObjectBase<TValueObject> right)
         {
             if ((object)left == null && (object)right == null)
-            {
                 return true;
-            }
             if (!(left is TValueObject) || !(right is TValueObject))
-            {
                 return false;
-            }
             var properties = left.GetType().GetTypeInfo().GetProperties();
             return properties.All(property => property.GetValue(left) == property.GetValue(right));
         }
@@ -55,16 +42,11 @@ namespace Bing.Domains.Entities
         /// </summary>
         /// <param name="left">值对象</param>
         /// <param name="right">值对象</param>
-        /// <returns></returns>
-        public static bool operator !=(ValueObjectBase<TValueObject> left, ValueObjectBase<TValueObject> right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(ValueObjectBase<TValueObject> left, ValueObjectBase<TValueObject> right) => !(left == right);
 
         /// <summary>
         /// 获取哈希
         /// </summary>
-        /// <returns></returns>
         public override int GetHashCode()
         {
             var properties = GetType().GetTypeInfo().GetProperties();
@@ -76,10 +58,6 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 克隆副本
         /// </summary>
-        /// <returns></returns>
-        public virtual TValueObject Clone()
-        {
-            return Utils.Helpers.Conv.To<TValueObject>(MemberwiseClone());
-        }
+        public virtual TValueObject Clone() => Utils.Helpers.Conv.To<TValueObject>(MemberwiseClone());
     }
 }

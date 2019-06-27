@@ -7,7 +7,7 @@ namespace Bing.Domains.Entities
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public class ListCompareResult<TEntity,TKey> where TEntity:IKey<TKey>
+    public class ListCompareResult<TEntity, TKey> where TEntity : IKey<TKey>
     {
         /// <summary>
         /// 创建列表
