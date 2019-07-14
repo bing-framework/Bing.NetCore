@@ -1,11 +1,12 @@
 ﻿using System;
+using Bing.Dependency;
 
 namespace Bing.Tracing
 {
     /// <summary>
     /// 默认跟踪关联ID提供程序
     /// </summary>
-    public class DefaultCorrelationIdProvider : ICorrelationIdProvider
+    internal class DefaultCorrelationIdProvider : ICorrelationIdProvider//, ISingletonDependency
     {
         /// <summary>
         /// 跟踪关联ID提供程序
@@ -15,7 +16,6 @@ namespace Bing.Tracing
         /// <summary>
         /// 创建新跟踪关联ID
         /// </summary>
-        /// <returns></returns>
         protected virtual string CreateNewCorrelationId() => Guid.NewGuid().ToString("N");
     }
 }

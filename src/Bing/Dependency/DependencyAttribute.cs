@@ -7,7 +7,7 @@ namespace Bing.Dependency
     /// 依赖注入行为特性
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class DependencyAttribute:Attribute
+    public class DependencyAttribute : Attribute
     {
         /// <summary>
         /// 声明周期类型，代替
