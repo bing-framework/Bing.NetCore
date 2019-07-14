@@ -424,46 +424,6 @@ namespace Bing.Utils.Extensions
         }
 
         /// <summary>
-        /// 获取字符串指定长度左边的部分
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="leftLength">指定字符串长度</param>
-        /// <returns></returns>
-        public static string Left(this string value, int leftLength)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            if (leftLength >= value.Length)
-            {
-                throw new ArgumentOutOfRangeException("leftLength", leftLength,
-                    "leftLength must be less than length of string");
-            }
-            return value.Substring(0, leftLength);
-        }
-
-        /// <summary>
-        /// 获取字符串指定长度右边的部分
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="rightLength">指定字符串长度</param>
-        /// <returns></returns>
-        public static string Right(this string value, int rightLength)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            if (rightLength >= value.Length)
-            {
-                throw new ArgumentOutOfRangeException("rightLength", rightLength,
-                    "rightLength must be less than length of string");
-            }
-            return value.Substring(value.Length - rightLength);
-        }
-
-        /// <summary>
         /// 获取字符串指定索引部分
         /// </summary>
         /// <param name="value">值</param>
@@ -902,6 +862,46 @@ namespace Bing.Utils.Extensions
             return string.Join(oldValue, listStart)
                    + (old > 0 ? oldValue : "")
                    + string.Join(newValue, listEnd);
+        }
+
+        #endregion
+
+        #region Left(获取从字符串开头指定长度的子字符串)
+
+        /// <summary>
+        /// 获取从字符串开头指定长度的子字符串
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="length">指定字符串长度</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static string Left(this string value, int length)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (length >= value.Length)
+                throw new ArgumentOutOfRangeException(nameof(length), length, $"{nameof(length)} 不能大于给定字符串的长度");
+            return value.Substring(0, length);
+        }
+
+        #endregion
+
+        #region Right(获取从字符串末尾指定长度的子字符串)
+
+        /// <summary>
+        /// 获取从字符串末尾指定长度的子字符串
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="length">指定字符串长度</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static string Right(this string value, int length)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (length >= value.Length)
+                throw new ArgumentOutOfRangeException(nameof(length), length, $"{nameof(length)} 不能大于给定字符串的长度");
+            return value.Substring(value.Length - length, length);
         }
 
         #endregion

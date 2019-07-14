@@ -63,6 +63,8 @@ namespace Bing.Webs.Commons
         /// </summary>
         public override Task ExecuteResultAsync(ActionContext context)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
             this.Value = new
             {
                 Code = Code,
