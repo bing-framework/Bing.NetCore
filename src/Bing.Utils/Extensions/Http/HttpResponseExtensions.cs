@@ -3,13 +3,15 @@ using System.Threading.Tasks;
 using Bing.Utils.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Bing.Webs.Extensions
+namespace Bing.Utils.Extensions.Http
 {
     /// <summary>
     /// Http响应(<see cref="HttpResponse"/>) 扩展
     /// </summary>
     public static class HttpResponseExtensions
     {
+        #region WriteJsonAsync(写入Json)
+
         /// <summary>
         /// 写入Json
         /// </summary>
@@ -32,6 +34,10 @@ namespace Bing.Webs.Extensions
             await response.WriteAsync(json);
         }
 
+        #endregion
+
+        #region SetCache(设置缓存头)
+
         /// <summary>
         /// 设置缓存头
         /// </summary>
@@ -43,7 +49,7 @@ namespace Bing.Webs.Extensions
             {
                 SetNoCache(response);
             }
-            else if(maxAge>0)
+            else if (maxAge > 0)
             {
                 if (!response.Headers.ContainsKey("Cache-Control"))
                 {
@@ -51,6 +57,10 @@ namespace Bing.Webs.Extensions
                 }
             }
         }
+
+        #endregion
+
+        #region SetNoCache(设置无缓存)
 
         /// <summary>
         /// 设置无缓存
@@ -64,6 +74,10 @@ namespace Bing.Webs.Extensions
                 response.Headers.Add("Pragma", "no-cache");
         }
 
+        #endregion
+
+        #region WriteHtmlAsync(写入Html)
+
         /// <summary>
         /// 写入Html
         /// </summary>
@@ -74,5 +88,8 @@ namespace Bing.Webs.Extensions
             response.ContentType = "text/html; charset=utf-8";
             await response.WriteAsync(html, Encoding.UTF8);
         }
+
+        #endregion
+
     }
 }
