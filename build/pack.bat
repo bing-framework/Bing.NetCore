@@ -26,6 +26,7 @@ dotnet pack ./src/Bing.Datas.EntityFramework/Bing.Datas.EntityFramework.csproj
 dotnet pack ./src/Bing.Datas.EntityFramework.MySql/Bing.Datas.EntityFramework.MySql.csproj
 dotnet pack ./src/Bing.Datas.EntityFramework.PgSql/Bing.Datas.EntityFramework.PgSql.csproj
 dotnet pack ./src/Bing.Datas.EntityFramework.SqlServer/Bing.Datas.EntityFramework.SqlServer.csproj
+dotnet pack ./src/Bing.Datas.EntityFramework.Oracle/Bing.Datas.EntityFramework.Oracle.csproj
 dotnet pack ./src/Bing.Applications/Bing.Applications.csproj
 dotnet pack ./src/Bing.Webs/Bing.Webs.csproj
 dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj

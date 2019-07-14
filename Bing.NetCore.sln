@@ -208,7 +208,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Angular.AntDes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Mapster", "src\Bing.Mapster\Bing.Mapster.csproj", "{E10DB76E-BDD0-422C-87E0-089985E4C404}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework.Oracle", "src\Bing.Datas.EntityFramework.Oracle\Bing.Datas.EntityFramework.Oracle.csproj", "{0F28A333-5605-4E61-BD42-89FB4FC18D34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.Oracle", "src\Bing.Datas.EntityFramework.Oracle\Bing.Datas.EntityFramework.Oracle.csproj", "{0F28A333-5605-4E61-BD42-89FB4FC18D34}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "01-Utopa.Tms.Infrastructure", "bus\Utopa.Tms.Infrastructure\01-Utopa.Tms.Infrastructure.csproj", "{45055F8A-8CC4-40D3-98A0-5FB3808B48CE}"
 EndProject
@@ -225,6 +225,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utopa.Tms", "bus\Utopa.Tms\Utopa.Tms.csproj", "{0763356F-5DF1-470B-90C0-57EA186723F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "04-Utopa.Tms.OpenApis.Domain", "bus\Utopa.Tms.OpenApis.Domain\04-Utopa.Tms.OpenApis.Domain.csproj", "{78C7242D-CE9D-43A7-9280-6801C5690E4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Datas.EntityFramework.Sqlite", "src\Bing.Datas.EntityFramework.Sqlite\Bing.Datas.EntityFramework.Sqlite.csproj", "{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -492,6 +494,10 @@ Global
 		{78C7242D-CE9D-43A7-9280-6801C5690E4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78C7242D-CE9D-43A7-9280-6801C5690E4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78C7242D-CE9D-43A7-9280-6801C5690E4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -593,6 +599,7 @@ Global
 		{34C8CD44-91F0-4A4D-B25E-1A5B632987AD} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 		{0763356F-5DF1-470B-90C0-57EA186723F2} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 		{78C7242D-CE9D-43A7-9280-6801C5690E4C} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
+		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
