@@ -15,7 +15,7 @@ namespace Bing.Datas.Sql.Builders.Core
     /// <summary>
     /// Sql生成器基类
     /// </summary>
-    public abstract class SqlBuilderBase:ISqlBuilder, IClauseAccessor, IUnionAccessor, ICteAccessor
+    public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAccessor, ICteAccessor
     {
         #region 字段
 
@@ -629,7 +629,7 @@ namespace Bing.Datas.Sql.Builders.Core
 
             AppendSql(result, sql);
         }
-        
+
         /// <summary>
         /// 添加过滤器列表
         /// </summary>

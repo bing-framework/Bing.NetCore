@@ -177,7 +177,7 @@ namespace Bing.Utils.Helpers
                 var result = HttpContext?.Connection?.RemoteIpAddress.SafeString();
                 if (string.IsNullOrWhiteSpace(result) || list.Contains(result))
                 {
-                    result = Sys.IsOsx ? GetLanIP(NetworkInterfaceType.Ethernet) : GetLanIP();
+                    result = Sys.IsWindows ? GetLanIP() : GetLanIP(NetworkInterfaceType.Ethernet);
                 }
                 return result;
             }

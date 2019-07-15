@@ -10,7 +10,7 @@ namespace Bing.Logs.Contents
     /// <summary>
     /// 日志内容
     /// </summary>
-    public class LogContent : ILogContent, ICaption,ILogConvert
+    public class LogContent : ILogContent, ICaption, ILogConvert
     {
         #region 属性
 
