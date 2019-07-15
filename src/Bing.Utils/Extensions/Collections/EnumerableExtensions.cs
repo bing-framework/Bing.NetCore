@@ -174,5 +174,24 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region WhereIf(是否执行条件查询)
+
+        /// <summary>
+        /// 是否执行指定条件的查询，根据第三方条件是否为真来决定
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="enumerable">源集合</param>
+        /// <param name="predicate">查询条件</param>
+        /// <param name="condition">第三方条件</param>
+        public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate, bool condition)
+        {
+            if(enumerable==null)
+                throw new ArgumentNullException(nameof(enumerable), $@"源{typeof(T).Name}集合对象不可为空！");
+            enumerable = enumerable as IList<T> ?? enumerable.ToList();
+            return condition ? enumerable.Where(predicate) : enumerable;
+        }
+
+        #endregion
     }
 }

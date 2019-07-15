@@ -8,7 +8,7 @@ namespace Bing.Finders
     /// 查找器基类
     /// </summary>
     /// <typeparam name="TItem">要查找的项类型</typeparam>
-    public abstract class FinderBase<TItem>:IFinder<TItem>
+    public abstract class FinderBase<TItem> : IFinder<TItem>
     {
         /// <summary>
         /// 对象锁
@@ -30,27 +30,19 @@ namespace Bing.Finders
         /// </summary>
         /// <param name="predicate">筛选条件</param>
         /// <param name="fromCache">是否来自缓存</param>
-        /// <returns></returns>
-        public virtual TItem[] Find(Func<TItem, bool> predicate, bool fromCache = false)
-        {
-            return FindAll(fromCache).Where(predicate).ToArray();
-        }
+        public virtual TItem[] Find(Func<TItem, bool> predicate, bool fromCache = false) => FindAll(fromCache).Where(predicate).ToArray();
 
         /// <summary>
         /// 查找所有项
         /// </summary>
         /// <param name="fromCache">是否来自缓存</param>
-        /// <returns></returns>
         public virtual TItem[] FindAll(bool fromCache = false)
         {
             lock (_lockObj)
             {
                 if (fromCache && Found)
-                {
                     return ItemsCache.ToArray();
-                }
-
-                TItem[] items = FindAllItems();
+                var items = FindAllItems();
                 Found = true;
                 ItemsCache.Clear();
                 ItemsCache.AddRange(items);
@@ -61,7 +53,6 @@ namespace Bing.Finders
         /// <summary>
         /// 重写已实现所有项的查找
         /// </summary>
-        /// <returns></returns>
         protected abstract TItem[] FindAllItems();
     }
 }

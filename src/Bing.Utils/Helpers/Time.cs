@@ -67,13 +67,13 @@ namespace Bing.Utils.Helpers
             return start.Add(span).Add(new TimeSpan(8, 0, 0));
         }
 
-        /// <summary>
-        /// 格式化时间间隔
-        /// </summary>
-        /// <param name="span">时间间隔</param>
-        public static string Format(TimeSpan span)
-        {
+        ///// <summary>
+        ///// 格式化时间间隔
+        ///// </summary>
+        ///// <param name="span">时间间隔</param>
+        //public static string Format(TimeSpan span)
+        //{
 
-        }
+        //}
     }
 }

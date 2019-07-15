@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Bing.Reflections;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dependency
@@ -9,14 +11,75 @@ namespace Bing.Dependency
     public static class ServiceCollectionExtensions
     {
         /// <summary>
+        /// 如果指定服务不存在，则添加指定服务
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="toAddDescriptor">服务描述</param>
+        public static ServiceDescriptor GetOrAdd(this IServiceCollection services, ServiceDescriptor toAddDescriptor)
+        {
+            var descriptor = services.FirstOrDefault(x => x.ServiceType == toAddDescriptor.ServiceType);
+            if (descriptor != null)
+                return descriptor;
+            services.Add(toAddDescriptor);
+            return toAddDescriptor;
+        }
+
+        /// <summary>
+        /// 获取或添加指定类型查找器
+        /// </summary>
+        /// <typeparam name="TTypeFinder">类型查找器类型</typeparam>
+        /// <param name="services">服务集合</param>
+        /// <param name="factory">实例工厂</param>
+        public static TTypeFinder GetOrAddTypeFinder<TTypeFinder>(this IServiceCollection services,
+            Func<IAllAssemblyFinder, TTypeFinder> factory) where TTypeFinder : class
+        {
+            return services.GetOrAddSingletonInstance<TTypeFinder>(() =>
+            {
+                var allAssemblyFinder = services.GetOrAddSingletonInstance<IAllAssemblyFinder>(() => new AppDomainAllAssemblyFinder());
+                return factory(allAssemblyFinder);
+            });
+        }
+
+        /// <summary>
+        /// 如果指定服务不存在，创建实例并添加
+        /// </summary>
+        /// <typeparam name="TServiceType">服务类型</typeparam>
+        /// <param name="services">服务集合</param>
+        /// <param name="factory">实例工厂</param>
+        public static TServiceType GetOrAddSingletonInstance<TServiceType>(this IServiceCollection services,
+            Func<TServiceType> factory) where TServiceType : class
+        {
+            var item = (TServiceType)services
+                .FirstOrDefault(x => x.ServiceType == typeof(TServiceType) && x.Lifetime == ServiceLifetime.Singleton)
+                ?.ImplementationInstance;
+            if (item == null)
+            {
+                item = factory();
+                services.AddSingleton<TServiceType>(item);
+            }
+            return item;
+        }
+
+        /// <summary>
         /// 获取单例注册服务对象
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="services">服务集合</param>
-        /// <returns></returns>
-        public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services)
+        public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services) =>
+            (T)services.FirstOrDefault(d => d.ServiceType == typeof(T))?.ImplementationInstance;
+
+        /// <summary>
+        /// 获取单例注册服务对象
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="services">服务集合</param>
+        public static T GetSingletonInstance<T>(this IServiceCollection services)
         {
-            return (T)services.FirstOrDefault(d => d.ServiceType == typeof(T))?.ImplementationInstance;
+            var instance = services.GetSingletonInstanceOrNull<T>();
+            if (instance == null)
+                throw new InvalidOperationException($"无法找到已注册的单例服务: {typeof(T).AssemblyQualifiedName}");
+            return instance;
         }
+
     }
 }
