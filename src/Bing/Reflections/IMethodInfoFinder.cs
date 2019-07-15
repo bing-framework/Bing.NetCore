@@ -5,7 +5,7 @@ using Bing.Dependency;
 namespace Bing.Reflections
 {
     /// <summary>
-    /// 定义方法信息查找器
+    /// 方法信息查找器
     /// </summary>
     [IgnoreDependency]
     public interface IMethodInfoFinder
