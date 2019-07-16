@@ -65,8 +65,7 @@ namespace Bing.Dependency
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="services">服务集合</param>
-        public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services) =>
-            (T)services.FirstOrDefault(d => d.ServiceType == typeof(T))?.ImplementationInstance;
+        public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services) => (T)services.FirstOrDefault(d => d.ServiceType == typeof(T))?.ImplementationInstance;
 
         /// <summary>
         /// 获取单例注册服务对象
@@ -81,5 +80,17 @@ namespace Bing.Dependency
             return instance;
         }
 
+        /// <summary>
+        /// 从Scoped字典获取指定类型的值
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <param name="key">键名</param>
+        public static T GetValue<T>(this ScopedDictionary dictionary, string key) where T : class
+        {
+            if (dictionary.TryGetValue(key, out object obj))
+                return obj as T;
+            return default(T);
+        }
     }
 }
