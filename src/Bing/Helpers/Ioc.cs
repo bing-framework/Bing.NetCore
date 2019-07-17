@@ -37,6 +37,7 @@ namespace Bing.Helpers
         public static List<T> CreateList<T>(string name = null)
         {
             return DefaultContainer.CreateList<T>(name);
+            //return ServiceLocator.Instance.GetServices<T>().ToList();
         }
 
         /// <summary>
@@ -60,6 +61,7 @@ namespace Bing.Helpers
         public static T Create<T>(string name = null)
         {
             return DefaultContainer.Create<T>(name);
+            //return ServiceLocator.Instance.GetService<T>();
         }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace Bing.Helpers
         public static object Create(Type type, string name = null)
         {
             return DefaultContainer.Create(type, name);
+            //return ServiceLocator.Instance.GetService(type);
         }
 
         /// <summary>

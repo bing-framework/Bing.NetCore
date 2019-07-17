@@ -222,7 +222,6 @@ namespace Bing.Dependency
         private Type[] GetTypes<T>()
         {
             return _finder.Find<T>(_assemblies).ToArray();
-            //return _finder.Find(x => x == typeof(T), true);
         }
 
         /// <summary>
@@ -233,7 +232,6 @@ namespace Bing.Dependency
         private Type[] GetTypes(Type type)
         {
             return _finder.Find(type, _assemblies).ToArray();
-            //return _finder.Find(x => x == type, true);
         }
     }
 }

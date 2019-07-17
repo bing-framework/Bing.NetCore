@@ -18,8 +18,7 @@ namespace Bing.Datas.Sql.Builders.Filters
         {
             foreach (var item in context.EntityAliasRegister.Data)
             {
-                Filter(context.Dialect, context.Matedata, context.EntityAliasRegister,
-                    context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
+                Filter(context.Dialect, context.Matedata, context.EntityAliasRegister, context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
             }
         }
 

@@ -69,6 +69,11 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         private bool _isAddFilters;
 
+        /// <summary>
+        /// 已排除过滤器集合
+        /// </summary>
+        private List<Type> _excludedFilters;
+
         #endregion
 
         #region 属性
@@ -198,6 +203,7 @@ namespace Bing.Datas.Sql.Builders.Core
             Pager = new Pager();
             UnionItems = new List<BuilderItem>();
             CteItems = new List<BuilderItem>();
+            _excludedFilters = new List<Type>();
         }
 
         #endregion
@@ -633,11 +639,16 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 添加过滤器列表
         /// </summary>
-        private void AddFilters()
+        protected void AddFilters()
         {
             _isAddFilters = true;
             var context = new SqlContext(Dialect, AliasRegister, EntityMatedata, ParameterManager, this);
-            SqlFilterCollection.Filters.ForEach(filter => filter.Filter(context));
+            SqlFilterCollection.Filters.ForEach(filter =>
+            {
+                if (_excludedFilters.Count > 0 && _excludedFilters.Exists(x => x == filter.GetType()))
+                    return;
+                filter.Filter(context);
+            });
         }
 
         /// <summary>
@@ -776,5 +787,17 @@ namespace Bing.Datas.Sql.Builders.Core
         }
 
         #endregion
+
+        /// <summary>
+        /// 忽略过滤器
+        /// </summary>
+        /// <typeparam name="TSqlFilter">Sql过滤器类型</typeparam>
+        public virtual ISqlBuilder IgnoreFilter<TSqlFilter>() where TSqlFilter : ISqlFilter
+        {
+            if (_excludedFilters.Exists(x => x == typeof(TSqlFilter)))
+                return this;
+            _excludedFilters.Add(typeof(TSqlFilter));
+            return this;
+        }
     }
 }
