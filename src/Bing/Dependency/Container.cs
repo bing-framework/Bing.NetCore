@@ -11,7 +11,7 @@ namespace Bing.Dependency
     /// <summary>
     /// 默认容器。Autofac对象容器
     /// </summary>
-    internal class DefaultContainer:IContainer
+    internal class Container : IContainer
     {
         /// <summary>
         /// Autofac容器
@@ -32,7 +32,7 @@ namespace Bing.Dependency
                 return new List<T>();
             }
 
-            return ((IEnumerable<T>) result).ToList();
+            return ((IEnumerable<T>)result).ToList();
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Bing.Dependency
         /// <returns></returns>
         public T Create<T>(string name = null)
         {
-            return (T) Create(typeof(T), name);
+            return (T)Create(typeof(T), name);
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace Bing.Dependency
         public ContainerBuilder CreateBuilder(IServiceCollection services, Action<ContainerBuilder> actionBefore,
             params IConfig[] configs)
         {
-            var builder=new ContainerBuilder();
+            var builder = new ContainerBuilder();
             actionBefore?.Invoke(builder);
             if (configs != null)
             {

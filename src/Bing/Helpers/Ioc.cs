@@ -14,7 +14,7 @@ namespace Bing.Helpers
         /// <summary>
         /// 默认容器
         /// </summary>
-        internal static readonly DefaultContainer DefaultContainer=new DefaultContainer();
+        internal static readonly Container DefaultContainer = new Container();
 
         /// <summary>
         /// 创建容器
@@ -23,7 +23,7 @@ namespace Bing.Helpers
         /// <returns></returns>
         public static IContainer CreateContainer(params IConfig[] configs)
         {
-            var container=new DefaultContainer();
+            var container = new Container();
             container.Register(null, builder => builder.EnableAop(), configs);
             return container;
         }
@@ -36,8 +36,8 @@ namespace Bing.Helpers
         /// <returns></returns>
         public static List<T> CreateList<T>(string name = null)
         {
-            return DefaultContainer.CreateList<T>(name);
-            //return ServiceLocator.Instance.GetServices<T>().ToList();
+            //return DefaultContainer.CreateList<T>(name);
+            return ServiceLocator.Instance.GetServices<T>().ToList();
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Bing.Helpers
         /// <returns></returns>
         public static List<TResult> CreateList<TResult>(Type type, string name = null)
         {
-            return ((IEnumerable<TResult>) DefaultContainer.CreateList(type, name)).ToList();
+            return ((IEnumerable<TResult>)DefaultContainer.CreateList(type, name)).ToList();
         }
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Bing.Helpers
         /// <returns></returns>
         public static T Create<T>(string name = null)
         {
-            return DefaultContainer.Create<T>(name);
-            //return ServiceLocator.Instance.GetService<T>();
+            //return DefaultContainer.Create<T>(name);
+            return ServiceLocator.Instance.GetService<T>();
         }
 
         /// <summary>
@@ -72,8 +72,8 @@ namespace Bing.Helpers
         /// <returns></returns>
         public static object Create(Type type, string name = null)
         {
-            return DefaultContainer.Create(type, name);
-            //return ServiceLocator.Instance.GetService(type);
+            //return DefaultContainer.Create(type, name);
+            return ServiceLocator.Instance.GetService(type);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Bing.Helpers
         /// <returns></returns>
         public static TResult Create<TResult>(Type type, string name = null)
         {
-            return (TResult) DefaultContainer.Create(type, name);
+            return (TResult)DefaultContainer.Create(type, name);
         }
 
         /// <summary>
