@@ -237,9 +237,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Select(string columns, string tableAlias = null)
         {
             if (string.IsNullOrWhiteSpace(columns))
-            {
                 return;
-            }
             _columns.Add(new ColumnCollection(columns, tableAlias));
         }
 

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Bing.PermissionSystem.Infrastructure</RootNamespace>
+    <AssemblyName>Bing.PermissionSystem.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bing.Applications" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.AspNetCore" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.AutoMapper" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.Datas.Dapper" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.Datas.EntityFramework.MySql" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.Datas.EntityFramework.SqlServer" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.EasyCaching" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.Events" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.0.0" />
+    <PackageReference Include="Bing.Logs.NLog" Version="0.0.1-preview-20190719-1" />
+    <PackageReference Include="Bing.Webs" Version="0.0.1-preview-20190719-1" />
+  </ItemGroup>
+</Project>

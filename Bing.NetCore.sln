@@ -226,6 +226,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "04-Utopa.Tms.OpenApis.Domai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.Sqlite", "src\Bing.Datas.EntityFramework.Sqlite\Bing.Datas.EntityFramework.Sqlite.csproj", "{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "05-Utopa.Tms.Statistics.Domain", "bus\Utopa.Tms.Statistics.Domain\05-Utopa.Tms.Statistics.Domain.csproj", "{D4D35E6F-A9D1-4559-BFAF-DFC0514D00D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -496,6 +498,10 @@ Global
 		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4D35E6F-A9D1-4559-BFAF-DFC0514D00D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4D35E6F-A9D1-4559-BFAF-DFC0514D00D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4D35E6F-A9D1-4559-BFAF-DFC0514D00D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4D35E6F-A9D1-4559-BFAF-DFC0514D00D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -597,6 +603,7 @@ Global
 		{0763356F-5DF1-470B-90C0-57EA186723F2} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 		{78C7242D-CE9D-43A7-9280-6801C5690E4C} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 		{7D3CE260-BF01-4F48-AB9F-B73BF293FDE4} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
+		{D4D35E6F-A9D1-4559-BFAF-DFC0514D00D3} = {ED2908C7-7CA1-4D3D-B2D0-053983142D07}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
