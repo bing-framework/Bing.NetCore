@@ -16,14 +16,28 @@ namespace Bing.Utils.Helpers
     // TODO: 1. 确认功能是否需根进行拆分到其它项目，如Bing.Office, Bing.Office.Npoi。
     //       2. 程序中存在命名不规范（有歧义，如 方法名Download ）
     //       3. 功能类引自于原CMS8.0框架，目前仅处理.xls，未扩展.xlsx处理，部分功能可进行优化重构。
-    public class ExcelHelper
+    public static class ExcelHelper
     {
         /// <summary>
         /// 导出DataTable为Excel格式的内存数据
         /// </summary>
         /// <param name="dt"></param>
+        /// <param name="columnTitles">列头</param>
+        /// <param name="titleName">表标题</param>
+        /// <param name="templatePath">模板文件地址[可选]</param>
+        /// <param name="createHeader">创建列头[可选]</param>
+        /// <param name="sheetName">工作薄名称[可选]</param>
+        /// <param name="startRowNum">数据起始行[可选]</param>
+        /// <param name="dataValidity">The data validity.</param>
         /// <returns></returns>
-        public static byte[] ExportToBuffer(DataTable dt)
+        public static byte[] ExportToBuffer(DataTable dt,
+            List<string> columnTitles = null,
+            string titleName = "",
+            string templatePath = "",
+            bool createHeader = true,
+            string sheetName = "",
+            int startRowNum = 2,
+            byte[] dataValidity = null)
         {
             Debug.Assert(null != dt);
 
@@ -31,7 +45,8 @@ namespace Bing.Utils.Helpers
             {
                 dset.Tables.Add(dt);
 
-                var workBook = Datatable2ExcelWorkbook(dset);
+                var workBook = Datatable2ExcelWorkbook(dset, columnTitles, titleName,
+                    templatePath, createHeader, sheetName, startRowNum, dataValidity);
 
                 if (null == workBook)
                 {
@@ -53,8 +68,23 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="dt">数据文件</param>
         /// <param name="fileName">文件名(fullname.xls)</param>
+        /// <param name="columnTitles">列头</param>
+        /// <param name="titleName">表标题</param>
+        /// <param name="templatePath">模板文件地址[可选]</param>
+        /// <param name="createHeader">创建列头[可选]</param>
+        /// <param name="sheetName">工作薄名称[可选]</param>
+        /// <param name="startRowNum">数据起始行[可选]</param>
+        /// <param name="dataValidity">The data validity.</param>
         /// <returns></returns>
-        public static bool ExportToFile(DataTable dt, string fileName)
+        public static bool ExportToFile(DataTable dt,
+            string fileName,
+            List<string> columnTitles = null,
+            string titleName = "",
+            string templatePath = "",
+            bool createHeader = true,
+            string sheetName = "",
+            int startRowNum = 2,
+            byte[] dataValidity = null)
         {
             Debug.Assert(null != dt && !string.IsNullOrEmpty(fileName));
 
@@ -62,7 +92,8 @@ namespace Bing.Utils.Helpers
             {
                 dset.Tables.Add(dt);
 
-                var workBook = Datatable2ExcelWorkbook(dset);
+                var workBook = Datatable2ExcelWorkbook(dset, columnTitles, titleName,
+                    templatePath, createHeader, sheetName, startRowNum, dataValidity);
 
                 if (null == workBook)
                 {
@@ -442,7 +473,7 @@ namespace Bing.Utils.Helpers
                     if (sheet != null)
                     {
                         ClearEmptyCell(sheet);
-                        DataTable dt = new DataTable("ImportExcelData");
+                        var dt = new DataTable("ImportExcelData");
 
                         for (int i = skipRow; i <= sheet.LastRowNum; i++)
                         {
