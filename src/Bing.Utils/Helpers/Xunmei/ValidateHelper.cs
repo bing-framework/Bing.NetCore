@@ -1,18 +1,10 @@
-﻿// ***********************************************************************
-// Assembly         : Utilities
-// Author           : zhuzhiqing
-// Created          : 10-17-2014
-//
-// Last Modified By : zhuzhiqing
-// Last Modified On : 10-17-2014
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-// TODO:新引入需整理
 namespace Bing.Utils.Helpers
 {
     /// <summary>
@@ -243,7 +235,6 @@ namespace Bing.Utils.Helpers
                     }
                 }
 
-                //清除 错误信息
                 if (isIDataErrorInfo && dErrors != null && dErrors.ContainsKey(e.PropertyName))
                 {
                     dErrors.Remove(e.PropertyName);
@@ -267,9 +258,8 @@ namespace Bing.Utils.Helpers
             isIDataErrorInfo = typeof(IDataErrorInfo).IsAssignableFrom(type);
         }
 
-        //获取属性，名称
         /// <summary>
-        /// Gets the name of the expr.
+        /// 获取属性，名称.
         /// </summary>
         /// <param name="expr">The expr.</param>
         /// <returns>System.String.</returns>

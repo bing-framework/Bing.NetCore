@@ -687,7 +687,7 @@ namespace Bing.Utils.Helpers
         /// <returns>System.Byte[][].</returns>
         public static byte[] DownloadExcel<T>(List<T> sources, List<string> columnTitles, string titleName, string templatePath = "", bool createHeader = true, string sheetName = "", int startRowNum = 2, byte[] dataValidity = null)
         {
-            DataSet dataset = new DataSet();
+            var dataset = new DataSet();
             if (sources != null && sources.Count > 0)
                 dataset.Tables.Add(sources.ToDataTable<T>() /*ModelHelper.ListToDataTable<T>(sources, "")*/);
             return DownloadExcel(dataset, columnTitles, titleName, templatePath, createHeader, sheetName, startRowNum, dataValidity);

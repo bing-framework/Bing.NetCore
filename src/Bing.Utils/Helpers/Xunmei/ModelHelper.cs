@@ -1,18 +1,4 @@
-﻿// ***********************************************************************
-// Assembly         : Utilities
-// Author           : zhuzhiqing
-// Created          : 06-27-2014
-//
-// Last Modified By : zhuzhiqing
-// Last Modified On : 01-29-2015
-/* * * * * * * * * * * * * * * * * * * * * * * * * * *
- * 作者：朱志清
- * 日期：2009-05-30
- * 描述：
- * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -45,13 +31,15 @@ namespace Bing.Utils.Helpers
             if (obj != null)
             {
                 var binaryFormatter = new BinaryFormatter();
-                var ms = new MemoryStream();
-                binaryFormatter.Serialize(ms, obj);
-                ms.Position = 0;
-                var b = new Byte[ms.Length];
-                ms.Read(b, 0, b.Length);
-                ms.Close();
-                return b;
+                using (var ms = new MemoryStream())
+                {
+                    binaryFormatter.Serialize(ms, obj);
+                    ms.Position = 0;
+                    var b = new byte[ms.Length];
+                    ms.Read(b, 0, b.Length);
+                    ms.Close();
+                    return b;
+                }
             }
             else
                 return new byte[0];
@@ -68,15 +56,14 @@ namespace Bing.Utils.Helpers
             FileStream fs = null;
             try
             {
-                // serialize it...
-                fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                XmlSerializer serializer = new XmlSerializer(t.GetType());
-                serializer.Serialize(fs, t);
+                using (fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                {
+                    var serializer = new XmlSerializer(t.GetType());
+                    serializer.Serialize(fs, t);
+                }
             }
-            finally
+            catch
             {
-                if (fs != null)
-                    fs.Close();
             }
         }
 
@@ -93,19 +80,21 @@ namespace Bing.Utils.Helpers
 
             var result = new object();
             var binaryFormatter = new BinaryFormatter();
-            var ms = new MemoryStream();
-            try
+            using (var ms = new MemoryStream())
             {
-                ms.Write(b, 0, b.Length);
-                ms.Position = 0;
-                result = binaryFormatter.Deserialize(ms);
-                ms.Close();
+                try
+                {
+                    ms.Write(b, 0, b.Length);
+                    ms.Position = 0;
+                    result = binaryFormatter.Deserialize(ms);
+                    ms.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                return result;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return result;
         }
 
         /// <summary>
@@ -124,15 +113,15 @@ namespace Bing.Utils.Helpers
             FileStream fs = null;
             try
             {
-                // open the stream...
-                fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                XmlSerializer serializer = new XmlSerializer(typeof(T));
-                return serializer.Deserialize(fs) as T;
+                using (fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var serializer = new XmlSerializer(typeof(T));
+                    return serializer.Deserialize(fs) as T;
+                }
             }
-            finally
+            catch
             {
-                if (fs != null)
-                    fs.Close();
+                return default;
             }
         }
 
@@ -148,14 +137,14 @@ namespace Bing.Utils.Helpers
         public static string ModelToXml(object model)
         {
             var xmldoc = new XmlDocument();
-            XmlElement modelNode = xmldoc.CreateElement("Model");
+            var modelNode = xmldoc.CreateElement("Model");
             xmldoc.AppendChild(modelNode);
 
             if (model != null)
             {
-                foreach (PropertyInfo property in model.GetType().GetProperties())
+                foreach (var property in model.GetType().GetProperties())
                 {
-                    XmlElement attribute = xmldoc.CreateElement(property.Name);
+                    var attribute = xmldoc.CreateElement(property.Name);
                     if (property.GetValue(model, null) != null)
                         attribute.InnerText = property.GetValue(model, null).ToString();
                     else
@@ -177,16 +166,16 @@ namespace Bing.Utils.Helpers
         public static string ModelToXml(object model, string rootName, bool isAttribite)
         {
             var xmldoc = new XmlDocument();
-            XmlElement modelNode = xmldoc.CreateElement(rootName);
+            var modelNode = xmldoc.CreateElement(rootName);
             xmldoc.AppendChild(modelNode);
 
             if (model != null)
             {
-                foreach (PropertyInfo property in model.GetType().GetProperties())
+                foreach (var property in model.GetType().GetProperties())
                 {
                     if (!isAttribite)
                     {
-                        XmlElement attribute = xmldoc.CreateElement(property.Name);
+                        var attribute = xmldoc.CreateElement(property.Name);
                         if (property.GetValue(model, null) != null)
                             attribute.InnerText = property.GetValue(model, null).ToString();
                         else
@@ -237,7 +226,7 @@ namespace Bing.Utils.Helpers
                 Debug.Assert(xmlNode.Attributes != null, "xmlNode.Attributes != null");
                 foreach (XmlAttribute node in xmlNode.Attributes)
                 {
-                    foreach (PropertyInfo property in sampleModel.GetType().GetProperties())
+                    foreach (var property in sampleModel.GetType().GetProperties())
                     {
                         if (string.Compare(node.Name, property.Name, true) == 0)
                         {
@@ -248,10 +237,10 @@ namespace Bing.Utils.Helpers
             }
             else
             {
-                XmlNodeList attributes = xmlNode.ChildNodes;
+                var attributes = xmlNode.ChildNodes;
                 foreach (XmlNode node in attributes)
                 {
-                    foreach (PropertyInfo property in sampleModel.GetType().GetProperties())
+                    foreach (var property in sampleModel.GetType().GetProperties())
                     {
                         if (string.Compare(node.Name, property.Name, true) == 0)
                         {
@@ -276,8 +265,7 @@ namespace Bing.Utils.Helpers
                 if (property.PropertyType == typeof(Guid))
                     property.SetValue(sampleModel, new Guid(value), null);
                 else
-                    property.SetValue(sampleModel, Convert.ChangeType(value, property.PropertyType),
-                                      null);
+                    property.SetValue(sampleModel, Convert.ChangeType(value, property.PropertyType), null);
             }
             else
             {
@@ -298,16 +286,16 @@ namespace Bing.Utils.Helpers
         /// <returns>DataTable.</returns>
         public static DataTable ListToDataTable<T>(IEnumerable<T> varlist, string tableName)
         {
-            DataTable dtReturn = string.IsNullOrEmpty(tableName) ? new DataTable() : new DataTable(tableName);
+            var dtReturn = string.IsNullOrEmpty(tableName) ? new DataTable() : new DataTable(tableName);
 
             // column names
             PropertyInfo[] oProps = null;
             if (oProps == null)
             {
                 oProps = (typeof(T)).GetProperties();
-                foreach (PropertyInfo pi in oProps)
+                foreach (var pi in oProps)
                 {
-                    Type colType = pi.PropertyType;
+                    var colType = pi.PropertyType;
 
                     if ((colType.IsGenericType) && (colType.GetGenericTypeDefinition() == typeof(Nullable<>)))
                     {
@@ -320,16 +308,17 @@ namespace Bing.Utils.Helpers
 
             if (varlist == null) return dtReturn;
 
-            foreach (T rec in varlist)
+            foreach (var rec in varlist)
             {
-                DataRow dr = dtReturn.NewRow();
-                foreach (PropertyInfo pi in oProps)
+                var dr = dtReturn.NewRow();
+                foreach (var pi in oProps)
                 {
                     dr[pi.Name] = pi.GetValue(rec, null) ?? DBNull.Value;
                 }
 
                 dtReturn.Rows.Add(dr);
             }
+
             return dtReturn;
         }
 
@@ -342,7 +331,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static DataTable ListToDataTable(List<List<string>> varlist, string tableName, List<string> listTitleColumn = null)
         {
-            DataTable dtReturn = string.IsNullOrEmpty(tableName) ? new DataTable() : new DataTable(tableName);
+            var dtReturn = string.IsNullOrEmpty(tableName) ? new DataTable() : new DataTable(tableName);
 
             // column names
             if (varlist == null) return dtReturn;
@@ -385,7 +374,6 @@ namespace Bing.Utils.Helpers
         public static IList<T> DataTableToList<T>(DataTable dt) where T : class, new()
         {
             IList<T> list = new List<T>();
-            //T model = default(T);
             for (int iRow = 0; iRow < dt.Rows.Count; iRow++)
             {
                 DataRow dr = dt.Rows[iRow];
@@ -408,7 +396,7 @@ namespace Bing.Utils.Helpers
             var model = new T();
             //PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(model.GetType());
             PropertyInfo[] properties = model.GetType().GetProperties();
-            foreach (PropertyInfo p in properties)
+            foreach (var p in properties)
             {
                 // we can't update value type properties that are read-only
                 if (p.PropertyType.IsValueType && !p.CanWrite)
@@ -496,7 +484,7 @@ namespace Bing.Utils.Helpers
 
             try
             {
-                object convertedValue = (canConvertFrom)
+                object convertedValue = canConvertFrom
                                             ? converter.ConvertFrom(null, culture, value)
                                             : converter.ConvertTo(null, culture, value, destinationType);
                 return convertedValue;
@@ -504,9 +492,6 @@ namespace Bing.Utils.Helpers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                //string message = String.Format(CultureInfo.CurrentUICulture, value.GetType().FullName,
-                //                               destinationType.FullName);
-                //throw new InvalidOperationException(message, ex);
             }
             return null;
         }
