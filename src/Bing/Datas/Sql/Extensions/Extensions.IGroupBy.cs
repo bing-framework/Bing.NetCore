@@ -60,7 +60,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-        /// <param name="condition">该值为true时添加Sql，否则忽略<</param>
+        /// <param name="condition">该值为true时添加Sql，否则忽略</param>
         /// <returns></returns>
         public static T AppendGroupBy<T>(this T source, string sql, bool condition) where T : IGroupBy
         {

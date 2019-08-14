@@ -1,14 +1,13 @@
 ﻿using Bing.Helpers;
-using Bing.Sessions;
 using Bing.Utils.Extensions;
 using IdentityModel;
 
-namespace Bing.Security.Sessions
+namespace Bing.Sessions
 {
     /// <summary>
     /// 用户会话
     /// </summary>
-    public class Session:ISession
+    public class Session : ISession
     {
         /// <summary>
         /// 用户标识
@@ -20,20 +19,6 @@ namespace Bing.Security.Sessions
                 var result = WebIdentity.Identity.GetValue(JwtClaimTypes.Subject);
                 return string.IsNullOrWhiteSpace(result)
                     ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.NameIdentifier)
-                    : result;
-            }
-        }
-
-        /// <summary>
-        /// 用户名
-        /// </summary>
-        public string UserName 
-        {
-            get
-            {
-                var result = WebIdentity.Identity.GetValue(JwtClaimTypes.Name);
-                return string.IsNullOrWhiteSpace(result)
-                    ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Name)
                     : result;
             }
         }

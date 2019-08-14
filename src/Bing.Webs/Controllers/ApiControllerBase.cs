@@ -28,7 +28,7 @@ namespace Bing.Webs.Controllers
         /// <summary>
         /// 会话
         /// </summary>
-        public virtual ISession Session => Security.Sessions.Session.Instance;
+        public virtual ISession Session => Bing.Sessions.Session.Instance;
 
         /// <summary>
         /// 获取日志操作

@@ -90,7 +90,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected UnitOfWorkBase(DbContextOptions options,IServiceProvider serviceProvider):base(options)
         {
             TraceId = Guid.NewGuid().ToString();
-            Session = Bing.Security.Sessions.Session.Instance;
+            Session = Bing.Sessions.Session.Instance;
             _serviceProvider = serviceProvider ?? Ioc.Create<IServiceProvider>();
             RegisterToManager();
         }

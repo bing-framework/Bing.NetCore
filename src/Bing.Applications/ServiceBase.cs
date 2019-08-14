@@ -21,7 +21,7 @@ namespace Bing.Applications
         /// <summary>
         /// 用户会话
         /// </summary>
-        public virtual ISession Session => Bing.Security.Sessions.Session.Instance;
+        public virtual ISession Session => Bing.Sessions.Session.Instance;
 
         /// <summary>
         /// 获取日志操作
