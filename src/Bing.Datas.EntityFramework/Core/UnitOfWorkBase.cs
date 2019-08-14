@@ -211,30 +211,22 @@ namespace Bing.Datas.EntityFramework.Core
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var mapper in GetMaps())
-            {
                 mapper.Map(modelBuilder);
-            }            
         }
 
         /// <summary>
         /// 获取映射配置列表
         /// </summary>
-        /// <returns></returns>
-        private IEnumerable<IMap> GetMaps()
-        {
-            return Maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
-        }
+        private IEnumerable<IMap> GetMaps() => Maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
 
         /// <summary>
         /// 获取映射接口类型
         /// </summary>
-        /// <returns></returns>
-        protected abstract Type GetMapType();
+        protected virtual Type GetMapType() => this.GetType();
 
         /// <summary>
         /// 从程序集获取映射配置列表
         /// </summary>
-        /// <returns></returns>
         private IEnumerable<IMap> GetMapsFromAssemblies()
         {
             var result = new List<IMap>();
@@ -250,7 +242,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        /// <returns></returns>
         protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly)
         {
             return Reflection.GetInstancesByInterface<IMap>(assembly);
@@ -259,7 +250,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取定义映射配置的程序集列表
         /// </summary>
-        /// <returns></returns>
         protected virtual Assembly[] GetAssemblies()
         {
             return new[] { GetType().Assembly };
