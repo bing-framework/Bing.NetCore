@@ -535,15 +535,12 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 创建CTE
         /// </summary>
         /// <param name="result">Sql拼接</param>
-        protected void CreateCte(StringBuilder result)
+        protected virtual void CreateCte(StringBuilder result)
         {
             if (CteItems.Count == 0)
-            {
                 return;
-            }
-
             var cte = new StringBuilder();
-            cte.Append("With ");
+            cte.Append($"{GetCteKeyWord()} ");
             foreach (var item in CteItems)
             {
                 cte.AppendLine($"{Dialect.SafeName(item.Name)} ");
@@ -552,6 +549,11 @@ namespace Bing.Datas.Sql.Builders.Core
 
             result.AppendLine(cte.ToString().RemoveEnd($",{Common.Line}"));
         }
+
+        /// <summary>
+        /// 获取CTE关键字
+        /// </summary>
+        protected virtual string GetCteKeyWord() => "With";
 
         /// <summary>
         /// 创建Sql语句 - 联合
