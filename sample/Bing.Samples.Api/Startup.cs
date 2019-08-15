@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
+using Bing.AspNetCore;
 using Bing.AutoMapper;
 using Bing.Biz.Payments.Extensions;
 using Bing.EasyCaching;
@@ -141,6 +142,9 @@ namespace Bing.Samples.Api
                     };
                 }).WithJson();
             });
+
+            services.AddUploadService();
+            services.AddApiInterfaceService();
 
             return services.AddBing();
         }

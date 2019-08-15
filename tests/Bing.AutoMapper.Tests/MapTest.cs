@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using Bing.AutoMapper.Tests.Samples;
 using Bing.Mapping;
 using Bing.Utils.Helpers;
@@ -8,7 +7,7 @@ using Xunit;
 namespace Bing.AutoMapper.Tests
 {
     /// <summary>
-    /// AutoMapper ¶ÔÏóÓ³Éä²âÊÔ
+    /// AutoMapper å¯¹è±¡æ˜ å°„æµ‹è¯•
     /// </summary>
     public class MapTest
     {
@@ -19,7 +18,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔÓ³Éä
+        /// æµ‹è¯•æ˜ å°„
         /// </summary>
         [Fact]
         public void Test_MapTo()
@@ -32,7 +31,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔÓ³Éä
+        /// æµ‹è¯•æ˜ å°„
         /// </summary>
         [Fact]
         public void Test_MapTo_2()
@@ -44,7 +43,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔÓ³Éä¼¯ºÏ
+        /// æµ‹è¯•æ˜ å°„é›†åˆ
         /// </summary>
         [Fact]
         public void Test_MapTo_List()
@@ -58,7 +57,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔÓ³Éä¼¯ºÏ
+        /// æµ‹è¯•æ˜ å°„é›†åˆ
         /// </summary>
         [Fact]
         public void Test_MapTo_List_2()
@@ -71,7 +70,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔÓ³Éä¼¯ºÏ
+        /// æµ‹è¯•æ˜ å°„é›†åˆ
         /// </summary>
         [Fact]
         public void Test_MapToList()
@@ -84,7 +83,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// Ó³Éä¼¯ºÏ - ²âÊÔ¿Õ¼¯ºÏ
+        /// æ˜ å°„é›†åˆ - æµ‹è¯•ç©ºé›†åˆ
         /// </summary>
         [Fact]
         public void Test_MapToList_Empty()
@@ -96,7 +95,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// Ó³Éä¼¯ºÏ - ²âÊÔÊı×é
+        /// æ˜ å°„é›†åˆ - æµ‹è¯•æ•°ç»„
         /// </summary>
         [Fact]
         public void Test_MapToList_Array()
@@ -109,7 +108,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²¢·¢²âÊÔ
+        /// å¹¶å‘æµ‹è¯•
         /// </summary>
         [Fact]
         public void Test_MapTo_MultipleThread()
@@ -122,7 +121,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔºöÂÔÌØĞÔ
+        /// æµ‹è¯•å¿½ç•¥ç‰¹æ€§
         /// </summary>
         [Fact]
         public void Test_MapTo_Ignore()
@@ -137,7 +136,7 @@ namespace Bing.AutoMapper.Tests
         }
 
         /// <summary>
-        /// ²âÊÔCastle´úÀíÀà
+        /// æµ‹è¯•Castleä»£ç†ç±»
         /// </summary>
         [Fact]
         public void Test_MapTo_CastleProxy()

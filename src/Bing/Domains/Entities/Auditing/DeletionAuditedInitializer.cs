@@ -49,8 +49,12 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         public void Init()
         {
+            if (_entity == null)
+                return;
             InitDeletionTime();
             InitDeleter();
+            if (string.IsNullOrWhiteSpace(_userId))
+                return;
             if (_entity is IDeletionAudited<Guid>)
             {
                 InitGuid();
@@ -94,9 +98,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitDeletionTime()
         {
             if (_entity is IDeletionTime result)
-            {
                 result.DeletionTime = DateTime.Now;
-            }
         }
 
         /// <summary>
@@ -105,9 +107,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitDeleter()
         {
             if (_entity is IDeleter result)
-            {
                 result.Deleter = _userName;
-            }
         }
 
         /// <summary>

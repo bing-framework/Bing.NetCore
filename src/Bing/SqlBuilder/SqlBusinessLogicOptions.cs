@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.SqlBuilder
+﻿namespace Bing.SqlBuilder
 {
     /// <summary>
     /// Sql业务逻辑配置

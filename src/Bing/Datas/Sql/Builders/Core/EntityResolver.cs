@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
@@ -62,8 +64,29 @@ namespace Bing.Datas.Sql.Builders.Core
         public string GetColumns<TEntity>(bool propertyAsAlias)
         {
             var type = typeof(TEntity);
-            var propertyies = type.GetProperties().Select(t => t.Name).ToList();
-            return GetColumns<TEntity>(propertyies, propertyAsAlias);
+            var names = GetProperties(type).Select(t => t.Name).ToList();
+            return GetColumns<TEntity>(names, propertyAsAlias);
+        }
+
+        /// <summary>
+        /// 获取属性列表
+        /// </summary>
+        /// <param name="type">类型</param>
+        private List<PropertyInfo> GetProperties(Type type)
+        {
+            var result = new List<PropertyInfo>();
+            var properties = type.GetProperties();
+            foreach (var property in properties)
+            {
+                var notMapped = property.GetCustomAttribute<NotMappedAttribute>();
+                if (notMapped != null)
+                {
+                    continue;
+                }
+                result.Add(property);
+            }
+
+            return result;
         }
 
         /// <summary>

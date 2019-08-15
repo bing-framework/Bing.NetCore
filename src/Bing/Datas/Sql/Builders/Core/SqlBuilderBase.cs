@@ -15,7 +15,7 @@ namespace Bing.Datas.Sql.Builders.Core
     /// <summary>
     /// Sql生成器基类
     /// </summary>
-    public abstract class SqlBuilderBase:ISqlBuilder, IClauseAccessor, IUnionAccessor, ICteAccessor
+    public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAccessor, ICteAccessor
     {
         #region 字段
 
@@ -68,6 +68,11 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 是否已添加过滤器
         /// </summary>
         private bool _isAddFilters;
+
+        /// <summary>
+        /// 已排除过滤器集合
+        /// </summary>
+        private List<Type> _excludedFilters;
 
         #endregion
 
@@ -198,6 +203,7 @@ namespace Bing.Datas.Sql.Builders.Core
             Pager = new Pager();
             UnionItems = new List<BuilderItem>();
             CteItems = new List<BuilderItem>();
+            _excludedFilters = new List<Type>();
         }
 
         #endregion
@@ -313,6 +319,7 @@ namespace Bing.Datas.Sql.Builders.Core
             LimitParam = sqlBuilder.LimitParam;
             UnionItems = sqlBuilder.UnionItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
             CteItems = sqlBuilder.CteItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
+            _excludedFilters = sqlBuilder._excludedFilters;
         }
 
         #endregion
@@ -528,15 +535,12 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 创建CTE
         /// </summary>
         /// <param name="result">Sql拼接</param>
-        protected void CreateCte(StringBuilder result)
+        protected virtual void CreateCte(StringBuilder result)
         {
             if (CteItems.Count == 0)
-            {
                 return;
-            }
-
             var cte = new StringBuilder();
-            cte.Append("With ");
+            cte.Append($"{GetCteKeyWord()} ");
             foreach (var item in CteItems)
             {
                 cte.AppendLine($"{Dialect.SafeName(item.Name)} ");
@@ -545,6 +549,11 @@ namespace Bing.Datas.Sql.Builders.Core
 
             result.AppendLine(cte.ToString().RemoveEnd($",{Common.Line}"));
         }
+
+        /// <summary>
+        /// 获取CTE关键字
+        /// </summary>
+        protected virtual string GetCteKeyWord() => "With";
 
         /// <summary>
         /// 创建Sql语句 - 联合
@@ -629,15 +638,20 @@ namespace Bing.Datas.Sql.Builders.Core
 
             AppendSql(result, sql);
         }
-        
+
         /// <summary>
         /// 添加过滤器列表
         /// </summary>
-        private void AddFilters()
+        protected void AddFilters()
         {
             _isAddFilters = true;
             var context = new SqlContext(Dialect, AliasRegister, EntityMatedata, ParameterManager, this);
-            SqlFilterCollection.Filters.ForEach(filter => filter.Filter(context));
+            SqlFilterCollection.Filters.ForEach(filter =>
+            {
+                if (_excludedFilters.Count > 0 && _excludedFilters.Exists(x => x == filter.GetType()))
+                    return;
+                filter.Filter(context);
+            });
         }
 
         /// <summary>
@@ -776,5 +790,17 @@ namespace Bing.Datas.Sql.Builders.Core
         }
 
         #endregion
+
+        /// <summary>
+        /// 忽略过滤器
+        /// </summary>
+        /// <typeparam name="TSqlFilter">Sql过滤器类型</typeparam>
+        public virtual ISqlBuilder IgnoreFilter<TSqlFilter>() where TSqlFilter : ISqlFilter
+        {
+            if (_excludedFilters.Exists(x => x == typeof(TSqlFilter)))
+                return this;
+            _excludedFilters.Add(typeof(TSqlFilter));
+            return this;
+        }
     }
 }

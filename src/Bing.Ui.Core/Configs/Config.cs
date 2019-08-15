@@ -9,7 +9,7 @@ namespace Bing.Ui.Configs
     /// <summary>
     /// 配置
     /// </summary>
-    public class Config:IConfig
+    public class Config : IConfig
     {
         /// <summary>
         /// 类
@@ -96,7 +96,6 @@ namespace Bing.Ui.Configs
         /// 属性集合是否包含指定属性
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         public bool Contains(string name)
         {
             return AllAttributes.ContainsName(name);
@@ -106,7 +105,6 @@ namespace Bing.Ui.Configs
         /// 获取属性值
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         public string GetValue(string name)
         {
             return Contains(name) ? AllAttributes[name].Value.SafeString() : string.Empty;
@@ -116,7 +114,6 @@ namespace Bing.Ui.Configs
         /// 获取属性值，无值则返回null
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         public string GetValueOrNull(string name)
         {
             return Contains(name) ? AllAttributes[name].Value.SafeString() : null;
@@ -127,7 +124,6 @@ namespace Bing.Ui.Configs
         /// </summary>
         /// <typeparam name="T">目标类型</typeparam>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         public T GetValue<T>(string name)
         {
             return Contains(name) ? Conv.To<T>(AllAttributes[name].Value) : default(T);
@@ -137,7 +133,6 @@ namespace Bing.Ui.Configs
         /// 获取布尔属性值
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         public string GetBoolValue(string name)
         {
             return Str.FirstLower(GetValue(name));
@@ -190,7 +185,6 @@ namespace Bing.Ui.Configs
         /// <summary>
         /// 获取类列表
         /// </summary>
-        /// <returns></returns>
         public List<string> GetClassList()
         {
             return _classList;
@@ -199,7 +193,6 @@ namespace Bing.Ui.Configs
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public string Validate()
         {
             if (IsValidate)
@@ -213,7 +206,6 @@ namespace Bing.Ui.Configs
         /// <summary>
         /// 获取验证消息
         /// </summary>
-        /// <returns></returns>
         public virtual string GetValidateMessage()
         {
             return string.Empty;

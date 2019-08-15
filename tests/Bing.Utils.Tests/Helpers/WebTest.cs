@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Bing.Utils.Develops;
 using Bing.Utils.Extensions;
@@ -55,6 +57,52 @@ namespace Bing.Utils.Tests.Helpers
                 .ResultAsync();
             var key = Bing.Utils.Randoms.GuidRandomGenerator.Instance.Generate();
             File.WriteAllBytes($"{path}test_{key}.txt", result.ToBytes());
+        }
+
+        /// <summary>
+        /// 测试获取主机
+        /// </summary>
+        [Fact]
+        public void Test_Host()
+        {
+            Output.WriteLine(Web.Host);
+        }
+
+        /// <summary>
+        /// 测试获取客户端IP地址
+        /// </summary>
+        [Fact]
+        public void Test_Ip()
+        {
+            Output.WriteLine(Web.IP);
+        }
+
+        /// <summary>
+        /// 测试获取本地IP
+        /// </summary>
+        [Fact]
+        public void Test_LocalIpAddress()
+        {
+            Output.WriteLine(Web.LocalIpAddress);
+        }
+
+        [Fact]
+        public void Test_LocalIpAddress_1()
+        {
+            Output.WriteLine(GetLocalIPAddress());
+        }
+
+        private string GetLocalIPAddress()
+        {
+            string AddressIP = string.Empty;
+            foreach (IPAddress _IPAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
+            {
+                if (_IPAddress.AddressFamily.ToString() == "InterNetwork")
+                {
+                    AddressIP = _IPAddress.ToString();
+                }
+            }
+            return AddressIP;
         }
     }
 }

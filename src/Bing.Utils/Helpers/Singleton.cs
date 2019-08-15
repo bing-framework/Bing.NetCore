@@ -11,7 +11,7 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// 单例对象字典
         /// </summary>
-        public static IDictionary<Type,object> AllSingletons { get; }
+        public static IDictionary<Type, object> AllSingletons { get; }
 
         /// <summary>
         /// 静态构造函数

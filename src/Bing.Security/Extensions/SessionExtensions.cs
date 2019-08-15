@@ -5,6 +5,7 @@ using Bing.Security.Claims;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using IdentityModel;
 
 namespace Bing.Security.Extensions
 {
@@ -41,7 +42,10 @@ namespace Bing.Security.Extensions
         /// <returns></returns>
         public static string GetUserName(this ISession session)
         {
-            return session.UserName;
+            var result = WebIdentity.Identity.GetValue(JwtClaimTypes.Name);
+            return string.IsNullOrWhiteSpace(result)
+                ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Name)
+                : result;
         }
 
         /// <summary>
@@ -51,7 +55,10 @@ namespace Bing.Security.Extensions
         /// <returns></returns>
         public static string GetFullName(this ISession session)
         {
-            return WebIdentity.Identity.GetValue(ClaimTypes.FullName);
+            var result = WebIdentity.Identity.GetValue(ClaimTypes.FullName);
+            return string.IsNullOrWhiteSpace(result)
+                ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Surname)
+                : result;
         }
 
         /// <summary>
@@ -177,7 +184,10 @@ namespace Bing.Security.Extensions
         /// <returns></returns>
         public static List<T> GetRoleIds<T>(this ISession session)
         {
-            return Conv.ToList<T>(WebIdentity.Identity.GetValue(ClaimTypes.RoleIds));
+            var result = WebIdentity.Identity.GetValue(ClaimTypes.RoleIds);
+            return string.IsNullOrWhiteSpace(result)
+                ? Conv.ToList<T>(WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Role))
+                : Conv.ToList<T>(result);
         }
 
         /// <summary>
@@ -189,6 +199,5 @@ namespace Bing.Security.Extensions
         {
             return WebIdentity.Identity.GetValue(ClaimTypes.RoleName);
         }
-       
     }
 }

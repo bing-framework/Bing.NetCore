@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.Exceptions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Properties;
 using Bing.Utils;
@@ -11,7 +10,7 @@ namespace Bing.Logs.Contents
     /// <summary>
     /// 日志内容
     /// </summary>
-    public class LogContent : ILogContent, ICaption,ILogConvert
+    public class LogContent : ILogContent, ICaption, ILogConvert
     {
         #region 属性
 

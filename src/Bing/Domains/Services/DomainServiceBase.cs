@@ -7,7 +7,7 @@ namespace Bing.Domains.Services
     /// <summary>
     /// 领域服务抽象基类
     /// </summary>
-    public abstract class DomainServiceBase:IDomainService
+    public abstract class DomainServiceBase : IDomainService
     {
         /// <summary>
         /// 初始化一个<see cref="DomainServiceBase"/>类型的实例
@@ -15,7 +15,6 @@ namespace Bing.Domains.Services
         protected DomainServiceBase()
         {
             Log = NullLog.Instance;
-            Session = NullSession.Instance;
         }
 
         /// <summary>
@@ -26,6 +25,6 @@ namespace Bing.Domains.Services
         /// <summary>
         /// 用户会话
         /// </summary>
-        public ISession Session { get; set; }
+        public virtual ISession Session => Sessions.Session.Instance;
     }
 }

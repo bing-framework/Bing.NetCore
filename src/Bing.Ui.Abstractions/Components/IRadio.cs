@@ -17,5 +17,10 @@ namespace Bing.Ui.Components
         IUrl, IDataSource, IItem,
         IColspan, IStandalone, IBindName
     {
+        /// <summary>
+        /// 绑定枚举
+        /// </summary>
+        /// <typeparam name="TEnum">枚举类型</typeparam>
+        IRadio Enum<TEnum>();
     }
 }

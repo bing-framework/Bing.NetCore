@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -120,7 +122,7 @@ namespace Bing.Utils.Helpers
             get
             {
                 Request.EnableRewind();
-                return FileUtil.ToString(Request.Body, isCloseStream: false);
+                return FileHelper.ToString(Request.Body, isCloseStream: false);
             }
         }
 
@@ -175,7 +177,7 @@ namespace Bing.Utils.Helpers
                 var result = HttpContext?.Connection?.RemoteIpAddress.SafeString();
                 if (string.IsNullOrWhiteSpace(result) || list.Contains(result))
                 {
-                    result = GetLanIP();
+                    result = Sys.IsWindows ? GetLanIP() : GetLanIP(NetworkInterfaceType.Ethernet);
                 }
                 return result;
             }
@@ -195,6 +197,46 @@ namespace Bing.Utils.Helpers
                     return hostAddress.ToString();
                 }
             }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 获取局域网IP。
+        /// 参考地址：https://stackoverflow.com/questions/6803073/get-local-ip-address/28621250#28621250
+        /// 解决OSX下获取IP地址产生"Device not configured"的问题
+        /// </summary>
+        /// <param name="type">网络接口类型</param>
+        /// <returns></returns>
+        // ReSharper disable once InconsistentNaming
+        private static string GetLanIP(NetworkInterfaceType type)
+        {
+            try
+            {
+                foreach (var item in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (item.NetworkInterfaceType != type || item.OperationalStatus != OperationalStatus.Up)
+                    {
+                        continue;
+                    }
+                    var ipProperties = item.GetIPProperties();
+                    if (ipProperties.GatewayAddresses.FirstOrDefault() == null)
+                    {
+                        continue;
+                    }
+                    foreach (var ip in ipProperties.UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            return ip.Address.ToString();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return string.Empty;
+            }
+
             return string.Empty;
         }
 
@@ -283,6 +325,45 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region IsLocal(是否本地请求)
+
+        /// <summary>
+        /// 是否本地请求
+        /// </summary>
+        public static bool IsLocal
+        {
+            get
+            {
+                var connection = HttpContext?.Request?.HttpContext?.Connection;
+                if (connection == null)
+                {
+                    throw new ArgumentNullException(nameof(connection));
+                }
+
+                if (connection.RemoteIpAddress.IsSet())
+                {
+                    return connection.LocalIpAddress.IsSet()
+                        ? connection.RemoteIpAddress.Equals(connection.LocalIpAddress)
+                        : IPAddress.IsLoopback(connection.RemoteIpAddress);
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 空IP地址
+        /// </summary>
+        private const string NullIpAddress = "::1";
+
+        /// <summary>
+        /// 是否已设置IP地址
+        /// </summary>
+        /// <param name="address">IP地址</param>
+        private static bool IsSet(this IPAddress address) => address != null && address.ToString() != NullIpAddress;
+
+        #endregion
+
         #endregion
 
         #region 构造函数
@@ -328,7 +409,7 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static List<IFormFile> GetFiles()
         {
-            var result=new List<IFormFile>();
+            var result = new List<IFormFile>();
             var files = HttpContext.Request.Form.Files;
             if (files == null || files.Count == 0)
             {
@@ -511,7 +592,86 @@ namespace Bing.Utils.Helpers
         public static async Task<string> GetBodyAsync()
         {
             Request.EnableRewind();
-            return await FileUtil.ToStringAsync(Request.Body, isCloseStream: false);
+            return await FileHelper.ToStringAsync(Request.Body, isCloseStream: false);
+        }
+
+        #endregion
+
+        #region DownloadAsync(下载)
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="filePath">文件绝对路径</param>
+        /// <param name="fileName">文件名。包含扩展名</param>
+        public static async Task DownloadFileAsync(string filePath, string fileName)
+        {
+            await DownloadFileAsync(filePath, fileName, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="filePath">文件绝对路径</param>
+        /// <param name="fileName">文件名。包含扩展名</param>
+        /// <param name="encoding">字符编码</param>
+        public static async Task DownloadFileAsync(string filePath, string fileName, Encoding encoding)
+        {
+            var bytes = FileHelper.ReadToBytes(filePath);
+            await DownloadAsync(bytes, fileName, encoding);
+        }
+
+        /// <summary>
+        /// 下载
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <param name="fileName">文件名。包含扩展名</param>
+        public static async Task DownloadAsync(Stream stream, string fileName)
+        {
+            await DownloadAsync(stream, fileName, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// 下载
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <param name="fileName">文件名。包含扩展名</param>
+        /// <param name="encoding">字符编码</param>
+        public static async Task DownloadAsync(Stream stream, string fileName, Encoding encoding)
+        {
+            await DownloadAsync(await FileHelper.ToBytesAsync(stream), fileName, encoding);
+        }
+
+        /// <summary>
+        /// 下载
+        /// </summary>
+        /// <param name="bytes">字节流</param>
+        /// <param name="fileName">文件名。包含扩展名</param>
+        public static async Task DownloadAsync(byte[] bytes, string fileName)
+        {
+            await DownloadAsync(bytes, fileName, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// 下载
+        /// </summary>
+        /// <param name="bytes">字节流</param>
+        /// <param name="fileName">文件名。包含扩展名</param>
+        /// <param name="encoding">字符编码</param>
+        /// <returns></returns>
+        public static async Task DownloadAsync(byte[] bytes, string fileName, Encoding encoding)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return;
+            }
+
+            fileName = fileName.Replace(" ", "");
+            fileName = UrlEncode(fileName, encoding);
+            Response.ContentType = "application/octet-stream";
+            Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
+            Response.Headers.Add("Content-Length", bytes.Length.ToString());
+            await Response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 
         #endregion

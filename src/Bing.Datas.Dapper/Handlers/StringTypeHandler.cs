@@ -1,24 +1,21 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
 
 namespace Bing.Datas.Dapper.Handlers
 {
     /// <summary>
     /// 字符串类型处理器
     /// </summary>
-    public class StringTypeHandler:SqlMapper.TypeHandler<string>
+    public class StringTypeHandler : SqlMapper.TypeHandler<string>
     {
         /// <summary>
         /// 设置值
         /// </summary>
         /// <param name="parameter">参数</param>
         /// <param name="value">值</param>
-        public override void SetValue(IDbDataParameter parameter, string value)
+        public override void SetValue(System.Data.IDbDataParameter parameter, string value)
         {
             if (parameter == null)
-            {
                 return;
-            }
             parameter.Value = value;
         }
 
@@ -26,10 +23,6 @@ namespace Bing.Datas.Dapper.Handlers
         /// 转换值
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public override string Parse(object value)
-        {
-            return value?.ToString();
-        }
+        public override string Parse(object value) => value?.ToString();
     }
 }

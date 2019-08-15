@@ -21,7 +21,7 @@ namespace Bing.Applications
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     public abstract class DeleteServiceBase<TEntity, TDto, TQueryParameter> : DeleteServiceBase<TEntity, TDto, TQueryParameter, Guid>
         where TEntity : class, IKey<Guid>, IVersion, new()
-        where TDto : IResponse, new()
+        where TDto : IDto, new()
         where TQueryParameter : IQueryParameter
     {
         /// <summary>
@@ -42,9 +42,10 @@ namespace Bing.Applications
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
-    public abstract class DeleteServiceBase<TEntity, TDto, TQueryParameter, TKey>:QueryServiceBase<TEntity, TDto, TQueryParameter, TKey>,IDeleteService<TDto, TQueryParameter> 
+    public abstract class DeleteServiceBase<TEntity, TDto, TQueryParameter, TKey>
+        : QueryServiceBase<TEntity, TDto, TQueryParameter, TKey>, IDeleteService<TDto, TQueryParameter> 
         where TEntity : class, IKey<TKey>, IVersion, new()
-        where TDto : IResponse, new()
+        where TDto : new()
         where TQueryParameter : IQueryParameter
     {
         /// <summary>
@@ -161,7 +162,6 @@ namespace Bing.Applications
         /// 删除
         /// </summary>
         /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
-        /// <returns></returns>
         public virtual async Task DeleteAsync(string ids)
         {
             if (string.IsNullOrWhiteSpace(ids))

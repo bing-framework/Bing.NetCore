@@ -6,7 +6,7 @@ namespace Bing.Applications
     /// <summary>
     /// 应用服务
     /// </summary>
-    public abstract class ServiceBase:IService
+    public abstract class ServiceBase : IService
     {
         /// <summary>
         /// 日志
@@ -21,7 +21,7 @@ namespace Bing.Applications
         /// <summary>
         /// 用户会话
         /// </summary>
-        public virtual ISession Session => Bing.Security.Sessions.Session.Instance;
+        public virtual ISession Session => Bing.Sessions.Session.Instance;
 
         /// <summary>
         /// 获取日志操作

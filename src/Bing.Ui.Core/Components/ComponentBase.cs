@@ -12,7 +12,7 @@ namespace Bing.Ui.Components
     /// <summary>
     /// 组件基类
     /// </summary>
-    public abstract class ComponentBase:IComponent,IOptionConfig
+    public abstract class ComponentBase : IComponent, IOptionConfig
     {
         /// <summary>
         /// 跟踪日志名
@@ -27,7 +27,7 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 渲染器
         /// </summary>
-        protected IRender Render => _render ?? (_render= GetRender());
+        protected IRender Render => _render ?? (_render = GetRender());
 
         /// <summary>
         /// 配置
@@ -42,7 +42,6 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
         protected virtual IConfig GetConfig()
         {
             return new Config();
@@ -51,7 +50,6 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 获取渲染器
         /// </summary>
-        /// <returns></returns>
         protected abstract IRender GetRender();
 
         /// <summary>
@@ -113,7 +111,6 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 输出组件Html
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return Render.ToString();
@@ -139,7 +136,6 @@ namespace Bing.Ui.Components
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         private ILog GetLog()
         {
             try

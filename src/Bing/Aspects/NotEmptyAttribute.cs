@@ -9,7 +9,7 @@ namespace Bing.Aspects
     /// <summary>
     /// 验证不能为空
     /// </summary>
-    public class NotEmptyAttribute:ParameterInterceptorBase
+    public class NotEmptyAttribute : ParameterInterceptorBase
     {
         /// <summary>
         /// 执行

@@ -11,11 +11,7 @@ namespace Bing.Domains.Entities
         /// 是否空对象或是否已删除
         /// </summary>
         /// <param name="entity">逻辑删除实体</param>
-        /// <returns></returns>
-        public static bool IsNullOrDeleted(this IDelete entity)
-        {
-            return entity == null || entity.IsDeleted;
-        }
+        public static bool IsNullOrDeleted(this IDelete entity) => entity == null || entity.IsDeleted;
 
         /// <summary>
         /// 取消删除。将<see cref="IDelete.IsDeleted"/>设为false，并且将<see cref="IDeletionAudited"/>属性设置为空

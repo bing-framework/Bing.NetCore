@@ -27,27 +27,29 @@ using Bing.Domains.Entities.Trees;
 using Bing.Domains.Entities.Auditing;
 using Bing.Domains.Entities.Tenants;
 
-namespace <%= Entity.GetNamespace(Namespace,"Domain","Models") %> {
+namespace <%= Entity.GetNamespace(Namespace,"Domain","Models") %> 
+{
     /// <summary>
     /// <%= Description %>
     /// </summary>
-    [Description( "<%= Description %>" )]
-    public partial class <%= SafeClassName %> : <%= Entity.GetTreeEntityAndInterfaces() %> {
+    [Display(Name = "<%= Description %>")]
+    public partial class <%= SafeClassName %> : <%= Entity.GetTreeEntityAndInterfaces() %> 
+    {
         /// <summary>
-        /// 初始化<%= Description %>
+        /// 初始化一个<see cref="<%= SafeClassName %>"/>类型的实例
         /// </summary>
-        public <%= SafeClassName %>()
-            : this( <%= Entity.GetKeyDefault() %>, "", 0 ) {
+        public <%= SafeClassName %>() : this( <%= Entity.GetKeyDefault() %>, "", 0 )
+        {
         }
 
         /// <summary>
-        /// 初始化<%= Description %>
+        /// 初始化一个<see cref="<%= SafeClassName %>"/>类型的实例
         /// </summary>
         /// <param name="id"><%= Description %>标识</param>
         /// <param name="path">路径</param>
         /// <param name="level">级数</param>
-        public <%= SafeClassName %>( <%= Entity.GetKeyTypeString() %> id, string path, int level )
-            : base( id, path, level ) {
+        public <%= SafeClassName %>( <%= Entity.GetKeyTypeString() %> id, string path, int level ) : base( id, path, level )
+        {
             <% foreach(var r in Entity.Relationships.Where(e => e.ThisCardinality == Cardinality.Many)) { %>
             <%= r.ThisPropertyName.ToSafeName() %> = new List<<%= r.OtherEntity.ToSafeName() %>>();
             <% } %>
@@ -60,11 +62,13 @@ namespace <%= Entity.GetNamespace(Namespace,"Domain","Models") %> {
         /// <summary>
         /// <%= p.Description %>
         /// </summary>
+        [Display(Name = "<%= p.Description %>")]
         <% if( p.HasValidate() ) {%>
         <%= p.Validate() %>
         <%}%>
         public <%= p.TypeName %> <%= p.PropertyName.ToSafeName() %> { get; set; }
         <% }%>
+        
         <% foreach(var r in Entity.Relationships) { %>
         <% if(r.ThisCardinality != Cardinality.Many) { %>
         /// <summary>
@@ -78,7 +82,8 @@ namespace <%= Entity.GetNamespace(Namespace,"Domain","Models") %> {
         /// <summary>
         /// 添加描述
         /// </summary>
-        protected override void AddDescriptions() {
+        protected override void AddDescriptions() 
+        {
             <% foreach(Property p in Entity.Properties) { %>
             <% if( p.ColumnName == "Version" && p.DataType == DbType.Binary ) continue;%>
             <% if( p.ColumnName == "IsDeleted" && p.DataType == DbType.Boolean ) continue;%>
@@ -92,7 +97,8 @@ namespace <%= Entity.GetNamespace(Namespace,"Domain","Models") %> {
         /// <summary>
         /// 添加变更列表
         /// </summary>
-        protected override void AddChanges( <%= SafeClassName %> other ) {
+        protected override void AddChanges( <%= SafeClassName %> other ) 
+        {
             <% foreach(Property p in Entity.Properties) { %>
             <% if( p.ColumnName == "Version" && p.DataType == DbType.Binary ) continue;%>
             <% if( p.ColumnName == "IsDeleted" && p.DataType == DbType.Boolean ) continue;%>

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 
 // ReSharper disable once CheckNamespace
@@ -300,6 +301,32 @@ namespace Bing.Utils.Extensions
             var asciiEncoder = new ASCIIEncoding();
             byte[] bytes = asciiEncoder.GetBytes(value);
             return DecryptFromBytes(bytes, pwd);
+        }
+
+        #endregion
+
+        #region FilterHtml(过滤Html标签)
+
+        /// <summary>
+        /// 过滤Html标签
+        /// </summary>
+        /// <param name="value">值，待过滤的字符串</param>
+        public static string FilterHtml(this string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+            value = Regex.Replace(value, @"<script[^>]*?>.*?</script>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"<style[^>]*?>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"</style>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"<p[^>]*?>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"<div[^>]*?>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"</p>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"</div>", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"-->", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @"<!--.*", "", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, "<[^>]*>", "", RegexOptions.Compiled);
+            value = Regex.Replace(value, @"([\r\n])[\s]+", " ", RegexOptions.Compiled);
+            return value.Replace("&nbsp;", " ");
         }
 
         #endregion

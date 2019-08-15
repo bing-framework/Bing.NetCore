@@ -9,7 +9,7 @@ namespace Bing.Aspects
     /// 验证不能为null
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public class NotNullAttribute:ParameterInterceptorBase
+    public class NotNullAttribute : ParameterInterceptorBase
     {
         /// <summary>
         /// 执行

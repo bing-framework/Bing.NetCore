@@ -158,7 +158,7 @@ namespace Bing.Utils.Parameters.Parsers
         /// <returns></returns>
         public string ToJson(bool isConvertToSingleQuotes = false)
         {
-            return JsonUtil.ToJson(_params, isConvertToSingleQuotes);
+            return JsonHelper.ToJson(_params, isConvertToSingleQuotes);
         }
     }
 }

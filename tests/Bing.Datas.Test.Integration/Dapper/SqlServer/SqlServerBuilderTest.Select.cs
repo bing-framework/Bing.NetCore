@@ -396,5 +396,18 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
         }
+
+        /// <summary>
+        /// 设置列 - 相同名称别名
+        /// </summary>
+        [Fact]
+        public void TestSelect_9()
+        {
+            _builder = new SqlServerBuilder(new DefaultEntityMatedata());
+            _builder.Select<Sample>(x => x.StringValue).Select<Sample2>(x => x.StringValue, "sample2StringValue")
+                .From<Sample>("a")
+                .Join<Sample2>("b").On<Sample, Sample2>((l, r) => l.StringValue == r.StringValue);
+            Output.WriteLine(_builder.ToSql());
+        }
     }
 }

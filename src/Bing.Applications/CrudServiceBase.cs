@@ -125,8 +125,8 @@ namespace Bing.Applications
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     public abstract partial class CrudServiceBase<TEntity, TDto, TRequest, TCreateRequest, TUpdateRequest, TQueryParameter, TKey>
-        : DeleteServiceBase<TEntity, TDto, TQueryParameter, TKey>,
-            ICrudService<TDto, TRequest, TCreateRequest, TUpdateRequest, TQueryParameter>, ICommitAfter
+        : DeleteServiceBase<TEntity, TDto, TQueryParameter, TKey>
+            , ICrudService<TDto, TRequest, TCreateRequest, TUpdateRequest, TQueryParameter>, ICommitAfter
         where TEntity : class, IAggregateRoot<TEntity, TKey>, new()
         where TDto : IResponse, new()
         where TRequest : IRequest, IKey, new()
@@ -160,7 +160,6 @@ namespace Bing.Applications
         /// 转换为实体
         /// </summary>
         /// <param name="request">请求参数</param>
-        /// <returns></returns>
         protected virtual TEntity ToEntity(TRequest request)
         {
             return request.MapTo<TEntity>();
@@ -170,7 +169,6 @@ namespace Bing.Applications
         /// 创建参数转换为实体
         /// </summary>
         /// <param name="request">创建参数</param>
-        /// <returns></returns>
         protected virtual TEntity ToEntityFromCreateRequest(TCreateRequest request)
         {
             if (typeof(TCreateRequest) == typeof(TRequest))
@@ -185,7 +183,6 @@ namespace Bing.Applications
         /// 修改参数转换为实体
         /// </summary>
         /// <param name="request">修改参数</param>
-        /// <returns></returns>
         protected virtual TEntity ToEntityFromUpdateRequest(TUpdateRequest request)
         {
             if (typeof(TCreateRequest) == typeof(TRequest))

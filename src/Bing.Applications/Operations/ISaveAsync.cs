@@ -15,7 +15,6 @@ namespace Bing.Applications.Operations
         /// 保存
         /// </summary>
         /// <param name="request">请求参数</param>
-        /// <returns></returns>
         [UnitOfWork]
         Task SaveAsync([Valid] TRequest request);
     }

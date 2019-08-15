@@ -2,6 +2,7 @@
 using Bing.Datas.Dapper.SqlServer;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql;
+using Bing.Datas.Sql.Builders.Filters;
 using Bing.Datas.Test.Integration.Samples;
 using Bing.Datas.Test.Integration.XUnitHelpers;
 using Bing.Properties;
@@ -28,7 +29,7 @@ namespace Bing.Datas.Test.Integration.Dapper.SqlServer
         /// <summary>
         /// 测试初始化
         /// </summary>
-        public SqlServerBuilderTest(ITestOutputHelper output)
+        public SqlServerBuilderTest(ITestOutputHelper output) : base(output)
         {
             _output = output;
             _builder = new SqlServerBuilder();

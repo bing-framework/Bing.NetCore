@@ -74,7 +74,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// 抛出编码重复异常
         /// </summary>
         /// <param name="code">角色编码</param>
-        protected void ThrowDuplicateCodeException(string code)
+        protected virtual void ThrowDuplicateCodeException(string code)
         {
             throw new Warning(string.Format(SecurityResources.DuplicateRoleCode, code));
         }
@@ -84,7 +84,7 @@ namespace Bing.Security.Identity.Services.Implements
         /// </summary>
         /// <param name="role">角色</param>
         /// <returns></returns>
-        public async Task UpdateAsync(TRole role)
+        public virtual async Task UpdateAsync(TRole role)
         {
             role.CheckNotNull(nameof(role));
             await ValidateUpdate(role);

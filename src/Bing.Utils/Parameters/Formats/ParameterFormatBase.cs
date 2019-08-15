@@ -3,7 +3,7 @@
     /// <summary>
     /// 参数格式化器基类
     /// </summary>
-    public abstract class ParameterFormatBase:IParameterFormat
+    public abstract class ParameterFormatBase : IParameterFormat
     {
         /// <summary>
         /// 格式化分割符

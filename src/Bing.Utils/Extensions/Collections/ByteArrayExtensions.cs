@@ -35,7 +35,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ToHexString(this byte[] value)
         {
-            StringBuilder sb=new StringBuilder();
+            var sb=new StringBuilder();
             foreach (var b in value)
             {
                 sb.AppendFormat(" {0}", b.ToString("X2").PadLeft(2, '0'));

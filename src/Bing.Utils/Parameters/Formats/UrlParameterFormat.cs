@@ -3,12 +3,12 @@
     /// <summary>
     /// Url参数格式化器
     /// </summary>
-    public class UrlParameterFormat:ParameterFormatBase
+    public class UrlParameterFormat : ParameterFormatBase
     {
         /// <summary>
         /// Url参数格式化器实例
         /// </summary>
-        public static readonly IParameterFormat Instance=new UrlParameterFormat();
+        public static readonly IParameterFormat Instance = new UrlParameterFormat();
 
         /// <summary>
         /// 格式化分割符

@@ -9,24 +9,7 @@ namespace Bing
     /// 安全扩展
     /// </summary>
     public static class SecurityExtensions
-    {
-        /// <summary>
-        /// 获取用户标识声明值
-        /// </summary>
-        /// <param name="identity">用户标识</param>
-        /// <param name="type">声明类型</param>
-        /// <returns></returns>
-        public static string GetValue(this ClaimsIdentity identity, string type)
-        {
-            var claim = identity.FindFirst(type);
-            if (claim == null)
-            {
-                return string.Empty;
-            }
-
-            return claim.Value;
-        }
-
+    {        
         /// <summary>
         /// 获取身份标识
         /// </summary>

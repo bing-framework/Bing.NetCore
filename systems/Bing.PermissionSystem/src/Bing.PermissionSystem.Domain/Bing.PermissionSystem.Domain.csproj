@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.PermissionSystem.Infrastructure\01-Bing.PermissionSystem.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Models/Application.*.cs">
+      <DependentUpon>Application.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Claim.*.cs">
+      <DependentUpon>Claim.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Permission.*.cs">
+      <DependentUpon>Permission.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/User.*.cs">
+      <DependentUpon>User.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Role.*.cs">
+      <DependentUpon>Role.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Module.*.cs">
+      <DependentUpon>Module.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Abstractions\" />
+    <Folder Include="Services\Implements\" />
+  </ItemGroup>
+
+</Project>

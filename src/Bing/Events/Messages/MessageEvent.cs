@@ -45,7 +45,7 @@ namespace Bing.Events.Messages
             {
                 result.AppendLine($"回调名称: {Callback}");
             }
-            result.Append($"事件数据: {Bing.Utils.Json.JsonUtil.ToJson(Data)}");
+            result.Append($"事件数据: {Bing.Utils.Json.JsonHelper.ToJson(Data)}");
             return result.ToString();
         }
     }

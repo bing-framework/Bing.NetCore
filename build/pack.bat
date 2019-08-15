@@ -26,14 +26,13 @@ dotnet pack ./src/Bing.Datas.EntityFramework/Bing.Datas.EntityFramework.csproj
 dotnet pack ./src/Bing.Datas.EntityFramework.MySql/Bing.Datas.EntityFramework.MySql.csproj
 dotnet pack ./src/Bing.Datas.EntityFramework.PgSql/Bing.Datas.EntityFramework.PgSql.csproj
 dotnet pack ./src/Bing.Datas.EntityFramework.SqlServer/Bing.Datas.EntityFramework.SqlServer.csproj
+dotnet pack ./src/Bing.Datas.EntityFramework.Oracle/Bing.Datas.EntityFramework.Oracle.csproj
 dotnet pack ./src/Bing.Applications/Bing.Applications.csproj
 dotnet pack ./src/Bing.Webs/Bing.Webs.csproj
 dotnet pack ./src/Bing.MailKit/Bing.MailKit.csproj
 dotnet pack ./src/Bing.AutoMapper/Bing.AutoMapper.csproj
 dotnet pack ./src/Bing.Biz/Bing.Biz.csproj
 dotnet pack ./src/Bing.EasyCaching/Bing.EasyCaching.csproj
-REM dotnet pack ./src/Bing.Geetest/Bing.Geetest.csproj
-REM dotnet pack ./src/Bing.Sequence/Bing.Sequence.csproj
 rem dotnet pack ./src/Bing.Offices/Bing.Offices.csproj
 rem dotnet pack ./src/Bing.Offices.Npoi/Bing.Offices.Npoi.csproj
 

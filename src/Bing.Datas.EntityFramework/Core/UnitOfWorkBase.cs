@@ -90,7 +90,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected UnitOfWorkBase(DbContextOptions options,IServiceProvider serviceProvider):base(options)
         {
             TraceId = Guid.NewGuid().ToString();
-            Session = Bing.Security.Sessions.Session.Instance;
+            Session = Bing.Sessions.Session.Instance;
             _serviceProvider = serviceProvider ?? Ioc.Create<IServiceProvider>();
             RegisterToManager();
         }
@@ -211,30 +211,22 @@ namespace Bing.Datas.EntityFramework.Core
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var mapper in GetMaps())
-            {
                 mapper.Map(modelBuilder);
-            }            
         }
 
         /// <summary>
         /// 获取映射配置列表
         /// </summary>
-        /// <returns></returns>
-        private IEnumerable<IMap> GetMaps()
-        {
-            return Maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
-        }
+        private IEnumerable<IMap> GetMaps() => Maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
 
         /// <summary>
         /// 获取映射接口类型
         /// </summary>
-        /// <returns></returns>
-        protected abstract Type GetMapType();
+        protected virtual Type GetMapType() => this.GetType();
 
         /// <summary>
         /// 从程序集获取映射配置列表
         /// </summary>
-        /// <returns></returns>
         private IEnumerable<IMap> GetMapsFromAssemblies()
         {
             var result = new List<IMap>();
@@ -250,7 +242,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        /// <returns></returns>
         protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly)
         {
             return Reflection.GetInstancesByInterface<IMap>(assembly);
@@ -259,7 +250,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取定义映射配置的程序集列表
         /// </summary>
-        /// <returns></returns>
         protected virtual Assembly[] GetAssemblies()
         {
             return new[] { GetType().Assembly };
@@ -353,7 +343,10 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化创建审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitCreationAudited(EntityEntry entry) => CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        private void InitCreationAudited(EntityEntry entry)
+        {
+            CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
 
         /// <summary>
         /// 获取用户标识
@@ -381,7 +374,10 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化修改审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitModificationAudited(EntityEntry entry) => ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        private void InitModificationAudited(EntityEntry entry)
+        {
+            ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
 
         /// <summary>
         /// 拦截修改操作
@@ -393,7 +389,10 @@ namespace Bing.Datas.EntityFramework.Core
         /// 拦截删除操作
         /// </summary>
         /// <param name="entry">输入实体</param>
-        protected virtual void InterceptDeletedOperation(EntityEntry entry) => DeletionAuditedInitializer.Init(entry.Entity,GetUserId(),GetUserName());
+        protected virtual void InterceptDeletedOperation(EntityEntry entry)
+        {
+            DeletionAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
 
         #endregion
 
@@ -461,7 +460,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected void InitVersion(EntityEntry entry)
         {
-            if (!(entry.Entity is IAggregateRoot entity))
+            if (!(entry.Entity is IVersion entity))
             {
                 return;
             }

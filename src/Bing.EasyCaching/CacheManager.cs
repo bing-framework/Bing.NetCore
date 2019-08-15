@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Bing.Caching;
 using Bing.Utils.Extensions;
 using EasyCaching.Core;
@@ -9,7 +8,7 @@ namespace Bing.EasyCaching
     /// <summary>
     /// EasyCaching缓存管理
     /// </summary>
-    public class CacheManager:ICache
+    public partial class CacheManager:ICache
     {
         /// <summary>
         /// EasyCaching缓存提供器
@@ -30,10 +29,7 @@ namespace Bing.EasyCaching
         /// </summary>
         /// <param name="key">缓存键</param>
         /// <returns></returns>
-        public bool Exists(string key)
-        {
-            return _provider.Exists(key);
-        }
+        public bool Exists(string key) => _provider.Exists(key);
 
         /// <summary>
         /// 从缓存中获取数据，如果不存在，则执行获取数据操作并添加到缓存中
@@ -45,7 +41,6 @@ namespace Bing.EasyCaching
         /// <returns></returns>
         public T Get<T>(string key, Func<T> func, TimeSpan? expiration = null)
         {
-            
             var result = _provider.Get(key, func, GetExpiration(expiration));
             return result.Value;
         }
@@ -53,23 +48,12 @@ namespace Bing.EasyCaching
         /// <summary>
         /// 从缓存中获取数据
         /// </summary>
+        /// <typeparam name="T">缓存数据类型</typeparam>
         /// <param name="key">缓存键</param>
-        /// <param name="type">缓存数据类型</param>
-        /// <returns></returns>
-        public async Task<object> GetAsync(string key, Type type)
+        public T Get<T>(string key)
         {
-            return await _provider.GetAsync(key, type);
-        }
-
-        /// <summary>
-        /// 获取过期时间间隔
-        /// </summary>
-        /// <param name="expiration">过期时间间隔</param>
-        /// <returns></returns>
-        private TimeSpan GetExpiration(TimeSpan? expiration)
-        {
-            expiration = expiration ?? TimeSpan.FromHours(12);
-            return expiration.SafeValue();
+            var result = _provider.Get<T>(key);
+            return result.Value;
         }
 
         /// <summary>
@@ -80,26 +64,43 @@ namespace Bing.EasyCaching
         /// <param name="value">值</param>
         /// <param name="expiration">过期时间间隔</param>
         /// <returns></returns>
-        public bool TryAdd<T>(string key, T value, TimeSpan? expiration = null)
-        {
-            return _provider.TrySet(key, value, GetExpiration(expiration));
-        }
+        public bool TryAdd<T>(string key, T value, TimeSpan? expiration = null) => _provider.TrySet(key, value, GetExpiration(expiration));
+
+        /// <summary>
+        /// 添加缓存。如果已存在缓存，将覆盖
+        /// </summary>
+        /// <typeparam name="T">缓存数据类型</typeparam>
+        /// <param name="key">缓存键</param>
+        /// <param name="value">值</param>
+        /// <param name="expiration">过期时间间隔</param>
+        public void Add<T>(string key, T value, TimeSpan? expiration = null) => _provider.Set(key, value, GetExpiration(expiration));
 
         /// <summary>
         /// 移除缓存
         /// </summary>
         /// <param name="key">缓存键</param>
-        public void Remove(string key)
-        {
-            _provider.Remove(key);
-        }
+        public void Remove(string key) => _provider.Remove(key);
+
+        /// <summary>
+        /// 通过缓存键前缀移除缓存
+        /// </summary>
+        /// <param name="prefix">缓存键前缀</param>
+        public void RemoveByPrefix(string prefix) => _provider.RemoveByPrefix(prefix);
 
         /// <summary>
         /// 清空缓存
         /// </summary>
-        public void Clear()
+        public void Clear() => _provider.Flush();
+
+        /// <summary>
+        /// 获取过期时间间隔
+        /// </summary>
+        /// <param name="expiration">过期时间间隔</param>
+        /// <returns></returns>
+        private TimeSpan GetExpiration(TimeSpan? expiration)
         {
-            _provider.Flush();
+            expiration = expiration ?? TimeSpan.FromHours(12);
+            return expiration.SafeValue();
         }
     }
 }

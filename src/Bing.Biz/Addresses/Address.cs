@@ -8,7 +8,7 @@ namespace Bing.Biz.Addresses
     /// <summary>
     /// 地址 - 不可变
     /// </summary>
-    public class Address:ValueObjectBase<Address>
+    public class Address : ValueObjectBase<Address>
     {
         /// <summary>
         /// 省份编号
@@ -32,7 +32,7 @@ namespace Bing.Biz.Addresses
         /// 省份
         /// </summary>
         [Column("Province")]
-        [StringLength(100,ErrorMessage = "省份输入过长，不能超过100位")]
+        [StringLength(100, ErrorMessage = "省份输入过长，不能超过100位")]
         public string Province { get; private set; }
 
         /// <summary>

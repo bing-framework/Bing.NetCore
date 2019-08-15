@@ -19,10 +19,9 @@ namespace Bing.Applications.Trees
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     public abstract class TreeServiceBase<TEntity, TDto, TQueryParameter>
-        : TreeServiceBase<TEntity, TDto,  TQueryParameter, Guid,Guid?>,
-            ITreeService<TDto, TQueryParameter>
+        : TreeServiceBase<TEntity, TDto, TQueryParameter, Guid, Guid?>, ITreeService<TDto, TQueryParameter>
         where TEntity : class, IParentId<Guid?>, IPath, IEnabled, ISortId, IKey<Guid>, IVersion, new()
-        where TDto : class, IDto, ITreeNode, new()
+        where TDto : class, ITreeNode, new()
         where TQueryParameter : class, ITreeQueryParameter
     {
         /// <summary>
@@ -73,7 +72,7 @@ namespace Bing.Applications.Trees
     public abstract class TreeServiceBase<TEntity, TDto, TQueryParameter, TKey, TParentId>
         : DeleteServiceBase<TEntity, TDto, TQueryParameter, TKey>, ITreeService<TDto, TQueryParameter, TParentId>
         where TEntity : class, IParentId<TParentId>, IPath, IEnabled, ISortId, IKey<TKey>, IVersion, new()
-        where TDto : class, IDto, ITreeNode, new()
+        where TDto : class, ITreeNode, new()
         where TQueryParameter : class, ITreeQueryParameter<TParentId>
     {
         /// <summary>

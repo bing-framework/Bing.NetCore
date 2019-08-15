@@ -149,6 +149,16 @@ namespace Bing.Datas.Test.Integration.Samples
         public List<string> StringList { get; set; }
 
         /// <summary>
+        /// Guid值
+        /// </summary>
+        public Guid GuidValue { get; set; }
+
+        /// <summary>
+        /// 可空Guid值
+        /// </summary>
+        public Guid? NullableGuidValue { get; set; }
+
+        /// <summary>
         /// 测试2
         /// </summary>
         public Sample2 Test2 { get; set; }
@@ -156,18 +166,12 @@ namespace Bing.Datas.Test.Integration.Samples
         /// <summary>
         /// 静态属性
         /// </summary>
-        public static string StaticString
-        {
-            get { return "TestStaticString"; }
-        }
+        public static string StaticString => "TestStaticString";
 
         /// <summary>
         /// 静态对象
         /// </summary>
-        public static Sample2 StaticSample
-        {
-            get { return new Sample2() { StringValue = "TestStaticSample" }; }
-        }
+        public static Sample2 StaticSample => new Sample2() { StringValue = "TestStaticSample" };
 
         /// <summary>
         /// 创建测试实例1

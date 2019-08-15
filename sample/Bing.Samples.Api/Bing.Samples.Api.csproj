@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing.Biz.Payments\Bing.Biz.Payments.csproj" />
     <ProjectReference Include="..\..\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />

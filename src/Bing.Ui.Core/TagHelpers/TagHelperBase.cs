@@ -28,7 +28,6 @@ namespace Bing.Ui.TagHelpers
         /// </summary>
         /// <param name="tagHelperContext">TagHelper上下文</param>
         /// <param name="output">TagHelper输出</param>
-        /// <returns></returns>
         public override async Task ProcessAsync(TagHelperContext tagHelperContext, TagHelperOutput output)
         {
             ProcessBefore(tagHelperContext, output);
@@ -53,7 +52,6 @@ namespace Bing.Ui.TagHelpers
         /// 获取渲染器
         /// </summary>
         /// <param name="context">上下文</param>
-        /// <returns></returns>
         protected abstract IRender GetRender(Context context);
 
         /// <summary>
@@ -90,7 +88,6 @@ namespace Bing.Ui.TagHelpers
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         private ILog GetLog()
         {
             try

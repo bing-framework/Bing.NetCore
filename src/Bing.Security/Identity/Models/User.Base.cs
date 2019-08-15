@@ -69,7 +69,6 @@ namespace Bing.Security.Identity.Models
         /// 密码
         /// </summary>
         [DisplayName("密码")]
-        [Required(ErrorMessage = "密码不能为空")]
         [StringLength(256, ErrorMessage = "密码输入过长，不能超过256位")]
         public string Password { get; set; }
         /// <summary>

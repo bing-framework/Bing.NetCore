@@ -23,7 +23,7 @@ namespace Bing.Applications
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     public interface ICrudService<TDto, TRequest, in TQueryParameter> : ICrudService<TDto, TRequest,TRequest,TRequest, TQueryParameter>
         where TDto : IResponse, new()
-        where TRequest : IRequest,IKey, new()
+        where TRequest : IRequest, IKey, new()
         where TQueryParameter : IQueryParameter
     {        
     }

@@ -6,7 +6,7 @@ namespace Bing.Biz.Addresses
     /// 空地址
     /// </summary>
     [NotMapped]
-    public class NullAddress:Address
+    public class NullAddress : Address
     {
     }
 }

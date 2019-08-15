@@ -84,7 +84,8 @@ namespace Bing.Utils.Helpers
             }
             finally
             {
-                md5.Clear();
+                md5?.Clear();
+                md5?.Dispose();
             }
             return result.Replace("-", "");
         }

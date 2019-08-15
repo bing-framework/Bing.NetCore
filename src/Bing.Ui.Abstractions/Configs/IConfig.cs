@@ -27,21 +27,18 @@ namespace Bing.Ui.Configs
         /// 属性集合是否包含指定属性
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         bool Contains(string name);
 
         /// <summary>
         /// 获取属性值
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         string GetValue(string name);
 
         /// <summary>
         /// 获取属性值，无值则返回null
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         string GetValueOrNull(string name);
 
         /// <summary>
@@ -49,14 +46,12 @@ namespace Bing.Ui.Configs
         /// </summary>
         /// <typeparam name="T">目标类型</typeparam>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         T GetValue<T>(string name);
 
         /// <summary>
         /// 获取布尔属性值
         /// </summary>
         /// <param name="name">属性名</param>
-        /// <returns></returns>
         string GetBoolValue(string name);
 
         /// <summary>
@@ -82,13 +77,11 @@ namespace Bing.Ui.Configs
         /// <summary>
         /// 获取类列表
         /// </summary>
-        /// <returns></returns>
         List<string> GetClassList();
 
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         string Validate();
     }
 }

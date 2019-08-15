@@ -4,7 +4,7 @@ using Bing.Applications.Dtos;
 namespace Bing.Applications.Trees
 {
     /// <summary>
-    /// 树型数据传输对象
+    /// 树型数据传输对象基类
     /// </summary>
     public abstract class TreeDtoBase : DtoBase, ITreeNode
     {
@@ -24,7 +24,7 @@ namespace Bing.Applications.Trees
         public string Path { get; set; }
 
         /// <summary>
-        /// 级数
+        /// 层级
         /// </summary>
         public int? Level { get; set; }
 
@@ -32,7 +32,7 @@ namespace Bing.Applications.Trees
         /// 启用
         /// </summary>
         [Display(Name = "启用")]
-        public bool? Enabled { get; set; }
+        public bool? Enabled { get; set; } = true;
 
         /// <summary>
         /// 排序号

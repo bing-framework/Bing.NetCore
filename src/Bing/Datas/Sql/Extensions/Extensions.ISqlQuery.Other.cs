@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿using Bing.Datas.Sql.Builders;
+using Bing.Datas.Sql.Builders.Filters;
+
+// ReSharper disable once CheckNamespace
 namespace Bing.Datas.Sql
 {
     /// <summary>
@@ -172,5 +175,23 @@ namespace Bing.Datas.Sql
             builder.AddParam(name, value);
             return sqlQuery;
         }
+
+        /// <summary>
+        /// 忽略过滤器
+        /// </summary>
+        /// <typeparam name="TSqlFilter">Sql过滤器类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        public static ISqlQuery IgnoreFilter<TSqlFilter>(this ISqlQuery sqlQuery) where TSqlFilter : ISqlFilter
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.IgnoreFilter<TSqlFilter>();
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 忽略逻辑删除过滤器
+        /// </summary>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        public static ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery) => sqlQuery.IgnoreFilter<IsDeletedFilter>();
     }
 }

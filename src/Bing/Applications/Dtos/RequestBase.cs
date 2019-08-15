@@ -7,7 +7,7 @@ namespace Bing.Applications.Dtos
     /// <summary>
     /// 请求对象
     /// </summary>
-    public abstract class RequestBase:IRequest
+    public abstract class RequestBase : IRequest
     {
         /// <summary>
         /// 验证

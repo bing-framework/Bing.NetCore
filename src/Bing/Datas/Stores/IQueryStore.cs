@@ -9,13 +9,14 @@ namespace Bing.Datas.Stores
     /// 查询存储器
     /// </summary>
     /// <typeparam name="TEntity">对象类型</typeparam>
-    public interface IQueryStore<TEntity>:IQueryStore<TEntity,Guid> where TEntity : class, IKey<Guid> { }
+    public interface IQueryStore<TEntity> : IQueryStore<TEntity,Guid> where TEntity : class, IKey<Guid> { }
 
     /// <summary>
     /// 查询存储器
     /// </summary>
     /// <typeparam name="TEntity">对象类型</typeparam>
     /// <typeparam name="TKey">对象标识类型</typeparam>
+    [IgnoreDependency]
     public interface IQueryStore<TEntity, in TKey> : IScopeDependency,
         IFindQueryable<TEntity, TKey>,
         IFindById<TEntity, TKey>, IFindByIdAsync<TEntity, TKey>,

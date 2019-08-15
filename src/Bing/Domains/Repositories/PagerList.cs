@@ -47,7 +47,6 @@ namespace Bing.Domains.Repositories
         /// 索引器
         /// </summary>
         /// <param name="index">索引</param>
-        /// <returns></returns>
         public T this[int index]
         {
             get => Data[index];
@@ -78,7 +77,7 @@ namespace Bing.Domains.Repositories
         /// </summary>
         /// <param name="totalCount">总行数</param>
         /// <param name="data">数据</param>
-        public PagerList(int totalCount, IEnumerable<T> data = null) : this(1, 20, totalCount,data)
+        public PagerList(int totalCount, IEnumerable<T> data = null) : this(1, 20, totalCount, data)
         {
         }
 
@@ -89,7 +88,7 @@ namespace Bing.Domains.Repositories
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="totalCount">总行数</param>
         /// <param name="data">数据</param>
-        public PagerList(int page, int pageSize, int totalCount, IEnumerable<T> data = null) : this(page, pageSize, totalCount, "",data)
+        public PagerList(int page, int pageSize, int totalCount, IEnumerable<T> data = null) : this(page, pageSize, totalCount, "", data)
         {
         }
 
@@ -98,7 +97,7 @@ namespace Bing.Domains.Repositories
         /// </summary>
         /// <param name="pager">查询对象</param>
         /// <param name="data">数据</param>
-        public PagerList(IPager pager, IEnumerable<T> data = null) : this(pager.Page, pager.PageSize, pager.TotalCount, pager.Order,data)
+        public PagerList(IPager pager, IEnumerable<T> data = null) : this(pager.Page, pager.PageSize, pager.TotalCount, pager.Order, data)
         {
         }
 
@@ -150,16 +149,25 @@ namespace Bing.Domains.Repositories
         }
 
         /// <summary>
-        /// 转换分页集合的元素类型
+        /// 转换为分页集合
         /// </summary>
         /// <typeparam name="TResult">目标元素类型</typeparam>
         /// <param name="converter">转换方法</param>
-        /// <returns></returns>
         public PagerList<TResult> Convert<TResult>(Func<T, TResult> converter)
         {
             var result = new PagerList<TResult>(Page, PageSize, TotalCount, Order);
             result.AddRange(this.Data.Select(converter));
             return result;
+        }
+
+        /// <summary>
+        /// 转换为分页集合
+        /// </summary>
+        /// <typeparam name="TResult">目标元素类型</typeparam>
+        /// <param name="data">数据</param>
+        public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data)
+        {
+            return new PagerList<TResult>(Page, PageSize, TotalCount, Order, data);
         }
     }
 }

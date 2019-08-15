@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
+using Bing.Utils;
+using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers
@@ -40,9 +44,8 @@ namespace Bing.Webs.Controllers
         /// /api/customers/1
         /// </remarks>
         /// <param name="id">标识</param>
-        /// <returns></returns>
         [HttpGet("{id}")]
-        public virtual async Task<IActionResult> GetAsync(object id)
+        public virtual async Task<IActionResult> GetAsync(string id)
         {
             var result = await _service.GetByIdAsync(id);
             return Success(result);
@@ -57,7 +60,6 @@ namespace Bing.Webs.Controllers
         /// /api/customers?name=a
         /// </remarks>
         /// <param name="query">查询参数</param>
-        /// <returns></returns>
         [HttpGet]
         public virtual async Task<IActionResult> PagerQueryAsync([FromQuery]TQuery query)
         {
@@ -78,11 +80,7 @@ namespace Bing.Webs.Controllers
         /// 转换分页查询结果
         /// </summary>
         /// <param name="result">分页查询结果</param>
-        /// <returns></returns>
-        protected virtual dynamic ToPagerQueryResult(PagerList<TDto> result)
-        {
-            return result;
-        }
+        protected virtual dynamic ToPagerQueryResult(PagerList<TDto> result) => result;
 
         /// <summary>
         /// 查询
@@ -93,7 +91,6 @@ namespace Bing.Webs.Controllers
         /// /api/customers/query?name=a
         /// </remarks>
         /// <param name="query">查询参数</param>
-        /// <returns></returns>
         [HttpGet("Query")]
         public virtual async Task<IActionResult> QueryAsync([FromQuery]TQuery query)
         {
@@ -114,10 +111,31 @@ namespace Bing.Webs.Controllers
         /// 转换查询结果
         /// </summary>
         /// <param name="result">查询结果</param>
-        /// <returns></returns>
-        protected virtual dynamic ToQueryResult(List<TDto> result)
+        protected virtual dynamic ToQueryResult(List<TDto> result) => result;
+
+        /// <summary>
+        /// 获取项列表
+        /// </summary>
+        /// <param name="query">查询参数</param>
+        [HttpGet("Items")]
+        public virtual async Task<IActionResult> GetItemsAsync([FromQuery]TQuery query)
         {
-            return result;
+            if (query == null)
+                return Fail(WebResource.QueryIsEmpty);
+            if (query.Order.IsEmpty())
+                query.Order = "CreationTime Desc";
+            var list = await _service.PagerQueryAsync(query);
+            var result = list.Data.Select(ToItem);
+            return Success(result);
+        }
+
+        /// <summary>
+        /// 将Dto转换为列表项
+        /// </summary>
+        /// <param name="dto">数据传输对象</param>
+        protected virtual Item ToItem(TDto dto)
+        {
+            throw new NotImplementedException("ToItem方法未实现，请重写控制器 ToItem 方法");
         }
     }
 }

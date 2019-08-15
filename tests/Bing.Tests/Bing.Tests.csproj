@@ -10,4 +10,8 @@
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dependency\" />
+  </ItemGroup>
+
 </Project>

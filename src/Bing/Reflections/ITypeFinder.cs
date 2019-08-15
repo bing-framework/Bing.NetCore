@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Bing.Dependency;
+using Bing.Finders;
 
 namespace Bing.Reflections
 {
     /// <summary>
-    /// 类型查找器
+    /// 定义类型查找器
     /// </summary>
-    public interface ITypeFinder
+    [IgnoreDependency]
+    public interface ITypeFinder : IFinder<Type>
     {
-        /// <summary>
-        /// 获取程序集列表
-        /// </summary>
-        /// <returns></returns>
-        List<Assembly> GetAssemblies();
-
         /// <summary>
         /// 查找类型列表
         /// </summary>

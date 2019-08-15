@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 // ReSharper disable once CheckNamespace
@@ -281,6 +282,29 @@ namespace Bing.Utils.Extensions
         public static void Write(this Stream stream, byte[] bytes)
         {
             stream.Write(bytes, 0, bytes.Length);
+        }
+
+        #endregion
+
+        #region GetMd5(获取流的MD5值)
+
+        /// <summary>
+        /// 获取流的MD5值
+        /// </summary>
+        /// <param name="stream">流</param>
+        public static string GetMd5(this Stream stream)
+        {
+            using (var md5 = MD5.Create())
+            {
+                var buffer = md5.ComputeHash(stream);
+                var md5Builder = new StringBuilder();
+                foreach (var b in buffer)
+                {
+                    md5Builder.Append(b.ToString("x2"));
+                }
+
+                return md5Builder.ToString();
+            }
         }
 
         #endregion

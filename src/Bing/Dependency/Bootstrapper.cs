@@ -36,6 +36,11 @@ namespace Bing.Dependency
         /// 类型查找器
         /// </summary>
         private ITypeFinder _finder;
+
+        /// <summary>
+        /// 所有程序集查找器
+        /// </summary>
+        private readonly IAllAssemblyFinder _allAssemblyFinder;
         
         /// <summary>
         /// 程序集列表
@@ -60,7 +65,8 @@ namespace Bing.Dependency
             _services = services ?? new ServiceCollection();
             _configs = configs;
             _aopConfigAction = aopConfigAction;
-            _finder = finder ?? new WebAppTypeFinder();
+            _allAssemblyFinder = new AppDomainAllAssemblyFinder();
+            _finder = finder ?? new DependencyTypeFinder(_allAssemblyFinder);
         }
 
         /// <summary>
@@ -94,7 +100,7 @@ namespace Bing.Dependency
         /// <returns></returns>
         public IServiceProvider Bootstrap()
         {
-            _assemblies = _finder.GetAssemblies();
+            _assemblies = _allAssemblyFinder.FindAll(true).ToList();
             return Ioc.DefaultContainer.Register(_services, RegistServices, _configs);
         }
 

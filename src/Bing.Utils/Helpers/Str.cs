@@ -631,6 +631,21 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region SplitWordGroup(分隔词组)
+
+        /// <summary>
+        /// 分隔词组
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="separator">分隔符。默认使用"-"分隔</param>
+        public static string SplitWordGroup(string value, char separator = '-')
+        {
+            var pattern = @"([A-Z])(?=[a-z])|(?<=[a-z])([A-Z]|[0-9]+)";
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : System.Text.RegularExpressions.Regex.Replace(value, pattern, $"{separator}$1$2").TrimStart(separator).ToLower();
+        }
+
+        #endregion
     }
 
     /// <summary>

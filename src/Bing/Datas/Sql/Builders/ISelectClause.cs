@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Bing.Datas.Sql.Queries;
 
 namespace Bing.Datas.Sql.Builders
 {
@@ -14,7 +13,6 @@ namespace Bing.Datas.Sql.Builders
         /// </summary>
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
         ISelectClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register);
 
         /// <summary>
@@ -162,7 +160,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 输出Sql
         /// </summary>
-        /// <returns></returns>
         string ToSql();
     }
 }

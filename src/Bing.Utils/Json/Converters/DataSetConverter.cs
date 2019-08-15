@@ -7,7 +7,7 @@ namespace Bing.Utils.Json.Converters
     /// <summary>
     /// DataSet 转换器
     /// </summary>
-    public class DataSetConverter:JsonConverter
+    public class DataSetConverter : JsonConverter
     {
         /// <summary>
         /// 写入JSON对象
@@ -37,7 +37,6 @@ namespace Bing.Utils.Json.Converters
         /// <param name="objectType">对象类型</param>
         /// <param name="existingValue">存在值</param>
         /// <param name="serializer">JSON序列化器</param>
-        /// <returns></returns>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
@@ -47,7 +46,6 @@ namespace Bing.Utils.Json.Converters
         /// 确定此实例是否可以转换指定的对象类型
         /// </summary>
         /// <param name="objectType">对象类型</param>
-        /// <returns></returns>
         public override bool CanConvert(Type objectType)
         {
             return typeof(DataSet).IsAssignableFrom(objectType);

@@ -35,41 +35,25 @@ namespace Bing.Utils.Extensions
         /// 判断 字符串 是否为空、null或空白字符串
         /// </summary>
         /// <param name="value">数据</param>
-        /// <returns></returns>
-        public static bool IsEmpty(this string value)
-        {
-            return string.IsNullOrWhiteSpace(value);
-        }
+        public static bool IsEmpty(this string value) => string.IsNullOrWhiteSpace(value);
 
         /// <summary>
         /// 判断 Guid 是否为空、null或Guid.Empty
         /// </summary>
         /// <param name="value">数据</param>
-        /// <returns></returns>
-        public static bool IsEmpty(this Guid value)
-        {
-            return value == Guid.Empty;
-        }
+        public static bool IsEmpty(this Guid value) => value == Guid.Empty;
 
         /// <summary>
         /// 判断 Guid 是否为空、null或Guid.Empty
         /// </summary>
         /// <param name="value">数据</param>
-        /// <returns></returns>
-        public static bool IsEmpty(this Guid? value)
-        {
-            return value == null || IsEmpty(value.Value);
-        }
+        public static bool IsEmpty(this Guid? value) => value == null || IsEmpty(value.Value);
 
         /// <summary>
-        /// 判断 可变字符串 是否为空
+        /// 判断 StringBuilder 是否为空
         /// </summary>
         /// <param name="sb">数据</param>
-        /// <returns></returns>
-        public static bool IsEmpty(this StringBuilder sb)
-        {
-            return sb == null || sb.Length == 0 || sb.ToString().IsEmpty();
-        }        
+        public static bool IsEmpty(this StringBuilder sb) => sb == null || sb.Length == 0 || sb.ToString().IsEmpty();
 
         /// <summary>
         /// 判断 迭代集合 是否为空
@@ -77,10 +61,7 @@ namespace Bing.Utils.Extensions
         /// <typeparam name="T">泛型对象</typeparam>
         /// <param name="list">数据</param>
         /// <returns></returns>
-        public static bool IsEmpty<T>(this IEnumerable<T> list)
-        {
-            return null == list || !list.Any();
-        }
+        public static bool IsEmpty<T>(this IEnumerable<T> list) => null == list || !list.Any();
 
         /// <summary>
         /// 判断 字典 是否为空
@@ -89,20 +70,14 @@ namespace Bing.Utils.Extensions
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="dictionary">数据</param>
         /// <returns></returns>
-        public static bool IsEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
-        {
-            return null == dictionary || dictionary.Count == 0;
-        }
+        public static bool IsEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => null == dictionary || dictionary.Count == 0;
 
         /// <summary>
         /// 判断 字典 是否为空
         /// </summary>
         /// <param name="dictionary">数据</param>
         /// <returns></returns>
-        public static bool IsEmpty(this IDictionary dictionary)
-        {
-            return null == dictionary || dictionary.Count == 0;
-        }
+        public static bool IsEmpty(this IDictionary dictionary) => null == dictionary || dictionary.Count == 0;
 
         #endregion
 
@@ -129,6 +104,118 @@ namespace Bing.Utils.Extensions
             var result = ReferenceEquals(target, null);
             return result;
         }
+
+        #endregion
+
+        #region NotEmpty(是否非空)
+
+        /// <summary>
+        /// 判断 字符串 是否非空
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool NotEmpty(this string value) => !string.IsNullOrWhiteSpace(value);
+
+        /// <summary>
+        /// 判断 Guid 是否非空
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool NotEmpty(this Guid value) => value != Guid.Empty;
+
+        /// <summary>
+        /// 判断 Guid? 是否非空
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool NotEmpty(this Guid? value) => value != null && value != Guid.Empty;
+
+        /// <summary>
+        /// 判断 StringBuilder 是否为空
+        /// </summary>
+        /// <param name="sb">数据</param>
+        public static bool NotEmpty(this StringBuilder sb) => sb != null && sb.Length != 0 && sb.ToString().NotEmpty();
+
+        #endregion
+
+        #region IsZeroOrMinus(是否为0或负数)
+
+        /// <summary>
+        /// 判断 short 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this short value) => value <= 0;
+
+        /// <summary>
+        /// 判断 int 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this int value) => value <= 0;
+
+        /// <summary>
+        /// 判断 long 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this long value) => value <= 0;
+
+        /// <summary>
+        /// 判断 float 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this float value) => value <= 0;
+
+        /// <summary>
+        /// 判断 double 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this double value) => value <= 0;
+
+        /// <summary>
+        /// 判断 decimal 是否为0或负数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrMinus(this decimal value) => value <= 0;
+
+        #endregion
+
+        #region IsPercentage(是否为百分数)
+
+        /// <summary>
+        /// 判断 float 是否为百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsPercentage(this float value) => value > 0 && value <= 1;
+
+        /// <summary>
+        /// 判断 double 是否为百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsPercentage(this double value) => value > 0 && value <= 1;
+
+        /// <summary>
+        /// 判断 decimal 是否为百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsPercentage(this decimal value) => value > 0 && value <= 1;
+
+        #endregion
+
+        #region IsZeroOrPercentage(是否为0或百分数)
+
+        /// <summary>
+        /// 判断 float 是否为0或百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrPercentage(this float value) => value.IsPercentage() || value.Equals(0f);
+
+        /// <summary>
+        /// 判断 double 是否为0或百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrPercentage(this double value) => value.IsPercentage() || value.Equals(0d);
+
+        /// <summary>
+        /// 判断 decimal 是否为0或百分数
+        /// </summary>
+        /// <param name="value">数据</param>
+        public static bool IsZeroOrPercentage(this decimal value) => value.IsPercentage() || value.Equals(0m);
 
         #endregion
     }

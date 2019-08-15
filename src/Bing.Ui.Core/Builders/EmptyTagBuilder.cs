@@ -1,5 +1,4 @@
-﻿
-using System.IO;
+﻿using System.IO;
 using System.Text.Encodings.Web;
 
 namespace Bing.Ui.Builders
@@ -28,7 +27,6 @@ namespace Bing.Ui.Builders
         /// <summary>
         /// 输出
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return string.Empty;

@@ -253,13 +253,10 @@ namespace Bing.Utils.Helpers
         /// 获取值，范例：t => t.Name == "A"，返回 A
         /// </summary>
         /// <param name="expression">表达式，范例：t => t.Name == "A"</param>
-        /// <returns></returns>
         public static object GetValue(Expression expression)
         {
             if (expression == null)
-            {
                 return null;
-            }
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:
@@ -272,12 +269,10 @@ namespace Bing.Utils.Helpers
                 case ExpressionType.GreaterThanOrEqual:
                 case ExpressionType.LessThan:
                 case ExpressionType.LessThanOrEqual:
-                    var result= GetValue(((BinaryExpression)expression).Right);
-                    if (result != null)
-                    {
-                        return result;
-                    }
-                    return GetValue(((BinaryExpression) expression).Left);
+                    var hasParameter = HasParameter(((BinaryExpression)expression).Left);
+                    if (hasParameter)
+                        return GetValue(((BinaryExpression)expression).Right);
+                    return GetValue(((BinaryExpression)expression).Left);
                 case ExpressionType.Call:
                     return GetMethodCallExpressionValue(expression);
                 case ExpressionType.MemberAccess:
@@ -292,6 +287,26 @@ namespace Bing.Utils.Helpers
                     return null;
             }
             return null;
+        }
+
+        /// <summary>
+        /// 是否包含参数，用于检测是属性，而不是值
+        /// </summary>
+        /// <param name="expression">表达式</param>
+        private static bool HasParameter(Expression expression)
+        {
+            if (expression == null)
+                return false;
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Convert:
+                    return HasParameter(((UnaryExpression)expression).Operand);
+                case ExpressionType.MemberAccess:
+                    return HasParameter(((MemberExpression)expression).Expression);
+                case ExpressionType.Parameter:
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>

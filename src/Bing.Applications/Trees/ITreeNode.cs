@@ -5,7 +5,7 @@ namespace Bing.Applications.Trees
     /// <summary>
     /// 树节点
     /// </summary>
-    public interface ITreeNode:IKey
+    public interface ITreeNode : IKey
     {
         /// <summary>
         /// 父标识

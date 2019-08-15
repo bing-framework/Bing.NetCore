@@ -6,7 +6,7 @@ namespace Bing.Ui.Attributes
     /// 模型绑定
     /// </summary>
     [AttributeUsage(AttributeTargets.Class|AttributeTargets.Property)]
-    public class ModelAttribute:Attribute
+    public class ModelAttribute : Attribute
     {
         /// <summary>
         /// 模型
@@ -22,7 +22,7 @@ namespace Bing.Ui.Attributes
         /// 初始化一个<see cref="ModelAttribute"/>类型的实例
         /// </summary>
         /// <param name="model">模型</param>
-        public ModelAttribute(string model = "")
+        public ModelAttribute(string model = "model")
         {
             Model = model;
         }

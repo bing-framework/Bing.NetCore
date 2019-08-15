@@ -8,7 +8,7 @@ namespace Bing.Webs.Commons
     /// <summary>
     /// 返回结果
     /// </summary>
-    public class Result:JsonResult
+    public class Result : JsonResult
     {
         /// <summary>
         /// 状态码
@@ -63,6 +63,8 @@ namespace Bing.Webs.Commons
         /// </summary>
         public override Task ExecuteResultAsync(ActionContext context)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
             this.Value = new
             {
                 Code = Code,

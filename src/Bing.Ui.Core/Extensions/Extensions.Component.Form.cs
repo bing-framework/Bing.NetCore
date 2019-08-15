@@ -10,6 +10,8 @@ namespace Bing.Ui.Extensions
     /// </summary>
     public static partial class Extensions
     {
+        #region Placeholder(设置占位提示符)
+
         /// <summary>
         /// 设置占位提示符
         /// </summary>
@@ -25,13 +27,16 @@ namespace Bing.Ui.Extensions
             return component;
         }
 
+        #endregion
+
+        #region Model(模型绑定)
+
         /// <summary>
         /// 模型绑定
         /// </summary>
         /// <typeparam name="TComponent">组件类型</typeparam>
         /// <param name="component">组件实例</param>
         /// <param name="model">模型</param>
-        /// <returns></returns>
         public static TComponent Model<TComponent>(this TComponent component, string model)
             where TComponent : IModel
         {
@@ -39,5 +44,7 @@ namespace Bing.Ui.Extensions
             option?.Config<Config>(config => { config.SetAttribute(UiConst.Model, model); });
             return component;
         }
+
+        #endregion
     }
 }

@@ -49,8 +49,12 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         public void Init()
         {
+            if (_entity == null)
+                return;
             InitLastModificationTime();
             InitLastModifier();
+            if (string.IsNullOrWhiteSpace(_userId))
+                return;
             if (_entity is IModificationAudited<Guid>)
             {
                 InitGuid();
@@ -94,9 +98,7 @@ namespace Bing.Domains.Entities.Auditing
         private void InitLastModificationTime()
         {
             if (_entity is IModificationTime result)
-            {
                 result.LastModificationTime = DateTime.Now;
-            }
         }
 
         /// <summary>
@@ -104,10 +106,10 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitLastModifier()
         {
+            if (string.IsNullOrWhiteSpace(_userName))
+                return;
             if (_entity is IModifier result)
-            {
                 result.LastModifier = _userName;
-            }
         }
 
         /// <summary>
