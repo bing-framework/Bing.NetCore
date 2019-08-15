@@ -7,7 +7,7 @@ using System.IO;
 namespace Bing.Utils.Helpers
 {
     /// <summary>
-    /// Class EncryptHelper.
+    /// 加密类.
     /// </summary>
     public class EncryptHelper
     {
