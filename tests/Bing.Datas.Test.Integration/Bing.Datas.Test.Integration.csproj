@@ -8,8 +8,4 @@
     <ProjectReference Include="..\..\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dapper\SqlServer\" />
-  </ItemGroup>
-
 </Project>

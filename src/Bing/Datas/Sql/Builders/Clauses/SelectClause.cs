@@ -9,7 +9,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
     /// <summary>
     /// Select子句
     /// </summary>
-    public class SelectClause:ISelectClause
+    public class SelectClause : ISelectClause
     {
         /// <summary>
         /// Sql生成器
@@ -67,7 +67,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <returns></returns>
         public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
         {
-            return new SelectClause(builder, _dialect, _resolver, register, new List<ColumnCollection>(_columns)); 
+            return new SelectClause(builder, _dialect, _resolver, register, new List<ColumnCollection>(_columns));
         }
 
         /// <summary>
