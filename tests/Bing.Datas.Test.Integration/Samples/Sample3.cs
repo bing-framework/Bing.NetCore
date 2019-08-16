@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Bing.Datas.Test.Integration.Samples
 {
@@ -17,5 +18,11 @@ namespace Bing.Datas.Test.Integration.Samples
         /// 是否删除
         /// </summary>
         public bool IsDeleted { get; set; }
+
+        /// <summary>
+        /// 跳过的属性
+        /// </summary>
+        [NotMapped]
+        public bool Ignore { get; set; }
     }
 }
