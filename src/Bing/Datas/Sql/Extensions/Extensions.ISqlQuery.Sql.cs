@@ -161,6 +161,39 @@ namespace Bing.Datas.Sql
 
         #endregion
 
+        #region RemoveSelect(移除列名)
+
+        /// <summary>
+        /// 移除列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
+        public static ISqlQuery RemoveSelect<TEntity>(this ISqlQuery sqlQuery,
+            Expression<Func<TEntity, object[]>> columns) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.RemoveSelect(columns);
+            return sqlQuery;
+        }
+
+        /// <summary>
+        /// 移除列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="sqlQuery">Sql查询对象</param>
+        /// <param name="column">列名，范例：t => t.A，支持字典批量设置列和列别名，
+        /// 范例：Select&lt;Sample&gt;( t => new Dictionary&lt;object, string&gt; { { t.Email, "e" }, { t.Url, "u" } } );</param>
+        public static ISqlQuery RemoveSelect<TEntity>(this ISqlQuery sqlQuery,
+            Expression<Func<TEntity, object>> column) where TEntity : class
+        {
+            var builder = sqlQuery.GetBuilder();
+            builder.RemoveSelect(column);
+            return sqlQuery;
+        }
+
+        #endregion
+
         #region From(设置表名)
 
         /// <summary>

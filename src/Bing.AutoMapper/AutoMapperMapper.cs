@@ -6,7 +6,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper;
-using AutoMapper.Configuration;
 using AutoMapper.QueryableExtensions;
 
 namespace Bing.AutoMapper
@@ -121,8 +120,9 @@ namespace Bing.AutoMapper
             try
             {
                 var maps = Mapper.Configuration.GetAllTypeMaps();
+                ClearConfig();
                 Mapper.Reset();
-                InitMapper(sourceType, destinationType);
+                Mapper.Initialize(config => config.CreateMap(sourceType, destinationType));
                 foreach (var map in maps)
                 {
                     Mapper.Configuration.RegisterTypeMap(map);
@@ -130,20 +130,18 @@ namespace Bing.AutoMapper
             }
             catch (InvalidOperationException)
             {
-                InitMapper(sourceType,destinationType);
+                Mapper.Initialize(config => config.CreateMap(sourceType, destinationType));
             }
         }
 
         /// <summary>
-        /// 初始化映射器
+        /// 清空配置
         /// </summary>
-        /// <param name="sourceType">源类型</param>
-        /// <param name="destinationType">目标类型</param>
-        private static void InitMapper(Type sourceType, Type destinationType)
+        private static void ClearConfig()
         {
-            var config = new MapperConfigurationExpression();
-            config.CreateMap(sourceType, destinationType);
-            Mapper.Initialize(config);
+            var typeMapper = typeof(Mapper).GetTypeInfo();
+            var configuration = typeMapper.GetDeclaredField("_configuration");
+            configuration.SetValue(null, null, BindingFlags.Static, null, CultureInfo.CurrentCulture);
         }
 
         #endregion

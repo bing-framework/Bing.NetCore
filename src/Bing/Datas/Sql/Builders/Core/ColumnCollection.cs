@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
@@ -9,32 +11,27 @@ namespace Bing.Datas.Sql.Builders.Core
     /// </summary>
     public class ColumnCollection
     {
-        #region 属性
+        #region 字段
 
         /// <summary>
         /// 列集合
         /// </summary>
-        public string Columns { get; }
+        private readonly List<ColumnItem> _items;
+
+        #endregion
+
+        #region 属性
 
         /// <summary>
-        /// 表别名
+        /// 获取列
         /// </summary>
-        public string TableAlias { get; }
+        /// <param name="index">索引</param>
+        public ColumnItem this[int index] => _items[index];
 
         /// <summary>
-        /// 表实体类型
+        /// 集合数量
         /// </summary>
-        public Type TableType { get; }
-
-        /// <summary>
-        /// 是否使用原始值
-        /// </summary>
-        public bool Raw { get; }
-
-        /// <summary>
-        /// 是否聚合函数
-        /// </summary>
-        public bool IsAggregation { get; }
+        public int Count => _items.Count;
 
         #endregion
 
@@ -43,19 +40,163 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 初始化一个<see cref="ColumnCollection"/>类型的实例
         /// </summary>
+        /// <param name="items">列集合</param>
+        public ColumnCollection(List<ColumnItem> items = null) => _items = items ?? new List<ColumnItem>();
+
+        #endregion
+
+        #region AddColumns(添加列集合)
+
+        /// <summary>
+        /// 添加列集合
+        /// </summary>
         /// <param name="columns">列集合</param>
         /// <param name="tableAlias">表别名</param>
-        /// <param name="tableType">表实体类型</param>
-        /// <param name="raw">是否使用原始值</param>
-        /// <param name="isAggregation">是否聚合函数</param>
-        public ColumnCollection(string columns, string tableAlias = null, Type tableType = null, bool raw = false, bool isAggregation = false)
+        public void AddColumns(string columns, string tableAlias = null)
         {
-            Columns = columns;
-            TableAlias = tableAlias;
-            TableType = tableType;
-            Raw = raw;
-            IsAggregation = isAggregation;
+            if (columns.IsEmpty())
+                return;
+            var items = columns.Split(',').Select(column => CreateItem(column, tableAlias)).ToList();
+            items.ForEach(AddColumn);
         }
+
+        /// <summary>
+        /// 创建列
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="tableAlias">表别名</param>
+        private ColumnItem CreateItem(string column, string tableAlias)
+        {
+            var item = new SqlItem(column, tableAlias);
+            return new ColumnItem(item.Name, item.Prefix, item.Alias);
+        }
+
+        /// <summary>
+        /// 添加列集合
+        /// </summary>
+        /// <param name="columns">列集合</param>
+        /// <param name="tableType">表类型</param>
+        /// <param name="columnAlias">列别名</param>
+        public void AddColumns(string columns, Type tableType, string columnAlias = null)
+        {
+            if(columns.IsEmpty())
+                return;
+            var items = columns.Split(',').Select(column => CreateItem(column, tableType, columnAlias)).ToList();
+            items.ForEach(item =>
+            {
+                RemoveColumn(item);
+                AddColumn(item);
+            });
+        }
+
+        /// <summary>
+        /// 创建列
+        /// </summary>
+        /// <param name="column">列名</param>
+        /// <param name="tableType">表类型</param>
+        /// <param name="columnAlias">列别名</param>
+        private ColumnItem CreateItem(string column, Type tableType, string columnAlias = null)
+        {
+            var item = new SqlItem(column, alias: columnAlias);
+            return new ColumnItem(item.Name, columnAlias: item.Alias, tableType: tableType);
+        }
+
+        #endregion
+
+        #region AddColumn(添加列)
+
+        /// <summary>
+        /// 添加列
+        /// </summary>
+        /// <param name="item">列</param>
+        public void AddColumn(ColumnItem item)
+        {
+            if (item == null)
+                return;
+            _items.Add(item);
+        }
+
+        #endregion
+
+        #region AddRawColumn(添加原始列)
+
+        /// <summary>
+        /// 添加原始列
+        /// </summary>
+        /// <param name="sql">Sql语句</param>
+        /// <param name="columnAlias">列别名</param>
+        public void AddRawColumn(string sql, string columnAlias = null)
+        {
+            if (sql.IsEmpty())
+                return;
+            AddColumn(new ColumnItem(sql, columnAlias: columnAlias, raw: true));
+        }
+
+        #endregion
+
+        #region AddAggregationColumn(添加聚合列)
+
+        /// <summary>
+        /// 添加聚合列
+        /// </summary>
+        /// <param name="column">列</param>
+        /// <param name="columnAlias">列别名</param>
+        public void AddAggregationColumn(string column, string columnAlias)
+        {
+            if(column.IsEmpty())
+                return;
+            AddColumn(new ColumnItem(column, columnAlias: columnAlias, isAggregation: true));
+        }
+
+        #endregion
+
+        #region RemoveColumns(移除列集合)
+
+        /// <summary>
+        /// 移除列集合
+        /// </summary>
+        /// <param name="columns">列集合</param>
+        /// <param name="tableAlias">表别名</param>
+        public void RemoveColumns(string columns, string tableAlias = null)
+        {
+            if(columns.IsEmpty())
+                return;
+            var items = columns.Split(',').Select(column => CreateItem(column, tableAlias)).ToList();
+            items.ForEach(RemoveColumn);
+        }
+
+        /// <summary>
+        /// 移除列
+        /// </summary>
+        /// <param name="item">列</param>
+        private void RemoveColumn(ColumnItem item)
+        {
+            if (item == null)
+                return;
+            _items.RemoveAll(t => t.Name == item.Name && t.TableAlias == item.TableAlias && t.TableType == item.TableType);
+        }
+
+        /// <summary>
+        /// 移除列集合
+        /// </summary>
+        /// <param name="columns">列集合</param>
+        /// <param name="tableType">表实体类型</param>
+        public void RemoveColumns(string columns, Type tableType)
+        {
+            if(columns.IsEmpty())
+                return;
+            var items = columns.Split(',').Select(column => CreateItem(column, tableType)).ToList();
+            items.ForEach(RemoveColumn);
+        }
+
+        #endregion
+
+        #region Clone(克隆)
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        public ColumnCollection Clone() => new ColumnCollection(_items.Select(t => t.Clone()).ToList());
 
         #endregion
 
@@ -69,33 +210,15 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <returns></returns>
         public string ToSql(IDialect dialect, IEntityAliasRegister register)
         {
-            if (Raw)
+            var result = new StringBuilder();
+            foreach (var item in _items)
             {
-                return Columns;
+                result.Append(item.ToSql(dialect, register));
+                if (item.Raw == false)
+                    result.Append(",");
             }
 
-            if (IsAggregation)
-            {
-                return Columns;
-            }
-
-            var columns = Columns.Split(',').Select(column => new SqlItem(column, GetTableAlias(register))).ToList();
-            return columns.Select(item => item.ToSql(dialect)).Join();
-        }
-
-        /// <summary>
-        /// 获取表别名
-        /// </summary>
-        /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
-        private string GetTableAlias(IEntityAliasRegister register)
-        {
-            if (register != null && register.Contains(TableType))
-            {
-                return register.GetAlias(TableType);
-            }
-
-            return TableAlias;
+            return result.ToString().TrimEnd(',');
         }
 
         #endregion
