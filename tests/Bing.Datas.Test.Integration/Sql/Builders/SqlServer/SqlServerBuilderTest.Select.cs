@@ -252,7 +252,7 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
             result.Append("From [c]");
 
             //执行
-            _builder.Select<Sample>(t => new object[] { t.Email, t.IntValue })
+            _builder.Select<Sample>(t => new object[] {t.Email, t.IntValue})
                 .From("c");
 
             //验证
@@ -320,9 +320,10 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
             result.Append("Where [Age]=@_p_1");
 
             //执行
-            _builder.Select("*").Select(builder => {
-                builder.Count().From("Test2").Where("Name", "a");
-            }, "TestCount")
+            _builder.Select("*").Select(builder =>
+                {
+                    builder.Count().From("Test2").Where("Name", "a");
+                }, "TestCount")
                 .From("Test").Where("Age", 1);
 
             //验证
@@ -368,7 +369,8 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
 
             //执行
             var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
-            _builder.Select("*").AppendSelect("(").Select(builder2, "").AppendSelect(") As testCount").From("Test").Where("Age", 1);
+            _builder.Select("*").AppendSelect("(").Select(builder2, "").AppendSelect(") As testCount").From("Test")
+                .Where("Age", 1);
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
@@ -412,6 +414,27 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
             _builder.Select<Sample3>()
                 .Select<Sample3>(t => t.StringValue, "a")
                 .From<Sample3>("s");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
+        /// 移除列名
+        /// </summary>
+        [Fact]
+        public void Test_RemoveSelect_1()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select [s].[Description],[s].[DisplayName],[s].[StringValue],[s].[IntValue] ");
+            result.Append("From [Sample2] As [s]");
+
+            //执行
+            _builder = new SqlServerBuilder(new DefaultEntityMatedata());
+            _builder.Select<Sample2>()
+                .RemoveSelect<Sample2>(x => x.Display)
+                .From<Sample2>("s");
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Bing.Datas.Test.Integration.Samples
 {
@@ -35,6 +36,7 @@ namespace Bing.Datas.Test.Integration.Samples
         /// <summary>
         /// 导航属性
         /// </summary>
+        [NotMapped]
         public Sample3 Test3 { get; set; }
     }
 }
