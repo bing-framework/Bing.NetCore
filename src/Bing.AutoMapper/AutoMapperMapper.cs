@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 namespace Bing.AutoMapper
 {
@@ -19,6 +17,11 @@ namespace Bing.AutoMapper
         /// 同步锁
         /// </summary>
         private static readonly object Sync = new object();
+
+        /// <summary>
+        /// 配置提供器
+        /// </summary>
+        private static IConfigurationProvider _config;
 
         #region MapTo(将源对象映射到目标对象)
 
@@ -54,15 +57,15 @@ namespace Bing.AutoMapper
             var destinationType = GetType(destination);
             var map = GetMap(sourceType, destinationType);
             if (map != null)
-                return Mapper.Map(source, destination);
+                return GetResult(source, destination);
             lock (Sync)
             {
                 map = GetMap(sourceType, destinationType);
                 if (map != null)
-                    return Mapper.Map(source, destination);
+                    return GetResult(source, destination);
                 InitMaps(sourceType, destinationType);
             }
-            return Mapper.Map(source, destination);
+            return GetResult(source, destination);
         }
 
         /// <summary>
@@ -72,25 +75,9 @@ namespace Bing.AutoMapper
         /// <param name="destinationType">目标类型</param>
         private static TypeMap GetMap(Type sourceType, Type destinationType)
         {
-            try
-            {
-                return Mapper.Configuration.FindTypeMapFor(sourceType, destinationType);
-            }
-            catch (InvalidOperationException)
-            {
-                lock (Sync)
-                {
-                    try
-                    {
-                        return Mapper.Configuration.FindTypeMapFor(sourceType, destinationType);
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        InitMaps(sourceType, destinationType);
-                    }
-                    return Mapper.Configuration.FindTypeMapFor(sourceType, destinationType);
-                }
-            }
+            if (_config == null)
+                InitMaps(sourceType, destinationType);
+            return _config?.FindTypeMapFor(sourceType, destinationType);
         }
 
         /// <summary>
@@ -117,31 +104,28 @@ namespace Bing.AutoMapper
         /// <param name="destinationType">目标类型</param>
         private static void InitMaps(Type sourceType, Type destinationType)
         {
-            try
+            if (_config == null)
             {
-                var maps = Mapper.Configuration.GetAllTypeMaps();
-                ClearConfig();
-                Mapper.Reset();
-                Mapper.Initialize(config => config.CreateMap(sourceType, destinationType));
-                foreach (var map in maps)
-                {
-                    Mapper.Configuration.RegisterTypeMap(map);
-                }
+                _config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
+                return;
             }
-            catch (InvalidOperationException)
-            {
-                Mapper.Initialize(config => config.CreateMap(sourceType, destinationType));
-            }
+
+            var maps = _config.GetAllTypeMaps();
+            _config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
+            foreach (var map in maps)
+                _config.RegisterTypeMap(map);
         }
 
         /// <summary>
-        /// 清空配置
+        /// 获取映射结果
         /// </summary>
-        private static void ClearConfig()
+        /// <typeparam name="TDestination">目标类型</typeparam>
+        /// <param name="source">源对象</param>
+        /// <param name="destination">目标对象</param>
+        private static TDestination GetResult<TDestination>(object source, TDestination destination)
         {
-            var typeMapper = typeof(Mapper).GetTypeInfo();
-            var configuration = typeMapper.GetDeclaredField("_configuration");
-            configuration.SetValue(null, null, BindingFlags.Static, null, CultureInfo.CurrentCulture);
+            var mapper = new Mapper(_config);
+            return mapper.Map(source, destination);
         }
 
         #endregion
@@ -170,7 +154,8 @@ namespace Bing.AutoMapper
         /// <param name="membersToExpand">成员展开</param>
         public IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source, params Expression<Func<TOutputDto, object>>[] membersToExpand)
         {
-            return source.ProjectTo(membersToExpand);
+            //return source.ProjectTo(membersToExpand);
+            throw new NotImplementedException();
         }
 
         #endregion
