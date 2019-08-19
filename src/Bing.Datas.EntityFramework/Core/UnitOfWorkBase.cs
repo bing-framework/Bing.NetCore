@@ -32,7 +32,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// <summary>
     /// 工作单元
     /// </summary>
-    public abstract class UnitOfWorkBase:DbContext,IUnitOfWork,IDatabase,IEntityMatedata
+    public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntityMatedata
     {
         #region 字段
 
@@ -488,7 +488,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// 获取表名
         /// </summary>
         /// <param name="entity">实体类型</param>
-        /// <returns></returns>
         public string GetTable(Type entity)
         {
             if (entity == null)
@@ -511,7 +510,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// 获取架构
         /// </summary>
         /// <param name="entity">实体类型</param>
-        /// <returns></returns>
         public string GetSchema(Type entity)
         {
             if (entity == null)
@@ -535,7 +533,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="entity">实体类型</param>
         /// <param name="property">属性名</param>
-        /// <returns></returns>
         public string GetColumn(Type entity, string property)
         {
             if (entity == null || string.IsNullOrWhiteSpace(property))
