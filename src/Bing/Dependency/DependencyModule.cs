@@ -32,6 +32,7 @@ namespace Bing.Dependency
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             // 服务定位器设置
+            ServiceLocator.Instance.SetServiceCollection(services);
             services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));
             // 查找所有自动注册的服务实现类型
             var dependencyTypeFinder =
@@ -50,6 +51,7 @@ namespace Bing.Dependency
         /// <param name="provider">服务提供程序</param>
         public override void UseModule(IServiceProvider provider)
         {
+            ServiceLocator.Instance.SetApplicationServiceProvider(provider);
             Enabled = true;
         }
 

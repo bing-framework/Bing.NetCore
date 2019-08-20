@@ -20,15 +20,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using <%= Entity.GetNamespace(Namespace,"Domain","Models") %>;
 
-namespace <%=Namespace%>.Data.Mappings.<%= Entity.TableSchema %>.MySql {
+namespace <%=Namespace%>.Data.Mappings.<%= Entity.TableSchema %>.MySql 
+{
     /// <summary>
     /// <%= Description %>映射配置
     /// </summary>
-    public class <%= SafeClassName %>Map : Bing.Datas.EntityFramework.MySql.AggregateRootMap<<%= SafeClassName %>> {
+    public class <%= SafeClassName %>Map : Bing.Datas.EntityFramework.MySql.AggregateRootMap<<%= SafeClassName %>> 
+    {
         /// <summary>
         /// 映射表
         /// </summary>
-        protected override void MapTable( EntityTypeBuilder<<%= SafeClassName %>> builder ) {
+        protected override void MapTable( EntityTypeBuilder<<%= SafeClassName %>> builder ) 
+        {
             <% if(!string.IsNullOrWhiteSpace(Entity.TableSchema)) %>
             builder.ToTable( "<%= Entity.TableSchema %>.<%= Entity.TableName %>" );
         }
@@ -36,7 +39,8 @@ namespace <%=Namespace%>.Data.Mappings.<%= Entity.TableSchema %>.MySql {
         /// <summary>
         /// 映射属性
         /// </summary>
-        protected override void MapProperties( EntityTypeBuilder<<%= SafeClassName %>> builder ) {
+        protected override void MapProperties( EntityTypeBuilder<<%= SafeClassName %>> builder ) 
+        {
             <%
             foreach(var p in Entity.Properties)
             {

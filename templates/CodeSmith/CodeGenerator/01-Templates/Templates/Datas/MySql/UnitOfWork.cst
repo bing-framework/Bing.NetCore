@@ -17,17 +17,20 @@
 using Microsoft.EntityFrameworkCore;
 using Bing.Datas.UnitOfWorks;
 
-namespace <%= Namespace %>.Data.UnitOfWorks.MySql {
+namespace <%= Namespace %>.Data.UnitOfWorks.MySql 
+{
     /// <summary>
     /// 工作单元
     /// </summary>
-    public class <%= UnitOfWork %> : Bing.Datas.EntityFramework.MySql.UnitOfWork,I<%= UnitOfWork %> {
+    public class <%= UnitOfWork %> : Bing.Datas.EntityFramework.MySql.UnitOfWork, I<%= UnitOfWork %> 
+    {
         /// <summary>
-        /// 初始化工作单元
+        /// 初始化一个<see cref="<%= UnitOfWork %>"/>类型的实例
         /// </summary>
         /// <param name="options">配置项</param>
         /// <param name="unitOfWorkManager">工作单元服务</param>
-        public <%= UnitOfWork %>( DbContextOptions options, IUnitOfWorkManager unitOfWorkManager ) : base( options, unitOfWorkManager ) {
+        public <%= UnitOfWork %>( DbContextOptions options, IUnitOfWorkManager unitOfWorkManager ) : base( options, unitOfWorkManager ) 
+        {
         }
     }
 }
