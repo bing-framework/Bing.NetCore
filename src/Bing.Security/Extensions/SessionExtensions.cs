@@ -5,6 +5,7 @@ using Bing.Security.Claims;
 using Bing.Sessions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using IdentityModel;
 
 namespace Bing.Security.Extensions
 {
@@ -41,7 +42,10 @@ namespace Bing.Security.Extensions
         /// <returns></returns>
         public static string GetUserName(this ISession session)
         {
-            return session.UserName;
+            var result = WebIdentity.Identity.GetValue(JwtClaimTypes.Name);
+            return string.IsNullOrWhiteSpace(result)
+                ? WebIdentity.Identity.GetValue(System.Security.Claims.ClaimTypes.Name)
+                : result;
         }
 
         /// <summary>
@@ -195,6 +199,5 @@ namespace Bing.Security.Extensions
         {
             return WebIdentity.Identity.GetValue(ClaimTypes.RoleName);
         }
-       
     }
 }
