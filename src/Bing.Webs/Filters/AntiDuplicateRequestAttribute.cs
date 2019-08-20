@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bing.Helpers;
 using Bing.Locks;
 using Bing.Properties;
-using Bing.Security.Sessions;
+
 using Bing.Utils.Helpers;
 using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -98,7 +98,7 @@ namespace Bing.Webs.Filters
             var userId = string.Empty;
             if (Type == LockType.User)
             {
-                userId = $"{Session.Instance.UserId}_";
+                userId = $"{Bing.Sessions.Session.Instance.UserId}_";
             }
 
             return string.IsNullOrWhiteSpace(Key) ? $"{userId}{Web.Request.Path}" : $"{userId}{Key}";

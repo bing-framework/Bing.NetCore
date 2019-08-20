@@ -523,8 +523,8 @@ namespace Bing.Utils.Helpers
                 return str;
             }
 
-            StringBuilder sb = new StringBuilder();
-            SnakeCaseState state = SnakeCaseState.Start;
+            var sb = new StringBuilder();
+            var state = SnakeCaseState.Start;
             for (var i = 0; i < str.Length;i++)
             {
                 if (str[i] == ' ')

@@ -18,11 +18,13 @@
 using System;
 using <%= Entity.GetNamespace(Namespace,"Domains","Models") %>;
 
-namespace <%= Entity.GetNamespace(Namespace,"Domains","Factories") %> {
+namespace <%= Entity.GetNamespace(Namespace,"Domains","Factories") %> 
+{
     /// <summary>
     /// <%= Description %>工厂
     /// </summary>
-    public static class <%= SafeClassName %>Factory {
+    public static class <%= SafeClassName %>Factory 
+    {
         /// <summary>
         /// 创建<%= Description %>
         /// </summary>
@@ -33,7 +35,8 @@ namespace <%= Entity.GetNamespace(Namespace,"Domains","Factories") %> {
             <% foreach(Property p in Entity.Properties) { %>
             <%= p.TypeName %> <%= p.PropertyName.ToSafeName().ToCamelCase() %><%= Entity.GetComma(p,false) %>
             <%} %> 
-        ) {
+        )
+        {
             <%= SafeClassName %> result;
             <% foreach(Property p in Entity.Properties) { %>
             <% if( p.IsPrimaryKey.SafeValue() ) {%>

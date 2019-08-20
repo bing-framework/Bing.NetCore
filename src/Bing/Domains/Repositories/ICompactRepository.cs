@@ -19,6 +19,7 @@ namespace Bing.Domains.Repositories
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
+    [IgnoreDependency]
     public interface ICompactRepository<TEntity, in TKey> : IScopeDependency,
         IFindById<TEntity, TKey>, IFindByIdAsync<TEntity, TKey>,
         IFindByIds<TEntity, TKey>, IFindByIdsAsync<TEntity, TKey>,

@@ -23,14 +23,6 @@ namespace Bing.Datas.EntityFramework.Oracle
         }
 
         /// <summary>
-        /// 获取映射接口类型
-        /// </summary>
-        protected override Type GetMapType()
-        {
-            return typeof(IMap);
-        }
-
-        /// <summary>
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>

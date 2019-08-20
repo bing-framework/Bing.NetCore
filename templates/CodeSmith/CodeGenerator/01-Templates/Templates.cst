@@ -30,6 +30,10 @@
              Type="System.String"
              Category="2.2 数据库名"
              Description="数据库名称,用于创建工作单元及其它类型名称，设置.将自动获取数据库名"%>
+<%@ Property Name="UnitOfWorkName"
+             Type="System.String"
+             Category="2.3 工作单元名"
+             Description="工作单元名"%>
 
 <%@ Property Name="TableNaming"
              Type="SchemaMapper.TableNaming"
@@ -355,7 +359,9 @@
     /// 获取工作单元名称
     /// </summary>
     private string GetUnitOfWork( EntityContext entityContext ){
-        return GetDbName(entityContext) + "UnitOfWork";
+        if(string.IsNullOrEmpty(UnitOfWorkName))
+            return GetDbName(entityContext) + "UnitOfWork";
+        return UnitOfWorkName + "UnitOfWork";
     }
     
     /// <summary>

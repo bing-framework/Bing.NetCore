@@ -53,7 +53,9 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <returns></returns>
         public string GenerateName()
         {
-            return $"{_dialect.GetPrefix()}_p_{_paramIndex++}";
+            var result = _dialect.GenerateName(_paramIndex);
+            _paramIndex += 1;
+            return result;
         }
 
         /// <summary>

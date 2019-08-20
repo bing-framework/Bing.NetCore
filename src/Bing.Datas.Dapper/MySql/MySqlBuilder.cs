@@ -73,5 +73,10 @@ namespace Bing.Datas.Dapper.MySql
         {
             return $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
         }
+
+        /// <summary>
+        /// 获取CTE关键字
+        /// </summary>
+        protected override string GetCteKeyWord() => "With Recursive";
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Security.Principal;
-using Bing.Core.Modularity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore
@@ -10,12 +7,12 @@ namespace Bing.AspNetCore
     /// AspNetCore模块
     /// </summary>
     [Description("AspNetCore模块")]
-    public class AspNetCoreModule : BingModule
+    public class AspNetCoreModule : Bing.Core.Modularity.BingModule
     {
         /// <summary>
         /// 模块级别。级别越小越先启动
         /// </summary>
-        public override ModuleLevel Level => ModuleLevel.Core;
+        public override Bing.Core.Modularity.ModuleLevel Level => Bing.Core.Modularity.ModuleLevel.Core;
 
         /// <summary>
         /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
@@ -30,11 +27,16 @@ namespace Bing.AspNetCore
         {
             services.AddHttpContextAccessor();
             // 注入当前用户，替换Thread.CurrentPrincipal的作用
-            services.AddTransient<IPrincipal>(provider =>
+            services.AddTransient<System.Security.Principal.IPrincipal>(provider =>
             {
-                var accessor = provider.GetService<IHttpContextAccessor>();
+                var accessor = provider.GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
                 return accessor?.HttpContext?.User;
             });
+            // 注入用户会话
+            services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.Session>();
+            // 注册编码
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
             return services;
         }
     }

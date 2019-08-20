@@ -1,21 +1,14 @@
-﻿using Bing.Dependency;
-
-namespace Bing.Sessions
+﻿namespace Bing.Sessions
 {
     /// <summary>
     /// 用户会话
     /// </summary>
-    public interface ISession: ISingletonDependency
+    public interface ISession
     {
         /// <summary>
         /// 用户标识
         /// </summary>
         string UserId { get; }
-
-        /// <summary>
-        /// 用户名
-        /// </summary>
-        string UserName { get; }
 
         /// <summary>
         /// 是否认证

@@ -51,7 +51,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="register">实体别名注册器</param>
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="table">表</param>
-        public FromClause(ISqlBuilder builder,IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,ITableDatabase tableDatabase, SqlItem table = null)
+        public FromClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,ITableDatabase tableDatabase, SqlItem table = null)
         {
             Builder = builder;
             Dialect = dialect;
