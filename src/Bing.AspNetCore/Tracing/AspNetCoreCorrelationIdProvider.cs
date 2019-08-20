@@ -3,6 +3,7 @@ using Bing.Dependency;
 using Bing.Tracing;
 using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Bing.AspNetCore.Tracing
@@ -10,6 +11,7 @@ namespace Bing.AspNetCore.Tracing
     /// <summary>
     /// AspNetCore 跟踪关联ID提供程序
     /// </summary>
+    [Dependency(ServiceLifetime.Transient, ReplaceExisting = true)]
     public class AspNetCoreCorrelationIdProvider : ICorrelationIdProvider, ITransientDependency
     {
         /// <summary>
@@ -18,7 +20,7 @@ namespace Bing.AspNetCore.Tracing
         protected IHttpContextAccessor HttpContextAccessor { get; }
 
         /// <summary>
-        /// 跟踪关联ID选项
+        /// 跟踪关联ID配置选项信息
         /// </summary>
         protected CorrelationIdOptions Options { get; }
 
@@ -53,7 +55,7 @@ namespace Bing.AspNetCore.Tracing
                     }
                 }
             }
-                
+
             return correlationId;
         }
 

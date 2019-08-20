@@ -18,10 +18,12 @@
 using Bing.Domains.Repositories;
 using <%= Entity.GetNamespace(Namespace,"Domain","Models") %>;
 
-namespace <%= Entity.GetNamespace(Namespace,"Domain","Repositories") %> {
+namespace <%= Entity.GetNamespace(Namespace,"Domain","Repositories") %> 
+{
     /// <summary>
     /// <%= Description %>仓储
     /// </summary>
-    public interface I<%= SafeClassName %>Repository : IRepository<<%= SafeClassName %><%= Entity.GetKeyTypeNoContainsGuid() %>> {
+    public interface I<%= SafeClassName %>Repository : IRepository<<%= SafeClassName %><%= Entity.GetKeyTypeNoContainsGuid() %>> 
+    {
     }
 }

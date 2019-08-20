@@ -6,7 +6,7 @@ namespace Bing.Tracing
     /// <summary>
     /// 默认跟踪关联ID提供程序
     /// </summary>
-    internal class DefaultCorrelationIdProvider : ICorrelationIdProvider//, ISingletonDependency
+    internal class DefaultCorrelationIdProvider : ICorrelationIdProvider, ISingletonDependency
     {
         /// <summary>
         /// 跟踪关联ID提供程序

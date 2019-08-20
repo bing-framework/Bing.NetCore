@@ -15,7 +15,6 @@ namespace Bing.Domains.Services
         protected DomainServiceBase()
         {
             Log = NullLog.Instance;
-            Session = NullSession.Instance;
         }
 
         /// <summary>
@@ -26,6 +25,6 @@ namespace Bing.Domains.Services
         /// <summary>
         /// 用户会话
         /// </summary>
-        public ISession Session { get; set; }
+        public virtual ISession Session => Sessions.Session.Instance;
     }
 }

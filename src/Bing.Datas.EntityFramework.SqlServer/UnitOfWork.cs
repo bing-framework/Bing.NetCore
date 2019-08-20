@@ -22,23 +22,9 @@ namespace Bing.Datas.EntityFramework.SqlServer
         }
 
         /// <summary>
-        /// 获取映射接口类型
-        /// </summary>
-        /// <returns></returns>
-        protected override Type GetMapType()
-        {
-            return typeof(IMap);
-        }
-
-        /// <summary>
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        /// <returns></returns>
-        protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
-        {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
-        }
-
+        protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly) => Reflection.GetInstancesByInterface<IMap>(assembly);
     }
 }

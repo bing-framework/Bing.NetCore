@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Bing.Datas.Sql.Queries;
 
 namespace Bing.Datas.Sql.Builders
 {
@@ -14,7 +13,6 @@ namespace Bing.Datas.Sql.Builders
         /// </summary>
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
         ISelectClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register);
 
         /// <summary>
@@ -157,12 +155,33 @@ namespace Bing.Datas.Sql.Builders
         /// 添加到Select子句
         /// </summary>
         /// <param name="sql">Sql语句</param>
-        void AppendSql(string sql);
+        /// <param name="columnAlias">列别名</param>
+        void AppendSql(string sql, string columnAlias = null);
+
+        /// <summary>
+        /// 移除列名
+        /// </summary>
+        /// <param name="columns">列名</param>
+        /// <param name="tableAlias">表别名</param>
+        void RemoveSelect(string columns, string tableAlias = null);
+
+        /// <summary>
+        /// 移除列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        void RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> expression) where TEntity : class;
+
+        /// <summary>
+        /// 移除列名
+        /// </summary>
+        /// <typeparam name="TEntity">实体类型</typeparam>
+        /// <param name="expression">列名表达式</param>
+        void RemoveSelect<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class;
 
         /// <summary>
         /// 输出Sql
         /// </summary>
-        /// <returns></returns>
         string ToSql();
     }
 }
