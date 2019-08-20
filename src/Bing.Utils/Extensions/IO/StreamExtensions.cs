@@ -135,7 +135,7 @@ namespace Bing.Utils.Extensions
                 throw new InvalidOperationException("Stream 不支持读取操作");
             }
             encoding = encoding ?? Encoding.UTF8;
-            return new StreamReader(stream,encoding);
+            return new StreamReader(stream, encoding);
         }
 
         #endregion
@@ -191,7 +191,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string ReadToEnd(this Stream stream, Encoding encoding)
         {
-            using (var reader=stream.GetReader(encoding))
+            using (var reader = stream.GetReader(encoding))
             {
                 return reader.ReadToEnd();
             }
@@ -248,7 +248,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static MemoryStream CopyToMemory(this Stream stream)
         {
-            var memoryStream=new MemoryStream((int)stream.Length);
+            var memoryStream = new MemoryStream((int)stream.Length);
             stream.CopyTo(memoryStream);
             return memoryStream;
         }
@@ -264,7 +264,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static byte[] ReadAllBytes(this Stream stream)
         {
-            using (var memoryStream=stream.CopyToMemory())
+            using (var memoryStream = stream.CopyToMemory())
             {
                 return memoryStream.ToArray();
             }
@@ -282,6 +282,22 @@ namespace Bing.Utils.Extensions
         public static void Write(this Stream stream, byte[] bytes)
         {
             stream.Write(bytes, 0, bytes.Length);
+        }
+
+        #endregion
+
+        #region Write(将字符串写入流)
+
+        /// <summary>
+        /// 将字符串写以指定编码方式写入流
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="context"></param>
+        /// <param name="encoding"></param>
+        public static void Write(this Stream stream, string context, Encoding encoding)
+        {
+            byte[] buffer = encoding.GetBytes(context);
+            stream.Write(buffer, 0, buffer.Length);
         }
 
         #endregion

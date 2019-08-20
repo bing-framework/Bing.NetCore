@@ -7,7 +7,7 @@ using System.Xml.Schema;
 namespace Bing.Utils.Helpers
 {
     /// <summary>
-    /// Class XmlHelper.
+    /// XML操作类.
     /// </summary>
     public class XmlHelper
     {
@@ -51,7 +51,7 @@ namespace Bing.Utils.Helpers
         /// <returns>DataView.</returns>
         public DataView GetData(string xmlPathNode)
         {
-            //查找数据。返回一个DataView
+            //查找数据,返回一个DataView
             using (var ds = new DataSet())
             {
                 var node = objXmlDoc.SelectSingleNode(xmlPathNode);
