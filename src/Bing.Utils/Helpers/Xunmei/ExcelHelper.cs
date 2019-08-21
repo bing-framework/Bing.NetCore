@@ -10,6 +10,7 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.Util;
 using System.Reflection;
 using Bing.Utils.Helpers;
+using Bing.Utils.Extensions;
 
 namespace Xunmei.CMS.Utilities
 {
@@ -222,10 +223,12 @@ namespace Xunmei.CMS.Utilities
         /// <returns>System.Byte[][].</returns>
         public static byte[] DownloadExcel<T>(List<T> sources, List<string> columnTitles)
         {
-            DataSet dataset = new DataSet();
-            if (sources != null && sources.Count > 0)
-                dataset.Tables.Add(ModelHelper.ListToDataTable<T>(sources, ""));
-            return DownloadExcel(dataset, columnTitles);
+            using (var dataset = new DataSet())
+            {
+                if (sources != null && sources.Count > 0)
+                    dataset.Tables.Add(/*ModelHelper.ListToDataTable<T>(sources, "")*/ sources.ToDataTable());
+                return DownloadExcel(dataset, columnTitles);
+            }
         }
 
         /// <summary>
@@ -280,7 +283,7 @@ namespace Xunmei.CMS.Utilities
         {
             DataSet dataset = new DataSet();
             if (sources != null && sources.Count > 0)
-                dataset.Tables.Add(ModelHelper.ListToDataTable<T>(sources, ""));
+                dataset.Tables.Add(/*ModelHelper.ListToDataTable<T>(sources, "")*/sources.ToDataTable());
             return DownloadExcel(dataset, columnTitles, titleName, templatePath, createHeader, sheetName, startRowNum, dataValidity);
         }
 
@@ -486,7 +489,7 @@ namespace Xunmei.CMS.Utilities
         {
             DataSet dataset = new DataSet();
             if (sources != null && sources.Count > 0)
-                dataset.Tables.Add(ModelHelper.ListToDataTable<T>(sources, ""));
+                dataset.Tables.Add(/*ModelHelper.ListToDataTable<T>(sources, "")*/sources.ToDataTable());
             return DownloadExcel(dataset, templatePath, sheetName, arguments, parameterSheetName, startRowNum, title);
         }
 
