@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Linq;
 using Bing.Utils.Extensions;
 using NPOI.SS.Util;
+using Bing.Offices.Excels.Models;
 
 namespace Bing.Utils.Helpers
 {

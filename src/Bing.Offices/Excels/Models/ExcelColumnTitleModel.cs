@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Bing.Utils.Helpers
+namespace Bing.Offices.Excels.Models
 {
     /// <summary>
     /// 定义Excel列头模板

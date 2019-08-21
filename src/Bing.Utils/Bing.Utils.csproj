@@ -43,6 +43,10 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bing.Offices\Bing.Offices.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="System.Data.SqlClient">
       <HintPath>..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.data.sqlclient\4.6.0\ref\netcoreapp2.1\System.Data.SqlClient.dll</HintPath>
     </Reference>
