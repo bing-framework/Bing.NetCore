@@ -13,7 +13,6 @@ using System.Xml.Serialization;
 
 namespace Bing.Utils.Helpers
 {
-    // TODO:新引入需整理
     /// <summary>
     /// Class ModelHelper.
     /// </summary>

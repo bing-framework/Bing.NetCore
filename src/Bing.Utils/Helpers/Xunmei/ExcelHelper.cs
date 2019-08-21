@@ -1,11 +1,4 @@
-﻿// ***********************************************************************
-// Assembly         : Utilities
-// Author           : zhuzhiqing
-// Created          : 01-20-2015
-//
-// Last Modified By : zhuzhiqing
-// Last Modified On : 01-20-2015
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
