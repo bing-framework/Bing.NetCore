@@ -72,55 +72,47 @@ namespace Bing.Logs.Exceptionless
             SetSource(builder, content);
             SetReferenceId(builder, content);
             AddProperties(builder, content as ILogConvert);
+            AddTags(builder, content);
             builder.Submit();
         }
 
         /// <summary>
         /// 初始化行号
         /// </summary>
-        private void InitLine()
-        {
-            _line = 1;
-        }
+        private void InitLine() => _line = 1;
 
         /// <summary>
         /// 创建事件生成器
         /// </summary>
         /// <param name="level">平台日志等级</param>
         /// <param name="content">日志内容</param>
-        /// <returns></returns>
         private el.EventBuilder CreateBuilder(LogLevel level, ILogContent content)
         {
-            if (content.Exception != null)
-            {
-                return _client.CreateException(content.Exception).AddTags(level.Description());
-            }
-            return _client.CreateLog(GetMessage(content), ConvertTo(level));
+            if (content.Exception != null && (level == LogLevel.Error || level == LogLevel.Fatal))
+                return _client.CreateException(content.Exception);
+            var builder = _client.CreateLog(GetMessage(content), ConvertTo(level));
+            if (content.Exception != null && level == LogLevel.Warning)
+                builder.SetException(content.Exception);
+            return builder;
         }
 
         /// <summary>
         /// 获取日志消息
         /// </summary>
         /// <param name="content">日志内容</param>
-        /// <returns></returns>
         private string GetMessage(ILogContent content)
         {
             if (content is ICaption caption && string.IsNullOrWhiteSpace(caption.Caption) == false)
-            {
                 return caption.Caption;
-            }
             if (content.Content.Length > 0)
-            {
                 return content.Content.ToString();
-            }
-            return content.TraceId;
+            return content.LogId;
         }
 
         /// <summary>
         /// 转换日志等级
         /// </summary>
         /// <param name="level">平台日志等级</param>
-        /// <returns></returns>
         private el.Logging.LogLevel ConvertTo(LogLevel level)
         {
             switch (level)
@@ -145,13 +137,11 @@ namespace Bing.Logs.Exceptionless
         /// <summary>
         /// 设置用户信息
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="content">日志内容</param>
         private void SetUser(ILogContent content)
         {
             if (string.IsNullOrWhiteSpace(content.UserId))
-            {
                 return;
-            }
             _client.Configuration.SetUserIdentity(content.UserId);
         }
 
@@ -163,9 +153,7 @@ namespace Bing.Logs.Exceptionless
         private void SetSource(EventBuilder builder, ILogContent content)
         {
             if (string.IsNullOrWhiteSpace(content.Url))
-            {
                 return;
-            }
             builder.SetSource(content.Url);
         }
 
@@ -174,10 +162,7 @@ namespace Bing.Logs.Exceptionless
         /// </summary>
         /// <param name="builder">事件生成器</param>
         /// <param name="content">日志内容</param>
-        private void SetReferenceId(EventBuilder builder, ILogContent content)
-        {
-            builder.SetReferenceId($"{content.TraceId}");
-        }
+        private void SetReferenceId(EventBuilder builder, ILogContent content) => builder.SetReferenceId($"{content.LogId}");
 
         /// <summary>
         /// 添加属性集合
@@ -187,26 +172,25 @@ namespace Bing.Logs.Exceptionless
         private void AddProperties(EventBuilder builder, ILogConvert content)
         {
             if (content == null)
-            {
                 return;
-            }
             foreach (var parameter in content.To().OrderBy(t => t.SortId))
             {
                 if (string.IsNullOrWhiteSpace(parameter.Value.SafeString()))
-                {
                     continue;
-                }
                 builder.SetProperty($"{GetLine()}. {parameter.Text}", parameter.Value);
             }
         }
 
         /// <summary>
+        /// 添加标签
+        /// </summary>
+        /// <param name="builder">事件生成器</param>
+        /// <param name="content">日志内容</param>
+        private void AddTags(EventBuilder builder, ILogContent content) => builder.AddTags(content.Level, content.LogName, content.TraceId);
+
+        /// <summary>
         /// 获取行号
         /// </summary>
-        /// <returns></returns>
-        private string GetLine()
-        {
-            return _line++.ToString().PadLeft(2, '0');
-        }
+        private string GetLine() => _line++.ToString().PadLeft(2, '0');
     }
 }

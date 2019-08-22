@@ -1,8 +1,6 @@
 ﻿using System;
-using Bing.Contexts;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Core;
-using Bing.Logs.Formats;
 using Bing.Sessions;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;

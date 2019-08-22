@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Exceptions;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Helpers;
@@ -109,6 +110,7 @@ namespace Bing.Samples.Api.Controllers
         public async Task TestGuid(Guid id)
         {
             var result = id;
+            throw new Warning("测试一下异常");
         }
     }
 }

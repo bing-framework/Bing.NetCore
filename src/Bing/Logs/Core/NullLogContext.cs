@@ -9,6 +9,11 @@ namespace Bing.Logs.Core
     public class NullLogContext:ILogContext
     {
         /// <summary>
+        /// 日志标识
+        /// </summary>
+        public string LogId => string.Empty;
+
+        /// <summary>
         /// 跟踪号
         /// </summary>
         public string TraceId => string.Empty;

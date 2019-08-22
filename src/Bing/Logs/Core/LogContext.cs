@@ -31,9 +31,14 @@ namespace Bing.Logs.Core
         private IContext _context;
 
         /// <summary>
+        /// 日志标识
+        /// </summary>
+        public string LogId => $"{GetInfo().TraceId}-{++_orderId}";
+
+        /// <summary>
         /// 跟踪号
         /// </summary>
-        public string TraceId => $"{GetInfo().TraceId}-{++_orderId}";
+        public string TraceId => $"{GetInfo().TraceId}";
 
         /// <summary>
         /// 计时器
@@ -71,10 +76,7 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 初始化一个<see cref="LogContext"/>类型的实例
         /// </summary>
-        public LogContext()
-        {
-            _orderId = 0;
-        }
+        public LogContext() => _orderId = 0;
 
         #endregion
 

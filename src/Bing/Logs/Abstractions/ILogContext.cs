@@ -10,6 +10,11 @@ namespace Bing.Logs.Abstractions
     public interface ILogContext
     {
         /// <summary>
+        /// 日志标识
+        /// </summary>
+        string LogId { get; }
+
+        /// <summary>
         /// 跟踪号
         /// </summary>
         string TraceId { get; }

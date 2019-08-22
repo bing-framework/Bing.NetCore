@@ -25,6 +25,11 @@ namespace Bing.Logs.Contents
         public string Level { get; set; }
 
         /// <summary>
+        /// 日志标识
+        /// </summary>
+        public string LogId { get; set; }
+
+        /// <summary>
         /// 跟踪号
         /// </summary>
         public string TraceId { get; set; }
