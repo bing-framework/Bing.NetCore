@@ -342,39 +342,19 @@ namespace Bing.Utils.Helpers
             return Array.ConvertAll(memberInfo.GetCustomAttributes(typeof(TAttribute), false), x => (TAttribute)x);
         }
 
+        #endregion
+
+        #region GetProperity
+
         /// <summary>
-        /// 获取指定实体中指定属性值
+        /// 获取属性
         /// </summary>
-        /// <param name="obj">对象实例</param>
+        /// <param name="type">类型</param>
         /// <param name="attributeName">属性名</param>
-        /// <returns></returns>
-        public static string GetAttributeValue(object obj, string attributeName)
+        /// <returns>存在时返回PropertyInfo，不存在时返回null</returns>
+        public static PropertyInfo GetAttributeValue(Type type, string attributeName)
         {
-            if (obj == null)
-                return string.Empty;
-            var type = obj.GetType();
-
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                if (string.Compare(pi.Name, attributeName, true) != 0)
-                {
-                    continue;
-                }
-                try
-                {
-                    var value = pi.GetValue(obj, null);
-                    if (value == null)
-                        return string.Empty;
-
-                    return value.ToString();
-                }
-                catch
-                {
-                    return string.Empty;
-                }
-            }
-
-            return string.Empty;
+            return type.GetProperties().Where(p => p.Name.Equals(attributeName)).FirstOrDefault();
         }
 
         #endregion
