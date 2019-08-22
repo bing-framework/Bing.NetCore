@@ -11,7 +11,7 @@ namespace Bing.Utils.Helpers
     /// </summary>
     public class XmlHelper
     {
-        #region 私有字段 (1) 
+        #region 私有字段
 
         /// <summary>
         /// The object XML document
@@ -20,7 +20,7 @@ namespace Bing.Utils.Helpers
 
         #endregion 私有字段 
 
-        #region 构造函数 (2) 
+        #region 构造函数
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlHelper" /> class.
@@ -42,20 +42,20 @@ namespace Bing.Utils.Helpers
 
         #endregion 构造函数 
 
-        #region 公共方法 (10) 
+        #region 公共方法
 
         /// <summary>
-        /// Gets the data.
+        /// 查找数据,返回一个DataView.
         /// </summary>
         /// <param name="xmlPathNode">The XML path node.</param>
         /// <returns>DataView.</returns>
         public DataView GetData(string xmlPathNode)
         {
-            //查找数据,返回一个DataView
             using (var ds = new DataSet())
             {
                 var node = objXmlDoc.SelectSingleNode(xmlPathNode);
-                if (node == null) return null;
+                if (node == null)
+                    return null;
                 using (var read = new StringReader(node.OuterXml))
                 {
                     ds.ReadXml(read);
@@ -65,13 +65,12 @@ namespace Bing.Utils.Helpers
         }
 
         /// <summary>
-        /// Gets all data.
+        /// 查找数据,返回一个DataView
         /// </summary>
         /// <param name="xmlPathNode">The XML path node.</param>
         /// <returns>DataView.</returns>
         public DataView GetAllData(string xmlPathNode)
         {
-            //查找数据。返回一个DataView
             using (var ds = new DataSet())
             {
                 using (var nodelist = objXmlDoc.SelectNodes(xmlPathNode))
@@ -91,23 +90,21 @@ namespace Bing.Utils.Helpers
         }
 
         /// <summary>
-        /// Replaces the specified XML path node.
+        /// 更新节点内容.
         /// </summary>
         /// <param name="xmlPathNode">The XML path node.</param>
         /// <param name="content">The content.</param>
         public void Replace(string xmlPathNode, string content)
         {
-            //更新节点内容。
             objXmlDoc.SelectSingleNode(xmlPathNode).InnerText = content;
         }
 
         /// <summary>
-        /// Deletes the specified node.
+        /// 删除一个节点.
         /// </summary>
         /// <param name="node">The node.</param>
         public void Delete(string node)
         {
-            //删除一个节点。
             string mainNode = node.Substring(0, node.LastIndexOf("/"));
             objXmlDoc.SelectSingleNode(mainNode).RemoveChild(objXmlDoc.SelectSingleNode(node));
         }
@@ -121,7 +118,6 @@ namespace Bing.Utils.Helpers
         /// <param name="content">The content.</param>
         public void InsertNode(string mainNode, string childNode, string element, string content)
         {
-            //插入一节点和此节点的一子节点。
             var objRootNode = objXmlDoc.SelectSingleNode(mainNode);
             var objChildNode = objXmlDoc.CreateElement(childNode);
             objRootNode.AppendChild(objChildNode);
@@ -140,7 +136,6 @@ namespace Bing.Utils.Helpers
         /// <param name="content">The content.</param>
         public void InsertElement(string mainNode, string element, string attrib, string attribContent, string content)
         {
-            //插入一个节点，带一属性。
             var objNode = objXmlDoc.SelectSingleNode(mainNode);
             var objElement = objXmlDoc.CreateElement(element);
             objElement.SetAttribute(attrib, attribContent);
@@ -156,7 +151,6 @@ namespace Bing.Utils.Helpers
         /// <param name="content">The content.</param>
         public void InsertElement(string mainNode, string element, string content)
         {
-            //插入一个节点，不带属性。
             var objNode = objXmlDoc.SelectSingleNode(mainNode);
             var objElement = objXmlDoc.CreateElement(element);
             objElement.InnerText = content;
@@ -169,7 +163,6 @@ namespace Bing.Utils.Helpers
         /// <param name="strXmlFile">The string XML file.</param>
         public void Save(string strXmlFile)
         {
-            //保存文檔。
             objXmlDoc.Save(strXmlFile);
             objXmlDoc = null;
         }
@@ -197,6 +190,7 @@ namespace Bing.Utils.Helpers
             {
                 throw new ArgumentException("参数不合法");
             }
+
             XmlReader reader = null;
             try
             {
@@ -207,9 +201,7 @@ namespace Bing.Utils.Helpers
                 settings.Schemas.Add(null, schemaFile);
                 using (reader = XmlReader.Create(xmlFile, settings))
                 {
-                    while (reader.Read())
-                    {
-                    }
+                    while (reader.Read()) { }
                 }
             }
             finally

@@ -13,26 +13,25 @@ namespace Bing.Utils.Helpers
     /// <typeparam name="T"></typeparam>
     public class ValidateHelper<T> where T : class
     {
-        //元数据列表
         /// <summary>
         /// The dic validations
         /// </summary>
         private Dictionary<string, List<ValidationAttribute>> dicValidations = new Dictionary<string, List<ValidationAttribute>>();
 
         /// <summary>
-        /// The d errors
+        /// 错误列表
         /// </summary>
-        private Dictionary<string, string> dErrors = new Dictionary<string, string>();//错误列表
+        private Dictionary<string, string> dErrors = new Dictionary<string, string>();
 
         /// <summary>
-        /// The is i data error information
+        /// 是否实现IDataErrorInfo接口
         /// </summary>
-        private bool isIDataErrorInfo;//是否实现IDataErrorInfo接口
+        private bool isIDataErrorInfo;
 
         /// <summary>
-        /// The validate object
+        /// 需要验证对象的实例
         /// </summary>
-        private T validateObj;//需要验证对象的实例
+        private T validateObj;
 
         /// <summary>
         /// 构造函数
@@ -84,7 +83,8 @@ namespace Bing.Utils.Helpers
         public ValidateHelper<T> Register(Expression<Func<T, object>> expr, ValidationAttribute metadata)
         {
             var prpName = GetExprName(expr);
-            if (string.IsNullOrEmpty(prpName)) return this;
+            if (string.IsNullOrEmpty(prpName))
+                return this;
             var key = prpName;
             if (dicValidations.ContainsKey(key))
             {
@@ -119,7 +119,7 @@ namespace Bing.Utils.Helpers
         {
             var properties = typeof(T).GetProperties();
             var baseType = typeof(ValidationAttribute);
-            List<ValidationAttribute> metadatas = new List<ValidationAttribute>();
+            var metadatas = new List<ValidationAttribute>();
             foreach (var property in properties)
             {
                 var atts = property.GetCustomAttributes(false);
@@ -169,14 +169,14 @@ namespace Bing.Utils.Helpers
             //触发所有的属性验证
             foreach (var key in dicValidations.Keys)
             {
-                if (dErrors != null) erroCount = dErrors.Count;
+                if (dErrors != null)
+                    erroCount = dErrors.Count;
                 if (notify != null)
                 {
                     notify.Invoke(validateObj, new object[] { key });
 
                     //手动触发验证事件时，IDataError的验证事件会先触发
-                    //然后才触发当前验证内的PropertyChanged属性，所以需要
-                    //2次触发
+                    //然后才触发当前验证内的PropertyChanged属性，所以需要2次触发
                     if (dErrors != null && dErrors.Count != erroCount)
                     {
                         notify.Invoke(validateObj, new object[] { key });
@@ -184,7 +184,7 @@ namespace Bing.Utils.Helpers
                 }
                 else
                 {
-                    this.PropertyChanged(validateObj, new PropertyChangedEventArgs(key));
+                    PropertyChanged(validateObj, new PropertyChangedEventArgs(key));
                 }
             }
 
@@ -242,9 +242,8 @@ namespace Bing.Utils.Helpers
             }
         }
 
-        //注册属性变更事件
         /// <summary>
-        /// Registers the event.
+        /// 注册属性变更事件.
         /// </summary>
         /// <param name="obj">The object.</param>
         private void RegisterEvent(T obj)
@@ -283,9 +282,8 @@ namespace Bing.Utils.Helpers
             return prpName;
         }
 
-        //获取属性值
         /// <summary>
-        /// Gets the property value.
+        /// 获取属性值.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="propertyName">Name of the property.</param>
@@ -300,9 +298,8 @@ namespace Bing.Utils.Helpers
             return null;
         }
 
-        //获取触发事件的methodinfo
         /// <summary>
-        /// Gets the property changed method.
+        /// 获取触发事件的methodinfo.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <returns>MethodInfo.</returns>
@@ -326,9 +323,8 @@ namespace Bing.Utils.Helpers
             return null;
         }
 
-        //silverlight下 GetValue抛出fiedlaccessexception，不能使用这类方法来处理
         /// <summary>
-        /// Gets the event member.
+        /// Gets the event member,silverlight下 GetValue抛出fiedlaccessexception，不能使用这类方法来处理.
         /// </summary>
         /// <param name="bindableObject">The bindable object.</param>
         /// <returns>System.Object.</returns>

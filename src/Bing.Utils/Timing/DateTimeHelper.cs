@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Bing.Utils.Timing
@@ -90,13 +91,13 @@ namespace Bing.Utils.Timing
         #region BusinessDateFormat(业务时间格式化)
 
         /// <summary>
-        /// 业务时间格式化，返回 秒前，小时前，天前，周前，月前
+        /// 业务时间格式化，返回:大于60天-"yyyy-MM-dd",31~60天-1个月前，15~30天-2周前,8~14天-1周前,1~7天-x天前 ,大于1小时-x小时前,x秒前
         /// </summary>
         /// <param name="dateTime">时间</param>
         /// <returns></returns>
-        public static string BusinessDateFormat(DateTime dateTime)
+        public static string BusinessDateString(DateTime dateTime)
         {
-            TimeSpan span = (DateTime.Now - dateTime).Duration();
+            var span = (DateTime.Now - dateTime).Duration();
             if (span.TotalDays > 60)
             {
                 return dateTime.ToString("yyyy-MM-dd");
@@ -129,22 +130,22 @@ namespace Bing.Utils.Timing
         }
 
         /// <summary>
-        /// 获取时间字符串(刚刚、分钟前、小时前、天前、yyyy-MM-dd HH:mm:ss)
+        /// 获取时间字符串(小于5分-刚刚、5~60分-x分钟前、1~24小时-x小时前、1~60天-x天前、yyyy-MM-dd HH:mm:ss)
         /// </summary>
         /// <param name="dateTime"></param>
         /// <returns></returns>
-        public static string GetDateTimeString(DateTime dateTime)
+        public static string BusinessDateString2(DateTime dateTime)
         {
-            return GetDateTimeString(dateTime, "yyyy-MM-dd HH:mm:ss");
+            return BusinessDateString(dateTime, "yyyy-MM-dd HH:mm:ss");
         }
 
         /// <summary>
-        /// 获取时间字符串(刚刚、分钟前、小时前、天前)
+        /// 获取时间字符串(小于5分-刚刚、5~60分-x分钟前、1~24小时-x小时前、1~60天-x天前、yyyy-MM-dd HH:mm:ss)
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="defaultFormat"></param>
         /// <returns></returns>
-        public static string GetDateTimeString(DateTime dt, string defaultFormat)
+        public static string BusinessDateString(DateTime dt, string defaultFormat)
         {
             var timeSpan = DateTime.Now - dt;
             string result = string.Empty;
@@ -165,19 +166,20 @@ namespace Bing.Utils.Timing
 
         #endregion
 
+        #region GetWeekDay(计算当前为星期几)
+
         /// <summary>
         /// 根据当前日期确定当前是星期几
         /// </summary>
         /// <param name="strDate">The string date.</param>
         /// <returns>System.String.</returns>
         /// <exception cref="System.Exception"></exception>
-        public string GetWeekDay(string strDate)
+        public static DayOfWeek GetWeekDay(string strDate)
         {
             try
             {
                 //需要判断的时间
                 DateTime dTime = Convert.ToDateTime(strDate);
-
                 return GetWeekDay(dTime);
             }
             catch (Exception ex)
@@ -192,7 +194,7 @@ namespace Bing.Utils.Timing
         /// <param name="dTime">The d time.</param>
         /// <returns>System.String.</returns>
         /// <exception cref="System.Exception"></exception>
-        public string GetWeekDay(DateTime dTime)
+        public static DayOfWeek GetWeekDay(DateTime dTime)
         {
             try
             {
@@ -207,16 +209,76 @@ namespace Bing.Utils.Timing
         }
 
         /// <summary>
+        /// 转换星期的表示方法
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <returns>System.String.</returns>
+        private static DayOfWeek GetWeekDay(int index)
+        {
+            return (DayOfWeek)index;
+        }
+
+        /// <summary>
+        /// 转换星期的表示方法
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <returns>System.String.</returns>
+        public static string GetChineseWeekDay(DayOfWeek dayOfWeek)
+        {
+            string retVal = string.Empty;
+
+            switch (dayOfWeek)
+            {
+                case DayOfWeek.Sunday:
+                    retVal = "星期日";
+                    break;
+
+                case DayOfWeek.Monday:
+                    retVal = "星期一";
+                    break;
+
+                case DayOfWeek.Tuesday:
+                    retVal = "星期二";
+                    break;
+
+                case DayOfWeek.Wednesday:
+                    retVal = "星期三";
+                    break;
+
+                case DayOfWeek.Thursday:
+                    retVal = "星期四";
+                    break;
+
+                case DayOfWeek.Friday:
+                    retVal = "星期五";
+                    break;
+
+                case DayOfWeek.Saturday:
+                    retVal = "星期六";
+                    break;
+
+                default:
+                    break;
+            }
+
+            return retVal;
+        }
+
+        #endregion
+
+        #region GetMaxWeekOfYear(计算当前年的最大周数)
+
+        /// <summary>
         /// 获取当前年的最大周数
         /// </summary>
         /// <param name="year">The year.</param>
         /// <returns>System.Int32.</returns>
         /// <exception cref="System.Exception"></exception>
-        public int GetMaxWeekOfYear(int year)
+        public static int GetMaxWeekOfYear(int year)
         {
             try
             {
-                DateTime tempDate = new DateTime(year, 12, 31);
+                var tempDate = new DateTime(year, 12, 31);
                 int tempDayOfWeek = (int)tempDate.DayOfWeek;
                 if (tempDayOfWeek != 0)
                 {
@@ -236,7 +298,7 @@ namespace Bing.Utils.Timing
         /// <param name="dTime">The d time.</param>
         /// <returns>System.Int32.</returns>
         /// <exception cref="System.Exception"></exception>
-        public int GetMaxWeekOfYear(DateTime dTime)
+        public static int GetMaxWeekOfYear(DateTime dTime)
         {
             try
             {
@@ -248,37 +310,38 @@ namespace Bing.Utils.Timing
             }
         }
 
+        #endregion
+
+        #region GetWeekIndex(计算当前是第几周)
+
         /// <summary>
         /// 根据时间获取当前是第几周
         /// </summary>
         /// <param name="dTime">The d time.</param>
         /// <returns>System.Int32.</returns>
         /// <exception cref="System.Exception"></exception>
-        public int GetWeekIndex(DateTime dTime)
+        public static int GetWeekIndex(DateTime dTime)
         {
             //如果12月31号与下一年的1月1好在同一个星期则算下一年的第一周
             try
             {
-                //需要判断的时间
-                //DateTime dTime = Convert.ToDateTime(strDate);
                 //确定此时间在一年中的位置
                 int dayOfYear = dTime.DayOfYear;
 
-                //DateTime tempDate = new DateTime(dTime.Year,1,6,calendar);
                 //当年第一天
-                DateTime tempDate = new DateTime(dTime.Year, 1, 1);
+                var tempDate = new DateTime(dTime.Year, 1, 1);
 
                 //确定当年第一天
                 int tempDayOfWeek = (int)tempDate.DayOfWeek;
                 tempDayOfWeek = tempDayOfWeek == 0 ? 7 : tempDayOfWeek;
+
                 //确定星期几
                 int index = (int)dTime.DayOfWeek;
-
                 index = index == 0 ? 7 : index;
 
                 //当前周的范围
-                DateTime retStartDay = dTime.AddDays(-(index - 1));
-                DateTime retEndDay = dTime.AddDays(7 - index);
+                var retStartDay = dTime.AddDays(-(index - 1));
+                var retEndDay = dTime.AddDays(7 - index);
 
                 //确定当前是第几周
                 int weekIndex = (int)Math.Ceiling(((double)dayOfYear + tempDayOfWeek - 1) / 7);
@@ -302,12 +365,12 @@ namespace Bing.Utils.Timing
         /// <param name="strDate">The string date.</param>
         /// <returns>System.Int32.</returns>
         /// <exception cref="System.Exception"></exception>
-        public int GetWeekIndex(string strDate)
+        public static int GetWeekIndex(string strDate)
         {
             try
             {
                 //需要判断的时间
-                DateTime dTime = Convert.ToDateTime(strDate);
+                var dTime = Convert.ToDateTime(strDate);
                 return GetWeekIndex(dTime);
             }
             catch (Exception ex)
@@ -316,19 +379,25 @@ namespace Bing.Utils.Timing
             }
         }
 
+        #endregion
+
+        #region GetWeekRange(计算周范围)
+
         /// <summary>
         /// 根据时间取周的日期范围
         /// </summary>
         /// <param name="strDate">The string date.</param>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">结束日期</param>
         /// <returns>System.String.</returns>
         /// <exception cref="System.Exception"></exception>
-        public string GetWeekRange(string strDate)
+        public static void GetWeekRange(string strDate, out DateTime startDate, out DateTime endDate)
         {
             try
             {
                 //需要判断的时间
-                DateTime dTime = Convert.ToDateTime(strDate);
-                return GetWeekRange(dTime);
+                var dTime = Convert.ToDateTime(strDate);
+                GetWeekRange(dTime, out startDate, out endDate);
             }
             catch (Exception ex)
             {
@@ -340,21 +409,19 @@ namespace Bing.Utils.Timing
         /// 根据时间取周的日期范围
         /// </summary>
         /// <param name="dTime">The d time.</param>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">结束日期</param>
         /// <returns>System.String.</returns>
         /// <exception cref="System.Exception"></exception>
-        public string GetWeekRange(DateTime dTime)
+        public static void GetWeekRange(DateTime dTime, out DateTime startDate, out DateTime endDate)
         {
             try
             {
                 int index = (int)dTime.DayOfWeek;
-
                 index = index == 0 ? 7 : index;
 
-                //当前周的范围
-                DateTime retStartDay = dTime.AddDays(-(index - 1));
-                DateTime retEndDay = dTime.AddDays(7 - index);
-
-                return WeekRangeToString(retStartDay, retEndDay);
+                startDate = dTime.AddDays(-(index - 1));
+                endDate = dTime.AddDays(7 - index);
             }
             catch (Exception ex)
             {
@@ -367,6 +434,8 @@ namespace Bing.Utils.Timing
         /// </summary>
         /// <param name="year">The year.</param>
         /// <param name="weekIndex">Index of the week.</param>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">结束日期</param>
         /// <returns>System.String.</returns>
         /// <exception cref="System.Exception">
         /// 请输入大于0的整数
@@ -374,54 +443,51 @@ namespace Bing.Utils.Timing
         /// 今年没有第 + weekIndex + 周。
         /// or
         /// </exception>
-        public string GetWeekRange(int year, int weekIndex)
+        public static void GetWeekRange(int year, int weekIndex, out DateTime startDate, out DateTime endDate)
         {
-            try
+            if (weekIndex < 1)
             {
-                if (weekIndex < 1)
-                {
-                    throw new Exception("请输入大于0的整数");
-                }
-
-                int allDays = (weekIndex - 1) * 7;
-                //确定当年第一天
-                DateTime firstDate = new DateTime(year, 1, 1);
-                int firstDayOfWeek = (int)firstDate.DayOfWeek;
-
-                firstDayOfWeek = firstDayOfWeek == 0 ? 7 : firstDayOfWeek;
-
-                //周开始日
-                int startAddDays = allDays + (1 - firstDayOfWeek);
-                DateTime weekRangeStart = firstDate.AddDays(startAddDays);
-                //周结束日
-                int endAddDays = allDays + (7 - firstDayOfWeek);
-                DateTime weekRangeEnd = firstDate.AddDays(endAddDays);
-
-                if (weekRangeStart.Year > year ||
-                 (weekRangeStart.Year == year && weekRangeEnd.Year > year))
-                {
-                    throw new Exception("今年没有第" + weekIndex + "周。");
-                }
-
-                return WeekRangeToString(weekRangeStart, weekRangeEnd);
+                throw new Exception("请输入大于0的整数");
             }
-            catch (Exception ex)
+
+            int allDays = (weekIndex - 1) * 7;
+
+            //确定当年第一天
+            var firstDate = new DateTime(year, 1, 1);
+            int firstDayOfWeek = (int)firstDate.DayOfWeek;
+            firstDayOfWeek = firstDayOfWeek == 0 ? 7 : firstDayOfWeek;
+
+            //周开始日
+            int startAddDays = allDays + (1 - firstDayOfWeek);
+            var weekRangeStart = firstDate.AddDays(startAddDays);
+
+            //周结束日
+            int endAddDays = allDays + (7 - firstDayOfWeek);
+            var weekRangeEnd = firstDate.AddDays(endAddDays);
+
+            if (weekRangeStart.Year > year ||
+             (weekRangeStart.Year == year && weekRangeEnd.Year > year))
             {
-                throw new Exception(ex.Message);
+                throw new Exception("今年没有第" + weekIndex + "周。");
             }
+
+            startDate = weekRangeStart;
+            endDate = weekRangeEnd;
         }
 
         /// <summary>
         /// 根据时间取周的日期范围
         /// </summary>
         /// <param name="weekIndex">Index of the week.</param>
+        /// <param name="startDate">输出开始日期</param>
+        /// <param name="endDate">输出结束日期</param>
         /// <returns>System.String.</returns>
         /// <exception cref="System.Exception"></exception>
-        public string GetWeekRange(int weekIndex)
+        public static void GetWeekRange(int weekIndex, out DateTime startDate, out DateTime endDate)
         {
             try
             {
-                return GetWeekRange(DateTime.Now.Year, weekIndex);
+                GetWeekRange(DateTime.Now.Year, weekIndex, out startDate, out endDate);
             }
             catch (Exception ex)
             {
@@ -429,127 +495,12 @@ namespace Bing.Utils.Timing
             }
         }
 
-        /// <summary>
-        /// 周范围.
-        /// </summary>
-        /// <param name="weekRangeStart">周开始日期.</param>
-        /// <param name="weekRangeEnd">周结束日期.</param>
-        /// <returns>日期范围{yyyy/MM/dd~yyyy/MM/dd}.</returns>
-        private string WeekRangeToString(DateTime weekRangeStart, DateTime weekRangeEnd)
-        {
-            string strWeekRangeStart = weekRangeStart.ToString("yyyy/MM/dd");
-            string strWeekRangeend = weekRangeEnd.ToString("yyyy/MM/dd");
+        #endregion
 
-            return strWeekRangeStart + "～" + strWeekRangeend;
-        }
+        #region GetDateRange(计算当前时间范围)
 
         /// <summary>
-        /// 转换星期的表示方法
-        /// </summary>
-        /// <param name="index">The index.</param>
-        /// <returns>System.String.</returns>
-        public string GetWeekDay(int index)
-        {
-            string retVal = string.Empty;
-            switch (index)
-            {
-                case 0:
-                    {
-                        retVal = "星期日";
-                        break;
-                    }
-                case 1:
-                    {
-                        retVal = "星期一";
-                        break;
-                    }
-                case 2:
-                    {
-                        retVal = "星期二";
-                        break;
-                    }
-                case 3:
-                    {
-                        retVal = "星期三";
-                        break;
-                    }
-                case 4:
-                    {
-                        retVal = "星期四";
-                        break;
-                    }
-                case 5:
-                    {
-                        retVal = "星期五";
-                        break;
-                    }
-                case 6:
-                    {
-                        retVal = "星期六";
-                        break;
-                    }
-            }
-
-            return retVal;
-        }
-
-        /// <summary>
-        /// 计算第几周（重新修改后）
-        /// </summary>
-        /// <param name="dt">The dt.</param>
-        /// <returns>System.Int32.</returns>
-        public int GetWeekOfCurrDate(DateTime dt)
-        {
-            int Week = 1;
-
-            int nYear = dt.Year;
-
-            System.DateTime FirstDayInYear = new DateTime(nYear, 1, 1);
-
-            System.DateTime LastDayInYear = new DateTime(nYear, 12, 31);
-
-            int DaysOfYear = Convert.ToInt32(LastDayInYear.DayOfYear);
-
-            int WeekNow = Convert.ToInt32(FirstDayInYear.DayOfWeek) - 1;
-
-            if (WeekNow < 0) WeekNow = 6;
-
-            int DayAdd = 6 - WeekNow;
-
-            System.DateTime BeginDayOfWeek = new DateTime(nYear, 1, 1);
-
-            System.DateTime EndDayOfWeek = BeginDayOfWeek.AddDays(DayAdd);
-
-            Week = 2;
-
-            for (int i = DayAdd + 1; i <= DaysOfYear; i++)
-            {
-                BeginDayOfWeek = FirstDayInYear.AddDays(i);
-
-                if (i + 6 > DaysOfYear)
-                {
-                    EndDayOfWeek = BeginDayOfWeek.AddDays(DaysOfYear - i - 1);
-                }
-                else
-                {
-                    EndDayOfWeek = BeginDayOfWeek.AddDays(6);
-                }
-
-                if (dt.Month == EndDayOfWeek.Month && dt.Day <= EndDayOfWeek.Day)
-                {
-                    break;
-                }
-
-                Week++;
-
-                i = i + 6;
-            }
-
-            return Week;
-        }
-
-        /// <summary>
-        /// 获取时间范围
+        /// 获取当前的时间范围
         /// </summary>
         /// <param name="range"></param>
         /// <param name="startDate"></param>
@@ -560,7 +511,7 @@ namespace Bing.Utils.Timing
         }
 
         /// <summary>
-        /// 获取时间范围
+        /// 获取当前时间范围
         /// </summary>
         /// <param name="date">当前日期</param>
         /// <param name="range">日期范围</param>
@@ -624,5 +575,7 @@ namespace Bing.Utils.Timing
                     break;
             }
         }
+
+        #endregion
     }
 }
