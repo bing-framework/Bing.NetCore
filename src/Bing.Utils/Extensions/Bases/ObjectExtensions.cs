@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 
 // ReSharper disable once CheckNamespace
@@ -43,25 +42,25 @@ namespace Bing.Utils.Extensions
 
         #endregion
 
-        #region PropertyClone 属性克隆
+        #region PropertyClone 对象值克隆
 
         /// <summary>
         /// 从源对象赋值到当前对象
         /// </summary>
         /// <param name="destination">当前对象</param>
-        /// <param name="source">源对象</param>
+        /// <param name="source">数据源对象</param>
         /// <returns>成功复制的值个数</returns>
         public static int ClonePropertyFrom(this object destination, object source)
         {
-            return ClonePropertyFrom(destination, source, null);
+            return destination.ClonePropertyFrom(source, null);
         }
 
         /// <summary>
         /// 从源对象赋值到当前对象
         /// </summary>
         /// <param name="destination">当前对象</param>
-        /// <param name="source">源对象</param>
-        /// <param name="excludeName">排除下列名称的属性不要复制</param>
+        /// <param name="source">数据源对象</param>
+        /// <param name="excludeName">排除下不要复制的属性名称</param>
         /// <returns>成功复制的值个数</returns>
         public static int ClonePropertyFrom(this object destination, object source, IEnumerable<string> excludeName)
         {
@@ -73,16 +72,21 @@ namespace Bing.Utils.Extensions
         }
 
         /// <summary>
-        /// 复制属性值
+        /// 从源对象赋值到当前对象
         /// </summary>
         /// <param name="this">当前对象</param>
-        /// <param name="source">属性值来源对象</param>
-        /// <param name="type">复制的属性字段模板</param>
-        /// <param name="excludeName">排除下列名称的属性不要复制</param>
+        /// <param name="source">数据源对象</param>
+        /// <param name="type">复制的属性的类型</param>
+        /// <param name="excludeName">排除不要复制属性名称</param>
         /// <returns>成功复制的值个数</returns>
         public static int ClonePropertyFrom(this object @this, object source, Type type, IEnumerable<string> excludeName)
         {
             if (@this == null || source == null)
+            {
+                return 0;
+            }
+
+            if (@this == source)
             {
                 return 0;
             }
@@ -144,7 +148,7 @@ namespace Bing.Utils.Extensions
         /// <returns>成功复制的值个数</returns>
         public static int ClonePropertyTo(this object source, object destination)
         {
-            return ClonePropertyTo(destination, source, null);
+            return source.ClonePropertyTo(destination, null);
         }
 
         /// <summary>

@@ -125,7 +125,7 @@ namespace Bing.Utils.Drawing
         }
 
         /// <summary>
-        /// 生成缩略图
+        /// 生成缩略图文件
         /// </summary>
         /// <param name="originalImagePath">源图路径（物理路径）</param>
         /// <param name="thumbnailPath">缩略图路径（物理路径）</param>
@@ -240,7 +240,7 @@ namespace Bing.Utils.Drawing
                 GraphicsUnit.Pixel);
             try
             {
-                //以jpg格式保存缩略图
+                //以png格式保存缩略图
                 bitmap.Save(thumbnailPath, System.Drawing.Imaging.ImageFormat.Png);
             }
             catch (System.Exception e)
@@ -256,7 +256,7 @@ namespace Bing.Utils.Drawing
         }
 
         /// <summary>
-        /// 生成缩略图
+        /// 生成缩略图文件
         /// </summary>
         /// <param name="originalImagePath">源图路径（物理路径）</param>
         /// <param name="thumbnailPath">缩略图路径（物理路径）</param>
@@ -269,7 +269,7 @@ namespace Bing.Utils.Drawing
         }
 
         /// <summary>
-        /// 生成缩略图
+        /// 生成缩略图文件
         /// </summary>
         /// <param name="originalImagePath">源图路径（物理路径）</param>
         /// <param name="thumbnailPath">缩略图路径（物理路径）</param>
