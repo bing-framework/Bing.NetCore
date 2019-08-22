@@ -132,20 +132,10 @@ namespace Bing.Utils.Timing
         /// <summary>
         /// 获取时间字符串(小于5分-刚刚、5~60分-x分钟前、1~24小时-x小时前、1~60天-x天前、yyyy-MM-dd HH:mm:ss)
         /// </summary>
-        /// <param name="dateTime"></param>
-        /// <returns></returns>
-        public static string BusinessDateString2(DateTime dateTime)
-        {
-            return BusinessDateString(dateTime, "yyyy-MM-dd HH:mm:ss");
-        }
-
-        /// <summary>
-        /// 获取时间字符串(小于5分-刚刚、5~60分-x分钟前、1~24小时-x小时前、1~60天-x天前、yyyy-MM-dd HH:mm:ss)
-        /// </summary>
         /// <param name="dt"></param>
         /// <param name="defaultFormat"></param>
         /// <returns></returns>
-        public static string BusinessDateString(DateTime dt, string defaultFormat)
+        public static string BusinessDateString(DateTime dt, string defaultFormat = "yyyy-MM-dd HH:mm:ss")
         {
             var timeSpan = DateTime.Now - dt;
             string result = string.Empty;
