@@ -17,7 +17,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
     <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="NPOI" Version="2.4.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
@@ -40,16 +39,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
 
   <ItemGroup>
     <Folder Include="Extensions\Configuration\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Offices\Bing.Offices.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Data.SqlClient">
-      <HintPath>..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.data.sqlclient\4.6.0\ref\netcoreapp2.1\System.Data.SqlClient.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
