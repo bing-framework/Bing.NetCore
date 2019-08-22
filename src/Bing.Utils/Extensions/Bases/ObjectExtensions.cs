@@ -64,7 +64,7 @@ namespace Bing.Utils.Extensions
         /// <returns>成功复制的值个数</returns>
         public static int ClonePropertyFrom(this object destination, object source, IEnumerable<string> excludeName)
         {
-            if (destination == null || source == null)
+            if (source == null)
             {
                 return 0;
             }
@@ -160,7 +160,7 @@ namespace Bing.Utils.Extensions
         /// <returns>成功复制的值个数</returns>
         public static int ClonePropertyTo(this object source, object destination, IEnumerable<string> excludeName)
         {
-            if (destination == null || source == null)
+            if (destination == null)
             {
                 return 0;
             }

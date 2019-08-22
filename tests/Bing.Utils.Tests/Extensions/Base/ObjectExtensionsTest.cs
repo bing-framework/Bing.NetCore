@@ -120,22 +120,9 @@ namespace Bing.Utils.Tests.Extensions.Base
             Assert.Equal(b.Id, a.Id);
             Assert.Equal(b.Description, a.Description);
         }
-
-        ///// <summary>
-        ///// 测试安全转换为字符串
-        ///// </summary>
-        ///// <param name="input">输入值</param>
-        ///// <param name="result">结果</param>
-        //[Theory]
-        //[InlineData(null, "")]
-        //[InlineData("  ", "")]
-        //[InlineData(1, "1")]
-        //[InlineData(" 1 ", "1")]
-        //public void Test_SafeString(object input, string result)
-        //{
-        //    Assert.Equal(result, input.SafeString());
-        //}
     }
+
+    #region 辅助类
 
     internal class TestClassA
     {
@@ -152,4 +139,6 @@ namespace Bing.Utils.Tests.Extensions.Base
 
         public string Description { get; set; }
     }
+
+    #endregion
 }
