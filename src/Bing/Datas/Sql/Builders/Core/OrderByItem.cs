@@ -53,10 +53,7 @@ namespace Bing.Datas.Sql.Builders.Core
             Type = type;
             Raw = raw;
             if (raw)
-            {
                 return;
-            }
-
             Order = Order.RemoveEnd("asc");
             if (Order.ToLower().EndsWith("desc"))
             {
@@ -78,10 +75,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public string ToSql(IDialect dialect, IEntityAliasRegister register)
         {
             if (Raw)
-            {
                 return Order;
-            }
-
             var name = new NameItem(Order);
             return $"{name.ToSql(dialect, GetPrefix(register))} {(Desc ? "Desc" : null)}".TrimEnd();
         }
@@ -90,14 +84,10 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 获取前缀
         /// </summary>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
         private string GetPrefix(IEntityAliasRegister register)
         {
             if (string.IsNullOrWhiteSpace(Prefix) == false)
-            {
                 return Prefix;
-            }
-
             return register.GetAlias(Type);
         }
     }

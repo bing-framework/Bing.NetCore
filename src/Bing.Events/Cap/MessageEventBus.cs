@@ -39,7 +39,6 @@ namespace Bing.Events.Cap
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
         /// <param name="event">事件</param>
-        /// <returns></returns>
         public Task PublishAsync<TEvent>(TEvent @event) where TEvent : IMessageEvent
         {
             return PublishAsync(@event.Name, @event.Data, @event.Callback, @event.Send);

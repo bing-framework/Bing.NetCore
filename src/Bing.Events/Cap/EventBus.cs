@@ -7,7 +7,7 @@ namespace Bing.Events.Cap
     /// <summary>
     /// Cap事件总线
     /// </summary>
-    public class EventBus:IEventBus
+    public class EventBus : IEventBus
     {
         /// <summary>
         /// 基于内存的简单事件总线
@@ -35,7 +35,6 @@ namespace Bing.Events.Cap
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
         /// <param name="event">事件</param>
-        /// <returns></returns>
         public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : IEvent
         {
             await SimpleEventBus.PublishAsync(@event);

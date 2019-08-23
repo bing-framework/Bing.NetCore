@@ -16,7 +16,6 @@ namespace Bing.Utils.Helpers
         /// 对byte[]数组进行压缩
         /// </summary>
         /// <param name="data">待压缩的byte数组</param>
-        /// <returns></returns>
         public static byte[] Compress(byte[] data)
         {
             using (var ms = new MemoryStream())
@@ -42,7 +41,6 @@ namespace Bing.Utils.Helpers
         /// 对byte[]数组进行解压
         /// </summary>
         /// <param name="data">待解压的byte数组U</param>
-        /// <returns></returns>
         public static byte[] Decompress(byte[] data)
         {
             using (var tmpMs = new MemoryStream())
@@ -68,14 +66,10 @@ namespace Bing.Utils.Helpers
         /// 对字符串进行压缩
         /// </summary>
         /// <param name="value">待压缩的字符串</param>
-        /// <returns></returns>
         public static string Compress(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return string.Empty;
-            }
-
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             bytes = Compress(bytes);
             return Convert.ToBase64String(bytes);
@@ -89,14 +83,10 @@ namespace Bing.Utils.Helpers
         /// 对字符串进行解压
         /// </summary>
         /// <param name="value">待解压的字符串</param>
-        /// <returns></returns>
         public static string Decompress(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return string.Empty;
-            }
-
             byte[] bytes = Convert.FromBase64String(value);
             bytes = Decompress(bytes);
             return Encoding.UTF8.GetString(bytes);
@@ -111,10 +101,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="sourceDir">压缩目录</param>
         /// <param name="zipFile">压缩文件存放路径</param>
-        public static void Zip(string sourceDir, string zipFile)
-        {
-            ZipFile.CreateFromDirectory(sourceDir, zipFile);
-        }
+        public static void Zip(string sourceDir, string zipFile) => ZipFile.CreateFromDirectory(sourceDir, zipFile);
 
         #endregion
 
@@ -125,10 +112,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="zipFile">压缩文件路径</param>
         /// <param name="targetDir">目标解压目录</param>
-        public static void UnZip(string zipFile, string targetDir)
-        {
-            ZipFile.ExtractToDirectory(zipFile, targetDir);
-        }
+        public static void UnZip(string zipFile, string targetDir) => ZipFile.ExtractToDirectory(zipFile, targetDir);
 
         #endregion
 

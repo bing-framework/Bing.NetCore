@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Bing.Datas.Sql.Builders.Extensions;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
