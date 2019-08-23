@@ -55,9 +55,11 @@ namespace Bing.Utils.Helpers
                 ? attribute.Description
                 : member.Name;
         }
+
         #endregion
 
         #region GetDisplayName(获取类型显示名称)
+
         /// <summary>
         /// 获取类型显示名称，使用<see cref="DisplayNameAttribute"/>设置显示名称
         /// </summary>
@@ -90,6 +92,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region GetDisplayNameOrDescription(获取显示名称或类型描述)
+
         /// <summary>
         /// 获取类型显示名称或描述，使用<see cref="DescriptionAttribute"/>设置描述，使用<see cref="DisplayNameAttribute"/>设置显示名称
         /// </summary>
@@ -107,9 +110,10 @@ namespace Bing.Utils.Helpers
         /// <returns></returns>
         public static string GetDisplayNameOrDescription(MemberInfo member)
         {
-            var result = GetDisplayName(member);            
+            var result = GetDisplayName(member);
             return string.IsNullOrWhiteSpace(result) ? GetDescription(member) : result;
         }
+
         #endregion
 
         #region FindTypes(查找类型列表)
@@ -195,7 +199,7 @@ namespace Bing.Utils.Helpers
 
             result.Add(type);
         }
-        
+
         /// <summary>
         /// 泛型匹配
         /// </summary>
@@ -210,7 +214,7 @@ namespace Bing.Utils.Helpers
             }
 
             var definition = findType.GetGenericTypeDefinition();
-            foreach (var implementedInterface in type.FindInterfaces((filiter,criteria)=>true,null))
+            foreach (var implementedInterface in type.FindInterfaces((filiter, criteria) => true, null))
             {
                 if (implementedInterface.IsGenericType == false)
                 {
@@ -222,7 +226,7 @@ namespace Bing.Utils.Helpers
 
             return false;
         }
-        
+
         #endregion
 
         #region GetInstancesByInterface(获取实现了接口的所有实例)
@@ -272,6 +276,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region GetAssembly(获取程序集)
+
         /// <summary>
         /// 获取程序集
         /// </summary>
@@ -282,6 +287,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region GetAssemblies(从目录获取所有程序集)
+
         /// <summary>
         /// 从目录获取所有程序集
         /// </summary>
@@ -296,6 +302,7 @@ namespace Bing.Utils.Helpers
                     .Select(path => Assembly.Load(new AssemblyName(path)))
                     .ToList();
         }
+
         #endregion
 
         #region GetCurrentAssemblyName(获取当前程序集名称)
@@ -337,7 +344,23 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region GetProperity
+
+        /// <summary>
+        /// 获取属性
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <param name="attributeName">属性名</param>
+        /// <returns>存在时返回PropertyInfo，不存在时返回null</returns>
+        public static PropertyInfo GetAttributeValue(Type type, string attributeName)
+        {
+            return type.GetProperties().Where(p => p.Name.Equals(attributeName)).FirstOrDefault();
+        }
+
+        #endregion
+
         #region IsBool(是否布尔类型)
+
         /// <summary>
         /// 是否布尔类型
         /// </summary>
@@ -353,6 +376,7 @@ namespace Bing.Utils.Helpers
             {
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.Boolean";
+
                 case MemberTypes.Property:
                     return IsBool((PropertyInfo)member);
             }
@@ -368,9 +392,11 @@ namespace Bing.Utils.Helpers
         {
             return property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?);
         }
+
         #endregion
 
         #region IsEnum(是否枚举类型)
+
         /// <summary>
         /// 是否枚举类型
         /// </summary>
@@ -386,6 +412,7 @@ namespace Bing.Utils.Helpers
             {
                 case MemberTypes.TypeInfo:
                     return ((TypeInfo)member).IsEnum;
+
                 case MemberTypes.Property:
                     return IsEnum((PropertyInfo)member);
             }
@@ -410,9 +437,11 @@ namespace Bing.Utils.Helpers
             }
             return value.GetTypeInfo().IsEnum;
         }
+
         #endregion
 
         #region IsDate(是否日期类型)
+
         /// <summary>
         /// 是否日期类型
         /// </summary>
@@ -428,6 +457,7 @@ namespace Bing.Utils.Helpers
             {
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.DateTime";
+
                 case MemberTypes.Property:
                     return IsDate((PropertyInfo)member);
             }
@@ -451,9 +481,11 @@ namespace Bing.Utils.Helpers
             }
             return false;
         }
+
         #endregion
 
         #region IsInt(是否整型)
+
         /// <summary>
         /// 是否整型
         /// </summary>
@@ -470,6 +502,7 @@ namespace Bing.Utils.Helpers
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.Int32" || member.ToString() == "System.Int16" ||
                            member.ToString() == "System.Int64";
+
                 case MemberTypes.Property:
                     return IsInt((PropertyInfo)member);
             }
@@ -509,9 +542,11 @@ namespace Bing.Utils.Helpers
             }
             return false;
         }
+
         #endregion
 
         #region IsNumber(是否数值类型)
+
         /// <summary>
         /// 是否数值类型
         /// </summary>
@@ -533,6 +568,7 @@ namespace Bing.Utils.Helpers
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.Double" || member.ToString() == "System.Decimal" ||
                            member.ToString() == "System.Single";
+
                 case MemberTypes.Property:
                     return IsNumber((PropertyInfo)member);
             }
@@ -572,6 +608,7 @@ namespace Bing.Utils.Helpers
             }
             return false;
         }
+
         #endregion
 
         #region IsCollection(是否集合)
@@ -585,6 +622,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region IsGenericCollection(是否泛型集合)
+
         /// <summary>
         /// 是否泛型集合
         /// </summary>
@@ -601,6 +639,7 @@ namespace Bing.Utils.Helpers
                    || typeDefinition == typeof(IList<>)
                    || typeDefinition == typeof(List<>);
         }
+
         #endregion
 
         #region GetPublicProperties(获取公共属性列表)
@@ -719,7 +758,7 @@ namespace Bing.Utils.Helpers
                 throw new ArgumentException("该功能只支持泛型类型的调用，非泛型类型可使用 IsAssignableFrom 方法。");
             }
 
-            var allOthers = new List<Type>() {type};
+            var allOthers = new List<Type>() { type };
             if (genericType.IsInterface)
             {
                 allOthers.AddRange(type.GetInterfaces());
@@ -728,7 +767,7 @@ namespace Bing.Utils.Helpers
             foreach (var other in allOthers)
             {
                 var cur = other;
-                while (cur!=null)
+                while (cur != null)
                 {
                     if (cur.IsGenericType)
                     {
