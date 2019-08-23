@@ -337,6 +337,21 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
+        #region GetProperity
+
+        /// <summary>
+        /// 获取属性
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <param name="attributeName">属性名</param>
+        /// <returns>存在时返回PropertyInfo，不存在时返回null</returns>
+        public static PropertyInfo GetAttributeValue(Type type, string attributeName)
+        {
+            return type.GetProperties().Where(p => p.Name.Equals(attributeName)).FirstOrDefault();
+        }
+
+        #endregion
+
         #region IsBool(是否布尔类型)
         /// <summary>
         /// 是否布尔类型

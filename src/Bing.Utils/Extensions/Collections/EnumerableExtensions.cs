@@ -148,14 +148,15 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="enumerable">集合</param>
+        /// <param name="tableName">表名</param>
         /// <exception cref="ArgumentNullException">源集合对象为空</exception>
-        public static DataTable ToDataTable<T>(this IEnumerable<T> enumerable)
+        public static DataTable ToDataTable<T>(this IEnumerable<T> enumerable, string tableName = "")
         {
             if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable), $@"源{typeof(T).Name}集合对象不可为空！");
             var type = typeof(T);
             var properties = type.GetProperties();
-            var dataTable = new DataTable();
+            var dataTable = string.IsNullOrEmpty(tableName) ? new DataTable() : new DataTable(tableName);
             foreach (var property in properties)
             {
                 dataTable.Columns.Add(new DataColumn(property.Name));
@@ -186,7 +187,7 @@ namespace Bing.Utils.Extensions
         /// <param name="condition">第三方条件</param>
         public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate, bool condition)
         {
-            if(enumerable==null)
+            if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable), $@"源{typeof(T).Name}集合对象不可为空！");
             enumerable = enumerable as IList<T> ?? enumerable.ToList();
             return condition ? enumerable.Where(predicate) : enumerable;
