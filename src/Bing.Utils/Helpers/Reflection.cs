@@ -337,18 +337,15 @@ namespace Bing.Utils.Helpers
 
         #endregion
 
-        #region GetProperity
+        #region GetPropertyInfo(获取属性信息)
 
         /// <summary>
-        /// 获取属性
+        /// 获取属性信息
         /// </summary>
         /// <param name="type">类型</param>
-        /// <param name="attributeName">属性名</param>
+        /// <param name="propertyName">属性名</param>
         /// <returns>存在时返回PropertyInfo，不存在时返回null</returns>
-        public static PropertyInfo GetAttributeValue(Type type, string attributeName)
-        {
-            return type.GetProperties().Where(p => p.Name.Equals(attributeName)).FirstOrDefault();
-        }
+        public static PropertyInfo GetPropertyInfo(Type type, string propertyName) => type.GetProperties().FirstOrDefault(p => p.Name.Equals(propertyName));
 
         #endregion
 
