@@ -14,4 +14,9 @@
     <Folder Include="Dependency\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+  </ItemGroup>
+
 </Project>

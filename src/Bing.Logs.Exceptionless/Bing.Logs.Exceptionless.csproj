@@ -7,7 +7,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Exceptionless" Version="4.3.2012" />
+    <PackageReference Include="Exceptionless" Version="4.3.2027" />
   </ItemGroup>
 
   <ItemGroup>

@@ -50,7 +50,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _account = config.Account ?? throw new ArgumentNullException(nameof(config.Account));
-            _proxy = HttpApiClient.Create<IKdniaoApi>();
+            _proxy = HttpApi.Create<IKdniaoApi>();
 
             var globalHandle = ExceptionHandleResolver.ResolveHandler();
             globalHandle += exceptionHandler;

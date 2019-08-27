@@ -9,7 +9,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao.Core
     /// 快递鸟 API
     /// </summary>
     [HttpHost("http://api.kdniao.cc")]
-    public interface IKdniaoApi:IHttpApiClient
+    public interface IKdniaoApi:IHttpApi
     {
         /// <summary>
         /// 即时查询

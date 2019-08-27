@@ -327,7 +327,7 @@ namespace Bing.Samples.Api
             ProjectName = "Bing.Samples.Api 在线文档调试",
             UseCustomIndex = true,
             RoutePrefix = "swagger",
-            ApiVersions = new List<string>() { "v1" },
+            ApiVersions = new List<ApiVersion>() { new ApiVersion() { Version = "v1"} },
             SwaggerAuthorizations = new List<CustomSwaggerAuthorization>()
             {
             },
