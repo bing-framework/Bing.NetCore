@@ -5,6 +5,7 @@ using Bing.Events.Messages;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using DotNetCore.CAP;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Events.Cap
 {
@@ -51,19 +52,19 @@ namespace Bing.Events.Cap
         /// <param name="data">事件数据</param>
         /// <param name="callback">回调名称</param>
         /// <param name="send">是否立即发送消息</param>
-        /// <returns></returns>
         public async Task PublishAsync(string name, object data, string callback = null, bool send = false)
         {
+            Publisher.Transaction.Value = Publisher.ServiceProvider.GetService<CapTransactionBase>();
             if (send)
             {
-                Publisher.Transaction.AutoCommit = true;
+                Publisher.Transaction.Value.AutoCommit = true;
                 await InternalPublishAsync(name, data, callback);
                 return;
             }
             TransactionActionManager.Register(async transaction =>
             {
-                Publisher.Transaction.DbTransaction = transaction;
-                Publisher.Transaction.AutoCommit = false;
+                Publisher.Transaction.Value.DbTransaction = transaction;
+                Publisher.Transaction.Value.AutoCommit = false;
                 await InternalPublishAsync(name, data, callback);
             });
         }
