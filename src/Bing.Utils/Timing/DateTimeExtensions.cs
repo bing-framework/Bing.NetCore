@@ -38,7 +38,6 @@ namespace Bing.Utils.Timing
         /// 当前时间是否周末
         /// </summary>
         /// <param name="dateTime">时间点</param>
-        /// <returns></returns>
         public static bool IsWeekend(this DateTime dateTime)
         {
             DayOfWeek[] weeks = { DayOfWeek.Saturday, DayOfWeek.Sunday };
@@ -52,7 +51,6 @@ namespace Bing.Utils.Timing
         /// 当前时间是否工作日
         /// </summary>
         /// <param name="dateTime">时间点</param>
-        /// <returns></returns>
         public static bool IsWeekday(this DateTime dateTime)
         {
             DayOfWeek[] weeks =

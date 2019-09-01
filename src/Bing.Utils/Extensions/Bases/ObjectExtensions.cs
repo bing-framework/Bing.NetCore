@@ -215,5 +215,57 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region Locking(锁定)
+
+        /// <summary>
+        /// 锁定
+        /// </summary>
+        /// <param name="source">锁定对象</param>
+        /// <param name="action">操作</param>
+        public static void Locking(this object source, Action action)
+        {
+            lock (source)
+                action?.Invoke();
+        }
+
+        /// <summary>
+        /// 锁定
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="source">锁定对象</param>
+        /// <param name="action">操作</param>
+        public static void Locking<T>(this T source, Action<T> action) where T : class
+        {
+            lock (source)
+                action?.Invoke(source);
+        }
+
+        /// <summary>
+        /// 锁定
+        /// </summary>
+        /// <typeparam name="TResult">结果类型</typeparam>
+        /// <param name="source">锁定对象</param>
+        /// <param name="func">执行函数</param>
+        public static TResult Locking<TResult>(this object source, Func<TResult> func)
+        {
+            lock (source)
+                return func();
+        }
+
+        /// <summary>
+        /// 锁定
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <typeparam name="TResult">结果类型</typeparam>
+        /// <param name="source">锁定对象</param>
+        /// <param name="func">执行函数</param>
+        public static TResult Locking<T, TResult>(this T source, Func<T, TResult> func) where T : class
+        {
+            lock (source)
+                return func(source);
+        }
+
+        #endregion
     }
 }

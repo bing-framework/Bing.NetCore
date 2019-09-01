@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Bing.Utils.Helpers;
 
 namespace Bing.Utils
