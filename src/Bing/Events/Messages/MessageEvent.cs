@@ -16,7 +16,7 @@ namespace Bing.Events.Messages
         /// <summary>
         /// 事件数据
         /// </summary>
-        public object Data { get; set; }        
+        public object Data { get; set; }
 
         /// <summary>
         /// 回调名称
@@ -34,7 +34,7 @@ namespace Bing.Events.Messages
         /// <returns></returns>
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             result.AppendLine($"事件标识: {Id}");
             result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
             if (string.IsNullOrWhiteSpace(Name) == false)
@@ -47,6 +47,14 @@ namespace Bing.Events.Messages
             }
             result.Append($"事件数据: {Bing.Utils.Json.JsonHelper.ToJson(Data)}");
             return result.ToString();
+        }
+    }
+
+    public class MessageEvent<T> : MessageEvent
+    {
+        public MessageEvent(T data)
+        {
+            Data = data;
         }
     }
 }
