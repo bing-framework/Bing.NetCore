@@ -9,7 +9,7 @@ namespace Bing.Samples.Api.Controllers
     /// 测试缓存控制器
     /// </summary>
     [Route("api/[controller]/[action]")]
-    public class TestCacheController:ApiControllerBase
+    public class TestCacheController : ApiControllerBase
     {
         public ITestCacheService TestCacheService { get; }
 
@@ -48,7 +48,7 @@ namespace Bing.Samples.Api.Controllers
         UserInfoCache GetUserInfoById(UserInfoCache userInfo);
     }
 
-    public class TestCacheService:DomainServiceBase,ITestCacheService
+    public class TestCacheService : DomainServiceBase, ITestCacheService
     {
         public TestCacheService()
         {

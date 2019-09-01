@@ -53,6 +53,7 @@ namespace Bing.MiniProfiler
         {
             return options =>
             {
+                // 可通过访问 /profiler/results 访问分析报告
                 options.RouteBasePath = "/profiler";
             };
         }

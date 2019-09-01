@@ -32,6 +32,7 @@
     <ProjectReference Include="..\..\src\Bing.Logs.Log4Net\Bing.Logs.Log4Net.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.Serilog\Bing.Logs.Serilog.csproj" />
+    <ProjectReference Include="..\..\src\Bing.MiniProfiler\Bing.MiniProfiler.csproj" />
     <ProjectReference Include="..\..\src\Bing.Webs\Bing.Webs.csproj" />
   </ItemGroup>
 

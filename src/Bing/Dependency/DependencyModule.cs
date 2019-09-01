@@ -41,7 +41,7 @@ namespace Bing.Dependency
 
             var dependencyTypes = dependencyTypeFinder.FindAll();
             foreach (var dependencyType in dependencyTypes)
-                AddToServices(services,dependencyType);
+                AddToServices(services, dependencyType);
             return services;
         }
 

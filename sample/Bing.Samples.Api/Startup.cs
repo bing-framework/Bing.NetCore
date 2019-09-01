@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
+using AspectCore.Extensions.DependencyInjection;
 using Bing.AspNetCore;
 using Bing.AutoMapper;
 using Bing.Biz.Payments.Extensions;
@@ -65,7 +66,7 @@ namespace Bing.Samples.Api
                     "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn7Oopue3a2x44FgJlWGM3S3QBTz6mBrCRqcvTeX5qH5StlvbF68J34oV3wt+QPn0YIskIgJMC9YwsDKUCPG1k9SjnlKy6hAbHeiAyt2boW9PfoTPYEV36ZH54jzZDGG7k34ZD1EbB3LZnvqpqLwGXQFglg5Xq52eUK6St2wysNzqHlx/WFt6m3OVfKg55udkF1RzBujy1B8Ym8+7YQmD/Ruty+eszBQUOC4nfqq8DsJ3LDMU7AX0J9leuQnReFLq+wCErJSQw/1fplCt3S7iETG7VrCNNRQ5evL8UcaNkDwT0SC+qukhX07Se6Tte61Wur3d6t8IkaeuS1oMQv04qwIDAQAB";
             });
             // 添加NLog日志操作
-            //services.AddNLog();
+            services.AddNLog();
 
             // 多日志输出
             //services.AddLog4NetWithFactory();
@@ -77,11 +78,11 @@ namespace Bing.Samples.Api
             //    options.ServerUrl = "";
             //});
 
-            services.AddExceptionless(options =>
-            {
-                options.ApiKey = "5K9YStkK1AUMz5FrWLtZghEcBEUGPuU1UoRjVp47";
-                options.ServerUrl = "http://192.168.0.66:65000";
-            });
+            //services.AddExceptionless(options =>
+            //{
+            //    options.ApiKey = "5K9YStkK1AUMz5FrWLtZghEcBEUGPuU1UoRjVp47";
+            //    options.ServerUrl = "http://192.168.0.66:65000";
+            //});
             //services.AddSerilog();
 
             services.AddAutoMapper();
@@ -149,8 +150,8 @@ namespace Bing.Samples.Api
             services.AddApiInterfaceService();
             //return services.AddBing();
             services.AddBing<AspNetCoreBingModuleManager>();
-            return services.BuildServiceProvider();
-            
+            //return services.BuildServiceProvider();
+            return services.BuildDynamicProxyServiceProvider();
         }
 
         /// <summary>

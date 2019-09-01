@@ -55,7 +55,7 @@ namespace Bing.Samples.Api.Controllers
         /// 获取所有控制器
         /// </summary>
         [HttpGet("getAllController")]
-        public Task<IActionResult> GetAllControllerAsync()
+        public virtual Task<IActionResult> GetAllControllerAsync()
         {
             return Task.FromResult(Success(_apiInterfaceService.GetAllController()));
         }
