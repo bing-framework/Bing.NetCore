@@ -3,7 +3,7 @@
 [![Build status](https://img.shields.io/appveyor/ci/bing-framework/Bing.NetCore/master.svg)](https://ci.appveyor.com/project/bing-framework/Bing.NetCore)
 [![Build Status](https://img.shields.io/travis/bing-framework/Bing.NetCore/master.svg)](https://travis-ci.org/bing-framework/Bing.NetCore)
 
-Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装，第三方业务接口封装等组成。
+Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团队的开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装，第三方业务接口封装等组成。
 
 ## Nuget Packages
 
@@ -39,8 +39,8 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
 > 如果没有标注版本号，则采用最新版本。
 
 1. 开发工具
-  - Visual Studio 2017 version 15.7.5
-  - Resharper Ultimate 2017.3.2
+  - [Visual Studio 2019](https://visualstudio.microsoft.com/zh-hans/vs/)
+  - [Resharper Ultimate](https://www.jetbrains.com/resharper/)
 
 2. 数据库
   - Sql Server
@@ -59,20 +59,25 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - Ubuntu Server
   - Docker
 
-6. 开发平台
-  - .Net Core 2.0
+6. `SDK`以及`Runtime`
+  - 当前SDK 64位版本：[SDK v2.2.401](https://dotnet.microsoft.com/download/thank-you/dotnet-sdk-2.2.401-windows-x64-installer)，开发机器安装
+  - 当前Runtime 64位版本：[Runtime v2.2.6](https://dotnet.microsoft.com/download/thank-you/dotnet-runtime-2.2.6-windows-hosting-bundle-installer)，服务器安装
 
 7. 单元测试以及模拟框架
   - XUnit
+  - NSubstitute
 
 8. ORM
-  - [EntityFrameworkCore 2.0.2](https://github.com/aspnet/EntityFrameworkCore)
-  - Microsoft.EntityFrameworkCore.Relational 2.0.2
-  - Microsoft.EntityFrameworkCore.SqlServer 2.0.2
-  - [Pomelo.EntityFrameworkCore.MySql 2.0.1](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)
-  - [Npgsql.EntityFrameworkCore.PostgreSQL 2.0.1](https://github.com/npgsql/Npgsql.EntityFrameworkCore.PostgreSQL)
+  - [EntityFrameworkCore](https://github.com/aspnet/EntityFrameworkCore)
+    - Microsoft.EntityFrameworkCore.Relational
+    - Microsoft.EntityFrameworkCore.SqlServer
+    - [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)
+    - [Npgsql.EntityFrameworkCore.PostgreSQL](https://github.com/npgsql/Npgsql.EntityFrameworkCore.PostgreSQL)
+    - Microsoft.EntityFrameworkCore.Sqlite
+  - [Dapper](https://github.com/StackExchange/Dapper)
 
 9. Ioc 框架
+  - MSDI(默认DI框架)
   - [Autofac](https://github.com/autofac/Autofac)
 
 10. Aop 框架
@@ -90,15 +95,14 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
   - [Exceptionless](https://github.com/exceptionless)
   - [Serilog](https://github.com/serilog/serilog-aspnetcore)
 
-14. 二维码操作
-  -	[QRCoder](https://github.com/codebude/QRCoder)
-  - [ZXing.Net](https://github.com/micjahn/ZXing.Net)
-
-15. Queryable 动态扩展
+14. Queryable 动态扩展
   - [System.Linq.Dynamic.Core](https://github.com/StefH/System.Linq.Dynamic.Core)
 
-16. 缓存框架
-  - [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
+15. 缓存框架
+  - [EasyCaching](https://github.com/dotnetcore/EasyCaching)
+
+16. 事件总线
+  - [CAP](https://github.com/dotnetcore/CAP)
 
 17. Web 框架
   - [ASP.NET Core](https://docs.microsoft.com/zh-cn/aspnet/core/)
@@ -144,126 +148,3 @@ Bing是基于 .net core 2.0 的框架，旨在提升团队的开发输出能力�
 > 这意味着你可以在任意场景下使用 Bing 应用框架而不会有人找你要钱。
 
 > Bing 会尽量引入开源免费的第三方技术框架，如有意外，还请自行了解。
-
-## 更新功能
-- 公共操作类（工具类）
-  - 类型转换操作 [已发布]
-  - Json 操作 - 基于 Newtonsoft.Json [已发布]
-  - 映射操作 - 基于 AutoMapper [已发布]
-  - Ioc 操作 - 基于 Autofac [已发布]
-  - 应用程序异常操作 [已发布]  
-  - 验证操作 [已发布]
-  - 验证操作拦截器 [已发布]
-  - 枚举操作 [已发布]
-  - 字符串操作 [已发布]
-  - Lambda 表达式操作 [已发布]
-  - 日志操作 - 基于 NLog、log4net、Exceptionless、Serilog [已发布]
-  - 日志操作拦截器 [已发布]
-  - IQueryable 查询扩展 [已发布]
-  - 时间操作 [已发布]
-  - 上下文操作 [已发布]  
-  - Url 参数生成器 [已发布]
-  - 配置文件操作 [已发布]    
-  - 反射操作 [已发布]    
-  - 正则表达式操作 [已发布]
-  - 参数检查操作 [已发布]
-  - 正则验证操作 [已发布]
-  - ID生成器 - 基于 雪花算法、时间戳、对象ID、有序Guid [已发布]
-  - 二维码操作 - 基于 QRCoder、ZXing.Net [已发布]
-  - 加密操作 - 基于 RSA、Base64、MD5、HMAC、SHA1、AES、DES、TripleDES [已发布]
-- 扩展
-  - Boolean 扩展 [已发布]
-  - Byte 扩展 [已发布]
-  - Char 扩展 [已发布]
-  - Decimal 扩展 [已发布]
-  - Double 扩展 [已发布]
-  - Float 扩展 [已发布]
-  - Int 扩展 [已发布]
-  - Long 扩展 [已发布]
-  - Object 扩展 [已发布]
-  - Array 扩展 [已发布]
-  - Byte[] 扩展 [已发布]
-  - ICollection 扩展 [已发布]
-  - IDicctionary 扩展 [已发布]
-  - IEnumerable 扩展 [已发布]
-  - IList 扩展 [已发布]
-  - IQueryable 扩展 [已发布]
-  - StringBuilder 扩展 [已发布]
-  - DateTime 扩展 [已发布]
-  - Json 扩展 - 基于 Newtonsoft.Json [已发布]
-- 分层架构基类及组件
-  - 实体基类 [已发布]
-  - 聚合根基类 [已发布]
-  - 值对象基类 [已发布]
-  - 操作审计 [已发布]
-  - EF Core 实体映射配置基类 [已发布]
-  - EF Core 工作单元基类 [已发布]
-  - EF Core 调试日志 [已发布]
-  - 仓储基类 [已发布]
-  - 查询对象 [已发布]
-  - 范围查询条件 [已发布]
-  - 分页参数 [已发布]
-  - 分页集合 [已发布]
-  - 查询参数 [已发布]
-  - 工作单元服务 [已发布]
-  - 工作单元拦截器 [已发布]
-  - Crud 服务 [已发布]
-  - 树型服务 [已发布]
-  - 持久化对象Po基类 [已发布]
-  - 持久化对象存储基类 [已发布]
-  - 事件总线 [已发布]
-  - Crud 控制器基类 [已发布]
-  - 树型控制器基类 [已发布]
-- 开发操作类
-  - 代码性能测试内存计算工具 [已发布] 
-  - 代码性能测试计时器 [已发布]
-  - 单元测试辅助操作 [已发布]
-- Mock数据组件
-  - 地址生成器 [已发布]
-  - 银行卡号生成器 [已发布]
-  - 身份证号生成器 [已发布]
-  - 手机号码生成器 [已发布]
-  - 姓名生成器 [已发布]
-  - 邮箱生成器 [已发布]
-- 缓存操作
-  - 运行时内存缓存操作 [已发布]
-  - Redis 缓存操作 [已发布]
-  - 混合缓存操作 [开发中]
-  - Memcached 缓存操作 [开发中]
-  - SQLite 操作 [开发中]
-- 支付操作
-  - 支付宝
-  - 微信
-  - 银联
-
-## 更新列表
-- 2018年03月10日，更新了对应映射操作(Bing.Extensions.AutoMapper，基于AutoMapper)。更新了配置文件操作类以及相关单元测试。
-- 2018年03月11日，更新了Web操作类、并发异常、Json操作类、进制转换操作类、线程操作类、Lambda操作类、验证扩展。
-- 2018年03月12日，更新了随机数生成器、参数检查扩展、参数检查操作类、类型转换操作类、类型转换扩展、枚举操作类、反射操作类、Item列表项、时间扩展、通用扩展、格式化扩展、IQueryable扩展、ICollection扩展、字符串操作、程序集扩展、程序集扩展单元测试、时间扩展单元测试。
-- 2018年03月13日，更新了验证操作类、通用扩展、AOP拦截器、工作单元。
-- 2018年03月14日，更新了Lambda扩展、表达式重绑、验证操作(Bing/Validations)、领域实体、值对象、审计接口、依赖注入、工作单元管理器、分页基类、Session类、Ioc操作类、查询契约对象、仓储、只读仓储、日志基础模块。
-- 2018年03月15日，更新了日志操作(Bing.Logs，基于NLog、Exceptionless以及log4net)，加入EF约束配置、EF日志。
-- 2018年03月16日，更新了EF仓储操(Bing.Datas，基于MySql、SqlServer、PgSql)、实体映射配置、仓储基类、正则表达式操作、数据传输对象、查询服务接口、程序集查找器、应用层(Bing.Application)、WebApi结果过滤、编码处理、异常中间件、忽略结果过滤。
-- 2018年03月19日，更新了控制器封装、字典扩展、Sql条件生成器。
-- 2018年03月20日，更新了视图结果输出扩展。
-- 2018年03月21日，更新了加密操作(Bing.Encryption，支持RSA、SHA、HMAC、AES、DES、TripleDES、Base64、MD5)以及单元测试。
-- 2018年03月23日，更新了银行卡信息(Bing.BankCardInfo，基于支付宝接口进行验证)以及单元测试。
-- 2018年03月26日，更新了Mock数据生成器(Bing.MockData，支持 手机号码、姓名、邮箱、身份证、银行卡、地址)、异常扩展、时间扩展、时间操作类以及单元测试。
-- 2018年03月27日，更新了测试操作类(Bing.Utils/Develops)、ID生成器操作(Bing.Utils/IdGenerators，支持 雪花算法、时间戳、对象ID、有序Guid)以及单元测试。
-- 2018年04月10日，更新了事件总线(Bing/Events)、加密器。
-- 2018年04月20日，更新了树型参数查询、树型服务、树型控制器。
-- 2018年05月25日，更新了验证过滤器、无缓存过滤器、数组扩展、StringBuilder扩展。
-- 2018年07月01日，更新了RazorHtml生成器。
-- 2018年07月02日，更新了Json转换器(时间转换器、DataTabel转换器)。
-- 2018年07月06日，更新了类型扩展、布尔值扩展、decimal扩展、对象扩展。
-- 2018年07月08日，更新了参数格式化器、参数生成器、Url参数生成器。
-- 2018年07月09日，更新了字节扩展、字符扩展、long扩展、int扩展、double扩展、float扩展、字节数组扩展、List扩展、IEnumerable扩展、文件存储器。
-- 2018年07月10日，更新了二维码操作(Bing.Tools.QrCode，基于QRCoder以及ZXing.Net)以及相关单元测试。
-- 2018年09月03日，更新了日志操作(Bing.Logs.Serilog，基于Serilog)。
-- 2018年09月24日，更新了缓存操作(Bing.Caching.InMemory，基于内存)。
-- 2018年09月25日，更新了缓存操作(Bing.Caching.Redis，基于StackExchange.Redis)。
-- 2018年09月26日，更新了缓存操作(Bing.Caching.Hybrid)。
-- 2018年09月27日，更新了缓存操作(Bing.Caching.Memcached)。
-## 架构说明
-
-## 常用Api
