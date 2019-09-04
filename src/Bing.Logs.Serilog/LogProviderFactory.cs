@@ -12,10 +12,6 @@ namespace Bing.Logs.Serilog
         /// </summary>
         /// <param name="logName">日志名称</param>
         /// <param name="format">日志格式化器</param>
-        /// <returns></returns>
-        public ILogProvider Create(string logName, ILogFormat format = null)
-        {
-            return new SerilogProvider(logName,format);
-        }
+        public ILogProvider Create(string logName, ILogFormat format = null) => new SerilogProvider(logName, format);
     }
 }
