@@ -189,4 +189,7 @@
   <data name="UserNameIsEmpty" xml:space="preserve">
     <value>用户名不能为空</value>
   </data>
+  <data name="UserNotInRole" xml:space="preserve">
+    <value>用户不在角色“{0}”中</value>
+  </data>
 </root>

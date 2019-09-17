@@ -211,5 +211,20 @@ namespace Bing.Permissions.Identity.Describers
             };
 
         #endregion
+
+        #region UserNotInRole(用户未包含角色)
+
+        /// <summary>
+        /// 用户未包含角色
+        /// </summary>
+        /// <param name="role">角色名</param>
+        public override IdentityError UserNotInRole(string role) =>
+            new IdentityError()
+            {
+                Code = nameof(UserNotInRole),
+                Description = string.Format(SecurityResources.UserNotInRole, role)
+            };
+
+        #endregion
     }
 }
