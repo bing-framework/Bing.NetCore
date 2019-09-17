@@ -9,9 +9,9 @@ using Bing.Validations;
 namespace Bing.Security.Identity.Models
 {
     /// <summary>
-    /// 用户
+    /// 用户基类
     /// </summary>
-    public partial class User<TUser, TKey>
+    public partial class UserBase<TUser, TKey>
     {
         /// <summary>
         /// 声明列表

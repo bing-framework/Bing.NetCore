@@ -3,9 +3,9 @@
 namespace Bing.Security.Identity.Models
 {
     /// <summary>
-    /// 角色
+    /// 角色基类
     /// </summary>
-    public abstract partial class Role<TRole, TKey, TParentId>
+    public abstract partial class RoleBase<TRole, TKey, TParentId>
     {
         /// <summary>
         /// 初始化

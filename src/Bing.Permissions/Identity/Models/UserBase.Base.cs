@@ -1,194 +1,206 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Auditing;
 
-namespace Bing.Security.Identity.Models
+namespace Bing.Permissions.Identity.Models
 {
     /// <summary>
-    /// 用户
+    /// 用户基类
     /// </summary>
-    /// <typeparam name="TUser">用户类型</typeparam>
+    /// <typeparam name="TUser">用户类型你</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    [DisplayName("用户")]
-    public abstract partial class User<TUser, TKey> : AggregateRoot<TUser, TKey>, IDelete, IAudited where TUser : User<TUser, TKey>
+    [Display(Name = "用户")]
+    public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>, IDelete, IAudited where TUser : UserBase<TUser, TKey>
     {
-        /// <summary>
-        /// 初始化用户
-        /// </summary>
-        /// <param name="id">用户标识</param>
-        protected User(TKey id) : base(id)
-        {
-            _claims = new List<Claim>();
-        }
+        #region 属性
 
         /// <summary>
         /// 用户名
         /// </summary>
-        [DisplayName("用户名")]
+        [Display(Name = "用户名")]
         [StringLength(256, ErrorMessage = "用户名输入过长，不能超过256位")]
         public string UserName { get; set; }
         /// <summary>
         /// 标准化用户名
         /// </summary>
-        [DisplayName("标准化用户名")]
+        [Display(Name = "标准化用户名")]
         [StringLength(256, ErrorMessage = "标准化用户名输入过长，不能超过256位")]
         public string NormalizedUserName { get; set; }
+        [Display(Name = "昵称")]
+        [StringLength(256, ErrorMessage = "昵称输入过长，不能超过256位")]
+        public string Nickname { get; set; }
         /// <summary>
-        /// 安全邮箱
+        /// 电子邮箱
         /// </summary>
-        [DisplayName("安全邮箱")]
-        [StringLength(256, ErrorMessage = "安全邮箱输入过长，不能超过256位")]
+        [Display(Name = "电子邮箱")]
+        [StringLength(256, ErrorMessage = "电子邮箱s输入过长，不能超过256位")]
         public string Email { get; set; }
         /// <summary>
-        /// 标准化邮箱
+        /// 标准化的电子邮箱
         /// </summary>
-        [DisplayName("标准化邮箱")]
-        [StringLength(256, ErrorMessage = "标准化邮箱输入过长，不能超过256位")]
+        [Display(Name = "标准化的电子邮箱")]
+        [StringLength(256, ErrorMessage = "标准化的电子邮箱输入过长，不能超过256位")]
         public string NormalizedEmail { get; set; }
         /// <summary>
         /// 邮箱已确认
         /// </summary>
-        [DisplayName("邮箱已确认")]
+        [Display(Name = "邮箱已确认")]
         public bool EmailConfirmed { get; set; }
         /// <summary>
-        /// 安全手机
+        /// 手机号码
         /// </summary>
-        [DisplayName("安全手机")]
-        [StringLength(64, ErrorMessage = "安全手机输入过长，不能超过64位")]
+        [Display(Name = "手机号码")]
+        [StringLength(64, ErrorMessage = "手机号码输入过长，不能超过64位")]
         public string PhoneNumber { get; set; }
         /// <summary>
-        /// 手机已确认
+        /// 手机号码已确认
         /// </summary>
-        [DisplayName("手机已确认")]
+        [Display(Name = "手机已确认")]
         public bool PhoneNumberConfirmed { get; set; }
         /// <summary>
         /// 密码
         /// </summary>
-        [DisplayName("密码")]
+        [Display(Name = "密码")]
         [StringLength(256, ErrorMessage = "密码输入过长，不能超过256位")]
         public string Password { get; set; }
         /// <summary>
-        /// 密码散列
+        /// 密码哈希值
         /// </summary>
-        [DisplayName("密码散列")]
-        [StringLength(1024, ErrorMessage = "密码散列输入过长，不能超过1024位")]
+        [Display(Name = "密码哈希值")]
+        [StringLength(1024, ErrorMessage = "密码哈希值输入过长，不能超过1024位")]
         public string PasswordHash { get; set; }
         /// <summary>
         /// 安全码
         /// </summary>
-        [DisplayName("安全码")]
+        [Display(Name = "安全码")]
         [StringLength(256, ErrorMessage = "安全码输入过长，不能超过256位")]
         public string SafePassword { get; set; }
         /// <summary>
-        /// 安全码散列
+        /// 安全码哈希值
         /// </summary>
-        [DisplayName("安全码散列")]
-        [StringLength(1024, ErrorMessage = "安全码散列输入过长，不能超过1024位")]
+        [Display(Name = "安全码哈希值")]
+        [StringLength(1024, ErrorMessage = "安全码哈希值输入过长，不能超过1024位")]
         public string SafePasswordHash { get; set; }
         /// <summary>
-        /// 启用锁定
+        /// 安全戳
         /// </summary>
-        [DisplayName("启用锁定")]
-        public bool LockoutEnabled { get; set; }
+        [Display(Name = "安全戳")]
+        [StringLength(1024, ErrorMessage = "安全戳输入过长，不能超过1024位")]
+        public string SecurityStamp { get; set; }
         /// <summary>
-        /// 锁定截止
+        /// 启用双因子身份验证
         /// </summary>
-        [DisplayName("锁定截止")]
-        public DateTimeOffset? LockoutEnd { get; set; }
-        /// <summary>
-        /// 上次登陆时间
-        /// </summary>
-        [DisplayName("上次登陆时间")]
-        public DateTime? LastLoginTime { get; set; }
-        /// <summary>
-        /// 上次登陆Ip
-        /// </summary>
-        [DisplayName("上次登陆Ip")]
-        [StringLength(30, ErrorMessage = "上次登陆Ip输入过长，不能超过30位")]
-        public string LastLoginIp { get; set; }
-        /// <summary>
-        /// 本次登陆时间
-        /// </summary>
-        [DisplayName("本次登陆时间")]
-        public DateTime? CurrentLoginTime { get; set; }
-        /// <summary>
-        /// 本次登陆Ip
-        /// </summary>
-        [DisplayName("本次登陆Ip")]
-        [StringLength(30, ErrorMessage = "本次登陆Ip输入过长，不能超过30位")]
-        public string CurrentLoginIp { get; set; }
-        /// <summary>
-        /// 登陆次数
-        /// </summary>
-        [DisplayName("登陆次数")]
-        public int? LoginCount { get; set; }
-        /// <summary>
-        /// 登陆失败次数
-        /// </summary>
-        [DisplayName("登陆失败次数")]
-        public int AccessFailedCount { get; set; }
-        /// <summary>
-        /// 启用两阶段认证
-        /// </summary>
-        [DisplayName("启用两阶段认证")]
+        [Display(Name = "启用双因子身份验证")]
         public bool TwoFactorEnabled { get; set; }
         /// <summary>
         /// 启用
         /// </summary>
-        [DisplayName("启用")]
+        [Display(Name = "启用")]
         public bool Enabled { get; set; }
         /// <summary>
         /// 冻结时间
         /// </summary>
-        [DisplayName("冻结时间")]
+        [Display(Name = "冻结时间")]
         public DateTime? DisabledTime { get; set; }
+        /// <summary>
+        /// 锁定截止时间
+        /// </summary>
+        [Display(Name = "锁定截止时间")]
+        public DateTimeOffset? LockoutEnd { get; set; }
+        /// <summary>
+        /// 启用锁定
+        /// </summary>
+        [Display(Name = "启用锁定")]
+        public bool LockoutEnabled { get; set; }
+        /// <summary>
+        /// 是否系统用户
+        /// </summary>
+        [Display(Name = "是否系统用户")]
+        public bool IsSystem { get; set; }
+        /// <summary>
+        /// 登录失败次数
+        /// </summary>
+        [Display(Name = "登录失败次数")]
+        public int AccessFailedCount { get; set; }
+        /// <summary>
+        /// 登录次数
+        /// </summary>
+        [Display(Name = "登录次数")]
+        public int? LoginCount { get; set; }
         /// <summary>
         /// 注册Ip
         /// </summary>
-        [DisplayName("注册Ip")]
+        [Display(Name = "注册Ip")]
         [StringLength(30, ErrorMessage = "注册Ip输入过长，不能超过30位")]
         public string RegisterIp { get; set; }
         /// <summary>
-        /// 安全戳
+        /// 上次登录时间
         /// </summary>
-        [DisplayName("安全戳")]
-        [StringLength(1024, ErrorMessage = "安全戳输入过长，不能超过1024位")]
-        public string SecurityStamp { get; set; }
+        [Display(Name = "上次登录时间")]
+        public DateTime? LastLoginTime { get; set; }
+        /// <summary>
+        /// 上次登录Ip
+        /// </summary>
+        [Display(Name = "上次登录Ip")]
+        [StringLength(30, ErrorMessage = "上次登录Ip输入过长，不能超过30位")]
+        public string LastLoginIp { get; set; }
+        /// <summary>
+        /// 本次登录时间
+        /// </summary>
+        [Display(Name = "本次登录时间")]
+        public DateTime? CurrentLoginTime { get; set; }
+        /// <summary>
+        /// 本次登录Ip
+        /// </summary>
+        [Display(Name = "本次登录Ip")]
+        [StringLength(30, ErrorMessage = "本次登录Ip输入过长，不能超过30位")]
+        public string CurrentLoginIp { get; set; }
         /// <summary>
         /// 备注
         /// </summary>
-        [DisplayName("备注")]
+        [Display(Name = "备注")]
         [StringLength(500, ErrorMessage = "备注输入过长，不能超过500位")]
-        public string Note { get; set; }
+        public string Remark { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>
-        [DisplayName("创建时间")]
+        [Display(Name = "创建时间")]
         public DateTime? CreationTime { get; set; }
         /// <summary>
         /// 创建人
         /// </summary>
-        [DisplayName("创建人")]
+        [Display(Name = "创建人")]
         public Guid? CreatorId { get; set; }
         /// <summary>
         /// 最后修改时间
         /// </summary>
-        [DisplayName("最后修改时间")]
+        [Display(Name = "最后修改时间")]
         public DateTime? LastModificationTime { get; set; }
         /// <summary>
         /// 最后修改人
         /// </summary>
-        [DisplayName("最后修改人")]
+        [Display(Name = "最后修改人")]
         public Guid? LastModifierId { get; set; }
         /// <summary>
         /// 是否删除
         /// </summary>
-        [DisplayName("是否删除")]
+        [Display(Name = "是否删除")]
         public bool IsDeleted { get; set; }
+
+        #endregion
+
+        #region 构造函数
+
+        /// <summary>
+        /// 初始化一个<see cref="AggregateRoot{TEntity,TKey}"/>类型的实例
+        /// </summary>
+        /// <param name="id">标识</param>
+        protected UserBase(TKey id) : base(id) { }
+
+        #endregion
+
+        #region AddDescriptions(添加描述)
 
         /// <summary>
         /// 添加描述
@@ -208,6 +220,7 @@ namespace Bing.Security.Identity.Models
             AddDescription(t => t.SafePassword);
             AddDescription(t => t.SafePasswordHash);
             AddDescription(t => t.LockoutEnabled);
+            AddDescription(t => t.IsSystem);
             AddDescription(t => t.LockoutEnd);
             AddDescription(t => t.LastLoginTime);
             AddDescription(t => t.LastLoginIp);
@@ -219,12 +232,16 @@ namespace Bing.Security.Identity.Models
             AddDescription(t => t.Enabled);
             AddDescription(t => t.DisabledTime);
             AddDescription(t => t.RegisterIp);
-            AddDescription(t => t.Note);
+            AddDescription(t => t.Remark);
             AddDescription(t => t.CreationTime);
             AddDescription(t => t.CreatorId);
             AddDescription(t => t.LastModificationTime);
             AddDescription(t => t.LastModifierId);
         }
+
+        #endregion
+
+        #region AddChanges(添加变更列表)
 
         /// <summary>
         /// 添加变更列表
@@ -245,6 +262,7 @@ namespace Bing.Security.Identity.Models
             AddChange(t => t.SafePasswordHash, other.SafePasswordHash);
             AddChange(t => t.LockoutEnabled, other.LockoutEnabled);
             AddChange(t => t.LockoutEnd, other.LockoutEnd);
+            AddChange(t => t.IsSystem, other.IsSystem);
             AddChange(t => t.LastLoginTime, other.LastLoginTime);
             AddChange(t => t.LastLoginIp, other.LastLoginIp);
             AddChange(t => t.CurrentLoginTime, other.CurrentLoginTime);
@@ -255,11 +273,14 @@ namespace Bing.Security.Identity.Models
             AddChange(t => t.Enabled, other.Enabled);
             AddChange(t => t.DisabledTime, other.DisabledTime);
             AddChange(t => t.RegisterIp, other.RegisterIp);
-            AddChange(t => t.Note, other.Note);
+            AddChange(t => t.Remark, other.Remark);
             AddChange(t => t.CreationTime, other.CreationTime);
             AddChange(t => t.CreatorId, other.CreatorId);
             AddChange(t => t.LastModificationTime, other.LastModificationTime);
             AddChange(t => t.LastModifierId, other.LastModifierId);
         }
+
+        #endregion
+
     }
 }

@@ -10,7 +10,7 @@ namespace Bing.Security.Identity.Services.Abstractions
     /// <typeparam name="TRole">角色类型</typeparam>
     /// <typeparam name="TKey">角色标识类型</typeparam>
     /// <typeparam name="TParentId">角色父标识类型</typeparam>
-    public interface IRoleManager<TRole,in TKey,TParentId>:IDomainService where TRole:Role<TRole,TKey,TParentId>
+    public interface IRoleManager<TRole,in TKey,TParentId>:IDomainService where TRole:RoleBase<TRole,TKey,TParentId>
     {
         /// <summary>
         /// 创建角色

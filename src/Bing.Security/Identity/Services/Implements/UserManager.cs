@@ -18,7 +18,7 @@ namespace Bing.Security.Identity.Services.Implements
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public class UserManager<TUser,TKey> : DomainServiceBase, IUserManager<TUser,TKey> where TUser : User<TUser,TKey> ,new()
+    public class UserManager<TUser,TKey> : DomainServiceBase, IUserManager<TUser,TKey> where TUser : UserBase<TUser,TKey> ,new()
     {
         /// <summary>
         /// Identity用户服务

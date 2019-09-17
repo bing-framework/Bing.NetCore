@@ -10,7 +10,7 @@ namespace Bing.Security.Identity.Services.Abstractions
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public interface ISignInManager<in TUser,TKey> :IDomainService where TUser:User<TUser,TKey>
+    public interface ISignInManager<in TUser,TKey> :IDomainService where TUser:UserBase<TUser,TKey>
     {
         /// <summary>
         /// 登录

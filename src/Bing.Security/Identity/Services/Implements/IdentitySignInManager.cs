@@ -14,7 +14,7 @@ namespace Bing.Security.Identity.Services.Implements
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public class IdentitySignInManager<TUser,TKey>:SignInManager<TUser> where TUser:User<TUser,TKey>
+    public class IdentitySignInManager<TUser,TKey>:SignInManager<TUser> where TUser:UserBase<TUser,TKey>
     {
         /// <summary>
         /// 初始化一个<see cref="IdentitySignInManager{TUser,TKey}"/>类型的实例

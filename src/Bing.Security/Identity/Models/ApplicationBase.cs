@@ -7,18 +7,18 @@ using Bing.Domains.Entities.Auditing;
 namespace Bing.Security.Identity.Models
 {
     /// <summary>
-    /// 应用程序
+    /// 应用程序基类
     /// </summary>
     /// <typeparam name="TApplication">应用程序类型</typeparam>
     /// <typeparam name="TKey">应用程序标识类型</typeparam>
     [DisplayName("应用程序")]
-    public abstract class Application<TApplication, TKey> : AggregateRoot<TApplication, TKey>, IDelete, IAudited where TApplication : Application<TApplication, TKey>
+    public abstract class ApplicationBase<TApplication, TKey> : AggregateRoot<TApplication, TKey>, IDelete, IAudited where TApplication : ApplicationBase<TApplication, TKey>
     {
         /// <summary>
-        /// 初始化应用程序
+        /// 初始化一个<see cref="ApplicationBase{TApplication,TKey}"/>类型的实例
         /// </summary>
         /// <param name="id">应用程序标识</param>
-        protected Application(TKey id) : base(id)
+        protected ApplicationBase(TKey id) : base(id)
         {
         }
 

@@ -13,7 +13,7 @@ namespace Bing.Security.Identity.Services.Implements
     /// </summary>
     /// <typeparam name="TUser">用户类型</typeparam>
     /// <typeparam name="TKey">用户标识类型</typeparam>
-    public class SignInManager<TUser,TKey>:ISignInManager<TUser,TKey> where TUser:User<TUser,TKey>
+    public class SignInManager<TUser,TKey>:ISignInManager<TUser,TKey> where TUser:UserBase<TUser,TKey>
     {
         /// <summary>
         /// Identity登录服务

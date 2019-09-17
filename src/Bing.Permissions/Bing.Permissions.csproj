@@ -2,17 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Bing.Security是Bing应用框架的权限类库。
-Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
+    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,20 +28,14 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Identity/Models/Role.*.cs">
-      <DependentUpon>Role.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Identity/Models/User.*.cs">
-      <DependentUpon>User.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Identity\Models\RoleBase.Base.cs">
+    <Compile Update="Identity/Models/RoleBase.*.cs">
       <DependentUpon>RoleBase.cs</DependentUpon>
     </Compile>
-    <Compile Update="Identity\Models\UserBase.Base.cs">
+    <Compile Update="Identity/Models/UserBase.*.cs">
       <DependentUpon>UserBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Identity/Models/ApplicationBase.*.cs">
+      <DependentUpon>ApplicationBase.cs</DependentUpon>
     </Compile>
   </ItemGroup>
 
