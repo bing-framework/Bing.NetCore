@@ -8,7 +8,7 @@ namespace Bing.Domains.Repositories
     /// <summary>
     /// 仓储
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntity">实体类型</typeparam>
     public interface ICompactRepository<TEntity> : ICompactRepository<TEntity, Guid>
         where TEntity : class, IAggregateRoot, IKey<Guid>, IVersion
     {

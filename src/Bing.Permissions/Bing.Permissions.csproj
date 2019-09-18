@@ -39,8 +39,4 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Identity\Repositories\" />
-  </ItemGroup>
-
 </Project>

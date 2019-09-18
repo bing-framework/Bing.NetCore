@@ -81,11 +81,11 @@ namespace Bing.Utils.Timing
         /// 将时间转换为Js时间格式（Date.getTiem()）
         /// </summary>
         /// <param name="dateTime">时间点</param>
-        /// <returns></returns>
-        public static string ToJsGetTime(this DateTime dateTime)
+        public static string ToJsGetTime(this DateTime dateTime, bool milsec = true)
         {
             DateTime utc = dateTime.ToUniversalTime();
-            return ((long)utc.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString();
+            TimeSpan span = utc.Subtract(new DateTime(1970, 1, 1));
+            return Math.Round(milsec ? span.TotalMilliseconds : span.TotalSeconds).ToString();
         }
 
         #endregion

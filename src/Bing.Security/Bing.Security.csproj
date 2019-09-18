@@ -9,6 +9,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,15 +37,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
     </Compile>
     <Compile Update="Identity/Models/User.*.cs">
       <DependentUpon>User.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Identity\Models\RoleBase.Base.cs">
-      <DependentUpon>RoleBase.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Identity\Models\UserBase.Base.cs">
-      <DependentUpon>UserBase.cs</DependentUpon>
     </Compile>
   </ItemGroup>
 
