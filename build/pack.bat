@@ -15,6 +15,7 @@ dotnet pack ./src/Bing.Utils.Drawing/Bing.Utils.Drawing.csproj
 dotnet pack ./src/Bing/Bing.csproj
 dotnet pack ./src/Bing.AspNetCore/Bing.AspNetCore.csproj
 dotnet pack ./src/Bing.Security/Bing.Security.csproj
+dotnet pack ./src/Bing.Permissions/Bing.Permissions.csproj
 dotnet pack ./src/Bing.Logs/Bing.Logs.csproj
 dotnet pack ./src/Bing.Logs.Exceptionless/Bing.Logs.Exceptionless.csproj
 dotnet pack ./src/Bing.Logs.Log4Net/Bing.Logs.Log4Net.csproj
