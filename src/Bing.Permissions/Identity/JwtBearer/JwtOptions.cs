@@ -1,9 +1,9 @@
-﻿namespace Bing.Security.Identity.JwtBearer
+﻿namespace Bing.Permissions.Identity.JwtBearer
 {
     /// <summary>
     /// Jwt选项配置
     /// </summary>
-    public class JsonWebTokenOptions
+    public class JwtOptions
     {
         /// <summary>
         /// 密钥。密钥加密算法：HmacSha256
@@ -29,5 +29,10 @@
         /// 刷新令牌有效期分钟数
         /// </summary>
         public double RefreshExpireMinutes { get; set; }
+
+        /// <summary>
+        /// 启用抛异常方式
+        /// </summary>
+        public bool ThrowEnabled { get; set; }
     }
 }

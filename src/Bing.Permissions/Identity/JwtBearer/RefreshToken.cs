@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bing.Security.Identity.JwtBearer
+namespace Bing.Permissions.Identity.JwtBearer
 {
     /// <summary>
     /// 刷新Token信息

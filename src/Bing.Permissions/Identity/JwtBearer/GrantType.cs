@@ -1,4 +1,4 @@
-﻿namespace Bing.Security.Identity.JwtBearer
+﻿namespace Bing.Permissions.Identity.JwtBearer
 {
     /// <summary>
     /// 授权类型

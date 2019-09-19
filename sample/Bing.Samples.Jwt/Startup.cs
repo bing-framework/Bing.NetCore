@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Bing.AspNetCore;
 using Bing.Core;
@@ -11,15 +11,21 @@ using Bing.Extensions.Swashbuckle.Extensions;
 using Bing.Extensions.Swashbuckle.Filters.Documents;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.NLog;
-using Bing.Security.Extensions;
+using Bing.Permissions.Authorization.Policies;
+using Bing.Permissions.Extensions;
+using Bing.Permissions.Identity.JwtBearer;
 using EasyCaching.Core;
 using EasyCaching.CSRedis;
 using EasyCaching.Serialization.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Bing.Samples.Jwt
@@ -39,8 +45,12 @@ namespace Bing.Samples.Jwt
         /// <param name="services">服务集合</param>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddControllersAsServices();
-            services.AddJwt(Configuration);
+            services.AddMvc(options =>
+            {
+                // 全局添加授权
+                options.Conventions.Add(new AuthorizeControllerModelConvention());
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddControllersAsServices();
+            
             services.AddNLog();
             // 添加EasyCaching缓存
             services.AddCaching(options =>
@@ -65,9 +75,43 @@ namespace Bing.Samples.Jwt
                 }).WithJson();
             });
 
+            var jwtOptions = Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("jwt", policy => policy.Requirements.Add(new JsonWebTokenAuthorizationRequirement()));
+            }).AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            });
+            services.AddJwt(Configuration);
+
             services.AddSwaggerCustom(CurrentSwaggerOptions);
             services.AddBing<AspNetCoreBingModuleManager>();
             return services.BuildServiceProvider();
+        }
+
+        /// <summary>
+        /// 获取验证参数
+        /// </summary>
+        /// <param name="options">配置</param>
+        /// <returns></returns>
+        private static TokenValidationParameters GetValidationParameters(JwtOptions options)
+        {
+            return new TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true, // 是否验证发行者签名密钥
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Secret)),
+                ValidateIssuer = true, // 是否验证发行者
+                ValidIssuer = options.Issuer,
+                ValidateAudience = true, // 是否验证接收者
+                ValidAudience = options.Audience,
+                ValidateLifetime = true, // 是否验证超时
+                LifetimeValidator = (before, expires, token, param) => expires > DateTime.UtcNow,
+                ClockSkew = TimeSpan.FromSeconds(30), // 缓冲过期时间，总的有效时间等于该时间加上Jwt的过期时间，如果不配置，则默认是5分钟
+                RequireExpirationTime = true
+            };
         }
 
         /// <summary>
@@ -79,7 +123,7 @@ namespace Bing.Samples.Jwt
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseAuthentication();
             app.UseEasyCaching();
             app.UseSwaggerCustom(CurrentSwaggerOptions);
             ConfigRoute(app);
@@ -160,5 +204,19 @@ namespace Bing.Samples.Jwt
                 config.UseDefaultSwaggerUI();
             }
         };
+    }
+
+    /// <summary>
+    /// 授权控制器模型转换器
+    /// </summary>
+    public class AuthorizeControllerModelConvention : IControllerModelConvention
+    {
+        /// <summary>
+        /// 实现Apply
+        /// </summary>
+        public void Apply(ControllerModel controller)
+        {
+            controller.Filters.Add(new AuthorizeFilter("jwt"));
+        }
     }
 }

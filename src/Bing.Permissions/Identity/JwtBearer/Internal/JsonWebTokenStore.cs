@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Caching;
 
-namespace Bing.Security.Identity.JwtBearer.Internal
+namespace Bing.Permissions.Identity.JwtBearer.Internal
 {
     /// <summary>
     /// Jwt令牌存储器
@@ -79,6 +79,12 @@ namespace Bing.Security.Identity.JwtBearer.Internal
             await _cache.AddAsync(GetTokenKey(token.AccessToken), token, expires.Subtract(DateTime.UtcNow));
             await _cache.AddAsync(GetBindRefreshTokenKey(token.RefreshToken), token, expires.Subtract(DateTime.UtcNow));
         }
+
+        /// <summary>
+        /// 是否存在访问令牌
+        /// </summary>
+        /// <param name="token">访问令牌</param>
+        public async Task<bool> ExistsTokenAsync(string token) => await _cache.ExistsAsync(GetTokenKey(token));
 
         /// <summary>
         /// 获取刷新令牌缓存键

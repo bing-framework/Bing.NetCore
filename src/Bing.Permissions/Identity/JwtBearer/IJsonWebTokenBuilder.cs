@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Bing.Security.Identity.JwtBearer
+namespace Bing.Permissions.Identity.JwtBearer
 {
     /// <summary>
     /// Jwt令牌构建器
@@ -20,7 +20,7 @@ namespace Bing.Security.Identity.JwtBearer
         /// </summary>
         /// <param name="payload">负载</param>
         /// <param name="options">Jwt选项配置</param>
-        Task<JsonWebToken> CreateAsync(IDictionary<string, string> payload, JsonWebTokenOptions options);
+        Task<JsonWebToken> CreateAsync(IDictionary<string, string> payload, JwtOptions options);
 
         /// <summary>
         /// 刷新令牌

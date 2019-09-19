@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Bing.Security.Identity.JwtBearer
+namespace Bing.Permissions.Identity.JwtBearer
 {
     /// <summary>
     /// Jwt令牌存储器
@@ -44,5 +44,11 @@ namespace Bing.Security.Identity.JwtBearer
         /// <param name="token">令牌</param>
         /// <param name="expires">过期时间</param>
         Task SaveTokenAsync(JsonWebToken token, DateTime expires);
+
+        /// <summary>
+        /// 是否存在访问令牌
+        /// </summary>
+        /// <param name="token">访问令牌</param>
+        Task<bool> ExistsTokenAsync(string token);
     }
 }

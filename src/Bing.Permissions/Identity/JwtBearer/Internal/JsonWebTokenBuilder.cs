@@ -11,7 +11,7 @@ using Bing.Utils.Timing;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Bing.Security.Identity.JwtBearer.Internal
+namespace Bing.Permissions.Identity.JwtBearer.Internal
 {
     /// <summary>
     /// Jwt构建器
@@ -31,10 +31,10 @@ namespace Bing.Security.Identity.JwtBearer.Internal
         /// <summary>
         /// Jwt选项配置
         /// </summary>
-        private readonly JsonWebTokenOptions _options;
+        private readonly JwtOptions _options;
 
         public JsonWebTokenBuilder(IJsonWebTokenStore tokenStore
-            ,IOptions<JsonWebTokenOptions> options)
+            ,IOptions<JwtOptions> options)
         {
             _tokenStore = tokenStore;
             _options = options.Value;
@@ -53,11 +53,11 @@ namespace Bing.Security.Identity.JwtBearer.Internal
         /// </summary>
         /// <param name="payload">负载</param>
         /// <param name="options">Jwt选项配置</param>
-        public async Task<JsonWebToken> CreateAsync(IDictionary<string, string> payload, JsonWebTokenOptions options)
+        public async Task<JsonWebToken> CreateAsync(IDictionary<string, string> payload, JwtOptions options)
         {
             if (string.IsNullOrWhiteSpace(options.Secret))
                 throw new ArgumentNullException(nameof(_options.Secret),
-                    $@"{nameof(options.Secret)}为Null或空字符串。请在""appsettings.json""配置""{nameof(JsonWebTokenOptions)}""节点及其子节点""{nameof(JsonWebTokenOptions.Secret)}""");
+                    $@"{nameof(options.Secret)}为Null或空字符串。请在""appsettings.json""配置""{nameof(JwtOptions)}""节点及其子节点""{nameof(JwtOptions.Secret)}""");
             var clientId = payload["clientId"] ?? Guid.NewGuid().ToString();
             var claims = new List<Claim>();
             foreach (var key in payload.Keys)
@@ -81,6 +81,7 @@ namespace Bing.Security.Identity.JwtBearer.Internal
             var accessToken = new JsonWebToken()
             {
                 AccessToken = token,
+                AccessTokenUtcExpires = Conv.To<long>(accessExpires.ToJsGetTime()),
                 RefreshToken = refreshTokenStr,
                 RefreshUtcExpires = Conv.To<long>(refreshExpires.ToJsGetTime())
             };
@@ -131,7 +132,7 @@ namespace Bing.Security.Identity.JwtBearer.Internal
         /// <param name="claims">声明列表</param>
         /// <param name="options">Jwt选项配置</param>
         /// <param name="tokenType">Jwt令牌类型</param>
-        private (string, DateTime) CreateToken(IEnumerable<Claim> claims, JsonWebTokenOptions options,
+        private (string, DateTime) CreateToken(IEnumerable<Claim> claims, JwtOptions options,
             JsonWebTokenType tokenType)
         {
             var secret = options.Secret;

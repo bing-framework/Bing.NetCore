@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Security.Identity.JwtBearer;
+using Bing.Permissions.Identity.JwtBearer;
 using Bing.Webs.Controllers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Samples.Jwt.Controllers
@@ -27,6 +28,7 @@ namespace Bing.Samples.Jwt.Controllers
         /// 登录
         /// </summary>
         /// <param name="request">请求</param>
+        [AllowAnonymous]
         [HttpPost("signIn")]
         public async Task<IActionResult> SignInAsync([FromBody] LoginRequest request)
         {
@@ -42,10 +44,21 @@ namespace Bing.Samples.Jwt.Controllers
         /// 刷新令牌
         /// </summary>
         /// <param name="token">刷新令牌</param>
+        [AllowAnonymous]
         [HttpPost("refreshToken")]
         public async Task<IActionResult> RefreshTokenAsync([FromBody] string token)
         {
             return Success(await TokenBuilder.RefreshAsync(token));
+        }
+
+        /// <summary>
+        /// 获取内容
+        /// </summary>
+        /// <param name="content">内容</param>
+        [HttpGet]
+        public Task<IActionResult> GetAsync(string content)
+        {
+            return Task.FromResult(Success(content));
         }
     }
 
