@@ -8,7 +8,7 @@ namespace Bing.EasyCaching
     /// <summary>
     /// EasyCaching缓存管理
     /// </summary>
-    public partial class CacheManager:ICache
+    public partial class CacheManager : ICache
     {
         /// <summary>
         /// EasyCaching缓存提供器
@@ -28,7 +28,6 @@ namespace Bing.EasyCaching
         /// 是否存在指定键的缓存
         /// </summary>
         /// <param name="key">缓存键</param>
-        /// <returns></returns>
         public bool Exists(string key) => _provider.Exists(key);
 
         /// <summary>
@@ -38,7 +37,6 @@ namespace Bing.EasyCaching
         /// <param name="key">缓存键</param>
         /// <param name="func">获取数据操作</param>
         /// <param name="expiration">过期时间间隔</param>
-        /// <returns></returns>
         public T Get<T>(string key, Func<T> func, TimeSpan? expiration = null)
         {
             var result = _provider.Get(key, func, GetExpiration(expiration));
@@ -63,7 +61,6 @@ namespace Bing.EasyCaching
         /// <param name="key">缓存键</param>
         /// <param name="value">值</param>
         /// <param name="expiration">过期时间间隔</param>
-        /// <returns></returns>
         public bool TryAdd<T>(string key, T value, TimeSpan? expiration = null) => _provider.TrySet(key, value, GetExpiration(expiration));
 
         /// <summary>
@@ -96,7 +93,6 @@ namespace Bing.EasyCaching
         /// 获取过期时间间隔
         /// </summary>
         /// <param name="expiration">过期时间间隔</param>
-        /// <returns></returns>
         private TimeSpan GetExpiration(TimeSpan? expiration)
         {
             expiration = expiration ?? TimeSpan.FromHours(12);

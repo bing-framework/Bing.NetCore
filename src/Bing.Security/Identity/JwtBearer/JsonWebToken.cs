@@ -1,8 +1,11 @@
-﻿namespace Bing.Security.Identity.JwtBearer
+﻿using System;
+
+namespace Bing.Security.Identity.JwtBearer
 {
     /// <summary>
     /// JwtToken
     /// </summary>
+    [Serializable]
     public class JsonWebToken
     {
         /// <summary>

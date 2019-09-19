@@ -5,6 +5,7 @@ namespace Bing.Security.Identity.JwtBearer
     /// <summary>
     /// 刷新Token信息
     /// </summary>
+    [Serializable]
     public class RefreshToken
     {
         /// <summary>

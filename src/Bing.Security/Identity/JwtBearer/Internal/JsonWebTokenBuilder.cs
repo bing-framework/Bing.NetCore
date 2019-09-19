@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Exceptions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Timing;
 using Microsoft.Extensions.Options;
@@ -17,22 +19,28 @@ namespace Bing.Security.Identity.JwtBearer.Internal
     internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
     {
         /// <summary>
-        /// Jwt选项配置
+        /// Jwt令牌存储器
         /// </summary>
-        private readonly JsonWebTokenOptions _options;
+        private readonly IJsonWebTokenStore _tokenStore;
 
         /// <summary>
         /// Jwt安全令牌处理器
         /// </summary>
-        private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler;
+        private readonly JwtSecurityTokenHandler _tokenHandler;
 
-        public JsonWebTokenBuilder(IOptions<JsonWebTokenOptions> options)
+        /// <summary>
+        /// Jwt选项配置
+        /// </summary>
+        private readonly JsonWebTokenOptions _options;
+
+        public JsonWebTokenBuilder(IJsonWebTokenStore tokenStore
+            ,IOptions<JsonWebTokenOptions> options)
         {
+            _tokenStore = tokenStore;
             _options = options.Value;
-            if (_jwtSecurityTokenHandler == null)
-                _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            if (_tokenHandler == null)
+                _tokenHandler = new JwtSecurityTokenHandler();
         }
-
 
         /// <summary>
         /// 创建令牌
@@ -50,7 +58,7 @@ namespace Bing.Security.Identity.JwtBearer.Internal
             if (string.IsNullOrWhiteSpace(options.Secret))
                 throw new ArgumentNullException(nameof(_options.Secret),
                     $@"{nameof(options.Secret)}为Null或空字符串。请在""appsettings.json""配置""{nameof(JsonWebTokenOptions)}""节点及其子节点""{nameof(JsonWebTokenOptions.Secret)}""");
-            var now = DateTime.UtcNow;
+            var clientId = payload["clientId"] ?? Guid.NewGuid().ToString();
             var claims = new List<Claim>();
             foreach (var key in payload.Keys)
             {
@@ -58,34 +66,28 @@ namespace Bing.Security.Identity.JwtBearer.Internal
                 claims.Add(tempClaim);
             }
 
-            var (token, expires) = CreateToken(claims, options, JsonWebTokenType.RefreshToken);
-            var refreshTokenStr = token;
+            // 生成刷新令牌
+            var (refreshToken, refreshExpires) = CreateToken(claims, options, JsonWebTokenType.RefreshToken);
+            var refreshTokenStr = refreshToken;
+            await _tokenStore.SaveRefreshTokenAsync(new RefreshToken()
+            {
+                ClientId = clientId,
+                EndUtcTime = refreshExpires,
+                Value = refreshTokenStr
+            });
 
-            (token, _) = CreateToken(claims, _options, JsonWebTokenType.AccessToken);
-
-            return new JsonWebToken()
+            // 生成访问令牌
+            var (token, accessExpires) = CreateToken(claims, _options, JsonWebTokenType.AccessToken);
+            var accessToken = new JsonWebToken()
             {
                 AccessToken = token,
                 RefreshToken = refreshTokenStr,
-                RefreshUtcExpires = Conv.To<long>(expires.ToJsGetTime())
+                RefreshUtcExpires = Conv.To<long>(refreshExpires.ToJsGetTime())
             };
+            await _tokenStore.SaveTokenAsync(accessToken, accessExpires);
 
-            //var jwt = new JwtSecurityToken(
-            //    issuer: null,
-            //    audience: null,
-            //    claims: claims,
-            //    notBefore: now,
-            //    expires: now.Add(TimeSpan.FromMinutes(options.AccessExpireMinutes)),
-            //    signingCredentials: new SigningCredentials(
-            //        new SymmetricSecurityKey(Encoding.ASCII.GetBytes(options.Secret)),
-            //        SecurityAlgorithms.HmacSha256));
-            //var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            //return new JsonWebToken()
-            //{
-            //    AccessToken = encodedJwt
-            //};
+            return accessToken;
         }
-
 
         /// <summary>
         /// 刷新令牌
@@ -93,7 +95,34 @@ namespace Bing.Security.Identity.JwtBearer.Internal
         /// <param name="refreshToken">刷新令牌</param>
         public async Task<JsonWebToken> RefreshAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            if(string.IsNullOrWhiteSpace(refreshToken))
+                throw new ArgumentNullException(nameof(refreshToken));
+            var parameters = new TokenValidationParameters()
+            {
+                ValidIssuer = _options.Issuer,
+                ValidAudience = _options.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret)),
+            };
+            var tokenModel = await _tokenStore.GetRefreshTokenAsync(refreshToken);
+            if (tokenModel == null || tokenModel.Value != refreshToken || tokenModel.EndUtcTime <= DateTime.UtcNow)
+            {
+                if (tokenModel != null && tokenModel.EndUtcTime <= DateTime.UtcNow)
+                {
+                    await _tokenStore.RemoveRefreshTokenAsync(refreshToken);
+                }
+                throw new Warning("刷新令牌不存在或已过期");
+            }
+
+            var principal = _tokenHandler.ValidateToken(refreshToken, parameters, out var securityToken);
+            var payload = principal.Claims.ToDictionary(x => x.Type, x => x.Value);
+            var result = await CreateAsync(payload, _options);
+            if (result != null)
+            {
+                await _tokenStore.RemoveRefreshTokenAsync(refreshToken);
+
+
+            }
+            return result;
         }
 
         /// <summary>
@@ -127,8 +156,8 @@ namespace Bing.Security.Identity.JwtBearer.Internal
                 IssuedAt = now,
                 Expires = expires
             };
-            var token = _jwtSecurityTokenHandler.CreateToken(descriptor);
-            var accessToken = _jwtSecurityTokenHandler.WriteToken(token);
+            var token = _tokenHandler.CreateToken(descriptor);
+            var accessToken = _tokenHandler.WriteToken(token);
             return (accessToken, expires);
         }
 
