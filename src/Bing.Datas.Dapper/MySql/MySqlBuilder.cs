@@ -8,7 +8,7 @@ namespace Bing.Datas.Dapper.MySql
     /// <summary>
     /// MySql Sql生成器
     /// </summary>
-    public class MySqlBuilder:SqlBuilderBase
+    public class MySqlBuilder : SqlBuilderBase
     {
         /// <summary>
         /// 初始化一个<see cref="MySqlBuilder"/>类型的实例
@@ -32,20 +32,12 @@ namespace Bing.Datas.Dapper.MySql
         /// <summary>
         /// 创建Sql生成器
         /// </summary>
-        /// <returns></returns>
-        public override ISqlBuilder New()
-        {
-            return new MySqlBuilder(EntityMatedata, TableDatabase, ParameterManager);
-        }
+        public override ISqlBuilder New() => new MySqlBuilder(EntityMatedata, TableDatabase, ParameterManager);
 
         /// <summary>
         /// 获取Sql方言
         /// </summary>
-        /// <returns></returns>
-        protected override IDialect GetDialect()
-        {
-            return new MySqlDialect();
-        }
+        protected override IDialect GetDialect() => new MySqlDialect();
 
         /// <summary>
         /// 创建From子句

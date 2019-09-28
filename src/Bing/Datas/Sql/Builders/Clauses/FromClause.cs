@@ -10,7 +10,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
     /// <summary>
     /// From子句
     /// </summary>
-    public class FromClause:IFromClause
+    public class FromClause : IFromClause
     {
         /// <summary>
         /// Sql项
@@ -51,7 +51,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="register">实体别名注册器</param>
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="table">表</param>
-        public FromClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,ITableDatabase tableDatabase, SqlItem table = null)
+        public FromClause(ISqlBuilder builder
+            , IDialect dialect
+            , IEntityResolver resolver
+            , IEntityAliasRegister register
+            , ITableDatabase tableDatabase
+            , SqlItem table = null)
         {
             Builder = builder;
             Dialect = dialect;
@@ -78,10 +83,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// </summary>
         /// <param name="table">表名</param>
         /// <param name="alias">别名</param>
-        public void From(string table, string alias = null)
-        {
-            Table = CreateSqlItem(table, null, alias);
-        }
+        public void From(string table, string alias = null) => Table = CreateSqlItem(table, null, alias);
 
         /// <summary>
         /// 创建Sql项
@@ -89,10 +91,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="table">表名</param>
         /// <param name="schema">架构名</param>
         /// <param name="alias">别名</param>
-        protected virtual SqlItem CreateSqlItem(string table, string schema, string alias)
-        {
-            return new SqlItem(table, schema, alias);
-        }
+        protected virtual SqlItem CreateSqlItem(string table, string schema, string alias) =>
+            new SqlItem(table, schema, alias);
 
         /// <summary>
         /// 设置表名
@@ -117,15 +117,10 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void From(ISqlBuilder builder, string alias)
         {
             if (builder == null)
-            {
                 return;
-            }
-
             var result = builder.ToSql();
             if (string.IsNullOrWhiteSpace(alias) == false)
-            {
                 result = $"({result}) As {Dialect.SafeName(alias)}";
-            }
             AppendSql(result);
         }
 
@@ -137,10 +132,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void From(Action<ISqlBuilder> action, string alias)
         {
             if (action == null)
-            {
                 return;
-            }
-
             var builder = Builder.New();
             action(builder);
             From(builder, alias);
@@ -153,10 +145,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void AppendSql(string sql)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             sql = Helper.ResolveSql(sql, Dialect);
             if (Table != null && Table.Raw)
             {
@@ -172,15 +161,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Validate()
         {
             if (string.IsNullOrWhiteSpace(Table?.Name))
-            {
                 throw new InvalidOperationException(LibraryResource.TableIsEmpty);
-            }
         }
 
         /// <summary>
         /// 输出Sql
         /// </summary>
-        /// <returns></returns>
         public string ToSql()
         {
             var table = Table?.ToSql(Dialect, TableDatabase);

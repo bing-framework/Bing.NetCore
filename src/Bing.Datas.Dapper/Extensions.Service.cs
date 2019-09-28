@@ -3,6 +3,7 @@ using Bing.Datas.Dapper.Handlers;
 using Bing.Datas.Dapper.MySql;
 using Bing.Datas.Dapper.Oracle;
 using Bing.Datas.Dapper.PgSql;
+using Bing.Datas.Dapper.Sqlite;
 using Bing.Datas.Dapper.SqlServer;
 using Bing.Datas.Enums;
 using Bing.Datas.Sql;
@@ -25,12 +26,9 @@ namespace Bing.Datas.Dapper
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="action">Sql查询配置</param>
-        /// <returns></returns>
         public static IServiceCollection AddSqlQuery(this IServiceCollection services,
-            Action<SqlOptions> action = null)
-        {
-            return AddSqlQuery(services, action, null, null);
-        }
+            Action<SqlOptions> action = null) =>
+            AddSqlQuery(services, action, null, null);
 
         /// <summary>
         /// 注册Sql查询服务
@@ -38,12 +36,9 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TDatabase">IDatabase实现类型，提供数据库连接</typeparam>
         /// <param name="services">服务集合</param>
         /// <param name="action">Sql查询配置</param>
-        /// <returns></returns>
         public static IServiceCollection AddSqlQuery<TDatabase>(this IServiceCollection services,
-            Action<SqlOptions> action = null) where TDatabase : class, IDatabase
-        {
-            return AddSqlQuery(services, action, typeof(TDatabase), null);
-        }
+            Action<SqlOptions> action = null) where TDatabase : class, IDatabase =>
+            AddSqlQuery(services, action, typeof(TDatabase), null);
 
         /// <summary>
         /// 注册Sql查询服务
@@ -52,14 +47,11 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TEntityMatedata">IEntityMatedata实现类型，提供实体元数据解析</typeparam>
         /// <param name="services">服务集合</param>
         /// <param name="configAction">Sql查询配置</param>
-        /// <returns></returns>
         public static IServiceCollection AddSqlQuery<TDatabase, TEntityMatedata>(this IServiceCollection services,
-            Action<SqlOptions> configAction = null) 
+            Action<SqlOptions> configAction = null)
             where TDatabase : class, IDatabase
-            where TEntityMatedata : class, IEntityMatedata
-        {
-            return AddSqlQuery(services, configAction, typeof(TDatabase), typeof(TEntityMatedata));
-        }
+            where TEntityMatedata : class, IEntityMatedata =>
+            AddSqlQuery(services, configAction, typeof(TDatabase), typeof(TEntityMatedata));
 
         /// <summary>
         /// 注册Sql查询服务
@@ -68,7 +60,6 @@ namespace Bing.Datas.Dapper
         /// <param name="configAction">Sql查询配置</param>
         /// <param name="database">数据库类型</param>
         /// <param name="entityMatedata">实体元数据解析器类型</param>
-        /// <returns></returns>
         private static IServiceCollection AddSqlQuery(IServiceCollection services, Action<SqlOptions> configAction,
             Type database, Type entityMatedata)
         {
@@ -78,12 +69,8 @@ namespace Bing.Datas.Dapper
                 configAction.Invoke(config);
                 services.Configure(configAction);
             }
-
             if (entityMatedata != null)
-            {
                 services.TryAddScoped(typeof(IEntityMatedata), t => t.GetService(entityMatedata));
-            }
-
             if (database != null)
             {
                 services.TryAddScoped(database);
@@ -117,6 +104,9 @@ namespace Bing.Datas.Dapper
                 case DatabaseType.Oracle:
                     services.AddTransient<ISqlBuilder, OracleBuilder>();
                     return;
+                case DatabaseType.Sqlite:
+                    services.AddTransient<ISqlBuilder, SqliteBuilder>();
+                    return;
                 default:
                     throw new NotImplementedException($"Sql生成器未实现 {config.DatabaseType.Description()} 数据库");
             }
@@ -128,7 +118,7 @@ namespace Bing.Datas.Dapper
         private static void RegisterTypeHandlers(SqlOptions config)
         {
             SqlMapper.AddTypeHandler(typeof(string), new StringTypeHandler());
-            if(config.DatabaseType==DatabaseType.Oracle)
+            if (config.DatabaseType == DatabaseType.Oracle)
                 SqlMapper.AddTypeHandler(new GuidTypeHandler());
         }
     }

@@ -213,80 +213,47 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 创建参数管理器
         /// </summary>
-        /// <returns></returns>
-        protected virtual IParameterManager CreateParameterManager()
-        {
-            return new ParameterManager(Dialect);
-        }
+        protected virtual IParameterManager CreateParameterManager() => new ParameterManager(Dialect);
 
         /// <summary>
         /// 获取Sql方言
         /// </summary>
-        /// <returns></returns>
         protected abstract IDialect GetDialect();
 
         /// <summary>
         /// 创建Select子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual ISelectClause CreateSelectClause()
-        {
-            return new SelectClause(this, Dialect, EntityResolver, AliasRegister);
-        }
+        protected virtual ISelectClause CreateSelectClause() => new SelectClause(this, Dialect, EntityResolver, AliasRegister);
 
         /// <summary>
         /// 创建From子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual IFromClause CreateFromClause()
-        {
-            return new FromClause(this, Dialect, EntityResolver, AliasRegister, TableDatabase);
-        }
+        protected virtual IFromClause CreateFromClause() => new FromClause(this, Dialect, EntityResolver, AliasRegister, TableDatabase);
 
         /// <summary>
         /// 创建Join子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual IJoinClause CreateJoinClause()
-        {
-            return new JoinClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager, TableDatabase);
-        }
+        protected virtual IJoinClause CreateJoinClause() => new JoinClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager, TableDatabase);
 
         /// <summary>
         /// 创建Where子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual IWhereClause CreateWhereClause()
-        {
-            return new WhereClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager);
-        }
+        protected virtual IWhereClause CreateWhereClause() => new WhereClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager);
 
         /// <summary>
         /// 创建分组子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual IGroupByClause CreateGroupByClause()
-        {
-            return new GroupByClause(Dialect, EntityResolver, AliasRegister);
-        }
+        protected virtual IGroupByClause CreateGroupByClause() => new GroupByClause(Dialect, EntityResolver, AliasRegister);
 
         /// <summary>
         /// 创建排序子句
         /// </summary>
-        /// <returns></returns>
-        protected virtual IOrderByClause CreateOrderByClause()
-        {
-            return new OrderByClause(Dialect, EntityResolver, AliasRegister);
-        }
+        protected virtual IOrderByClause CreateOrderByClause() => new OrderByClause(Dialect, EntityResolver, AliasRegister);
 
         /// <summary>
         /// 获取参数字面值解析器
         /// </summary>
-        /// <returns></returns>
-        protected virtual IParamLiteralsResolver GetParamLiteralsResolver()
-        {
-            return new ParamLiteralsResolver();
-        }
+        protected virtual IParamLiteralsResolver GetParamLiteralsResolver() => new ParamLiteralsResolver();
 
         #endregion
 
@@ -295,7 +262,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
         public abstract ISqlBuilder Clone();
 
         /// <summary>
@@ -445,7 +411,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 创建Sql生成器
         /// </summary>
-        /// <returns></returns>
         public abstract ISqlBuilder New();
 
         #endregion
@@ -455,7 +420,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
         /// </summary>
-        /// <returns></returns>
         public virtual string ToDebugSql()
         {
             return GetDebugSql(ToSql());
@@ -464,8 +428,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取调试Sql
         /// </summary>
-        /// <param name="sql"></param>
-        /// <returns></returns>
+        /// <param name="sql">Sql语句</param>
         private string GetDebugSql(string sql)
         {
             var parameters = GetParams();
@@ -485,7 +448,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 生成Sql语句
         /// </summary>
-        /// <returns></returns>
         public virtual string ToSql()
         {
             Init();
@@ -693,7 +655,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取参数
         /// </summary>
-        /// <returns></returns>
         public IReadOnlyDictionary<string, object> GetParams()
         {
             return ParameterManager.GetParams();
@@ -706,7 +667,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         public virtual string GetCondition()
         {
             return WhereClause.GetCondition();
@@ -731,7 +691,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取跳过行数的参数名
         /// </summary>
-        /// <returns></returns>
         protected string GetOffsetParam()
         {
             if (string.IsNullOrWhiteSpace(OffsetParam) == false)
@@ -748,7 +707,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 设置获取行数
         /// </summary>
         /// <param name="count">获取的行数</param>
-        /// <returns></returns>
         public ISqlBuilder Take(int count)
         {
             var param = GetLimitParam();
@@ -760,7 +718,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取限制行数的参数名
         /// </summary>
-        /// <returns></returns>
         protected string GetLimitParam()
         {
             if (string.IsNullOrWhiteSpace(LimitParam) == false)
@@ -776,7 +733,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 设置分页
         /// </summary>
         /// <param name="pager">分页参数</param>
-        /// <returns></returns>
         public ISqlBuilder Page(IPager pager)
         {
             if (pager == null)

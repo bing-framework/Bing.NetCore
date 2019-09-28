@@ -8,7 +8,7 @@ namespace Bing.Datas.Dapper.SqlServer
     /// <summary>
     /// Sql Server Sql生成器
     /// </summary>
-    public class SqlServerBuilder:SqlBuilderBase
+    public class SqlServerBuilder : SqlBuilderBase
     {
         /// <summary>
         /// 初始化一个<see cref="SqlServerBuilder"/>类型的实例
@@ -16,7 +16,7 @@ namespace Bing.Datas.Dapper.SqlServer
         /// <param name="matedata">实体元数据解析器</param>
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="parameterManager">参数管理器</param>
-        public SqlServerBuilder(IEntityMatedata matedata=null,ITableDatabase tableDatabase =null,IParameterManager parameterManager = null) : base(matedata, tableDatabase, parameterManager) { }
+        public SqlServerBuilder(IEntityMatedata matedata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(matedata, tableDatabase, parameterManager) { }
 
         /// <summary>
         /// 克隆

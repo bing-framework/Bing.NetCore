@@ -25,11 +25,9 @@ namespace Bing.Datas.EntityFramework.Sqlite
         public static IServiceCollection AddSqliteUnitOfWork<TService, TImplementation>(
             this IServiceCollection services, string connection, DataLogLevel level = DataLogLevel.Sql)
             where TService : class, IUnitOfWork
-            where TImplementation : UnitOfWorkBase, TService
-        {
-            return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlite(connection); },
+            where TImplementation : UnitOfWorkBase, TService =>
+            services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlite(connection); },
                 config => config.LogLevel = level);
-        }
 
         /// <summary>
         /// 注册Sqlite工作单元服务
@@ -42,11 +40,9 @@ namespace Bing.Datas.EntityFramework.Sqlite
         public static IServiceCollection AddSqliteUnitOfWork<TService, TImplementation>(
             this IServiceCollection services, string connection, Action<DataConfig> dataConfigAction)
             where TService : class, IUnitOfWork
-            where TImplementation : UnitOfWorkBase, TService
-        {
-            return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlite(connection); },
+            where TImplementation : UnitOfWorkBase, TService =>
+            services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlite(connection); },
                 dataConfigAction);
-        }
 
         /// <summary>
         /// 注册Sqlite工作单元服务
@@ -59,10 +55,8 @@ namespace Bing.Datas.EntityFramework.Sqlite
         public static IServiceCollection AddSqliteUnitOfWork<TService, TImplementation>(
             this IServiceCollection services, string connection, IConfiguration configuration)
             where TService : class, IUnitOfWork
-            where TImplementation : UnitOfWorkBase, TService
-        {
-            return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlite(connection); }, null,
+            where TImplementation : UnitOfWorkBase, TService =>
+            services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseSqlite(connection); }, null,
                 configuration);
-        }
     }
 }

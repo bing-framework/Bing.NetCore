@@ -20,6 +20,10 @@
         /// <summary>
         /// Oracle数据库
         /// </summary>
-        Oracle
+        Oracle,
+        /// <summary>
+        /// Sqlite数据库
+        /// </summary>
+        Sqlite
     }
 }
