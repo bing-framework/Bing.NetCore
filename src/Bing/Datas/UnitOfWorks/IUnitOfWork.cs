@@ -8,18 +8,16 @@ namespace Bing.Datas.UnitOfWorks
     /// 工作单元
     /// </summary>
     [Ignore]
-    public interface IUnitOfWork:IDisposable
+    public interface IUnitOfWork : IDisposable
     {
         /// <summary>
         /// 提交，返回影响的行数
         /// </summary>
-        /// <returns></returns>
         int Commit();
 
         /// <summary>
         /// 提交，返回影响的行数
         /// </summary>
-        /// <returns></returns>
         Task<int> CommitAsync();
     }
 }

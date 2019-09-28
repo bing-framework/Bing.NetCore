@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bing.Reflections;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,7 +91,46 @@ namespace Bing.Dependency
         {
             if (dictionary.TryGetValue(key, out object obj))
                 return obj as T;
-            return default(T);
+            return default;
+        }
+
+        /// <summary>
+        /// 批量注册服务
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="types">类型集合</param>
+        /// <param name="serviceLifetime">服务生命周期</param>
+        public static IServiceCollection BatchRegisterService(this IServiceCollection services, Type[] types,
+            ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+        {
+            var typeDict = new Dictionary<Type, Type[]>();
+            foreach (var type in types)
+            {
+                var interfaces = type.GetInterfaces();
+                typeDict.Add(type, interfaces);
+            }
+            if (typeDict.Keys.Count <= 0)
+                return services;
+            foreach (var instanceType in typeDict.Keys)
+            {
+                foreach (var interfaceType in typeDict[instanceType])
+                {
+                    switch (serviceLifetime)
+                    {
+                        case ServiceLifetime.Scoped:
+                            services.AddScoped(interfaceType, instanceType);
+                            break;
+                        case ServiceLifetime.Singleton:
+                            services.AddSingleton(interfaceType, instanceType);
+                            break;
+                        case ServiceLifetime.Transient:
+                            services.AddTransient(interfaceType, instanceType);
+                            break;
+                    }
+                }
+            }
+
+            return services;
         }
     }
 }

@@ -25,7 +25,6 @@ namespace Bing.Datas.Transactions
         /// 提交
         /// </summary>
         /// <param name="transaction">事务</param>
-        /// <returns></returns>
         Task CommitAsync(IDbTransaction transaction);
     }
 }

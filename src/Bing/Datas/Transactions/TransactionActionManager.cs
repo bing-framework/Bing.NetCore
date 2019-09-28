@@ -23,10 +23,7 @@ namespace Bing.Datas.Transactions
         /// <summary>
         /// 初始化一个<see cref="TransactionActionManager"/>类型的实例
         /// </summary>
-        public TransactionActionManager()
-        {
-            _actions = new List<Func<IDbTransaction, Task>>();
-        }
+        public TransactionActionManager() => _actions = new List<Func<IDbTransaction, Task>>();
 
         /// <summary>
         /// 注册事务操作
@@ -35,10 +32,7 @@ namespace Bing.Datas.Transactions
         public void Register(Func<IDbTransaction, Task> action)
         {
             if (action == null)
-            {
                 return;
-            }
-
             _actions.Add(action);
         }
 
@@ -46,13 +40,10 @@ namespace Bing.Datas.Transactions
         /// 提交
         /// </summary>
         /// <param name="transaction">事务</param>
-        /// <returns></returns>
         public async Task CommitAsync(IDbTransaction transaction)
         {
             foreach (var action in _actions)
-            {
                 await action(transaction);
-            }
             _actions.Clear();
         }
     }

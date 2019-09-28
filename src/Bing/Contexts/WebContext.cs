@@ -5,7 +5,7 @@ namespace Bing.Contexts
     /// <summary>
     /// Web上下文
     /// </summary>
-    public class WebContext:IContext
+    public class WebContext : IContext
     {
         /// <summary>
         /// 跟踪号
@@ -21,10 +21,7 @@ namespace Bing.Contexts
         public void Add<T>(string key, T value)
         {
             if (Web.HttpContext == null)
-            {
                 return;
-            }
-
             Web.HttpContext.Items[key] = value;
         }
 
@@ -33,14 +30,10 @@ namespace Bing.Contexts
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="key">键名</param>
-        /// <returns></returns>
         public T Get<T>(string key)
         {
             if (Web.HttpContext == null)
-            {
                 return default(T);
-            }
-
             return Conv.To<T>(Web.HttpContext.Items[key]);
         }
 
@@ -48,9 +41,6 @@ namespace Bing.Contexts
         /// 移除对象
         /// </summary>
         /// <param name="key">键名</param>
-        public void Remove(string key)
-        {
-            Web.HttpContext?.Items.Remove(key);
-        }
+        public void Remove(string key) => Web.HttpContext?.Items.Remove(key);
     }
 }

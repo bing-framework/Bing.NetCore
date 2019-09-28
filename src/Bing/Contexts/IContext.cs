@@ -25,7 +25,6 @@ namespace Bing.Contexts
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="key">键名</param>
-        /// <returns></returns>
         T Get<T>(string key);
 
         /// <summary>
