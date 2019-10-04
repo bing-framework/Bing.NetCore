@@ -147,18 +147,20 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
                     ? options.RefreshExpireMinutes
                     : 10080; // 默认7天
             var expires = now.AddMinutes(minutes);
-            var descriptor = new SecurityTokenDescriptor()
-            {
-                Subject = new ClaimsIdentity(claims),
-                Audience = options.Audience,
-                Issuer = options.Issuer,
-                SigningCredentials = credentials,
-                NotBefore = now,
-                IssuedAt = now,
-                Expires = expires
-            };
-            var token = _tokenHandler.CreateToken(descriptor);
-            var accessToken = _tokenHandler.WriteToken(token);
+            //var descriptor = new SecurityTokenDescriptor()
+            //{
+            //    Subject = new ClaimsIdentity(claims),
+            //    Audience = options.Audience,
+            //    Issuer = options.Issuer,
+            //    SigningCredentials = credentials,
+            //    NotBefore = now,
+            //    IssuedAt = now,
+            //    Expires = expires,
+            //};
+            //var token = _tokenHandler.CreateToken(descriptor);
+            //var accessToken = _tokenHandler.WriteToken(token);
+            var jwt = new JwtSecurityToken(options.Issuer, options.Audience, claims, now, expires, credentials);
+            var accessToken = _tokenHandler.WriteToken(jwt);
             return (accessToken, expires);
         }
 

@@ -55,7 +55,7 @@ namespace Bing.Samples.Jwt.Controllers
         /// 获取内容
         /// </summary>
         /// <param name="content">内容</param>
-        [HttpGet]
+        [HttpGet("getContent")]
         public Task<IActionResult> GetAsync(string content)
         {
             return Task.FromResult(Success(content));
