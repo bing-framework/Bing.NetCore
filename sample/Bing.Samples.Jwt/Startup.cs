@@ -84,6 +84,10 @@ namespace Bing.Samples.Jwt
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = GetValidationParameters(jwtOptions);
+                o.SaveToken = true;
             });
             services.AddJwt(Configuration);
 

@@ -37,9 +37,9 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
             if (!string.Equals(jwtArray[2], sign))
                 return false;
             // 其次验证是否在有效期内
-            var now = ToUnixEpochDate(DateTime.UtcNow);
-            if (!(now >= long.Parse(payload["nbf"].ToString()) && now < long.Parse(payload["exp"].ToString())))
-                return false;
+            //var now = ToUnixEpochDate(DateTime.UtcNow);
+            //if (!(now >= long.Parse(payload["nbf"].ToString()) && now < long.Parse(payload["exp"].ToString())))
+            //    return false;
             // 进行自定义验证
             return validatePayload(payload, options);
         }
