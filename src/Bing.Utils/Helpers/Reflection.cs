@@ -73,17 +73,11 @@ namespace Bing.Utils.Helpers
         private static string GetDisplayName(MemberInfo member)
         {
             if (member == null)
-            {
                 return string.Empty;
-            }
             if (member.GetCustomAttribute<DisplayAttribute>() is DisplayAttribute displayAttribute)
-            {
                 return displayAttribute.Description; ;
-            }
             if (member.GetCustomAttribute<DisplayNameAttribute>() is DisplayNameAttribute displayNameAttribute)
-            {
                 return displayNameAttribute.DisplayName;
-            }
             return string.Empty;
         }
 

@@ -30,13 +30,9 @@ namespace Bing.Utils.Helpers
             if (value.IsEmpty())
             {
                 if (typeof(TEnum).IsGenericType)
-                {
                     return default(TEnum);
-                }
-
                 throw new ArgumentNullException(nameof(member));
             }
-
             return (TEnum)System.Enum.Parse(Common.GetType<TEnum>(), value, true);
         }
 
@@ -60,25 +56,13 @@ namespace Bing.Utils.Helpers
         public static string GetName(Type type, object member)
         {
             if (type == null)
-            {
                 return string.Empty;
-            }
-
             if (member == null)
-            {
                 return string.Empty;
-            }
-
             if (member is string)
-            {
                 return member.ToString();
-            }
-
             if (type.GetTypeInfo().IsEnum == false)
-            {
                 return string.Empty;
-            }
-
             return System.Enum.GetName(type, member);
         }
 
