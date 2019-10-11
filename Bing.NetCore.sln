@@ -212,7 +212,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MiniProfiler", "src\Bi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Permissions", "src\Bing.Permissions\Bing.Permissions.csproj", "{1DA7A52C-D593-4B04-9A5B-1136BDC3D69F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Jwt", "sample\Bing.Samples.Jwt\Bing.Samples.Jwt.csproj", "{0A8432D1-A6DA-4FA6-9CDD-5D6F4400C106}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Jwt", "sample\Bing.Samples.Jwt\Bing.Samples.Jwt.csproj", "{0A8432D1-A6DA-4FA6-9CDD-5D6F4400C106}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
