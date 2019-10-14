@@ -29,15 +29,9 @@ namespace Bing.Exceptions.Prompts
         public static void AddPrompt(IExceptionPrompt prompt)
         {
             if (prompt == null)
-            {
                 throw new ArgumentNullException(nameof(prompt));
-            }
-
             if (Prompts.Contains(prompt))
-            {
                 return;
-            }
-
             Prompts.Add(prompt);
         }
 
@@ -45,30 +39,18 @@ namespace Bing.Exceptions.Prompts
         /// 获取异常提示
         /// </summary>
         /// <param name="exception">异常</param>
-        /// <returns></returns>
         public static string GetPrompty(Exception exception)
         {
             if (exception == null)
-            {
                 return null;
-            }
             exception = exception.GetRawException();
             var prompt = GetExceptionPrompt(exception);
             if (string.IsNullOrWhiteSpace(prompt) == false)
-            {
                 return prompt;
-            }
-
             if (exception is Warning warning)
-            {
                 return warning.Message;
-            }
-
             if (Web.Environment.IsDevelopment() || IsShowSystemException)
-            {
                 return exception.Message;
-            }
-
             return R.SystemError;
         }
 
@@ -76,18 +58,14 @@ namespace Bing.Exceptions.Prompts
         /// 获取异常提示
         /// </summary>
         /// <param name="exception">提倡</param>
-        /// <returns></returns>
         private static string GetExceptionPrompt(Exception exception)
         {
             foreach (var prompt in Prompts)
             {
                 var result = prompt.GetPrompt(exception);
                 if (result.IsEmpty() == false)
-                {
                     return result;
-                }
             }
-
             return string.Empty;
         }
     }

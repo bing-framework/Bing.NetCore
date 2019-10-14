@@ -17,10 +17,7 @@ namespace Bing.Aspects
         public override Task Invoke(ParameterAspectContext context, ParameterAspectDelegate next)
         {
             if (string.IsNullOrWhiteSpace(context.Parameter.Value.SafeString()))
-            {
                 throw new ArgumentNullException(context.Parameter.Name);
-            }
-
             return next(context);
         }
     }

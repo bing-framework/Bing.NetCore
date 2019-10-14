@@ -17,7 +17,6 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public static string ToString(this byte[] value, Encoding encoding)
         {
             encoding = (encoding ?? Encoding.UTF8);

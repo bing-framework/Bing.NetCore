@@ -22,9 +22,7 @@ namespace Bing.Utils.Extensions
         public static void CheckNull(this object obj, string parameterName)
         {
             if (obj == null)
-            {
                 throw new ArgumentNullException(parameterName);
-            }
         }
 
         #endregion
@@ -60,7 +58,6 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <typeparam name="T">泛型对象</typeparam>
         /// <param name="list">数据</param>
-        /// <returns></returns>
         public static bool IsEmpty<T>(this IEnumerable<T> list) => null == list || !list.Any();
 
         /// <summary>
@@ -69,14 +66,12 @@ namespace Bing.Utils.Extensions
         /// <typeparam name="TKey">键类型</typeparam>
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="dictionary">数据</param>
-        /// <returns></returns>
         public static bool IsEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => null == dictionary || dictionary.Count == 0;
 
         /// <summary>
         /// 判断 字典 是否为空
         /// </summary>
         /// <param name="dictionary">数据</param>
-        /// <returns></returns>
         public static bool IsEmpty(this IDictionary dictionary) => null == dictionary || dictionary.Count == 0;
 
         #endregion
@@ -87,23 +82,14 @@ namespace Bing.Utils.Extensions
         /// 判断目标对象是否为空
         /// </summary>
         /// <param name="target">目标对象</param>
-        /// <returns></returns>
-        public static bool IsNull(this object target)
-        {
-            return target.IsNull<object>();
-        }
+        public static bool IsNull(this object target) => target.IsNull<object>();
 
         /// <summary>
         /// 判断目标对象是否为空
         /// </summary>
         /// <typeparam name="T">目标对象类型</typeparam>
         /// <param name="target">目标对象</param>
-        /// <returns></returns>
-        public static bool IsNull<T>(this T target)
-        {
-            var result = ReferenceEquals(target, null);
-            return result;
-        }
+        public static bool IsNull<T>(this T target) => ReferenceEquals(target, null);
 
         #endregion
 
@@ -132,6 +118,20 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="sb">数据</param>
         public static bool NotEmpty(this StringBuilder sb) => sb != null && sb.Length != 0 && sb.ToString().NotEmpty();
+
+        /// <summary>
+        /// 判断 迭代集合 是否非空
+        /// </summary>
+        /// <typeparam name="T">泛型对象</typeparam>
+        /// <param name="enumerable">数据</param>
+        public static bool NotEmpty<T>(this IEnumerable<T> enumerable)
+        {
+            if (enumerable == null)
+                return false;
+            if (enumerable.Any())
+                return true;
+            return false;
+        }
 
         #endregion
 

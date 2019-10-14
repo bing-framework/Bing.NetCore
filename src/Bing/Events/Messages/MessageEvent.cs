@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Bing.Utils.Extensions;
+using Bing.Utils.Json;
 
 namespace Bing.Events.Messages
 {
@@ -38,14 +39,10 @@ namespace Bing.Events.Messages
             result.AppendLine($"事件标识: {Id}");
             result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
             if (string.IsNullOrWhiteSpace(Name) == false)
-            {
                 result.AppendLine($"消息名称: {Name}");
-            }
             if (string.IsNullOrWhiteSpace(Callback) == false)
-            {
                 result.AppendLine($"回调名称: {Callback}");
-            }
-            result.Append($"事件数据: {Bing.Utils.Json.JsonHelper.ToJson(Data)}");
+            result.Append($"事件数据: {(Data).ToJson()}");
             return result.ToString();
         }
     }
