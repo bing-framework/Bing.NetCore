@@ -38,7 +38,7 @@ namespace Bing.Utils.Webs
         /// <param name="value">值</param>
         public static void WriteCookie(HttpContext context, string name, string value)
         {
-            var cookieOptions = new CookieOptions() {HttpOnly = true};
+            var cookieOptions = new CookieOptions() { HttpOnly = true };
             context?.Response?.Cookies?.Append(name, value, cookieOptions);
         }
 
