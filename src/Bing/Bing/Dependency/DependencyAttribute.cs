@@ -11,7 +11,7 @@ namespace Bing.Dependency
     {
         /// <summary>
         /// 声明周期类型，代替
-        /// <see cref="ISingletonDependency"/>,<see cref="IScopeDependency"/>,<see cref="ITransientDependency"/>三个接口的作用
+        /// <see cref="ISingletonDependency"/>,<see cref="IScopedDependency"/>,<see cref="ITransientDependency"/>三个接口的作用
         /// </summary>
         public ServiceLifetime Lifetime { get; }
 

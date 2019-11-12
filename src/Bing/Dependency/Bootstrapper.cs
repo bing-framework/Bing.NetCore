@@ -191,7 +191,7 @@ namespace Bing.Dependency
         /// </summary>
         private void RegistScopeDependency()
         {
-            _builder.RegisterTypes(GetTypes<IScopeDependency>()).AsImplementedInterfaces().PropertiesAutowired()
+            _builder.RegisterTypes(GetTypes<IScopedDependency>()).AsImplementedInterfaces().PropertiesAutowired()
                 .InstancePerLifetimeScope();
         }
 

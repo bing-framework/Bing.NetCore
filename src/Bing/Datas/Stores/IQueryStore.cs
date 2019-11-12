@@ -17,7 +17,7 @@ namespace Bing.Datas.Stores
     /// <typeparam name="TEntity">对象类型</typeparam>
     /// <typeparam name="TKey">对象标识类型</typeparam>
     [IgnoreDependency]
-    public interface IQueryStore<TEntity, in TKey> : IScopeDependency,
+    public interface IQueryStore<TEntity, in TKey> : IScopedDependency,
         IFindQueryable<TEntity, TKey>,
         IFindById<TEntity, TKey>, IFindByIdAsync<TEntity, TKey>,
         IFindByIds<TEntity, TKey>, IFindByIdsAsync<TEntity, TKey>,

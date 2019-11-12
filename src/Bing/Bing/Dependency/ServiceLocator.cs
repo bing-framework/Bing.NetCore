@@ -12,6 +12,8 @@ namespace Bing.Dependency
     /// </summary>
     public sealed class ServiceLocator : IDisposable
     {
+        #region 字段
+
         /// <summary>
         /// 懒加载实例
         /// </summary>
@@ -26,6 +28,10 @@ namespace Bing.Dependency
         /// 服务集合
         /// </summary>
         private IServiceCollection _services;
+
+        #endregion
+
+        #region 属性
 
         /// <summary>
         /// 服务定位器实例
@@ -44,15 +50,23 @@ namespace Bing.Dependency
         {
             get
             {
-                var scopeResolver = _provider.GetService<IScopeServiceResolver>();
-                return scopeResolver != null && scopeResolver.ResolveEnabled ? scopeResolver.ScopeProvider : null;
+                var scopeResolver = _provider.GetService<IScopedServiceResolver>();
+                return scopeResolver != null && scopeResolver.ResolveEnabled ? scopeResolver.ScopedProvider : null;
             }
         }
+
+        #endregion
+
+        #region 构造函数
 
         /// <summary>
         /// 初始化一个<see cref="ServiceLocator"/>类型的实例
         /// </summary>
         private ServiceLocator() { }
+
+        #endregion
+
+        #region InScoped(是否在作用域生命周期中)
 
         /// <summary>
         /// 当前是否处于<see cref="ServiceLifetime.Scoped"/>生命周期中
@@ -60,15 +74,23 @@ namespace Bing.Dependency
         /// <returns></returns>
         public static bool InScoped() => Instance.ScopedProvider != null;
 
+        #endregion
+
+        #region SetServiceCollection(设置应用程序服务集合)
+
         /// <summary>
         /// 设置应用程序服务集合
         /// </summary>
         /// <param name="services">服务集合</param>
         internal void SetServiceCollection(IServiceCollection services)
         {
-            Check.NotNull(services,nameof(services));
+            Check.NotNull(services, nameof(services));
             _services = services;
         }
+
+        #endregion
+
+        #region SetApplicationServiceProvider(设置应用程序服务提供程序)
 
         /// <summary>
         /// 设置应用程序服务提供程序
@@ -76,9 +98,13 @@ namespace Bing.Dependency
         /// <param name="provider">服务提供程序</param>
         internal void SetApplicationServiceProvider(IServiceProvider provider)
         {
-            Check.NotNull(provider,nameof(provider));
+            Check.NotNull(provider, nameof(provider));
             _provider = provider;
         }
+
+        #endregion
+
+        #region GetServiceDescriptors(获取所有已注册的 ServiceDescriptor 对象)
 
         /// <summary>
         /// 获取所有已注册的<see cref="ServiceDescriptor"/>对象
@@ -89,6 +115,10 @@ namespace Bing.Dependency
             return _services;
         }
 
+        #endregion
+
+        #region GetService(解析指定类型的服务实例)
+
         /// <summary>
         /// 解析指定类型的服务实例
         /// </summary>
@@ -98,7 +128,7 @@ namespace Bing.Dependency
             Check.NotNull(_services, nameof(_services));
             Check.NotNull(_provider, nameof(_provider));
 
-            var scopedResolver = _provider.GetService<IScopeServiceResolver>();
+            var scopedResolver = _provider.GetService<IScopedServiceResolver>();
             if (scopedResolver != null && scopedResolver.ResolveEnabled)
                 return scopedResolver.GetService<T>();
             return _provider.GetService<T>();
@@ -113,11 +143,15 @@ namespace Bing.Dependency
             Check.NotNull(_services, nameof(_services));
             Check.NotNull(_provider, nameof(_provider));
 
-            var scopedResolver = _provider.GetService<IScopeServiceResolver>();
+            var scopedResolver = _provider.GetService<IScopedServiceResolver>();
             if (scopedResolver != null && scopedResolver.ResolveEnabled)
                 return scopedResolver.GetService(serviceType);
             return _provider.GetService(serviceType);
         }
+
+        #endregion
+
+        #region GetServices(解析指定类型的所有服务实例)
 
         /// <summary>
         /// 解析指定类型的所有服务实例
@@ -128,7 +162,7 @@ namespace Bing.Dependency
             Check.NotNull(_services, nameof(_services));
             Check.NotNull(_provider, nameof(_provider));
 
-            var scopedResolver = _provider.GetService<IScopeServiceResolver>();
+            var scopedResolver = _provider.GetService<IScopedServiceResolver>();
             if (scopedResolver != null && scopedResolver.ResolveEnabled)
                 return scopedResolver.GetServices<T>();
             return _provider.GetServices<T>();
@@ -143,11 +177,15 @@ namespace Bing.Dependency
             Check.NotNull(_services, nameof(_services));
             Check.NotNull(_provider, nameof(_provider));
 
-            var scopedResolver = _provider.GetService<IScopeServiceResolver>();
+            var scopedResolver = _provider.GetService<IScopedServiceResolver>();
             if (scopedResolver != null && scopedResolver.ResolveEnabled)
                 return scopedResolver.GetServices(serviceType);
             return _provider.GetServices(serviceType);
         }
+
+        #endregion
+
+        #region Dispose(释放资源)
 
         /// <summary>
         /// 释放资源
@@ -157,5 +195,7 @@ namespace Bing.Dependency
             _services = null;
             _provider = null;
         }
+
+        #endregion
     }
 }

@@ -7,7 +7,7 @@ namespace Bing.Dependency
     /// <summary>
     /// <see cref="ServiceLifetime.Scoped"/>服务解析器
     /// </summary>
-    public interface IScopeServiceResolver
+    public interface IScopedServiceResolver
     {
         /// <summary>
         /// 是否可解析
@@ -17,7 +17,7 @@ namespace Bing.Dependency
         /// <summary>
         /// <see cref="ServiceLifetime.Scoped"/>生命周期的服务提供程序
         /// </summary>
-        IServiceProvider ScopeProvider { get; }
+        IServiceProvider ScopedProvider { get; }
 
         /// <summary>
         /// 获取指定服务类型的实例

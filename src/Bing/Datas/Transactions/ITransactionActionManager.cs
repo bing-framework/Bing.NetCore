@@ -8,7 +8,7 @@ namespace Bing.Datas.Transactions
     /// <summary>
     /// 事务操作管理器
     /// </summary>
-    public interface ITransactionActionManager : IScopeDependency
+    public interface ITransactionActionManager : IScopedDependency
     {
         /// <summary>
         /// 事务操作数量
