@@ -20,10 +20,7 @@ namespace Bing.Webs.Middlewares
         /// 初始化一个<see cref="ErrorLogMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        public ErrorLogMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        public ErrorLogMiddleware(RequestDelegate next) => _next = next;
 
         /// <summary>
         /// 执行方法
@@ -51,10 +48,7 @@ namespace Bing.Webs.Middlewares
         private void WriteLog(HttpContext context, Exception ex)
         {
             if (context == null)
-            {
                 return;
-            }
-
             var log = (ILog) context.RequestServices.GetService(typeof(ILog));
             log.Caption("全局异常捕获 - 错误日志中间件")
                 .Content($"状态码：{context.Response.StatusCode}");
