@@ -11,7 +11,6 @@ namespace Bing.Caching
         /// 生成缓存键
         /// </summary>
         /// <param name="args">参数</param>
-        /// <returns></returns>
         public string GetKey(params object[] args)
         {
             args.CheckNotNullOrEmpty(nameof(args));

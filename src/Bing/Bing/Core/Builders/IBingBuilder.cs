@@ -21,6 +21,11 @@ namespace Bing.Core.Builders
         IEnumerable<Type> ExceptModules { get; }
 
         /// <summary>
+        /// Bing 选项配置委托
+        /// </summary>
+        Action<BingOptions> OptionsAction { get; }
+
+        /// <summary>
         /// 添加指定模块
         /// </summary>
         /// <typeparam name="TModule">要添加的模块类型</typeparam>

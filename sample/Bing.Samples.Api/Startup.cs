@@ -14,6 +14,7 @@ using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.Exceptionless;
 using Bing.Logs.Log4Net;
 using Bing.Core;
+using Bing.Locks.Default;
 using Bing.Logs.NLog;
 using Bing.Logs.Serilog;
 using Bing.Samples.Api.OAuths;
@@ -145,6 +146,9 @@ namespace Bing.Samples.Api
                     };
                 }).WithJson();
             });
+
+            // 添加业务锁
+            services.AddLock();
 
             services.AddUploadService();
             services.AddApiInterfaceService();
