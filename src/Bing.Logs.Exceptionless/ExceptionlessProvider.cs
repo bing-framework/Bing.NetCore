@@ -186,7 +186,12 @@ namespace Bing.Logs.Exceptionless
         /// </summary>
         /// <param name="builder">事件生成器</param>
         /// <param name="content">日志内容</param>
-        private void AddTags(EventBuilder builder, ILogContent content) => builder.AddTags(content.Level, content.LogName, content.TraceId);
+        private void AddTags(EventBuilder builder, ILogContent content)
+        {
+            builder.AddTags(content.Level, content.LogName, content.TraceId);
+            if (content.Tags.Any())
+                builder.AddTags(content.Tags.ToArray());
+        }
 
         /// <summary>
         /// 获取行号
