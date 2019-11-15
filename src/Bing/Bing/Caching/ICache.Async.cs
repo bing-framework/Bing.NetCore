@@ -70,7 +70,6 @@ namespace Bing.Caching
         /// <summary>
         /// 清空缓存
         /// </summary>
-        /// <returns></returns>
         Task ClearAsync();
     }
 }

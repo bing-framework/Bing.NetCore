@@ -21,7 +21,6 @@ namespace Bing.Caching.Internal
         /// 将对象转换成字典
         /// </summary>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
         public static Dictionary<string, object> ToDictionary(object obj)
         {
             var type = obj.GetType();
@@ -38,7 +37,6 @@ namespace Bing.Caching.Internal
         /// 创建字典生成器
         /// </summary>
         /// <param name="type">类型</param>
-        /// <returns></returns>
         private static Func<object, Dictionary<string, object>> CreateDictionaryGenerator(Type type)
         {
             var dm = new DynamicMethod($"Dictionary{Guid.NewGuid()}", typeof(Dictionary<string, object>),

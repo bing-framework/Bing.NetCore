@@ -1,5 +1,6 @@
 ﻿using Bing.Applications.Operations;
 using Bing.Datas.Queries;
+using Bing.Dependency;
 
 namespace Bing.Applications
 {
@@ -8,6 +9,7 @@ namespace Bing.Applications
     /// </summary>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
+    [IgnoreDependency]
     public interface IQueryService<TDto, in TQueryParameter> : IService,
         IGetAll<TDto>, IGetById<TDto>,
         IGetAllAsync<TDto>, IGetByIdAsync<TDto>,
