@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Text;
-using Bing.Utils.Extensions;
 using MimeKit;
 using MimeKit.IO;
 
@@ -17,14 +16,10 @@ namespace Bing.MailKit.Extensions
         /// 转换成MimeMessage
         /// </summary>
         /// <param name="mail">邮件消息</param>
-        /// <returns></returns>
         public static MimeMessage ToMimeMessage(this MailMessage mail)
         {
             if (mail == null)
-            {
                 throw new ArgumentNullException(nameof(mail));
-            }
-
             var headers = new List<Header>();
             foreach (var key in mail.Headers.AllKeys)
             {
@@ -39,19 +34,15 @@ namespace Bing.MailKit.Extensions
                 }
             }
 
-            var message=new MimeMessage(headers.ToArray());
+            var message = new MimeMessage(headers.ToArray());
             MimeEntity body = null;
             if (mail.Sender != null)
-            {
                 message.Sender = mail.Sender.ToMailboxAddress();
-            }
-
             if (mail.From != null)
             {
-                message.Headers.Replace(HeaderId.From,string.Empty);
+                message.Headers.Replace(HeaderId.From, string.Empty);
                 message.From.Add(mail.From.ToMailboxAddress());
             }
-
             if (mail.ReplyToList.Count > 0)
             {
                 message.Headers.Replace(HeaderId.ReplyTo, string.Empty);
@@ -77,13 +68,9 @@ namespace Bing.MailKit.Extensions
             }
 
             if (mail.SubjectEncoding != null)
-            {
                 message.Headers.Replace(HeaderId.Subject, mail.SubjectEncoding, mail.Subject ?? string.Empty);
-            }
             else
-            {
                 message.Subject = mail.Subject ?? string.Empty;
-            }
 
             switch (mail.Priority)
             {
@@ -166,10 +153,7 @@ namespace Bing.MailKit.Extensions
             }
 
             if (body == null)
-            {
                 body = new TextPart(mail.IsBodyHtml ? "html" : "plain");
-            }
-
             if (mail.Attachments.Count > 0)
             {
                 var mixed = new Multipart("mixed");
@@ -206,18 +190,18 @@ namespace Bing.MailKit.Extensions
 
             if (contentType.MediaType.Equals("text", StringComparison.OrdinalIgnoreCase))
             {
-                part=new TextPart();
+                part = new TextPart();
             }
             else
             {
-                part=new MimePart(contentType);
+                part = new MimePart(contentType);
             }
 
             if (attachemt != null)
             {
                 //var disposition = attachemt.ContentDisposition.ToString();
                 //part.ContentDisposition = ContentDisposition.Parse(disposition);
-                part.ContentDisposition=new ContentDisposition(ContentDisposition.Attachment);
+                part.ContentDisposition = new ContentDisposition(ContentDisposition.Attachment);
             }
 
             switch (item.TransferEncoding)
@@ -290,7 +274,7 @@ namespace Bing.MailKit.Extensions
             {
                 return null;
             }
-            var list=new InternetAddressList();
+            var list = new InternetAddressList();
             foreach (var address in addresses)
             {
                 list.Add(address.ToMailboxAddress());

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Mail;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Bing.Net.Mail.Abstractions;
@@ -15,7 +13,7 @@ namespace Bing.Net.Mail.Core
     /// <summary>
     /// 电子邮件发送器基类
     /// </summary>
-    public abstract class EmailSenderBase:IEmailSender
+    public abstract class EmailSenderBase : IEmailSender
     {
         /// <summary>
         /// 电子邮件配置提供器
@@ -42,7 +40,7 @@ namespace Bing.Net.Mail.Core
         {
             Send(new MailMessage()
             {
-                To = { to},
+                To = { to },
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = isBodyHtml
@@ -60,7 +58,7 @@ namespace Bing.Net.Mail.Core
         {
             await SendAsync(new MailMessage()
             {
-                To = {to},
+                To = { to },
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = isBodyHtml
@@ -77,7 +75,7 @@ namespace Bing.Net.Mail.Core
         /// <param name="isBodyHtml">是否html内容</param>
         public virtual void Send(string @from, string to, string subject, string body, bool isBodyHtml = true)
         {
-            Send(new MailMessage(from, to, subject, body) {IsBodyHtml = isBodyHtml});
+            Send(new MailMessage(from, to, subject, body) { IsBodyHtml = isBodyHtml });
         }
 
         /// <summary>
@@ -104,7 +102,7 @@ namespace Bing.Net.Mail.Core
             mail.From = new MailAddress(config.FromAddress);
             PaserMailAddress(box.To, mail.To);
             PaserMailAddress(box.Cc, mail.CC);
-            PaserMailAddress(box.Bcc,mail.Bcc);
+            PaserMailAddress(box.Bcc, mail.Bcc);
             PaserMailAddress(config.FromAddress, mail.ReplyToList);
             mail.Subject = box.Subject;
             mail.Body = box.Body;
@@ -130,7 +128,7 @@ namespace Bing.Net.Mail.Core
             mail.Subject = box.Subject;
             mail.Body = box.Body;
             mail.IsBodyHtml = box.IsBodyHtml;
-            HandlerAttachments(box.Attachments,mail.Attachments);
+            HandlerAttachments(box.Attachments, mail.Attachments);
             await SendAsync(mail);
         }
 
@@ -142,9 +140,7 @@ namespace Bing.Net.Mail.Core
         public virtual void Send(MailMessage mail, bool normalize = true)
         {
             if (normalize)
-            {
                 NormalizeMail(mail);
-            }
             SendEmail(mail);
         }
 
@@ -156,10 +152,7 @@ namespace Bing.Net.Mail.Core
         public virtual async Task SendAsync(MailMessage mail, bool normalize = true)
         {
             if (normalize)
-            {
                 NormalizeMail(mail);
-            }
-
             await SendEmailAsync(mail);
         }
 
@@ -173,7 +166,6 @@ namespace Bing.Net.Mail.Core
         /// 发送邮件
         /// </summary>
         /// <param name="mail">邮件</param>
-        /// <returns></returns>
         protected abstract Task SendEmailAsync(MailMessage mail);
 
         /// <summary>
@@ -181,17 +173,13 @@ namespace Bing.Net.Mail.Core
         /// </summary>
         /// <param name="attachments">附件集合</param>
         /// <param name="attachmentCollection">附件集合对象</param>
-        /// <returns></returns>
-        protected virtual void HandlerAttachments(IList<IAttachment> attachments,AttachmentCollection attachmentCollection)
+        protected virtual void HandlerAttachments(IList<IAttachment> attachments, AttachmentCollection attachmentCollection)
         {
             if (attachments == null || !attachments.Any())
-            {
                 return;
-            }
-
             foreach (var item in attachments)
             {
-                Attachment attachment=new Attachment(item.GetFileStream(),item.GetName());
+                Attachment attachment = new Attachment(item.GetFileStream(), item.GetName());
                 attachmentCollection.Add(attachment);
             }
         }
@@ -199,7 +187,7 @@ namespace Bing.Net.Mail.Core
         /// <summary>
         /// 规范化邮件，设置发件人地址/名称并使邮件编码为UTF-8
         /// </summary>
-        /// <param name="mail"></param>
+        /// <param name="mail">邮件</param>
         protected virtual void NormalizeMail(MailMessage mail)
         {
             if (mail.From == null || mail.From.Address.IsEmpty())
@@ -207,21 +195,12 @@ namespace Bing.Net.Mail.Core
                 var config = ConfigProvider.GetConfig();
                 mail.From = new MailAddress(config.FromAddress, config.DisplayName, Encoding.UTF8);
             }
-
             if (mail.HeadersEncoding == null)
-            {
-                mail.HeadersEncoding=Encoding.UTF8;
-            }
-
+                mail.HeadersEncoding = Encoding.UTF8;
             if (mail.SubjectEncoding == null)
-            {
-                mail.SubjectEncoding=Encoding.UTF8;
-            }
-
+                mail.SubjectEncoding = Encoding.UTF8;
             if (mail.BodyEncoding == null)
-            {
-                mail.BodyEncoding=Encoding.UTF8;
-            }
+                mail.BodyEncoding = Encoding.UTF8;
         }
 
         /// <summary>
@@ -232,10 +211,8 @@ namespace Bing.Net.Mail.Core
         protected static void PaserMailAddress(string mailAddress, MailAddressCollection mailAddressCollection)
         {
             if (mailAddress.IsEmpty())
-            {
                 return;
-            }
-            char[] separator = new char[2] {',', ';'};
+            char[] separator = new char[2] { ',', ';' };
             string[] addressArray = mailAddress.Split(separator);
             PaserMailAddress(addressArray.ToList(), mailAddressCollection);
         }
@@ -249,16 +226,11 @@ namespace Bing.Net.Mail.Core
             MailAddressCollection mailAddressCollection)
         {
             if (mailAddress == null || mailAddress.Count == 0)
-            {
                 return;
-            }
-
             foreach (var address in mailAddress)
             {
                 if (address.Trim() == string.Empty)
-                {
                     continue;
-                }
                 mailAddressCollection.Add(new MailAddress(address));
             }
         }
