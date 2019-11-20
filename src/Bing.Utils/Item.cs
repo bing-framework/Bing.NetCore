@@ -52,13 +52,13 @@ namespace Bing.Utils
         /// 组
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string Group { get; }
+        public string Group { get; set; }
 
         /// <summary>
         /// 禁用
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public bool? Disabled { get; }
+        public bool? Disabled { get; set; }
 
         /// <summary>
         /// 比较
