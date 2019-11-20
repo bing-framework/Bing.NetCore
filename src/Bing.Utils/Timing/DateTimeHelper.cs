@@ -49,26 +49,19 @@ namespace Bing.Utils.Timing
         /// 计算年龄
         /// </summary>
         /// <param name="dateOfBirth">出生日期</param>
-        /// <returns></returns>
-        public static int CalculateAge(DateTime dateOfBirth)
-        {
-            return CalculateAge(dateOfBirth, DateTime.Now.Date);
-        }
+        public static int CalculateAge(DateTime dateOfBirth) => CalculateAge(dateOfBirth, DateTime.Now.Date);
 
         /// <summary>
         /// 计算年龄，指定参考日期
         /// </summary>
         /// <param name="dateOfBirth">出生日期</param>
         /// <param name="referenceDate">参考日期</param>
-        /// <returns></returns>
         public static int CalculateAge(DateTime dateOfBirth, DateTime referenceDate)
         {
             var years = referenceDate.Year - dateOfBirth.Year;
             if (referenceDate.Month < dateOfBirth.Month ||
                 (referenceDate.Month == dateOfBirth.Month && referenceDate.Day < dateOfBirth.Day))
-            {
                 --years;
-            }
             return years;
         }
 
@@ -80,7 +73,6 @@ namespace Bing.Utils.Timing
         /// 业务时间格式化，返回:大于60天-"yyyy-MM-dd",31~60天-1个月前，15~30天-2周前,8~14天-1周前,1~7天-x天前 ,大于1小时-x小时前,x秒前
         /// </summary>
         /// <param name="dateTime">时间</param>
-        /// <returns></returns>
         public static string BusinessDateFormat(DateTime dateTime)
         {
             var span = (DateTime.Now - dateTime).Duration();
@@ -120,7 +112,6 @@ namespace Bing.Utils.Timing
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="defaultFormat"></param>
-        /// <returns></returns>
         public static string BusinessDateFormat(DateTime dt, string defaultFormat = "yyyy-MM-dd HH:mm:ss")
         {
             var timeSpan = DateTime.Now - dt;

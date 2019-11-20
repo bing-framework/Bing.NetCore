@@ -26,10 +26,7 @@ namespace Bing.Utils.IO
 
             var lastDotIndex = fileNameWithExtension.LastIndexOf('.');
             if (lastDotIndex < 0)
-            {
                 return string.Empty;
-            }
-
             return fileNameWithExtension.Substring(lastDotIndex + 1);
         }
 
