@@ -55,6 +55,7 @@ namespace Bing.Samples.Api.Controllers
         /// <summary>
         /// 获取所有控制器
         /// </summary>
+        [AntiDuplicateRequest(Interval = 1)]
         [HttpGet("getAllController")]
         public virtual Task<IActionResult> GetAllControllerAsync()
         {

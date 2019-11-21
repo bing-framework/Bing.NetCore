@@ -137,6 +137,7 @@ namespace Bing.Samples.Api
             {
                 options.UseCSRedis(config =>
                 {
+                    config.MaxRdSecond = 0;
                     config.DBConfig = new CSRedisDBOptions()
                     {
                         ConnectionStrings = new List<string>()
