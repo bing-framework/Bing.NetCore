@@ -150,6 +150,11 @@ namespace Bing.Logs.Contents
         public Exception Exception { get; set; }
 
         /// <summary>
+        /// 标签列表
+        /// </summary>
+        public List<string> Tags { get; set; }
+
+        /// <summary>
         /// 排序
         /// </summary>
         public int Order { get; set; }
@@ -166,6 +171,7 @@ namespace Bing.Logs.Contents
             Content = new StringBuilder();
             Sql = new StringBuilder();
             SqlParams = new StringBuilder();
+            Tags = new List<string>();
         }
         #endregion
 

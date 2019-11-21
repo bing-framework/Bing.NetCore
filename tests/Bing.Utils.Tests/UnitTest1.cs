@@ -516,6 +516,18 @@ Where `a`.`IsDeny`=1 And `b`.`ApplicationId`='79c3c002-1474-4b3f-bf83-b17aa173a2
             var result = $"{1000.01877:0.##}";
             Output.WriteLine(result);
         }
+
+
+        [Fact]
+        public void Test_ToObject()
+        {
+            var json= "[{\"Text\":\"寸\",\"Value\":\"00000002\",\"SortId\":1,\"Group\":\"尺寸\"}]";
+            var items = JsonHelper.ToObject<List<Item>>(json);
+            foreach (var item in items)
+            {
+                Output.WriteLine($"Text: {item.Text}, Value: {item.Value}, SortId: {item.SortId}, Group: {item.Group}, Disabled: {item.Disabled}");
+            }
+        }
     }
 
     public class BingLogModel

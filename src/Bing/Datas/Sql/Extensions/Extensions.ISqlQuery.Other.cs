@@ -14,7 +14,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="value">是否在执行之后清空Sql和参数，默认为 true</param>
-        /// <returns></returns>
         public static ISqlQuery ClearAfterExecution(this ISqlQuery sqlQuery, bool value = true)
         {
             sqlQuery.Config(t => t.IsClearAfterExecution = value);
@@ -25,7 +24,6 @@ namespace Bing.Datas.Sql
         /// 复制Sql生成器
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlBuilder CloneBuilder(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -36,7 +34,6 @@ namespace Bing.Datas.Sql
         /// 创建一个新的Sql生成器
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlBuilder NewBuilder(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -47,7 +44,6 @@ namespace Bing.Datas.Sql
         /// 获取调试Sql语句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static string GetDebugSql(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -58,7 +54,6 @@ namespace Bing.Datas.Sql
         /// 清空
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery Clear(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -70,7 +65,6 @@ namespace Bing.Datas.Sql
         /// 清空Select子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearSelect(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -82,7 +76,6 @@ namespace Bing.Datas.Sql
         /// 清空From子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearFrom(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -94,7 +87,6 @@ namespace Bing.Datas.Sql
         /// 清空Join子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearJoin(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -106,7 +98,6 @@ namespace Bing.Datas.Sql
         /// 清空Where子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearWhere(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -118,7 +109,6 @@ namespace Bing.Datas.Sql
         /// 清空GroupBy子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearGroupBy(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -130,7 +120,6 @@ namespace Bing.Datas.Sql
         /// 清空OrderBy子句
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearOrderBy(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -142,7 +131,6 @@ namespace Bing.Datas.Sql
         /// 清空Sql参数
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearSqlParams(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -154,7 +142,6 @@ namespace Bing.Datas.Sql
         /// 清空分页参数
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
-        /// <returns></returns>
         public static ISqlQuery ClearPageParams(this ISqlQuery sqlQuery)
         {
             var builder = sqlQuery.GetBuilder();
@@ -168,7 +155,6 @@ namespace Bing.Datas.Sql
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
-        /// <returns></returns>
         public static ISqlQuery AddParam(this ISqlQuery sqlQuery, string name, object value)
         {
             var builder = sqlQuery.GetBuilder();

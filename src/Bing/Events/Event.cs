@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Bing.Utils.Extensions;
+using Bing.Utils.Json;
 
 namespace Bing.Events
 {
@@ -9,6 +10,15 @@ namespace Bing.Events
     /// </summary>
     public class Event : IEvent
     {
+        /// <summary>
+        /// 初始化一个<see cref="Event"/>类型的实例
+        /// </summary>
+        public Event()
+        {
+            Id = Bing.Utils.Helpers.Id.Guid();
+            Time = DateTime.Now;
+        }
+
         /// <summary>
         /// 事件标识
         /// </summary>
@@ -20,24 +30,14 @@ namespace Bing.Events
         public DateTime Time { get; }
 
         /// <summary>
-        /// 初始化一个<see cref="Event"/>类型的实例
-        /// </summary>
-        public Event()
-        {
-            Id = Bing.Utils.Helpers.Id.Guid();
-            Time = DateTime.Now;
-        }
-
-        /// <summary>
         /// 输出日志
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             StringBuilder result = new StringBuilder();
             result.AppendLine($"事件标识: {Id}");
             result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
-            result.AppendLine($"事件数据: {this}");
+            result.AppendLine($"事件数据: {(this).ToJson()}");
             return result.ToString();
         }
     }

@@ -6,7 +6,7 @@ namespace Bing.Domains.Services
     /// 领域服务
     /// </summary>
     [IgnoreDependency]
-    public interface IDomainService : IScopeDependency
+    public interface IDomainService : IScopedDependency
     {
     }
 }

@@ -16,11 +16,7 @@ namespace Bing.Utils.Drawing
         /// 从指定文件创建图片
         /// </summary>
         /// <param name="filePath">文件的绝对路径</param>
-        /// <returns></returns>
-        public static Image FromFile(string filePath)
-        {
-            return Image.FromFile(filePath);
-        }
+        public static Image FromFile(string filePath) => Image.FromFile(filePath);
 
         #endregion
 
@@ -30,11 +26,7 @@ namespace Bing.Utils.Drawing
         /// 从指定流创建图片
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static Image FromStream(Stream stream)
-        {
-            return Image.FromStream(stream);
-        }
+        public static Image FromStream(Stream stream) => Image.FromStream(stream);
 
         #endregion
 
@@ -44,7 +36,6 @@ namespace Bing.Utils.Drawing
         /// 从指定字节数组创建图片
         /// </summary>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
         public static Image FromBytes(byte[] bytes)
         {
             using (var ms = new MemoryStream(bytes))
@@ -61,7 +52,6 @@ namespace Bing.Utils.Drawing
         /// 从指定Base64字符串创建图片
         /// </summary>
         /// <param name="base64String">Base64字符串</param>
-        /// <returns></returns>
         public static Image FromBase64String(string base64String)
         {
             byte[] bytes = Convert.FromBase64String(GetBase64String(base64String));
@@ -76,7 +66,6 @@ namespace Bing.Utils.Drawing
         /// 即去掉data:image/jpg;base64,这样的格式
         /// </summary>
         /// <param name="base64String">带前缀的Base64图片字符串</param>
-        /// <returns></returns>
         private static string GetBase64String(string base64String)
         {
             string parttern = "^(data:image/.*?;base64,).*?$";

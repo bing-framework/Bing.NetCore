@@ -238,7 +238,6 @@ namespace Bing.Utils.IO
         /// 读取文件到字符串
         /// </summary>
         /// <param name="filePath">文件的绝对路径</param>
-        /// <returns></returns>
         public static string Read(string filePath)
         {
             return Read(filePath, Encoding.UTF8);
@@ -249,23 +248,14 @@ namespace Bing.Utils.IO
         /// </summary>
         /// <param name="filePath">文件的绝对路径</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public static string Read(string filePath, Encoding encoding)
         {
             if (encoding == null)
-            {
                 encoding = Encoding.UTF8;
-            }
-
             if (!File.Exists(filePath))
-            {
                 return string.Empty;
-            }
-
             using (var reader = new StreamReader(filePath, encoding))
-            {
                 return reader.ReadToEnd();
-            }
         }
 
         #endregion
@@ -328,15 +318,9 @@ namespace Bing.Utils.IO
         public static void Write(string filePath, byte[] bytes)
         {
             if (string.IsNullOrWhiteSpace(filePath))
-            {
                 return;
-            }
-
             if (bytes == null)
-            {
                 return;
-            }
-
             File.WriteAllBytes(filePath, bytes);
         }
 

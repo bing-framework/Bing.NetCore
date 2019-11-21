@@ -3,6 +3,7 @@ using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Bing.AspNetCore.Uploads.Params;
 using Bing.Webs.Controllers;
+using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

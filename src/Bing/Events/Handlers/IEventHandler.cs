@@ -19,7 +19,6 @@ namespace Bing.Events.Handlers
         /// 处理事件
         /// </summary>
         /// <param name="event">事件</param>
-        /// <returns></returns>
         Task HandleAsync(TEvent @event);
     }
 }

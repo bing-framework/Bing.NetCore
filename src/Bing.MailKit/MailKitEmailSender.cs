@@ -10,7 +10,7 @@ namespace Bing.MailKit
     /// <summary>
     /// MailKit 电子邮件发送器
     /// </summary>
-    public class MailKitEmailSender:EmailSenderBase,IMailKitEmailSender
+    public class MailKitEmailSender : EmailSenderBase, IMailKitEmailSender
     {
         /// <summary>
         /// SMTP 生成器
@@ -22,7 +22,7 @@ namespace Bing.MailKit
         /// </summary>
         /// <param name="provider">电子邮件配置提供器</param>
         /// <param name="smtpBuilder">SMTP 生成器</param>
-        public MailKitEmailSender(IEmailConfigProvider provider,IMailKitSmtpBuilder smtpBuilder) : base(provider)
+        public MailKitEmailSender(IEmailConfigProvider provider, IMailKitSmtpBuilder smtpBuilder) : base(provider)
         {
             _smtpBuilder = smtpBuilder;
         }
@@ -33,7 +33,7 @@ namespace Bing.MailKit
         /// <param name="mail">邮件</param>
         protected override void SendEmail(MailMessage mail)
         {
-            using (var client=BuildSmtpClient())
+            using (var client = BuildSmtpClient())
             {
                 var message = mail.ToMimeMessage();
                 client.Send(message);
@@ -58,11 +58,6 @@ namespace Bing.MailKit
         /// <summary>
         /// 生成SMTP客户端
         /// </summary>
-        /// <returns></returns>
-        protected virtual SmtpClient BuildSmtpClient()
-        {
-            return _smtpBuilder.Build();
-        }
-
+        protected virtual SmtpClient BuildSmtpClient() => _smtpBuilder.Build();
     }
 }

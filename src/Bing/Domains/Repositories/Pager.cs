@@ -8,6 +8,42 @@ namespace Bing.Domains.Repositories
     /// </summary>
     public class Pager : IPager
     {
+        #region 构造函数
+
+        /// <summary>
+        /// 初始化一个<see cref="Pager"/>类型的实例
+        /// </summary>
+        public Pager() : this(1)
+        {
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="Pager"/>类型的实例
+        /// </summary>
+        /// <param name="page">页索引</param>
+        /// <param name="pageSize">每页显示行数，默认20</param>
+        /// <param name="order">排序条件</param>
+        public Pager(int page, int pageSize, string order) : this(page, pageSize, 0, order)
+        {
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="Pager"/>类型的实例
+        /// </summary>
+        /// <param name="page">页索引</param>
+        /// <param name="pageSize">每页显示行数，默认20</param>
+        /// <param name="totalCount">总行数</param>
+        /// <param name="order">排序条件</param>
+        public Pager(int page, int pageSize = 20, int totalCount = 0, string order = "")
+        {
+            Page = page;
+            PageSize = pageSize;
+            TotalCount = totalCount;
+            Order = order;
+        }
+
+        #endregion
+
         /// <summary>
         /// 页索引，级第几页，从1开始
         /// </summary>
@@ -47,37 +83,7 @@ namespace Bing.Domains.Repositories
         /// </summary>
         public string Order { get; set; }
 
-        /// <summary>
-        /// 初始化一个<see cref="Pager"/>类型的实例
-        /// </summary>
-        public Pager() : this(1)
-        {
-        }
-
-        /// <summary>
-        /// 初始化一个<see cref="Pager"/>类型的实例
-        /// </summary>
-        /// <param name="page">页索引</param>
-        /// <param name="pageSize">每页显示行数，默认20</param>
-        /// <param name="order">排序条件</param>
-        public Pager(int page, int pageSize, string order) : this(page, pageSize, 0, order)
-        {
-        }
-
-        /// <summary>
-        /// 初始化一个<see cref="Pager"/>类型的实例
-        /// </summary>
-        /// <param name="page">页索引</param>
-        /// <param name="pageSize">每页显示行数，默认20</param>
-        /// <param name="totalCount">总行数</param>
-        /// <param name="order">排序条件</param>
-        public Pager(int page, int pageSize = 20, int totalCount = 0, string order = "")
-        {
-            Page = page;
-            PageSize = pageSize;
-            TotalCount = totalCount;
-            Order = order;
-        }
+        
 
         /// <summary>
         /// 获取总页数
@@ -102,10 +108,7 @@ namespace Bing.Domains.Repositories
         /// <summary>
         /// 获取结束行数
         /// </summary>
-        public int GetEndNumber()
-        {
-            return Page * PageSize;
-        }
+        public int GetEndNumber() => Page * PageSize;
 
         /// <summary>
         /// 重写 生成字符串
@@ -134,9 +137,7 @@ namespace Bing.Domains.Repositories
         protected void AddDescription(string description)
         {
             if (string.IsNullOrWhiteSpace(description))
-            {
                 return;
-            }
             _description.Append(description);
         }
 
@@ -149,9 +150,7 @@ namespace Bing.Domains.Repositories
         protected void AddDescription<TValue>(string name, TValue value)
         {
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return;
-            }
             _description.AppendFormat("{0}:{1},", name, value);
         }
     }

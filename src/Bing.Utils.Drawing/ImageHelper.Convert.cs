@@ -16,14 +16,13 @@ namespace Bing.Utils.Drawing
         /// 将图像转换为字节数组
         /// </summary>
         /// <param name="bitmap">图像</param>
-        /// <returns></returns>
         public static byte[] ToBytes(Bitmap bitmap)
         {
             using (var newBitmap = new Bitmap(bitmap))
             {
                 using (var ms = new MemoryStream())
                 {
-                    ImageFormat format = newBitmap.RawFormat;
+                    var format = newBitmap.RawFormat;
                     if (ImageFormat.MemoryBmp.Equals(format))
                     {
                         format = ImageFormat.Bmp;
@@ -39,7 +38,6 @@ namespace Bing.Utils.Drawing
         /// 将图片转换成字节数组
         /// </summary>
         /// <param name="image">图片</param>
-        /// <returns></returns>
         public static byte[] ToBytes(Image image)
         {
             using (var ms = new MemoryStream())

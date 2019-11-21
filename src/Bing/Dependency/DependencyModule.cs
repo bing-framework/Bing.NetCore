@@ -125,7 +125,7 @@ namespace Bing.Dependency
                 return attribute.Lifetime;
             if (type.IsDeriveClassFrom<ITransientDependency>())
                 return ServiceLifetime.Transient;
-            if (type.IsDeriveClassFrom<IScopeDependency>())
+            if (type.IsDeriveClassFrom<IScopedDependency>())
                 return ServiceLifetime.Scoped;
             if (type.IsDeriveClassFrom<ISingletonDependency>())
                 return ServiceLifetime.Singleton;

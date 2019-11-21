@@ -14,6 +14,7 @@ using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.Exceptionless;
 using Bing.Logs.Log4Net;
 using Bing.Core;
+using Bing.Locks.Default;
 using Bing.Logs.NLog;
 using Bing.Logs.Serilog;
 using Bing.Samples.Api.OAuths;
@@ -78,11 +79,11 @@ namespace Bing.Samples.Api
             //    options.ServerUrl = "";
             //});
 
-            services.AddExceptionless(options =>
-            {
-                options.ApiKey = "5K9YStkK1AUMz5FrWLtZghEcBEUGPuU1UoRjVp47";
-                options.ServerUrl = "http://192.168.0.66:65000";
-            });
+            //services.AddExceptionless(options =>
+            //{
+            //    options.ApiKey = "5K9YStkK1AUMz5FrWLtZghEcBEUGPuU1UoRjVp47";
+            //    options.ServerUrl = "http://192.168.0.66:65000";
+            //});
             //services.AddSerilog();
 
             services.AddAutoMapper();
@@ -146,11 +147,12 @@ namespace Bing.Samples.Api
                 }).WithJson();
             });
 
+            // 添加业务锁
+            services.AddLock();
+
             services.AddUploadService();
             services.AddApiInterfaceService();
-            //return services.AddBing();
             services.AddBing<AspNetCoreBingModuleManager>();
-            //return services.BuildServiceProvider();
             return services.BuildDynamicProxyServiceProvider();
         }
 

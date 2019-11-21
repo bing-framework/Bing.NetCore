@@ -10,7 +10,7 @@ namespace Bing.AspNetCore
     /// Request的<see cref="ServiceLifetime.Scoped"/>服务解析器
     /// </summary>
     [Dependency(ServiceLifetime.Singleton, TryAdd = true)]
-    public class RequestScopedServiceResolver : IScopeServiceResolver
+    public class RequestScopedServiceResolver : IScopedServiceResolver
     {
         /// <summary>
         /// Http上下文访问器
@@ -25,7 +25,7 @@ namespace Bing.AspNetCore
         /// <summary>
         /// <see cref="ServiceLifetime.Scoped"/>生命周期的服务提供程序
         /// </summary>
-        public IServiceProvider ScopeProvider => _httpContextAccessor.HttpContext.RequestServices;
+        public IServiceProvider ScopedProvider => _httpContextAccessor.HttpContext.RequestServices;
 
         /// <summary>
         /// 初始化一个<see cref="RequestScopedServiceResolver"/>类型的实例

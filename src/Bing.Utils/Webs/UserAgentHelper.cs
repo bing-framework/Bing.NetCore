@@ -1,70 +1,63 @@
-﻿namespace Bing.Utils.Webs
+﻿using System.Collections.Generic;
+
+namespace Bing.Utils.Webs
 {
     /// <summary>
     /// UserAgent操作辅助类
     /// </summary>
     public static class UserAgentHelper
     {
+        /// <summary>
+        /// 操作系统字典
+        /// </summary>
+        public static IDictionary<string, string> OperationSystemDict { get; set; } = new Dictionary<string, string>()
+        {
+            {"NT 10.0","Windows 10" },
+            {"NT 6.2","Windows 8" },
+            {"NT 6.1","Windows 7" },
+            {"NT 6.0","Windows Vista/Server 2008" },
+            {"NT 5.2","Windows Server 2003" },
+            {"NT 5.1","Windows XP" },
+            {"NT 5.0","Windows 2000" },
+            {"ME","Windows ME" },
+            {"Mac","Mac" },
+            {"Unix","UNIX" },
+            {"Linux","Linux" },
+            {"SunOs","Solaris" },
+            {"FreeBSD","FreeBSD" },
+        };
+
+        public static IDictionary<string,string> BrowserDict { get; set; }=new Dictionary<string, string>()
+        {
+            {"Maxthon","遨游浏览器" },
+            {"MetaSr","搜狗高速浏览器" },
+            {"BIDUBrowser","百度浏览器" },
+            {"QQBrowser","QQ浏览器" },
+            {"GreenBrowser","Green浏览器" },
+            {"360se","360安全浏览器" },
+            {"MSIE 6.0","Internet Explorer 6.0" },
+            {"MSIE 7.0","Internet Explorer 7.0" },
+            {"MSIE 8.0","Internet Explorer 8.0" },
+            {"MSIE 9.0","Internet Explorer 9.0" },
+            {"MSIE 10.0","Internet Explorer 10.0" },
+            {"Firefox","Firefox" },
+            {"Opera","Opera" },
+            {"Chrome","Chrome" },
+            {"Safari","Safari" },
+        };
+
         #region GetOperatingSystemName(根据 UserAgent 获取操作系统名称)
 
         /// <summary>
         /// 根据 UserAgent 获取操作系统名称
         /// </summary>
         /// <param name="userAgent">UA</param>
-        /// <returns></returns>
         public static string GetOperatingSystemName(string userAgent)
         {
-            if (userAgent.Contains("NT 10.0"))
+            foreach (var keyValue in OperationSystemDict)
             {
-                return "Windows 10";
-            }
-            if (userAgent.Contains("NT 6.2"))
-            {
-                return "Windows 8";
-            }
-            if (userAgent.Contains("NT 6.1 "))
-            {
-                return "Windows 7";
-            }
-            if (userAgent.Contains("NT 6.0"))
-            {
-                return "Windows Vista/Server 2008";
-            }
-            if (userAgent.Contains("NT 5.2"))
-            {
-                return "Windows Server 2003";
-            }
-            if (userAgent.Contains("NT 5.1"))
-            {
-                return "Windows XP";
-            }
-            if (userAgent.Contains("NT 5.0"))
-            {
-                return "Windows 2000";
-            }
-            if (userAgent.Contains("ME"))
-            {
-                return "Windows ME";
-            }
-            if (userAgent.Contains("Mac"))
-            {
-                return "Mac";
-            }
-            if (userAgent.Contains("Unix"))
-            {
-                return "UNIX";
-            }
-            if (userAgent.Contains("Linux"))
-            {
-                return "Linux";
-            }
-            if (userAgent.Contains("SunOS"))
-            {
-                return "Solaris";
-            }
-            if (userAgent.Contains("FreeBSD"))
-            {
-                return "FreeBSD";
+                if (userAgent.Contains(keyValue.Key))
+                    return keyValue.Value;
             }
             return "Other OperationSystem";
         }
@@ -77,68 +70,12 @@
         /// 根据 UserAgent 获取浏览器名称
         /// </summary>
         /// <param name="userAgent">UA</param>
-        /// <returns></returns>
         public static string GetBrowserName(string userAgent)
         {
-            if (userAgent.Contains("Maxthon"))
+            foreach (var keyValue in BrowserDict)
             {
-                return "遨游浏览器";
-            }
-            if (userAgent.Contains("MetaSr"))
-            {
-                return "搜狗高速浏览器";
-            }
-            if (userAgent.Contains("BIDUBrowser"))
-            {
-                return "百度浏览器";
-            }
-            if (userAgent.Contains("QQBrowser"))
-            {
-                return "QQ浏览器";
-            }
-            if (userAgent.Contains("GreenBrowser"))
-            {
-                return "Green浏览器";
-            }
-            if (userAgent.Contains("360se"))
-            {
-                return "360安全浏览器";
-            }
-            if (userAgent.Contains("MSIE 6.0"))
-            {
-                return "Internet Explorer 6.0";
-            }
-            if (userAgent.Contains("MSIE 7.0"))
-            {
-                return "Internet Explorer 7.0";
-            }
-            if (userAgent.Contains("MSIE 8.0"))
-            {
-                return "Internet Explorer 8.0";
-            }
-            if (userAgent.Contains("MSIE 9.0"))
-            {
-                return "Internet Explorer 9.0";
-            }
-            if (userAgent.Contains("MSIE 10.0"))
-            {
-                return "Internet Explorer 10.0";
-            }
-            if (userAgent.Contains("Firefox"))
-            {
-                return "Firefox";
-            }
-            if (userAgent.Contains("Opera"))
-            {
-                return "Opera";
-            }
-            if (userAgent.Contains("Chrome"))
-            {
-                return "Chrome";
-            }
-            if (userAgent.Contains("Safari"))
-            {
-                return "Safari";
+                if (userAgent.Contains(keyValue.Key))
+                    return keyValue.Value;
             }
             return "Other Browser";
         }
@@ -151,16 +88,7 @@
         /// 是否微信浏览器
         /// </summary>
         /// <param name="userAgent">UA</param>
-        /// <returns></returns>
-        public static bool IsWechatBrowser(string userAgent)
-        {
-            if (userAgent.Contains("MicroMessenger"))
-            {
-                return true;
-            }
-
-            return false;
-        }
+        public static bool IsWechatBrowser(string userAgent) => userAgent.Contains("MicroMessenger");
 
         #endregion
     }

@@ -76,6 +76,14 @@ namespace Bing.Permissions.Identity.Services.Implements
         protected virtual void ThrowDuplicateCodeException(string code) =>
             throw new Warning(string.Format(SecurityResources.DuplicateRoleCode, code));
 
+        /// <summary>
+        /// 抛出名称重复异常
+        /// </summary>
+        /// <param name="name">角色名称</param>
+        /// <exception cref="Warning">应用程序异常</exception>
+        protected virtual void ThrowDuplicateNameException(string name) =>
+            throw new Warning(string.Format(Bing.Permissions.Properties.SecurityResources.DuplicateRoleName, name));
+
         #endregion
 
         #region UpdateAsync(修改角色)
