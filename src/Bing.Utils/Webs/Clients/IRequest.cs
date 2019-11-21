@@ -75,13 +75,19 @@ namespace Bing.Utils.Webs.Clients
         TRequest BearerToken(string token);
 
         /// <summary>
-        /// 超时时间
+        /// 设置超时时间
         /// </summary>
-        /// <param name="timeout">超时时间，单位：秒</param>
+        /// <param name="timeout">超时时间。单位：秒</param>
         TRequest Timeout(int timeout);
 
         /// <summary>
-        /// 请求头
+        /// 设置超时时间
+        /// </summary>
+        /// <param name="timeout">超时时间</param>
+        TRequest Timeout(TimeSpan timeout);
+
+        /// <summary>
+        /// 设置请求头
         /// </summary>
         /// <typeparam name="T">数据类型</typeparam>
         /// <param name="key">键</param>

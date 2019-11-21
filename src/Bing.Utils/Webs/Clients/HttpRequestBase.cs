@@ -20,7 +20,7 @@ namespace Bing.Utils.Webs.Clients
     /// Http请求基类
     /// </summary>
     /// <typeparam name="TRequest">Http请求</typeparam>
-    public abstract class HttpRequestBase<TRequest> where TRequest:IRequest<TRequest>
+    public abstract class HttpRequestBase<TRequest> where TRequest : IRequest<TRequest>
     {
         #region 字段
 
@@ -125,7 +125,7 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 返回自身
         /// </summary>
-        private TRequest This() => (TRequest) (object) this;
+        private TRequest This() => (TRequest)(object)this;
 
         #endregion
 
@@ -216,10 +216,16 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 设置超时时间
         /// </summary>
+        /// <param name="timeout">超时时间。单位：秒</param>
+        public TRequest Timeout(int timeout) => Timeout(new TimeSpan(0, 0, 1));
+
+        /// <summary>
+        /// 设置超时时间
+        /// </summary>
         /// <param name="timeout">超时时间</param>
-        public TRequest Timeout(int timeout)
+        public TRequest Timeout(TimeSpan timeout)
         {
-            _timeout = new TimeSpan(0, 0, timeout);
+            _timeout = timeout;
             return This();
         }
 
@@ -425,9 +431,7 @@ namespace Bing.Utils.Webs.Clients
         protected virtual void InitHttpClient(HttpClient client)
         {
             if (string.IsNullOrWhiteSpace(_token))
-            {
                 return;
-            }
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 
@@ -437,7 +441,7 @@ namespace Bing.Utils.Webs.Clients
         /// <returns></returns>
         protected virtual HttpRequestMessage CreateRequestMessage()
         {
-            var message=new HttpRequestMessage()
+            var message = new HttpRequestMessage()
             {
                 Method = _httpMethod,
                 RequestUri = new Uri(_url),
