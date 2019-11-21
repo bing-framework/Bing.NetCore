@@ -336,17 +336,11 @@ namespace Bing.Utils.Helpers
             {
                 var connection = HttpContext?.Request?.HttpContext?.Connection;
                 if (connection == null)
-                {
                     throw new ArgumentNullException(nameof(connection));
-                }
-
                 if (connection.RemoteIpAddress.IsSet())
-                {
                     return connection.LocalIpAddress.IsSet()
                         ? connection.RemoteIpAddress.Equals(connection.LocalIpAddress)
                         : IPAddress.IsLoopback(connection.RemoteIpAddress);
-                }
-
                 return true;
             }
         }
@@ -371,10 +365,7 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// 静态构造函数
         /// </summary>
-        static Web()
-        {
-            ServicePointManager.DefaultConnectionLimit = 200;
-        }
+        static Web() => ServicePointManager.DefaultConnectionLimit = 200;
 
         #endregion
 
@@ -383,21 +374,13 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// Web客户端，用于发送Http请求
         /// </summary>
-        /// <returns></returns>
-        public static Bing.Utils.Webs.Clients.WebClient Client()
-        {
-            return new Bing.Utils.Webs.Clients.WebClient();
-        }
+        public static Bing.Utils.Webs.Clients.WebClient Client() => new Bing.Utils.Webs.Clients.WebClient();
 
         /// <summary>
         /// Web客户端，用于发送Http请求
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
-        /// <returns></returns>
-        public static Bing.Utils.Webs.Clients.WebClient<TResult> Client<TResult>() where TResult : class
-        {
-            return new Bing.Utils.Webs.Clients.WebClient<TResult>();
-        }
+        public static Bing.Utils.Webs.Clients.WebClient<TResult> Client<TResult>() where TResult : class => new Bing.Utils.Webs.Clients.WebClient<TResult>();
 
         #endregion
 
@@ -406,16 +389,12 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// 获取客户端文件集合
         /// </summary>
-        /// <returns></returns>
         public static List<IFormFile> GetFiles()
         {
             var result = new List<IFormFile>();
             var files = HttpContext.Request.Form.Files;
             if (files == null || files.Count == 0)
-            {
                 return result;
-            }
-
             result.AddRange(files.Where(file => file?.Length > 0));
             return result;
         }
@@ -427,11 +406,38 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// 获取客户端文件
         /// </summary>
-        /// <returns></returns>
         public static IFormFile GetFile()
         {
             var files = GetFiles();
             return files.Count == 0 ? null : files[0];
+        }
+
+        #endregion
+
+        #region GetParam(获取请求参数)
+
+        /// <summary>
+        /// 获取请求参数，搜索路径：查询参数->表单参数->请求头
+        /// </summary>
+        /// <param name="name">参数名</param>
+        public static string GetParam(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return string.Empty;
+            if (Request == null)
+                return string.Empty;
+            var result = string.Empty;
+            if (Request.Query != null)
+                result = Request.Query[name];
+            if (string.IsNullOrWhiteSpace(result) == false)
+                return result;
+            if (Request.HasFormContentType && Request.Form != null)
+                result = Request.Form[name];
+            if (string.IsNullOrWhiteSpace(result) == false)
+                return result;
+            if (Request.Headers != null)
+                result = Request.Headers[name];
+            return result;
         }
 
         #endregion
@@ -443,11 +449,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="url">url</param>
         /// <param name="isUpper">编码字符是否转成大写，范例："http://"转成"http%3A%2F%2F"</param>
-        /// <returns></returns>
-        public static string UrlEncode(string url, bool isUpper = false)
-        {
-            return UrlEncode(url, Encoding.UTF8, isUpper);
-        }
+        public static string UrlEncode(string url, bool isUpper = false) => UrlEncode(url, Encoding.UTF8, isUpper);
 
         /// <summary>
         /// Url编码
@@ -455,7 +457,6 @@ namespace Bing.Utils.Helpers
         /// <param name="url">url</param>
         /// <param name="encoding">字符编码</param>
         /// <param name="isUpper">编码字符是否转成大写，范例："http://"转成"http%3A%2F%2F"</param>
-        /// <returns></returns>
         public static string UrlEncode(string url, string encoding, bool isUpper = false)
         {
             encoding = string.IsNullOrWhiteSpace(encoding) ? "UTF-8" : encoding;
@@ -468,15 +469,11 @@ namespace Bing.Utils.Helpers
         /// <param name="url">url</param>
         /// <param name="encoding">字符编码</param>
         /// <param name="isUpper">编码字符是否转成大写，范例："http://"转成"http%3A%2F%2F"</param>
-        /// <returns></returns>
         public static string UrlEncode(string url, Encoding encoding, bool isUpper = false)
         {
             var result = HttpUtility.UrlEncode(url, encoding);
             if (isUpper == false)
-            {
                 return result;
-            }
-
             return GetUpperEncode(result);
         }
 
@@ -484,7 +481,6 @@ namespace Bing.Utils.Helpers
         /// 获取大写编码字符串
         /// </summary>
         /// <param name="encode">编码字符串</param>
-        /// <returns></returns>
         private static string GetUpperEncode(string encode)
         {
             var result=new StringBuilder();
@@ -493,18 +489,11 @@ namespace Bing.Utils.Helpers
             {
                 string character = encode[i].ToString();
                 if (character == "%")
-                {
                     index = i;
-                }
-
                 if (i - index == 1 || i - index == 2)
-                {
                     character = character.ToUpper();
-                }
-
                 result.Append(character);
             }
-
             return result.ToString();
         }
 
@@ -516,22 +505,14 @@ namespace Bing.Utils.Helpers
         /// Url解码
         /// </summary>
         /// <param name="url">url</param>
-        /// <returns></returns>
-        public static string UrlDecode(string url)
-        {
-            return HttpUtility.UrlDecode(url);
-        }
+        public static string UrlDecode(string url) => HttpUtility.UrlDecode(url);
 
         /// <summary>
         /// Url解码
         /// </summary>
         /// <param name="url">url</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
-        public static string UrlDecode(string url, Encoding encoding)
-        {
-            return HttpUtility.UrlDecode(url, encoding);
-        }
+        public static string UrlDecode(string url, Encoding encoding) => HttpUtility.UrlDecode(url, encoding);
 
         #endregion
 
@@ -588,7 +569,6 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// 获取请求正文
         /// </summary>
-        /// <returns></returns>
         public static async Task<string> GetBodyAsync()
         {
             Request.EnableRewind();
@@ -604,10 +584,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="filePath">文件绝对路径</param>
         /// <param name="fileName">文件名。包含扩展名</param>
-        public static async Task DownloadFileAsync(string filePath, string fileName)
-        {
-            await DownloadFileAsync(filePath, fileName, Encoding.UTF8);
-        }
+        public static async Task DownloadFileAsync(string filePath, string fileName) => await DownloadFileAsync(filePath, fileName, Encoding.UTF8);
 
         /// <summary>
         /// 下载文件
@@ -626,10 +603,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="fileName">文件名。包含扩展名</param>
-        public static async Task DownloadAsync(Stream stream, string fileName)
-        {
-            await DownloadAsync(stream, fileName, Encoding.UTF8);
-        }
+        public static async Task DownloadAsync(Stream stream, string fileName) => await DownloadAsync(stream, fileName, Encoding.UTF8);
 
         /// <summary>
         /// 下载
@@ -637,20 +611,14 @@ namespace Bing.Utils.Helpers
         /// <param name="stream">流</param>
         /// <param name="fileName">文件名。包含扩展名</param>
         /// <param name="encoding">字符编码</param>
-        public static async Task DownloadAsync(Stream stream, string fileName, Encoding encoding)
-        {
-            await DownloadAsync(await FileHelper.ToBytesAsync(stream), fileName, encoding);
-        }
+        public static async Task DownloadAsync(Stream stream, string fileName, Encoding encoding) => await DownloadAsync(await FileHelper.ToBytesAsync(stream), fileName, encoding);
 
         /// <summary>
         /// 下载
         /// </summary>
         /// <param name="bytes">字节流</param>
         /// <param name="fileName">文件名。包含扩展名</param>
-        public static async Task DownloadAsync(byte[] bytes, string fileName)
-        {
-            await DownloadAsync(bytes, fileName, Encoding.UTF8);
-        }
+        public static async Task DownloadAsync(byte[] bytes, string fileName) => await DownloadAsync(bytes, fileName, Encoding.UTF8);
 
         /// <summary>
         /// 下载
@@ -658,14 +626,10 @@ namespace Bing.Utils.Helpers
         /// <param name="bytes">字节流</param>
         /// <param name="fileName">文件名。包含扩展名</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public static async Task DownloadAsync(byte[] bytes, string fileName, Encoding encoding)
         {
             if (bytes == null || bytes.Length == 0)
-            {
                 return;
-            }
-
             fileName = fileName.Replace(" ", "");
             fileName = UrlEncode(fileName, encoding);
             Response.ContentType = "application/octet-stream";

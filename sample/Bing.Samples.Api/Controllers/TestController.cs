@@ -2,6 +2,7 @@
 using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Bing.AspNetCore.Uploads.Params;
+using Bing.Utils.Helpers;
 using Bing.Webs.Controllers;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Http;
@@ -69,6 +70,16 @@ namespace Bing.Samples.Api.Controllers
         public Task<IActionResult> GetAllActionAsync()
         {
             return Task.FromResult(Success(_apiInterfaceService.GetAllAction()));
+        }
+
+        /// <summary>
+        /// 获取参数
+        /// </summary>
+        [HttpGet("getParam")]
+        public Task<IActionResult> GetParamAsync()
+        {
+            var result = Web.GetParam("aaa");
+            return Task.FromResult(Success(result));
         }
     }
 }
