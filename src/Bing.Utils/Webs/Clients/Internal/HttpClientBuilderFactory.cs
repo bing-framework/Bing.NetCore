@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace Bing.Utils.Webs.Clients.Internal
 {
     /// <summary>
-    /// HttpClien生成工厂
+    /// HttpClient 生成工厂
     /// </summary>
     internal static class HttpClientBuilderFactory
     {
@@ -28,15 +28,11 @@ namespace Bing.Utils.Webs.Clients.Internal
         /// </summary>
         /// <param name="url">请求地址</param>
         /// <param name="timeout">超时时间</param>
-        /// <returns></returns>
-        public static HttpClient CreateClient(string url,TimeSpan timeout)
+        public static HttpClient CreateClient(string url, TimeSpan timeout)
         {
             var domain = GetDomainByUrl(url);
             if (_httpClients.ContainsKey(domain))
-            {
                 return _httpClients[domain];
-            }
-
             var httpClient = Create(timeout);
             _httpClients[domain] = httpClient;
             return httpClient;
@@ -46,16 +42,11 @@ namespace Bing.Utils.Webs.Clients.Internal
         /// 通过Url地址获取域名
         /// </summary>
         /// <param name="url">Url地址</param>
-        /// <returns></returns>
-        private static string GetDomainByUrl(string url)
-        {
-            return _domainRegex.Match(url).Value;
-        }
+        private static string GetDomainByUrl(string url) => _domainRegex.Match(url).Value;
 
         /// <summary>
         /// 创建Http客户端
         /// </summary>
-        /// <returns></returns>
         private static HttpClient Create(TimeSpan timeout)
         {
             var httpClient = new HttpClient(new HttpClientHandler()

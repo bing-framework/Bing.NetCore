@@ -1,6 +1,8 @@
 ﻿using Bing.Core.Modularity;
 using Bing.Exceptions;
+using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore
@@ -20,6 +22,7 @@ namespace Bing.AspNetCore
             if (!(provider.GetService<IBingModuleManager>() is IAspNetCoreUseModule aspNetCoreModule))
                 throw new Warning("接口 IBingModuleManager 的注入类型不正确，该类型应同时实现接口 IAspNetCoreUseModule");
             aspNetCoreModule.UseModule(app);
+            Web.Environment = app.ApplicationServices.GetService<IHostingEnvironment>();
             return app;
         }
 

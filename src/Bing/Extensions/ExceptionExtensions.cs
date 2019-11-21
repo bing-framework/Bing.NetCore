@@ -29,6 +29,6 @@ namespace Bing
         /// 获取异常提示
         /// </summary>
         /// <param name="exception">异常</param>
-        public static string GetPrompt(this Exception exception) => ExceptionPrompt.GetPrompty(exception);
+        public static string GetPrompt(this Exception exception) => ExceptionPrompt.GetPrompt(exception);
     }
 }

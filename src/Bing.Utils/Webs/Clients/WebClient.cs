@@ -11,41 +11,25 @@ namespace Bing.Utils.Webs.Clients
         /// Get请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest Get(string url)
-        {
-            return new HttpRequest(HttpMethod.Get, url);
-        }
+        public IHttpRequest Get(string url) => new HttpRequest(HttpMethod.Get, url);
 
         /// <summary>
         /// Post请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest Post(string url)
-        {
-            return new HttpRequest(HttpMethod.Post, url);
-        }
+        public IHttpRequest Post(string url) => new HttpRequest(HttpMethod.Post, url);
 
         /// <summary>
         /// Put请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest Put(string url)
-        {
-            return new HttpRequest(HttpMethod.Put, url);
-        }
+        public IHttpRequest Put(string url) => new HttpRequest(HttpMethod.Put, url);
 
         /// <summary>
         /// Delete请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest Delete(string url)
-        {
-            return new HttpRequest(HttpMethod.Delete, url);
-        }
+        public IHttpRequest Delete(string url) => new HttpRequest(HttpMethod.Delete, url);
     }
     
     /// <summary>
@@ -58,40 +42,24 @@ namespace Bing.Utils.Webs.Clients
         /// Get请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest<TResult> Get(string url)
-        {
-            return new HttpRequest<TResult>(HttpMethod.Get, url);
-        }
+        public IHttpRequest<TResult> Get(string url) => new HttpRequest<TResult>(HttpMethod.Get, url);
 
         /// <summary>
         /// Post请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest<TResult> Post(string url)
-        {
-            return new HttpRequest<TResult>(HttpMethod.Post, url);
-        }
+        public IHttpRequest<TResult> Post(string url) => new HttpRequest<TResult>(HttpMethod.Post, url);
 
         /// <summary>
         /// Put请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest<TResult> Put(string url)
-        {
-            return new HttpRequest<TResult>(HttpMethod.Put, url);
-        }
+        public IHttpRequest<TResult> Put(string url) => new HttpRequest<TResult>(HttpMethod.Put, url);
 
         /// <summary>
         /// Delete请求
         /// </summary>
         /// <param name="url">请求地址</param>
-        /// <returns></returns>
-        public IHttpRequest<TResult> Delete(string url)
-        {
-            return new HttpRequest<TResult>(HttpMethod.Delete, url);
-        }
+        public IHttpRequest<TResult> Delete(string url) => new HttpRequest<TResult>(HttpMethod.Delete, url);
     }
 }

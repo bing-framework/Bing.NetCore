@@ -39,7 +39,7 @@ namespace Bing.Exceptions.Prompts
         /// 获取异常提示
         /// </summary>
         /// <param name="exception">异常</param>
-        public static string GetPrompty(Exception exception)
+        public static string GetPrompt(Exception exception)
         {
             if (exception == null)
                 return null;
@@ -57,7 +57,7 @@ namespace Bing.Exceptions.Prompts
         /// <summary>
         /// 获取异常提示
         /// </summary>
-        /// <param name="exception">提倡</param>
+        /// <param name="exception">异常</param>
         private static string GetExceptionPrompt(Exception exception)
         {
             foreach (var prompt in Prompts)

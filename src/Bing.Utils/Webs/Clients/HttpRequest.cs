@@ -11,7 +11,7 @@ namespace Bing.Utils.Webs.Clients
     /// <summary>
     /// Http请求
     /// </summary>
-    public class HttpRequest:HttpRequestBase<IHttpRequest>,IHttpRequest
+    public class HttpRequest : HttpRequestBase<IHttpRequest>, IHttpRequest
     {
         /// <summary>
         /// 执行成功的回调函数
@@ -36,7 +36,6 @@ namespace Bing.Utils.Webs.Clients
         /// 请求成功回调函数
         /// </summary>
         /// <param name="action">执行成功的回调函数，参数为响应结果</param>
-        /// <returns></returns>
         public IHttpRequest OnSuccess(Action<string> action)
         {
             _successAction = action;
@@ -47,7 +46,6 @@ namespace Bing.Utils.Webs.Clients
         /// 请求成功回调函数
         /// </summary>
         /// <param name="action">执行成功的回调函数，第一个参数为响应结果，第二个参数为状态码</param>
-        /// <returns></returns>
         public IHttpRequest OnSuccess(Action<string, HttpStatusCode> action)
         {
             _successStatusCodeAction = action;
@@ -70,11 +68,7 @@ namespace Bing.Utils.Webs.Clients
         /// 获取Json结果
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
-        /// <returns></returns>
-        public async Task<TResult> ResultFromJsonAsync<TResult>()
-        {
-            return JsonHelper.ToObject<TResult>(await ResultAsync());
-        }
+        public async Task<TResult> ResultFromJsonAsync<TResult>() => JsonHelper.ToObject<TResult>(await ResultAsync());
     }
 
     /// <summary>
@@ -113,7 +107,6 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         /// <param name="action">执行成功的回调函数，参数为响应结果</param>
         /// <param name="convertAction">将结果字符串转换为指定类型，当默认转换实现无法转换时使用</param>
-        /// <returns></returns>
         public IHttpRequest<TResult> OnSuccess(Action<TResult> action, Func<string, TResult> convertAction = null)
         {
             _successAction = action;
@@ -126,7 +119,6 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         /// <param name="action">执行成功的回调函数，第一个参数为响应结果，第二个参数为状态码</param>
         /// <param name="convertAction">将结果字符串转换为指定类型，当默认转换实现无法转换时使用</param>
-        /// <returns></returns>
         public IHttpRequest<TResult> OnSuccess(Action<TResult, HttpStatusCode> action, Func<string, TResult> convertAction = null)
         {
             _successStatusCodeAction = action;
@@ -142,9 +134,9 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="contentType">内容类型</param>
         protected override void SuccessHandler(string result, HttpStatusCode statusCode, string contentType)
         {
-            TResult successResult = ConvertTo(result, contentType);
+            var successResult = ConvertTo(result, contentType);
             _successAction?.Invoke(successResult);
-            _successStatusCodeAction?.Invoke(successResult,statusCode);
+            _successStatusCodeAction?.Invoke(successResult, statusCode);
         }
 
         /// <summary>
@@ -152,31 +144,20 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         /// <param name="result">结果</param>
         /// <param name="contentType">内容类型</param>
-        /// <returns></returns>
         private TResult ConvertTo(string result, string contentType)
         {
             if (typeof(TResult) == typeof(string))
-            {
                 return Conv.To<TResult>(result);
-            }
             if (_convertAction != null)
-            {
                 return _convertAction(result);
-            }
             if (contentType.SafeString().ToLower() == "application/json")
-            {
                 return JsonHelper.ToObject<TResult>(result);
-            }
             return null;
         }
 
         /// <summary>
         /// 获取Json结果
         /// </summary>
-        /// <returns></returns>
-        public async Task<TResult> ResultFromJsonAsync()
-        {
-            return JsonHelper.ToObject<TResult>(await ResultAsync());
-        }
+        public async Task<TResult> ResultFromJsonAsync() => JsonHelper.ToObject<TResult>(await ResultAsync());
     }
 }

@@ -36,9 +36,7 @@ namespace Bing.Utils.Webs.Clients.Parameters
         public PhysicalFileParameter(string absolutePath, string name)
         {
             if (!File.Exists(absolutePath))
-            {
                 throw new FileNotFoundException($"文件未找到：{absolutePath}");
-            }
             AbsolutePath = absolutePath;
             Name = name;
         }
@@ -51,19 +49,16 @@ namespace Bing.Utils.Webs.Clients.Parameters
         /// <summary>
         /// 获取文件流
         /// </summary>
-        /// <returns></returns>
         public Stream GetFileStream() => _stream ?? (_stream = new FileStream(AbsolutePath, FileMode.Open));
 
         /// <summary>
         /// 获取文件名
         /// </summary>
-        /// <returns></returns>
         public string GetFileName() => Path.GetFileName(AbsolutePath);
 
         /// <summary>
         /// 获取参数名
         /// </summary>
-        /// <returns></returns>
         public string GetName() => Name;
     }
 }

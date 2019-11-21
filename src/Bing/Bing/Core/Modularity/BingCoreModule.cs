@@ -18,9 +18,6 @@ namespace Bing.Core.Modularity
         /// 添加服务。将模块服务添加到依赖注入服务容器中
         /// </summary>
         /// <param name="services">服务集合</param>
-        public override IServiceCollection AddServices(IServiceCollection services)
-        {
-            return services;
-        }
+        public override IServiceCollection AddServices(IServiceCollection services) => services;
     }
 }
