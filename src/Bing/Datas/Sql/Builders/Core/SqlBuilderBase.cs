@@ -380,7 +380,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         public ISqlBuilder ClearPageParams()
         {
-            Pager = null;
+            Pager = new Pager();
             OffsetParam = null;
             LimitParam = null;
             return this;
@@ -594,10 +594,7 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             var sql = FromClause.ToSql();
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 throw new InvalidOperationException("必须设置From子句");
-            }
-
             AppendSql(result, sql);
         }
 
@@ -623,9 +620,7 @@ namespace Bing.Datas.Sql.Builders.Core
         private void AppendLimit(StringBuilder result)
         {
             if (IsLimit)
-            {
                 AppendSql(result, CreateLimitSql());
-            }
         }
 
         /// <summary>
@@ -694,10 +689,7 @@ namespace Bing.Datas.Sql.Builders.Core
         protected string GetOffsetParam()
         {
             if (string.IsNullOrWhiteSpace(OffsetParam) == false)
-            {
                 return OffsetParam;
-            }
-
             OffsetParam = ParameterManager.GenerateName();
             ParameterManager.Add(OffsetParam, 0);
             return OffsetParam;
@@ -721,10 +713,7 @@ namespace Bing.Datas.Sql.Builders.Core
         protected string GetLimitParam()
         {
             if (string.IsNullOrWhiteSpace(LimitParam) == false)
-            {
                 return LimitParam;
-            }
-
             LimitParam = ParameterManager.GenerateName();
             return LimitParam;
         }
@@ -736,10 +725,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public ISqlBuilder Page(IPager pager)
         {
             if (pager == null)
-            {
                 return this;
-            }
-
             Pager = pager;
             Skip(pager.GetSkipCount()).Take(pager.PageSize);
             return this;

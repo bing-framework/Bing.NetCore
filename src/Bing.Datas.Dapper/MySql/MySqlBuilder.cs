@@ -43,28 +43,19 @@ namespace Bing.Datas.Dapper.MySql
         /// 创建From子句
         /// </summary>
         /// <returns></returns>
-        protected override IFromClause CreateFromClause()
-        {
-            return new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister, TableDatabase);
-        }
+        protected override IFromClause CreateFromClause() => new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister, TableDatabase);
 
         /// <summary>
         /// 创建Join子句
         /// </summary>
-        /// <returns></returns>
-        protected override IJoinClause CreateJoinClause()
-        {
-            return new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
+        protected override IJoinClause CreateJoinClause() =>
+            new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
                 TableDatabase);
-        }
 
         /// <summary>
         /// 创建分页Sql
         /// </summary>
-        protected override string CreateLimitSql()
-        {
-            return $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
-        }
+        protected override string CreateLimitSql() => $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
 
         /// <summary>
         /// 获取CTE关键字

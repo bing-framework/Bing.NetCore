@@ -19,7 +19,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static string ToString(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return sqlQuery.ToScalar(connection).SafeString();
@@ -30,7 +29,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<string> ToStringAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return (await sqlQuery.ToScalarAsync(connection)).SafeString();
@@ -45,7 +43,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static int ToInt(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToInt(sqlQuery.ToScalar(connection));
@@ -56,7 +53,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<int> ToIntAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToInt(await sqlQuery.ToScalarAsync(connection));
@@ -71,7 +67,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static int? ToIntOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToIntOrNull(sqlQuery.ToScalar(connection));
@@ -82,7 +77,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<int?> ToIntOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToIntOrNull(await sqlQuery.ToScalarAsync(connection));
@@ -97,7 +91,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static float ToFloat(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToFloat(sqlQuery.ToScalar(connection));
@@ -108,7 +101,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<float> ToFloatAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToFloat(await sqlQuery.ToScalarAsync(connection));
@@ -123,7 +115,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static float? ToFloatOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToFloatOrNull(sqlQuery.ToScalar(connection));
@@ -134,7 +125,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<float?> ToFloatOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToFloatOrNull(await sqlQuery.ToScalarAsync(connection));
@@ -149,7 +139,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static double ToDouble(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDouble(sqlQuery.ToScalar(connection));
@@ -160,7 +149,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<double> ToDoubleAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDouble(await sqlQuery.ToScalarAsync(connection));
@@ -175,7 +163,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static double? ToDoubleOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDoubleOrNull(sqlQuery.ToScalar(connection));
@@ -186,7 +173,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<double?> ToDoubleOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDoubleOrNull(await sqlQuery.ToScalarAsync(connection));
@@ -201,7 +187,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static decimal ToDecimal(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDecimal(sqlQuery.ToScalar(connection));
@@ -212,7 +197,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<decimal> ToDecimalAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDecimal(await sqlQuery.ToScalarAsync(connection));
@@ -227,7 +211,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static decimal? ToDecimalOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDecimalOrNull(sqlQuery.ToScalar(connection));
@@ -238,7 +221,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<decimal?> ToDecimalOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDecimalOrNull(await sqlQuery.ToScalarAsync(connection));
@@ -253,7 +235,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static bool ToBool(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToBool(sqlQuery.ToScalar(connection));
@@ -264,7 +245,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<bool> ToBoolAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToBool(await sqlQuery.ToScalarAsync(connection));
@@ -279,7 +259,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static bool? ToBoolOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToBoolOrNull(sqlQuery.ToScalar(connection));
@@ -290,7 +269,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<bool?> ToBoolOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToBoolOrNull(await sqlQuery.ToScalarAsync(connection));
@@ -305,7 +283,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static DateTime ToDate(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDate(sqlQuery.ToScalar(connection));
@@ -316,7 +293,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<DateTime> ToDateAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDate(await sqlQuery.ToScalarAsync(connection));
@@ -331,7 +307,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static DateTime? ToDateOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDateOrNull(sqlQuery.ToScalar(connection));
@@ -342,7 +317,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<DateTime?> ToDateOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToDateOrNull(await sqlQuery.ToScalarAsync(connection));
@@ -357,7 +331,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static Guid ToGuid(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToGuid(sqlQuery.ToScalar(connection));
@@ -368,7 +341,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<Guid> ToGuidAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToGuid(await sqlQuery.ToScalarAsync(connection));
@@ -383,7 +355,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static Guid? ToGuidOrNull(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToGuidOrNull(sqlQuery.ToScalar(connection));
@@ -394,7 +365,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         public static async Task<Guid?> ToGuidOrNullAsync(this ISqlQuery sqlQuery, IDbConnection connection = null)
         {
             return Conv.ToGuidOrNull(await sqlQuery.ToScalarAsync(connection));
