@@ -10,11 +10,11 @@ namespace Bing.Utils.Tests.Samples
         A = 1,
         [Description("B2")]
         B = 2,
-        [Description("C2")]
+        [Description("C3")]
         C =3,
-        [Description("D2")]
+        [Description("D4")]
         D =4,
-        [Description("E2")]
+        [Description("E5")]
         E =5
     }
 }

@@ -45,8 +45,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可，范例：Enum1枚举有成员A=0，则传入Enum1.A或0，获取成员名"A"</param>
-        public static string GetName<TEnum>(object member) where TEnum : struct =>
-            GetName(Common.GetType<TEnum>(), member);
+        public static string GetName<TEnum>(object member) => GetName(Common.GetType<TEnum>(), member);
 
         /// <summary>
         /// 获取成员名
@@ -91,7 +90,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可，范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
-        public static int GetValue<TEnum>(object member) where TEnum : struct => GetValue(Common.GetType<TEnum>(), member);
+        public static int GetValue<TEnum>(object member) => GetValue(Common.GetType<TEnum>(), member);
 
         /// <summary>
         /// 获取成员值
@@ -116,7 +115,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可,范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
-        public static string GetDescription<TEnum>(object member) where TEnum : struct => Reflection.GetDescription<TEnum>(GetName<TEnum>(member));
+        public static string GetDescription<TEnum>(object member) => Reflection.GetDescription<TEnum>(GetName<TEnum>(member));
 
         /// <summary>
         /// 获取描述，使用<see cref="DescriptionAttribute"/>特性设置描述
@@ -133,7 +132,7 @@ namespace Bing.Utils.Helpers
         /// 获取描述项集合，文本设置为Description，值为Value
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
-        public static List<Item> GetItems<TEnum>() where TEnum : struct => GetItems(typeof(TEnum));
+        public static List<Item> GetItems<TEnum>() => GetItems(typeof(TEnum));
 
         /// <summary>
         /// 获取描述项集合，文本设置为Description，值为Value

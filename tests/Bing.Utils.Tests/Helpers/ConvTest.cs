@@ -7,8 +7,11 @@ namespace Bing.Utils.Tests.Helpers
     /// <summary>
     /// 类型转换操作测试
     /// </summary>
-    public class ConvTest:TestBase
+    public class ConvTest : TestBase
     {
+        /// <summary>
+        /// 初始化一个<see cref="ConvTest"/>类型的实例
+        /// </summary>
         public ConvTest(ITestOutputHelper output) : base(output)
         {
         }
@@ -19,13 +22,13 @@ namespace Bing.Utils.Tests.Helpers
         /// <param name="input">输入值</param>
         /// <param name="result">结果</param>
         [Theory]
-        [InlineData(null,0)]
+        [InlineData(null, 0)]
         [InlineData("", 0)]
-        [InlineData("1A",0)]
-        [InlineData("0",0)]
+        [InlineData("1A", 0)]
+        [InlineData("0", 0)]
         [InlineData("1", 1)]
-        [InlineData("12.3",12)]
-        [InlineData("12.335556",12)]
+        [InlineData("12.3", 12)]
+        [InlineData("12.335556", 12)]
         public void Test_ToByte(object input, byte result)
         {
             Assert.Equal(result, Conv.ToByte(input));
@@ -55,10 +58,10 @@ namespace Bing.Utils.Tests.Helpers
         /// <param name="input">输入值</param>
         /// <param name="result">结果</param>
         [Theory]
-        [InlineData(null,default(char))]
-        [InlineData("",default(char))]
-        [InlineData("1",'1')]
-        [InlineData("A",'A')]
+        [InlineData(null, default(char))]
+        [InlineData("", default(char))]
+        [InlineData("1", '1')]
+        [InlineData("A", 'A')]
         public void Test_ToChar(object input, char result)
         {
             Assert.Equal(result, Conv.ToChar(input));
@@ -70,8 +73,8 @@ namespace Bing.Utils.Tests.Helpers
         /// <param name="input">输入值</param>
         /// <param name="result">结果</param>
         [Theory]
-        [InlineData(null,null)]
-        [InlineData("",null)]
+        [InlineData(null, null)]
+        [InlineData("", null)]
         [InlineData("1", '1')]
         [InlineData("A", 'A')]
         public void Test_ToCharOrNull(object input, char? result)

@@ -528,6 +528,17 @@ Where `a`.`IsDeny`=1 And `b`.`ApplicationId`='79c3c002-1474-4b3f-bf83-b17aa173a2
                 Output.WriteLine($"Text: {item.Text}, Value: {item.Value}, SortId: {item.SortId}, Group: {item.Group}, Disabled: {item.Disabled}");
             }
         }
+
+        [Fact]
+        public void Test_Tuple_IsNull()
+        {
+            var list = new List<Tuple<int, decimal>>()
+            {
+                new Tuple<int, decimal>(1, 20), new Tuple<int, decimal>(2, 20),
+            };
+            var item = list.FirstOrDefault(x => x.Item1 == 3);
+            Assert.Equal(default, item);
+        }
     }
 
     public class BingLogModel
