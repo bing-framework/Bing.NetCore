@@ -30,10 +30,36 @@ namespace Bing.Utils.Helpers
             if (value.IsEmpty())
             {
                 if (typeof(TEnum).IsGenericType)
-                    return default(TEnum);
+                    return default;
                 throw new ArgumentNullException(nameof(member));
             }
             return (TEnum)System.Enum.Parse(Common.GetType<TEnum>(), value, true);
+        }
+
+        #endregion
+
+        #region ParseByDescription(通过描述获取实例)
+
+        /// <summary>
+        /// 通过描述获取实例
+        /// </summary>
+        /// <typeparam name="TEnum">枚举类型</typeparam>
+        /// <param name="desc">描述</param>
+        public static TEnum ParseByDescription<TEnum>(string desc)
+        {
+            if (desc.IsEmpty())
+            {
+                if(typeof(TEnum).IsGenericType)
+                    return default;
+                throw new ArgumentNullException(nameof(desc));
+            }
+            var type = Common.GetType<TEnum>();
+            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.Default);
+            var fieldInfo =
+                fieldInfos.FirstOrDefault(p => p.GetCustomAttribute<DescriptionAttribute>(false)?.Description == desc);
+            if (fieldInfo == null)
+                throw new ArgumentNullException($"在枚举（{type.FullName}）中，未发现描述为“{desc}”的枚举项。");
+            return (TEnum)System.Enum.Parse(type, fieldInfo.Name);
         }
 
         #endregion
@@ -171,28 +197,6 @@ namespace Bing.Utils.Helpers
             var value = GetValue(type, field.Name);
             var description = Reflection.GetDescription(field);
             result.Add(new Item(description, value, value));
-        }
-
-        #endregion
-
-        #region GetEnumItemByDescription(获取指定描述信息的枚举项)
-
-        /// <summary>
-        /// 获取指定描述信息的枚举项
-        /// </summary>
-        /// <typeparam name="TEnum">枚举类型</typeparam>
-        /// <param name="desc">枚举项描述信息</param>
-        public static TEnum GetEnumItemByDescription<TEnum>(string desc) where TEnum : struct
-        {
-            if (desc.IsEmpty())
-                throw new ArgumentNullException(nameof(desc));
-            var type = typeof(TEnum);
-            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static);
-            var fieldInfo =
-                fieldInfos.FirstOrDefault(p => p.GetCustomAttribute<DescriptionAttribute>(false).Description == desc);
-            if (fieldInfo == null)
-                throw new ArgumentNullException($"在枚举（{type.FullName}）中，未发现描述为“{desc}”的枚举项。");
-            return (TEnum)System.Enum.Parse(type, fieldInfo.Name);
         }
 
         #endregion

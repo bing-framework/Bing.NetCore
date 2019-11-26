@@ -59,6 +59,46 @@ namespace Bing.Utils.Tests.Helpers
         }
 
         /// <summary>
+        /// 测试通过描述获取实例
+        /// </summary>
+        [Theory]
+        [InlineData("B2",EnumSample.B)]
+        [InlineData("C3", EnumSample.C)]
+        [InlineData("D4", EnumSample.D)]
+        [InlineData("E5", EnumSample.E)]
+        public void Test_ParseByDescription(string desc, EnumSample sample)
+        {
+            Assert.Equal(sample, Bing.Utils.Helpers.Enum.ParseByDescription<EnumSample>(desc));
+        }
+
+        /// <summary>
+        /// 测试通过描述获取实例 - 参数为空，抛出异常
+        /// </summary>
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Test_ParseByDescription_MemberIsEmpty(string desc)
+        {
+            AssertHelper.Throws<ArgumentNullException>(() =>
+            {
+                Bing.Utils.Helpers.Enum.ParseByDescription<EnumSample>(desc);
+            }, "desc");
+        }
+
+        /// <summary>
+        /// 测试通过描述获取实例 - 可空枚举
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)]
+        [InlineData("", null)]
+        [InlineData(" ", null)]
+        [InlineData("C3", EnumSample.C)]
+        public void Test_ParseByDescription_Nullable(string member, EnumSample? sample)
+        {
+            Assert.Equal(sample, Bing.Utils.Helpers.Enum.ParseByDescription<EnumSample?>(member));
+        }
+
+        /// <summary>
         /// 测试获取枚举成员名
         /// </summary>
         [Theory]
