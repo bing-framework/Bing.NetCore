@@ -308,7 +308,6 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TAttribute">泛型特性</typeparam>
         /// <param name="memberInfo">元数据</param>
-        /// <returns></returns>
         public static TAttribute GetAttribute<TAttribute>(MemberInfo memberInfo) where TAttribute : Attribute
         {
             return (TAttribute)memberInfo.GetCustomAttributes(typeof(TAttribute), false).FirstOrDefault();

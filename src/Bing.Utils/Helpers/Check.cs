@@ -19,17 +19,14 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="TException">异常类型</typeparam>
         /// <param name="assertion">要验证的断言</param>
         /// <param name="message">异常消息</param>
+        /// <exception cref="ArgumentNullException"></exception>
         private static void Require<TException>(bool assertion, string message) where TException : Exception
         {
             if (assertion)
-            {
                 return;
-            }
             if (string.IsNullOrWhiteSpace(message))
-            {
                 throw new ArgumentNullException(nameof(message));
-            }
-            TException exception = (TException)Activator.CreateInstance(typeof(TException), message);
+            var exception = (TException)Activator.CreateInstance(typeof(TException), message);
             throw exception;
         }
 
@@ -40,12 +37,11 @@ namespace Bing.Utils.Helpers
         /// <param name="value">要判断的值</param>
         /// <param name="assertionFunc">要验证的断言</param>
         /// <param name="message">异常消息</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void Required<T>(T value, Func<T, bool> assertionFunc, string message)
         {
             if (assertionFunc == null)
-            {
                 throw new ArgumentNullException(nameof(assertionFunc));
-            }
             Require<Exception>(assertionFunc(value), message);
         }
 
@@ -57,13 +53,12 @@ namespace Bing.Utils.Helpers
         /// <param name="value">要判断的值</param>
         /// <param name="assertionFunc">要验证的断言</param>
         /// <param name="message">异常消息</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void Required<T, TException>(T value, Func<T, bool> assertionFunc, string message)
             where TException : Exception
         {
             if (assertionFunc == null)
-            {
                 throw new ArgumentNullException(nameof(assertionFunc));
-            }
             Require<TException>(assertionFunc(value), message);
         }
 
@@ -77,16 +72,16 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void NotNull<T>(T value, string paramName)// where T : class
-        {
-            Require<ArgumentNullException>(value != null, string.Format(R.ParameterCheck_NotNull, paramName));
-        }
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void NotNull<T>(T value, string paramName) => Require<ArgumentNullException>(value != null, string.Format(R.ParameterCheck_NotNull, paramName));
 
         /// <summary>
         /// 检查字符串不能为空引用或空字符串，否则抛出<see cref="ArgumentNullException"/>异常或<see cref="ArgumentException"/>异常
         /// </summary>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public static void NotNullOrEmpty(string value, string paramName)
         {
             NotNull(value, paramName);
@@ -98,10 +93,9 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
-        public static void NotEmpty(Guid value, string paramName)
-        {
-            Require<ArgumentException>(value != Guid.Empty, string.Format(R.ParameterCheck_NotEmpty_Guid, paramName));
-        }
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void NotEmpty(Guid value, string paramName) => Require<ArgumentException>(value != Guid.Empty, string.Format(R.ParameterCheck_NotEmpty_Guid, paramName));
 
         /// <summary>
         /// 检查集合不能为空引用或空集合，否则抛出<see cref="ArgumentNullException"/>异常或<see cref="ArgumentException"/>异常。
@@ -109,6 +103,8 @@ namespace Bing.Utils.Helpers
         /// <typeparam name="T">集合项的类型</typeparam>
         /// <param name="collection">要判断的值</param>
         /// <param name="paramName">参数名</param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void NotNullOrEmpty<T>(IEnumerable<T> collection, string paramName)
         {
             NotNull(collection, paramName);
@@ -118,13 +114,15 @@ namespace Bing.Utils.Helpers
         /// <summary>
         /// 检查字典不能为空引用或空字典，否则抛出<see cref="ArgumentNullException"/>异常或<see cref="ArgumentException"/>异常。
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="dictionary"></param>
-        /// <param name="paramName"></param>
+        /// <typeparam name="T">值类型</typeparam>
+        /// <param name="dictionary">字典</param>
+        /// <param name="paramName">参数名</param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void NotNullOrEmpty<T>(IDictionary<string, T> dictionary, string paramName)
         {
-            NotNull(dictionary,paramName);
-            Require<ArgumentException>(dictionary.Any(),string.Format(R.ParameterCheck_NotNullOrEmpty_Collection));
+            NotNull(dictionary, paramName);
+            Require<ArgumentException>(dictionary.Any(), string.Format(R.ParameterCheck_NotNullOrEmpty_Collection));
         }
 
         #endregion
@@ -139,6 +137,7 @@ namespace Bing.Utils.Helpers
         /// <param name="paramName">参数名</param>
         /// <param name="target">要比较的值</param>
         /// <param name="canEqual">是否可等于</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static void LessThan<T>(T value, string paramName, T target, bool canEqual = false)
             where T : IComparable<T>
         {
@@ -155,6 +154,7 @@ namespace Bing.Utils.Helpers
         /// <param name="paramName">参数名</param>
         /// <param name="target">要比较的值</param>
         /// <param name="canEqual">是否可等于</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static void GreaterThan<T>(T value, string paramName, T target, bool canEqual = false)
             where T : IComparable<T>
         {
@@ -173,6 +173,7 @@ namespace Bing.Utils.Helpers
         /// <param name="end">比较范围的结束值</param>
         /// <param name="startEqual">是否可等于起始值</param>
         /// <param name="endEqual">是否可等于结束值</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static void Between<T>(T value, string paramName, T start, T end, bool startEqual = false,
             bool endEqual = false) where T : IComparable<T>
         {
@@ -194,10 +195,8 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="timeSpan">时间戳</param>
         /// <param name="paramaName">参数名</param>
-        public static void NotNegativeOrZero(TimeSpan timeSpan, string paramaName)
-        {
-            Require<ArgumentOutOfRangeException>(timeSpan > TimeSpan.Zero, paramaName);
-        }
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static void NotNegativeOrZero(TimeSpan timeSpan, string paramaName) => Require<ArgumentOutOfRangeException>(timeSpan > TimeSpan.Zero, paramaName);
 
         #endregion
 
@@ -208,6 +207,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="directory">目录路径</param>
         /// <param name="paramName">参数名</param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
         public static void DirectoryExists(string directory, string paramName = null)
         {
             NotNull(directory, paramName);
@@ -219,6 +219,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="fileName">文件路径，包含文件名</param>
         /// <param name="paramName">参数名</param>
+        /// <exception cref="FileNotFoundException"></exception>
         public static void FileExists(string fileName, string paramName = null)
         {
             NotNull(fileName, paramName);
