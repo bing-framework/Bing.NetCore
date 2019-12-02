@@ -19,10 +19,7 @@ namespace Bing.Utils.Extensions
         /// <param name="value">要判断的值</param>
         /// <param name="assertionFunc">要验证的断言</param>
         /// <param name="message">异常消息</param>
-        public static void Required<T>(this T value, Func<T, bool> assertionFunc, string message)
-        {
-            Check.Required<T>(value, assertionFunc, message);
-        }
+        public static void Required<T>(this T value, Func<T, bool> assertionFunc, string message) => Check.Required<T>(value, assertionFunc, message);
 
         /// <summary>
         /// 验证指定值的断言表达式是否为真，不为真抛出<see cref="Exception"/>异常
@@ -33,10 +30,8 @@ namespace Bing.Utils.Extensions
         /// <param name="assertionFunc">要验证的断言</param>
         /// <param name="message">异常消息</param>
         public static void Required<T, TException>(this T value, Func<T, bool> assertionFunc, string message)
-            where TException : Exception
-        {
+            where TException : Exception =>
             Check.Required<T, TException>(value, assertionFunc, message);
-        }
 
         #endregion
 

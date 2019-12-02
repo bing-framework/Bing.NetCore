@@ -116,6 +116,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可，范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
+        /// <exception cref="ArgumentNullException">成员为空</exception>
         public static int GetValue<TEnum>(object member) => GetValue(Common.GetType<TEnum>(), member);
 
         /// <summary>
@@ -258,5 +259,6 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
     }
 }

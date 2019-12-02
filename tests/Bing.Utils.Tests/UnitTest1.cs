@@ -539,6 +539,7 @@ Where `a`.`IsDeny`=1 And `b`.`ApplicationId`='79c3c002-1474-4b3f-bf83-b17aa173a2
             var item = list.FirstOrDefault(x => x.Item1 == 3);
             Assert.Equal(default, item);
         }
+
     }
 
     public class BingLogModel
