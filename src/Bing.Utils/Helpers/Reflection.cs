@@ -58,6 +58,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region GetDisplayName(获取类型显示名称)
+
         /// <summary>
         /// 获取类型显示名称，使用<see cref="DisplayNameAttribute"/>设置显示名称
         /// </summary>

@@ -8,7 +8,7 @@ namespace Bing.Webs.Commons
     /// <summary>
     /// 验证失败结果
     /// </summary>
-    public class ValidationFailedResult:ObjectResult
+    public class ValidationFailedResult : ObjectResult
     {
         /// <summary>
         /// 允许多个结果
