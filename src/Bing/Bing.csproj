@@ -8,6 +8,11 @@
     <PackageId>Bing.Core</PackageId>
     <RootNamespace />
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Domains\Entities\Caching\**" />
+    <EmbeddedResource Remove="Domains\Entities\Caching\**" />
+    <None Remove="Domains\Entities\Caching\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="1.3.0" />
@@ -59,10 +64,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>R.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Domains\Entities\Caching\" />
   </ItemGroup>
 
 </Project>

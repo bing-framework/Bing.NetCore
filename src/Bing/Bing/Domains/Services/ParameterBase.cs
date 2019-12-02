@@ -12,7 +12,6 @@ namespace Bing.Domains.Services
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public virtual ValidationResultCollection Validate()
         {
             var result = DataAnnotationValidation.Validate(this);

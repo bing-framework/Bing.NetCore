@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Bing.Domains.Entities;
+using Bing.Domains.Values;
 
 namespace Bing.Biz.Contacts
 {

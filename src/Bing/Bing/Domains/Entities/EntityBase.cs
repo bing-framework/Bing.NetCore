@@ -35,7 +35,7 @@ namespace Bing.Domains.Entities
         /// 标识
         /// </summary>
         [Key]
-        public TKey Id { get; private set; }
+        public TKey Id { get; protected set; }
 
         /// <summary>
         /// 用户会话

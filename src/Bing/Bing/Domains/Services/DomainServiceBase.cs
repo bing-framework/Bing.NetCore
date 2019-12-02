@@ -12,10 +12,7 @@ namespace Bing.Domains.Services
         /// <summary>
         /// 初始化一个<see cref="DomainServiceBase"/>类型的实例
         /// </summary>
-        protected DomainServiceBase()
-        {
-            Log = NullLog.Instance;
-        }
+        protected DomainServiceBase() => Log = NullLog.Instance;
 
         /// <summary>
         /// 日志

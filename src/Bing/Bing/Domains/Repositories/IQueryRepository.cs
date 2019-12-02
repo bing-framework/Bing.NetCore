@@ -11,7 +11,6 @@ namespace Bing.Domains.Repositories
     public interface IQueryRepository<TEntity> : IQueryRepository<TEntity, Guid>
         where TEntity : class, IAggregateRoot, IKey<Guid>
     {
-
     }
 
     /// <summary>
