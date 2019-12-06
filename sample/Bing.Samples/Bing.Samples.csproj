@@ -18,4 +18,10 @@
     <ProjectReference Include="..\Bing.Samples.Service\Bing.Samples.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

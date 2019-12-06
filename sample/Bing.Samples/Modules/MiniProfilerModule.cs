@@ -1,4 +1,5 @@
-﻿using Bing.Modularity;
+﻿using Bing.AspNetCore;
+using Bing.Core.Modularity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Profiling;
@@ -8,16 +9,22 @@ namespace Bing.Samples.Modules
     /// <summary>
     /// MiniProfiler 模块
     /// </summary>
-    public class MiniProfilerModule : BingModule
+    [DependsOnModule(typeof(AspNetCoreModule))]
+    public class MiniProfilerModule : AspNetCoreBingModule
     {
         /// <summary>
-        /// 配置服务集合
+        /// 模块级别。级别越小越先启动
         /// </summary>
-        /// <param name="context">配置服务上下文</param>
-        public override void ConfigureServices(ServiceConfigurationContext context)
+        public override ModuleLevel Level => ModuleLevel.Application;
+
+        /// <summary>
+        /// 添加服务。将模块服务添加到依赖注入服务容器中
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        public override IServiceCollection AddServices(IServiceCollection services)
         {
             // 注册MiniProfiler
-            context.Services.AddMiniProfiler(options =>
+            services.AddMiniProfiler(options =>
             {
                 // 设置弹出框位置为左下角
                 options.PopupRenderPosition = RenderPosition.BottomLeft;
@@ -26,15 +33,17 @@ namespace Bing.Samples.Modules
                 // 设置访问分析结果URL的路由基地址
                 options.RouteBasePath = "/profiler";
             }).AddEntityFramework();
+            return services;
         }
 
         /// <summary>
-        /// 应用程序预初始化
+        /// 应用AspNetCore的服务业务
         /// </summary>
-        /// <param name="context">应用程序初始化上下文</param>
-        public override void OnPreApplicationInitialization(ApplicationInitializationContext context)
+        /// <param name="app">应用程序构建器</param>
+        public override void UseModule(IApplicationBuilder app)
         {
-            context.GetApplicationBuilder().UseMiniProfiler();
+            app.UseMiniProfiler();
+            Enabled = true;
         }
     }
 }

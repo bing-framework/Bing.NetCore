@@ -23,16 +23,17 @@ namespace Bing.Samples.Controllers
         /// <summary>
         /// 测试服务
         /// </summary>
-        public ITestService TestService { get; }
+        public ITestService TestService { get; set; }
 
         /// <summary>
         /// 获取字符串
         /// </summary>
         /// <param name="id">标识</param>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAsync(Guid id)
+        public virtual async Task<IActionResult> GetAsync(Guid id)
         {
-            return Success(await TestService.GetAsync(id));
+            var result= await TestService.GetAsync(id);
+            return Success(result);
         }
     }
 }
