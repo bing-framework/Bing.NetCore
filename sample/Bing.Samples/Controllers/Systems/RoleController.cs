@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Bing.Samples.Service.Abstractions.Systems;
 using Bing.Samples.Service.Dtos.Systems;
@@ -35,7 +36,7 @@ namespace Bing.Samples.Controllers.Systems
         /// <param name="async">是否异步</param>
         protected override RoleDto ToResult(List<RoleDto> data, bool async = false)
         {
-            throw new NotImplementedException();
+            return data.FirstOrDefault();
         }
 
         /// <summary>

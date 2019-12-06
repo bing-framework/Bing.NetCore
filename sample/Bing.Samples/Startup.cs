@@ -35,6 +35,7 @@ namespace Bing.Samples
         {
             services.AddBing<AspNetCoreBingModuleManager>();
             return services.BuildDynamicProxyServiceProvider();
+            //return services.BuildServiceProvider();
         }
 
         /// <summary>

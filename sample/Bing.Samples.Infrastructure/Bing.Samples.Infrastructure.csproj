@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,8 +6,9 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="2.6.0" />
-    <PackageReference Include="DotNetCore.CAP.SqlServer" Version="2.6.0" />
-    <PackageReference Include="Savorboard.CAP.InMemoryMessageQueue" Version="2.6.0" />
+    <!--<PackageReference Include="DotNetCore.CAP.SqlServer" Version="2.6.0" />-->
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="2.6.0" />
+    <!--<PackageReference Include="Savorboard.CAP.InMemoryMessageQueue" Version="2.6.0" />-->
   </ItemGroup>
 
   <ItemGroup>

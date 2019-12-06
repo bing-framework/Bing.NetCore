@@ -5,7 +5,7 @@ using Bing.AutoMapper;
 using Bing.Core;
 using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
-using Bing.Datas.EntityFramework.SqlServer;
+using Bing.Datas.EntityFramework.MySql;
 using Bing.Datas.Enums;
 using Bing.Extensions.Swashbuckle.Configs;
 using Bing.Extensions.Swashbuckle.Core;
@@ -13,6 +13,8 @@ using Bing.Extensions.Swashbuckle.Extensions;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.NLog;
 using Bing.Samples.Data;
+using Bing.Samples.EventHandlers.Abstractions;
+using Bing.Samples.EventHandlers.Implements;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
@@ -40,6 +42,9 @@ namespace Bing.Samples
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
+            // 注册Swagger
+            services.AddSwaggerCustom(SwaggerOptions);
+
             // 注册Mvc
             services
                 .AddMvc(options =>
@@ -53,17 +58,18 @@ namespace Bing.Samples
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
-            // 注册Swagger
-            services.AddSwaggerCustom(SwaggerOptions);
+
+
+            services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
 
             // 注册工作单元
-            services.AddSqlServerUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(
+            services.AddMySqlUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.MySql.SampleUnitOfWork>(
                 services.GetConfiguration().GetConnectionString("DefaultConnection"));
 
             // 注册SqlQuery
-            services.AddSqlQuery<Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(options =>
+            services.AddSqlQuery<Bing.Samples.Data.UnitOfWorks.MySql.SampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.MySql.SampleUnitOfWork>(options =>
             {
-                options.DatabaseType = DatabaseType.SqlServer;
+                options.DatabaseType = DatabaseType.MySql;
                 options.IsClearAfterExecution = true;
             });
 

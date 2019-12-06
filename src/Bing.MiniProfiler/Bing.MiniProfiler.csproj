@@ -7,7 +7,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.180" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>

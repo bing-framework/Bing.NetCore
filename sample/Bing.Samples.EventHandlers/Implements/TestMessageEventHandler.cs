@@ -1,10 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bing.Events;
+using Bing.Exceptions;
+using Bing.Logs.Extensions;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Events;
 using Bing.Samples.Domain.Models;
 using Bing.Samples.Domain.Services.Abstractions;
 using Bing.Samples.EventHandlers.Abstractions;
+using Bing.Utils.Extensions;
+using Bing.Utils.Helpers;
 
 namespace Bing.Samples.EventHandlers.Implements
 {
@@ -47,6 +52,12 @@ namespace Bing.Samples.EventHandlers.Implements
             role.Type = message.Type;
             role.Enabled = true;
             role.IsDeleted = false;
+            var begin = DateTime.Now;
+            Log.Caption("测试时间开始");
+            await Task.Delay(10000);
+            var end = DateTime.Now;
+            Log.Content($"{begin.ToDateTimeString()},{end.ToDateTimeString()}").Info();
+            throw new Warning("测试异常");
             await RoleManager.CreateAsync(role);
             await UnitOfWork.CommitAsync();
         }
