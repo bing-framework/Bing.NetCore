@@ -3,6 +3,7 @@ using Bing.Core.Modularity;
 using Bing.Events.Cap;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Savorboard.CAP.InMemoryMessageQueue;
 
 namespace Bing.Samples.Modules
 {
@@ -34,14 +35,14 @@ namespace Bing.Samples.Modules
                 o.FailedRetryCount = 5;
                 o.Version = "bing_test";
                 // 启用内存队列
-                //o.UseInMemoryMessageQueue();
+                o.UseInMemoryMessageQueue();
                 // 启用RabbitMQ
-                o.UseRabbitMQ(x =>
-                {
-                    x.HostName = "";
-                    x.UserName = "admin";
-                    x.Password = "";
-                });
+                //o.UseRabbitMQ(x =>
+                //{
+                //    x.HostName = "";
+                //    x.UserName = "admin";
+                //    x.Password = "";
+                //});
             });
             return services;
         }

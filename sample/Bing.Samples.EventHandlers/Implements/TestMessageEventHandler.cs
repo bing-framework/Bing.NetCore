@@ -52,12 +52,12 @@ namespace Bing.Samples.EventHandlers.Implements
             role.Type = message.Type;
             role.Enabled = true;
             role.IsDeleted = false;
-            var begin = DateTime.Now;
-            Log.Caption("测试时间开始");
-            await Task.Delay(10000);
-            var end = DateTime.Now;
-            Log.Content($"{begin.ToDateTimeString()},{end.ToDateTimeString()}").Info();
-            throw new Warning("测试异常");
+            //var begin = DateTime.Now;
+            //Log.Caption("测试时间开始");
+            //await Task.Delay(10000);
+            //var end = DateTime.Now;
+            //Log.Content($"{begin.ToDateTimeString()},{end.ToDateTimeString()}").Info();
+            //throw new Warning("测试异常");
             await RoleManager.CreateAsync(role);
             await UnitOfWork.CommitAsync();
         }
