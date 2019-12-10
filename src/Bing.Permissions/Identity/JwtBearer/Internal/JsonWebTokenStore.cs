@@ -18,10 +18,7 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         /// 初始化一个<see cref="JsonWebTokenStore"/>类型的实例
         /// </summary>
         /// <param name="cache">缓存</param>
-        public JsonWebTokenStore(ICache cache)
-        {
-            _cache = cache;
-        }
+        public JsonWebTokenStore(ICache cache) => _cache = cache;
 
         /// <summary>
         /// 获取刷新令牌
@@ -87,6 +84,25 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         public async Task<bool> ExistsTokenAsync(string token) => await _cache.ExistsAsync(GetTokenKey(token));
 
         /// <summary>
+        /// 绑定用户设备令牌
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        /// <param name="clientType">客户端类型</param>
+        /// <param name="info">设备信息</param>
+        /// <param name="expires">过期时间</param>
+        public async Task BindUserDeviceTokenAsync(string userId, string clientType, DeviceTokenBindInfo info,
+            DateTime expires) => await _cache.AddAsync(GetBindUserDeviceTokenKey(userId, clientType), info,
+            expires.Subtract(DateTime.UtcNow));
+
+        /// <summary>
+        /// 获取用户设备令牌
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        /// <param name="clientType">客户端类型</param>
+        public async Task<DeviceTokenBindInfo> GetUserDeviceTokenAsync(string userId, string clientType) =>
+            await _cache.GetAsync<DeviceTokenBindInfo>(GetBindUserDeviceTokenKey(userId, clientType));
+
+        /// <summary>
         /// 获取刷新令牌缓存键
         /// </summary>
         /// <param name="token">刷新令牌</param>
@@ -103,5 +119,13 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         /// </summary>
         /// <param name="token">刷新令牌</param>
         private static string GetBindRefreshTokenKey(string token) => $"jwt:token:bind:{token}";
+
+        /// <summary>
+        /// 获取绑定用户设备令牌缓存键
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        /// <param name="clientType">客户端类型</param>
+        private static string GetBindUserDeviceTokenKey(string userId, string clientType) =>
+            $"jwt:token:bind_user:{userId}:{clientType}";
     }
 }

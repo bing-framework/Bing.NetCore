@@ -9,7 +9,7 @@ namespace Bing.Samples.Controllers
     /// <summary>
     /// 测试 控制器
     /// </summary>
-    public class TestController:ApiControllerBase
+    public class TestController : ApiControllerBase
     {
         /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
@@ -32,7 +32,7 @@ namespace Bing.Samples.Controllers
         [HttpGet("{id}")]
         public virtual async Task<IActionResult> GetAsync(Guid id)
         {
-            var result= await TestService.GetAsync(id);
+            var result = await TestService.GetAsync(id);
             return Success(result);
         }
     }

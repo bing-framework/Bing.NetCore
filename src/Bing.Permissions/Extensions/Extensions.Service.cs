@@ -46,6 +46,7 @@ namespace Bing.Permissions.Extensions
             services.TryAddSingleton<IJsonWebTokenValidator, JsonWebTokenValidator>();
             services.TryAddSingleton<IJsonWebTokenCustomerAuthorizeOption, JsonWebTokenCustomerAuthorizeOption>();
             services.TryAddSingleton<IJsonWebTokenAuthorizationRequirement, JsonWebTokenAuthorizationRequirement>();
+            services.TryAddSingleton<ITokenPayloadStore, TokenPayloadStore>();
             services.AddSingleton<IAuthorizationHandler, JsonWebTokenAuthorizationHandler>();
         }
 

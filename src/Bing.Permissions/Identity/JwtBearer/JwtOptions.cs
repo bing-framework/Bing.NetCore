@@ -34,5 +34,11 @@
         /// 启用抛异常方式
         /// </summary>
         public bool ThrowEnabled { get; set; }
+
+        /// <summary>
+        /// 启用单设备登录
+        /// </summary>
+        public bool SingleDeviceEnabled { get; set; }
+
     }
 }

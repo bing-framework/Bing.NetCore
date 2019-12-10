@@ -38,6 +38,11 @@ namespace Bing.Security
         [Description("指定的功能被锁定")]
         Locked = 423,
         /// <summary>
+        /// 其它设备登录
+        /// </summary>
+        [Description("该账号已在其它设备登录")]
+        OtherDeviceLogin = 424,
+        /// <summary>
         /// 权限检查出现错误
         /// </summary>
         [Description("权限检查出现错误")]

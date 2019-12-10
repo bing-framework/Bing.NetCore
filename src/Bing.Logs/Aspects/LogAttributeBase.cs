@@ -10,7 +10,7 @@ namespace Bing.Logs.Aspects
     /// <summary>
     /// 日志 属性基类
     /// </summary>
-    public abstract class LogAttributeBase:InterceptorBase
+    public abstract class LogAttributeBase : InterceptorBase
     {
         /// <summary>
         /// 执行
@@ -20,33 +20,23 @@ namespace Bing.Logs.Aspects
             var methodName = GetMethodName(context);
             var log = Log.GetLog(methodName);
             if (!Enabled(log))
-            {
                 return;
-            }
-            ExecuteBefore(log,context,methodName);
+            ExecuteBefore(log, context, methodName);
             await next(context);
-            ExecuteAfter(log,context,methodName);
+            ExecuteAfter(log, context, methodName);
         }
 
         /// <summary>
         /// 获取方法名
         /// </summary>
         /// <param name="context">Aspect上下文</param>
-        /// <returns></returns>
-        private string GetMethodName(AspectContext context)
-        {
-            return $"{context.ServiceMethod.DeclaringType.FullName}.{context.ServiceMethod.Name}";
-        }
+        private string GetMethodName(AspectContext context) => $"{context.ServiceMethod.DeclaringType.FullName}.{context.ServiceMethod.Name}";
 
         /// <summary>
         /// 是否启用
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <returns></returns>
-        protected virtual bool Enabled(ILog log)
-        {
-            return true;
-        }
+        protected virtual bool Enabled(ILog log) => true;
 
         /// <summary>
         /// 执行前
@@ -60,9 +50,7 @@ namespace Bing.Logs.Aspects
                 .Class(context.ServiceMethod.DeclaringType.FullName)
                 .Method(methodName);
             foreach (var parameter in context.GetParameters())
-            {
                 parameter.AppendTo(log);
-            }
             WriteLog(log);
         }
 

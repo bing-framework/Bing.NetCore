@@ -19,10 +19,7 @@ namespace Bing.EasyCaching
         /// 初始化一个<see cref="CacheManager"/>类型的实例
         /// </summary>
         /// <param name="provider">EasyCaching缓存提供器</param>
-        public CacheManager(IEasyCachingProvider provider)
-        {
-            _provider = provider;
-        }
+        public CacheManager(IEasyCachingProvider provider) => _provider = provider;
 
         /// <summary>
         /// 是否存在指定键的缓存

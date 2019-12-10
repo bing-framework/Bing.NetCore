@@ -5,8 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
-using AspectCore.Injector;
 using Bing.Aspects.Base;
 using Bing.Exceptions;
 using Bing.Utils.Threading.Asyncs;
@@ -47,7 +47,7 @@ namespace Bing.Caching
         /// <summary>
         /// 缓存
         /// </summary>
-        [FromContainer]
+        [FromServiceContext]
         public ICache Cache { get; set; }
 
         /// <summary>

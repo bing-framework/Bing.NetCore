@@ -50,5 +50,21 @@ namespace Bing.Permissions.Identity.JwtBearer
         /// </summary>
         /// <param name="token">访问令牌</param>
         Task<bool> ExistsTokenAsync(string token);
+
+        /// <summary>
+        /// 绑定用户设备令牌
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        /// <param name="clientType">客户端类型</param>
+        /// <param name="info">设备信息</param>
+        /// <param name="expires">过期时间</param>
+        Task BindUserDeviceTokenAsync(string userId, string clientType, DeviceTokenBindInfo info, DateTime expires);
+
+        /// <summary>
+        /// 获取用户设备令牌
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        /// <param name="clientType">客户端类型</param>
+        Task<DeviceTokenBindInfo> GetUserDeviceTokenAsync(string userId, string clientType);
     }
 }

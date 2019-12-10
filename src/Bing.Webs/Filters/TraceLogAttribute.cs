@@ -51,22 +51,14 @@ namespace Bing.Webs.Filters
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             if (context == null)
-            {
                 throw new ArgumentNullException(nameof(context));
-            }
-
             if (next == null)
-            {
                 throw new ArgumentNullException(nameof(next));
-            }
-
             var log = GetLog();
             OnActionExecuting(context);
             await OnActionExecutingAsync(context, log);
             if (context.Result != null)
-            {
                 return;
-            }
             var executedContext = await next();
             OnActionExecuted(executedContext);
             OnActionExecuted(executedContext, log);
@@ -80,15 +72,9 @@ namespace Bing.Webs.Filters
         protected async Task OnActionExecutingAsync(ActionExecutingContext context, ILog log)
         {
             if (Ignore)
-            {
                 return;
-            }
-
             if (log.IsTraceEnabled == false)
-            {
                 return;
-            }
-
             await WriteLogAsync(context, log);
         }
 
@@ -116,10 +102,7 @@ namespace Bing.Webs.Filters
             var request = context.HttpContext.Request;
             log.Params("Http请求方式", request.Method);
             if (string.IsNullOrWhiteSpace(request.ContentType) == false)
-            {
                 log.Params("ContentType", request.ContentType);
-            }
-
             AddHeaders(request, log);
             await AddFormParamsAsync(request, log);
             AddCookie(request, log);
@@ -133,10 +116,7 @@ namespace Bing.Webs.Filters
         private void AddHeaders(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
         {
             if (request.Headers == null || request.Headers.Count == 0)
-            {
                 return;
-            }
-
             log.Params("Headers:").Params(JsonHelper.ToJson(request.Headers));
         }
 
@@ -148,17 +128,11 @@ namespace Bing.Webs.Filters
         private async Task AddFormParamsAsync(Microsoft.AspNetCore.Http.HttpRequest request, ILog log)
         {
             if (IsMultipart(request.ContentType))
-            {
                 return;
-            }
-
             request.EnableRewind();
             var result = await FileHelper.ToStringAsync(request.Body, isCloseStream: false);
             if (string.IsNullOrWhiteSpace(result))
-            {
                 return;
-            }
-
             log.Params("表单参数:").Params(result);
         }
 
@@ -166,10 +140,9 @@ namespace Bing.Webs.Filters
         /// 是否multipart内容类型
         /// </summary>
         /// <param name="contentType">内容类型</param>
-        private static bool IsMultipart(string contentType)
-        {
-            return !string.IsNullOrEmpty(contentType) && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
-        }
+        private static bool IsMultipart(string contentType) =>
+            !string.IsNullOrEmpty(contentType) &&
+            contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
 
         /// <summary>
         /// 添加Cookie
@@ -180,9 +153,7 @@ namespace Bing.Webs.Filters
         {
             log.Params("Cookie:");
             foreach (var key in request.Cookies.Keys)
-            {
                 log.Params(key, request.Cookies[key]);
-            }
         }
 
         /// <summary>
@@ -193,15 +164,10 @@ namespace Bing.Webs.Filters
         public virtual void OnActionExecuted(ActionExecutedContext context, ILog log)
         {
             if (Ignore)
-            {
                 return;
-            }
 
             if (log.IsTraceEnabled == false)
-            {
                 return;
-            }
-
             WriteLog(context, log);
         }
 
@@ -229,10 +195,7 @@ namespace Bing.Webs.Filters
         {
             var response = context.HttpContext.Response;
             if (string.IsNullOrWhiteSpace(response.ContentType) == false)
-            {
                 log.Content($"ContentType: {response.ContentType}");
-            }
-
             log.Content($"Http状态码: {response.StatusCode}");
         }
 
@@ -244,10 +207,7 @@ namespace Bing.Webs.Filters
         private void AddResult(ActionExecutedContext context, ILog log)
         {
             if (!(context.Result is Result result))
-            {
                 return;
-            }
-
             log.Content($"响应消息: {result.Message}")
                 .Content("响应结果:")
                 .Content($"{JsonHelper.ToJson(result.Data)}");
