@@ -113,13 +113,12 @@ namespace Bing.Utils.Extensions
         /// 将集合展开并分别转换成字符串，再以指定的分隔符衔接，拼成一个字符串返回。默认分隔符为逗号
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
-        /// <param name="collection">要处理的结合</param>
+        /// <param name="collection">要处理的集合</param>
         /// <param name="separator">分隔符，默认为逗号</param>
-        /// <returns>拼接后的字符串</returns>
-        public static string ExpandAndToString<T>(this IEnumerable<T> collection, string separator = ",")
-        {
-            return collection.ExpandAndToString(t => t.ToString(), separator);
-        }
+        /// <param name="wrapItem">项目包裹符</param>
+        public static string ExpandAndToString<T>(this IEnumerable<T> collection, string separator = ",",
+            string wrapItem = "") =>
+            collection.ExpandAndToString(t => t.ToString(), separator, wrapItem);
 
         /// <summary>
         /// 将集合展开并转为字符串，循环集合每一项，调用委托生成字符串，返回合并后的字符串。默认分隔符为逗号
@@ -128,28 +127,31 @@ namespace Bing.Utils.Extensions
         /// <param name="collection">要处理的集合</param>
         /// <param name="itemFormatFunc">单个集合项的转换委托</param>
         /// <param name="separator">分隔符，默认为逗号</param>
-        /// <returns>拼接后的字符串</returns>
+        /// <param name="wrapItem">项目包裹符</param>
         public static string ExpandAndToString<T>(this IEnumerable<T> collection, Func<T, string> itemFormatFunc,
-            string separator = ",")
+            string separator = ",", string wrapItem = "")
         {
             collection = collection as IList<T> ?? collection.ToList();
-            itemFormatFunc.CheckNotNull("itemFormatFunc");
+            itemFormatFunc.CheckNotNull(nameof(itemFormatFunc));
             if (!collection.Any())
-            {
                 return null;
-            }
             var sb = new StringBuilder();
-            int i = 0;
-            int count = collection.Count();
+            var i = 0;
+            var count = collection.Count();
             foreach (var t in collection)
             {
-                if (i == count - 1)
+                if (!string.IsNullOrWhiteSpace(wrapItem))
                 {
-                    sb.Append(itemFormatFunc(t));
+                    sb.Append(i == count - 1
+                        ? $"{wrapItem}{itemFormatFunc(t)}{wrapItem}"
+                        : $"{wrapItem}{itemFormatFunc(t)}{wrapItem}{separator}");
                 }
                 else
                 {
-                    sb.Append(itemFormatFunc(t) + separator);
+                    if (i == count - 1)
+                        sb.Append(itemFormatFunc(t));
+                    else
+                        sb.Append(itemFormatFunc(t) + separator);
                 }
                 i++;
             }

@@ -20,8 +20,6 @@ namespace Bing.Utils
         /// <summary>
         /// 释放资源
         /// </summary>
-        public void Dispose()
-        {
-        }
+        public void Dispose() { }
     }
 }
