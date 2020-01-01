@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Applications.Trees;
 using Bing.Datas.Queries;
+using Bing.Datas.Sql;
 using Bing.Domains.Repositories;
 using Bing.Events.Messages;
 using Bing.Mapping;
@@ -27,16 +28,19 @@ namespace Bing.Samples.Service.Implements.Systems
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         /// <param name="messageEventBus">消息事件总线</param>
+        /// <param name="sqlExecutor">Sql执行对象</param>
         /// <param name="roleManager">角色服务</param>
         /// <param name="roleRepository">角色仓储</param>
         public RoleService(ISampleUnitOfWork unitOfWork
             , IMessageEventBus messageEventBus
+            , ISqlExecutor sqlExecutor
             , IRoleManager roleManager
             , IRoleRepository roleRepository)
             : base(unitOfWork, roleRepository)
         {
             UnitOfWork = unitOfWork;
             MessageEventBus = messageEventBus;
+            SqlExecutor = sqlExecutor;
             RoleManager = roleManager;
             RoleRepository = roleRepository;
         }
@@ -50,6 +54,11 @@ namespace Bing.Samples.Service.Implements.Systems
         /// 消息事件总线
         /// </summary>
         public IMessageEventBus MessageEventBus { get; set; }
+
+        /// <summary>
+        /// Sql执行对象
+        /// </summary>
+        public ISqlExecutor SqlExecutor { get; set; }
 
         /// <summary>
         /// 角色服务
@@ -77,6 +86,8 @@ namespace Bing.Samples.Service.Implements.Systems
                     Name = $"event:{role.Name}",
                     Type = $"event:{role.Type}"
                 }));
+            await SqlExecutor.ExecuteSqlAsync("insert into Systems.Test(Id, Name) Values(@Id, @Name)",
+                new {Id = Guid.NewGuid(), Name = "隔壁老王"});
             await UnitOfWork.CommitAsync();
             return role.Id;
         }

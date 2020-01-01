@@ -300,7 +300,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 保存更改
         /// </summary>
-        /// <returns></returns>
         public override int SaveChanges()
         {
             SaveChangesBefore();
@@ -343,10 +342,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化创建审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitCreationAudited(EntityEntry entry)
-        {
-            CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-        }
+        private void InitCreationAudited(EntityEntry entry) => CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
 
         /// <summary>
         /// 获取用户标识
@@ -402,16 +398,12 @@ namespace Bing.Datas.EntityFramework.Core
         /// 异步保存更改
         /// </summary>
         /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             SaveChangesBefore();
             var transactionActionManager = Create<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
-            {
                 return await base.SaveChangesAsync(cancellationToken);
-            }
-
             return await TransactionCommit(transactionActionManager, cancellationToken);
         }
 
@@ -420,17 +412,13 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="transactionActionManager">事务操作管理器</param>
         /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
         private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager,
             CancellationToken cancellationToken)
         {
             using (var connection = Database.GetDbConnection())
             {
                 if (connection.State == ConnectionState.Closed)
-                {
                     await connection.OpenAsync(cancellationToken);
-                }
-
                 using (var transaction = connection.BeginTransaction())
                 {
                     try

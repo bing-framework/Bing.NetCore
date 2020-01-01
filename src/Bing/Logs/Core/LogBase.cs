@@ -264,13 +264,9 @@ namespace Bing.Logs.Core
         protected virtual void Execute(LogLevel level, ref TContent content)
         {
             if (content == null)
-            {
                 return;
-            }
             if (Enabled(level) == false)
-            {
                 return;
-            }
             try
             {
                 content.Level = Utils.Helpers.Enum.GetName<LogLevel>(level);
@@ -287,13 +283,10 @@ namespace Bing.Logs.Core
         /// 是否启用
         /// </summary>
         /// <param name="level">日志级别</param>
-        /// <returns></returns>
         private bool Enabled(LogLevel level)
         {
             if (level >= LogLevel.Debug)
-            {
                 return true;
-            }
             return IsDebugEnabled || IsTraceEnabled && level == LogLevel.Trace;
         }
     }

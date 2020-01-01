@@ -6,6 +6,7 @@ using Bing.Core;
 using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
+using Bing.Datas.EntityFramework.SqlServer;
 using Bing.Datas.Enums;
 using Bing.Extensions.Swashbuckle.Configs;
 using Bing.Extensions.Swashbuckle.Core;
@@ -63,15 +64,17 @@ namespace Bing.Samples
             services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
 
             // 注册工作单元
-            services.AddMySqlUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.MySql.SampleUnitOfWork>(
+            services.AddSqlServerUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(
                 services.GetConfiguration().GetConnectionString("DefaultConnection"));
 
             // 注册SqlQuery
-            services.AddSqlQuery<Bing.Samples.Data.UnitOfWorks.MySql.SampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.MySql.SampleUnitOfWork>(options =>
+            services.AddSqlQuery<Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(options =>
             {
-                options.DatabaseType = DatabaseType.MySql;
+                options.DatabaseType = DatabaseType.SqlServer;
                 options.IsClearAfterExecution = true;
             });
+            // 注册SqlExecutor
+            services.AddSqlExecutor();
 
             // 注册日志
             services.AddNLog();

@@ -40,10 +40,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取工作单元
         /// </summary>
-        /// <returns></returns>
-        public IUnitOfWork GetUnitOfWork()
-        {
-            return UnitOfWork;
-        }
+        public IUnitOfWork GetUnitOfWork() => UnitOfWork;
     }
 }

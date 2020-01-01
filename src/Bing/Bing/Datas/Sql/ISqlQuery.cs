@@ -17,7 +17,6 @@ namespace Bing.Datas.Sql
         /// 设置数据库连接
         /// </summary>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         ISqlQuery SetConnection(IDbConnection connection);
 
         /// <summary>

@@ -17,7 +17,7 @@ namespace Bing.Datas.Dapper
     /// <summary>
     /// Dapper Sql查询对象
     /// </summary>
-    public class SqlQuery:SqlQueryBase
+    public class SqlQuery : SqlQueryBase
     {
         /// <summary>
         /// 跟踪日志名称
@@ -39,7 +39,7 @@ namespace Bing.Datas.Dapper
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="database">数据库</param>
         /// <param name="sqlQueryOptions">Sql查询配置</param>
-        protected SqlQuery(ISqlBuilder sqlBuilder,IDatabase database,SqlOptions sqlQueryOptions) : base(sqlBuilder, database, sqlQueryOptions) { }
+        protected SqlQuery(ISqlBuilder sqlBuilder, IDatabase database, SqlOptions sqlQueryOptions) : base(sqlBuilder, database, sqlQueryOptions) { }
 
         /// <summary>
         /// 克隆
@@ -132,7 +132,7 @@ namespace Bing.Datas.Dapper
         public override PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null)
         {
             return PagerQuery(() => ToList<TResult>(connection), parameter, connection);
-        }        
+        }
 
         /// <summary>
         /// 分页查询

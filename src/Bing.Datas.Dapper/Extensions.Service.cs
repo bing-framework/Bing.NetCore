@@ -121,5 +121,15 @@ namespace Bing.Datas.Dapper
             if (config.DatabaseType == DatabaseType.Oracle)
                 SqlMapper.AddTypeHandler(new GuidTypeHandler());
         }
+
+        /// <summary>
+        /// 注册Sql执行服务
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        public static IServiceCollection AddSqlExecutor(this IServiceCollection services)
+        {
+            services.TryAddScoped<ISqlExecutor, SqlExecutor>();
+            return services;
+        }
     }
 }
