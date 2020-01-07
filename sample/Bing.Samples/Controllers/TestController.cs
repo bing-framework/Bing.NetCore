@@ -35,5 +35,16 @@ namespace Bing.Samples.Controllers
             var result = await TestService.GetAsync(id);
             return Success(result);
         }
+
+        /// <summary>
+        /// 写入日志
+        /// </summary>
+        /// <param name="content">内容</param>
+        [HttpPost("writeLog")]
+        public async Task<IActionResult> WriteLogAsync([FromBody] string content)
+        {
+            await TestService.WriteLogAsync(content);
+            return Success();
+        }
     }
 }

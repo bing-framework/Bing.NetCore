@@ -16,5 +16,11 @@ namespace Bing.Samples.Service.Abstractions
         /// <param name="id">标识</param>
         [DebugLog]
         Task<string> GetAsync(Guid id);
+
+        /// <summary>
+        /// 写入日志
+        /// </summary>
+        /// <param name="content">内容</param>
+        Task WriteLogAsync(string content);
     }
 }

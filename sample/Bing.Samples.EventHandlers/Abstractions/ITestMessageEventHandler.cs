@@ -13,5 +13,11 @@ namespace Bing.Samples.EventHandlers.Abstractions
         /// </summary>
         /// <param name="message">消息</param>
         Task CreateRoleAsync(CreateRoleMessage message);
+
+        /// <summary>
+        /// 写入日志
+        /// </summary>
+        /// <param name="message">消息</param>
+        Task WriteLogAsync(LogMessage message);
     }
 }

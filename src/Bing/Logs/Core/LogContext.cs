@@ -83,19 +83,14 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 获取日志上下文信息
         /// </summary>
-        /// <returns></returns>
         private LogContextInfo GetInfo()
         {
             if (_info != null)
-            {
                 return _info;
-            }
             var key = "Bing.Logs.LogContext";
             _info = Context.Get<LogContextInfo>(key);
             if (_info != null)
-            {
                 return _info;
-            }
             _info = CreateInfo();
             Context.Add(key, _info);
             return _info;
@@ -104,7 +99,6 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 创建日志上下文信息
         /// </summary>
-        /// <returns></returns>
         protected virtual LogContextInfo CreateInfo()
         {
             return new LogContextInfo()
@@ -121,7 +115,6 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 获取跟踪号
         /// </summary>
-        /// <returns></returns>
         protected string GetTraceId()
         {
             var traceId = Context.TraceId;
@@ -131,10 +124,9 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 获取计时器
         /// </summary>
-        /// <returns></returns>
         protected Stopwatch GetStopwatch()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             return stopwatch;
         }
