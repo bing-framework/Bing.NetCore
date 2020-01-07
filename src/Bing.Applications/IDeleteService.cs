@@ -1,5 +1,4 @@
-﻿using Bing.Applications.Dtos;
-using Bing.Applications.Operations;
+﻿using Bing.Applications.Operations;
 using Bing.Datas.Queries;
 
 namespace Bing.Applications

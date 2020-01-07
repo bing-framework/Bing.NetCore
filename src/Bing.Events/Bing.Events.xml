@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Events</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Events.Cap.EventBus">
+            <summary>
+            Cap事件总线
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Cap.EventBus.SimpleEventBus">
+            <summary>
+            基于内存的简单事件总线
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Cap.EventBus.MessageEventBus">
+            <summary>
+            Cap消息事件总线
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Cap.EventBus.#ctor(Bing.Events.ISimpleEventBus,Bing.Events.Messages.IMessageEventBus)">
+            <summary>
+            初始化一个<see cref="T:Bing.Events.Cap.EventBus"/>类型的实例
+            </summary>
+            <param name="simpleEventBus">基于内存的简单事件总线</param>
+            <param name="messageEventBus">Cap消息事件总线</param>
+        </member>
+        <member name="M:Bing.Events.Cap.EventBus.PublishAsync``1(``0)">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+            <param name="event">事件</param>
+        </member>
+        <member name="T:Bing.Events.Cap.Extensions">
+            <summary>
+            事件总线扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Cap.Extensions.AddCapEventBus(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{DotNetCore.CAP.CapOptions})">
+            <summary>
+            注册Cap事件总线服务
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="action">配置操作</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Events.Cap.MessageEventBus">
+            <summary>
+            Cap消息事件总线
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Cap.MessageEventBus.Publisher">
+            <summary>
+            事件发布器
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Cap.MessageEventBus.TransactionActionManager">
+            <summary>
+            事务操作管理器
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.#ctor(DotNetCore.CAP.ICapPublisher,Bing.Datas.Transactions.ITransactionActionManager)">
+            <summary>
+            初始化一个<see cref="T:Bing.Events.Cap.MessageEventBus"/>类型的实例
+            </summary>
+            <param name="publisher">事件发布器</param>
+            <param name="transactionActionManager">事务操作管理器</param>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.PublishAsync``1(``0)">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+            <param name="event">事件</param>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.PublishAsync(System.String,System.Object,System.String,System.Boolean)">
+            <summary>
+            发布事件
+            </summary>
+            <param name="name">消息名称</param>
+            <param name="data">事件数据</param>
+            <param name="callback">回调名称</param>
+            <param name="send">是否立即发送消息</param>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.GetCapTransaction">
+            <summary>
+            获取CAP事务
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.InternalPublishAsync(System.String,System.Object,System.String)">
+            <summary>
+            发布事件
+            </summary>
+            <param name="name">消息名称</param>
+            <param name="data">事件数据</param>
+            <param name="callback">回调名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.WriteLog(System.String)">
+            <summary>
+            写日志
+            </summary>
+            <param name="name">消息名称</param>
+        </member>
+        <member name="M:Bing.Events.Cap.MessageEventBus.GetLog">
+            <summary>
+            获取日志
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Events.Default.EventBus">
+            <summary>
+            事件总线
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Default.EventBus.Manager">
+            <summary>
+            事件处理器服务
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Default.EventBus.#ctor(Bing.Events.Handlers.IEventHandlerManager)">
+            <summary>
+            初始化一个<see cref="T:Bing.Events.Default.EventBus"/>类型的实例
+            </summary>
+            <param name="manager">事件处理器服务</param>
+        </member>
+        <member name="M:Bing.Events.Default.EventBus.PublishAsync``1(``0)">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+            <param name="event">事件</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Events.Default.EventHandlerManager">
+            <summary>
+            事件处理器服务
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Default.EventHandlerManager.GetHandlers``1">
+            <summary>
+            获取事件处理器列表
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Events.Default.Extensions">
+            <summary>
+            事件总线扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Default.Extensions.AddDefaultEventBus(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册默认事件总线服务
+            </summary>
+            <param name="services">服务集合</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Events.EventHandlerAttribute">
+            <summary>
+            事件处理器
+            </summary>
+        </member>
+        <member name="M:Bing.Events.EventHandlerAttribute.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Events.EventHandlerAttribute"/>类型的实例
+            </summary>
+            <param name="name">消息名称</param>
+        </member>
+    </members>
+</doc>

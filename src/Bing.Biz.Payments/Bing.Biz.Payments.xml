@@ -1,0 +1,3133 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Biz.Payments</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayAppPayService">
+            <summary>
+            支付宝App支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayAppPayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayAppPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayBarcodePayService">
+            <summary>
+            支付宝条码支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayBarcodePayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayBarcodePayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">条码支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayNotifyService">
+            <summary>
+            支付宝通知服务
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Abstractions.IAlipayNotifyService.BuyerId">
+            <summary>
+            买家支付宝用户号
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayPagePayService">
+            <summary>
+            支付宝电脑网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayPagePayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPagePayRequest)">
+            <summary>
+            支付，返回跳转地址
+            </summary>
+            <param name="request">支付宝电脑网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayPagePayService.RedirectAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPagePayRequest)">
+            <summary>
+            支付，跳转到支付宝收银台
+            </summary>
+            <param name="request">支付宝电脑网址支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayQrCodePayService">
+            <summary>
+            支付宝二维码支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayQrCodePayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPrecreateRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService">
+            <summary>
+            支付宝返回服务
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.OrderId">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.TradeNo">
+            <summary>
+            支付订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.Money">
+            <summary>
+            支付金额
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.BuyerId">
+            <summary>
+            买家支付宝用户号
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.GetParam(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.GetParam``1(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <typeparam name="T">参数类型</typeparam>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.GetParams">
+            <summary>
+            获取参数集合
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayReturnService.ValidateAsync">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Abstractions.IAlipayWapPayService">
+            <summary>
+            支付宝手机网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayWapPayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayWapPayRequest)">
+            <summary>
+            支付，返回跳转地址
+            </summary>
+            <param name="request">支付宝手机网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Abstractions.IAlipayWapPayService.RedirectAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayWapPayRequest)">
+            <summary>
+            支付，跳转到支付宝收银台
+            </summary>
+            <param name="request">支付宝手机网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Configs.AlipayConfig">
+            <summary>
+            支付宝配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.GatewayUrl">
+            <summary>
+            支付网关地址。默认为正式地址：https://openapi.alipay.com/gateway.do ，如果进行测试，则设置为 https://openapi.alipaydev.com/gateway.do
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.PrivateKey">
+            <summary>
+            商户应用私钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.PublicKey">
+            <summary>
+            支付宝公钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.NotifyUrl">
+            <summary>
+            回调通知地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.Charset">
+            <summary>
+            字符编码。默认值：utf-8
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.GetGatewayUrl">
+            <summary>
+            获取支付网关地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Configs.AlipayConfig.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Configs.AlipayConfigProvider">
+            <summary>
+            支付宝配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConfigProvider._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Configs.AlipayConfigProvider.#ctor(Bing.Biz.Payments.Alipay.Configs.AlipayConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Configs.AlipayConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">支付宝配置</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Configs.AlipayConfigProvider.GetConfigAsync">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Configs.AlipayConst">
+            <summary>
+            支付宝常量
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.TraceLogName">
+            <summary>
+            支付宝跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Charset">
+            <summary>
+            编码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Method">
+            <summary>
+            请求方法
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Timestamp">
+            <summary>
+            时间戳
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Version">
+            <summary>
+            版本
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Format">
+            <summary>
+            格式
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Sign">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.SignType">
+            <summary>
+            签名类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.NotifyUrl">
+            <summary>
+            回调通知Url
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.ReturnUrl">
+            <summary>
+            返回Url
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.BizContent">
+            <summary>
+            内容
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.TradeNo">
+            <summary>
+            支付订单号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.OutTradeNo">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.TotalAmount">
+            <summary>
+            订单金额
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Subject">
+            <summary>
+            订单标题
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.AuthCode">
+            <summary>
+            用户付款授权码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.TimeoutExpress">
+            <summary>
+            交易超时时间
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.Scene">
+            <summary>
+            场景
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.StoreId">
+            <summary>
+            商户门店编号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.BuyerId">
+            <summary>
+            买家支付宝用户号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.TradeStatus">
+            <summary>
+            交易状态
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.NotifyId">
+            <summary>
+            回调通知标识
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.QrCode">
+            <summary>
+            二维码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Configs.AlipayConst.ProductCode">
+            <summary>
+            销售产品码
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider">
+            <summary>
+            支付宝配置提供器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider.GetConfigAsync">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Enums.TradeStatus">
+            <summary>
+            支付宝交易状态
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Enums.TradeStatus.WaitPay">
+            <summary>
+            交易创建，等待买家付款
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Enums.TradeStatus.Success">
+            <summary>
+            支付成功
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Enums.TradeStatus.Close">
+            <summary>
+            未付款交易超时关闭，或支付完成后全额退款
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Enums.TradeStatus.Finished">
+            <summary>
+            交易结束，不可退款
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder">
+            <summary>
+            支付宝内容参数生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.Init(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化支付参数
+            </summary>
+            <param name="param">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.OutTradeNo(System.String)">
+            <summary>
+            设置商户订单号
+            </summary>
+            <param name="orderId">商户订单号</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.Scene(System.String)">
+            <summary>
+            设置场景
+            </summary>
+            <param name="scene">场景</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.AuthCode(System.String)">
+            <summary>
+            设置用户付款授权码
+            </summary>
+            <param name="code">用户付款授权码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.Subject(System.String)">
+            <summary>
+            设置订单标题
+            </summary>
+            <param name="subject">订单标题</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.TimeoutExpress(System.Int32)">
+            <summary>
+            设置支付超时
+            </summary>
+            <param name="timeout">支付超时间隔。单位：分钟</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.TotalAmount(System.Decimal)">
+            <summary>
+            设置金额
+            </summary>
+            <param name="amount">支付金额</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.ProductCode(System.String)">
+            <summary>
+            设置销售产品码
+            </summary>
+            <param name="productCode">销售产品码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder.ToString">
+            <summary>
+            输出结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder">
+            <summary>
+            支付宝参数生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder._builder">
+            <summary>
+            参数生成器
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Content">
+            <summary>
+            内容
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.#ctor(Bing.Biz.Payments.Alipay.Configs.AlipayConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder"/>类型的实例
+            </summary>
+            <param name="config">支付宝配置</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Init(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Format(System.String)">
+            <summary>
+            设置格式
+            </summary>
+            <param name="format">格式</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Charset(System.String)">
+            <summary>
+            设置编码
+            </summary>
+            <param name="charset">字符集</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.SignType(System.String)">
+            <summary>
+            设置签名类型
+            </summary>
+            <param name="type">签名类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Timestamp">
+            <summary>
+            设置时间戳
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Version(System.String)">
+            <summary>
+            设置版本
+            </summary>
+            <param name="version">版本</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.AppId(System.String)">
+            <summary>
+            设置应用标识
+            </summary>
+            <param name="appId">应用标识</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.ReturnUrl(System.String)">
+            <summary>
+            设置返回地址
+            </summary>
+            <param name="returnUrl">返回地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.NotifyUrl(System.String)">
+            <summary>
+            设置回调通知地址
+            </summary>
+            <param name="notifyUrl">回调通知地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.GetNotifyUrl(System.String)">
+            <summary>
+            获取回调通知地址
+            </summary>
+            <param name="notifyUrl">回调通知地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Method(System.String)">
+            <summary>
+            设置请求方法
+            </summary>
+            <param name="method">请求方法</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.GetValue(System.String)">
+            <summary>
+            获取值
+            </summary>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.GetDictionary(System.Boolean,System.Boolean)">
+            <summary>
+            获取参数字典
+            </summary>
+            <param name="isConvertToSingleQuotes">是否将双引号转成单引号</param>
+            <param name="isUrlEncode">是否Url编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.GetSignBuilder(System.Boolean)">
+            <summary>
+            获取签名的参数生成器
+            </summary>
+            <param name="isConvertToSingleQuotes">是否将双引号转成单引号</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.GetSign(Bing.Utils.Parameters.UrlParameterBuilder)">
+            <summary>
+            获取签名
+            </summary>
+            <param name="builder">Url参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.Result(System.Boolean)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="isUrlEncode">是否Url编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder.ToString">
+            <summary>
+            输出结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayAppPayRequest">
+            <summary>
+            支付宝App支付参数
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayBarcodePayRequest">
+            <summary>
+            支付宝条码支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayBarcodePayRequest.AuthCode">
+            <summary>
+            用户付款授权码
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPagePayRequest">
+            <summary>
+            支付宝电脑网站支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPagePayRequest.ReturnUrl">
+            <summary>
+            返回地址
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPrecreateRequest">
+            <summary>
+            支付宝预创建支付参数
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayRequestBase">
+            <summary>
+            支付宝支付参数基类
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayRequestBase.Timeout">
+            <summary>
+            支付宝订单付款超时时间。单位：分钟，默认为90分钟
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayWapPayRequest">
+            <summary>
+            支付宝手机网站支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayWapPayRequest.ReturnUrl">
+            <summary>
+            返回地址
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Results.AlipayResult">
+            <summary>
+            支付宝结果
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Results.AlipayResult._result">
+            <summary>
+            结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Results.AlipayResult.Raw">
+            <summary>
+            支付宝原始响应
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Results.AlipayResult"/>类型的实例
+            </summary>
+            <param name="response">json响应消息</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.LoadJson(System.String)">
+            <summary>
+            加载json
+            </summary>
+            <param name="json">json响应消息</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.AddNodes(Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            添加节点
+            </summary>
+            <param name="token">token节点</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.GetIgnoreItems">
+            <summary>
+            获取忽略项
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.GetDictionary">
+            <summary>
+            获取字典
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.GetValue(System.String)">
+            <summary>
+            获取值
+            </summary>
+            <param name="key">键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.HasKey(System.String)">
+            <summary>
+            是否包含指定键
+            </summary>
+            <param name="key">键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.GetCode">
+            <summary>
+            获取状态码
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.GetMessage">
+            <summary>
+            获取消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Results.AlipayResult.GetTradeNo">
+            <summary>
+            获取支付订单号
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Results.AlipayResult.Success">
+            <summary>
+            是否成功
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService">
+            <summary>
+            支付宝App支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService"/>类型的实例
+            </summary>
+            <param name="provider">支付宝配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayAppPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService.RequestResult(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder)">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService.GetMethod">
+            <summary>
+            获取请求方法
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayAppPayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService">
+            <summary>
+            支付宝条码支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService"/>类型的实例
+            </summary>
+            <param name="provider">支付宝配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayBarcodePayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.GetScene">
+            <summary>
+            获取场景
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.GetMethod">
+            <summary>
+            获取请求方法
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.ValidateParam(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayBarcodePayService.InitContentBuilder(Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化内容生成器
+            </summary>
+            <param name="builder">内容参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService">
+            <summary>
+            支付宝回调通知服务
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.Status">
+            <summary>
+            交易状态
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService"/>类型的实例
+            </summary>
+            <param name="configProvider">配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.Load(Bing.Utils.Parameters.UrlParameterBuilder)">
+            <summary>
+            加载参数
+            </summary>
+            <param name="builder">参数生成器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.Validate">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.Success">
+            <summary>
+            返回成功消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.Fail">
+            <summary>
+            返回失败消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayNotifyService.GetCaption">
+            <summary>
+            获取日志标题
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService">
+            <summary>
+            支付宝电脑网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService"/>类型的实例
+            </summary>
+            <param name="provider">支付宝配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPagePayRequest)">
+            <summary>
+            支付，返回跳转地址
+            </summary>
+            <param name="request">支付宝电脑网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.RedirectAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPagePayRequest)">
+            <summary>
+            支付，跳转到支付宝收银台
+            </summary>
+            <param name="request">支付宝电脑网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.RequestResult(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder)">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.GetMethod">
+            <summary>
+            获取请求方法
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayPagePayService.InitContentBuilder(Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化内容生成器
+            </summary>
+            <param name="builder">内容参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService">
+            <summary>
+            支付宝二维码支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService"/>类型的实例
+            </summary>
+            <param name="provider">支付宝配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayPrecreateRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">条码支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService.GetMethod">
+            <summary>
+            获取请求方法
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayQrCodePayService.CreateResult(Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder,Bing.Biz.Payments.Alipay.Results.AlipayResult)">
+            <summary>
+            创建结果
+            </summary>
+            <param name="builder">支付宝参数生成器</param>
+            <param name="result">支付宝结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayReturnService">
+            <summary>
+            支付宝返回服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayReturnService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayReturnService"/>类型的实例
+            </summary>
+            <param name="configProvider">配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayReturnService.Load(Bing.Utils.Parameters.UrlParameterBuilder)">
+            <summary>
+            加载参数
+            </summary>
+            <param name="builder">参数生成器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayReturnService.GetCaption">
+            <summary>
+            获取日志标题
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService">
+            <summary>
+            支付宝手机网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService"/>类型的实例
+            </summary>
+            <param name="provider">支付宝配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.PayAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayWapPayRequest)">
+            <summary>
+            支付，返回跳转地址
+            </summary>
+            <param name="request">支付宝手机网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.RedirectAsync(Bing.Biz.Payments.Alipay.Parameters.Requests.AlipayWapPayRequest)">
+            <summary>
+            支付，跳转到支付宝收银台
+            </summary>
+            <param name="request">支付宝手机网站支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.RequestResult(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder)">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.GetMethod">
+            <summary>
+            获取请求方法
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.AlipayWapPayService.InitContentBuilder(Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化内容生成器
+            </summary>
+            <param name="builder">内容参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase">
+            <summary>
+            支付宝通知服务
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase._builder">
+            <summary>
+            参数生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase._configProvider">
+            <summary>
+            配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase._isLoad">
+            <summary>
+            是否已加载
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.OrderId">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.TradeNo">
+            <summary>
+            支付订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.Money">
+            <summary>
+            支付金额
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.BuyerId">
+            <summary>
+            买家支付宝用户号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.Sign">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase"/>类型的实例
+            </summary>
+            <param name="configProvider">配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.GetParam``1(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <typeparam name="T">类型</typeparam>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.GetParam(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.Load(Bing.Utils.Parameters.UrlParameterBuilder)">
+            <summary>
+            加载参数
+            </summary>
+            <param name="builder">参数生成器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.WriteLog">
+            <summary>
+            写日志
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.GetLog">
+            <summary>
+            获取日志操作
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.GetCaption">
+            <summary>
+            获取日志标题
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.GetParams">
+            <summary>
+            获取参数集合
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.ValidateAsync">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.VerifySign">
+            <summary>
+            验证签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.CreateVerifyBuilder">
+            <summary>
+            创建验签生成器
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayNotifyServiceBase.Validate">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase">
+            <summary>
+            支付宝支付服务基类
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.ConfigProvider">
+            <summary>
+            配置提供器
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.IsSend">
+            <summary>
+            是否发送请求
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase"/>类型的实例
+            </summary>
+            <param name="provider">支付宝配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.PayAsync(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            支付
+            </summary>
+            <param name="param">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.Validate(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.ValidateParam(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.Config(Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">支付宝参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.GetMethod">
+            <summary>
+            获取请求方法
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.GetScene">
+            <summary>
+            获取场景
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.InitContentBuilder(Bing.Biz.Payments.Alipay.Parameters.AlipayContentBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化内容生成器
+            </summary>
+            <param name="builder">内容参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.RequestResult(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder)">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.Request(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder)">
+            <summary>
+            发送请求
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.WriteLog(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder,Bing.Biz.Payments.Alipay.Results.AlipayResult)">
+            <summary>
+            写日志
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <param name="result">支付宝结果</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.WriteLog(Bing.Biz.Payments.Alipay.Configs.AlipayConfig,Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder,System.String)">
+            <summary>
+            写日志
+            </summary>
+            <param name="config">支付宝配置</param>
+            <param name="builder">支付宝参数生成器</param>
+            <param name="content">内容</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.GetLog">
+            <summary>
+            获取日志操作
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Alipay.Services.Base.AlipayServiceBase.CreateResult(Bing.Biz.Payments.Alipay.Parameters.AlipayParameterBuilder,Bing.Biz.Payments.Alipay.Results.AlipayResult)">
+            <summary>
+            创建结果
+            </summary>
+            <param name="builder">支付宝参数生成器</param>
+            <param name="result">支付宝结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Core.INotifyService">
+            <summary>
+            支付通知服务
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.INotifyService.OrderId">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.INotifyService.TradeNo">
+            <summary>
+            支付订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.INotifyService.Money">
+            <summary>
+            支付金额
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.INotifyService.GetParam(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.INotifyService.GetParam``1(System.String)">
+            <summary>
+            获取参数名
+            </summary>
+            <typeparam name="T">类型</typeparam>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.INotifyService.GetParams">
+            <summary>
+            获取参数集合
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.INotifyService.ValidateAsync">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.INotifyService.Success">
+            <summary>
+            返回成功消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.INotifyService.Fail">
+            <summary>
+            返回失败消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Core.IPayService">
+            <summary>
+            支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.IPayService.PayAsync(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            支付
+            </summary>
+            <param name="param">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Core.PayParam">
+            <summary>
+            支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParam.Timeout">
+            <summary>
+            支付订单付款超时时间。单位：分钟，默认为90分钟
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParam.ReturnUrl">
+            <summary>
+            返回地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParam.AuthCode">
+            <summary>
+            用户付款授权码
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParam.Attach">
+            <summary>
+            附加数据，通知时原路返回
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParam.OpenId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Core.PayParamBase">
+            <summary>
+            支付参数基类
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParamBase.Subject">
+            <summary>
+            订单标题
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParamBase.OrderId">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParamBase.Money">
+            <summary>
+            支付金额。单位：元
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayParamBase.NotifyUrl">
+            <summary>
+            回调通知地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayParamBase.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayParamBase.InitSubject">
+            <summary>
+            初始化订单标题
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayParamBase.Validate">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayParamBase.ValidateMoney">
+            <summary>
+            验证金额
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayParamBase.ToParam">
+            <summary>
+            转换为支付参数
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Core.PayResult">
+            <summary>
+            支付结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayResult.Success">
+            <summary>
+            是否成功
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayResult.TradeId">
+            <summary>
+            交易编号，外部支付系统的交易流水号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayResult.Raw">
+            <summary>
+            支付接口返回的原始消息
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayResult.Result">
+            <summary>
+            结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayResult.Message">
+            <summary>
+            消息
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Core.PayResult.Parameter">
+            <summary>
+            请求参数
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayResult.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Core.PayResult"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Core.PayResult.#ctor(System.Boolean,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Core.PayResult"/>类型的实例
+            </summary>
+            <param name="success">是否成功</param>
+            <param name="tradeId">交易编号</param>
+            <param name="raw">支付接口返回的原始消息</param>
+        </member>
+        <member name="T:Bing.Biz.Payments.Core.PayWay">
+            <summary>
+            支付方式
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.AlipayBarcodePay">
+            <summary>
+            支付宝条码支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.AlipayQrCodePay">
+            <summary>
+            支付宝二维码支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.AlipayPagePay">
+            <summary>
+            支付宝电脑网站支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.AlipayWapPay">
+            <summary>
+            支付宝手机网站支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.AlipayAppPay">
+            <summary>
+            支付宝App支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.WechatpayAppPay">
+            <summary>
+            微信App支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.WechatpayMiniProgramPay">
+            <summary>
+            微信小程序支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.WechatpayPagePay">
+            <summary>
+            微信电脑网站支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.WechatpayWapPay">
+            <summary>
+            微信手机网站支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.WechatpayPublicPay">
+            <summary>
+            微信公众号支付
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Core.PayWay.WechatpayBarcodePay">
+            <summary>
+            微信条码支付
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Extensions.Extensions">
+            <summary>
+            支付扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Extensions.Extensions.AddPay(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Bing.Biz.Payments.Extensions.PayOptions})">
+            <summary>
+            注册支付操作
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="setupAction">配置操作</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Extensions.Extensions.AddPay``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册支付操作
+            </summary>
+            <typeparam name="TAlipayConfigProvider">支付宝配置提供器</typeparam>
+            <typeparam name="TWechatpayConfigProvider">微信支付配置提供器</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Extensions.Extensions.AddAlipay``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册支付宝支付操作
+            </summary>
+            <typeparam name="TAlipayConfigProvider">支付宝配置提供器</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Extensions.Extensions.AddWechatpay``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册微信支付操作
+            </summary>
+            <typeparam name="TWechatpayConfigProvider">微信支付配置提供器</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="T:Bing.Biz.Payments.Extensions.PayOptions">
+            <summary>
+            支付配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Extensions.PayOptions.AlipayOptions">
+            <summary>
+            支付宝配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Extensions.PayOptions.WechatpayOptions">
+            <summary>
+            微信支付配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Factories.PayFactory">
+            <summary>
+            支付工厂
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Factories.PayFactory._alipayConfigProvider">
+            <summary>
+            支付宝配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Factories.PayFactory._wechatpayConfigProvider">
+            <summary>
+            微信支付配置提供器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.#ctor(Bing.Biz.Payments.Alipay.Configs.IAlipayConfigProvider,Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Factories.PayFactory"/>类型的实例
+            </summary>
+            <param name="alipayConfigProvider">支付宝配置提供器</param>
+            <param name="wechatpayConfigProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreatePayService(Bing.Biz.Payments.Core.PayWay)">
+            <summary>
+            创建支付服务
+            </summary>
+            <param name="way">支付方式</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayNotifyService">
+            <summary>
+            创建支付宝回调通知服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayReturnService">
+            <summary>
+            创建支付宝返回服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayBarcodePayService">
+            <summary>
+            创建支付宝条码支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayQrCodePayService">
+            <summary>
+            创建支付宝二维码支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayAppPayService">
+            <summary>
+            创建支付宝App支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayPagePayService">
+            <summary>
+            创建支付宝电脑网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateAlipayWapPayService">
+            <summary>
+            创建支付宝手机网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayNotifyService">
+            <summary>
+            创建微信回调通知服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayAppPayService">
+            <summary>
+            创建微信App支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayMiniProgramPayService">
+            <summary>
+            创建微信小程序支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayPagePayService">
+            <summary>
+            创建微信电脑网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayWapPayService">
+            <summary>
+            创建微信手机网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayPublicPayService">
+            <summary>
+            创建微信公众号支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Factories.PayFactory.CreateWechatpayBarcodePayService">
+            <summary>
+            创建微信条码支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.IPayFactory">
+            <summary>
+            支付工厂
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreatePayService(Bing.Biz.Payments.Core.PayWay)">
+            <summary>
+            创建支付服务
+            </summary>
+            <param name="way">支付方式</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayNotifyService">
+            <summary>
+            创建支付宝回调通知服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayReturnService">
+            <summary>
+            创建支付宝返回服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayBarcodePayService">
+            <summary>
+            创建支付宝条码支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayQrCodePayService">
+            <summary>
+            创建支付宝二维码支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayAppPayService">
+            <summary>
+            创建支付宝App支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayPagePayService">
+            <summary>
+            创建支付宝电脑网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateAlipayWapPayService">
+            <summary>
+            创建支付宝手机网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayNotifyService">
+            <summary>
+            创建微信回调通知服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayAppPayService">
+            <summary>
+            创建微信App支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayMiniProgramPayService">
+            <summary>
+            创建微信小程序支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayPagePayService">
+            <summary>
+            创建微信电脑网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayWapPayService">
+            <summary>
+            创建微信手机网站支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayPublicPayService">
+            <summary>
+            创建微信公众号支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.IPayFactory.CreateWechatpayBarcodePayService">
+            <summary>
+            创建微信条码支付服务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Properties.PayResource">
+            <summary>
+              一个强类型的资源类，用于查找本地化的字符串等。
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Properties.PayResource.ResourceManager">
+            <summary>
+              返回此类使用的缓存的 ResourceManager 实例。
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Properties.PayResource.Culture">
+            <summary>
+              重写当前线程的 CurrentUICulture 属性
+              重写当前线程的 CurrentUICulture 属性。
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Properties.PayResource.AuthCode">
+            <summary>
+              查找类似 用户付款授权码 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Properties.PayResource.AuthCodeIsEmpty">
+            <summary>
+              查找类似 用户付款授权码不能为空 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Properties.PayResource.InvalidMoney">
+            <summary>
+              查找类似 支付金额必须大于0 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Properties.PayResource.OrderIdIsEmpty">
+            <summary>
+              查找类似 商户订单号不能为空 的本地化字符串。
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayAppPayService">
+            <summary>
+            微信App支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayAppPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayAppPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayBarcodePayService">
+            <summary>
+            微信条码支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayBarcodePayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayBarcodePayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayMiniProgramPayService">
+            <summary>
+            微信小程序支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayMiniProgramPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayMiniProgramPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayNotifyService">
+            <summary>
+            微信支付通知服务
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayPagePayService">
+            <summary>
+            微信电脑网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayPagePayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPagePayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayPublicPayService">
+            <summary>
+            微信公众号支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayPublicPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPublicPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayWapPayService">
+            <summary>
+            微信手机网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Abstractions.IWechatpayWapPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayWapPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider">
+            <summary>
+            微信支付配置提供器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider.GetConfigAsync(Bing.Utils.Parameters.IParameterManager)">
+            <summary>
+            获取配置
+            </summary>
+            <param name="parameterManager">参数管理器</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig">
+            <summary>
+            微信支付配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.GatewayUrl">
+            <summary>
+            支付网关地址。默认为正式地址：https://api.mch.weixin.qq.com
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.MerchantId">
+            <summary>
+            商户号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.PrivateKey">
+            <summary>
+            应用私钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.SignType">
+            <summary>
+            签名类型。默认MD5
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.NotifyUrl">
+            <summary>
+            回调通知地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig.GetOrderUrl">
+            <summary>
+            获取统一下单地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfigProvider">
+            <summary>
+            微信支付配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfigProvider._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfigProvider.#ctor(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">微信支付配置</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfigProvider.GetConfigAsync(Bing.Utils.Parameters.IParameterManager)">
+            <summary>
+            获取配置
+            </summary>
+            <param name="parameterManager">参数管理器</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst">
+            <summary>
+            微信支付常量
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.TraceLogName">
+            <summary>
+            微信支付跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.MerchantId">
+            <summary>
+            商户号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Body">
+            <summary>
+            标题
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.OutTradeNo">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.TransactionId">
+            <summary>
+            微信支付订单号
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.FeeType">
+            <summary>
+            货币类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.TotalFee">
+            <summary>
+            总金额
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.NotifyUrl">
+            <summary>
+            回调通知Url
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.SpbillCreateIp">
+            <summary>
+            终端IP
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.TradeType">
+            <summary>
+            交易类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.SignType">
+            <summary>
+            签名类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Sign">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Success">
+            <summary>
+            成功
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Fail">
+            <summary>
+            失败
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Ok">
+            <summary>
+            成功
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.ReturnCode">
+            <summary>
+            返回状态码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.ResultCode">
+            <summary>
+            业务结果代码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.ReturnMessage">
+            <summary>
+            返回消息
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.PartnerId">
+            <summary>
+            伙伴标识
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Timestamp">
+            <summary>
+            时间戳
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Package">
+            <summary>
+            包
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.ErrorCode">
+            <summary>
+            错误码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.ErrorCodeDescription">
+            <summary>
+            错误码和描述
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.Attach">
+            <summary>
+            附加数据
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.OpenId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Configs.WechatpayConst.AuthCode">
+            <summary>
+            用户授权码
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Enums.WechatpaySignType">
+            <summary>
+            微信支付签名类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Enums.WechatpaySignType.Md5">
+            <summary>
+            Md5
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Enums.WechatpaySignType.HmacSha256">
+            <summary>
+            HMAC-SHA256
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayAppPayRequest">
+            <summary>
+            微信App支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayAppPayRequest.Attach">
+            <summary>
+            附加数据，通知时原样返回
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayBarcodePayRequest">
+            <summary>
+            微信条码支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayBarcodePayRequest.AuthCode">
+            <summary>
+            用户付款授权码
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayMiniProgramPayRequest">
+            <summary>
+            微信小程序支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayMiniProgramPayRequest.OpenId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayMiniProgramPayRequest.Attach">
+            <summary>
+            附加数据，通知原样返回
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPagePayRequest">
+            <summary>
+            微信电脑网站支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPagePayRequest.Attach">
+            <summary>
+            附加数据，通知时原样返回
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPublicPayRequest">
+            <summary>
+            微信公众号支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPublicPayRequest.OpenId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPublicPayRequest.Attach">
+            <summary>
+            附加数据，通知原样返回
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayWapPayRequest">
+            <summary>
+            微信手机网站支付参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayWapPayRequest.Attach">
+            <summary>
+            附加数据，通知原样返回
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder">
+            <summary>
+            微信支付参数生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder._builder">
+            <summary>
+            参数生成器
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Config">
+            <summary>
+            微信支付配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.#ctor(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder"/>类型的实例
+            </summary>
+            <param name="config">微信支付配置</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Init(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Add(System.String,System.String)">
+            <summary>
+            添加参数
+            </summary>
+            <param name="name">参数名</param>
+            <param name="value">参数值</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.AppId(System.String)">
+            <summary>
+            设置应用标识
+            </summary>
+            <param name="appId">应用标识</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.MerchantId(System.String)">
+            <summary>
+            设置商户号
+            </summary>
+            <param name="merchantId">商户号</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Body(System.String)">
+            <summary>
+            设置标题
+            </summary>
+            <param name="body">标题</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.OutTradeNo(System.String)">
+            <summary>
+            设置商户订单号
+            </summary>
+            <param name="orderId">商户订单号</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.FeeType(System.String)">
+            <summary>
+            设置货币类型
+            </summary>
+            <param name="feeType">货币类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.TotalFee(System.Decimal)">
+            <summary>
+            设置总金额
+            </summary>
+            <param name="totalFee">总金额。单位：元</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.NotifyUrl(System.String)">
+            <summary>
+            设置回调通知地址
+            </summary>
+            <param name="notifyUrl">回调通知地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.GetNotifyUrl(System.String)">
+            <summary>
+            获取回调通知地址
+            </summary>
+            <param name="notifyUrl">回调通知地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.SpbillCreateIp(System.String)">
+            <summary>
+            设置终端IP
+            </summary>
+            <param name="ip">终端IP</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.TradeType(System.String)">
+            <summary>
+            设置交易类型
+            </summary>
+            <param name="type">交易类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.SignType(System.String)">
+            <summary>
+            设置签名类型
+            </summary>
+            <param name="type">签名类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.PartnerId(System.String)">
+            <summary>
+            设置伙伴标识
+            </summary>
+            <param name="partnerId">伙伴标识</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Timestamp(System.Int64)">
+            <summary>
+            设置时间戳
+            </summary>
+            <param name="timestamp">时间戳</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Package(System.String)">
+            <summary>
+            设置包
+            </summary>
+            <param name="package">包。默认值："Sign=WXPay"</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.Attach(System.String)">
+            <summary>
+            设置附加数据
+            </summary>
+            <param name="attach">附加数据</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.OpenId(System.String)">
+            <summary>
+            设置用户标识
+            </summary>
+            <param name="openId">用户标识</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.AuthCode(System.String)">
+            <summary>
+            设置用户授权码
+            </summary>
+            <param name="code">用户授权码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.ToXml">
+            <summary>
+            获取Xml结果，包含签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.ToXmlDocument(Bing.Utils.Parameters.ParameterBuilder)">
+            <summary>
+            获取Xml文档
+            </summary>
+            <param name="builder">参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.AddNode(Bing.Utils.Helpers.Xml,System.String,System.Object)">
+            <summary>
+            添加Xml节点
+            </summary>
+            <param name="xml">Xml操作</param>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.GetSignBuilder">
+            <summary>
+            获取签名的参数生成器
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.GetSign">
+            <summary>
+            获取签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.ToXmlNoContainsSign">
+            <summary>
+            获取Xml结果，不包含签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.ToJson">
+            <summary>
+            获取Json结果，包含签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.ToString">
+            <summary>
+            输出结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult">
+            <summary>
+            微信支付结果
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult._configProvider">
+            <summary>
+            配置提供者
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult._builder">
+            <summary>
+            响应结果
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult._sign">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.Raw">
+            <summary>
+            微信支付原始响应
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult"/>类型的实例
+            </summary>
+            <param name="configProvider">配置提供器</param>
+            <param name="response">xml响应消息</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.Resolve(System.String)">
+            <summary>
+            解析响应
+            </summary>
+            <param name="response">xml响应消息</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.WriteLog">
+            <summary>
+            写日志
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetLog">
+            <summary>
+            获取日志操作
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetParam(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <param name="name">xml节点名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetReturnCode">
+            <summary>
+            获取返回状态码
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetResultCode">
+            <summary>
+            获取业务结果代码
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetReturnMessage">
+            <summary>
+            获取返回消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.AppId">
+            <summary>
+            获取应用标识
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetMerchantId">
+            <summary>
+            获取商户号
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetNonce">
+            <summary>
+            获取随机字符串
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetPrepayId">
+            <summary>
+            获取预支付标识
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetCodeUrl">
+            <summary>
+            获取二维码链接
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetMWebUrl">
+            <summary>
+            获取支付跳转链接
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetErrorCode">
+            <summary>
+            获取错误码
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetErrorCodeDesciption">
+            <summary>
+            获取错误码和描述
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetSign">
+            <summary>
+            获取签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.GetParams">
+            <summary>
+            获取参数列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.ValidateAsync">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Results.WechatpayResult.VerifySign">
+            <summary>
+            验证签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase">
+            <summary>
+            微信支付服务
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.ConfigProvider">
+            <summary>
+            配置提供器
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.IsSend">
+            <summary>
+            是否发送请求
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.PayAsync(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            支付
+            </summary>
+            <param name="param">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.Validate(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.ValidateParam(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.Config(Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.InitBuilder(Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化参数生成器
+            </summary>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.RequestResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder)">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.Request(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder)">
+            <summary>
+            发送请求
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生辰器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.GetOrderUrl">
+            <summary>
+            获取统一下单地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.WriteLog(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            写日志
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.GetLog">
+            <summary>
+            获取日志操作
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.CreateResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            创建支付结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.Base.WechatpayServiceBase.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService">
+            <summary>
+            微信App支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayAppPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayAppPayService.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService">
+            <summary>
+            微信条码支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayBarcodePayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.ValidateParam(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.InitBuilder(Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            初始化内容生成器
+            </summary>
+            <param name="builder">内容参数生成器</param>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayBarcodePayService.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService">
+            <summary>
+            微信小程序支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService.ValidateParam(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayMiniProgramPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">微信小程序支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayMiniProgramPayService.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService">
+            <summary>
+            微信支付通知服务
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService._configProvider">
+            <summary>
+            配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService._result">
+            <summary>
+            微信支付结果
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService._isLoad">
+            <summary>
+            是否已加载
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.OrderId">
+            <summary>
+            商户订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.TradeNo">
+            <summary>
+            支付订单号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.Money">
+            <summary>
+            支付金额
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.GetParam(System.String)">
+            <summary>
+            获取参数
+            </summary>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.GetParam``1(System.String)">
+            <summary>
+            获取参数名
+            </summary>
+            <typeparam name="T">类型</typeparam>
+            <param name="name">参数名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.GetParams">
+            <summary>
+            获取参数集合
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.InitResult">
+            <summary>
+            初始化支付结果
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.ValidateAsync">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.Success">
+            <summary>
+            返回成功消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.Fail">
+            <summary>
+            返回失败消息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayNotifyService.Return(System.String,System.String)">
+            <summary>
+            返回消息
+            </summary>
+            <param name="code">编码</param>
+            <param name="message">消息</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService">
+            <summary>
+            微信电脑网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPagePayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPagePayService.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService">
+            <summary>
+            微信公众号支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayPublicPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService.ValidateParam(Bing.Biz.Payments.Core.PayParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">支付参数</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayPublicPayService.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService">
+            <summary>
+            微信手机网站支付服务
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService.#ctor(Bing.Biz.Payments.Wechatpay.Configs.IWechatpayConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService"/>类型的实例
+            </summary>
+            <param name="configProvider">微信支付配置提供器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService.PayAsync(Bing.Biz.Payments.Wechatpay.Parameters.Requests.WechatpayWapPayRequest)">
+            <summary>
+            支付
+            </summary>
+            <param name="request">支付参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService.GetTradeType">
+            <summary>
+            获取交易类型
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService.GetPayWay">
+            <summary>
+            获取支付方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Services.WechatpayWapPayService.GetResult(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder,Bing.Biz.Payments.Wechatpay.Results.WechatpayResult)">
+            <summary>
+            获取结果
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">微信支付参数生成器</param>
+            <param name="result">微信支付结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager">
+            <summary>
+            微信支付HMACSHA256签名管理器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager._key">
+            <summary>
+            签名密钥
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager._builder">
+            <summary>
+            Url参数生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager.#ctor(Bing.Utils.Signatures.ISignKey,Bing.Utils.Parameters.ParameterBuilder)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager"/>类型的实例
+            </summary>
+            <param name="key">签名密钥</param>
+            <param name="builder">参数生成器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager.Add(System.String,System.Object)">
+            <summary>
+            添加参数
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager.Sign">
+            <summary>
+            签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.HmacSha256SignManager.Verify(System.String)">
+            <summary>
+            验证签名
+            </summary>
+            <param name="sign">签名</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager">
+            <summary>
+            微信支付Md5签名管理器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager._key">
+            <summary>
+            签名密钥
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager._builder">
+            <summary>
+            Url参数生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager.#ctor(Bing.Utils.Signatures.ISignKey,Bing.Utils.Parameters.ParameterBuilder)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager"/>类型的实例
+            </summary>
+            <param name="key">签名密钥</param>
+            <param name="builder">参数生成器</param>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager.Add(System.String,System.Object)">
+            <summary>
+            添加参数
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager.Sign">
+            <summary>
+            签名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.Md5SignManager.Verify(System.String)">
+            <summary>
+            验证签名
+            </summary>
+            <param name="sign">签名</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.Payments.Wechatpay.Signatures.SignManagerFactory">
+            <summary>
+            微信支付签名工厂
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.Payments.Wechatpay.Signatures.SignManagerFactory.Create(Bing.Biz.Payments.Wechatpay.Configs.WechatpayConfig,Bing.Utils.Parameters.ParameterBuilder)">
+            <summary>
+            创建签名管理器
+            </summary>
+            <param name="config">微信支付配置</param>
+            <param name="builder">参数生成器</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

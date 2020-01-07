@@ -1,0 +1,751 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.AspNetCore</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.AspNetCore.AspNetCoreBingModule">
+            <summary>
+            基于AspNetCore环境的模块基类
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.AspNetCoreBingModule.UseModule(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            应用AspNetCore的服务业务
+            </summary>
+            <param name="app">应用程序构建器</param>
+        </member>
+        <member name="T:Bing.AspNetCore.AspNetCoreBingModuleManager">
+            <summary>
+            AspNetCore Bing 模块管理器
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.AspNetCoreBingModuleManager.UseModule(System.IServiceProvider)">
+            <summary>
+            应用模块服务
+            </summary>
+            <param name="provider">服务提供程序</param>
+        </member>
+        <member name="M:Bing.AspNetCore.AspNetCoreBingModuleManager.UseModule(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            应用模块服务。仅在AspNetCore环境下调用，非AspNetCore环境请求执行 <see cref="M:Bing.AspNetCore.AspNetCoreBingModuleManager.UseModule(System.IServiceProvider)"/> 功能
+            </summary>
+            <param name="app">应用程序构建器</param>
+        </member>
+        <member name="T:Bing.AspNetCore.AspNetCoreModule">
+            <summary>
+            AspNetCore模块
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.AspNetCoreModule.Level">
+            <summary>
+            模块级别。级别越小越先启动
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.AspNetCoreModule.Order">
+            <summary>
+            模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.AspNetCoreModule.AddServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            添加服务。将模块服务添加到依赖注入服务容器中
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.AspNetCoreModule.UseModule(System.IServiceProvider)">
+            <summary>
+            应用模块服务
+            </summary>
+            <param name="provider">服务提供程序</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Logs.SysLogger">
+            <summary>
+            系统日志记录器
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Logs.SysLogger.LogName">
+            <summary>
+            日志名称
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Logs.SysLogger.CategoryName">
+            <summary>
+            日志分类
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLogger.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.Logs.SysLogger"/>类型的实例
+            </summary>
+            <param name="categoryName">日志分类</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLogger.Log``1(Microsoft.Extensions.Logging.LogLevel,Microsoft.Extensions.Logging.EventId,``0,System.Exception,System.Func{``0,System.Exception,System.String})">
+            <summary>
+            日志记录
+            </summary>
+            <typeparam name="TState">状态类型</typeparam>
+            <param name="logLevel">日志级别</param>
+            <param name="eventId">事件编号</param>
+            <param name="state">状态</param>
+            <param name="exception">异常</param>
+            <param name="formatter">日志内容</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLogger.GetLog">
+            <summary>
+            获取日志操作
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLogger.IsEnabled(Microsoft.Extensions.Logging.LogLevel)">
+            <summary>
+            是否启用
+            </summary>
+            <param name="logLevel">日志级别</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLogger.BeginScope``1(``0)">
+            <summary>
+            起始范围
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.Logs.SysLoggerProvider">
+            <summary>
+            系统日志提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Logs.SysLoggerProvider._loggers">
+            <summary>
+            日志字典
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLoggerProvider.Dispose">
+            <summary>
+            释放资源
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLoggerProvider.CreateLogger(System.String)">
+            <summary>
+            初始化系统日志提供器
+            </summary>
+            <param name="categoryName">日志分类</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Logs.SysLoggerProvider.CreateLoggerImplementation(System.String)">
+            <summary>
+            创建日志实现类
+            </summary>
+            <param name="name">名称</param>
+        </member>
+        <member name="T:Bing.AspNetCore.ApplicationBuilderExtensions">
+            <summary>
+            应用程序构建器(<see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.ApplicationBuilderExtensions.UseBing(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Bing框架初始化。适用于AspNetCore环境
+            </summary>
+            <param name="app">应用程序构建器</param>
+        </member>
+        <member name="M:Bing.AspNetCore.ApplicationBuilderExtensions.UseMvcWithAreaRoute(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.Boolean)">
+            <summary>
+            添加MVC并支持Area路由
+            </summary>
+            <param name="app">应用程序构建器</param>
+            <param name="area">是否支持Area路由</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Extensions">
+            <summary>
+            服务扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddUploadService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册上传服务
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddUploadService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册上传服务
+            </summary>
+            <typeparam name="TFileUploadService">文件上传服务类型</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddApiInterfaceService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册Api接口服务
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddApiInterfaceService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册Api接口服务
+            </summary>
+            <typeparam name="TApiInterfaceService">Api接口服务类型</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="T:Bing.AspNetCore.ServiceCollectionExtensions">
+            <summary>
+            服务集合(<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.ServiceCollectionExtensions.GetHostingEnvironment(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            获取<see cref="T:Microsoft.AspNetCore.Hosting.IHostingEnvironment"/>环境信息
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="T:Bing.AspNetCore.ServiceProviderExtensions">
+            <summary>
+            服务提供程序(<see cref="T:System.IServiceProvider"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.ServiceProviderExtensions.HttpContext(System.IServiceProvider)">
+            <summary>
+            获取HttpContext实例
+            </summary>
+            <param name="provider">服务提供程序</param>
+        </member>
+        <member name="M:Bing.AspNetCore.ServiceProviderExtensions.InHttpRequest(System.IServiceProvider)">
+            <summary>
+            当前业务是否处于HttpRequest中
+            </summary>
+            <param name="provider">服务提供程序</param>
+        </member>
+        <member name="T:Bing.AspNetCore.HttpContextServiceScopeFactory">
+            <summary>
+            基于当前HttpContext的<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>工厂。如果当前操作处于HttpRequest作用域中，直接使用HttpRequest的作用域，否则创建新的作用域
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.ServiceScopeFactory">
+            <summary>
+            服务作用域工厂
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.HttpContextAccessor">
+            <summary>
+            当前请求的<see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/>对象
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.HttpContextServiceScopeFactory"/>类型的实例
+            </summary>
+            <param name="serviceScopeFactory">服务作用域工厂</param>
+            <param name="httpContextAccessor">Http上下文访问器</param>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.CreateScope">
+            <summary>
+            创建依赖注入服务的作用域。如果当前操作处于HttpRequest作用域中，直接使用HttpReqeust的作用域，否则创建新的作用域
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope">
+            <summary>
+            当前HttpRequest的<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>的包装，保持HttpContext.RequestServices的可传递性，并且不释放
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.ServiceProvider">
+            <summary>
+            服务提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.#ctor(System.IServiceProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope"/>类型的实例
+            </summary>
+            <param name="serviceProvider">服务提供程序</param>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.Dispose">
+            <summary>
+            释放资源。因为是HttpContext的，啥也不做，避免在using使用时被释放
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.IAspNetCoreUseModule">
+            <summary>
+            AspNetCore环境下的应用模块服务
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.IAspNetCoreUseModule.UseModule(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            应用模块服务。仅在AspNetCore环境下调用，非AspNetCore环境请求执行 UseModule(IServiceProvider) 功能
+            </summary>
+            <param name="app">应用程序构建器</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Mvc.DefaultApiInterfaceService">
+            <summary>
+            默认Api接口服务
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Mvc.DefaultApiInterfaceService._controllerDescriptors">
+            <summary>
+            控制器描述列表
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Mvc.DefaultApiInterfaceService._actionDescriptors">
+            <summary>
+            操作描述列表
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Mvc.DefaultApiInterfaceService._partManager">
+            <summary>
+            应用程序部分管理
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Mvc.DefaultApiInterfaceService.Lock">
+            <summary>
+            对象锁
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.DefaultApiInterfaceService.#ctor(Microsoft.AspNetCore.Mvc.ApplicationParts.ApplicationPartManager)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.Mvc.DefaultApiInterfaceService"/>类型的实例
+            </summary>
+            <param name="partManager">应用程序部分管理</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.DefaultApiInterfaceService.GetAllController">
+            <summary>
+            获取所有控制器。不包含抽象的类
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.DefaultApiInterfaceService.GetAllAction">
+            <summary>
+            获取所有操作
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.Mvc.IApiInterfaceService">
+            <summary>
+            Api接口服务
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.IApiInterfaceService.GetAllController">
+            <summary>
+            获取所有控制器。不包含抽象的类
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.IApiInterfaceService.GetAllAction">
+            <summary>
+            获取所有操作
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.Mvc.Models.ActionDescriptor">
+            <summary>
+            操作描述
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ActionDescriptor.Controller">
+            <summary>
+            控制器描述
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ActionDescriptor.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ActionDescriptor.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ActionDescriptor.MethodInfo">
+            <summary>
+            方法信息
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ActionDescriptor.#ctor(Bing.AspNetCore.Mvc.Models.ControllerDescriptor,System.Reflection.MethodInfo)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.Mvc.Models.ActionDescriptor"/>类型的实例
+            </summary>
+            <param name="controller">控制器</param>
+            <param name="methodInfo">方法信息</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ActionDescriptor.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ActionDescriptor.InitDescription">
+            <summary>
+            初始化描述
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.Mvc.Models.ControllerDescriptor">
+            <summary>
+            控制器描述
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.Area">
+            <summary>
+            区域
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.TypeInfo">
+            <summary>
+            类型信息
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.#ctor(System.Reflection.TypeInfo)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.Mvc.Models.ControllerDescriptor"/>类型的实例
+            </summary>
+            <param name="typeInfo">类型信息</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.InitName">
+            <summary>
+            初始化名称
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.InitArea">
+            <summary>
+            初始化区域
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Mvc.Models.ControllerDescriptor.InitDescription">
+            <summary>
+            初始化描述
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.RequestScopedServiceResolver">
+            <summary>
+            Request的<see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"/>服务解析器
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.RequestScopedServiceResolver._httpContextAccessor">
+            <summary>
+            Http上下文访问器
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.RequestScopedServiceResolver.ResolveEnabled">
+            <summary>
+            是否可解析
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.RequestScopedServiceResolver.ScopedProvider">
+            <summary>
+            <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"/>生命周期的服务提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.RequestScopedServiceResolver.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.RequestScopedServiceResolver"/>类型的实例
+            </summary>
+            <param name="httpContextAccessor">Http上下文访问器</param>
+        </member>
+        <member name="M:Bing.AspNetCore.RequestScopedServiceResolver.GetService``1">
+            <summary>
+            获取指定服务类型的实例
+            </summary>
+            <typeparam name="T">服务类型</typeparam>
+        </member>
+        <member name="M:Bing.AspNetCore.RequestScopedServiceResolver.GetService(System.Type)">
+            <summary>
+            获取指定服务类型的实例
+            </summary>
+            <param name="serviceType">服务类型</param>
+        </member>
+        <member name="M:Bing.AspNetCore.RequestScopedServiceResolver.GetServices``1">
+            <summary>
+            获取指定服务类型的所有实例
+            </summary>
+            <typeparam name="T">服务类型</typeparam>
+        </member>
+        <member name="M:Bing.AspNetCore.RequestScopedServiceResolver.GetServices(System.Type)">
+            <summary>
+            获取指定服务类型的所有实例
+            </summary>
+            <param name="serviceType">服务类型</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider">
+            <summary>
+            AspNetCore 跟踪关联ID提供程序
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider.HttpContextAccessor">
+            <summary>
+            Http上下文访问器
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider.Options">
+            <summary>
+            跟踪关联ID配置选项信息
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor,Microsoft.Extensions.Options.IOptions{Bing.Tracing.CorrelationIdOptions})">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider"/>类型的实例
+            </summary>
+            <param name="httpContextAccessor">Http上下文访问器</param>
+            <param name="options">跟踪关联ID选项</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider.Get">
+            <summary>
+            获取跟踪关联ID
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider.CreateNewCorrelationId">
+            <summary>
+            创建新跟踪关联ID
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.Tracing.CorrelationIdMiddleware">
+            <summary>
+            跟踪关联ID提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Tracing.CorrelationIdMiddleware._next">
+            <summary>
+            方法
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Tracing.CorrelationIdMiddleware._options">
+            <summary>
+            跟踪关联ID配置选项信息
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.Tracing.CorrelationIdMiddleware._correlationIdProvider">
+            <summary>
+            跟踪关联ID提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Tracing.CorrelationIdMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Options.IOptions{Bing.Tracing.CorrelationIdOptions},Bing.Tracing.ICorrelationIdProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.Tracing.CorrelationIdMiddleware"/>类型的实例
+            </summary>
+            <param name="next">方法</param>
+            <param name="options">跟踪关联ID配置选项信息</param>
+            <param name="correlationIdProvider">跟踪关联ID提供程序</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Tracing.CorrelationIdMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            执行方法
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Tracing.CorrelationIdMiddleware.CheckAndSetCorrelationIdOnResponse(Microsoft.AspNetCore.Http.HttpContext,Bing.Tracing.CorrelationIdOptions,System.String)">
+            <summary>
+            检查并设置跟踪关联ID在响应内容
+            </summary>
+            <param name="httpContext">Http上下文</param>
+            <param name="options">跟踪关联ID配置选项信息</param>
+            <param name="correlationId">跟踪关联ID</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Uploads.DefaultFileUploadService">
+            <summary>
+            默认文件上传服务
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.DefaultFileUploadService.UploadAsync(Bing.AspNetCore.Uploads.Params.SingleFileUploadParam,System.Threading.CancellationToken)">
+            <summary>
+            上传文件。单文件
+            </summary>
+            <param name="param">参数</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.DefaultFileUploadService.SaveAsync(Microsoft.AspNetCore.Http.IFormFile,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            保存文件
+            </summary>
+            <param name="formFile">表单文件</param>
+            <param name="relativePath">相对路径</param>
+            <param name="rootPath">根路径</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.DefaultFileUploadService.UploadAsync(Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam,System.Threading.CancellationToken)">
+            <summary>
+            上传文件。多文件
+            </summary>
+            <param name="param">参数</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.DefaultFileUploadService.SaveAsync(Microsoft.AspNetCore.Http.IFormFile,System.String,System.Threading.CancellationToken)">
+            <summary>
+            保存文件
+            </summary>
+            <param name="formFile">表单文件</param>
+            <param name="savePath">保存路径</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.DefaultFileUploadService.SaveWithMd5Async(Microsoft.AspNetCore.Http.IFormFile,System.String,System.Threading.CancellationToken)">
+            <summary>
+            保存文件并返回文件MD5值
+            </summary>
+            <param name="formFile">表单文件</param>
+            <param name="savePath">保存路径</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.DefaultFileUploadService.Md5(System.IO.Stream)">
+            <summary>
+            MD5哈希
+            </summary>
+            <param name="stream">流</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Uploads.IFileUploadService">
+            <summary>
+            文件上传服务
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.IFileUploadService.UploadAsync(Bing.AspNetCore.Uploads.Params.SingleFileUploadParam,System.Threading.CancellationToken)">
+            <summary>
+            上传文件。单文件
+            </summary>
+            <param name="param">参数</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.IFileUploadService.UploadAsync(Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam,System.Threading.CancellationToken)">
+            <summary>
+            上传文件。多文件
+            </summary>
+            <param name="param">参数</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.IFileUploadService.SaveAsync(Microsoft.AspNetCore.Http.IFormFile,System.String,System.Threading.CancellationToken)">
+            <summary>
+            保存文件
+            </summary>
+            <param name="formFile">表单文件</param>
+            <param name="savePath">保存路径</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Uploads.IFileUploadService.SaveWithMd5Async(Microsoft.AspNetCore.Http.IFormFile,System.String,System.Threading.CancellationToken)">
+            <summary>
+            保存文件并返回文件MD5值
+            </summary>
+            <param name="formFile">表单文件</param>
+            <param name="savePath">保存路径</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam">
+            <summary>
+            多文件上传参数
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.Request">
+            <summary>
+            当前请求
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.FormFiles">
+            <summary>
+            上传的文件对象
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.RootPath">
+            <summary>
+            存储根路径
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.Module">
+            <summary>
+            模块名称
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.Group">
+            <summary>
+            分组
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.FullPath">
+            <summary>
+            完整目录
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.MultipleFileUploadParam.RelativePath">
+            <summary>
+            相对目录
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam">
+            <summary>
+            单文件上传参数
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.Request">
+            <summary>
+            当前请求
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.FormFile">
+            <summary>
+            上传的文件对象
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.RootPath">
+            <summary>
+            存储根路径
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.Module">
+            <summary>
+            模块名称
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.Group">
+            <summary>
+            分组
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.FullPath">
+            <summary>
+            完整目录
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.Uploads.Params.SingleFileUploadParam.RelativePath">
+            <summary>
+            相对目录
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.VerifyCodes.IVerifyCodeService">
+            <summary>
+            验证码服务
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.VerifyCodes.IVerifyCodeService.CheckCode(System.String,System.String,System.Boolean)">
+            <summary>
+            校验验证码有效性
+            </summary>
+            <param name="code">验证码</param>
+            <param name="id">验证码编号</param>
+            <param name="removeIfSuccess">验证成功时是否移除</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.AspNetCore.VerifyCodes.IVerifyCodeService.SetCode(System.String,System.String@)">
+            <summary>
+            设置验证码到Session中
+            </summary>
+            <param name="code">验证码</param>
+            <param name="id">验证码编号</param>
+        </member>
+        <member name="M:Bing.AspNetCore.VerifyCodes.IVerifyCodeService.GetImageString(System.Drawing.Image,System.String)">
+            <summary>
+            将图片序列化成字符串
+            </summary>
+            <param name="image">图片</param>
+            <param name="id">验证码编号</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Extensions.Logging.LoggerFactoryExtensions">
+            <summary>
+            日志工厂(<see cref="T:Microsoft.Extensions.Logging.ILoggerFactory"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Logging.LoggerFactoryExtensions.AddSysLogProvider(Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            添加系统日志提供程序。用于接管ILogger日志
+            </summary>
+            <param name="loggerFactory">日志工厂</param>
+        </member>
+    </members>
+</doc>

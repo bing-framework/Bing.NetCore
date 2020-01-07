@@ -128,9 +128,7 @@ namespace Bing.Applications
         {
             Log.BussinessId(entities.Select(t => t.Id).Join());
             foreach (var entity in entities)
-            {
                 Log.Content(entity.ToString());
-            }
         }
 
         #endregion
@@ -142,17 +140,11 @@ namespace Bing.Applications
         public virtual void Delete(string ids)
         {
             if (string.IsNullOrWhiteSpace(ids))
-            {
                 return;
-            }
-
             var entities = _store.FindByIds(ids);
             if (entities?.Count == 0)
-            {
                 return;
-            }
-
-            DeleteBeofre(entities);
+            DeleteBefore(entities);
             _store.Remove(entities);
             _unitOfWork.Commit();
             DeleteAfter(entities);
@@ -165,17 +157,11 @@ namespace Bing.Applications
         public virtual async Task DeleteAsync(string ids)
         {
             if (string.IsNullOrWhiteSpace(ids))
-            {
                 return;
-            }
-
             var entities = await _store.FindByIdsAsync(ids);
             if (entities?.Count == 0)
-            {
                 return;
-            }
-
-            DeleteBeofre(entities);
+            DeleteBefore(entities);
             await _store.RemoveAsync(entities);
             await _unitOfWork.CommitAsync();
             DeleteAfter(entities);
@@ -185,7 +171,7 @@ namespace Bing.Applications
         /// 删除前操作
         /// </summary>
         /// <param name="entities">实体集合</param>
-        protected virtual void DeleteBeofre(List<TEntity> entities)
+        protected virtual void DeleteBefore(List<TEntity> entities)
         {
         }
 

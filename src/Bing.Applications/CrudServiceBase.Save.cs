@@ -20,14 +20,10 @@ namespace Bing.Applications
         public virtual string Create(TCreateRequest request)
         {
             if (request == null)
-            {
                 throw new ArgumentNullException(nameof(request));
-            }
             var entity = ToEntityFromCreateRequest(request);
             if (entity == null)
-            {
                 throw new ArgumentNullException(nameof(entity));
-            }
             Create(entity);
             return entity.Id.ToString();
         }
@@ -56,10 +52,7 @@ namespace Bing.Applications
         /// 创建后操作
         /// </summary>
         /// <param name="entity">实体</param>
-        protected virtual void CreateAfter(TEntity entity)
-        {
-            AddLog(entity);
-        }
+        protected virtual void CreateAfter(TEntity entity) => AddLog(entity);
 
         /// <summary>
         /// 创建
@@ -69,14 +62,10 @@ namespace Bing.Applications
         public virtual async Task<string> CreateAsync(TCreateRequest request)
         {
             if (request == null)
-            {
                 throw new ArgumentNullException(nameof(request));
-            }
             var entity = ToEntityFromCreateRequest(request);
             if (entity == null)
-            {
                 throw new ArgumentNullException(nameof(entity));
-            }
             await CreateAsync(entity);
             return entity.Id.ToString();
         }
@@ -99,19 +88,13 @@ namespace Bing.Applications
         /// 创建前操作
         /// </summary>
         /// <param name="entity">实体</param>
-        protected virtual Task CreateBeforeAsync(TEntity entity)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task CreateBeforeAsync(TEntity entity) => Task.CompletedTask;
 
         /// <summary>
         /// 创建后操作
         /// </summary>
         /// <param name="entity">实体</param>
-        protected virtual Task CreateAfterAsync(TEntity entity)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task CreateAfterAsync(TEntity entity) => Task.CompletedTask;
 
         #endregion
 
@@ -124,14 +107,10 @@ namespace Bing.Applications
         public virtual void Update(TUpdateRequest request)
         {
             if (request == null)
-            {
                 throw new ArgumentNullException(nameof(request));
-            }
             var entity = ToEntityFromUpdateRequest(request);
             if (entity == null)
-            {
                 throw new ArgumentNullException(nameof(entity));
-            }
             Update(entity);
         }
 
@@ -143,9 +122,7 @@ namespace Bing.Applications
         {
             var oldEntity = FindOldEntity(entity.Id);
             if (oldEntity == null)
-            {
                 throw new ArgumentNullException(nameof(oldEntity));
-            }
             var changes = oldEntity.GetChanges(entity);
             UpdateBefore(entity);
             _repository.Update(entity);
@@ -156,20 +133,13 @@ namespace Bing.Applications
         /// 查找旧实体
         /// </summary>
         /// <param name="id">标识</param>
-        protected virtual TEntity FindOldEntity(TKey id)
-        {
-            return _repository.Find(id);
-        }
+        protected virtual TEntity FindOldEntity(TKey id) => _repository.Find(id);
 
         /// <summary>
         /// 查找旧实体
         /// </summary>
         /// <param name="id">标识</param>
-        /// <returns></returns>
-        protected virtual async Task<TEntity> FindOldEntityAsync(TKey id)
-        {
-            return await _repository.FindAsync(id);
-        }
+        protected virtual async Task<TEntity> FindOldEntityAsync(TKey id) => await _repository.FindAsync(id);
 
         /// <summary>
         /// 修改前操作
@@ -184,10 +154,9 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        protected virtual void UpdateAfter(TEntity entity, ChangeValueCollection changeValues)
-        {
-            Log.BussinessId(entity.Id.SafeString()).Content(changeValues.SafeString());
-        }
+        protected virtual void UpdateAfter(TEntity entity, ChangeValueCollection changeValues) => Log
+            .BussinessId(entity.Id.SafeString())
+            .Content(changeValues.SafeString());
 
         /// <summary>
         /// 修改
@@ -196,15 +165,10 @@ namespace Bing.Applications
         public virtual async Task UpdateAsync(TUpdateRequest request)
         {
             if (request == null)
-            {
                 throw new ArgumentNullException(nameof(request));
-            }
             var entity = ToEntityFromUpdateRequest(request);
             if (entity == null)
-            {
                 throw new ArgumentNullException(nameof(entity));
-            }
-
             await UpdateAsync(entity);
         }
 
@@ -216,9 +180,7 @@ namespace Bing.Applications
         {
             var oldEntity = await FindOldEntityAsync(entity.Id);
             if (oldEntity == null)
-            {
                 throw new ArgumentNullException(nameof(oldEntity));
-            }
             var changes = oldEntity.GetChanges(entity);
             UpdateBefore(entity);
             await UpdateBeforeAsync(entity);
@@ -231,20 +193,14 @@ namespace Bing.Applications
         /// 修改前操作
         /// </summary>
         /// <param name="entity">实体</param>
-        protected virtual Task UpdateBeforeAsync(TEntity entity)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task UpdateBeforeAsync(TEntity entity) => Task.CompletedTask;
 
         /// <summary>
         /// 修改后操作
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        protected virtual Task UpdateAfterAsync(TEntity entity, ChangeValueCollection changeValues)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task UpdateAfterAsync(TEntity entity, ChangeValueCollection changeValues) => Task.CompletedTask;
 
         #endregion
 
@@ -257,15 +213,11 @@ namespace Bing.Applications
         public virtual void Save(TRequest request)
         {
             if (request == null)
-            {
                 throw new ArgumentNullException(nameof(request));
-            }
             SaveBefore(request);
             var entity = ToEntity(request);
             if (entity == null)
-            {
                 throw new ArgumentNullException(nameof(entity));
-            }
             if (IsNew(request, entity))
             {
                 Create(entity);
@@ -284,15 +236,11 @@ namespace Bing.Applications
         public virtual async Task SaveAsync(TRequest request)
         {
             if (request == null)
-            {
                 throw new ArgumentNullException(nameof(request));
-            }
             SaveBefore(request);
             var entity = ToEntity(request);
             if (entity == null)
-            {
                 throw new ArgumentNullException(nameof(entity));
-            }
             if (IsNew(request, entity))
             {
                 await CreateAsync(entity);
@@ -325,18 +273,12 @@ namespace Bing.Applications
         /// <summary>
         /// 提交后操作 - 该方法由工作单元拦截器调用
         /// </summary>
-        public void CommitAfter()
-        {
-            SaveAfter();
-        }
+        public void CommitAfter() => SaveAfter();
 
         /// <summary>
         /// 保存后操作
         /// </summary>
-        protected virtual void SaveAfter()
-        {
-            WriteLog($"保存{EntityDescription}成功");
-        }
+        protected virtual void SaveAfter() => WriteLog($"保存{EntityDescription}成功");
 
         #endregion
 

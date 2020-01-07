@@ -26,7 +26,6 @@ namespace Bing.Applications
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         protected virtual ILog GetLog()
         {
             try

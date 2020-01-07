@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Logs.NLog</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Logs.NLog.Extensions">
+            <summary>
+            日志扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.NLog.Extensions.AddNLog(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            注册NLog日志操作
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="name">服务名称</param>
+        </member>
+        <member name="M:Bing.Logs.NLog.Extensions.AddNLogWithFactory(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            注册NLog日志操作。使用日志工厂，实现混合日志
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="name">名称</param>
+        </member>
+        <member name="T:Bing.Logs.NLog.LogProviderFactory">
+            <summary>
+            NLog日志提供程序工厂
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.NLog.LogProviderFactory.Create(System.String,Bing.Logs.Abstractions.ILogFormat)">
+            <summary>
+            创建日志提供程序
+            </summary>
+            <param name="logName">日志名称</param>
+            <param name="format">日志格式化器</param>
+        </member>
+        <member name="T:Bing.Logs.NLog.NLogProvider">
+            <summary>
+            NLog 日志提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Logs.NLog.NLogProvider._logger">
+            <summary>
+            NLog 日志操作
+            </summary>
+        </member>
+        <member name="F:Bing.Logs.NLog.NLogProvider._format">
+            <summary>
+            日志格式化器
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.NLog.NLogProvider.LogName">
+            <summary>
+            日志名称
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.NLog.NLogProvider.IsDebugEnabled">
+            <summary>
+            调试级别是否启用
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.NLog.NLogProvider.IsTraceEnabled">
+            <summary>
+            跟踪级别是否启用
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.NLog.NLogProvider.IsDistributedLog">
+            <summary>
+            是否分布式日志
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.NLog.NLogProvider.#ctor(System.String,Bing.Logs.Abstractions.ILogFormat)">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.NLog.NLogProvider"/>类型的实例
+            </summary>
+            <param name="logName">日志名称</param>
+            <param name="format">日志格式化器</param>
+        </member>
+        <member name="M:Bing.Logs.NLog.NLogProvider.GetLogger(System.String)">
+            <summary>
+            获取NLog日志操作
+            </summary>
+            <param name="logName">日志名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Logs.NLog.NLogProvider.WriteLog(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
+            <summary>
+            写日志
+            </summary>
+            <param name="level">日志等级</param>
+            <param name="content">日志内容</param>
+        </member>
+        <member name="M:Bing.Logs.NLog.NLogProvider.GetFormatProvider">
+            <summary>
+            获取格式化提供程序
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Logs.NLog.NLogProvider.ConvertTo(Bing.Logs.LogLevel)">
+            <summary>
+            转换日志等级
+            </summary>
+            <param name="level">平台日志等级</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
