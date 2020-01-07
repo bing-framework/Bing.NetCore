@@ -5,8 +5,7 @@ using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
-
-namespace Bing.AutoMapper.Tests.Samples
+namespace Bing.Tests.Samples
 {
     /// <summary>
     /// 数据传输对象样例

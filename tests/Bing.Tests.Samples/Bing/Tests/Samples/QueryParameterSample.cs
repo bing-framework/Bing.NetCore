@@ -1,6 +1,6 @@
 ﻿using Bing.Datas.Queries;
 
-namespace Bing.AutoMapper.Tests.Samples
+namespace Bing.Tests.Samples
 {
     /// <summary>
     /// 查询参数测试样例
