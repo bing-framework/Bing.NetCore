@@ -1,0 +1,3572 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Biz.OAuthLogin</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider">
+            <summary>
+            阿里巴巴授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Alibaba.Configs.IAlibabaAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">阿里巴巴授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Alibaba.Configs.AlibabaAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">阿里巴巴授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationRequest">
+            <summary>
+            阿里巴巴授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Alibaba.AlibabaAuthorizationRequest.Site">
+            <summary>
+            授权站点
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Alibaba.Configs.AlibabaAuthorizationConfig">
+            <summary>
+            阿里巴巴授权配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Alibaba.Configs.AlibabaAuthorizationConfigProvider">
+            <summary>
+            阿里巴巴授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Alibaba.Configs.AlibabaAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Alibaba.Configs.AlibabaAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Alibaba.Configs.AlibabaAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">阿里巴巴授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Alibaba.Configs.IAlibabaAuthorizationConfigProvider">
+            <summary>
+            阿里巴巴授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Alibaba.IAlibabaAuthorizationProvider">
+            <summary>
+            阿里巴巴授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider">
+            <summary>
+            百度授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Baidu.Configs.IBaiduAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">百度授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">百度授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest">
+            <summary>
+            百度授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest.Display">
+            <summary>
+            登录和授权页面的展示样式
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest.ForceLogin">
+            <summary>
+            是否强制登录
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest.ConfirmLogin">
+            <summary>
+            是否提示使用当前登录用户对应用授权
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Baidu.BaiduAuthorizationRequest.LoginType">
+            <summary>
+            登录类型
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfig">
+            <summary>
+            百度授权配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfigProvider">
+            <summary>
+            百度授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Baidu.Configs.BaiduAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">百度授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Baidu.Configs.IBaiduAuthorizationConfigProvider">
+            <summary>
+            百度授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Baidu.IBaiduAuthorizationProvider">
+            <summary>
+            百度授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider">
+            <summary>
+            Coding.NET 授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.GetUserInfoUrl">
+            <summary>
+            获取用户信息Url
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Coding.Configs.ICodingAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">Coding.NET 授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Coding.CodingAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">Coding.NET 授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.ConfigGetToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AccessTokenParam,Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig)">
+            <summary>
+            配置获取访问令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationProvider.GetUserInfoAsync(Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserRequest)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationRequest">
+            <summary>
+            Coding.NET 授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult">
+            <summary>
+            Coding.NET 授权用户信息结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Tags">
+            <summary>
+            标签
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.TagsStr">
+            <summary>
+            标签显示文本
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Job">
+            <summary>
+            工作
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.JobStr">
+            <summary>
+            工作显示文本
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Sex">
+            <summary>
+            性别
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Phone">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Birthday">
+            <summary>
+            生日
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Location">
+            <summary>
+            位置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Company">
+            <summary>
+            公司
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Slogan">
+            <summary>
+            口号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Website">
+            <summary>
+            站点
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Introduction">
+            <summary>
+            介绍
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Avatar">
+            <summary>
+            头像
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Gravatar">
+            <summary>
+            大头像
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Lavatar">
+            <summary>
+            小头像
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.CreatedAt">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.LastLoginedAt">
+            <summary>
+            最后登录时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.LastActivityAt">
+            <summary>
+            最后活跃时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.GlobalKey">
+            <summary>
+            全局键
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.NamePinyin">
+            <summary>
+            名称拼音
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.UpdatedAt">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Path">
+            <summary>
+            路径
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Status">
+            <summary>
+            状态
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Email">
+            <summary>
+            邮箱
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.IsMember">
+            <summary>
+            是否会员
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Id">
+            <summary>
+            系统编号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.PointsLeft">
+            <summary>
+            积分剩余
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Vip">
+            <summary>
+            VIP等级
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.VipExpiredAt">
+            <summary>
+            VIP有效期
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Degree">
+            <summary>
+            学历
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.School">
+            <summary>
+            学校
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.FollowsCount">
+            <summary>
+            关注数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.FansCount">
+            <summary>
+            粉丝数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.TweetsCount">
+            <summary>
+            推广数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.PhoneCountryCode">
+            <summary>
+            国家手机编码
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Country">
+            <summary>
+            国家
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Followed">
+            <summary>
+            是否已关注
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.Follow">
+            <summary>
+            是否关注
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.IsPhoneValidated">
+            <summary>
+            是否已验证手机
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.EmailValidation">
+            <summary>
+            邮箱验证
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.PhoneValidation">
+            <summary>
+            手机验证
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserInfoResult.TwofaEnabled">
+            <summary>
+            启用二次验证
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.CodingAuthorizationUserRequest">
+            <summary>
+            Coding.NET 授权用户请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig">
+            <summary>
+            Coding.NET 授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig.ApplicationName">
+            <summary>
+            应用名称
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfigProvider">
+            <summary>
+            Coding.NET 授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Coding.Configs.CodingAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">Coding.NET 授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.Configs.ICodingAuthorizationConfigProvider">
+            <summary>
+            Coding.NET 授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Coding.ICodingAuthorizationProvider">
+            <summary>
+            Coding.NET 授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AccessTokenParam">
+            <summary>
+            访问令牌参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AccessTokenParam.GrantType">
+            <summary>
+            授权类型
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AccessTokenParam.Code">
+            <summary>
+            授权码。授权码一旦被使用需要重新获取
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AccessTokenParam.RedirectUri">
+            <summary>
+            重定向地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AccessTokenParam.Validate">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AccessTokenResult">
+            <summary>
+            访问令牌结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AccessTokenResult.AccessToken">
+            <summary>
+            访问令牌
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AccessTokenResult.ExpiresIn">
+            <summary>
+            有效期。单位：秒
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AccessTokenResult.RefreshToken">
+            <summary>
+            刷新令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase">
+            <summary>
+            授权配置基类
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase.AppKey">
+            <summary>
+            应用密钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase.CallbackUrl">
+            <summary>
+            回调地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase.AuthorizationUrl">
+            <summary>
+            授权地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase.AccessTokenUrl">
+            <summary>
+            获取授权令牌地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationConfigBase.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationConfigProviderBase`1">
+            <summary>
+            授权配置提供程序基类
+            </summary>
+            <typeparam name="TAuthorizationConfig">授权配置类型</typeparam>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.AuthorizationConfigProviderBase`1._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationConfigProviderBase`1.#ctor(`0)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Core.AuthorizationConfigProviderBase`1"/>类型的实例
+            </summary>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationConfigProviderBase`1.GetConfigAsync">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationParam">
+            <summary>
+            授权参数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.View">
+            <summary>
+            显示视图
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.Display">
+            <summary>
+            显示样式
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.Site">
+            <summary>
+            授权站点
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.Forcelogin">
+            <summary>
+            是否强制用户重新登录
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.Language">
+            <summary>
+            授权页语言
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParam.AllowSignup">
+            <summary>
+            是否为未经身份验证的用户提供在OAuth流程期间注册Github的选项
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase">
+            <summary>
+            授权参数基类
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.ResponseType">
+            <summary>
+            授权类型
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.RedirectUri">
+            <summary>
+            重定向地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.State">
+            <summary>
+            客户端的当前状态，可以指定任意值，认证服务器会原封不动地返回这个值
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.InitState">
+            <summary>
+            初始化客户端当前状态
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.Validate">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParamBase.ToParam">
+            <summary>
+            转换为授权参数
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder">
+            <summary>
+            授权参数生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder._builder">
+            <summary>
+            参数生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder._gatewayUrl">
+            <summary>
+            网关地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.GatewayUrl(System.String)">
+            <summary>
+            设置网关地址
+            </summary>
+            <param name="url">网关地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.AppId(System.String)">
+            <summary>
+            设置应用ID
+            </summary>
+            <param name="appId">应用ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.Secret(System.String)">
+            <summary>
+            设置应用密钥
+            </summary>
+            <param name="secret">应用密钥</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.ClientId(System.String)">
+            <summary>
+            设置客户端ID
+            </summary>
+            <param name="clientId">客户端ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.ClientSecret(System.String)">
+            <summary>
+            设置客户端密钥
+            </summary>
+            <param name="clientSecret">客户端密钥</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.Scope(System.String)">
+            <summary>
+            设置权限范围
+            </summary>
+            <param name="scope">权限范围</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.State(System.String)">
+            <summary>
+            设置客户端状态
+            </summary>
+            <param name="state">客户端状态</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.ResponseType(System.String)">
+            <summary>
+            设置响应类型
+            </summary>
+            <param name="code">响应类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.GrantType(System.String)">
+            <summary>
+            设置授权类型
+            </summary>
+            <param name="code">授权类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.RedirectUri(System.String,System.Boolean)">
+            <summary>
+            设置重定向地址
+            </summary>
+            <param name="url">重定向地址</param>
+            <param name="urlEncode">是否进行UrlEncode</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.Code(System.String)">
+            <summary>
+            设置授权码
+            </summary>
+            <param name="code">授权码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.RefreshToken(System.String)">
+            <summary>
+            设置刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.View(System.String)">
+            <summary>
+            设置浏览器页面样式
+            </summary>
+            <param name="view">浏览器页面样式</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.Add(System.String,System.String)">
+            <summary>
+            添加参数
+            </summary>
+            <param name="name">参数名</param>
+            <param name="value">参数值</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.AccessToken(System.String)">
+            <summary>
+            设置访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.OpenId(System.String)">
+            <summary>
+            设置用户OpenId
+            </summary>
+            <param name="openid">用户OpenId</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.GetGatewayUrl">
+            <summary>
+            获取网关地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.GetDictionary">
+            <summary>
+            获取字典
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder.ToString">
+            <summary>
+            输出结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2">
+            <summary>
+            授权提供程序基类
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ConfigProvider">
+            <summary>
+            配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.GenerateUrlAsync(Bing.Biz.OAuthLogin.Core.AuthorizationParam)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="param">授权参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.HandlerUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder)">
+            <summary>
+            处理授权地址
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.GetTokenAsync(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.RefreshTokenAsync(System.String)">
+            <summary>
+            刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.Validate(`1,Bing.Biz.OAuthLogin.Core.AuthorizationParam)">
+            <summary>
+            验证
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="param">授权参数</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.Validate(`1)">
+            <summary>
+            验证
+            </summary>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.Validate(`1,Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            验证
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="param">访问令牌参数</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.Validate(`1,Bing.Biz.OAuthLogin.Core.AuthorizationUserParam)">
+            <summary>
+            验证
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="param">授权用户参数</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ValidateParam(Bing.Biz.OAuthLogin.Core.AuthorizationParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">授权参数</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ValidateParam(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">访问令牌参数</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ValidateParam(Bing.Biz.OAuthLogin.Core.AuthorizationUserParam)">
+            <summary>
+            验证参数
+            </summary>
+            <param name="param">授权用户参数</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,`1)">
+            <summary>
+            配置生成授权地址
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ConfigGetToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AccessTokenParam,`1)">
+            <summary>
+            配置获取访问令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.ConfigRefreshToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,System.String,`1)">
+            <summary>
+            配置刷新令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="token">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.RequestResult(`1,Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Utils.Parameters.Parsers.ParameterParserType,System.Func{Bing.Biz.OAuthLogin.Core.AuthorizationResult,System.Boolean})">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="builder">授权参数生成器</param>
+            <param name="type">参数解析器类型</param>
+            <param name="success">请求成功条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.PostRequestResult(`1,Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Utils.Parameters.Parsers.ParameterParserType,System.Func{Bing.Biz.OAuthLogin.Core.AuthorizationResult,System.Boolean})">
+            <summary>
+            Post请求结果
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="builder">授权参数生成器</param>
+            <param name="type">参数解析器类型</param>
+            <param name="success">请求成功条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.Request(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder)">
+            <summary>
+            发送请求
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.PostRequest(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder)">
+            <summary>
+            发送Post请求
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.Success(Bing.Biz.OAuthLogin.Core.AuthorizationResult)">
+            <summary>
+            授权结果是否成功
+            </summary>
+            <param name="result">授权结果</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.GetMessage(Bing.Biz.OAuthLogin.Core.AuthorizationResult)">
+            <summary>
+            获取错误消息
+            </summary>
+            <param name="result">授权结果</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.GetLog">
+            <summary>
+            获取日志操作
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationProviderBase`2.WriteLog(`1,Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationResult)">
+            <summary>
+            写日志
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="builder">授权参数生成器</param>
+            <param name="result">授权结果</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationResult">
+            <summary>
+            授权结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationResult.Success">
+            <summary>
+            是否成功
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationResult.Raw">
+            <summary>
+            授权接口返回的原始消息
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationResult.Result">
+            <summary>
+            结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationResult.Message">
+            <summary>
+            消息
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationResult.Parameter">
+            <summary>
+            请求参数
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.AuthorizationResult._parser">
+            <summary>
+            参数解析器
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationResult.#ctor(System.String,System.Func{Bing.Biz.OAuthLogin.Core.AuthorizationResult,System.Boolean},Bing.Utils.Parameters.Parsers.ParameterParserType)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Core.AuthorizationResult"/>类型的实例
+            </summary>
+            <param name="raw">授权接口返回的原始消息</param>
+            <param name="success">是否成功</param>
+            <param name="type">参数解析器类型</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationResult.GetDictionary">
+            <summary>
+            获取字典
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationResult.GetValue(System.String)">
+            <summary>
+            获取值
+            </summary>
+            <param name="key">键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationResult.HasKey(System.String)">
+            <summary>
+            是否包含指定键
+            </summary>
+            <param name="key">键</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationUserInfoResult">
+            <summary>
+            用户信息结果
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationUserParam">
+            <summary>
+            授权用户参数
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.AuthorizationUserParamBase">
+            <summary>
+            授权用户参数基类
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.AuthorizationUserParamBase.AccessToken">
+            <summary>
+            访问令牌
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationUserParamBase.Validate">
+            <summary>
+            验证
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.AuthorizationUserParamBase.ToParam">
+            <summary>
+            转换为授权参数
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IAccessTokenProvider`1">
+            <summary>
+            授权访问令牌提供程序
+            </summary>
+            <typeparam name="TAccessTokenResult">访问令牌结果类型</typeparam>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IAccessTokenProvider`1.GetTokenAsync(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IAccessTokenProvider">
+            <summary>
+            授权访问令牌提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IAccessTokenProvider.GetTokenAsync(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig">
+            <summary>
+            授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig.AppKey">
+            <summary>
+            应用密钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig.CallbackUrl">
+            <summary>
+            回调地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig.AuthorizationUrl">
+            <summary>
+            授权地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig.AccessTokenUrl">
+            <summary>
+            获取访问令牌地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IAuthorizationConfig.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IAuthorizationConfigProvider`1">
+            <summary>
+            授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IAuthorizationConfigProvider`1.GetConfigAsync">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IAuthorizationProvider">
+            <summary>
+            授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IAuthorizationUrlProvider`1">
+            <summary>
+            授权地址提供程序
+            </summary>
+            <typeparam name="TAuthorizationParam">授权参数</typeparam>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IAuthorizationUrlProvider`1.GenerateUrlAsync(`0)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="param">授权参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IGetOpenIdProvider">
+            <summary>
+            获取用户ID提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IGetOpenIdProvider.GetOpenIdAsync(System.String)">
+            <summary>
+            获取用户OpenId
+            </summary>
+            <param name="token">授权令牌</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IGetUserInfoProvider`2">
+            <summary>
+            获取用户信息提供程序
+            </summary>
+            <typeparam name="TUserInfoResult">授权用户信息结果</typeparam>
+            <typeparam name="TAuthorizationUserParam">授权用户参数</typeparam>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IGetUserInfoProvider`2.GetUserInfoAsync(`1)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IGetUserInfoProvider">
+            <summary>
+            获取用户信息提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IRefreshTokenProvider`1">
+            <summary>
+            刷新访问令牌提供程序
+            </summary>
+            <typeparam name="TAccessTokenResult">访问令牌结果类型</typeparam>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Core.IRefreshTokenProvider`1.RefreshTokenAsync(System.String)">
+            <summary>
+            刷新访问令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.IRefreshTokenProvider">
+            <summary>
+            刷新访问令牌提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.OAuthConst">
+            <summary>
+            OAuth 常量
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.Code">
+            <summary>
+            编码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.AuthorizationCode">
+            <summary>
+            授权码
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.RefreshToken">
+            <summary>
+            刷新令牌
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.AppId">
+            <summary>
+            应用ID
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.Secret">
+            <summary>
+            密钥
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.ClientId">
+            <summary>
+            客户端ID
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.ClientSecret">
+            <summary>
+            客户端密钥
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.State">
+            <summary>
+            客户端的当前状态
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.RedirectUri">
+            <summary>
+            重定向地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.ResponseType">
+            <summary>
+            响应类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.GrantType">
+            <summary>
+            授权类型
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.Site">
+            <summary>
+            站点
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.View">
+            <summary>
+            视图
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.AccessToken">
+            <summary>
+            访问令牌
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthConst.OpenId">
+            <summary>
+            用户OpenId
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Core.OAuthWay">
+            <summary>
+            OAuth方式
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.QQ">
+            <summary>
+            QQ
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Wechat">
+            <summary>
+            微信
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Weibo">
+            <summary>
+            新浪微博
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Taobao">
+            <summary>
+            淘宝
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Microsoft">
+            <summary>
+            微软
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Github">
+            <summary>
+            Github
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Facebook">
+            <summary>
+            Facebook
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Youzan">
+            <summary>
+            有赞
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Jd">
+            <summary>
+            京东
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Alibaba">
+            <summary>
+            阿里巴巴
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.MeiliShuo">
+            <summary>
+            美丽说
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Baidu">
+            <summary>
+            百度
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Coding">
+            <summary>
+            Coding.NET
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.Gitee">
+            <summary>
+            码云
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.OsChina">
+            <summary>
+            开源中国
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Core.OAuthWay.DingTalk">
+            <summary>
+            钉钉
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.DingTalk.Configs.DingTalkAuthorizationConfig">
+            <summary>
+            钉钉授权配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.DingTalk.Configs.DingTalkAuthorizationConfigProvider">
+            <summary>
+            钉钉授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.DingTalk.Configs.DingTalkAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.DingTalk.Configs.DingTalkAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.DingTalk.Configs.DingTalkAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">钉钉授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.DingTalk.Configs.IDingTalkAuthorizationConfigProvider">
+            <summary>
+            钉钉授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider">
+            <summary>
+            钉钉授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.DingTalk.Configs.IDingTalkAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">钉钉授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.DingTalk.Configs.DingTalkAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">钉钉授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationRequest">
+            <summary>
+            钉钉授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.DingTalk.DingTalkAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.DingTalk.IDingTalkAuthorizationProvider">
+            <summary>
+            钉钉授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Extensions.AuthorizationProviderExtensions">
+            <summary>
+            授权提供程序(<see cref="T:Bing.Biz.OAuthLogin.Core.IAuthorizationProvider"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Extensions.AuthorizationProviderExtensions.GetTokenAsync(Bing.Biz.OAuthLogin.Core.IAuthorizationProvider,Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="provider">授权提供程序</param>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Extensions.AuthorizationProviderExtensions.RefreshTokenAsync(Bing.Biz.OAuthLogin.Core.IAuthorizationProvider,System.String)">
+            <summary>
+            刷新访问令牌
+            </summary>
+            <param name="provider">授权提供程序</param>
+            <param name="token">刷新令牌</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Extensions.AuthorizationResultExtensions">
+            <summary>
+            授权结果(<see cref="T:Bing.Biz.OAuthLogin.Core.AuthorizationResult"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Extensions.AuthorizationResultExtensions.ToQQToken(Bing.Biz.OAuthLogin.Core.AuthorizationResult)">
+            <summary>
+            转换为QQ访问令牌
+            </summary>
+            <param name="value">授权结果</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Extensions.AuthorizationResultExtensions.ToWechatToken(Bing.Biz.OAuthLogin.Core.AuthorizationResult)">
+            <summary>
+            转换为微信访问令牌
+            </summary>
+            <param name="value">授权结果</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Extensions.AuthorizationResultExtensions.ToWeiboToken(Bing.Biz.OAuthLogin.Core.AuthorizationResult)">
+            <summary>
+            转换为微博访问令牌
+            </summary>
+            <param name="value">授权结果</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Facebook.Configs.FacebookAuthorizationConfig">
+            <summary>
+            Facebook 授权配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Facebook.Configs.FacebookAuthorizationConfigProvider">
+            <summary>
+            Facebook 授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Facebook.Configs.FacebookAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Facebook.Configs.FacebookAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Facebook.Configs.FacebookAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">Facebook 授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Facebook.Configs.IFacebookAuthorizationConfigProvider">
+            <summary>
+            Facebooke 授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider">
+            <summary>
+            Facebook 授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Facebook.Configs.IFacebookAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">Facebook 授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Facebook.Configs.FacebookAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">Facebook 授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationRequest">
+            <summary>
+            Facebook 授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Facebook.FacebookAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Facebook.IFacebookAuthorizationProvider">
+            <summary>
+            Facebook 授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfig">
+            <summary>
+            Gitee 授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfig.ApplicationName">
+            <summary>
+            应用名称
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfigProvider">
+            <summary>
+            Gitee 授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">Gitee 授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.Configs.IGiteeAuthorizationConfigProvider">
+            <summary>
+            Gitee 授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider">
+            <summary>
+            Gitee 授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.GetUserInfoUrl">
+            <summary>
+            获取用户信息Url
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Gitee.Configs.IGiteeAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">Gitee 授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">Gitee 授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.GetTokenAsync(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.ConfigGetToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AccessTokenParam,Bing.Biz.OAuthLogin.Gitee.Configs.GiteeAuthorizationConfig)">
+            <summary>
+            配置获取访问令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationProvider.GetUserInfoAsync(Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserRequest)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationRequest">
+            <summary>
+            Gitee 授权请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult">
+            <summary>
+            Gitee 授权用户信息结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.AvatarUrl">
+            <summary>
+            头像地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Bio">
+            <summary>
+            简介
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Blog">
+            <summary>
+            博客
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.CreateAt">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Email">
+            <summary>
+            邮箱
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.EventsUrl">
+            <summary>
+            事件地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Followers">
+            <summary>
+            关注者数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.FollowersUrl">
+            <summary>
+            关注者地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Following">
+            <summary>
+            关注中
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.FollowingUrl">
+            <summary>
+            关注中地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.GistsUrl">
+            <summary>
+            Gists地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.HtmlUrl">
+            <summary>
+            Html地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Id">
+            <summary>
+            系统编号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Login">
+            <summary>
+            登录账号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.OrganizationsUrl">
+            <summary>
+            组织地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.OwnedPrivateRepos">
+            <summary>
+            拥有私仓数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.OwnedRepos">
+            <summary>
+            拥有仓库数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Phone">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.PrivateGists">
+            <summary>
+            私有Gists数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.PrivateToken">
+            <summary>
+            私有令牌
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.PublicGists">
+            <summary>
+            公共Gists数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.PublicRepos">
+            <summary>
+            公共仓库数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.ReceivedEventsUrl">
+            <summary>
+            接收事件地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.ReposUrl">
+            <summary>
+            仓储地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.SiteAdmin">
+            <summary>
+            站点管理员
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Stared">
+            <summary>
+            star数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.StarredUrl">
+            <summary>
+            start地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.SubscriptionsUrl">
+            <summary>
+            订阅地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.TotalPrivateRepos">
+            <summary>
+            总私仓数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.TotalRepos">
+            <summary>
+            总仓数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Type">
+            <summary>
+            类型
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.UpdatedAt">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Url">
+            <summary>
+            Url地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Watched">
+            <summary>
+            监察数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserInfoResult.Weibo">
+            <summary>
+            微博
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.GiteeAuthorizationUserRequest">
+            <summary>
+            Gitee 授权用户请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Gitee.IGiteeAuthorizationProvider">
+            <summary>
+            Gitee 授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig">
+            <summary>
+            Github授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig.ApplicationName">
+            <summary>
+            应用名称
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfigProvider">
+            <summary>
+            Github授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">Github授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.Configs.IGithubAuthorizationConfigProvider">
+            <summary>
+            Github授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider">
+            <summary>
+            Github授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.GetUserInfoUrl">
+            <summary>
+            获取用户信息Url
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Github.Configs.IGithubAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">微博授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Github.GithubAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">Github授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.GetUserInfoAsync(Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserRequest)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.RequestResult(Bing.Biz.OAuthLogin.Github.Configs.GithubAuthorizationConfig,Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Utils.Parameters.Parsers.ParameterParserType,System.Func{Bing.Biz.OAuthLogin.Core.AuthorizationResult,System.Boolean})">
+            <summary>
+            请求结果
+            </summary>
+            <param name="config">授权配置</param>
+            <param name="builder">授权参数生成器</param>
+            <param name="type">参数解析器类型</param>
+            <param name="success">请求成功条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Github.GithubAuthorizationProvider.Request(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,System.String)">
+            <summary>
+            发送请求
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="appName">应用名称</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.GithubAuthorizationRequest">
+            <summary>
+            Github授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationRequest.AllowSignup">
+            <summary>
+            是否为未经身份验证的用户提供在OAuth流程期间注册Github的选项
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult">
+            <summary>
+            Github 授权用户信息结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Login">
+            <summary>
+            登录账号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Id">
+            <summary>
+            系统编号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.AvatarUrl">
+            <summary>
+            头像
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.GravatarId">
+            <summary>
+            头像ID
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Url">
+            <summary>
+            Url
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.HtmlUrl">
+            <summary>
+            Html地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.FollowersUrl">
+            <summary>
+            关注者地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.FollowingUrl">
+            <summary>
+            关注中地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.GistsUrl">
+            <summary>
+            概要地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.StarredUrl">
+            <summary>
+            Star地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.SubscriptionsUrl">
+            <summary>
+            订阅地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.OrganizationsUrl">
+            <summary>
+            组织地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.ReposUrl">
+            <summary>
+            仓储地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.EventsUrl">
+            <summary>
+            事件地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.ReceivedEventsUrl">
+            <summary>
+            接收事件地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Type">
+            <summary>
+            类型
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.SiteAdmin">
+            <summary>
+            是否站点管理员
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Company">
+            <summary>
+            公司
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Blog">
+            <summary>
+            博客地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Location">
+            <summary>
+            位置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Email">
+            <summary>
+            邮箱
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Hireable">
+            <summary>
+            是否雇佣
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Bio">
+            <summary>
+            简介
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.PublicRepos">
+            <summary>
+            开放仓储
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.PubulicGists">
+            <summary>
+            开放Gis
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Followers">
+            <summary>
+            关注数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Following">
+            <summary>
+            关注中数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.CreatedAt">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.UpdatedAt">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.PrivateGists">
+            <summary>
+            私有Gis数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.TotalPrivateRepos">
+            <summary>
+            私有仓数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.OwnedPrivateRepos">
+            <summary>
+            拥有私仓数量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.DiskUsage">
+            <summary>
+            磁盘使用量
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.Collaborators">
+            <summary>
+            合作者
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserInfoResult.TwoFactorAuthentication">
+            <summary>
+            是否启用二级认证
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.GithubAuthorizationUserRequest">
+            <summary>
+            Github 授权用户请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Github.IGithubAuthorizationProvider">
+            <summary>
+            Github授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.IOAuthLoginFactory">
+            <summary>
+            OAuth 登录工厂
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Jd.Configs.IJdAuthorizationConfigProvider">
+            <summary>
+            京东授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Jd.Configs.JdAuthorizationConfig">
+            <summary>
+            京东授权配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Jd.Configs.JdAuthorizationConfigProvider">
+            <summary>
+            京东授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Jd.Configs.JdAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Jd.Configs.JdAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Jd.Configs.JdAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">京东授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Jd.IJdAuthorizationProvider">
+            <summary>
+            京东授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider">
+            <summary>
+            京东授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Jd.Configs.IJdAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">京东授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Jd.Configs.JdAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Jd.JdAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Jd.JdAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">京东授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Jd.JdAuthorizationRequest">
+            <summary>
+            京东授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Jd.JdAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围。目前支持参数值：read
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Jd.JdAuthorizationRequest.View">
+            <summary>
+            显示页面类型。移动端授权，该值固定为wap；非移动端授权，无需传值
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.MeiliShuo.Configs.IMeiliShuoAuthorizationConfigProvider">
+            <summary>
+            美丽说授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfig">
+            <summary>
+            美丽说授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfig.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfig.AppKey">
+            <summary>
+            应用密钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfig.CallbackUrl">
+            <summary>
+            回调地址
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfigProvider">
+            <summary>
+            美丽说授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">美丽说授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.MeiliShuo.IMeiliShuoAuthorizationProvider">
+            <summary>
+            美丽说授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider">
+            <summary>
+            美丽说授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.MeiliShuo.Configs.IMeiliShuoAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">美丽说授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.MeiliShuo.Configs.MeiliShuoAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">美丽说授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.MeiliShuo.MeiliShuoAuthorizationRequest">
+            <summary>
+            美丽说授权请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Microsoft.Configs.IMicrosoftAuthorizationConfigProvider">
+            <summary>
+            Microsoft 授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfig">
+            <summary>
+            Microsoft 授权配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfigProvider">
+            <summary>
+            Microsoft 授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">Microsoft 授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Microsoft.IMicrosoftAuthorizationProvider">
+            <summary>
+            Microsoft 授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider">
+            <summary>
+            Microsoft 授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Microsoft.Configs.IMicrosoftAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">Microsoft 授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Microsoft.Configs.MicrosoftAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">Microsoft 授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationRequest">
+            <summary>
+            Microsoft 授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Microsoft.MicrosoftAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.OsChina.Configs.IOsChinaAuthorizationConfigProvider">
+            <summary>
+            开源中国授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.OsChina.Configs.OsChinaAuthorizationConfig">
+            <summary>
+            开源中国授权配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.OsChina.Configs.OsChinaAuthorizationConfigProvider">
+            <summary>
+            开源中国授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.OsChina.Configs.OsChinaAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.OsChina.Configs.OsChinaAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.OsChina.Configs.OsChinaAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">开源中国授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.OsChina.IOsChinaAuthorizationProvider">
+            <summary>
+            开源中国授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider">
+            <summary>
+            开源中国授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.OsChina.Configs.IOsChinaAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">开源中国授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.OsChina.Configs.OsChinaAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">开源中国授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.OsChina.OsChinaAuthorizationRequest">
+            <summary>
+            开源中国授权请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.Configs.IQQAuthorizationConfigProvider">
+            <summary>
+            QQ授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfig">
+            <summary>
+            QQ 授权配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfigProvider">
+            <summary>
+            QQ 授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.QQ.Configs.QQAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">QQ 授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.IQQAuthorizationProvider">
+            <summary>
+            QQ授权提供程序。
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider">
+            <summary>
+            QQ授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GetOpenIdUrl">
+            <summary>
+            获取用户OpenId地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GetUserInfoUrl">
+            <summary>
+            获取用户信息地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.QQ.Configs.IQQAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">QQ授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.QQ.QQAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">QQ授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GetOpenIdAsync(System.String)">
+            <summary>
+            获取用户OpenId
+            </summary>
+            <param name="token">授权令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.QQ.QQAuthorizationProvider.GetUserInfoAsync(Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserRequest)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.QQAuthorizationRequest">
+            <summary>
+            QQ 授权请求
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult">
+            <summary>
+            QQ授权用户信息结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.Code">
+            <summary>
+            返回状态码
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.Message">
+            <summary>
+            错误信息
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.Nickname">
+            <summary>
+            昵称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.Gender">
+            <summary>
+            性别
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.IsYellowVip">
+            <summary>
+            是否黄钻VIP。0:不是,1:是
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.IsYellowYearVip">
+            <summary>
+            是否年费黄钻VIP。0:不是,1:是
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.YellowVipLevel">
+            <summary>
+            黄钻等级
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.QQAvatarx40">
+            <summary>
+            QQ头像。40 x 40像素
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.QQAvatarx100">
+            <summary>
+            QQ头像。100 x 100像素
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.QQZoneAvatarx30">
+            <summary>
+            QQ空间头像。30 x 30像素
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.QQZoneAvatarx50">
+            <summary>
+            QQ空间头像。50 x 50像素
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserInfoResult.QQZoneAvatarx100">
+            <summary>
+            QQ空间头像。100 x 100像素
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserRequest">
+            <summary>
+            QQ授权用户请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.QQ.QQAuthorizationUserRequest.OpenId">
+            <summary>
+            用户OpenId
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Taobao.Configs.ITaobaoAuthorizationConfigProvider">
+            <summary>
+            淘宝授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfig">
+            <summary>
+            淘宝授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfig.AppId">
+            <summary>
+            应用标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfig.AppKey">
+            <summary>
+            应用密钥
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfig.CallbackUrl">
+            <summary>
+            回调地址
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfigProvider">
+            <summary>
+            淘宝授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">淘宝授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Taobao.ITaobaoAuthorizationProvider">
+            <summary>
+            淘宝授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider">
+            <summary>
+            淘宝授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Taobao.Configs.ITaobaoAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">淘宝授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Taobao.Configs.TaobaoAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">淘宝授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationRequest">
+            <summary>
+            淘宝授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Taobao.TaobaoAuthorizationRequest.View">
+            <summary>
+            显示页面类型。Web对应PC端（淘宝logo）浏览器页面样式；Tmall对应天猫的浏览器页面样式；Wap对应无线端的浏览器页面样式。
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.Configs.IWechatAuthorizationConfigProvider">
+            <summary>
+            微信授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig">
+            <summary>
+            微信授权配置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig.RefreshTokenUrl">
+            <summary>
+            刷新令牌地址
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfigProvider">
+            <summary>
+            微信授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">微信授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.IWechatAuthorizationProvider">
+            <summary>
+            微信授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.WechatAccessTokenResult">
+            <summary>
+            微信访问令牌结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAccessTokenResult.OpenId">
+            <summary>
+            授权用户唯一标识
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAccessTokenResult.Scope">
+            <summary>
+            用户授权的作用域，使用逗号(,)分隔
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAccessTokenResult.UnionId">
+            <summary>
+            唯一标识。当且仅当该网站应用已获得该用户的userinfo授权时，才会出现该字段。
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider">
+            <summary>
+            微信授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.GetUserInfoUrl">
+            <summary>
+            获取用户信息Url
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Wechat.Configs.IWechatAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">微信授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.HandlerUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder)">
+            <summary>
+            处理授权地址
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">微信授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.GetTokenAsync(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.ConfigGetToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AccessTokenParam,Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig)">
+            <summary>
+            配置获取访问令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.RefreshTokenAsync(System.String)">
+            <summary>
+            刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.ConfigRefreshToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,System.String,Bing.Biz.OAuthLogin.Wechat.Configs.WechatAuthorizationConfig)">
+            <summary>
+            配置刷新令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="token">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationProvider.GetUserInfoAsync(Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserRequest)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationRequest">
+            <summary>
+            微信授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult">
+            <summary>
+            微信授权用户信息结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.OpenId">
+            <summary>
+            用户OpenId。对当前开发者账号唯一
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.Nickname">
+            <summary>
+            昵称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.Sex">
+            <summary>
+            性别。1:男性,2:女性
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.Country">
+            <summary>
+            国家
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.Avatar">
+            <summary>
+            头像。最后一个数值代表正方形头像大小（有0、46、64、96、132数值可选，0代表640*640正方形头像），用户没有头像时该项为空
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.Privilege">
+            <summary>
+            用户特权信息。Json数组
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserInfoResult.UnionId">
+            <summary>
+            用户唯一标识。针对一个微信开放平台帐号下的应用，同一用户的unionid是唯一的
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserRequest">
+            <summary>
+            微信授权用户请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserRequest.OpenId">
+            <summary>
+            用户OpenId
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Wechat.WechatAuthorizationUserRequest.Lang">
+            <summary>
+            国际地区语言版本。zh_CN:简体,zh_TW:繁体,en:英语
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.Configs.IWeiboAuthorizationConfigProvider">
+            <summary>
+            微博授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfig">
+            <summary>
+            微博授权配置
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfig.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfig"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfigProvider">
+            <summary>
+            微博授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">微博授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.IWeiboAuthorizationProvider">
+            <summary>
+            微博授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.WeiboAccessTokenResult">
+            <summary>
+            微博访问令牌结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAccessTokenResult.UnionId">
+            <summary>
+            授权用户的UID
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider">
+            <summary>
+            微博授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.GetUserInfoUrl">
+            <summary>
+            获取用户信息Url
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Weibo.Configs.IWeiboAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">微博授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">微博授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.GetTokenAsync(Bing.Biz.OAuthLogin.Core.AccessTokenParam)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="param">访问令牌参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.ConfigGetToken(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AccessTokenParam,Bing.Biz.OAuthLogin.Weibo.Configs.WeiboAuthorizationConfig)">
+            <summary>
+            配置获取访问令牌
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">访问令牌参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationProvider.GetUserInfoAsync(Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserRequest)">
+            <summary>
+            获取用户信息
+            </summary>
+            <param name="param">授权用户参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationRequest">
+            <summary>
+            微博授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationRequest.Display">
+            <summary>
+            授权页面的终端类型
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationRequest.Forcelogin">
+            <summary>
+            是否强制用户重新登录
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationRequest.Language">
+            <summary>
+            授权页语言
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult">
+            <summary>
+            微博授权用户信息结果
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Id">
+            <summary>
+            用户UID
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.IdStr">
+            <summary>
+            字符串型的用户UID
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.ScreenName">
+            <summary>
+            用户昵称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Province">
+            <summary>
+            省级ID
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.City">
+            <summary>
+            城市ID
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Location">
+            <summary>
+            所在地
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Description">
+            <summary>
+            个人描述
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Url">
+            <summary>
+            博客地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.ProfileImageUrl">
+            <summary>
+            头像地址（中图），50 x 50像素
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.ProfileUrl">
+            <summary>
+            微博统一URL地址
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Domain">
+            <summary>
+            个性化域名
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Weihao">
+            <summary>
+            微号
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Gender">
+            <summary>
+            性别。m:男,f:女,n:未知
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.FollowersCount">
+            <summary>
+            粉丝数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.FriendsCount">
+            <summary>
+            关注数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.StatusesCount">
+            <summary>
+            微博数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.FavouritesCount">
+            <summary>
+            收藏数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.CreatedAt">
+            <summary>
+            用户创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.AllowAllActMsg">
+            <summary>
+            是否允许所有人给我发私信
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.GeoEnabled">
+            <summary>
+            是否允许标识用户的地理位置
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Verified">
+            <summary>
+            是否是微博认证用户。即加V用户
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Remark">
+            <summary>
+            备注信息，只有在查询用户关系时才返回此字段
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.AllowAllComment">
+            <summary>
+            是否允许所有人对我的微博进行评论
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.AvatarLarge">
+            <summary>
+            头像地址（大图）。180 × 180像素
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.AvatarHd">
+            <summary>
+            头像地址（高清）。高清头像原图
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.VerifiedReason">
+            <summary>
+            认证原因
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.FollowMe">
+            <summary>
+            该用户是否关注当前登录用户
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.OnlineStatus">
+            <summary>
+            在线状态。0:不在线,1:在线
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.BiFollowersCount">
+            <summary>
+            互粉数
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserInfoResult.Lang">
+            <summary>
+            语言版本。zh-cn:简体中文,zh-tw:繁体中文,en:英语
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserRequest">
+            <summary>
+            微博授权用户请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserRequest.UnionId">
+            <summary>
+            授权用户的UID
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Weibo.WeiboAuthorizationUserRequest.ScreenName">
+            <summary>
+            用户昵称
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Youzan.Configs.IYouzanAuthorizationConfigProvider">
+            <summary>
+            有赞授权配置提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Youzan.Configs.YouzanAuthorizationConfig">
+            <summary>
+            有赞授权配置
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Youzan.Configs.YouzanAuthorizationConfigProvider">
+            <summary>
+            有赞授权配置提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Youzan.Configs.YouzanAuthorizationConfigProvider.#ctor(Bing.Biz.OAuthLogin.Youzan.Configs.YouzanAuthorizationConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Youzan.Configs.YouzanAuthorizationConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">有赞授权配置</param>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Youzan.IYouzanAuthorizationProvider">
+            <summary>
+            有赞授权提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider">
+            <summary>
+            有赞授权提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.PcAuthorizationUrl">
+            <summary>
+            PC端授权地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.PcAccessTokenUrl">
+            <summary>
+            PC端获取访问令牌地址
+            </summary>
+        </member>
+        <member name="F:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.TraceLogName">
+            <summary>
+            跟踪日志名
+            </summary>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.#ctor(Bing.Biz.OAuthLogin.Youzan.Configs.IYouzanAuthorizationConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider"/>类型的实例
+            </summary>
+            <param name="provider">有赞授权配置提供程序</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.ConfigGenerateUrl(Bing.Biz.OAuthLogin.Core.AuthorizationParameterBuilder,Bing.Biz.OAuthLogin.Core.AuthorizationParam,Bing.Biz.OAuthLogin.Youzan.Configs.YouzanAuthorizationConfig)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">授权参数生成器</param>
+            <param name="param">授权参数</param>
+            <param name="config">授权配置</param>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.GetTraceLogName">
+            <summary>
+            获取跟踪日志名
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.GetOAuthWay">
+            <summary>
+            获取授权方式
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationProvider.GenerateUrlAsync(Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationRequest)">
+            <summary>
+            生成授权地址
+            </summary>
+            <param name="request">有赞授权请求</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationRequest">
+            <summary>
+            有赞授权请求
+            </summary>
+        </member>
+        <member name="P:Bing.Biz.OAuthLogin.Youzan.YouzanAuthorizationRequest.Scope">
+            <summary>
+            申请的权限范围
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Scheduler.Client</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Scheduler.Client.SchedulerClient">
+            <summary>
+            任务调度客户端
+            </summary>
+        </member>
+        <member name="M:Bing.Scheduler.Client.SchedulerClient.ConnectScheduler">
+            <summary>
+            连接任务调度器
+            </summary>
+        </member>
+        <member name="M:Bing.Scheduler.Client.SchedulerClient.OnWatchCallback(Microsoft.AspNetCore.SignalR.Client.HubConnection)">
+            <summary>
+            监听回调
+            </summary>
+            <param name="connection">连接</param>
+        </member>
+        <member name="M:Bing.Scheduler.Client.SchedulerClient.OnClose(Microsoft.AspNetCore.SignalR.Client.HubConnection)">
+            <summary>
+            监听关闭
+            </summary>
+            <param name="connection">连接</param>
+        </member>
+        <member name="M:Bing.Scheduler.Client.SchedulerClient.OnFire(Microsoft.AspNetCore.SignalR.Client.HubConnection)">
+            <summary>
+            监听触发
+            </summary>
+            <param name="connection">连接</param>
+        </member>
+        <member name="M:Bing.Scheduler.Client.SchedulerClient.ScanAssemblies">
+            <summary>
+            扫描程序集
+            </summary>
+        </member>
+    </members>
+</doc>

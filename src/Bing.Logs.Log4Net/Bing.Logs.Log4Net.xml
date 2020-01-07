@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Logs.Log4Net</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Logs.Log4Net.Extensions">
+            <summary>
+            日志扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Extensions.AddLog4Net(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+            <summary>
+            注册Log4Net日志操作
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="configFile">log4net配置文件</param>
+            <param name="name">服务名</param>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Extensions.AddLog4NetWithFactory(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+            <summary>
+            注册Log4Net日志操作。使用日志工厂，实现混合日志
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="name">名称</param>
+            <param name="configFile">log4net配置文件</param>
+        </member>
+        <member name="T:Bing.Logs.Log4Net.Log4NetProvider">
+            <summary>
+            Log4Net 日志提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Logs.Log4Net.Log4NetProvider._log">
+            <summary>
+            Log4Net 日志操作
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.Log4Net.Log4NetProvider.Repository">
+            <summary>
+            Log4Net 日志仓储
+            </summary>
+        </member>
+        <member name="F:Bing.Logs.Log4Net.Log4NetProvider._format">
+            <summary>
+            日志格式化器
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.Log4Net.Log4NetProvider.LogName">
+            <summary>
+            日志名称
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.Log4Net.Log4NetProvider.IsDebugEnabled">
+            <summary>
+            调试级别是否启用
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.Log4Net.Log4NetProvider.IsTraceEnabled">
+            <summary>
+            跟踪级别是否启用，log4net 无跟踪级别
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.Log4Net.Log4NetProvider.IsDistributedLog">
+            <summary>
+            是否分布式日志
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Log4NetProvider.#ctor(System.String,Bing.Logs.Abstractions.ILogFormat)">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.Log4Net.Log4NetProvider"/>类型的实例
+            </summary>
+            <param name="logName">日志名称</param>
+            <param name="format">日志格式化器</param>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Log4NetProvider.InitRepository(System.String)">
+            <summary>
+            初始化日志仓储
+            </summary>
+            <param name="configFileName">log4net配置文件</param>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Log4NetProvider.GetLogger(System.String)">
+            <summary>
+            获取Log4Net日志操作
+            </summary>
+            <param name="logName">日志名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Log4NetProvider.WriteLog(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
+            <summary>
+            写日志
+            </summary>
+            <param name="level">日志等级</param>
+            <param name="content">日志内容</param>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Log4NetProvider.GetFormatProvider">
+            <summary>
+            获取格式化提供程序
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.Log4NetProvider.WriteLog(Bing.Logs.LogLevel,System.Object)">
+            <summary>
+            写日志
+            </summary>
+            <param name="level">日志等级</param>
+            <param name="message">日志内容</param>
+        </member>
+        <member name="T:Bing.Logs.Log4Net.LogProviderFactory">
+            <summary>
+            Log4Net日志提供程序工厂
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Log4Net.LogProviderFactory.Create(System.String,Bing.Logs.Abstractions.ILogFormat)">
+            <summary>
+            创建日志提供程序
+            </summary>
+            <param name="logName">日志名称</param>
+            <param name="format">日志格式化器</param>
+        </member>
+    </members>
+</doc>

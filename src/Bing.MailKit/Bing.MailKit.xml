@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.MailKit</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.MailKit.Configs.DefaultMailKitConfigProvider">
+            <summary>
+            MailKit默认配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.MailKit.Configs.DefaultMailKitConfigProvider._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.Configs.DefaultMailKitConfigProvider.#ctor(Bing.MailKit.Configs.MailKitConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.MailKit.Configs.DefaultMailKitConfigProvider"/>类型的实例
+            </summary>
+            <param name="config">MailKit 配置</param>
+        </member>
+        <member name="M:Bing.MailKit.Configs.DefaultMailKitConfigProvider.GetConfig">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.MailKit.Configs.DefaultMailKitConfigProvider.GetConfigAsync">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.MailKit.Configs.IMailKitConfigProvider">
+            <summary>
+            MailKit 配置提供器
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.Configs.IMailKitConfigProvider.GetConfig">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.MailKit.Configs.IMailKitConfigProvider.GetConfigAsync">
+            <summary>
+            获取配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.MailKit.Configs.MailKitConfig">
+            <summary>
+            MailKit 配置
+            </summary>
+        </member>
+        <member name="P:Bing.MailKit.Configs.MailKitConfig.SecureSocketOption">
+            <summary>
+            安全套接字选项
+            </summary>
+        </member>
+        <member name="T:Bing.MailKit.DefaultMailKitSmtpBuilder">
+            <summary>
+            默认MailKit SMTP生成器
+            </summary>
+        </member>
+        <member name="F:Bing.MailKit.DefaultMailKitSmtpBuilder._emailConfigProvider">
+            <summary>
+            电子邮件配置提供器
+            </summary>
+        </member>
+        <member name="F:Bing.MailKit.DefaultMailKitSmtpBuilder._mailKitConfigProvider">
+            <summary>
+            MailKit配置提供器
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.DefaultMailKitSmtpBuilder.#ctor(Bing.Net.Mail.Configs.IEmailConfigProvider,Bing.MailKit.Configs.IMailKitConfigProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.MailKit.DefaultMailKitSmtpBuilder"/>类型的实例
+            </summary>
+            <param name="emailConfigProvider">电子邮件配置提供器</param>
+            <param name="mailKitConfigProvider">MailKit配置提供器</param>
+        </member>
+        <member name="M:Bing.MailKit.DefaultMailKitSmtpBuilder.Build">
+            <summary>
+            生成SMTP客户端
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.DefaultMailKitSmtpBuilder.ConfigureClient(MailKit.Net.Smtp.SmtpClient)">
+            <summary>
+            配置SMTP客户端
+            </summary>
+            <param name="client">SMTP客户端</param>
+        </member>
+        <member name="M:Bing.MailKit.DefaultMailKitSmtpBuilder.GetSecureSocketOption">
+            <summary>
+            获取安全套接字选项
+            </summary>
+        </member>
+        <member name="T:Bing.MailKit.Extensions.EmailExtensions">
+            <summary>
+            电子邮件扩展
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.Extensions.EmailExtensions.ToMimeMessage(System.Net.Mail.MailMessage)">
+            <summary>
+            转换成MimeMessage
+            </summary>
+            <param name="mail">邮件消息</param>
+        </member>
+        <member name="M:Bing.MailKit.Extensions.EmailExtensions.GetMimePart(System.Net.Mail.AttachmentBase)">
+            <summary>
+            获取MimePart
+            </summary>
+            <param name="item">附件基类</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.MailKit.Extensions.EmailExtensions.ToMailboxAddress(System.Net.Mail.MailAddress)">
+            <summary>
+            转换成邮箱地址
+            </summary>
+            <param name="address">邮箱地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.MailKit.Extensions.EmailExtensions.ToInternetAddressList(System.Net.Mail.MailAddressCollection)">
+            <summary>
+            转换成Internet地址列表
+            </summary>
+            <param name="addresses">邮箱地址集合</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.MailKit.Extensions.EmailOptions">
+            <summary>
+            邮件配置
+            </summary>
+        </member>
+        <member name="P:Bing.MailKit.Extensions.EmailOptions.EmailConfig">
+            <summary>
+            电子邮件配置
+            </summary>
+        </member>
+        <member name="P:Bing.MailKit.Extensions.EmailOptions.MailKitConfig">
+            <summary>
+            MailKit 配置
+            </summary>
+        </member>
+        <member name="T:Bing.MailKit.Extensions.Extensions">
+            <summary>
+            邮件扩展
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.Extensions.Extensions.AddMailKit(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Bing.MailKit.Extensions.EmailOptions})">
+            <summary>
+            注册MailKit邮件操作
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="setupAcion">配置操作</param>
+        </member>
+        <member name="M:Bing.MailKit.Extensions.Extensions.AddMailKit``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册MailKit邮件操作
+            </summary>
+            <typeparam name="TEmailConfigProvider">邮件配置提供器</typeparam>
+            <typeparam name="TMailKitConfigProvider">MailKit配置提供器</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="T:Bing.MailKit.IMailKitEmailSender">
+            <summary>
+            MailKit电子邮件发送器
+            </summary>
+        </member>
+        <member name="T:Bing.MailKit.IMailKitSmtpBuilder">
+            <summary>
+            MailKit SMTP生成器
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.IMailKitSmtpBuilder.Build">
+            <summary>
+            生成SMTP客户端
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.MailKit.MailKitEmailSender">
+            <summary>
+            MailKit 电子邮件发送器
+            </summary>
+        </member>
+        <member name="F:Bing.MailKit.MailKitEmailSender._smtpBuilder">
+            <summary>
+            SMTP 生成器
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.MailKitEmailSender.#ctor(Bing.Net.Mail.Configs.IEmailConfigProvider,Bing.MailKit.IMailKitSmtpBuilder)">
+            <summary>
+            初始化一个<see cref="T:Bing.MailKit.MailKitEmailSender"/>类型的实例
+            </summary>
+            <param name="provider">电子邮件配置提供器</param>
+            <param name="smtpBuilder">SMTP 生成器</param>
+        </member>
+        <member name="M:Bing.MailKit.MailKitEmailSender.SendEmail(System.Net.Mail.MailMessage)">
+            <summary>
+            发送邮件
+            </summary>
+            <param name="mail">邮件</param>
+        </member>
+        <member name="M:Bing.MailKit.MailKitEmailSender.SendEmailAsync(System.Net.Mail.MailMessage)">
+            <summary>
+            发送邮件
+            </summary>
+            <param name="mail">邮件</param>
+        </member>
+        <member name="M:Bing.MailKit.MailKitEmailSender.BuildSmtpClient">
+            <summary>
+            生成SMTP客户端
+            </summary>
+        </member>
+        <member name="T:Bing.MailKit.MailKitMailQueueManager">
+            <summary>
+            Mailkit邮件队列管理器
+            </summary>
+        </member>
+        <member name="F:Bing.MailKit.MailKitMailQueueManager._mailKitEmailSender">
+            <summary>
+            MailKit电子邮件发送器
+            </summary>
+        </member>
+        <member name="M:Bing.MailKit.MailKitMailQueueManager.#ctor(Bing.Net.Mail.Configs.IEmailConfigProvider,Bing.Net.Mail.Abstractions.IMailQueueProvider,Bing.MailKit.IMailKitEmailSender)">
+            <summary>
+            初始化一个<see cref="T:Bing.MailKit.MailKitMailQueueManager"/>类型的实例
+            </summary>
+            <param name="emailConfigProvider">电子邮件配置提供器</param>
+            <param name="mailQueueProvider">邮件队列提供程序</param>
+            <param name="mailKitEmailSender">MailKit电子邮件发送器</param>
+        </member>
+        <member name="M:Bing.MailKit.MailKitMailQueueManager.SendMail(Bing.Net.Mail.Core.EmailBox)">
+            <summary>
+            发送邮件
+            </summary>
+            <param name="box">电子邮件</param>
+        </member>
+        <member name="M:Bing.MailKit.MailKitMailQueueManager.WriteLog(System.String,Bing.Logs.LogLevel)">
+            <summary>
+            写入日志
+            </summary>
+            <param name="log">日志</param>
+            <param name="level">日志等级</param>
+        </member>
+    </members>
+</doc>

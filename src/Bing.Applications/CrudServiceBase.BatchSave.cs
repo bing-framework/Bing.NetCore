@@ -16,13 +16,10 @@ namespace Bing.Applications
         /// <param name="addList">新增列表</param>
         /// <param name="updateList">修改列表</param>
         /// <param name="deleteList">删除列表</param>
-        /// <returns></returns>
         public virtual List<TDto> Save(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
         {
             if (addList == null && updateList == null && deleteList == null)
-            {
                 return new List<TDto>();
-            }
             addList = addList ?? new List<TRequest>();
             updateList = updateList ?? new List<TRequest>();
             deleteList = deleteList ?? new List<TRequest>();
@@ -45,7 +42,6 @@ namespace Bing.Applications
         /// <param name="addList">新增列表</param>
         /// <param name="updateList">修改列表</param>
         /// <param name="deleteList">删除列表</param>
-        /// <returns></returns>
         public virtual async Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
         {
             if (addList == null && updateList == null && deleteList == null)
@@ -72,11 +68,7 @@ namespace Bing.Applications
         /// 转换成实体集合
         /// </summary>
         /// <param name="dtos">请求参数集合</param>
-        /// <returns></returns>
-        private List<TEntity> ToEntities(List<TRequest> dtos)
-        {
-            return dtos.Select(ToEntity).Distinct().ToList();
-        }
+        private List<TEntity> ToEntities(List<TRequest> dtos) => dtos.Select(ToEntity).Distinct().ToList();
 
         /// <summary>
         /// 过滤列表
@@ -97,13 +89,11 @@ namespace Bing.Applications
         /// <param name="deleteList">需要删除的列表</param>
         private void FilterByDeleteList(List<TRequest> list, List<TRequest> deleteList)
         {
-            for (int i = 0; i < list.Count; i++)
+            for (var i = 0; i < list.Count; i++)
             {
                 var item = list[i];
                 if (deleteList.Any(d => d.Id == item.Id))
-                {
                     list.Remove(item);
-                }
             }
         }
 
@@ -124,9 +114,7 @@ namespace Bing.Applications
         private void AddList(List<TEntity> list)
         {
             if (list.Count == 0)
-            {
                 return;
-            }
             Log.Content("创建实体：");
             list.ForEach(Create);
         }
@@ -139,14 +127,10 @@ namespace Bing.Applications
         private async Task AddListAsync(List<TEntity> list)
         {
             if (list.Count == 0)
-            {
                 return;
-            }
             Log.Content("创建实体：");
             foreach (var entity in list)
-            {
                 await CreateAsync(entity);
-            }
         }
 
         /// <summary>
@@ -156,9 +140,7 @@ namespace Bing.Applications
         private void UpdateList(List<TEntity> list)
         {
             if (list.Count == 0)
-            {
                 return;
-            }
             Log.Content("修改实体：");
             list.ForEach(Update);
         }
@@ -167,18 +149,13 @@ namespace Bing.Applications
         /// 更新列表
         /// </summary>
         /// <param name="list">修改列表</param>
-        /// <returns></returns>
         private async Task UpdateListAsync(List<TEntity> list)
         {
             if (list.Count == 0)
-            {
                 return;
-            }
             Log.Content("修改实体：");
             foreach (var entity in list)
-            {
                 await UpdateAsync(entity);
-            }
         }
 
         /// <summary>
@@ -188,9 +165,7 @@ namespace Bing.Applications
         private void DeleteList(List<TEntity> list)
         {
             if (list.Count == 0)
-            {
                 return;
-            }
             Log.Content("删除实体：");
             list.ForEach(DeleteChilds);
         }
@@ -199,38 +174,26 @@ namespace Bing.Applications
         /// 删除列表
         /// </summary>
         /// <param name="list">删除列表</param>
-        /// <returns></returns>
         private async Task DeleteListAsync(List<TEntity> list)
         {
             if (list.Count == 0)
-            {
                 return;
-            }
             Log.Content("删除实体：");
             foreach (var entity in list)
-            {
                 await DeleteChildsAsync(entity);
-            }
         }
 
         /// <summary>
         /// 删除子节点集合
         /// </summary>
         /// <param name="parent">父节点</param>
-        protected virtual void DeleteChilds(TEntity parent)
-        {
-            DeleteEntity(parent);
-        }
+        protected virtual void DeleteChilds(TEntity parent) => DeleteEntity(parent);
 
         /// <summary>
         /// 删除子节点集合
         /// </summary>
         /// <param name="parent">父节点</param>
-        /// <returns></returns>
-        protected virtual async Task DeleteChildsAsync(TEntity parent)
-        {
-            await DeleteEntityAsync(parent);
-        }
+        protected virtual async Task DeleteChildsAsync(TEntity parent) => await DeleteEntityAsync(parent);
 
         /// <summary>
         /// 删除实体
@@ -246,7 +209,6 @@ namespace Bing.Applications
         /// 删除实体
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         protected async Task DeleteEntityAsync(TEntity entity)
         {
             await _repository.RemoveAsync(entity.Id);
@@ -256,19 +218,12 @@ namespace Bing.Applications
         /// <summary>
         /// 提交
         /// </summary>
-        private void Commit()
-        {
-            _unitOfWork.Commit();
-        }
+        private void Commit() => _unitOfWork.Commit();
 
         /// <summary>
         /// 提交
         /// </summary>
-        /// <returns></returns>
-        private async Task CommitAsync()
-        {
-            await _unitOfWork.CommitAsync();
-        }
+        private async Task CommitAsync() => await _unitOfWork.CommitAsync();
 
         /// <summary>
         /// 保存后操作
@@ -276,20 +231,13 @@ namespace Bing.Applications
         /// <param name="addList">新增列表</param>
         /// <param name="updateList">修改列表</param>
         /// <param name="deleteList">删除列表</param>
-        protected virtual void SaveAfter(List<TEntity> addList, List<TEntity> updateList, List<TEntity> deleteList)
-        {
-            WriteLog($"保存{EntityDescription}成功");
-        }
+        protected virtual void SaveAfter(List<TEntity> addList, List<TEntity> updateList, List<TEntity> deleteList) => WriteLog($"保存{EntityDescription}成功");
 
         /// <summary>
         /// 获取结果
         /// </summary>
         /// <param name="addList">新增列表</param>
         /// <param name="updateList">修改列表</param>
-        /// <returns></returns>
-        protected virtual List<TDto> GetResult(List<TEntity> addList, List<TEntity> updateList)
-        {
-            return addList.Concat(updateList).Select(ToDto).ToList();
-        }
+        protected virtual List<TDto> GetResult(List<TEntity> addList, List<TEntity> updateList) => addList.Concat(updateList).Select(ToDto).ToList();
     }
 }

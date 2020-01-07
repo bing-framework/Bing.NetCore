@@ -40,7 +40,6 @@ namespace Bing.Mapping
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        /// <returns></returns>
         public static TDestination MapTo<TSource, TDestination>(this TSource source, TDestination destination)
         {
             CheckMapper();
@@ -53,9 +52,7 @@ namespace Bing.Mapping
         private static void CheckMapper()
         {
             if (_mapper == null)
-            {
                 throw new NullReferenceException(R.Map_MapperIsNull);
-            }
         }
 
         /// <summary>
@@ -63,7 +60,6 @@ namespace Bing.Mapping
         /// </summary>
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
-        /// <returns></returns>
         public static TDestination MapTo<TDestination>(this object source) where TDestination : new()
         {
             CheckMapper();
@@ -79,7 +75,6 @@ namespace Bing.Mapping
         /// </summary>
         /// <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
         /// <param name="source">源集合</param>
-        /// <returns></returns>
         public static List<TDestination> MapToList<TDestination>(this System.Collections.IEnumerable source)
         {
             CheckMapper();
@@ -97,7 +92,6 @@ namespace Bing.Mapping
         /// <typeparam name="TOutputDto">输出Dto类型</typeparam>
         /// <param name="source">源类型</param>
         /// <param name="membersToExpand">成员展开</param>
-        /// <returns></returns>
         public static IQueryable<TOutputDto> ToOutput<TEntity, TOutputDto>(this IQueryable<TEntity> source,
             params Expression<Func<TOutputDto, object>>[] membersToExpand)
         {

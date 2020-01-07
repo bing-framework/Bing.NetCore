@@ -1,0 +1,500 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Utils.Drawing</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Utils.Drawing.BitmapExtensions">
+            <summary>
+            图像(<see cref="T:System.Drawing.Bitmap"/>) 扩展
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.Drawing.CaptchaBuilder">
+            <summary>
+            验证码生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.CaptchaBuilder.Random">
+            <summary>
+            随机数
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.CaptchaBuilder.Seed">
+            <summary>
+            生成种子
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.FontNames">
+            <summary>
+            字体名称集合
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.FontNamesForChinese">
+            <summary>
+            汉字字体名称集合
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.FontSize">
+            <summary>
+            字体大小
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.FontWidth">
+            <summary>
+            字体宽度
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.Height">
+            <summary>
+            图片高度
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.Background">
+            <summary>
+            背景色
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.HasBorder">
+            <summary>
+            是否有边框
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.RandomPosition">
+            <summary>
+            是否随机位置
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.RandomColor">
+            <summary>
+            是否随机颜色
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.RandomItalic">
+            <summary>
+            是否随机倾斜字体
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.RandomPointPercent">
+            <summary>
+            随机干扰点百分比（百分数形式）
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Drawing.CaptchaBuilder.RandomLineCount">
+            <summary>
+            随机干扰线数量
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Utils.Drawing.CaptchaBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetCode(System.Int32,Bing.Utils.Drawing.CaptchaType)">
+            <summary>
+            获取指定长度的验证码字符串
+            </summary>
+            <param name="length">长度</param>
+            <param name="captchaType">验证码类型</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetRandomNumbers(System.Int32)">
+            <summary>
+            获取随机数字的字符串
+            </summary> 
+            <param name="length">长度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetRandomNumbersAndLetters(System.Int32)">
+            <summary>
+            获取随机数字与字母的字符串
+            </summary>
+            <param name="length">长度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetRandomChinese(System.Int32)">
+            <summary>
+            获取随机汉字的字符串
+            </summary>
+            <param name="length">长度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GenerateChinese">
+            <summary>
+            生成汉字
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.CreateImage(System.String)">
+            <summary>
+            创建指定字符串的验证码图片
+            </summary>
+            <param name="code">验证码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.DrawBorder(System.Drawing.Graphics,System.Int32,System.Int32)">
+            <summary>
+            绘制边框
+            </summary>
+            <param name="g">绘制器</param>
+            <param name="width">宽度</param>
+            <param name="height">高度</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetFontSize(System.Int32,System.Int32)">
+            <summary>
+            获取文字大小
+            </summary>
+            <param name="imageWidth">图片宽度</param>
+            <param name="captchCodeCount">验证码长度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetRandomDeepColor">
+            <summary>
+            获取随机深色
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetRandomLightColor">
+            <summary>
+            获取随机浅色
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.DrawDisorderLine(System.Drawing.Graphics,System.Int32,System.Int32)">
+            <summary>
+            绘制干扰线
+            </summary>
+            <param name="g">绘制器</param>
+            <param name="width">宽度</param>
+            <param name="height">高度</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetDisorderColor">
+            <summary>
+            获取干扰颜色
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.IsBgLight">
+            <summary>
+            是否背景高亮
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.DrawDisorderPoint(System.Drawing.Graphics,System.Int32,System.Int32)">
+            <summary>
+            绘制干扰点
+            </summary>
+            <param name="g">绘制器</param>
+            <param name="width">宽度</param>
+            <param name="height">高度</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.DrawText(System.Drawing.Graphics,System.String,System.Int32)">
+            <summary>
+            绘制文本
+            </summary>
+            <param name="g">绘制器</param>
+            <param name="code">验证码</param>
+            <param name="height">高度</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetTextColor">
+            <summary>
+            获取文本颜色
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetFont(System.String)">
+            <summary>
+            获取文本字体
+            </summary>
+            <param name="code">验证码</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetPosition(System.Int32,System.Int32)">
+            <summary>
+            获取位置
+            </summary>
+            <param name="index">当前字符索引</param>
+            <param name="height">图片高度</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.FontItalic(System.Drawing.Graphics)">
+            <summary>
+            倾斜字体
+            </summary>
+            <param name="g">绘制器</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.CaptchaBuilder.CreateImage(System.Int32,System.String@,Bing.Utils.Drawing.CaptchaType)">
+            <summary>
+            获取指定长度的验证码图片
+            </summary>
+            <param name="length">长度</param>
+            <param name="code">验证码</param>
+            <param name="captchaType">验证码类型</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Utils.Drawing.CaptchaType">
+            <summary>
+            验证码类型
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.CaptchaType.Number">
+            <summary>
+            纯数值
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.CaptchaType.NumberAndLetter">
+            <summary>
+            数值与字母组合
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.CaptchaType.ChineseChar">
+            <summary>
+            汉字
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.Drawing.ImageHelper">
+            <summary>
+            图片操作辅助类 - 转换
+            </summary>
+            <summary>
+            图片操作辅助类
+            </summary>
+            <summary>
+            图片操作辅助类 - 信息
+            </summary>
+            <summary>
+            图片操作辅助类 - 加载
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToBytes(System.Drawing.Bitmap)">
+            <summary>
+            将图像转换为字节数组
+            </summary>
+            <param name="bitmap">图像</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToBytes(System.Drawing.Image)">
+            <summary>
+            将图片转换成字节数组
+            </summary>
+            <param name="image">图片</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToStream(System.Drawing.Image)">
+            <summary>
+            将图片转换为内存流，需要释放资源
+            </summary>
+            <param name="image">图片</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToStream(System.Drawing.Bitmap)">
+            <summary>
+            将图像转换为内存流，需要释放资源
+            </summary>
+            <param name="bitmap">图像</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToBase64String(System.Drawing.Image,System.Boolean)">
+            <summary>
+            将图片转换为Base64字符串
+            </summary>
+            <param name="image">图片</param>
+            <param name="appendPrefix">是否追加前缀</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToBase64String(System.Drawing.Image,System.Drawing.Imaging.ImageFormat,System.Boolean)">
+            <summary>
+            将图片转换为Base64字符串
+            </summary>
+            <param name="image">图片</param>
+            <param name="imageFormat">图片格式</param>
+            <param name="appendPrefix">是否追加前缀</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToBase64String(System.Drawing.Bitmap,System.Boolean)">
+            <summary>
+            将图像转换为Base64字符串
+            </summary>
+            <param name="bitmap">图像</param>
+            <param name="appendPrefix">是否追加前缀</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.ToBase64String(System.Drawing.Bitmap,System.Drawing.Imaging.ImageFormat,System.Boolean)">
+            <summary>
+            将图像转换为Base64字符串
+            </summary>
+            <param name="bitmap">图像</param>
+            <param name="imageFormat">图片格式</param>
+            <param name="appendPrefix">是否追加前缀</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.MakeThumbnail(System.Drawing.Image,System.Int32,System.Int32,Bing.Utils.Drawing.ThumbnailMode)">
+            <summary>
+            生成缩略图
+            </summary>
+            <param name="sourceImage">源图</param>
+            <param name="width">缩略图宽度</param>
+            <param name="height">缩略图高度</param>
+            <param name="mode">缩略图方式</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.MakeThumbnail(System.Byte[],System.Int32,System.Int32,Bing.Utils.Drawing.ThumbnailMode)">
+            <summary>
+            生成缩略图
+            </summary>
+            <param name="imgBytes">源文件字节数组</param>
+            <param name="width">缩略图宽度</param>
+            <param name="height">缩略图高度</param>
+            <param name="mode">缩略图方式</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.MakeThumbnail(System.String,System.String,System.Int32,System.Int32,Bing.Utils.Drawing.ThumbnailMode)">
+            <summary>
+            生成缩略图
+            </summary>
+            <param name="sourceImagePath">文件路径</param>
+            <param name="thumbnailPath">缩略图文件生成路径</param>
+            <param name="width">缩略图宽度</param>
+            <param name="height">缩略图高度</param>
+            <param name="mode">缩略图方式</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.DeleteCoordinate(System.String)">
+            <summary>
+            删除图片中的经纬度信息，覆盖原图像
+            </summary>
+            <param name="filePath">文件路径</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.DeleteCoordinate(System.String,System.String)">
+            <summary>
+            删除图片中的经纬度信息，并另存为
+            </summary>
+            <param name="filePath">文件路径</param>
+            <param name="savePath">保存文件路径</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.DeleteCoordinate(System.Drawing.Image)">
+            <summary>
+            删除图片中的经纬度信息
+            </summary>
+            <param name="image">图片</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.GetImageExtension(System.Drawing.Image)">
+            <summary>
+            获取图片扩展名
+            </summary>
+            <param name="image">图片</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.GetCodecInfo(System.Drawing.Image)">
+            <summary>
+            获取特定图像编解码信息
+            </summary>
+            <param name="image">图片</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.GetCodecInfo(System.Drawing.Imaging.ImageFormat)">
+            <summary>
+            获取特定图像编解码信息
+            </summary>
+            <param name="imageFormat">图片格式</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.FromFile(System.String)">
+            <summary>
+            从指定文件创建图片
+            </summary>
+            <param name="filePath">文件的绝对路径</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.FromStream(System.IO.Stream)">
+            <summary>
+            从指定流创建图片
+            </summary>
+            <param name="stream">流</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.FromBytes(System.Byte[])">
+            <summary>
+            从指定字节数组创建图片
+            </summary>
+            <param name="bytes">字节数组</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.FromBase64String(System.String)">
+            <summary>
+            从指定Base64字符串创建图片
+            </summary>
+            <param name="base64String">Base64字符串</param>
+        </member>
+        <member name="M:Bing.Utils.Drawing.ImageHelper.GetBase64String(System.String)">
+            <summary>
+            获取真正的图片Base64数据。
+            即去掉data:image/jpg;base64,这样的格式
+            </summary>
+            <param name="base64String">带前缀的Base64图片字符串</param>
+        </member>
+        <member name="T:Bing.Utils.Drawing.ImageLocationMode">
+            <summary>
+            图片位置模式
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.LeftTop">
+            <summary>
+            左上
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.Top">
+            <summary>
+            靠上
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.RightTop">
+            <summary>
+            右上
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.LeftCenter">
+            <summary>
+            左中
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.Center">
+            <summary>
+            居中
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.RightCenter">
+            <summary>
+            右中
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.LeftBottom">
+            <summary>
+            左下
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.Bottom">
+            <summary>
+            靠下
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ImageLocationMode.RightBottom">
+            <summary>
+            右下角
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.Drawing.ThumbnailMode">
+            <summary>
+            缩略图模式
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ThumbnailMode.Cut">
+            <summary>
+            指定宽高裁剪（不变形）
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ThumbnailMode.FixedW">
+            <summary>
+            指定宽度，高度自动
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ThumbnailMode.FixedH">
+            <summary>
+            指定高度，宽度自动
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Drawing.ThumbnailMode.FixedBoth">
+            <summary>
+            指定宽高（变形）
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -236,6 +236,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-Infrastructure", "04-Inf
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "99-Other", "99-Other", "{2D0D80CE-BE06-49D9-A392-E7D122F91534}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E6769B84-BD45-407E-B1DC-34349F1A8F05}"
+	ProjectSection(SolutionItems) = preProject
+		build\common.props = build\common.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -617,6 +622,7 @@ Global
 		{72AC5356-5FCA-4D9C-A8DD-1519228665C1} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
 		{64C31B2B-8532-4C98-9475-7E5B5A2AA635} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
 		{2D0D80CE-BE06-49D9-A392-E7D122F91534} = {474AB182-21D2-44C4-A99C-31FC31E469CB}
+		{E6769B84-BD45-407E-B1DC-34349F1A8F05} = {268C9D9A-9655-4A48-8A5F-27815D05D224}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

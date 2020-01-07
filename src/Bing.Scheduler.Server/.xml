@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Scheduler.Server</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Scheduler.Server.JobController">
+            <summary>
+            任务调度 控制器
+            </summary>
+        </member>
+        <member name="F:Bing.Scheduler.Server.JobController._schedulerCenter">
+            <summary>
+            任务调度中心
+            </summary>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.#ctor(Bing.Scheduler.Abstractions.Servers.ISchedulerCenter)">
+            <summary>
+            初始化一个<see cref="T:Bing.Scheduler.Server.JobController"/>类型的实例
+            </summary>
+            <param name="schedulerCenter">任务调度中心</param>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.AddJob(Bing.Scheduler.Core.Models.ScheduleInfo)">
+            <summary>
+            添加任务
+            </summary>
+            <param name="info">调度信息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.StopJob(Bing.Scheduler.Core.Models.JobKey)">
+            <summary>
+            暂停任务
+            </summary>
+            <param name="job">任务键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.RemoveJob(Bing.Scheduler.Core.Models.JobKey)">
+            <summary>
+            删除任务
+            </summary>
+            <param name="job">任务键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.ResumeJob(Bing.Scheduler.Core.Models.JobKey)">
+            <summary>
+            恢复暂停中的任务
+            </summary>
+            <param name="job">任务键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.QueryJob(Bing.Scheduler.Core.Models.JobKey)">
+            <summary>
+            查询任务
+            </summary>
+            <param name="job">任务键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.UpdateJob(Bing.Scheduler.Core.Models.ScheduleInfo)">
+            <summary>
+            修改任务
+            </summary>
+            <param name="entity">调度信息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.TriggerJob(Bing.Scheduler.Core.Models.JobKey)">
+            <summary>
+            立即执行任务
+            </summary>
+            <param name="job">任务键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.GetJobLog(Bing.Scheduler.Core.Models.JobKey)">
+            <summary>
+            获取任务日志
+            </summary>
+            <param name="job">任务键</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.Start">
+            <summary>
+            启动调度
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.Stop">
+            <summary>
+            停止调度
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.GetAllJob">
+            <summary>
+            获取所有任务
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Server.JobController.GetAllJobBrief">
+            <summary>
+            获取所有任务信息（简要信息 - 刷新数据的时候使用）
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

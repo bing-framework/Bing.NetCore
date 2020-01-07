@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Scheduler.Quartz</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Scheduler.Quartz.QuartzSchedulerCenter">
+            <summary>
+            基于Quartz.Net的任务调度中心
+            </summary>
+        </member>
+        <member name="F:Bing.Scheduler.Quartz.QuartzSchedulerCenter._scheduler">
+            <summary>
+            调度器
+            </summary>
+        </member>
+        <member name="P:Bing.Scheduler.Quartz.QuartzSchedulerCenter.Scheduler">
+            <summary>
+            调度器
+            </summary>
+        </member>
+        <member name="M:Bing.Scheduler.Quartz.QuartzSchedulerCenter.CreateSqliteDb">
+            <summary>
+            创建SqliteDb
+            </summary>
+        </member>
+        <member name="M:Bing.Scheduler.Quartz.QuartzSchedulerCenter.CreateSimpleTrigger(Bing.Scheduler.Core.Models.ScheduleInfo)">
+            <summary>
+            创建简单触发器
+            </summary>
+            <param name="entity">调度信息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Scheduler.Quartz.QuartzSchedulerCenter.CreateCronTrigger(Bing.Scheduler.Core.Models.ScheduleInfo)">
+            <summary>
+            创建Cron触发器
+            </summary>
+            <param name="entity">调度信息</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
