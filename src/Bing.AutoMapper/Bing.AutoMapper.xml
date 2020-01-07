@@ -43,22 +43,38 @@
             <param name="source">源对象</param>
             <param name="destination">目标对象</param>
         </member>
-        <member name="M:Bing.AutoMapper.AutoMapperMapper.GetMap(System.Type,System.Type)">
-            <summary>
-            获取映射配置
-            </summary>
-            <param name="sourceType">源类型</param>
-            <param name="destinationType">目标类型</param>
-        </member>
         <member name="M:Bing.AutoMapper.AutoMapperMapper.GetType(System.Object)">
             <summary>
             获取类型
             </summary>
             <param name="obj">对象</param>
         </member>
-        <member name="M:Bing.AutoMapper.AutoMapperMapper.InitMaps(System.Type,System.Type)">
+        <member name="M:Bing.AutoMapper.AutoMapperMapper.GetType(System.Type)">
             <summary>
-            初始化映射配置
+            获取类型
+            </summary>
+            <param name="type">类型</param>
+        </member>
+        <member name="M:Bing.AutoMapper.AutoMapperMapper.GetResult``1(System.Type,System.Type,System.Object,``0)">
+            <summary>
+            获取映射结果
+            </summary>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="sourceType">源类型</param>
+            <param name="destinationType">目标类型</param>
+            <param name="source">源对象</param>
+            <param name="destination">目标对象</param>
+        </member>
+        <member name="M:Bing.AutoMapper.AutoMapperMapper.Exists(System.Type,System.Type)">
+            <summary>
+            是否已存在映射配置
+            </summary>
+            <param name="sourceType">源类型</param>
+            <param name="destinationType">目标类型</param>
+        </member>
+        <member name="M:Bing.AutoMapper.AutoMapperMapper.Init(System.Type,System.Type)">
+            <summary>
+            初始化
             </summary>
             <param name="sourceType">源类型</param>
             <param name="destinationType">目标类型</param>

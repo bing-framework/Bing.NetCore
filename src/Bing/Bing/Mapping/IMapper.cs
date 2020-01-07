@@ -15,7 +15,6 @@ namespace Bing.Mapping
         /// </summary>
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
-        /// <returns></returns>
         TDestination MapTo<TDestination>(object source) where TDestination : new();
 
         /// <summary>
@@ -25,7 +24,6 @@ namespace Bing.Mapping
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        /// <returns></returns>
         TDestination MapTo<TSource, TDestination>(TSource source, TDestination destination);
 
         /// <summary>
@@ -33,7 +31,6 @@ namespace Bing.Mapping
         /// </summary>
         /// <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
         /// <param name="source">源集合</param>
-        /// <returns></returns>
         List<TDestination> MapToList<TDestination>(System.Collections.IEnumerable source);
 
         /// <summary>
@@ -42,7 +39,6 @@ namespace Bing.Mapping
         /// <typeparam name="TOutputDto">输出DTO类型</typeparam>
         /// <param name="source">数据源</param>
         /// <param name="membersToExpand">成员展开</param>
-        /// <returns></returns>
         IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source,
             params Expression<Func<TOutputDto, object>>[] membersToExpand);
     }

@@ -13430,6 +13430,95 @@
             错误详情
             </summary>
         </member>
+        <member name="T:Bing.Mapping.IMapper">
+            <summary>
+            对象映射
+            </summary>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.MapTo``1(System.Object)">
+            <summary>
+            将对象映射为指定类型
+            </summary>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.MapTo``2(``0,``1)">
+            <summary>
+            将源对象的对象更新目标类型的对象
+            </summary>
+            <typeparam name="TSource">源类型</typeparam>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+            <param name="destination">目标对象</param>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.MapToList``1(System.Collections.IEnumerable)">
+            <summary>
+            将源集合映射到目标列表
+            </summary>
+            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
+            <param name="source">源集合</param>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.ToOutput``1(System.Linq.IQueryable,System.Linq.Expressions.Expression{System.Func{``0,System.Object}}[])">
+            <summary>
+            将数据源映射为指定输出DTO的集合
+            </summary>
+            <typeparam name="TOutputDto">输出DTO类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="membersToExpand">成员展开</param>
+        </member>
+        <member name="T:Bing.Mapping.MapperExtensions">
+            <summary>
+            对象映射扩展
+            </summary>
+        </member>
+        <member name="F:Bing.Mapping.MapperExtensions._mapper">
+            <summary>
+            对象映射执行者
+            </summary>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.SetMapper(Bing.Mapping.IMapper)">
+            <summary>
+            设置对象映射执行者
+            </summary>
+            <param name="mapper">对象映射执行者</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.MapTo``2(``0,``1)">
+            <summary>
+            将源对象映射到目标对象
+            </summary>
+            <typeparam name="TSource">源类型</typeparam>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+            <param name="destination">目标对象</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.CheckMapper">
+            <summary>
+            检查映射执行者是否为空
+            </summary>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.MapTo``1(System.Object)">
+            <summary>
+            将源对象映射到目标对象
+            </summary>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.MapToList``1(System.Collections.IEnumerable)">
+            <summary>
+            将源集合映射到目标列表
+            </summary>
+            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
+            <param name="source">源集合</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.ToOutput``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``1,System.Object}}[])">
+            <summary>
+            将数据源映射为指定<typeparamref name="TOutputDto"/>集合
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TOutputDto">输出Dto类型</typeparam>
+            <param name="source">源类型</param>
+            <param name="membersToExpand">成员展开</param>
+        </member>
         <member name="T:Bing.Configurations.BingConfig">
             <summary>
             Bing 框架配置
@@ -15457,99 +15546,6 @@
             <summary>
             关闭所有日志，不输出日志
             </summary>
-        </member>
-        <member name="T:Bing.Mapping.IMapper">
-            <summary>
-            对象映射
-            </summary>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.MapTo``1(System.Object)">
-            <summary>
-            将对象映射为指定类型
-            </summary>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.MapTo``2(``0,``1)">
-            <summary>
-            将源对象的对象更新目标类型的对象
-            </summary>
-            <typeparam name="TSource">源类型</typeparam>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-            <param name="destination">目标对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.MapToList``1(System.Collections.IEnumerable)">
-            <summary>
-            将源集合映射到目标列表
-            </summary>
-            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
-            <param name="source">源集合</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.ToOutput``1(System.Linq.IQueryable,System.Linq.Expressions.Expression{System.Func{``0,System.Object}}[])">
-            <summary>
-            将数据源映射为指定输出DTO的集合
-            </summary>
-            <typeparam name="TOutputDto">输出DTO类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="membersToExpand">成员展开</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Mapping.MapperExtensions">
-            <summary>
-            对象映射扩展
-            </summary>
-        </member>
-        <member name="F:Bing.Mapping.MapperExtensions._mapper">
-            <summary>
-            对象映射执行者
-            </summary>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.SetMapper(Bing.Mapping.IMapper)">
-            <summary>
-            设置对象映射执行者
-            </summary>
-            <param name="mapper">对象映射执行者</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.MapTo``2(``0,``1)">
-            <summary>
-            将源对象映射到目标对象
-            </summary>
-            <typeparam name="TSource">源类型</typeparam>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-            <param name="destination">目标对象</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.CheckMapper">
-            <summary>
-            检查映射执行者是否为空
-            </summary>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.MapTo``1(System.Object)">
-            <summary>
-            将源对象映射到目标对象
-            </summary>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.MapToList``1(System.Collections.IEnumerable)">
-            <summary>
-            将源集合映射到目标列表
-            </summary>
-            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
-            <param name="source">源集合</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.ToOutput``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``1,System.Object}}[])">
-            <summary>
-            将数据源映射为指定<typeparamref name="TOutputDto"/>集合
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TOutputDto">输出Dto类型</typeparam>
-            <param name="source">源类型</param>
-            <param name="membersToExpand">成员展开</param>
         </member>
         <member name="T:Bing.Net.Mail.Abstractions.IAttachment">
             <summary>

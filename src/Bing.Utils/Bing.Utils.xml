@@ -193,14 +193,12 @@
             </summary>
             <param name="map">参数字典</param>
             <param name="exp">表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Expressions.ParameterRebinder.VisitParameter(System.Linq.Expressions.ParameterExpression)">
             <summary>
             访问参数
             </summary>
             <param name="parameterExpression">参数表达式</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Expressions.PredicateExpressionBuilder`1">
             <summary>
@@ -227,7 +225,6 @@
             <summary>
             获取参数表达式
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Expressions.PredicateExpressionBuilder`1.Append``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},Bing.Utils.Operator,System.Object)">
             <summary>
@@ -272,7 +269,6 @@
             <summary>
             转换为Lambda表达式
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Extensions.BooleanExtensions">
             <summary>
@@ -2999,7 +2995,6 @@
             </summary>
             <param name="left">左操作数</param>
             <param name="right">右操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.And``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -3008,7 +3003,6 @@
             <typeparam name="T">对象类型</typeparam>
             <param name="left">左操作数</param>
             <param name="right">右操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Or(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)">
             <summary>
@@ -3016,7 +3010,6 @@
             </summary>
             <param name="left">左操作数</param>
             <param name="right">右操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Or``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -3025,7 +3018,6 @@
             <typeparam name="T">对象类型</typeparam>
             <param name="left">左操作数</param>
             <param name="right">右操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Value``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -3057,7 +3049,6 @@
             </summary>
             <param name="left">左操作数</param>
             <param name="right">右操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.NotEqual(System.Linq.Expressions.Expression,System.Object)">
             <summary>
@@ -3065,7 +3056,6 @@
             </summary>
             <param name="left">左操作数</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Greater(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)">
             <summary>
@@ -3209,7 +3199,6 @@
             <param name="first">左操作数</param>
             <param name="second">右操作数</param>
             <param name="merge">合并操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.ToLambda``1(System.Linq.Expressions.Expression,System.Linq.Expressions.ParameterExpression[])">
             <summary>
@@ -7005,6 +6994,12 @@
             <param name="genericType">泛型类型</param>
             <param name="type">指定类型</param>
         </member>
+        <member name="M:Bing.Utils.Helpers.Reflection.GetElementType(System.Type)">
+            <summary>
+            获取元素类型。如果是集合，返回集合的元素类型
+            </summary>
+            <param name="type">类型</param>
+        </member>
         <member name="T:Bing.Utils.Helpers.Regexs">
             <summary>
             正则表达式 操作
@@ -7337,7 +7332,12 @@
             首字母小写
             </summary>
             <param name="value">值</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Helpers.Str.FirstUpper(System.String)">
+            <summary>
+            首字母大写
+            </summary>
+            <param name="value">值</param>
         </member>
         <member name="P:Bing.Utils.Helpers.Str.Empty">
             <summary>
@@ -7387,14 +7387,12 @@
             获取字符串的字节数
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Helpers.Str.ToSnakeCase(System.String)">
             <summary>
             将字符串转换为蛇形策略
             </summary>
             <param name="str">字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Helpers.Str.ToCamelCase(System.String)">
             <summary>
