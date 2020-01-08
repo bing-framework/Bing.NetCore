@@ -14,18 +14,13 @@ namespace Bing.Logs.Extensions
         /// 设置内容
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <returns></returns>
-        public static ILog Content(this ILog log)
-        {
-            return log.Set<ILogContent>(content => content.Content(""));
-        }
+        public static ILog Content(this ILog log) => log.Set<ILogContent>(content => content.Content(""));
 
         /// <summary>
         /// 设置内容
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public static ILog Content(this ILog log, string value) => log.Set<ILogContent>(content => content.Content(value));
 
         /// <summary>

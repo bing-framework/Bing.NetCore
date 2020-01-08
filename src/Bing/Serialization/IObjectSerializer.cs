@@ -10,7 +10,6 @@
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
         byte[] Serialize<T>(T obj);
 
         /// <summary>
@@ -18,7 +17,6 @@
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
         T Deserialize<T>(byte[] bytes);
     }
 
@@ -32,14 +30,12 @@
         /// 序列化
         /// </summary>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
         byte[] Serialize(T obj);
 
         /// <summary>
         /// 反序列化
         /// </summary>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
         T Deserialize(byte[] bytes);
     }
 }

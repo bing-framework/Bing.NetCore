@@ -15027,25 +15027,21 @@
             <summary>
             获取日志上下文信息
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.LogContext.CreateInfo">
             <summary>
             创建日志上下文信息
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.LogContext.GetTraceId">
             <summary>
             获取跟踪号
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.LogContext.GetStopwatch">
             <summary>
             获取计时器
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Core.NullLog">
             <summary>
@@ -16718,14 +16714,12 @@
             加密
             </summary>
             <param name="data">原始数据</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Encryptors.NullEncryptor.Decrypt(System.String)">
             <summary>
             解密
             </summary>
             <param name="data">已加密数据</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Security.Principals.UnauthenticatedIdentity">
             <summary>
@@ -16888,7 +16882,6 @@
             </summary>
             <typeparam name="T">对象类型</typeparam>
             <param name="obj">对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Serialization.IObjectSerializer.Deserialize``1(System.Byte[])">
             <summary>
@@ -16896,7 +16889,6 @@
             </summary>
             <typeparam name="T">对象类型</typeparam>
             <param name="bytes">字节数组</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Serialization.IObjectSerializer`1">
             <summary>
@@ -16909,14 +16901,12 @@
             序列化
             </summary>
             <param name="obj">对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Serialization.IObjectSerializer`1.Deserialize(System.Byte[])">
             <summary>
             反序列化
             </summary>
             <param name="bytes">字节数组</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Sessions.ISession">
             <summary>

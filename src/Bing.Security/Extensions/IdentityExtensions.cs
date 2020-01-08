@@ -22,10 +22,7 @@ namespace Bing.Security.Extensions
         {
             Check.NotNull(identity, nameof(identity));
             if (!(identity is ClaimsIdentity claimsIdentity))
-            {
                 return null;
-            }
-
             var result = claimsIdentity.GetValue(IdentityModel.JwtClaimTypes.Subject);
             return string.IsNullOrWhiteSpace(result)
                 ? claimsIdentity.GetValue(System.Security.Claims.ClaimTypes.NameIdentifier)
@@ -41,21 +38,13 @@ namespace Bing.Security.Extensions
         {
             Check.NotNull(identity, nameof(identity));
             if (!(identity is ClaimsIdentity claimsIdentity))
-            {
-                return default(T);
-            }
+                return default;
 
             var result = claimsIdentity.GetValue(IdentityModel.JwtClaimTypes.Subject);
             if (string.IsNullOrWhiteSpace(result))
-            {
                 result = claimsIdentity.GetValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-            }
-
             if (string.IsNullOrWhiteSpace(result))
-            {
-                return default(T);
-            }
-
+                return default;
             return Conv.To<T>(result);
         }
 
@@ -71,10 +60,7 @@ namespace Bing.Security.Extensions
         {
             Check.NotNull(identity, nameof(identity));
             if (!(identity is ClaimsIdentity claimsIdentity))
-            {
                 return null;
-            }
-
             var result = claimsIdentity.GetValue(IdentityModel.JwtClaimTypes.Name);
             return string.IsNullOrWhiteSpace(result)
                 ? claimsIdentity.GetValue(System.Security.Claims.ClaimTypes.Name)
@@ -93,10 +79,7 @@ namespace Bing.Security.Extensions
         {
             Check.NotNull(identity, nameof(identity));
             if (!(identity is ClaimsIdentity claimsIdentity))
-            {
                 return null;
-            }
-
             var result = claimsIdentity.GetValue(IdentityModel.JwtClaimTypes.Email);
             return string.IsNullOrWhiteSpace(result)
                 ? claimsIdentity.GetValue(System.Security.Claims.ClaimTypes.Email)
@@ -115,10 +98,7 @@ namespace Bing.Security.Extensions
         {
             Check.NotNull(identity, nameof(identity));
             if (!(identity is ClaimsIdentity claimsIdentity))
-            {
                 return null;
-            }
-
             var result = claimsIdentity.GetValue(IdentityModel.JwtClaimTypes.GivenName);
             return string.IsNullOrWhiteSpace(result)
                 ? claimsIdentity.GetValue(System.Security.Claims.ClaimTypes.GivenName)
@@ -137,16 +117,10 @@ namespace Bing.Security.Extensions
         {
             Check.NotNull(identity, nameof(identity));
             if (!(identity is ClaimsIdentity claimsIdentity))
-            {
                 return new string[0];
-            }
-
             var result = GetRoles(claimsIdentity, IdentityModel.JwtClaimTypes.Role);
             if (result.Length == 0)
-            {
                 result = GetRoles(claimsIdentity, System.Security.Claims.ClaimTypes.Role);
-            }
-
             return result;
         }
 
@@ -159,7 +133,7 @@ namespace Bing.Security.Extensions
         {
             return claimsIdentity.FindAll(type).SelectMany(m =>
             {
-                string[] roles = m.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                var roles = m.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 return roles;
             }).ToArray();
         }
