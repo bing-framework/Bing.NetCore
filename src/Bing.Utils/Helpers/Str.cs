@@ -354,14 +354,10 @@ namespace Bing.Utils.Helpers
         /// 首字母小写
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public static string FirstLower(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return string.Empty;
-            }
-
             return $"{value.Substring(0, 1).ToLower()}{value.Substring(1)}";
         }
 
@@ -369,12 +365,14 @@ namespace Bing.Utils.Helpers
 
         #region FirstUpper(首字母大写)
 
+        /// <summary>
+        /// 首字母大写
+        /// </summary>
+        /// <param name="value">值</param>
         public static string FirstUpper(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return string.Empty;
-            }
             return $"{value.Substring(0, 1).ToUpper()}{value.Substring(1)}";
         }
 
@@ -485,23 +483,18 @@ namespace Bing.Utils.Helpers
         /// 获取字符串的字节数
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public static int GetStringLength(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return 0;
-            }
             int strLength = 0;
-            ASCIIEncoding encoding = new ASCIIEncoding();
+            var encoding = new ASCIIEncoding();
             // 将字符串转换为ASCII编码的字节数字
             byte[] bytes = encoding.GetBytes(value);
             for (var i = 0; i <= bytes.Length - 1; i++)
             {
                 if (bytes[i] == 63)
-                {
                     strLength++;
-                }
                 strLength++;
             }
             return strLength;
@@ -515,13 +508,10 @@ namespace Bing.Utils.Helpers
         /// 将字符串转换为蛇形策略
         /// </summary>
         /// <param name="str">字符串</param>
-        /// <returns></returns>
         public static string ToSnakeCase(string str)
         {
             if (string.IsNullOrEmpty(str))
-            {
                 return str;
-            }
 
             var sb = new StringBuilder();
             var state = SnakeCaseState.Start;
@@ -530,9 +520,7 @@ namespace Bing.Utils.Helpers
                 if (str[i] == ' ')
                 {
                     if (state != SnakeCaseState.Start)
-                    {
                         state = SnakeCaseState.NewWord;
-                    }
                 }
                 else if (char.IsUpper(str[i]))
                 {

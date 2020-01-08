@@ -11,7 +11,7 @@ using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 
-namespace Bing.AutoMapper.Tests.Samples
+namespace Bing.Tests.Samples
 {
     /// <summary>
     /// 实体样例

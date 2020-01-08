@@ -18,9 +18,7 @@ namespace Bing.Logs.Extensions
         public static void Append(this ILogContent content, StringBuilder result, string value)
         {
             if (value.IsEmpty())
-            {
                 return;
-            }
             result.Append(value);
         }
 
@@ -41,9 +39,6 @@ namespace Bing.Logs.Extensions
         /// </summary>
         /// <param name="content">日志内容</param>
         /// <param name="value">值</param>
-        public static void Content(this ILogContent content, string value)
-        {
-            content.AppendLine(content.Content, value);
-        }
+        public static void Content(this ILogContent content, string value) => content.AppendLine(content.Content, value);
     }
 }

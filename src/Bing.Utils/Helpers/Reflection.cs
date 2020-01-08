@@ -754,5 +754,25 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
+        #region GetElementType(获取元素类型)
+
+        /// <summary>
+        /// 获取元素类型。如果是集合，返回集合的元素类型
+        /// </summary>
+        /// <param name="type">类型</param>
+        public static Type GetElementType(Type type)
+        {
+            if (IsCollection(type) == false)
+                return type;
+            if (type.IsArray)
+                return type.GetElementType();
+            var genericArgumentsTypes = type.GetTypeInfo().GetGenericArguments();
+            if (genericArgumentsTypes == null || genericArgumentsTypes.Length == 0)
+                throw new ArgumentException("泛型类型参数不能为空");
+            return genericArgumentsTypes[0];
+        }
+
+        #endregion
     }
 }

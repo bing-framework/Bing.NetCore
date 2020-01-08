@@ -1,15 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bing.Events;
-using Bing.Exceptions;
 using Bing.Logs.Extensions;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Events;
 using Bing.Samples.Domain.Models;
 using Bing.Samples.Domain.Services.Abstractions;
 using Bing.Samples.EventHandlers.Abstractions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Samples.EventHandlers.Implements
 {
@@ -60,6 +56,19 @@ namespace Bing.Samples.EventHandlers.Implements
             //throw new Warning("测试异常");
             await RoleManager.CreateAsync(role);
             await UnitOfWork.CommitAsync();
+        }
+
+        /// <summary>
+        /// 写入日志
+        /// </summary>
+        /// <param name="message">消息</param>
+        [EventHandler("WriteLog")]
+        public Task WriteLogAsync(LogMessage message)
+        {
+            Log.Caption("写入日志消息")
+                .Content(message.Content)
+                .Debug();
+            return Task.CompletedTask;
         }
     }
 }

@@ -28,7 +28,6 @@ namespace Bing.Security.Sessions
         /// 执行方法
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
             await Authenticate(context);
@@ -39,15 +38,11 @@ namespace Bing.Security.Sessions
         /// 认证
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
         protected virtual async Task Authenticate(HttpContext context)
         {
             await AuthenticateBefore(context);
             if (IsAuthenticated(context) == false)
-            {
                 return;
-            }
-
             await LoadClaims(context, context.GetIdentity());
             await AuthenticateAfter(context);
         }
@@ -56,29 +51,18 @@ namespace Bing.Security.Sessions
         /// 认证前操作
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
-        protected virtual Task AuthenticateBefore(HttpContext context)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task AuthenticateBefore(HttpContext context) => Task.CompletedTask;
 
         /// <summary>
         /// 是否认证
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
+        /// <param name="context">Http上下文</param>
         protected virtual bool IsAuthenticated(HttpContext context)
         {
             if (context.User == null)
-            {
                 return false;
-            }
-
             if (context.User.Identity.IsAuthenticated == false)
-            {
                 return false;
-            }
-
             return true;
         }
 
@@ -87,28 +71,19 @@ namespace Bing.Security.Sessions
         /// </summary>
         /// <param name="context">Http上下文</param>
         /// <param name="identity">身份标识</param>
-        /// <returns></returns>
         protected abstract Task LoadClaims(HttpContext context, ClaimsIdentity identity);
 
         /// <summary>
         /// 认证后操作
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
-        protected virtual Task AuthenticateAfter(HttpContext context)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task AuthenticateAfter(HttpContext context) => Task.CompletedTask;
 
         /// <summary>
         /// 获取服务
         /// </summary>
         /// <typeparam name="T">Http上下文</typeparam>
         /// <param name="context">服务类型</param>
-        /// <returns></returns>
-        protected T GetService<T>(HttpContext context)
-        {
-            return context.RequestServices.GetService<T>();
-        }
+        protected T GetService<T>(HttpContext context) => context.RequestServices.GetService<T>();
     }
 }

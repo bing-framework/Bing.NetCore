@@ -154,7 +154,7 @@ namespace Bing.Samples.Api
             services.AddUploadService();
             services.AddApiInterfaceService();
             services.AddBing<AspNetCoreBingModuleManager>();
-            return services.BuildDynamicProxyServiceProvider();
+            return services.BuildServiceContextProvider();
         }
 
         /// <summary>

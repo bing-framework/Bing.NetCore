@@ -1,0 +1,4280 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Ui.Angular.AntDesign</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Ui.Data.TreeResult">
+            <summary>
+            树形结果
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Data.TreeResult._data">
+            <summary>
+            树形参数列表
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Data.TreeResult._result">
+            <summary>
+            树形结果
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Data.TreeResult._async">
+            <summary>
+            是否异步加载
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.#ctor(System.Collections.Generic.IEnumerable{Bing.Ui.Data.TreeDto},System.Boolean)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Data.TreeResult"/>类型的实例
+            </summary>
+            <param name="data">树形参数列表</param>
+            <param name="async">是否异步加载</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.GetResult">
+            <summary>
+            获取树形结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.IsRoot(Bing.Ui.Data.TreeDto)">
+            <summary>
+            是否根节点
+            </summary>
+            <param name="dto">树形数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.AddNodes(Bing.Ui.Data.TreeDto)">
+            <summary>
+            添加节点
+            </summary>
+            <param name="root">树形数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.ToNode(Bing.Ui.Data.TreeDto)">
+            <summary>
+            转换为树节点
+            </summary>
+            <param name="dto">树形数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.InitIsLeaf(Bing.Ui.Data.ZorroTreeNode)">
+            <summary>
+            初始化叶节点状态
+            </summary>
+            <param name="node">树节点</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.IsLeaf(Bing.Ui.Data.ZorroTreeNode)">
+            <summary>
+            是否叶节点
+            </summary>
+            <param name="node">树节点</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.GetChildren(System.String)">
+            <summary>
+            获取节点直接下级
+            </summary>
+            <param name="parentId">父标识</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.AddChildren(Bing.Ui.Data.ZorroTreeNode)">
+            <summary>
+            添加子节点
+            </summary>
+            <param name="node">树节点</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeResult.InitKeys">
+            <summary>
+            初始化展开、选中标识列表
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Data.TreeTableResult`1">
+            <summary>
+            树形表格结果
+            </summary>
+            <typeparam name="TNode">树节点类型</typeparam>
+        </member>
+        <member name="F:Bing.Ui.Data.TreeTableResult`1._data">
+            <summary>
+            树形参数列表
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Data.TreeTableResult`1._result">
+            <summary>
+            树形表格结果
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Data.TreeTableResult`1._async">
+            <summary>
+            是否异步加载
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Boolean)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Data.TreeTableResult`1"/>类型的实例
+            </summary>
+            <param name="data">树形参数列表</param>
+            <param name="async">是否异步加载</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.GetResult">
+            <summary>
+            获取树形表格结果
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.IsRoot(`0)">
+            <summary>
+            是否根节点
+            </summary>
+            <param name="dto">树节点数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.ToNode(`0)">
+            <summary>
+            转换为结果节点
+            </summary>
+            <param name="dto">树节点数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.AddNode(Bing.Ui.Data.ZorroTreeTableResult{`0},`0)">
+            <summary>
+            添加节点
+            </summary>
+            <param name="root">树形表格根节点</param>
+            <param name="dto">树节点数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.InitLeaf(`0)">
+            <summary>
+            初始化叶节点状态
+            </summary>
+            <param name="node">树节点数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.IsLeaf(`0)">
+            <summary>
+            是否叶节点
+            </summary>
+            <param name="node">树节点数据传输对象</param>
+        </member>
+        <member name="M:Bing.Ui.Data.TreeTableResult`1.GetChildren(`0)">
+            <summary>
+            获取节点直接下级
+            </summary>
+            <param name="node">树节点数据传输对象</param>
+        </member>
+        <member name="T:Bing.Ui.Data.ZorroTreeNode">
+            <summary>
+            Ng-Zorro树节点
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Key">
+            <summary>
+            标识
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Title">
+            <summary>
+            标题
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Icon">
+            <summary>
+            图标
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.IsLeaf">
+            <summary>
+            是否叶节点
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Expanded">
+            <summary>
+            是否展开
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Disabled">
+            <summary>
+            是否禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.DisableCheckbox">
+            <summary>
+            是否禁用复选框
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Selectable">
+            <summary>
+            是否可选中
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Checked">
+            <summary>
+            复选框是否被选中
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Selected">
+            <summary>
+            当前节点是否被选中
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeNode.Children">
+            <summary>
+            子节点列表
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Data.ZorroTreeResult">
+            <summary>
+            Ng-Zorro树形结果数据
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeResult.Nodes">
+            <summary>
+            树节点列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeResult.ExpandedKeys">
+            <summary>
+            展开节点的标识列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeResult.CheckedKeys">
+            <summary>
+            复选框选中节点的标识列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeResult.SelectedKeys">
+            <summary>
+            选中节点的标识列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Data.ZorroTreeResult.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Data.ZorroTreeResult"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Data.ZorroTreeTableResult`1">
+            <summary>
+            Ng-Zorro树形表格结果数据
+            </summary>
+            <typeparam name="TNode">树节点类型</typeparam>
+        </member>
+        <member name="P:Bing.Ui.Data.ZorroTreeTableResult`1.Children">
+            <summary>
+            子节点列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Data.ZorroTreeTableResult`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Data.ZorroTreeTableResult`1"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder">
+            <summary>
+            NgZorro按钮包装器生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder._templateBuilder">
+            <summary>
+            模板生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder.AddText(System.String)">
+            <summary>
+            添加文本
+            </summary>
+            <param name="text">文本</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder.AddBindText(System.String)">
+            <summary>
+            添加文本
+            </summary>
+            <param name="text">文本</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder.AppendContent(Microsoft.AspNetCore.Html.IHtmlContent)">
+            <summary>
+            添加内容
+            </summary>
+            <param name="content">内容</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder.AddTemplateBuilder">
+            <summary>
+            添加模板生成器
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Buttons.ButtonTagHelper">
+            <summary>
+            按钮
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Text">
+            <summary>
+            text,文本
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.BindText">
+            <summary>
+            [text],文本属性绑定
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Color">
+            <summary>
+            颜色
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.ValidateForm">
+            <summary>
+            是否验证表单
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Disabled">
+            <summary>
+            禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Icon">
+            <summary>
+            图标
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Tooltip">
+            <summary>
+            提示
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Size">
+            <summary>
+            nzSize,按钮尺寸
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Shape">
+            <summary>
+            nzShape,按钮形状
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Loading">
+            <summary>
+            [nzLoading],设置加载状态
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Block">
+            <summary>
+            [nzBlock],将按钮宽度调整为其父宽度
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.Ghost">
+            <summary>
+            [nzGhost],设置为透明背景
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Buttons.ButtonTagHelper.OnClick">
+            <summary>
+            单击事件处理函数,范例：handle()
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.ButtonTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">TagHelper上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Buttons.Renders.ButtonRender">
+            <summary>
+            按钮渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Buttons.Renders.ButtonRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.#ctor(Bing.Ui.Configs.IConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Buttons.Renders.ButtonRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.Config(Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">NgZorro按钮包装器生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigText(Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder)">
+            <summary>
+            配置文本
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigValidateForm(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置是否验证表单
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigStyle(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置样式
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigDisabled(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置禁用
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigTooltip(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置提示
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigLoading(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置加载状态
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigEvents(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置事件
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Buttons.Renders.ButtonRender.ConfigIcon(Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder)">
+            <summary>
+            配置图标
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Enums.AntDesignIcon">
+            <summary>
+            Ant Design图标
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AccountBook">
+            <summary>
+            account-book
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Alert">
+            <summary>
+            alert
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AlipayCircle">
+            <summary>
+            alipay-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AlipaySquare">
+            <summary>
+            alipay-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Aliwangwang">
+            <summary>
+            aliwangwang
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AmazonCircle">
+            <summary>
+            amazon-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AmazonSquare">
+            <summary>
+            amazon-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Android">
+            <summary>
+            android
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Api">
+            <summary>
+            api
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Apple">
+            <summary>
+            apple
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Appstore">
+            <summary>
+            appstore
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Audio">
+            <summary>
+            audio
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Backward">
+            <summary>
+            backward
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Bank">
+            <summary>
+            bank
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BehanceCircle">
+            <summary>
+            behance-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BehanceSquare">
+            <summary>
+            behance-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Bell">
+            <summary>
+            bell
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Book">
+            <summary>
+            book
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BoxPlot">
+            <summary>
+            box-plot
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Build">
+            <summary>
+            build
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Bulb">
+            <summary>
+            bulb
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Calculator">
+            <summary>
+            calculator
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Calendar">
+            <summary>
+            calendar
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Camera">
+            <summary>
+            camera
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Car">
+            <summary>
+            car
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CaretDown">
+            <summary>
+            caret-down
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CaretLeft">
+            <summary>
+            caret-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CaretRight">
+            <summary>
+            caret-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CarryOut">
+            <summary>
+            carry-out
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CheckCircle">
+            <summary>
+            check-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CaretUp">
+            <summary>
+            caret-up
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CheckSquare">
+            <summary>
+            check-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Chrome">
+            <summary>
+            chrome
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CiCircle">
+            <summary>
+            ci-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ClockCircle">
+            <summary>
+            clock-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CloseCircle">
+            <summary>
+            close-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CloseSquare">
+            <summary>
+            close-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Cloud">
+            <summary>
+            cloud
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CodeSandboxCircle">
+            <summary>
+            code-sandbox-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CodeSandboxSquare">
+            <summary>
+            code-sandbox-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Code">
+            <summary>
+            code
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CodepenCircle">
+            <summary>
+            codepen-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CodepenSquare">
+            <summary>
+            codepen-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Compass">
+            <summary>
+            compass
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Contacts">
+            <summary>
+            contacts
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Container">
+            <summary>
+            container
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Control">
+            <summary>
+            control
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Copy">
+            <summary>
+            copy
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CopyrightCircle">
+            <summary>
+            copyright-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CreditCard">
+            <summary>
+            credit-card
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Crown">
+            <summary>
+            crown
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CustomerService">
+            <summary>
+            customer-service
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dashboard">
+            <summary>
+            dashboard
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Database">
+            <summary>
+            database
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Delete">
+            <summary>
+            delete
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Diff">
+            <summary>
+            diff
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DingtalkCircle">
+            <summary>
+            dingtalk-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DingtalkSquare">
+            <summary>
+            dingtalk-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dislike">
+            <summary>
+            dislike
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DollarCircle">
+            <summary>
+            dollar-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DownCircle">
+            <summary>
+            down-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DownSquare">
+            <summary>
+            down-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Download">
+            <summary>
+            download
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DribbbleCircle">
+            <summary>
+            dribbble-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DribbbleSquare">
+            <summary>
+            dribbble-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DropboxCircle">
+            <summary>
+            dropbox-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DropboxSquare">
+            <summary>
+            dropbox-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Edit">
+            <summary>
+            edit
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Environment">
+            <summary>
+            environment
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.EuroCircle">
+            <summary>
+            euro-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ExclamationCircle">
+            <summary>
+            exclamation-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Experiment">
+            <summary>
+            experiment
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.EyeInvisible">
+            <summary>
+            eye-invisible
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Eye">
+            <summary>
+            eye
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Facebook">
+            <summary>
+            facebook
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FastBackward">
+            <summary>
+            fast-backward
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FastForward">
+            <summary>
+            fast-forward
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileAdd">
+            <summary>
+            file-add
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileExcel">
+            <summary>
+            file-excel
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileExclamation">
+            <summary>
+            file-exclamation
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileImage">
+            <summary>
+            file-image
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileMarkdown">
+            <summary>
+            file-markdown
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FilePdf">
+            <summary>
+            file-pdf
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FilePpt">
+            <summary>
+            file-ppt
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileText">
+            <summary>
+            file-text
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileUnknown">
+            <summary>
+            file-unknown
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileWord">
+            <summary>
+            file-word
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileZip">
+            <summary>
+            file-zip
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.File">
+            <summary>
+            file
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Filter">
+            <summary>
+            filter
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Fire">
+            <summary>
+            fire
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Flag">
+            <summary>
+            flag
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FolderAdd">
+            <summary>
+            folder-add
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FolderOpen">
+            <summary>
+            folder-open
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Folder">
+            <summary>
+            folder
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Forward">
+            <summary>
+            forward
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Frown">
+            <summary>
+            frown
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Fund">
+            <summary>
+            fund
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FunnelPlot">
+            <summary>
+            funnel-plot
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Gift">
+            <summary>
+            gift
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Github">
+            <summary>
+            github
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Gitlab">
+            <summary>
+            gitlab
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Golden">
+            <summary>
+            golden
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.GoogleCircle">
+            <summary>
+            google-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.GooglePlusCircle">
+            <summary>
+            google-plus-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.GooglePlusSquare">
+            <summary>
+            google-plus-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.GoogleSquare">
+            <summary>
+            google-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Hdd">
+            <summary>
+            hdd
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Heart">
+            <summary>
+            heart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Highlight">
+            <summary>
+            highlight
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Home">
+            <summary>
+            home
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Hourglass">
+            <summary>
+            hourglass
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Html5">
+            <summary>
+            html5
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Idcard">
+            <summary>
+            idcard
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.IeCircle">
+            <summary>
+            ie-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.IeSquare">
+            <summary>
+            ie-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.InfoCircle">
+            <summary>
+            info-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Instagram">
+            <summary>
+            instagram
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Insurance">
+            <summary>
+            insurance
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Interation">
+            <summary>
+            interation
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Layout">
+            <summary>
+            layout
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.LeftCircle">
+            <summary>
+            left-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.LeftSquare">
+            <summary>
+            left-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Like">
+            <summary>
+            like
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Linkedin">
+            <summary>
+            linkedin
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Lock">
+            <summary>
+            lock
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Mail">
+            <summary>
+            mail
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MedicineBox">
+            <summary>
+            medicine-box
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MediumCircle">
+            <summary>
+            medium-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MediumSquare">
+            <summary>
+            medium-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Message">
+            <summary>
+            message
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MinusCircle">
+            <summary>
+            minus-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Meh">
+            <summary>
+            meh
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MinusSquare">
+            <summary>
+            minus-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Mobile">
+            <summary>
+            mobile
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Notification">
+            <summary>
+            notification
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MoneyCollect">
+            <summary>
+            money-collect
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PauseCircle">
+            <summary>
+            pause-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PayCircle">
+            <summary>
+            pay-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Phone">
+            <summary>
+            phone
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Picture">
+            <summary>
+            picture
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PieChart">
+            <summary>
+            pie-chart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PlayCircle">
+            <summary>
+            play-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PlaySquare">
+            <summary>
+            play-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PlusCircle">
+            <summary>
+            plus-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PlusSquare">
+            <summary>
+            plus-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PoundCircle">
+            <summary>
+            pound-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Printer">
+            <summary>
+            printer
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Profile">
+            <summary>
+            profile
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Project">
+            <summary>
+            project
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PropertySafety">
+            <summary>
+            property-safety
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Pushpin">
+            <summary>
+            pushpin
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.QqCircle">
+            <summary>
+            qq-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.QqSquare">
+            <summary>
+            qq-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.QuestionCircle">
+            <summary>
+            question-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Read">
+            <summary>
+            read
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Reconciliation">
+            <summary>
+            reconciliation
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RedEnvelope">
+            <summary>
+            red-envelope
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RedditCircle">
+            <summary>
+            reddit-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RedditSquare">
+            <summary>
+            reddit-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Rest">
+            <summary>
+            rest
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RightCircle">
+            <summary>
+            right-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RightSquare">
+            <summary>
+            right-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Rocket">
+            <summary>
+            rocket
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SafetyCertificate">
+            <summary>
+            safety-certificate
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Save">
+            <summary>
+            save
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Schedule">
+            <summary>
+            schedule
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SecurityScan">
+            <summary>
+            security-scan
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Setting">
+            <summary>
+            setting
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Shop">
+            <summary>
+            shop
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Shopping">
+            <summary>
+            shopping
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SketchCircle">
+            <summary>
+            sketch-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SketchSquare">
+            <summary>
+            sketch-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Skin">
+            <summary>
+            skin
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Skype">
+            <summary>
+            skype
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SlackCircle">
+            <summary>
+            slack-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SlackSquare">
+            <summary>
+            slack-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Sliders">
+            <summary>
+            sliders
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Smile">
+            <summary>
+            smile
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Sync">
+            <summary>
+            sync
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Snippets">
+            <summary>
+            snippets
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Sound">
+            <summary>
+            sound
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Star">
+            <summary>
+            star
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.StepBackward">
+            <summary>
+            step-backward
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.StepForward">
+            <summary>
+            step-forward
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Stop">
+            <summary>
+            stop
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Switcher">
+            <summary>
+            switcher
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Tablet">
+            <summary>
+            tablet
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Tag">
+            <summary>
+            tag
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Tags">
+            <summary>
+            tags
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.TaobaoCircle">
+            <summary>
+            taobao-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.TaobaoSquare">
+            <summary>
+            taobao-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Thunderbolt">
+            <summary>
+            thunderbolt
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Tool">
+            <summary>
+            tool
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.TrademarkCircle">
+            <summary>
+            trademark-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Trophy">
+            <summary>
+            trophy
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.TwitterCircle">
+            <summary>
+            twitter-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.TwitterSquare">
+            <summary>
+            twitter-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Unlock">
+            <summary>
+            unlock
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UpCircle">
+            <summary>
+            up-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UpSquare">
+            <summary>
+            up-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Usb">
+            <summary>
+            usb
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Upload">
+            <summary>
+            usb
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.VideoCamera">
+            <summary>
+            video-camera
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Wallet">
+            <summary>
+            wallet
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Warning">
+            <summary>
+            warning
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Wechat">
+            <summary>
+            wechat
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.WeiboCircle">
+            <summary>
+            weibo-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.WeiboSquare">
+            <summary>
+            weibo-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Windows">
+            <summary>
+            windows
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Yahoo">
+            <summary>
+            yahoo
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Youtube">
+            <summary>
+            youtube
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Yuque">
+            <summary>
+            yuque
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ZhihuCircle">
+            <summary>
+            zhihu-circle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ZhihuSquare">
+            <summary>
+            zhihu-square
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Alibaba">
+            <summary>
+            alibaba
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AlignLeft">
+            <summary>
+            align-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AlignRight">
+            <summary>
+            align-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Alipay">
+            <summary>
+            alipay
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Aliyun">
+            <summary>
+            aliyun
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Amazon">
+            <summary>
+            amazon
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AntCloud">
+            <summary>
+            ant-cloud
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AntDesign">
+            <summary>
+            ant-design
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Apartment">
+            <summary>
+            apartment
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AreaChart">
+            <summary>
+            area-chart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ArrowDown">
+            <summary>
+            arrow-down
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ArrowLeft">
+            <summary>
+            arrow-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ArrowRight">
+            <summary>
+            arrow-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ArrowUp">
+            <summary>
+            arrow-up
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ArrowsAlt">
+            <summary>
+            arrows-alt
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Audit">
+            <summary>
+            audit
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.AlignCenter">
+            <summary>
+            align-center
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Barcode">
+            <summary>
+            barcode
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BarChart">
+            <summary>
+            bar-chart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Bars">
+            <summary>
+            bars
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Behance">
+            <summary>
+            behance
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BgColors">
+            <summary>
+            bg-colors
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Block">
+            <summary>
+            block
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Bold">
+            <summary>
+            bold
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderBottom">
+            <summary>
+            border-bottom
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderHorizontal">
+            <summary>
+            border-horizontal
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderInner">
+            <summary>
+            border-inner
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderLeft">
+            <summary>
+            border-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderOuter">
+            <summary>
+            border-outer
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderRight">
+            <summary>
+            border-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderTop">
+            <summary>
+            border-top
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.BorderVerticle">
+            <summary>
+            border-verticle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Border">
+            <summary>
+            border
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Branches">
+            <summary>
+            branches
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Check">
+            <summary>
+            check
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Ci">
+            <summary>
+            ci
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Close">
+            <summary>
+            close
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CloudDownload">
+            <summary>
+            cloud-download
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CloudServer">
+            <summary>
+            cloud-server
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CloudSync">
+            <summary>
+            cloud-sync
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CloudUpload">
+            <summary>
+            cloud-upload
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Cluster">
+            <summary>
+            cluster
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.CodeSandbox">
+            <summary>
+            code-sandbox
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Codepen">
+            <summary>
+            codepen
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Coffee">
+            <summary>
+            coffee
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ColumHeight">
+            <summary>
+            colum-height
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ColumnWidth">
+            <summary>
+            column-width
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Copyright">
+            <summary>
+            copyright
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dash">
+            <summary>
+            dash
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DeploymentUnit">
+            <summary>
+            deployment-unit
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Desktop">
+            <summary>
+            desktop
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dingding">
+            <summary>
+            dingding
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Disconnect">
+            <summary>
+            disconnect
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dollar">
+            <summary>
+            dollar
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DotChart">
+            <summary>
+            dot-chart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DoubleRight">
+            <summary>
+            double-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.DoubleLeft">
+            <summary>
+            double-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Down">
+            <summary>
+            down
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Drag">
+            <summary>
+            drag
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dribbble">
+            <summary>
+            dribbble
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Dropbox">
+            <summary>
+            dropbox
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Ellipsis">
+            <summary>
+            ellipsis
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Enter">
+            <summary>
+            enter
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Euro">
+            <summary>
+            euro
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Exception">
+            <summary>
+            exception
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Exclamation">
+            <summary>
+            exclamation
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Export">
+            <summary>
+            export
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Fall">
+            <summary>
+            fall
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileDone">
+            <summary>
+            file-done
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileJpg">
+            <summary>
+            file-jpg
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileProtect">
+            <summary>
+            file-protect
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileSearch">
+            <summary>
+            file-search
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FileSync">
+            <summary>
+            file-sync
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FontColors">
+            <summary>
+            font-colors
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FontSize">
+            <summary>
+            font-size
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Fork">
+            <summary>
+            fork
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Form">
+            <summary>
+            form
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.FullscreenExit">
+            <summary>
+            fullscreen-exit
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Fullscreen">
+            <summary>
+            fullscreen
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Gateway">
+            <summary>
+            gateway
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Global">
+            <summary>
+            global
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Gold">
+            <summary>
+            gold
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.GooglePlus">
+            <summary>
+            google-plus
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Google">
+            <summary>
+            google
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.HeatMap">
+            <summary>
+            heat-map
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Ie">
+            <summary>
+            ie
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Import">
+            <summary>
+            import
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Inbox">
+            <summary>
+            inbox
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Info">
+            <summary>
+            info
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.IssuesClose">
+            <summary>
+            issues-close
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Italic">
+            <summary>
+            italic
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Key">
+            <summary>
+            key
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Laptop">
+            <summary>
+            laptop
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Left">
+            <summary>
+            left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.LineChart">
+            <summary>
+            line-chart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.LineHeight">
+            <summary>
+            line-height
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Line">
+            <summary>
+            line
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Link">
+            <summary>
+            link
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Loading3Quarters">
+            <summary>
+            loading-3-quarters
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Loading">
+            <summary>
+            loading
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Login">
+            <summary>
+            login
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Logout">
+            <summary>
+            logout
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Man">
+            <summary>
+            man
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MediumWorkmark">
+            <summary>
+            medium-workmark
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Medium">
+            <summary>
+            medium
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MenuFold">
+            <summary>
+            menu-fold
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.MenuUnfold">
+            <summary>
+            menu-unfold
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Menu">
+            <summary>
+            menu
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Minus">
+            <summary>
+            minus
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Monitor">
+            <summary>
+            monitor
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Mr">
+            <summary>
+            mr
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Number">
+            <summary>
+            number
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.OrderedList">
+            <summary>
+            ordered-list
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PaperClip">
+            <summary>
+            paper-clip
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Pause">
+            <summary>
+            pause
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Percentage">
+            <summary>
+            percentage
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PicCenter">
+            <summary>
+            pic-center
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PicLeft">
+            <summary>
+            pic-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.PicRight">
+            <summary>
+            pic-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Plus">
+            <summary>
+            plus
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Pound">
+            <summary>
+            pound
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Poweroff">
+            <summary>
+            poweroff
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Qq">
+            <summary>
+            qq
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Qrcode">
+            <summary>
+            qrcode
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Question">
+            <summary>
+            question
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RadarChart">
+            <summary>
+            radar-chart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RadiusBottomleft">
+            <summary>
+            radius-bottomleft
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RadiusBottomright">
+            <summary>
+            radius-bottomright
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RadiusSetting">
+            <summary>
+            radius-setting
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RadiusUpleft">
+            <summary>
+            radius-upleft
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.RadiusUpright">
+            <summary>
+            radius-upright
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Reddit">
+            <summary>
+            reddit
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Redo">
+            <summary>
+            redo
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Reload">
+            <summary>
+            reload
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ReloadTime">
+            <summary>
+            reload-time
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Retweet">
+            <summary>
+            retweet
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Right">
+            <summary>
+            right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Rise">
+            <summary>
+            rise
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Robot">
+            <summary>
+            robot
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Rollback">
+            <summary>
+            rollback
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Safety">
+            <summary>
+            safety
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Scan">
+            <summary>
+            scan
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Scissor">
+            <summary>
+            scissor
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Search">
+            <summary>
+            search
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Select">
+            <summary>
+            select
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Shake">
+            <summary>
+            shake
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ShareAlt">
+            <summary>
+            share-alt
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ShoppingCart">
+            <summary>
+            shopping-cart
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Shrink">
+            <summary>
+            shrink
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Sketch">
+            <summary>
+            sketch
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Slack">
+            <summary>
+            slack
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SmallDash">
+            <summary>
+            small-dash
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Solution">
+            <summary>
+            solution
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SortAscending">
+            <summary>
+            sort-ascending
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SortDescending">
+            <summary>
+            sort-descending
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Stock">
+            <summary>
+            stock
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Strikethrough">
+            <summary>
+            strikethrough
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SwapLeft">
+            <summary>
+            swap-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.SwapRight">
+            <summary>
+            swap-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Swap">
+            <summary>
+            swap
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Table">
+            <summary>
+            table
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Taobao">
+            <summary>
+            taobao
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Team">
+            <summary>
+            team
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ToTop">
+            <summary>
+            to-top
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Trademark">
+            <summary>
+            trademark
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Transaction">
+            <summary>
+            transaction
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Twitter">
+            <summary>
+            twitter
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Underline">
+            <summary>
+            underline
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Undo">
+            <summary>
+            undo
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UnorderedList">
+            <summary>
+            unordered-list
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Up">
+            <summary>
+            up
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UserAdd">
+            <summary>
+            user-add
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UserDelete">
+            <summary>
+            user-delete
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.User">
+            <summary>
+            user
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UsergroupAdd">
+            <summary>
+            usergroup-add
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.UsergroupDelete">
+            <summary>
+            usergroup-delete
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.VerticalAlignBottom">
+            <summary>
+            vertical-align-bottom
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.VerticalAlignMiddle">
+            <summary>
+            vertical-align-middle
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.VerticalAlignTop">
+            <summary>
+            vertical-align-top
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.VerticalLeft">
+            <summary>
+            vertical-left
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.VerticalRight">
+            <summary>
+            vertical-right
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Weibo">
+            <summary>
+            weibo
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Wifi">
+            <summary>
+            wifi
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Woman">
+            <summary>
+            woman
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Zhihu">
+            <summary>
+            zhihu
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ZoomIn">
+            <summary>
+            zoom-in
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.ZoomOut">
+            <summary>
+            zoom-out
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignIcon.Canlendar">
+            <summary>
+            canlendar
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Enums.AntDesignTheme">
+            <summary>
+            AntDesign图标主题风格
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignTheme.Fill">
+            <summary>
+            实心主题
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignTheme.Outline">
+            <summary>
+            描线主题
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.AntDesignTheme.TwoTone">
+            <summary>
+            双色主题
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Enums.ButtonShape">
+            <summary>
+            按钮形状
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.ButtonShape.Default">
+            <summary>
+            默认
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.ButtonShape.Circle">
+            <summary>
+            圆形
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.ButtonShape.Round">
+            <summary>
+            圆角
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Enums.ButtonSize">
+            <summary>
+            按钮尺寸
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.ButtonSize.Default">
+            <summary>
+            默认
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.ButtonSize.Small">
+            <summary>
+            小尺寸
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.ButtonSize.Large">
+            <summary>
+            大尺寸
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Enums.Color">
+            <summary>
+            颜色
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.Color.Default">
+            <summary>
+            默认
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.Color.Primary">
+            <summary>
+            主色，深蓝色
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.Color.Dashed">
+            <summary>
+            虚线
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.Color.Danger">
+            <summary>
+            危险色，红色
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Enums.DatePickerType">
+            <summary>
+            日期选择器类型
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.DatePickerType.Date">
+            <summary>
+            选择日期
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.DatePickerType.Range">
+            <summary>
+            选择日期范围
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.DatePickerType.Year">
+            <summary>
+            选择年份
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.DatePickerType.Month">
+            <summary>
+            选择年和月份
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Enums.DatePickerType.Week">
+            <summary>
+            选择一周
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase">
+            <summary>
+            表单控件渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.#ctor(Bing.Ui.Configs.IConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.Config(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigName(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置名称
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigDisabled(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置禁用
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigPlaceholder(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置占位符
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigPrefix(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置前缀
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigModel(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置模型绑定
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigRequired(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置必填项
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Base.FormControlRenderBase.ConfigEvents(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase">
+            <summary>
+            表单控件
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.For">
+            <summary>
+            属性表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.NgModel">
+            <summary>
+            [(ngModel)],模型绑定
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.BindName">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.Disabled">
+            <summary>
+            禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.Placeholder">
+            <summary>
+            占位提示
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.BindPlaceholder">
+            <summary>
+            占位提示
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.Required">
+            <summary>
+            必填项
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.RequiredMessage">
+            <summary>
+            必填项错误消息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.OnChange">
+            <summary>
+            (ngModelChange),变更事件处理函数
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.OnFocus">
+            <summary>
+            获得焦点事件处理函数,范例：handle()
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.OnBlur">
+            <summary>
+            失去焦点事件处理函数,范例：handle()
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.OnKeyup">
+            <summary>
+            键盘按键事件处理函数,范例：handle()
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.Base.FormControlTagHelperBase.OnKeydown">
+            <summary>
+            键盘按下事件处理函数,范例：handle()
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.CheckBoxBuilder">
+            <summary>
+            NgZorro复选框生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.CheckBoxBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.CheckBoxBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.DatePickerWrapperBuilder">
+            <summary>
+            NgZorro日期选择包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.DatePickerWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.DatePickerWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.RadioWrapperBuilder">
+            <summary>
+            NgZorro单选框包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.RadioWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.RadioWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder">
+            <summary>
+            NgZorro下拉列表包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.SwitchBuilder">
+            <summary>
+            NgZorro开关生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.SwitchBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.SwitchBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.TextAreaWrapperBuilder">
+            <summary>
+            NgZorro多行文本框包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.TextAreaWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.TextAreaWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.TextBoxWrapperBuilder">
+            <summary>
+            NgZorro文本框包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.TextBoxWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.TextBoxWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.UploadBuilder">
+            <summary>
+            NgZorro文件上传生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.UploadBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.UploadBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.UploadBuilder.Accept(System.String)">
+            <summary>
+            添加nzAccept
+            </summary>
+            <param name="value">至</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.UploadBuilder.FileType(System.String)">
+            <summary>
+            添加nzFileType
+            </summary>
+            <param name="value">治啊</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Builders.UploadWrapperBuilder">
+            <summary>
+            NgZorro文件上传包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Builders.UploadWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Builders.UploadWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.CheckBoxTagHelper">
+            <summary>
+            复选框
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.For">
+            <summary>
+            属性表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.NgModel">
+            <summary>
+            [(ngModel)],模型绑定
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.BindName">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.Label">
+            <summary>
+            标签文本
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.BindLabel">
+            <summary>
+            标签文本
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.Disabled">
+            <summary>
+            nzDisabled,禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.BindDisabled">
+            <summary>
+            [nzDisabled],禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.Indeterminate">
+            <summary>
+            [nzIndeterminate],是否中间状态
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.OnChange">
+            <summary>
+            (nzOnChange),变更事件处理函数
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.CheckBoxTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.DatePickerTagHelper">
+            <summary>
+            日期选择
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.DatePickerTagHelper.Type">
+            <summary>
+            日期选择器类型
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.DatePickerTagHelper.Format">
+            <summary>
+            nzFormat,格式化字符串，格式说明：
+            1. 年 - yyyy
+            2. 月 - MM
+            3. 日 - dd
+            4. 时 - HH
+            5. 分 - mm
+            6. 秒 - ss
+            7. 毫秒 - SSS
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.DatePickerTagHelper.ShowTime">
+            <summary>
+            nzShowTime,显示时间
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.DatePickerTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.FormTagHelper">
+            <summary>
+            表单
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.FormTagHelper.OnSubmit">
+            <summary>
+            提交事件处理函数，范例：handle()
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.FormTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.RadioTagHelper">
+            <summary>
+            单选框
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.For">
+            <summary>
+            属性表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.NgModel">
+            <summary>
+            [(ngModel)],模型绑定
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.Name">
+            <summary>
+            nzName,控件的名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.BindName">
+            <summary>
+            [nzName],控件的名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.Vertical">
+            <summary>
+            是否垂直布局
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.Url">
+            <summary>
+            请求地址
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.BindUrl">
+            <summary>
+            [url],请求地址
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.DatasSource">
+            <summary>
+            数据源
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.Disabled">
+            <summary>
+            [nzDisabled],禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.Required">
+            <summary>
+            必填项
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.RadioTagHelper.OnChange">
+            <summary>
+            (ngModelChange),变更事件处理函数
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.RadioTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender">
+            <summary>
+            复选框渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.#ctor(Bing.Ui.Configs.Config)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ResolveExpression">
+            <summary>
+            解析属性表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.Config(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigName(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置名称
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigLabel(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置标签
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigDisabled(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置禁用
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigModel(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置模型绑定
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigIndeterminate(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置中间状态
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigEvents(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.CheckBoxRender.ConfigOnChange(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置变更事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.FormRender">
+            <summary>
+            表单渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.FormRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.FormRender.#ctor(Bing.Ui.Configs.Config)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.FormRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.FormRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.FormRender.Config(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.FormRender.ConfigId(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置标识
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.FormRender.ConfigEvents(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.RadioRender">
+            <summary>
+            单选框渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.RadioRender._config">
+            <summary>
+            下拉列表配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.#ctor(Bing.Ui.Angular.Forms.Configs.SelectConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.RadioRender"/>类型的实例
+            </summary>
+            <param name="config">下拉列表配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ResolveExpression">
+            <summary>
+            解析属性表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.Config(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigName(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置名称
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigLabel(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置标签
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigDisabled(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置禁用
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigModel(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置模型绑定
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigRequired(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置必填项
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigEvents(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigUrl(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置Url
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.ConfigDataSource(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置数据源
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.RadioRender.AddItems">
+            <summary>
+            添加项集合
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.SelectRender">
+            <summary>
+            下拉列表渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.SelectRender._config">
+            <summary>
+            下拉列表配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.#ctor(Bing.Ui.Angular.Forms.Configs.SelectConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.SelectRender"/>类型的实例
+            </summary>
+            <param name="config">下拉列表配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ResolveExpression">
+            <summary>
+            解析属性表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigSelect(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigWidth(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置宽度
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigUrl(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置Url
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigDataSource(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置数据源
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.AddItems">
+            <summary>
+            添加项集合
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigDefaultOption(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置默认项
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigMultiple(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置多选
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigTemplate(Bing.Ui.Zorro.Forms.Builders.SelectWrapperBuilder)">
+            <summary>
+            配置显示模板
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SelectRender.ConfigStandalone(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置独立
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.SwitchRender">
+            <summary>
+            开关渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.SwitchRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SwitchRender.#ctor(Bing.Ui.Configs.Config)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.SwitchRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SwitchRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.SwitchRender.ConfigOnChange(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置变更事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.TextBoxRender">
+            <summary>
+            文本框渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.TextBoxRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.#ctor(Bing.Ui.Angular.Forms.Configs.TextBoxConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.TextBoxRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ResolveExpression">
+            <summary>
+            解析属性表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.CreateBuilder">
+            <summary>
+            创建标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigTextArea(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置多行文本框
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigDatePicker(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置日期选择框
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigDatePickerType(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置日期选择器类型
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigDateFormat(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置日期格式化
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigShowTime(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置显示时间
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigTextBox(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置文本框
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigType(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置类型
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigReadOnly(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置只读
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigValidations(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置验证操作
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigEmail(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置Email验证
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigMinLength(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置最小长度验证
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigMaxLength(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置最大长度验证
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigMin(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置最小值验证
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigMax(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置最大值验证
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigRegex(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置正则表达式验证
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.TextBoxRender.ConfigStandalone(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置独立
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.Renders.UploadRender">
+            <summary>
+            文件上传渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.UploadRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Forms.Renders.UploadRender._wrapperId">
+            <summary>
+            包装器标识
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.#ctor(Bing.Ui.Configs.Config)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Forms.Renders.UploadRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ResolveExpression">
+            <summary>
+            解析属性表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigWrapper(Bing.Ui.Zorro.Forms.Builders.UploadWrapperBuilder)">
+            <summary>
+            配置包装器
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetWrapperId">
+            <summary>
+            获取包装器标识
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.Config(Bing.Ui.Zorro.Forms.Builders.UploadBuilder)">
+            <summary>
+            配置
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigDataSource(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置数据源
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigDisabled(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置禁用
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigShowButton(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置显示按钮
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigMultiple(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置多选
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigDirectory(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置上传文件夹
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigFileList(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置文件列表
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigButton(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置按钮
+            </summary>
+            <param name="builder">标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigButtonDisabled(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置按钮禁用
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigButtonText(Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder)">
+            <summary>
+            配置按钮文本
+            </summary>
+            <param name="buttonBuilder">按钮标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigButtonIcon(Bing.Ui.Zorro.Buttons.Builders.ButtonWrapperBuilder)">
+            <summary>
+            配置按钮图标
+            </summary>
+            <param name="buttonBuilder">按钮标签生成器i</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigAccept(Bing.Ui.Zorro.Forms.Builders.UploadBuilder)">
+            <summary>
+            配置接受的文件类型
+            </summary>
+            <param name="builder">文件上传生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetAccepts">
+            <summary>
+            获取接受的文件类型列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetImageAccepts">
+            <summary>
+            获取图片类型接受列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetAccepts``1">
+            <summary>
+            获取枚举接受列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetDocumentAccepts">
+            <summary>
+            获取文档类型接受列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigFileType(Bing.Ui.Zorro.Forms.Builders.UploadBuilder)">
+            <summary>
+            配置文件类型限制
+            </summary>
+            <param name="builder">文件上传生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetFileTypes">
+            <summary>
+            获取文件类型限制列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetImageFileTypes">
+            <summary>
+            获取图片类型限制列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetFileTypes``1">
+            <summary>
+            获取枚举文件类型限制列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.GetDocumentFileTypes">
+            <summary>
+            获取文档类型限制列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigLimit(Bing.Ui.Zorro.Forms.Builders.UploadBuilder)">
+            <summary>
+            配置文件限制
+            </summary>
+            <param name="builder">文件上传生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigFilter(Bing.Ui.Zorro.Forms.Builders.UploadBuilder)">
+            <summary>
+            配置过滤器
+            </summary>
+            <param name="builder">文件上传生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigEvents(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.Renders.UploadRender.ConfigOnChange(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置OnChange事件
+            </summary>
+            <param name="builder">标签生成器</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.SelectTagHelper">
+            <summary>
+            下拉列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.Width">
+            <summary>
+            宽度，单位：px
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.Url">
+            <summary>
+            请求地址
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.BindUrl">
+            <summary>
+            [url],请求地址
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.QueryParam">
+            <summary>
+            查询参数
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.DatasSource">
+            <summary>
+            数据源
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.DefaultOptionText">
+            <summary>
+            默认项文本，默认项显示在列表的第一行
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SelectTagHelper.Multiple">
+            <summary>
+            启用多选
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.SelectTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.SwitchTagHelper">
+            <summary>
+            开关
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.For">
+            <summary>
+            属性表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.Name">
+            <summary>
+            name,控件名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.BindName">
+            <summary>
+            [name],控件名称
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.Disabled">
+            <summary>
+            nzDisabled,禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.BindDisabled">
+            <summary>
+            [nzDisabled],禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.Model">
+            <summary>
+            [(ngModel)],模型绑定
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.SwitchTagHelper.OnChange">
+            <summary>
+            (ngModelChange),变更事件处理函数
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.SwitchTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.TextAreaTagHelper">
+            <summary>
+            多行文本框
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.MinRows">
+            <summary>
+            最小行数
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.MaxRows">
+            <summary>
+            最大行数
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.MinLength">
+            <summary>
+            最小长度
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.MinLengthMessage">
+            <summary>
+            最小长度错误消息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.MaxLength">
+            <summary>
+            最大长度
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.Regex">
+            <summary>
+            正则表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextAreaTagHelper.RegexMessage">
+            <summary>
+            正则表达式错误消息
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.TextAreaTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.TextBoxTagHelper">
+            <summary>
+            文本框
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.ShowClearButton">
+            <summary>
+            是否显示清除按钮
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.Readonly">
+            <summary>
+            只读
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.Type">
+            <summary>
+            文本框类型
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.EmailMessage">
+            <summary>
+            电子邮件错误消息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.MinLength">
+            <summary>
+            最小长度
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.MinLengthMessage">
+            <summary>
+            最小长度错误消息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.MaxLength">
+            <summary>
+            最大长度
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.Min">
+            <summary>
+            最小值
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.MinMessage">
+            <summary>
+            最小值错误消息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.Max">
+            <summary>
+            最大值
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.MaxMessage">
+            <summary>
+            最大值错误消息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.Regex">
+            <summary>
+            正则表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.TextBoxTagHelper.RegexMessage">
+            <summary>
+            正则表达式错误消息
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.TextBoxTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Forms.UploadTagHelper">
+            <summary>
+            文件上传
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.For">
+            <summary>
+            属性表达式
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.NgModel">
+            <summary>
+            [(ngModel)],模型绑定
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Url">
+            <summary>
+            nzAction, 上传地址
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.BindUrl">
+            <summary>
+            [nzAction],上传地址
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Data">
+            <summary>
+            [nzData],上传参数或返回上传参数的方法
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Disabled">
+            <summary>
+            [nzDisabled],禁用
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.ShowButton">
+            <summary>
+            [nzShowButton],是否显示上传按钮
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.FileList">
+            <summary>
+            [(nzFileList)],上传文件列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Multiple">
+            <summary>
+            [nzMultiple],启用多选
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Directory">
+            <summary>
+            [nzDirectory],启用上传文件夹
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.ButtonText">
+            <summary>
+            按钮文本
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.ButtonIcon">
+            <summary>
+            按钮图标
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Accept">
+            <summary>
+            nzAccept,接受上传的文件类型，在文件选择框中对显示的文件过滤
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.AcceptImage">
+            <summary>
+            允许上传图片，在文件选择框中显示图片文件
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.AcceptDocument">
+            <summary>
+            允许上传文档，在文件选择框中显示文档文件
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.FileType">
+            <summary>
+            nzFileType,允许上传的文件类型的MIME,范例：image/png,image/jpeg,image/gif,image/bmp
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.ImageTypes">
+            <summary>
+            图片文件类型限制列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.DocumentTypes">
+            <summary>
+            文档文件类型限制列表
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Size">
+            <summary>
+            nzSize,文件大小限制，单位：KB
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.TotalLimit">
+            <summary>
+            上传文件总数量限制，超过总数隐藏按钮
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Limit">
+            <summary>
+            nzLimit,单次上传文件数量限制
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.Filter">
+            <summary>
+            [nzFilter],过滤器
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.OnChange">
+            <summary>
+            (nzChange),上传状态改变事件,范例：on-change="change($event)"
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Forms.UploadTagHelper.OnBeforeUpload">
+            <summary>
+            [nzBeforeUpload],上传前事件，返回 false 停止上传
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Forms.UploadTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Icons.Builders.IconBuilder">
+            <summary>
+            图标生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Builders.IconBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Icons.Builders.IconBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Builders.IconBuilder.AddType(System.String)">
+            <summary>
+            添加图标类型
+            </summary>
+            <param name="value">图标类型</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Builders.IconBuilder.AddBindType(System.String)">
+            <summary>
+            添加图标类型
+            </summary>
+            <param name="value">图标类型</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Icons.IconTagHelper">
+            <summary>
+            图标
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Icons.IconTagHelper.Type">
+            <summary>
+            nzType,图标类型
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Icons.IconTagHelper.BindType">
+            <summary>
+            [nzType],图标类型
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Icons.IconTagHelper.Theme">
+            <summary>
+            nzTheme,图标主题风格
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Icons.IconTagHelper.BindTheme">
+            <summary>
+            [nzTheme],图标主题风格
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Icons.IconTagHelper.Spin">
+            <summary>
+            持续旋转
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Icons.IconTagHelper.Rotate">
+            <summary>
+            旋转角度
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.IconTagHelper.GetRender(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            获取渲染器
+            </summary>
+            <param name="context">TagHelper上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Icons.Renders.IconRender">
+            <summary>
+            图标渲染器
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Icons.Renders.IconRender._config">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Renders.IconRender.#ctor(Bing.Ui.Configs.IConfig)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Icons.Renders.IconRender"/>类型的实例
+            </summary>
+            <param name="config">配置</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Renders.IconRender.GetTagBuilder">
+            <summary>
+            获取标签生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Renders.IconRender.Config(Bing.Ui.Zorro.Icons.Builders.IconBuilder)">
+            <summary>
+            公共配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Renders.IconRender.ConfigType(Bing.Ui.Zorro.Icons.Builders.IconBuilder)">
+            <summary>
+            配置图标类型
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Renders.IconRender.ConfigTheme(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置图标主题
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Icons.Renders.IconRender.ConfigSpin(Bing.Ui.Builders.TagBuilder)">
+            <summary>
+            配置图标旋转
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Builders.TableBuilder">
+            <summary>
+            NgZorro表格生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Builders.TableBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Builders.TableColumnBuilder">
+            <summary>
+            表格列td生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableColumnBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Builders.TableColumnBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableColumnBuilder.Truncate(System.String,System.Int32)">
+            <summary>
+            截断
+            </summary>
+            <param name="column">列名</param>
+            <param name="length">保留长度</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder">
+            <summary>
+            表格标题列th生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder.Title(System.String)">
+            <summary>
+            设置标题
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder.AddCheckBox(System.String)">
+            <summary>
+            添加复选框
+            </summary>
+            <param name="tableId">表格标识</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder.AddSort(System.String)">
+            <summary>
+            添加排序
+            </summary>
+            <param name="sortKey">排序字段</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableHeadColumnBuilder.AddWidth(System.String)">
+            <summary>
+            添加宽度
+            </summary>
+            <param name="width">宽度</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Builders.TableWrapperBuilder">
+            <summary>
+            NgZorro表格包装器生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Builders.TableWrapperBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Builders.TableWrapperBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Configs.ColumnInfo">
+            <summary>
+            列配置信息
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.Title">
+            <summary>
+            标题
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.Column">
+            <summary>
+            列名
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.IsSort">
+            <summary>
+            是否排序
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.IsCheckbox">
+            <summary>
+            是否复选框
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.IsLineNumber">
+            <summary>
+            是否序号
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.Width">
+            <summary>
+            宽度
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.#ctor(System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Configs.ColumnInfo"/>类型的实例
+            </summary>
+            <param name="title">标题</param>
+            <param name="column">列名</param>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Configs.ColumnInfo.GetSortKey">
+            <summary>
+            获取排序字段
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Configs.TableConfig">
+            <summary>
+            表格配置
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.LineNumberWidth">
+            <summary>
+            序号宽度
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.CheckboxWidth">
+            <summary>
+            复选框宽度
+            </summary>
+        </member>
+        <member name="F:Bing.Ui.Zorro.Tables.Configs.TableConfig.TableShareKey">
+            <summary>
+            表格共享键
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.WrapperId">
+            <summary>
+            表格包装器标识
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.Id">
+            <summary>
+            表格标识
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.Columns">
+            <summary>
+            标题集合
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.AutoCreateRow">
+            <summary>
+            是否自动创建行
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.AutoCreateHead">
+            <summary>
+            是否自动创建表头
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableConfig.IsSort">
+            <summary>
+            是否排序
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Configs.TableConfig.#ctor(Bing.Ui.TagHelpers.Context)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Configs.TableConfig"/>类型的实例
+            </summary>
+            <param name="context">上下文</param>
+        </member>
+        <member name="T:Bing.Ui.Zorro.Tables.Configs.TableShareConfig">
+            <summary>
+            表格共享配置
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.TableWrapperId">
+            <summary>
+            表格包装器标识
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.TableId">
+            <summary>
+            表格标识
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.Columns">
+            <summary>
+            列信息集合
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.AutoCreateRow">
+            <summary>
+            是否自动创建行
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.AutoCreateHead">
+            <summary>
+            是否自动创建表头
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.AutoCreateSort">
+            <summary>
+            是否自动创建排序列
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.IsSort">
+            <summary>
+            是否排序
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Zorro.Tables.Configs.TableShareConfig.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Ui.Zorro.Tables.Configs.TableShareConfig"/>类型的实例
+            </summary>
+            <param name="tableId">表格标识</param>
+        </member>
+    </members>
+</doc>

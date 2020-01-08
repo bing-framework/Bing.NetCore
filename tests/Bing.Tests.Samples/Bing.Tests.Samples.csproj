@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
+    <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+  </ItemGroup>
+
+</Project>

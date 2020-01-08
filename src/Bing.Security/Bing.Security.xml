@@ -1,0 +1,421 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Security</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Security.Claims.ClaimTypes">
+            <summary>
+            声明类型
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.FullName">
+            <summary>
+            姓名
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.Email">
+            <summary>
+            电子邮件
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.Mobile">
+            <summary>
+            手机号
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.ApplicationId">
+            <summary>
+            应用程序标识
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.ApplicationCode">
+            <summary>
+            应用程序编码
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.ApplicationName">
+            <summary>
+            应用程序名称
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.TenantId">
+            <summary>
+            租户标识
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.TenantCode">
+            <summary>
+            租户编码
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.TenantName">
+            <summary>
+            租户名称
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.RoleIds">
+            <summary>
+            角色标识列表
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Claims.ClaimTypes.RoleName">
+            <summary>
+            角色名
+            </summary>
+        </member>
+        <member name="T:Bing.Security.Extensions.IdentityExtensions">
+            <summary>
+            标识(<see cref="T:System.Security.Principal.IIdentity"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetUserId(System.Security.Principal.IIdentity)">
+            <summary>
+            获取用户标识
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetUserId``1(System.Security.Principal.IIdentity)">
+            <summary>
+            获取用户标识
+            </summary>
+            <typeparam name="T">数据类型</typeparam>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetUserName(System.Security.Principal.IIdentity)">
+            <summary>
+            获取用户名
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetEmail(System.Security.Principal.IIdentity)">
+            <summary>
+            获取电子邮件
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetNickName(System.Security.Principal.IIdentity)">
+            <summary>
+            获取昵称
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetRoles(System.Security.Principal.IIdentity)">
+            <summary>
+            获取所有角色
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.IdentityExtensions.GetRoles(System.Security.Claims.ClaimsIdentity,System.String)">
+            <summary>
+            获取角色
+            </summary>
+            <param name="claimsIdentity">声明标识</param>
+            <param name="type">类型</param>
+        </member>
+        <member name="T:Bing.Security.Extensions.SessionExtensions">
+            <summary>
+            用户会话扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetUserId(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人标识
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetUserId``1(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人标识
+            </summary>
+            <typeparam name="T">数据类型</typeparam>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetUserName(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人用户名
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetFullName(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人姓名
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetEmail(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人电子邮件
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetMobile(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人手机号
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationId(Bing.Sessions.ISession)">
+            <summary>
+            获取当前应用程序标识
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationId``1(Bing.Sessions.ISession)">
+            <summary>
+            获取当前应用程序标识
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationCode(Bing.Sessions.ISession)">
+            <summary>
+            获取当前应用程序编码
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationName(Bing.Sessions.ISession)">
+            <summary>
+            获取当前应用程序名称
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantId(Bing.Sessions.ISession)">
+            <summary>
+            获取当前租户标识
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantId``1(Bing.Sessions.ISession)">
+            <summary>
+            获取当前租户标识
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantCode(Bing.Sessions.ISession)">
+            <summary>
+            获取当前租户编码
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantName(Bing.Sessions.ISession)">
+            <summary>
+            获取当前租户名称
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetRoleIds(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人角色标识列表
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetRoleIds``1(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人角色标识列表
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="M:Bing.Security.Extensions.SessionExtensions.GetRoleName(Bing.Sessions.ISession)">
+            <summary>
+            获取当前操作人角色名
+            </summary>
+            <param name="session">用户会话</param>
+        </member>
+        <member name="T:Bing.Security.Properties.SecurityResources">
+            <summary>
+              一个强类型的资源类，用于查找本地化的字符串等。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.ResourceManager">
+            <summary>
+              返回此类使用的缓存的 ResourceManager 实例。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.Culture">
+            <summary>
+              重写当前线程的 CurrentUICulture 属性
+              重写当前线程的 CurrentUICulture 属性。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.DuplicateApplicationCode">
+            <summary>
+              查找类似 应用程序编码 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.DuplicateApplicationName">
+            <summary>
+              查找类似 应用程序名称 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.DuplicateEmail">
+            <summary>
+              查找类似 电子邮件 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.DuplicateRoleCode">
+            <summary>
+              查找类似 角色编码 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.DuplicateRoleName">
+            <summary>
+              查找类似 角色名 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.DuplicateUserName">
+            <summary>
+              查找类似 用户名 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidAccountOrPassword">
+            <summary>
+              查找类似 帐号无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidEmail">
+            <summary>
+              查找类似 电子邮件 {0} 无效 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidEmailOrPassword">
+            <summary>
+              查找类似 电子邮件无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidPhoneOrPassword">
+            <summary>
+              查找类似 手机号无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidRoleName">
+            <summary>
+              查找类似 用户名 {0} 无效 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidToken">
+            <summary>
+              查找类似 无效的令牌 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidUserName">
+            <summary>
+              查找类似 用户名 {0} 无效，仅允许字母或数字 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.InvalidUserNameOrPassword">
+            <summary>
+              查找类似 用户名无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.LoginFailLock">
+            <summary>
+              查找类似 由于您多次登录失败，暂时被系统锁定，请稍后再试 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordMismatch">
+            <summary>
+              查找类似 密码错误 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordRequiresDigit">
+            <summary>
+              查找类似 密码应包含数字 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordRequiresLower">
+            <summary>
+              查找类似 密码应包含小写字母 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordRequiresNonAlphanumeric">
+            <summary>
+              查找类似 密码应包含非字母和数字的特殊字符，比如 # 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordRequiresUniqueChars">
+            <summary>
+              查找类似 密码应包含至少 {0} 个不重复的字符 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordRequiresUpper">
+            <summary>
+              查找类似 密码应包含大写字母 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.PasswordTooShort">
+            <summary>
+              查找类似 密码不能少于 {0} 个字符 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.UserIsDisabled">
+            <summary>
+              查找类似 您的帐户已被冻结，请联系管理员 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Security.Properties.SecurityResources.UserNameIsEmpty">
+            <summary>
+              查找类似 用户名不能为空 的本地化字符串。
+            </summary>
+        </member>
+        <member name="T:Bing.Security.Sessions.SessionMiddlewareBase">
+            <summary>
+            用户会话中间件
+            </summary>
+        </member>
+        <member name="F:Bing.Security.Sessions.SessionMiddlewareBase._next">
+            <summary>
+            方法
+            </summary>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            初始化一个<see cref="T:Bing.Security.Sessions.SessionMiddlewareBase"/>类型的实例
+            </summary>
+            <param name="next">方法</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            执行方法
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.Authenticate(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            认证
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.AuthenticateBefore(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            认证前操作
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.IsAuthenticated(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            是否认证
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.LoadClaims(Microsoft.AspNetCore.Http.HttpContext,System.Security.Claims.ClaimsIdentity)">
+            <summary>
+            加载声明列表
+            </summary>
+            <param name="context">Http上下文</param>
+            <param name="identity">身份标识</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.AuthenticateAfter(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            认证后操作
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
+        <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.GetService``1(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            获取服务
+            </summary>
+            <typeparam name="T">Http上下文</typeparam>
+            <param name="context">服务类型</param>
+        </member>
+    </members>
+</doc>

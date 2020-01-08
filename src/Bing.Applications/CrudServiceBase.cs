@@ -160,37 +160,18 @@ namespace Bing.Applications
         /// 转换为实体
         /// </summary>
         /// <param name="request">请求参数</param>
-        protected virtual TEntity ToEntity(TRequest request)
-        {
-            return request.MapTo<TEntity>();
-        }
+        protected virtual TEntity ToEntity(TRequest request) => request.MapTo<TEntity>();
 
         /// <summary>
         /// 创建参数转换为实体
         /// </summary>
         /// <param name="request">创建参数</param>
-        protected virtual TEntity ToEntityFromCreateRequest(TCreateRequest request)
-        {
-            if (typeof(TCreateRequest) == typeof(TRequest))
-            {
-                return ToEntity(Bing.Utils.Helpers.Conv.To<TRequest>(request));
-            }
-
-            return request.MapTo<TEntity>();
-        }
+        protected virtual TEntity ToEntityFromCreateRequest(TCreateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Bing.Utils.Helpers.Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
 
         /// <summary>
         /// 修改参数转换为实体
         /// </summary>
         /// <param name="request">修改参数</param>
-        protected virtual TEntity ToEntityFromUpdateRequest(TUpdateRequest request)
-        {
-            if (typeof(TCreateRequest) == typeof(TRequest))
-            {
-                return ToEntity(Bing.Utils.Helpers.Conv.To<TRequest>(request));
-            }
-
-            return request.MapTo<TEntity>();
-        }        
+        protected virtual TEntity ToEntityFromUpdateRequest(TUpdateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Bing.Utils.Helpers.Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
     }
 }

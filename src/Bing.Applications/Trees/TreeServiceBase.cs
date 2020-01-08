@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Applications.Dtos;
 using Bing.Datas.Queries.Trees;
 using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
@@ -34,31 +33,20 @@ namespace Bing.Applications.Trees
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         /// <param name="store">存储器</param>
-        protected TreeServiceBase(IUnitOfWork unitOfWork, IStore<TEntity, Guid> store) : base(unitOfWork, store)
-        {
-            _store = store;
-        }
+        protected TreeServiceBase(IUnitOfWork unitOfWork, IStore<TEntity, Guid> store) : base(unitOfWork, store) => _store = store;
 
         /// <summary>
         /// 过滤
         /// </summary>
         /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
-        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter)
-        {
-            return queryable.Where(new TreeCriteria<TEntity>(parameter));
-        }
+        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCriteria<TEntity>(parameter));
 
         /// <summary>
         /// 获取直接下级子节点列表
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
-        protected override async Task<List<TEntity>> GetChildren(TQueryParameter parameter)
-        {
-            return await _store.FindAllAsync(t => t.ParentId == parameter.ParentId);
-        }
+        protected override async Task<List<TEntity>> GetChildren(TQueryParameter parameter) => await _store.FindAllAsync(t => t.ParentId == parameter.ParentId);
     }
 
     /// <summary>
@@ -102,17 +90,12 @@ namespace Bing.Applications.Trees
         /// </summary>
         /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
-        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter)
-        {
-            return queryable.Where(new TreeCriteria<TEntity, TParentId>(parameter));
-        }
+        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCriteria<TEntity, TParentId>(parameter));
 
         /// <summary>
         /// 查找实体列表
         /// </summary>
         /// <param name="ids">标识列表</param>
-        /// <returns></returns>
         public virtual async Task<List<TDto>> FindByIdsAsync(string ids)
         {
             var entities = await _store.FindByIdsNoTrackingAsync(ids);
@@ -123,40 +106,26 @@ namespace Bing.Applications.Trees
         /// 启用
         /// </summary>
         /// <param name="ids">标识列表</param>
-        /// <returns></returns>
-        public virtual async Task EnableAsync(string ids)
-        {
-            await Enable(Conv.ToList<TKey>(ids), true);
-        }
+        public virtual async Task EnableAsync(string ids) => await Enable(Conv.ToList<TKey>(ids), true);
 
         /// <summary>
         /// 启用
         /// </summary>
         /// <param name="ids">标识列表</param>
         /// <param name="enabled">启用/禁用</param>
-        /// <returns></returns>
         private async Task Enable(List<TKey> ids, bool enabled)
         {
             if (ids == null || ids.Count == 0)
-            {
                 return;
-            }
             var entities = await _store.FindByIdsAsync(ids);
             if (entities == null)
-            {
                 return;
-            }
-
             foreach (var entity in entities)
             {
                 if (enabled && await AllowEnable(entity) == false)
-                {
                     return;
-                }
                 if (enabled == false && await AllowDisable(entity) == false)
-                {
                     return;
-                }
                 entity.Enabled = enabled;
                 await _store.UpdateAsync(entity);
             }            
@@ -168,21 +137,13 @@ namespace Bing.Applications.Trees
         /// 允许启用
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
-        protected virtual Task<bool> AllowEnable(TEntity entity)
-        {
-            return Task.FromResult(true);
-        }
+        protected virtual Task<bool> AllowEnable(TEntity entity) => Task.FromResult(true);
 
         /// <summary>
         /// 允许禁用
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
-        protected virtual Task<bool> AllowDisable(TEntity entity)
-        {
-            return Task.FromResult(true);
-        }
+        protected virtual Task<bool> AllowDisable(TEntity entity) => Task.FromResult(true);
 
         /// <summary>
         /// 写日志
@@ -199,26 +160,19 @@ namespace Bing.Applications.Trees
         /// 冻结
         /// </summary>
         /// <param name="ids">标识列表</param>
-        /// <returns></returns>
-        public virtual Task DisableAsync(string ids)
-        {
-            return Enable(Conv.ToList<TKey>(ids), false);
-        }
+        public virtual Task DisableAsync(string ids) => Enable(Conv.ToList<TKey>(ids), false);
 
         /// <summary>
         /// 交换排序
         /// </summary>
         /// <param name="id">标识</param>
         /// <param name="swapId">目标标识</param>
-        /// <returns></returns>
         public virtual async Task SwapSortAsync(Guid id, Guid swapId)
         {
             var entity = await _store.FindAsync(id);
             var swapEntity = await _store.FindAsync(swapId);
             if (entity == null || swapEntity == null)
-            {
                 return;
-            }
             entity.SwapSort(swapEntity);
             await _store.UpdateAsync(entity);
             await _store.UpdateAsync(swapEntity);
@@ -229,19 +183,14 @@ namespace Bing.Applications.Trees
         /// 修正排序
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         public virtual async Task FixSortIdAsync(TQueryParameter parameter)
         {
             var children = await GetChildren(parameter);
             if (children == null)
-            {
                 return;
-            }
             var list = children.OrderBy(t => t.SortId).ToList();
-            for (int i = 0; i < children.Count; i++)
-            {
+            for (var i = 0; i < children.Count; i++)
                 children[i].SortId = i + 1;
-            }
             await _store.UpdateAsync(list);
             await _unitOfWork.CommitAsync();
         }
@@ -250,7 +199,6 @@ namespace Bing.Applications.Trees
         /// 获取直接下级节点列表
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        /// <returns></returns>
         protected abstract Task<List<TEntity>> GetChildren(TQueryParameter parameter);
     }
 }

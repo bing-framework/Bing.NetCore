@@ -11,21 +11,16 @@ namespace Bing.Biz.Addresses
         /// 转换为地址
         /// </summary>
         /// <param name="info">地址信息</param>
-        /// <returns></returns>
-        public static Address ToAddress(this AddressInfo info)
-        {
-            return new Address(info.ProvinceId.ToGuidOrNull(), info.CityId.ToGuidOrNull(), info.CountyId.ToGuidOrNull(),
+        public static Address ToAddress(this AddressInfo info) =>
+            new Address(info.ProvinceId.ToGuidOrNull(), info.CityId.ToGuidOrNull(), info.CountyId.ToGuidOrNull(),
                 info.Province, info.City, info.County, info.Street, info.Zip);
-        }
 
         /// <summary>
         /// 转换为地址信息
         /// </summary>
         /// <param name="address">地址</param>
-        /// <returns></returns>
-        public static AddressInfo ToInfo(this Address address)
-        {
-            return new AddressInfo()
+        public static AddressInfo ToInfo(this Address address) =>
+            new AddressInfo()
             {
                 ProvinceId = address.ProvinceId.SafeString(),
                 CityId = address.CityId.SafeString(),
@@ -37,6 +32,5 @@ namespace Bing.Biz.Addresses
                 Zip = address.Zip,
                 Description = address.Description
             };
-        }
     }
 }

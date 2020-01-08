@@ -24,19 +24,12 @@ namespace Bing.Utils.Expressions
         /// <summary>
         /// 初始化一个<see cref="PredicateExpressionBuilder{TEntity}"/>类型的实例
         /// </summary>
-        public PredicateExpressionBuilder()
-        {
-            _parameter = Expression.Parameter(typeof(TEntity), "t");
-        }
+        public PredicateExpressionBuilder() => _parameter = Expression.Parameter(typeof(TEntity), "t");
 
         /// <summary>
         /// 获取参数表达式
         /// </summary>
-        /// <returns></returns>
-        public ParameterExpression GetParameter()
-        {
-            return _parameter;
-        }
+        public ParameterExpression GetParameter() => _parameter;
 
         /// <summary>
         /// 添加表达式
@@ -46,11 +39,9 @@ namespace Bing.Utils.Expressions
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
         public void Append<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, Operator @operator,
-            object value)
-        {
+            object value) =>
             _result = _result.And(_parameter.Property(Lambda.GetMember(propertyExpression))
                 .Operation(@operator, value));
-        }
 
         /// <summary>
         /// 添加表达式
@@ -60,11 +51,9 @@ namespace Bing.Utils.Expressions
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
         public void Append<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, Operator @operator,
-            Expression value)
-        {
+            Expression value) =>
             _result = _result.And(_parameter.Property(Lambda.GetMember(propertyExpression))
                 .Operation(@operator, value));
-        }
 
         /// <summary>
         /// 添加表达式
@@ -72,10 +61,7 @@ namespace Bing.Utils.Expressions
         /// <param name="property">属性名</param>
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
-        public void Append(string property, Operator @operator, object value)
-        {
-            _result = _result.And(_parameter.Property(property).Operation(@operator, value));
-        }
+        public void Append(string property, Operator @operator, object value) => _result = _result.And(_parameter.Property(property).Operation(@operator, value));
 
         /// <summary>
         /// 添加表达式
@@ -83,26 +69,16 @@ namespace Bing.Utils.Expressions
         /// <param name="property">属性名</param>
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
-        public void Append(string property, Operator @operator, Expression value)
-        {
-            _result = _result.And(_parameter.Property(property).Operation(@operator, value));
-        }
+        public void Append(string property, Operator @operator, Expression value) => _result = _result.And(_parameter.Property(property).Operation(@operator, value));
 
         /// <summary>
         /// 清空
         /// </summary>
-        public void Clear()
-        {
-            _result = null;
-        }
+        public void Clear() => _result = null;
 
         /// <summary>
         /// 转换为Lambda表达式
         /// </summary>
-        /// <returns></returns>
-        public Expression<Func<TEntity, bool>> ToLambda()
-        {
-            return _result.ToLambda<Func<TEntity, bool>>(_parameter);
-        }
+        public Expression<Func<TEntity, bool>> ToLambda() => _result.ToLambda<Func<TEntity, bool>>(_parameter);
     }
 }

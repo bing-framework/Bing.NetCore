@@ -299,20 +299,12 @@ namespace Bing.Biz.Enums
         /// 获取描述
         /// </summary>
         /// <param name="nation">民族</param>
-        /// <returns></returns>
-        public static string Description(this Nation? nation)
-        {
-            return nation == null ? string.Empty : nation.Value.Description();
-        }
+        public static string Description(this Nation? nation) => nation == null ? string.Empty : nation.Value.Description();
 
         /// <summary>
         /// 获取值
         /// </summary>
         /// <param name="nation">民族</param>
-        /// <returns></returns>
-        public static int? Value(this Nation? nation)
-        {
-            return nation?.Value();
-        }
+        public static int? Value(this Nation? nation) => nation?.Value();
     }
 }

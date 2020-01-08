@@ -1,0 +1,448 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Ui.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Ui.Components.IAnchor">
+            <summary>
+            链接
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IButton">
+            <summary>
+            按钮
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.ICheckBox">
+            <summary>
+            复选框
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IColorPicker">
+            <summary>
+            颜色选择器
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IComponent">
+            <summary>
+            组件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IContainer">
+            <summary>
+            容器
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IContainer`1">
+            <summary>
+            容器
+            </summary>
+            <typeparam name="TWrapper">包装器类型</typeparam>
+        </member>
+        <member name="M:Bing.Ui.Components.IContainer`1.Begin">
+            <summary>
+            准备渲染器
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Ui.Components.IFormControl">
+            <summary>
+            表单控件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IIcon">
+            <summary>
+            图标
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.Internal.IOptionConfig">
+            <summary>
+            组件配置
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Components.Internal.IOptionConfig.Config``1(System.Action{``0})">
+            <summary>
+            配置
+            </summary>
+            <typeparam name="TConfig">配置类型</typeparam>
+            <param name="configAction">配置操作</param>
+        </member>
+        <member name="T:Bing.Ui.Components.Internal.IRenderEnd">
+            <summary>
+            容器渲染结束操作
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Components.Internal.IRenderEnd.End">
+            <summary>
+            渲染结束
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IOption">
+            <summary>
+            配置项
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.IRadio">
+            <summary>
+            单选框
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Components.IRadio.Enum``1">
+            <summary>
+            绑定枚举
+            </summary>
+            <typeparam name="TEnum">枚举类型</typeparam>
+        </member>
+        <member name="T:Bing.Ui.Components.ISelect">
+            <summary>
+            下拉列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Components.ISelect.Enum``1">
+            <summary>
+            绑定枚举
+            </summary>
+            <typeparam name="TEnum">枚举类型</typeparam>
+        </member>
+        <member name="T:Bing.Ui.Components.ISlideToggle">
+            <summary>
+            滑动开关
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Components.ITextBox">
+            <summary>
+            文本框
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Configs.IConfig">
+            <summary>
+            基础配置
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Configs.IConfig.AllAttributes">
+            <summary>
+            全部属性集合
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Configs.IConfig.OutputAttributes">
+            <summary>
+            输出属性集合，TagHelper中未明确定义的属性从该集合获取
+            </summary>
+        </member>
+        <member name="P:Bing.Ui.Configs.IConfig.Content">
+            <summary>
+            内容
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.Contains(System.String)">
+            <summary>
+            属性集合是否包含指定属性
+            </summary>
+            <param name="name">属性名</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.GetValue(System.String)">
+            <summary>
+            获取属性值
+            </summary>
+            <param name="name">属性名</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.GetValueOrNull(System.String)">
+            <summary>
+            获取属性值，无值则返回null
+            </summary>
+            <param name="name">属性名</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.GetValue``1(System.String)">
+            <summary>
+            获取属性值
+            </summary>
+            <typeparam name="T">目标类型</typeparam>
+            <param name="name">属性名</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.GetBoolValue(System.String)">
+            <summary>
+            获取布尔属性值
+            </summary>
+            <param name="name">属性名</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.SetAttribute(System.String,System.Object,System.Boolean)">
+            <summary>
+            设置属性
+            </summary>
+            <param name="name">属性名</param>
+            <param name="value">值</param>
+            <param name="replaceExisting">是否替换已存在的属性</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.Remove(System.String)">
+            <summary>
+            移除属性
+            </summary>
+            <param name="name">属性名</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.AddClass(System.String)">
+            <summary>
+            添加类
+            </summary>
+            <param name="class">类</param>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.GetClassList">
+            <summary>
+            获取类列表
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Configs.IConfig.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Bind.IBindName">
+            <summary>
+            绑定名称
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Datas.IDataSource">
+            <summary>
+            数据源
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Datas.IItem">
+            <summary>
+            列表项
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Datas.IUrl">
+            <summary>
+            Url
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Effects.ISpin">
+            <summary>
+            旋转
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnBlur">
+            <summary>
+            失去焦点事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnChange">
+            <summary>
+            变更事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnClick">
+            <summary>
+            单击事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnFocus">
+            <summary>
+            获得焦点事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnKeydown">
+            <summary>
+            键盘按下事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnKeyup">
+            <summary>
+            键盘按键事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Events.IOnSubmit">
+            <summary>
+            提交事件
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IHint">
+            <summary>
+            提示
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.ILabelPosition">
+            <summary>
+            标签位置
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IModel">
+            <summary>
+            模型绑定
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IMultiple">
+            <summary>
+            多选
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IPlaceholder">
+            <summary>
+            占位提示符
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IPrefix">
+            <summary>
+            前缀
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IReadOnly">
+            <summary>
+            只读
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IResetOption">
+            <summary>
+            重置项
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.IStandalone">
+            <summary>
+            独立
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.ISuffix">
+            <summary>
+            后缀
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.Validations.IMax">
+            <summary>
+            最大值验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.Validations.IMaxLength">
+            <summary>
+            最大长度验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.Validations.IMin">
+            <summary>
+            最小值验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.Validations.IMinLength">
+            <summary>
+            最小长度验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.Validations.IRegex">
+            <summary>
+            正则表达式验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Forms.Validations.IRequired">
+            <summary>
+            必填项验证
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.IAttribute">
+            <summary>
+            属性
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.IDisabled">
+            <summary>
+            禁用
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.IHeight">
+            <summary>
+            高度
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.ILabel">
+            <summary>
+            标签
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.IName">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.ISetIcon">
+            <summary>
+            设置图标
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.IText">
+            <summary>
+            文本
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.ITooltip">
+            <summary>
+            提示
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Layouts.IColspan">
+            <summary>
+            合并列
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Navigation.ILink">
+            <summary>
+            链接
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Navigation.IMenuId">
+            <summary>
+            菜单标识
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Styles.IBackgroundColor">
+            <summary>
+            背景颜色
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Styles.IButtonStyle">
+            <summary>
+            按钮样式
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Styles.IClass">
+            <summary>
+            类
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Styles.IColor">
+            <summary>
+            颜色
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Operations.Styles.IStyle">
+            <summary>
+            样式
+            </summary>
+        </member>
+        <member name="T:Bing.Ui.Renders.IRender">
+            <summary>
+            渲染器
+            </summary>
+        </member>
+        <member name="M:Bing.Ui.Renders.IRender.RenderStartTag(System.IO.TextWriter)">
+            <summary>
+            渲染起始标签
+            </summary>
+            <param name="writer">流写入器</param>
+        </member>
+        <member name="M:Bing.Ui.Renders.IRender.RenderEndTag(System.IO.TextWriter)">
+            <summary>
+            渲染结束标签
+            </summary>
+            <param name="writer">流写入器</param>
+        </member>
+        <member name="T:Bing.Ui.Services.IUiContext`1">
+            <summary>
+            Ui上下文
+            </summary>
+            <typeparam name="TModel">组件类型</typeparam>
+        </member>
+        <member name="P:Bing.Ui.Services.IUiContext`1.Helper">
+            <summary>
+            HtmlHelper
+            </summary>
+        </member>
+    </members>
+</doc>

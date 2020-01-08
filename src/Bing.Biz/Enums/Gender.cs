@@ -29,20 +29,12 @@ namespace Bing.Biz.Enums
         /// 获取描述
         /// </summary>
         /// <param name="gender">性别</param>
-        /// <returns></returns>
-        public static string Description(this Gender? gender)
-        {
-            return gender == null ? string.Empty : gender.Value.Description();
-        }
+        public static string Description(this Gender? gender) => gender == null ? string.Empty : gender.Value.Description();
 
         /// <summary>
         /// 获取值
         /// </summary>
         /// <param name="gender">性别</param>
-        /// <returns></returns>
-        public static int? Value(this Gender? gender)
-        {
-            return gender?.Value();
-        }
+        public static int? Value(this Gender? gender) => gender?.Value();
     }
 }

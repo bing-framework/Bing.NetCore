@@ -61,17 +61,12 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="right">右操作数</param>
-        /// <returns></returns>
         public static Expression And(this Expression left, Expression right)
         {
             if (left == null)
-            {
                 return right;
-            }
             if (right == null)
-            {
                 return left;
-            }
             return Expression.AndAlso(left, right);
         }
 
@@ -81,18 +76,13 @@ namespace Bing.Utils.Extensions
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="left">左操作数</param>
         /// <param name="right">右操作数</param>
-        /// <returns></returns>
         public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> left,
             Expression<Func<T, bool>> right)
         {
             if (left == null)
-            {
                 return right;
-            }
             if (right == null)
-            {
                 return left;
-            }
             return left.Compose(right, Expression.AndAlso);
         }
 
@@ -105,17 +95,12 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="right">右操作数</param>
-        /// <returns></returns>
         public static Expression Or(this Expression left, Expression right)
         {
             if (left == null)
-            {
                 return right;
-            }
             if (right == null)
-            {
                 return left;
-            }
             return Expression.OrElse(left, right);
         }
 
@@ -125,18 +110,13 @@ namespace Bing.Utils.Extensions
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="left">左操作数</param>
         /// <param name="right">右操作数</param>
-        /// <returns></returns>
         public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> left,
             Expression<Func<T, bool>> right)
         {
             if (left == null)
-            {
                 return right;
-            }
             if (right == null)
-            {
                 return left;
-            }
             return left.Compose(right, Expression.OrElse);
         }
 
@@ -190,22 +170,14 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="right">右操作数</param>
-        /// <returns></returns>
-        public static Expression NotEqual(this Expression left, Expression right)
-        {
-            return Expression.NotEqual(left, right);
-        }
+        public static Expression NotEqual(this Expression left, Expression right) => Expression.NotEqual(left, right);
 
         /// <summary>
         /// 创建不等于运算表达式
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static Expression NotEqual(this Expression left, object value)
-        {
-            return left.NotEqual(Lambda.Constant(value, left));
-        }
+        public static Expression NotEqual(this Expression left, object value) => left.NotEqual(Lambda.Constant(value, left));
 
         #endregion
 
@@ -483,7 +455,6 @@ namespace Bing.Utils.Extensions
         /// <param name="first">左操作数</param>
         /// <param name="second">右操作数</param>
         /// <param name="merge">合并操作</param>
-        /// <returns></returns>
         internal static Expression<T> Compose<T>(this Expression<T> first, Expression<T> second,
             Func<Expression, Expression, Expression> merge)
         {

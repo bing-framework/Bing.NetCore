@@ -1,0 +1,2290 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bing.Permissions</name>
+    </assembly>
+    <members>
+        <member name="T:Bing.Permissions.Authorization.AuthorizeResult">
+            <summary>
+            授权结果
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Authorization.AuthorizeResult.Code">
+            <summary>
+            状态码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Authorization.AuthorizeResult.Message">
+            <summary>
+            消息
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Authorization.AuthorizeResult.Data">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Authorization.AuthorizeResult.OperationTime">
+            <summary>
+            操作时间
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.AuthorizeResult.#ctor(System.Int32,System.String,System.Object)">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Authorization.AuthorizeResult"/>类型的实例
+            </summary>
+            <param name="code">状态码</param>
+            <param name="message">消息</param>
+            <param name="data">数据</param>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.AuthorizeResult.ExecuteResultAsync(Microsoft.AspNetCore.Mvc.ActionContext)">
+            <summary>
+            执行结果
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Middlewares.IJsonWebTokenCustomerAuthorizeOption">
+            <summary>
+            JWT客户授权配置
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.IJsonWebTokenCustomerAuthorizeOption.SetAnonymousPaths(System.Collections.Generic.IList{System.String})">
+            <summary>
+            设置匿名访问路径
+            </summary>
+            <param name="urls">路径列表</param>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.IJsonWebTokenCustomerAuthorizeOption.SetValidateFunc(System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean})">
+            <summary>
+            设置校验函数
+            </summary>
+            <param name="func">校验函数</param>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware">
+            <summary>
+            JWT客户授权中间件
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware._next">
+            <summary>
+            方法
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware._options">
+            <summary>
+            Jwt选项配置
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware._validatePayload">
+            <summary>
+            校验负载
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware._anonymousPathList">
+            <summary>
+            匿名访问路径列表
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware._tokenValidator">
+            <summary>
+            Jwt令牌校验器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Options.IOptions{Bing.Permissions.Identity.JwtBearer.JwtOptions},Bing.Permissions.Identity.JwtBearer.IJsonWebTokenValidator,System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean},System.Collections.Generic.IList{System.String})">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware"/>类型的实例
+            </summary>
+            <param name="next">方法</param>
+            <param name="options">Jwt选项配置</param>
+            <param name="tokenValidator">Jwt令牌校验器</param>
+            <param name="validatePayload">校验负载</param>
+            <param name="anonymousPathList">匿名访问路径列表</param>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            执行中间件拦截逻辑
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption">
+            <summary>
+            Jwt客户授权配置
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption.AnonymousPaths">
+            <summary>
+            匿名访问路径列表
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption.ValidatePayload">
+            <summary>
+            校验负载
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption.SetAnonymousPaths(System.Collections.Generic.IList{System.String})">
+            <summary>
+            设置匿名访问路径
+            </summary>
+            <param name="urls">路径列表</param>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Middlewares.JsonWebTokenCustomerAuthorizeOption.SetValidateFunc(System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean})">
+            <summary>
+            设置校验函数
+            </summary>
+            <param name="func">校验函数</param>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Policies.IJsonWebTokenAuthorizationRequirement">
+            <summary>
+            JWT授权请求
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.IJsonWebTokenAuthorizationRequirement.SetValidateFunc(System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean})">
+            <summary>
+            设置校验函数
+            </summary>
+            <param name="func">校验函数</param>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler">
+            <summary>
+            Jwt授权处理器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler._options">
+            <summary>
+            Jwt选项配置
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler._tokenValidator">
+            <summary>
+            Jwt令牌校验器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler._tokenStore">
+            <summary>
+            Jwt令牌存储器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler.#ctor(Microsoft.Extensions.Options.IOptions{Bing.Permissions.Identity.JwtBearer.JwtOptions},Bing.Permissions.Identity.JwtBearer.IJsonWebTokenValidator,Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore)">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler"/>类型的实例
+            </summary>
+            <param name="options">Jwt选项配置</param>
+            <param name="tokenValidator">Jwt令牌校验器</param>
+            <param name="tokenStore">Jwt令牌存储器</param>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler.HandleRequirementAsync(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext,Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationRequirement)">
+            <summary>
+            重载异步处理
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler.ThrowExceptionHandleAsync(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext,Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationRequirement)">
+            <summary>
+            抛异常处理方式
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler.ResultHandleAsync(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext,Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationRequirement)">
+            <summary>
+            结果处理方式
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationHandler.GetPayload(System.String)">
+            <summary>
+            获取Payload
+            </summary>
+            <param name="encodeJwt">加密后的Jwt令牌</param>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationRequirement">
+            <summary>
+            JWT授权请求
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationRequirement.ValidatePayload">
+            <summary>
+            校验负载
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Authorization.Policies.JsonWebTokenAuthorizationRequirement.SetValidateFunc(System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean})">
+            <summary>
+            设置校验函数
+            </summary>
+            <param name="func">校验函数</param>
+        </member>
+        <member name="T:Bing.Permissions.Authorization.Policies.JwtAuthorizeAttribute">
+            <summary>
+            Jwt授权
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Extensions.Extensions">
+            <summary>
+            扩展服务
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Extensions.Extensions.UseJwtCustomerAuthorize(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.Action{Bing.Permissions.Authorization.Middlewares.IJsonWebTokenCustomerAuthorizeOption})">
+            <summary>
+            注册Jwt客户授权中间件
+            </summary>
+            <param name="builder">应用程序生成器</param>
+            <param name="action">操作</param>
+        </member>
+        <member name="M:Bing.Permissions.Extensions.Extensions.AddJwt(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            注册Jwt服务
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="configuration">配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Extensions.Extensions.GetOptions(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            获取Jwt身份认证选项
+            </summary>
+            <param name="configuration">配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Extensions.Extensions.GetValidationParameters(Bing.Permissions.Identity.JwtBearer.JwtOptions)">
+            <summary>
+            获取验证参数
+            </summary>
+            <param name="options">Jwt选项配置</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber">
+            <summary>
+            Identity中文错误描述
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordTooShort(System.Int32)">
+            <summary>
+            密码太短
+            </summary>
+            <param name="length">密码长度</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordRequiresNonAlphanumeric">
+            <summary>
+            密码应包含非字母和数字的特殊字符
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordRequiresUpper">
+            <summary>
+            密码应包含大写字母
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordRequiresLower">
+            <summary>
+            密码应包含小写字母
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordRequiresDigit">
+            <summary>
+            密码应包含数字
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordRequiresUniqueChars(System.Int32)">
+            <summary>
+            密码应包含不重复的字符数
+            </summary>
+            <param name="uniqueChars">重复字符数</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.InvalidUserName(System.String)">
+            <summary>
+            无效用户名
+            </summary>
+            <param name="userName">用户名</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.DuplicateUserName(System.String)">
+            <summary>
+            用户名重复
+            </summary>
+            <param name="userName">用户名</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.DuplicateEmail(System.String)">
+            <summary>
+            电子邮件重复
+            </summary>
+            <param name="email">电子邮件</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.InvalidEmail(System.String)">
+            <summary>
+            无效电子邮件
+            </summary>
+            <param name="email">电子邮件</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.InvalidToken">
+            <summary>
+            无效令牌
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.PasswordMismatch">
+            <summary>
+            密码错误
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.InvalidRoleName(System.String)">
+            <summary>
+            角色名无效
+            </summary>
+            <param name="role">角色名</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.DuplicateRoleName(System.String)">
+            <summary>
+            角色名重复
+            </summary>
+            <param name="role">角色名</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber.UserNotInRole(System.String)">
+            <summary>
+            用户未包含角色
+            </summary>
+            <param name="role">角色名</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Extensions.IdentityExtensions">
+            <summary>
+            标识(<see cref="T:System.Security.Principal.IIdentity"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetUserId(System.Security.Principal.IIdentity)">
+            <summary>
+            获取用户标识
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetUserId``1(System.Security.Principal.IIdentity)">
+            <summary>
+            获取用户标识
+            </summary>
+            <typeparam name="T">数据类型</typeparam>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetUserName(System.Security.Principal.IIdentity)">
+            <summary>
+            获取用户名
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetEmail(System.Security.Principal.IIdentity)">
+            <summary>
+            获取电子邮件
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetNickName(System.Security.Principal.IIdentity)">
+            <summary>
+            获取昵称
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetRoles(System.Security.Principal.IIdentity)">
+            <summary>
+            获取所有角色
+            </summary>
+            <param name="identity">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityExtensions.GetRoles(System.Security.Claims.ClaimsIdentity,System.String)">
+            <summary>
+            获取角色
+            </summary>
+            <param name="claimsIdentity">声明标识</param>
+            <param name="type">类型</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions">
+            <summary>
+            授权配置(<see cref="T:Microsoft.AspNetCore.Identity.IdentityOptions"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions.Load(Microsoft.AspNetCore.Identity.IdentityOptions,Bing.Permissions.Identity.Options.PermissionOptions)">
+            <summary>
+            加载权限配置
+            </summary>
+            <param name="options">Identity配置</param>
+            <param name="permissionOptions">权限配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions.LoadPassword(Microsoft.AspNetCore.Identity.IdentityOptions,Bing.Permissions.Identity.Options.PermissionOptions)">
+            <summary>
+            加载密码配置
+            </summary>
+            <param name="options">Identity配置</param>
+            <param name="permissionOptions">权限配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions.LoadUser(Microsoft.AspNetCore.Identity.IdentityOptions,Bing.Permissions.Identity.Options.PermissionOptions)">
+            <summary>
+            加载用户配置
+            </summary>
+            <param name="options">Identity配置</param>
+            <param name="permissionOptions">权限配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions.LoadStore(Microsoft.AspNetCore.Identity.IdentityOptions,Bing.Permissions.Identity.Options.PermissionOptions)">
+            <summary>
+            加载存储配置
+            </summary>
+            <param name="options">Identity配置</param>
+            <param name="permissionOptions">权限配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions.LoadSignIn(Microsoft.AspNetCore.Identity.IdentityOptions,Bing.Permissions.Identity.Options.PermissionOptions)">
+            <summary>
+            加载登录配置
+            </summary>
+            <param name="options">Identity配置</param>
+            <param name="permissionOptions">权限配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityOptionsExtensions.LoadLockout(Microsoft.AspNetCore.Identity.IdentityOptions,Bing.Permissions.Identity.Options.PermissionOptions)">
+            <summary>
+            加载登录锁定配置
+            </summary>
+            <param name="options">Identity配置</param>
+            <param name="permissionOptions">权限配置</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Extensions.IdentityResultExtensions">
+            <summary>
+            授权结果(<see cref="T:Microsoft.AspNetCore.Identity.IdentityResult"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Extensions.IdentityResultExtensions.ThrowIfError(Microsoft.AspNetCore.Identity.IdentityResult)">
+            <summary>
+            失败抛出异常
+            </summary>
+            <param name="result">Identity结果</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo">
+            <summary>
+            设备令牌绑定信息
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo.UserId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo.DeviceId">
+            <summary>
+            设备标识
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo.DeviceType">
+            <summary>
+            设备类型
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo.Token">
+            <summary>
+            令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.GrantType">
+            <summary>
+            授权类型
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.GrantType.Password">
+            <summary>
+            用户密码类型
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.GrantType.RefreshToken">
+            <summary>
+            刷新Token类型
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.IAccessClaimsProvider">
+            <summary>
+            访问令牌用户声明提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IAccessClaimsProvider.CreateClaims(System.String)">
+            <summary>
+            创建用户标识
+            </summary>
+            <param name="userId">用户标识</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenBuilder">
+            <summary>
+            Jwt令牌构建器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenBuilder.CreateAsync(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            创建令牌
+            </summary>
+            <param name="payload">负载</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenBuilder.CreateAsync(System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions)">
+            <summary>
+            创建令牌
+            </summary>
+            <param name="payload">负载</param>
+            <param name="options">Jwt选项配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenBuilder.RefreshAsync(System.String)">
+            <summary>
+            刷新令牌
+            </summary>
+            <param name="refreshToken">刷新令牌</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore">
+            <summary>
+            Jwt令牌存储器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.GetRefreshTokenAsync(System.String)">
+            <summary>
+            获取刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.SaveRefreshTokenAsync(Bing.Permissions.Identity.JwtBearer.RefreshToken)">
+            <summary>
+            保存刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.RemoveRefreshTokenAsync(System.String)">
+            <summary>
+            移除刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.GetTokenAsync(System.String)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.RemoveTokenAsync(System.String)">
+            <summary>
+            移除访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.SaveTokenAsync(Bing.Permissions.Identity.JwtBearer.JsonWebToken,System.DateTime)">
+            <summary>
+            保存访问令牌
+            </summary>
+            <param name="token">令牌</param>
+            <param name="expires">过期时间</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.ExistsTokenAsync(System.String)">
+            <summary>
+            是否存在访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.BindUserDeviceTokenAsync(System.String,System.String,Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo,System.DateTime)">
+            <summary>
+            绑定用户设备令牌
+            </summary>
+            <param name="userId">用户标识</param>
+            <param name="clientType">客户端类型</param>
+            <param name="info">设备信息</param>
+            <param name="expires">过期时间</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore.GetUserDeviceTokenAsync(System.String,System.String)">
+            <summary>
+            获取用户设备令牌
+            </summary>
+            <param name="userId">用户标识</param>
+            <param name="clientType">客户端类型</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenValidator">
+            <summary>
+            Jwt令牌校验器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.IJsonWebTokenValidator.Validate(System.String,Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean})">
+            <summary>
+            校验
+            </summary>
+            <param name="encodeJwt">加密后的Jwt令牌</param>
+            <param name="options">Jwt选项配置</param>
+            <param name="validatePayload">校验负载</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.Internal.Helper">
+            <summary>
+            JwtBearer帮助类
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.Helper.ToClaims(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            转换为声明列表
+            </summary>
+            <param name="dictionary">字典</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.Helper.CreateToken(System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler,System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},Bing.Permissions.Identity.JwtBearer.JwtOptions,Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenType)">
+            <summary>
+            创建令牌
+            </summary>
+            <param name="tokenHandler">Jwt安全令牌处理器</param>
+            <param name="claims">声明列表</param>
+            <param name="options">Jwt选项配置</param>
+            <param name="tokenType">Jwt令牌类型</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenType">
+            <summary>
+            Jwt令牌类型
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenType.AccessToken">
+            <summary>
+            访问令牌
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenType.RefreshToken">
+            <summary>
+            刷新令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder">
+            <summary>
+            Jwt构建器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder._tokenStore">
+            <summary>
+            Jwt令牌存储器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder._tokenPayloadStore">
+            <summary>
+            令牌Payload存储器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder._tokenHandler">
+            <summary>
+            Jwt安全令牌处理器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder._options">
+            <summary>
+            Jwt选项配置
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder.#ctor(Bing.Permissions.Identity.JwtBearer.IJsonWebTokenStore,Bing.Permissions.Identity.JwtBearer.ITokenPayloadStore,Microsoft.Extensions.Options.IOptions{Bing.Permissions.Identity.JwtBearer.JwtOptions})">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder"/>类型的实例
+            </summary>
+            <param name="tokenStore">Jwt令牌存储器</param>
+            <param name="tokenPayloadStore">令牌Payload存储器</param>
+            <param name="options">Jwt选项配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder.CreateAsync(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            创建令牌
+            </summary>
+            <param name="payload">负载</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder.CreateAsync(System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions)">
+            <summary>
+            创建令牌
+            </summary>
+            <param name="payload">负载</param>
+            <param name="options">Jwt选项配置</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder.GetUserId(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            获取用户标识
+            </summary>
+            <param name="payload">负载列表</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenBuilder.RefreshAsync(System.String)">
+            <summary>
+            刷新令牌
+            </summary>
+            <param name="refreshToken">刷新令牌</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore">
+            <summary>
+            Jwt令牌存储器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore._cache">
+            <summary>
+            缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.#ctor(Bing.Caching.ICache)">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore"/>类型的实例
+            </summary>
+            <param name="cache">缓存</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetRefreshTokenAsync(System.String)">
+            <summary>
+            获取刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.SaveRefreshTokenAsync(Bing.Permissions.Identity.JwtBearer.RefreshToken)">
+            <summary>
+            保存刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.RemoveRefreshTokenAsync(System.String)">
+            <summary>
+            移除刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetTokenAsync(System.String)">
+            <summary>
+            获取访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.RemoveTokenAsync(System.String)">
+            <summary>
+            移除访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.SaveTokenAsync(Bing.Permissions.Identity.JwtBearer.JsonWebToken,System.DateTime)">
+            <summary>
+            保存访问令牌
+            </summary>
+            <param name="token">令牌</param>
+            <param name="expires">过期时间</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.ExistsTokenAsync(System.String)">
+            <summary>
+            是否存在访问令牌
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.BindUserDeviceTokenAsync(System.String,System.String,Bing.Permissions.Identity.JwtBearer.DeviceTokenBindInfo,System.DateTime)">
+            <summary>
+            绑定用户设备令牌
+            </summary>
+            <param name="userId">用户标识</param>
+            <param name="clientType">客户端类型</param>
+            <param name="info">设备信息</param>
+            <param name="expires">过期时间</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetUserDeviceTokenAsync(System.String,System.String)">
+            <summary>
+            获取用户设备令牌
+            </summary>
+            <param name="userId">用户标识</param>
+            <param name="clientType">客户端类型</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetRefreshTokenKey(System.String)">
+            <summary>
+            获取刷新令牌缓存键
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetTokenKey(System.String)">
+            <summary>
+            获取访问令牌缓存键
+            </summary>
+            <param name="token">访问令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetBindRefreshTokenKey(System.String)">
+            <summary>
+            获取绑定刷新令牌缓存键
+            </summary>
+            <param name="token">刷新令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenStore.GetBindUserDeviceTokenKey(System.String,System.String)">
+            <summary>
+            获取绑定用户设备令牌缓存键
+            </summary>
+            <param name="userId">用户标识</param>
+            <param name="clientType">客户端类型</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenValidator">
+            <summary>
+            Jwt令牌校验器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenValidator.Validate(System.String,Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Func{System.Collections.Generic.IDictionary{System.String,System.String},Bing.Permissions.Identity.JwtBearer.JwtOptions,System.Boolean})">
+            <summary>
+            校验
+            </summary>
+            <param name="encodeJwt">加密后的Jwt令牌</param>
+            <param name="options">Jwt选项配置</param>
+            <param name="validatePayload">校验负载</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.JsonWebTokenValidator.ToUnixEpochDate(System.DateTime)">
+            <summary>
+            生成时间戳
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore">
+            <summary>
+            令牌Payload存储器
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore._cache">
+            <summary>
+            缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore.#ctor(Bing.Caching.ICache)">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore"/>类型的实例
+            </summary>
+            <param name="cache"></param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore.SaveAsync(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.DateTime)">
+            <summary>
+            保存
+            </summary>
+            <param name="token">令牌</param>
+            <param name="payload">负载字典</param>
+            <param name="expires">过期时间</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore.RemoveAsync(System.String)">
+            <summary>
+            移除
+            </summary>
+            <param name="token">令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore.GetAsync(System.String)">
+            <summary>
+            获取Payload
+            </summary>
+            <param name="token">令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.Internal.TokenPayloadStore.GetPayloadKey(System.String)">
+            <summary>
+            获取Payload缓存键
+            </summary>
+            <param name="token">令牌</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.ITokenPayloadStore">
+            <summary>
+            令牌Payload存储器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.ITokenPayloadStore.SaveAsync(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.DateTime)">
+            <summary>
+            保存
+            </summary>
+            <param name="token">令牌</param>
+            <param name="payload">负载字典</param>
+            <param name="expires">过期时间</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.ITokenPayloadStore.RemoveAsync(System.String)">
+            <summary>
+            移除
+            </summary>
+            <param name="token">令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.ITokenPayloadStore.GetAsync(System.String)">
+            <summary>
+            获取Payload
+            </summary>
+            <param name="token">令牌</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.JsonWebToken">
+            <summary>
+            JwtToken
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JsonWebToken.AccessToken">
+            <summary>
+            访问令牌。用于业务身份认证的令牌
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JsonWebToken.AccessTokenUtcExpires">
+            <summary>
+            访问令牌有效期。UTC标准
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JsonWebToken.RefreshToken">
+            <summary>
+            刷新令牌。用于刷新AccessToken的令牌
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JsonWebToken.RefreshUtcExpires">
+            <summary>
+            刷新令牌有效期。UTC标准
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.JwtBearer.JsonWebToken.IsExpired">
+            <summary>
+            是否已过期
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.JwtOptions">
+            <summary>
+            Jwt选项配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.Secret">
+            <summary>
+            密钥。密钥加密算法：HmacSha256
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.Issuer">
+            <summary>
+            发行方
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.Audience">
+            <summary>
+            订阅方
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.AccessExpireMinutes">
+            <summary>
+            访问令牌有效期分钟数
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.RefreshExpireMinutes">
+            <summary>
+            刷新令牌有效期分钟数
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.ThrowEnabled">
+            <summary>
+            启用抛异常方式
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.JwtOptions.SingleDeviceEnabled">
+            <summary>
+            启用单设备登录
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.JwtBearer.RefreshToken">
+            <summary>
+            刷新Token信息
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.RefreshToken.ClientId">
+            <summary>
+            客户端ID
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.RefreshToken.Value">
+            <summary>
+            标识值
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.JwtBearer.RefreshToken.EndUtcTime">
+            <summary>
+            过期时间
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Models.ApplicationBase`2">
+            <summary>
+            应用程序基类
+            </summary>
+            <typeparam name="TApplication">应用程序类型</typeparam>
+            <typeparam name="TKey">应用程序标识类型</typeparam>
+            <summary>
+            应用程序基类
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.Code">
+            <summary>
+            应用程序编码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.Name">
+            <summary>
+            应用程序名称
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.Enabled">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.RegisterEnabled">
+            <summary>
+            启用注册
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.Remark">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.IsDeleted">
+            <summary>
+            是否删除
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.CreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.CreatorId">
+            <summary>
+            创建人标识
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.LastModificationTime">
+            <summary>
+            最后修改时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.ApplicationBase`2.LastModifierId">
+            <summary>
+            最后修改人标识
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.ApplicationBase`2.#ctor(`1)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`2"/>类型的实例
+            </summary>
+            <param name="id">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.ApplicationBase`2.AddDescriptions">
+            <summary>
+            添加描述
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.ApplicationBase`2.AddChanges(`0)">
+            <summary>
+            添加变更列表
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Models.RoleBase`3">
+            <summary>
+            角色基类
+            </summary>
+            <typeparam name="TRole">角色类型</typeparam>
+            <typeparam name="TKey">角色标识类型</typeparam>
+            <typeparam name="TParentId">角色父标识类型</typeparam>
+            <summary>
+            角色基类
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.Code">
+            <summary>
+            角色编码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.Name">
+            <summary>
+            角色名称
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.NormalizedName">
+            <summary>
+            标准化角色名称
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.Type">
+            <summary>
+            角色类型
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.IsAdmin">
+            <summary>
+            是否管理员角色
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.IsDefault">
+            <summary>
+            是否默认角色
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.IsSystem">
+            <summary>
+            是否系统角色
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.Remark">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.PinYin">
+            <summary>
+            拼音简码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.Sign">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.IsDeleted">
+            <summary>
+            是否删除
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.CreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.CreatorId">
+            <summary>
+            创建人标识
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.LastModificationTime">
+            <summary>
+            最后修改时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.RoleBase`3.LastModifierId">
+            <summary>
+            最后修改人标识
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.RoleBase`3.#ctor(`1,System.String,System.Int32)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.Trees.TreeEntityBase`3"/>类型的实例
+            </summary>
+            <param name="id">标识</param>
+            <param name="path">路径</param>
+            <param name="level">级数</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.RoleBase`3.AddDescriptions">
+            <summary>
+            添加描述
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.RoleBase`3.AddChanges(`0)">
+            <summary>
+            添加变更列表
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.RoleBase`3.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.RoleBase`3.InitType">
+            <summary>
+            初始化类型
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.RoleBase`3.InitPinYin">
+            <summary>
+            初始化拼音简码
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Models.UserBase`2">
+            <summary>
+            用户基类
+            </summary>
+            <typeparam name="TUser">用户类型你</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+            <summary>
+            用户基类
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.UserName">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.NormalizedUserName">
+            <summary>
+            标准化用户名
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.Email">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.NormalizedEmail">
+            <summary>
+            标准化的电子邮箱
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.EmailConfirmed">
+            <summary>
+            邮箱已确认
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.PhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.PhoneNumberConfirmed">
+            <summary>
+            手机号码已确认
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.PasswordHash">
+            <summary>
+            密码哈希值
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.SafePassword">
+            <summary>
+            安全码
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.SafePasswordHash">
+            <summary>
+            安全码哈希值
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.SecurityStamp">
+            <summary>
+            安全戳
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.TwoFactorEnabled">
+            <summary>
+            启用双因子身份验证
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.Enabled">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.DisabledTime">
+            <summary>
+            冻结时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LockoutEnd">
+            <summary>
+            锁定截止时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LockoutEnabled">
+            <summary>
+            启用锁定
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.IsSystem">
+            <summary>
+            是否系统用户
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.AccessFailedCount">
+            <summary>
+            登录失败次数
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LoginCount">
+            <summary>
+            登录次数
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.RegisterIp">
+            <summary>
+            注册Ip
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LastLoginTime">
+            <summary>
+            上次登录时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LastLoginIp">
+            <summary>
+            上次登录Ip
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.CurrentLoginTime">
+            <summary>
+            本次登录时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.CurrentLoginIp">
+            <summary>
+            本次登录Ip
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.Remark">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.CreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.CreatorId">
+            <summary>
+            创建人
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LastModificationTime">
+            <summary>
+            最后修改时间
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.LastModifierId">
+            <summary>
+            最后修改人
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.IsDeleted">
+            <summary>
+            是否删除
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.#ctor(`1)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`2"/>类型的实例
+            </summary>
+            <param name="id">标识</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.AddDescriptions">
+            <summary>
+            添加描述
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.AddChanges(`0)">
+            <summary>
+            添加变更列表
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Models.UserBase`2.Encryptor">
+            <summary>
+            加密器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.InitUserName">
+            <summary>
+            初始化用户名
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.SetPassword(System.String,System.Nullable{System.Boolean})">
+            <summary>
+            设置密码
+            </summary>
+            <param name="password">密码</param>
+            <param name="storeOriginalPassword">是否存储原始密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.GetEncryptor">
+            <summary>
+            获取加密器
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.SetSafePassword(System.String,System.Nullable{System.Boolean})">
+            <summary>
+            设置安全码
+            </summary>
+            <param name="password">安全码</param>
+            <param name="storeOriginalPassword">是否存储原始密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.GetPassword">
+            <summary>
+            获取密码
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Models.UserBase`2.GetSafePassword">
+            <summary>
+            获取安全码
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Options.LockoutOptions">
+            <summary>
+            登录锁定配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.LockoutOptions.AllowedForNewUsers">
+            <summary>
+            是否锁定新创建的用户。默认锁定
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.LockoutOptions.MaxFailedAccessAttempts">
+            <summary>
+            导致锁定的登录失败最大次数。默认5次
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.LockoutOptions.LockoutTimeSpan">
+            <summary>
+            锁定时间间隔。默认5分钟
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Options.PasswordOptions">
+            <summary>
+            密码配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PasswordOptions.MinLength">
+            <summary>
+            密码最小长度。默认值为 1
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PasswordOptions.UniqueChars">
+            <summary>
+            密码应包含不重复的字符串。默认值为 1
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PasswordOptions.NonAlphanumeric">
+            <summary>
+            密码应包含非字母和数字的特殊字符。比如 #，默认不启用
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PasswordOptions.Uppercase">
+            <summary>
+            密码应包含大写字母。默认不启用
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PasswordOptions.Lowercase">
+            <summary>
+            密码应包含小写字母。默认不启用
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PasswordOptions.Digit">
+            <summary>
+            密码应包含数字。默认不启用
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Options.PermissionOptions">
+            <summary>
+            权限配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PermissionOptions.Password">
+            <summary>
+            密码配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PermissionOptions.User">
+            <summary>
+            用户配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PermissionOptions.Store">
+            <summary>
+            存储配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PermissionOptions.SignIn">
+            <summary>
+            登录配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.PermissionOptions.Lockout">
+            <summary>
+            登录锁定配置
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Options.SignInOptions">
+            <summary>
+            登录配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.SignInOptions.ConfirmedEmail">
+            <summary>
+            必须确认电子邮件才能登录
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.SignInOptions.ConfirmedPhoneNumber">
+            <summary>
+            必须确认手机号才能登录
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Options.StoreOptions">
+            <summary>
+            存储配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.StoreOptions.MaxLengthForKeys">
+            <summary>
+            键最大长度
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.StoreOptions.ProtectPersonalData">
+            <summary>
+            加密存储标记为[ProtectPersonalData]的用户数据。默认不启用
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.StoreOptions.StoreOriginalPassword">
+            <summary>
+            存储原始密码。默认不启用
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Options.UserOptions">
+            <summary>
+            用户配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.UserOptions.UserNameCharacters">
+            <summary>
+            用户名允许使用的字符。 默认值为 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Options.UserOptions.UniqueEmail">
+            <summary>
+            用户的电子邮件必须唯一。默认不启用
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Purposes.TokenPurpose">
+            <summary>
+            令牌用途
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.Purposes.TokenPurpose.PhoneRegister">
+            <summary>
+            手机号注册
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Repositories.IApplicationRepository`2">
+            <summary>
+            应用程序仓储
+            </summary>
+            <typeparam name="TApplication">应用程序类型</typeparam>
+            <typeparam name="TKey">应用程序标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Repositories.IRoleRepository`3">
+            <summary>
+            角色仓储
+            </summary>
+            <typeparam name="TRole">角色类型</typeparam>
+            <typeparam name="TKey">角色标识类型</typeparam>
+            <typeparam name="TParentId">角色父标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Repositories.IUserRepository`2">
+            <summary>
+            用户仓储
+            </summary>
+            <typeparam name="TUser">用户类型</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Results.SignInResult">
+            <summary>
+            登录结果
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Results.SignInResult.State">
+            <summary>
+            登录状态
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Results.SignInResult.UserId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Results.SignInResult.Message">
+            <summary>
+            消息
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Results.SignInResult.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Results.SignInResult"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Results.SignInResult.#ctor(Bing.Permissions.Identity.Results.SignInState,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Results.SignInResult"/>类型的实例
+            </summary>
+            <param name="state">登录状态</param>
+            <param name="userId">用户标识</param>
+            <param name="message">消息</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Results.SignInState">
+            <summary>
+            登录状态
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.Results.SignInState.Succeeded">
+            <summary>
+            登录成功
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.Results.SignInState.Failed">
+            <summary>
+            失败
+            </summary>
+        </member>
+        <member name="F:Bing.Permissions.Identity.Results.SignInState.TwoFactor">
+            <summary>
+            需要两阶段认证
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Abstractions.IRoleManager`3">
+            <summary>
+            角色管理
+            </summary>
+            <typeparam name="TRole">角色类型</typeparam>
+            <typeparam name="TKey">角色标识类型</typeparam>
+            <typeparam name="TParentId">角色父标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IRoleManager`3.CreateAsync(`0)">
+            <summary>
+            创建角色
+            </summary>
+            <param name="role">角色</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IRoleManager`3.UpdateAsync(`0)">
+            <summary>
+            修改角色
+            </summary>
+            <param name="role">角色</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Abstractions.ISignInManager`2">
+            <summary>
+            登录管理
+            </summary>
+            <typeparam name="TUser">用户类型</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.ISignInManager`2.SignInAsync(`0,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            登录
+            </summary>
+            <param name="user">用户</param>
+            <param name="password">密码</param>
+            <param name="isPersistent">cookie是否持久保留。设置为false，当关闭浏览器则cookie失效</param>
+            <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.ISignInManager`2.SignOutAsync">
+            <summary>
+            退出登录
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2">
+            <summary>
+            用户管理s
+            </summary>
+            <typeparam name="TUser">用户类型个</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.CreateAsync(`0,System.String)">
+            <summary>
+            创建用户
+            </summary>
+            <param name="user">用户</param>
+            <param name="password">密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.GenerateTokenAsync(System.String,System.String,System.String,System.String)">
+            <summary>
+            生成令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="purpose">用途</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.GenerateTokenAsync(`0,System.String,System.String,System.String)">
+            <summary>
+            生成令牌
+            </summary>
+            <param name="user">用户</param>
+            <param name="purpose">用途</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.VerifyTokenAsync(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            验证令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="purpose">用途</param>
+            <param name="token">令牌</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.VerifyTokenAsync(`0,System.String,System.String,System.String,System.String)">
+            <summary>
+            验证令牌
+            </summary>
+            <param name="user">用户</param>
+            <param name="purpose">用途</param>
+            <param name="token">令牌</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.GenerateRegisterTokenAsync(System.String,System.String)">
+            <summary>
+            生成手机号注册令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="application">应用程序</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.VerifyRegisterTokenAsync(System.String,System.String,System.String)">
+            <summary>
+            验证手机号注册令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="token">令牌</param>
+            <param name="application">应用程序</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.GenerateEmailConfirmationTokenAsync(`0)">
+            <summary>
+            生成电子邮件确认令牌
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.ConfirmEmailAsync(`0,System.String)">
+            <summary>
+            激活电子邮件
+            </summary>
+            <param name="user">用户</param>
+            <param name="token">令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.GenerateEmailPasswordResetTokenAsync(`0)">
+            <summary>
+            生成电子邮件重置密码令牌
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.ResetPasswordByEmailAsync(`0,System.String,System.String)">
+            <summary>
+            通过电子邮件重置密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="token">令牌</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.GeneratePhonePasswordResetTokenAsync(`0)">
+            <summary>
+            生成手机号重置密码令牌
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.ResetPasswordByPhoneAsync(`0,System.String,System.String)">
+            <summary>
+            通过手机号重置密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="token">令牌</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.ChangePasswordAsync(`0,System.String,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="currentPassword">当前密码</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.ChangePasswordAsync(`0,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.FindByNameAsync(System.String)">
+            <summary>
+            通过用户名查找
+            </summary>
+            <param name="userName">用户名</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.FindByEmailAsync(System.String)">
+            <summary>
+            通过电子邮件查找
+            </summary>
+            <param name="email">电子邮件</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Abstractions.IUserManager`2.FindByPhoneAsync(System.String)">
+            <summary>
+            通过手机号查找
+            </summary>
+            <param name="phone">手机号</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Implements.IdentitySignInManager`2">
+            <summary>
+            Identity登录服务
+            </summary>
+            <typeparam name="TUser">用户类型</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.IdentitySignInManager`2.#ctor(Microsoft.AspNetCore.Identity.UserManager{`0},Microsoft.AspNetCore.Http.IHttpContextAccessor,Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory{`0},Microsoft.Extensions.Options.IOptions{Microsoft.AspNetCore.Identity.IdentityOptions},Microsoft.Extensions.Logging.ILogger{Microsoft.AspNetCore.Identity.SignInManager{`0}},Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Services.Implements.IdentitySignInManager`2"/>类型的实例
+            </summary>
+            <param name="userManager">Identity用户管理器</param>
+            <param name="contextAccessor">HttpContext访问器</param>
+            <param name="claimsFactory">用户声明工厂</param>
+            <param name="optionsAccessor">Identity配置</param>
+            <param name="logger">日志</param>
+            <param name="schemes">认证架构提供程序</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.IdentitySignInManager`2.CanSignInAsync(`0)">
+            <summary>
+            是否允许登录
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Implements.IdentityUserManager`2">
+            <summary>
+            Identity用户服务
+            </summary>
+            <typeparam name="TUser">用户类型</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.IdentityUserManager`2.#ctor(Microsoft.AspNetCore.Identity.IUserStore{`0},Microsoft.Extensions.Options.IOptions{Microsoft.AspNetCore.Identity.IdentityOptions},Microsoft.AspNetCore.Identity.IPasswordHasher{`0},System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Identity.IUserValidator{`0}},System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Identity.IPasswordValidator{`0}},Microsoft.AspNetCore.Identity.ILookupNormalizer,Microsoft.AspNetCore.Identity.IdentityErrorDescriber,System.IServiceProvider,Microsoft.Extensions.Logging.ILogger{Microsoft.AspNetCore.Identity.UserManager{`0}})">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Services.Implements.IdentityUserManager`2"/>类型的实例
+            </summary>
+            <param name="store">用户存储</param>
+            <param name="optionsAccessor">配置</param>
+            <param name="passwordHasher">密码加密器</param>
+            <param name="userValidators">用户验证器</param>
+            <param name="passwordValidators">密码验证器</param>
+            <param name="keyNormalizer">键标准化器</param>
+            <param name="errors">错误描述</param>
+            <param name="services">服务提供程序</param>
+            <param name="logger">日志</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.IdentityUserManager`2.ResetPasswordAsync(`0,System.String,System.String,System.String)">
+            <summary>
+            重置密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="tokenProvider">令牌提供程序</param>
+            <param name="token">令牌</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.IdentityUserManager`2.UpdatePasswordAsync(`0,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Implements.RoleManager`3">
+            <summary>
+            角色管理
+            </summary>
+            <typeparam name="TRole">角色类型</typeparam>
+            <typeparam name="TKey">角色标识类型</typeparam>
+            <typeparam name="TParentId">角色父标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.RoleManager`3.Manager">
+            <summary>
+            Identity角色管理
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.RoleManager`3.Repository">
+            <summary>
+            角色仓储
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.#ctor(Microsoft.AspNetCore.Identity.RoleManager{`0},Bing.Permissions.Identity.Repositories.IRoleRepository{`0,`1,`2})">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Services.Implements.RoleManager`3"/>类型的实例
+            </summary>
+            <param name="roleManager">Identity角色管理</param>
+            <param name="repository">角色仓储</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.CreateAsync(`0)">
+            <summary>
+            创建角色
+            </summary>
+            <param name="role">角色</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.ValidateCreate(`0)">
+            <summary>
+            创建角色验证
+            </summary>
+            <param name="role">角色</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.ThrowDuplicateCodeException(System.String)">
+            <summary>
+            抛出编码重复异常
+            </summary>
+            <param name="code">角色编码</param>
+            <exception cref="T:Bing.Exceptions.Warning">应用程序异常</exception>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.ThrowDuplicateNameException(System.String)">
+            <summary>
+            抛出名称重复异常
+            </summary>
+            <param name="name">角色名称</param>
+            <exception cref="T:Bing.Exceptions.Warning">应用程序异常</exception>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.UpdateAsync(`0)">
+            <summary>
+            修改角色
+            </summary>
+            <param name="role">角色</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.RoleManager`3.ValidateUpdate(`0)">
+            <summary>
+            修改角色验证
+            </summary>
+            <param name="role">角色</param>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Implements.SignInManager`2">
+            <summary>
+            登录服务
+            </summary>
+            <typeparam name="TUser">用户类型</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.SignInManager`2.IdentitySignInManager">
+            <summary>
+            Identity登录管理
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.SignInManager`2.UserManager">
+            <summary>
+            用户管理
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.SignInManager`2.#ctor(Bing.Permissions.Identity.Services.Implements.IdentitySignInManager{`0,`1},Bing.Permissions.Identity.Services.Abstractions.IUserManager{`0,`1})">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Services.Implements.SignInManager`2"/>类型的实例
+            </summary>
+            <param name="identitySignInManager">Identity登录管理</param>
+            <param name="userManager">用户管理</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.SignInManager`2.SignInAsync(`0,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            登录
+            </summary>
+            <param name="user">用户</param>
+            <param name="password">密码</param>
+            <param name="isPersistent">cookie是否持久保留。设置为false，当关闭浏览器则cookie失效</param>
+            <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.SignInManager`2.PasswordSignIn(`0,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            密码登录
+            </summary>
+            <param name="user">用户</param>
+            <param name="password">密码</param>
+             <param name="isPersistent">cookie是否持久保留，设置为false，当关闭浏览器则cookie失效</param>
+            <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.SignInManager`2.SignOutAsync">
+            <summary>
+            退出登录
+            </summary>
+        </member>
+        <member name="T:Bing.Permissions.Identity.Services.Implements.UserManager`2">
+            <summary>
+            用户管理
+            </summary>
+            <typeparam name="TUser">用户类型</typeparam>
+            <typeparam name="TKey">用户标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.UserManager`2.Manager">
+            <summary>
+            Identity用户管理
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.UserManager`2.Options">
+            <summary>
+            权限配置
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Identity.Services.Implements.UserManager`2.UserRepository">
+            <summary>
+            用户仓储
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.#ctor(Bing.Permissions.Identity.Services.Implements.IdentityUserManager{`0,`1},Microsoft.Extensions.Options.IOptions{Bing.Permissions.Identity.Options.PermissionOptions},Bing.Permissions.Identity.Repositories.IUserRepository{`0,`1})">
+            <summary>
+            初始化一个<see cref="T:Bing.Permissions.Identity.Services.Implements.UserManager`2"/>类型的实例
+            </summary>
+            <param name="userManager">Identity用户管理</param>
+            <param name="options">权限配置</param>
+            <param name="userRepository">用户仓储</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.CreateAsync(`0,System.String)">
+            <summary>
+            创建用户
+            </summary>
+            <param name="user">用户</param>
+            <param name="password">密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GenerateTokenAsync(System.String,System.String,System.String,System.String)">
+            <summary>
+            生成令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="purpose">用途</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GetUserOrDefault(System.String)">
+            <summary>
+            获取用户
+            </summary>
+            <param name="phone">手机号</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.CreateSecurityStamp">
+            <summary>
+            创建安全戳
+            </summary>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GenerateTokenAsync(`0,System.String,System.String,System.String)">
+            <summary>
+            生成令牌
+            </summary>
+            <param name="user">用户</param>
+            <param name="purpose">用途</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GetPurpose(System.String,System.String)">
+            <summary>
+            创建用途
+            </summary>
+            <param name="purpose">用途</param>
+            <param name="application">应用程序</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.VerifyTokenAsync(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            验证令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="purpose">用途</param>
+            <param name="token">令牌</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.VerifyTokenAsync(`0,System.String,System.String,System.String,System.String)">
+            <summary>
+            验证令牌
+            </summary>
+            <param name="user">用户</param>
+            <param name="purpose">用途</param>
+            <param name="token">令牌</param>
+            <param name="application">应用程序</param>
+            <param name="provider">令牌提供器</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GenerateRegisterTokenAsync(System.String,System.String)">
+            <summary>
+            生成手机号注册令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="application">应用程序</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.VerifyRegisterTokenAsync(System.String,System.String,System.String)">
+            <summary>
+            验证手机号注册令牌
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="token">令牌</param>
+            <param name="application">应用程序</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GenerateEmailConfirmationTokenAsync(`0)">
+            <summary>
+            生成电子邮件确认令牌
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.ConfirmEmailAsync(`0,System.String)">
+            <summary>
+            激活电子邮件
+            </summary>
+            <param name="user">用户</param>
+            <param name="token">令牌</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GenerateEmailPasswordResetTokenAsync(`0)">
+            <summary>
+            生成电子邮件重置密码令牌
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.ResetPasswordByEmailAsync(`0,System.String,System.String)">
+            <summary>
+            通过电子邮件重置密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="token">令牌</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.GeneratePhonePasswordResetTokenAsync(`0)">
+            <summary>
+            生成手机号重置密码令牌
+            </summary>
+            <param name="user">用户</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.ResetPasswordByPhoneAsync(`0,System.String,System.String)">
+            <summary>
+            通过手机号重置密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="token">令牌</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.ChangePasswordAsync(`0,System.String,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="currentPassword">当前密码</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.ChangePasswordAsync(`0,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="user">用户</param>
+            <param name="newPassword">新密码</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.FindByNameAsync(System.String)">
+            <summary>
+            通过用户名查找
+            </summary>
+            <param name="userName">用户名</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.FindByEmailAsync(System.String)">
+            <summary>
+            通过电子邮件查找
+            </summary>
+            <param name="email">电子邮件</param>
+        </member>
+        <member name="M:Bing.Permissions.Identity.Services.Implements.UserManager`2.FindByPhoneAsync(System.String)">
+            <summary>
+            通过手机号查找
+            </summary>
+            <param name="phone">手机号</param>
+        </member>
+        <member name="T:Bing.Permissions.Properties.SecurityResources">
+            <summary>
+              一个强类型的资源类，用于查找本地化的字符串等。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.ResourceManager">
+            <summary>
+              返回此类使用的缓存的 ResourceManager 实例。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.Culture">
+            <summary>
+              重写当前线程的 CurrentUICulture 属性
+              重写当前线程的 CurrentUICulture 属性。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.DuplicateApplicationCode">
+            <summary>
+              查找类似 应用程序编码 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.DuplicateApplicationName">
+            <summary>
+              查找类似 应用程序名称 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.DuplicateEmail">
+            <summary>
+              查找类似 电子邮件 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.DuplicateRoleCode">
+            <summary>
+              查找类似 角色编码 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.DuplicateRoleName">
+            <summary>
+              查找类似 角色名 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.DuplicateUserName">
+            <summary>
+              查找类似 用户名 {0} 已存在 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidAccountOrPassword">
+            <summary>
+              查找类似 帐号无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidEmail">
+            <summary>
+              查找类似 电子邮件 {0} 无效 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidEmailOrPassword">
+            <summary>
+              查找类似 电子邮件无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidPhoneOrPassword">
+            <summary>
+              查找类似 手机号无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidRoleName">
+            <summary>
+              查找类似 用户名 {0} 无效 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidToken">
+            <summary>
+              查找类似 无效的令牌 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidUserName">
+            <summary>
+              查找类似 用户名 {0} 无效，仅允许字母或数字 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.InvalidUserNameOrPassword">
+            <summary>
+              查找类似 用户名无效或密码不正确 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.LoginFailLock">
+            <summary>
+              查找类似 由于您多次登录失败，暂时被系统锁定，请稍后再试 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordMismatch">
+            <summary>
+              查找类似 密码错误 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordRequiresDigit">
+            <summary>
+              查找类似 密码应包含数字 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordRequiresLower">
+            <summary>
+              查找类似 密码应包含小写字母 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordRequiresNonAlphanumeric">
+            <summary>
+              查找类似 密码应包含非字母和数字的特殊字符，比如 # 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordRequiresUniqueChars">
+            <summary>
+              查找类似 密码应包含至少 {0} 个不重复的字符 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordRequiresUpper">
+            <summary>
+              查找类似 密码应包含大写字母 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.PasswordTooShort">
+            <summary>
+              查找类似 密码不能少于 {0} 个字符 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.UserIsDisabled">
+            <summary>
+              查找类似 您的帐户已被冻结，请联系管理员 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.UserNameIsEmpty">
+            <summary>
+              查找类似 用户名不能为空 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Permissions.Properties.SecurityResources.UserNotInRole">
+            <summary>
+              查找类似 用户不在角色“{0}”中 的本地化字符串。
+            </summary>
+        </member>
+    </members>
+</doc>

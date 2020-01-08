@@ -59,29 +59,20 @@ namespace Bing.Applications
         /// 初始化一个<see cref="QueryServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
         /// </summary>
         /// <param name="store">查询存储器</param>
-        protected QueryServiceBase(IQueryStore<TEntity, TKey> store)
-        {
-            _store = store ?? throw new ArgumentNullException(nameof(store));
-        }
+        protected QueryServiceBase(IQueryStore<TEntity, TKey> store) => _store = store ?? throw new ArgumentNullException(nameof(store));
 
         /// <summary>
         /// 转换为数据传输对象
         /// </summary>
         /// <param name="entity">实体</param>
-        protected virtual TDto ToDto(TEntity entity)
-        {
-            return entity.MapTo<TDto>();
-        }
+        protected virtual TDto ToDto(TEntity entity) => entity.MapTo<TDto>();
 
         #region GetAll(获取全部)
 
         /// <summary>
         /// 获取全部
         /// </summary>
-        public virtual List<TDto> GetAll()
-        {
-            return _store.FindAll().Select(ToDto).ToList();
-        }
+        public virtual List<TDto> GetAll() => _store.FindAll().Select(ToDto).ToList();
 
         /// <summary>
         /// 获取全部
@@ -124,10 +115,7 @@ namespace Bing.Applications
         /// 通过编号列表获取
         /// </summary>
         /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
-        public virtual List<TDto> GetByIds(string ids)
-        {
-            return _store.FindByIds(ids).Select(ToDto).ToList();
-        }
+        public virtual List<TDto> GetByIds(string ids) => _store.FindByIds(ids).Select(ToDto).ToList();
 
         /// <summary>
         /// 通过编号列表获取
@@ -150,10 +138,7 @@ namespace Bing.Applications
         public virtual List<TDto> Query(TQueryParameter parameter)
         {
             if (parameter == null)
-            {
                 return new List<TDto>();
-            }
-
             return ExecuteQuery(parameter).ToList().Select(ToDto).ToList();
         }
 
@@ -164,10 +149,7 @@ namespace Bing.Applications
         public virtual async Task<List<TDto>> QueryAsync(TQueryParameter parameter)
         {
             if (parameter == null)
-            {
                 return new List<TDto>();
-            }
-
             return (await ExecuteQuery(parameter).ToListAsync()).Select(ToDto).ToList();
         }
 
@@ -188,29 +170,20 @@ namespace Bing.Applications
         /// 创建查询对象
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        protected virtual IQueryBase<TEntity> CreateQuery(TQueryParameter parameter)
-        {
-            return new Query<TEntity>(parameter);
-        }
+        protected virtual IQueryBase<TEntity> CreateQuery(TQueryParameter parameter) => new Query<TEntity>(parameter);
 
         /// <summary>
         /// 过滤
         /// </summary>
         /// <param name="query">查询条件</param>
-        private IQueryable<TEntity> Filter(IQueryBase<TEntity> query)
-        {
-            return IsTracking ? _store.Find().Where(query) : _store.FindAsNoTracking().Where(query);
-        }
+        private IQueryable<TEntity> Filter(IQueryBase<TEntity> query) => IsTracking ? _store.Find().Where(query) : _store.FindAsNoTracking().Where(query);
 
         /// <summary>
         /// 过滤
         /// </summary>
         /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
-        protected virtual IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter)
-        {
-            return queryable;
-        }
+        protected virtual IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable;
 
         #endregion
 
@@ -223,9 +196,7 @@ namespace Bing.Applications
         public virtual PagerList<TDto> PagerQuery(TQueryParameter parameter)
         {
             if (parameter == null)
-            {
                 return new PagerList<TDto>();
-            }
             var query = CreateQuery(parameter);
             var queryable = Filter(query);
             queryable = Filter(queryable, parameter);
@@ -239,9 +210,7 @@ namespace Bing.Applications
         public virtual async Task<PagerList<TDto>> PagerQueryAsync(TQueryParameter parameter)
         {
             if (parameter == null)
-            {
                 return new PagerList<TDto>();
-            }
             var query = CreateQuery(parameter);
             var queryable = Filter(query);
             queryable = Filter(queryable, parameter);

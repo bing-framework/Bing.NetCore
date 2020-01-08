@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using AutoMapper;
+using Bing.Utils.Helpers;
 
 namespace Bing.AutoMapper
 {
@@ -49,67 +49,75 @@ namespace Bing.AutoMapper
         /// <param name="destination">目标对象</param>
         private static TDestination MapTo<TDestination>(object source, TDestination destination)
         {
-            if (source == null)
-                return default;
-            if (destination == null)
-                return default;
-            var sourceType = GetType(source);
-            var destinationType = GetType(destination);
-            var map = GetMap(sourceType, destinationType);
-            if (map != null)
-                return GetResult(source, destination);
-            lock (Sync)
+            try
             {
-                map = GetMap(sourceType, destinationType);
-                if (map != null)
-                    return GetResult(source, destination);
-                InitMaps(sourceType, destinationType);
+                if (source == null)
+                    return default;
+                if (destination == null)
+                    return default;
+                var sourceType = GetType(source);
+                var destinationType = GetType(destination);
+                return GetResult(sourceType, destinationType, source, destination);
             }
-            return GetResult(source, destination);
-        }
-
-        /// <summary>
-        /// 获取映射配置
-        /// </summary>
-        /// <param name="sourceType">源类型</param>
-        /// <param name="destinationType">目标类型</param>
-        private static TypeMap GetMap(Type sourceType, Type destinationType)
-        {
-            if (_config == null)
-                InitMaps(sourceType, destinationType);
-            return _config?.FindTypeMapFor(sourceType, destinationType);
+            catch (AutoMapperMappingException e)
+            {
+                return GetResult(GetType(e.MemberMap.SourceType), GetType(e.MemberMap.DestinationType), source,
+                    destination);
+            }
         }
 
         /// <summary>
         /// 获取类型
         /// </summary>
         /// <param name="obj">对象</param>
-        private static Type GetType(object obj)
+        private static Type GetType(object obj) => GetType(obj.GetType());
+
+        /// <summary>
+        /// 获取类型
+        /// </summary>
+        /// <param name="type">类型</param>
+        private static Type GetType(Type type) => Reflection.GetElementType(type);
+
+        /// <summary>
+        /// 获取映射结果
+        /// </summary>
+        /// <typeparam name="TDestination">目标类型</typeparam>
+        /// <param name="sourceType">源类型</param>
+        /// <param name="destinationType">目标类型</param>
+        /// <param name="source">源对象</param>
+        /// <param name="destination">目标对象</param>
+        private static TDestination GetResult<TDestination>(Type sourceType,Type destinationType, object source, TDestination destination)
         {
-            var type = obj.GetType();
-            if (obj is System.Collections.IEnumerable == false)
-                return type;
-            if (type.IsArray)
-                return type.GetElementType();
-            var genericArgumentsTypes = type.GetTypeInfo().GetGenericArguments();
-            if (genericArgumentsTypes == null || genericArgumentsTypes.Length == 0)
-                throw new ArgumentException("泛型类型参数不能为空");
-            return genericArgumentsTypes[0];
+            if (Exists(sourceType, destinationType))
+                return GetResult(source, destination);
+            lock (Sync)
+            {
+                if (Exists(sourceType, destinationType))
+                    return GetResult(source, destination);
+                Init(sourceType,destinationType);
+            }
+            return GetResult(source, destination);
         }
 
         /// <summary>
-        /// 初始化映射配置
+        /// 是否已存在映射配置
         /// </summary>
         /// <param name="sourceType">源类型</param>
         /// <param name="destinationType">目标类型</param>
-        private static void InitMaps(Type sourceType, Type destinationType)
+        private static bool Exists(Type sourceType, Type destinationType) => _config?.FindTypeMapFor(sourceType, destinationType) != null;
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="sourceType">源类型</param>
+        /// <param name="destinationType">目标类型</param>
+        private static void Init(Type sourceType, Type destinationType)
         {
             if (_config == null)
             {
                 _config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
                 return;
             }
-
             var maps = _config.GetAllTypeMaps();
             _config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
             foreach (var map in maps)
@@ -122,11 +130,7 @@ namespace Bing.AutoMapper
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        private static TDestination GetResult<TDestination>(object source, TDestination destination)
-        {
-            var mapper = new Mapper(_config);
-            return mapper.Map(source, destination);
-        }
+        private static TDestination GetResult<TDestination>(object source, TDestination destination) => new Mapper(_config).Map(source, destination);
 
         #endregion
 
