@@ -142,14 +142,12 @@
             转换为地址
             </summary>
             <param name="info">地址信息</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Biz.Addresses.AddressInfoExtensions.ToInfo(Bing.Biz.Addresses.Address)">
             <summary>
             转换为地址信息
             </summary>
             <param name="address">地址</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Biz.Addresses.NullAddress">
             <summary>
@@ -243,14 +241,12 @@
             获取描述
             </summary>
             <param name="gender">性别</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Biz.Enums.GenderExtensions.Value(System.Nullable{Bing.Biz.Enums.Gender})">
             <summary>
             获取值
             </summary>
             <param name="gender">性别</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Biz.Enums.Nation">
             <summary>
@@ -547,14 +543,12 @@
             获取描述
             </summary>
             <param name="nation">民族</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Biz.Enums.NationExtensions.Value(System.Nullable{Bing.Biz.Enums.Nation})">
             <summary>
             获取值
             </summary>
             <param name="nation">民族</param>
-            <returns></returns>
         </member>
     </members>
 </doc>

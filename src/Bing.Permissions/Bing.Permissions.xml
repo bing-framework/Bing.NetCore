@@ -243,6 +243,12 @@
             </summary>
             <param name="configuration">配置</param>
         </member>
+        <member name="M:Bing.Permissions.Extensions.Extensions.GetValidationParameters(Bing.Permissions.Identity.JwtBearer.JwtOptions)">
+            <summary>
+            获取验证参数
+            </summary>
+            <param name="options">Jwt选项配置</param>
+        </member>
         <member name="T:Bing.Permissions.Identity.Describers.IdentityErrorChineseDescriber">
             <summary>
             Identity中文错误描述

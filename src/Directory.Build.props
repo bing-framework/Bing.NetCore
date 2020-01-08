@@ -3,7 +3,7 @@
   <PropertyGroup>
     <VersionMajor>1</VersionMajor>
     <VersionMinor>1</VersionMinor>
-    <VersionPatch>8</VersionPatch>
+    <VersionPatch>9</VersionPatch>
     <VersionQuality></VersionQuality>
     <!--<VersionQuality>20190816-1</VersionQuality>-->
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>

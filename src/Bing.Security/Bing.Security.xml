@@ -123,7 +123,6 @@
             获取当前操作人标识
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetUserId``1(Bing.Sessions.ISession)">
             <summary>
@@ -131,112 +130,96 @@
             </summary>
             <typeparam name="T">数据类型</typeparam>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetUserName(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人用户名
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetFullName(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人姓名
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetEmail(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人电子邮件
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetMobile(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人手机号
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationId(Bing.Sessions.ISession)">
             <summary>
             获取当前应用程序标识
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationId``1(Bing.Sessions.ISession)">
             <summary>
             获取当前应用程序标识
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationCode(Bing.Sessions.ISession)">
             <summary>
             获取当前应用程序编码
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetApplicationName(Bing.Sessions.ISession)">
             <summary>
             获取当前应用程序名称
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantId(Bing.Sessions.ISession)">
             <summary>
             获取当前租户标识
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantId``1(Bing.Sessions.ISession)">
             <summary>
             获取当前租户标识
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantCode(Bing.Sessions.ISession)">
             <summary>
             获取当前租户编码
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetTenantName(Bing.Sessions.ISession)">
             <summary>
             获取当前租户名称
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetRoleIds(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人角色标识列表
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetRoleIds``1(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人角色标识列表
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Extensions.SessionExtensions.GetRoleName(Bing.Sessions.ISession)">
             <summary>
             获取当前操作人角色名
             </summary>
             <param name="session">用户会话</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Security.Properties.SecurityResources">
             <summary>
@@ -395,28 +378,24 @@
             执行方法
             </summary>
             <param name="context">Http上下文</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.Authenticate(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             认证
             </summary>
             <param name="context">Http上下文</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.AuthenticateBefore(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             认证前操作
             </summary>
             <param name="context">Http上下文</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.IsAuthenticated(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             是否认证
             </summary>
-            <param name="context"></param>
-            <returns></returns>
+            <param name="context">Http上下文</param>
         </member>
         <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.LoadClaims(Microsoft.AspNetCore.Http.HttpContext,System.Security.Claims.ClaimsIdentity)">
             <summary>
@@ -424,14 +403,12 @@
             </summary>
             <param name="context">Http上下文</param>
             <param name="identity">身份标识</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.AuthenticateAfter(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             认证后操作
             </summary>
             <param name="context">Http上下文</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Security.Sessions.SessionMiddlewareBase.GetService``1(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
@@ -439,7 +416,6 @@
             </summary>
             <typeparam name="T">Http上下文</typeparam>
             <param name="context">服务类型</param>
-            <returns></returns>
         </member>
     </members>
 </doc>
