@@ -214,14 +214,10 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="ids">标识列表</param>
         /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (ids == null)
-            {
                 return null;
-            }
-
             return await Find(t => ids.Contains(t.Id)).ToListAsync(cancellationToken);
         }
 
