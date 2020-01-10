@@ -6,7 +6,7 @@ namespace Bing.Logs.Core
     /// <summary>
     /// 空日志上下文
     /// </summary>
-    public class NullLogContext:ILogContext
+    public class NullLogContext : ILogContext
     {
         /// <summary>
         /// 日志标识

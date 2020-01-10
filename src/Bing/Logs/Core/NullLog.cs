@@ -46,11 +46,7 @@ namespace Bing.Logs.Core
         /// 获取内容
         /// </summary>
         /// <typeparam name="TContent">日志内容类型</typeparam>
-        /// <returns></returns>
-        public TContent Get<TContent>() where TContent : ILogContent
-        {
-            return default(TContent);
-        }
+        public TContent Get<TContent>() where TContent : ILogContent => default;
 
         /// <summary>
         /// 跟踪

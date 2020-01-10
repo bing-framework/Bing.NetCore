@@ -5,7 +5,7 @@ namespace Bing.Logs.Core
     /// <summary>
     /// 空日志提供程序工厂
     /// </summary>
-    public class NullLogProviderFactory:ILogProviderFactory
+    public class NullLogProviderFactory : ILogProviderFactory
     {
         /// <summary>
         /// 空日志提供程序工厂实例
@@ -17,10 +17,6 @@ namespace Bing.Logs.Core
         /// </summary>
         /// <param name="logName">日志名称</param>
         /// <param name="format">日志格式化器</param>
-        /// <returns></returns>
-        public ILogProvider Create(string logName, ILogFormat format = null)
-        {
-            return NullLogProvider.Instance;
-        }
+        public ILogProvider Create(string logName, ILogFormat format = null) => NullLogProvider.Instance;
     }
 }

@@ -99,9 +99,8 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 创建日志上下文信息
         /// </summary>
-        protected virtual LogContextInfo CreateInfo()
-        {
-            return new LogContextInfo()
+        protected virtual LogContextInfo CreateInfo() =>
+            new LogContextInfo()
             {
                 TraceId = GetTraceId(),
                 Stopwatch = GetStopwatch(),
@@ -110,7 +109,6 @@ namespace Bing.Logs.Core
                 Browser = Web.Browser,
                 Url = Web.Url,
             };
-        }
 
         /// <summary>
         /// 获取跟踪号

@@ -5,7 +5,7 @@ namespace Bing.Logs.Core
     /// <summary>
     /// 空日志提供程序
     /// </summary>
-    public class NullLogProvider:ILogProvider
+    public class NullLogProvider : ILogProvider
     {
         /// <summary>
         /// 空日志提供程序实例

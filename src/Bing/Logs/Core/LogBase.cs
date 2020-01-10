@@ -100,13 +100,10 @@ namespace Bing.Logs.Core
         /// </summary>
         /// <typeparam name="T">日志内容类型</typeparam>
         /// <param name="action">设置内容操作</param>
-        /// <returns></returns>
         public ILog Set<T>(Action<T> action) where T : ILogContent
         {
             if (action == null)
-            {
                 throw new ArgumentNullException(nameof(action));
-            }
             ILogContent content = LogContent;
             action((T)content);
             return this;
@@ -116,7 +113,6 @@ namespace Bing.Logs.Core
         /// 获取内容
         /// </summary>
         /// <typeparam name="T">日志内容类型</typeparam>
-        /// <returns></returns>
         public T Get<T>() where T : ILogContent
         {
             ILogContent content = LogContent;

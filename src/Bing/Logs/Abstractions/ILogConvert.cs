@@ -11,7 +11,6 @@ namespace Bing.Logs.Abstractions
         /// <summary>
         /// 转换
         /// </summary>
-        /// <returns></returns>
         List<Item> To();
     }
 }
