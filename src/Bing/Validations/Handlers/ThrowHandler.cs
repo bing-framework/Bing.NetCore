@@ -15,9 +15,7 @@ namespace Bing.Validations.Handlers
         public void Handle(ValidationResultCollection results)
         {
             if (results.IsValid)
-            {
                 return;
-            }
             BingConfig.Current.ValidationHandler(results.First().ErrorMessage);
             //throw new Warning(results.First().ErrorMessage);
         }

@@ -19,10 +19,7 @@ namespace System.ComponentModel.DataAnnotations
         public override string FormatErrorMessage(string name)
         {
             if (ErrorMessage == null && ErrorMessageResourceName == null)
-            {
                 ErrorMessage = LibraryResource.InvalidIdCard;
-            }
-
             return string.Format(CultureInfo.CurrentCulture, ErrorMessageString);
         }
 
@@ -32,15 +29,9 @@ namespace System.ComponentModel.DataAnnotations
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (value.SafeString().IsEmpty())
-            {
                 return ValidationResult.Success;
-            }
-
             if (Regexs.IsMatch(value.SafeString(), ValidatePattern.IdCardPattern))
-            {
                 return ValidationResult.Success;
-            }
-
             return new ValidationResult(FormatErrorMessage(string.IsNullOrWhiteSpace(validationContext.DisplayName)
                 ? validationContext.MemberName
                 : validationContext.DisplayName));

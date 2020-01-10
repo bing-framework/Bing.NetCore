@@ -42,7 +42,7 @@ namespace Bing.Validations
         /// <summary>
         /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
         /// </summary>
-        public ValidationResultCollection():this("")
+        public ValidationResultCollection() : this("")
         {
         }
 
@@ -54,9 +54,7 @@ namespace Bing.Validations
         {
             _results = new List<ValidationResult>();
             if (string.IsNullOrWhiteSpace(result))
-            {
                 return;
-            }
             _results.Add(new ValidationResult(result));
         }
 
@@ -69,9 +67,7 @@ namespace Bing.Validations
         public void Add(ValidationResult result)
         {
             if (result == null)
-            {
                 return;
-            }
             _results.Add(result);
         }
 
@@ -82,32 +78,19 @@ namespace Bing.Validations
         public void AddList(IEnumerable<ValidationResult> results)
         {
             if (results == null)
-            {
                 return;
-            }
-
             foreach (var result in results)
-            {
                 Add(result);
-            }
         }
 
         /// <summary>
         /// 获取迭代器
         /// </summary>
-        /// <returns></returns>
-        IEnumerator<ValidationResult> IEnumerable<ValidationResult>.GetEnumerator()
-        {
-            return _results.GetEnumerator();
-        }
+        IEnumerator<ValidationResult> IEnumerable<ValidationResult>.GetEnumerator() => _results.GetEnumerator();
 
         /// <summary>
         /// 获取迭代器
         /// </summary>
-        /// <returns></returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _results.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _results.GetEnumerator();
     }
 }

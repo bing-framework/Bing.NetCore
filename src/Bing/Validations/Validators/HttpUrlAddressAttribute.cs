@@ -22,10 +22,7 @@ namespace System.ComponentModel.DataAnnotations
         public override string FormatErrorMessage(string name)
         {
             if (ErrorMessage == null && ErrorMessageResourceName == null)
-            {
                 ErrorMessage = ErrorMsg;
-            }
-
             return base.FormatErrorMessage(name);
         }
 

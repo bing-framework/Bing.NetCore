@@ -31,7 +31,7 @@ namespace Bing.Validations.Aspects
                 ValidateCollection(parameter);
                 return;
             }
-            IValidation validation=parameter.Value as IValidation;
+            var validation=parameter.Value as IValidation;
             validation?.Validate();
         }
 
@@ -42,14 +42,9 @@ namespace Bing.Validations.Aspects
         private void ValidateCollection(Parameter parameter)
         {
             if (!(parameter.Value is IEnumerable<IValidation> validations))
-            {
                 return;
-            }
-
             foreach (var validation in validations)
-            {
                 validation.Validate();
-            }
         }
     }
 }

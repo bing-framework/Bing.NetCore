@@ -10,7 +10,6 @@ namespace Bing.Validations
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         ValidationResult Validate();
     }
 }

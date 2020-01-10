@@ -8,7 +8,6 @@
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         ValidationResultCollection Validate();
     }
 }
