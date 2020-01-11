@@ -67,4 +67,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Bing\Events\Local\" />
+  </ItemGroup>
+
 </Project>

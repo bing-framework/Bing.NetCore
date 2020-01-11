@@ -451,7 +451,6 @@
             </summary>
             <param name="ids">标识列表</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsAsync(System.String)">
             <summary>
@@ -740,7 +739,6 @@
             </summary>
             <param name="entity">实体</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.StoreBase`2.AddAsync(System.Collections.Generic.IEnumerable{`0},System.Threading.CancellationToken)">
             <summary>
@@ -748,7 +746,6 @@
             </summary>
             <param name="entities">实体集合</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.StoreBase`2.Update(`0)">
             <summary>
@@ -804,7 +801,7 @@
             <summary>
             删除实体集合
             </summary>
-            <param name="list"></param>
+            <param name="list">实体集合</param>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.StoreBase`2.Remove(System.Collections.Generic.IEnumerable{`0})">
             <summary>
@@ -818,7 +815,6 @@
             </summary>
             <param name="id">标识</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.StoreBase`2.RemoveAsync(`0,System.Threading.CancellationToken)">
             <summary>
@@ -826,7 +822,6 @@
             </summary>
             <param name="entity">实体</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.StoreBase`2.RemoveAsync(System.Collections.Generic.IEnumerable{`1},System.Threading.CancellationToken)">
             <summary>
@@ -834,7 +829,6 @@
             </summary>
             <param name="ids">标识集合</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.StoreBase`2.RemoveAsync(System.Collections.Generic.IEnumerable{`0},System.Threading.CancellationToken)">
             <summary>

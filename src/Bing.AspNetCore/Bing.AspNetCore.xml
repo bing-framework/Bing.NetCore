@@ -59,6 +59,27 @@
             </summary>
             <param name="provider">服务提供程序</param>
         </member>
+        <member name="T:Bing.AspNetCore.HttpContextCancellationTokenProvider">
+            <summary>
+            基于当前HttpContext的异步任务取消令牌提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.AspNetCore.HttpContextCancellationTokenProvider._httpContextAccessor">
+            <summary>
+            Http上下文访问器
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextCancellationTokenProvider.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.HttpContextCancellationTokenProvider"/>类型的实例
+            </summary>
+            <param name="httpContextAccessor">Http上下文访问器</param>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextCancellationTokenProvider.Token">
+            <summary>
+            异步任务取消令牌
+            </summary>
+        </member>
         <member name="T:Bing.AspNetCore.Logs.SysLogger">
             <summary>
             系统日志记录器

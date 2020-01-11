@@ -11,12 +11,18 @@ namespace Bing.Events
     public class Event : IEvent
     {
         /// <summary>
+        /// 事件名称
+        /// </summary>
+        private readonly string _eventName;
+
+        /// <summary>
         /// 初始化一个<see cref="Event"/>类型的实例
         /// </summary>
-        public Event()
+        public Event(string eventName = default)
         {
             Id = Bing.Utils.Helpers.Id.Guid();
             Time = DateTime.Now;
+            _eventName = eventName;
         }
 
         /// <summary>
@@ -30,11 +36,31 @@ namespace Bing.Events
         public DateTime Time { get; }
 
         /// <summary>
+        /// 获取事件名称
+        /// </summary>
+        public virtual string GetEventName()
+        {
+            var eventName = _eventName;
+            if (eventName.IsEmpty())
+            {
+                var eventType = base.GetType();
+                if (!eventType.IsGenericType)
+                    eventName = EventNameAttribute.GetNameOrDefault(eventType);
+                else
+                {
+                    var eventNameAttribute = GetType().GetAttribute<GenericEventNameAttribute>();
+                    eventName = eventNameAttribute.GetName(eventType);
+                }
+            }
+            return eventName;
+        }
+
+        /// <summary>
         /// 输出日志
         /// </summary>
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             result.AppendLine($"事件标识: {Id}");
             result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
             result.AppendLine($"事件数据: {(this).ToJson()}");

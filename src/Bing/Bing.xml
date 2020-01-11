@@ -13410,6 +13410,249 @@
             克隆副本
             </summary>
         </member>
+        <member name="T:Bing.Events.Event">
+            <summary>
+            事件
+            </summary>
+        </member>
+        <member name="F:Bing.Events.Event._eventName">
+            <summary>
+            事件名称
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Event.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Events.Event"/>类型的实例
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Event.Id">
+            <summary>
+            事件标识
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Event.Time">
+            <summary>
+            事件时间
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Event.GetEventName">
+            <summary>
+            获取事件名称
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Event.ToString">
+            <summary>
+            输出日志
+            </summary>
+        </member>
+        <member name="T:Bing.Events.EventNameAttribute">
+            <summary>
+            事件名称 特性
+            </summary>
+        </member>
+        <member name="P:Bing.Events.EventNameAttribute.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="M:Bing.Events.EventNameAttribute.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Events.EventNameAttribute"/>类型的实例
+            </summary>
+            <param name="name">名称</param>
+        </member>
+        <member name="M:Bing.Events.EventNameAttribute.GetName(System.Type)">
+            <summary>
+            获取名称
+            </summary>
+            <param name="eventType">事件类型</param>
+        </member>
+        <member name="M:Bing.Events.EventNameAttribute.GetNameOrDefault``1">
+            <summary>
+            获取名称
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+        </member>
+        <member name="M:Bing.Events.EventNameAttribute.GetNameOrDefault(System.Type)">
+            <summary>
+            获取名称
+            </summary>
+            <param name="eventType">事件类型</param>
+        </member>
+        <member name="T:Bing.Events.GenericEventNameAttribute">
+            <summary>
+            泛型事件名称 特性
+            </summary>
+        </member>
+        <member name="P:Bing.Events.GenericEventNameAttribute.Prefix">
+            <summary>
+            前缀
+            </summary>
+        </member>
+        <member name="P:Bing.Events.GenericEventNameAttribute.Postfix">
+            <summary>
+            后缀
+            </summary>
+        </member>
+        <member name="M:Bing.Events.GenericEventNameAttribute.GetName(System.Type)">
+            <summary>
+            获取名称
+            </summary>
+            <param name="eventType">事件类型</param>
+        </member>
+        <member name="T:Bing.Events.IEvent">
+            <summary>
+            事件
+            </summary>
+        </member>
+        <member name="P:Bing.Events.IEvent.Id">
+            <summary>
+            事件标识
+            </summary>
+        </member>
+        <member name="P:Bing.Events.IEvent.Time">
+            <summary>
+            事件时间
+            </summary>
+        </member>
+        <member name="M:Bing.Events.IEvent.GetEventName">
+            <summary>
+            获取事件名称
+            </summary>
+        </member>
+        <member name="T:Bing.Events.IEventNameProvider">
+            <summary>
+            事件名称提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.Events.IEventNameProvider.GetName(System.Type)">
+            <summary>
+            获取名称
+            </summary>
+            <param name="eventType">事件类型</param>
+        </member>
+        <member name="T:Bing.Events.Handlers.IEventHandler">
+            <summary>
+            事件处理器
+            </summary>
+        </member>
+        <member name="T:Bing.Events.Handlers.IEventHandler`1">
+            <summary>
+            事件处理器
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+        </member>
+        <member name="M:Bing.Events.Handlers.IEventHandler`1.HandleAsync(`0)">
+            <summary>
+            处理事件
+            </summary>
+            <param name="event">事件</param>
+        </member>
+        <member name="T:Bing.Events.Handlers.IEventHandlerManager">
+            <summary>
+            事件处理器服务
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Handlers.IEventHandlerManager.GetHandlers``1">
+            <summary>
+            获取事件处理器列表
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+        </member>
+        <member name="T:Bing.Events.IEventBus">
+            <summary>
+            事件总线
+            </summary>
+        </member>
+        <member name="M:Bing.Events.IEventBus.PublishAsync``1(``0)">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+            <param name="event">事件</param>
+        </member>
+        <member name="T:Bing.Events.ISimpleEventBus">
+            <summary>
+            基于内存的简单事件总线
+            </summary>
+        </member>
+        <member name="T:Bing.Events.Messages.IMessageEvent">
+            <summary>
+            消息事件
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.IMessageEvent.Name">
+            <summary>
+            消息名称
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.IMessageEvent.Data">
+            <summary>
+            事件数据
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.IMessageEvent.Callback">
+            <summary>
+            回调名称
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.IMessageEvent.Send">
+            <summary>
+            是否立即发送消息
+            </summary>
+        </member>
+        <member name="T:Bing.Events.Messages.IMessageEventBus">
+            <summary>
+            消息事件总线
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Messages.IMessageEventBus.PublishAsync``1(``0)">
+            <summary>
+            发布事件
+            </summary>
+            <typeparam name="TEvent">事件类型</typeparam>
+            <param name="event">事件</param>
+        </member>
+        <member name="M:Bing.Events.Messages.IMessageEventBus.PublishAsync(System.String,System.Object,System.String,System.Boolean)">
+            <summary>
+            发布事件
+            </summary>
+            <param name="name">消息名称</param>
+            <param name="data">事件数据</param>
+            <param name="callback">回调名称</param>
+            <param name="send">是否立即发送消息</param>
+        </member>
+        <member name="T:Bing.Events.Messages.MessageEvent">
+            <summary>
+            消息事件
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.MessageEvent.Name">
+            <summary>
+            消息名称
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.MessageEvent.Data">
+            <summary>
+            事件数据
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.MessageEvent.Callback">
+            <summary>
+            回调名称
+            </summary>
+        </member>
+        <member name="P:Bing.Events.Messages.MessageEvent.Send">
+            <summary>
+            是否立即发送消息
+            </summary>
+        </member>
+        <member name="M:Bing.Events.Messages.MessageEvent.ToString">
+            <summary>
+            输出日志
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Bing.ExceptionHandling.IHasErrorCode">
             <summary>
             错误码
@@ -13519,6 +13762,31 @@
             <param name="source">源类型</param>
             <param name="membersToExpand">成员展开</param>
         </member>
+        <member name="T:Bing.Threading.ICancellationTokenProvider">
+            <summary>
+            异步任务取消令牌提供程序
+            </summary>
+        </member>
+        <member name="P:Bing.Threading.ICancellationTokenProvider.Token">
+            <summary>
+            异步任务取消令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Threading.NoneCancellationTokenProvider">
+            <summary>
+            空异步任务取消令牌提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Threading.NoneCancellationTokenProvider.Instance">
+            <summary>
+            空异步任务取消令牌提供程序实例
+            </summary>
+        </member>
+        <member name="P:Bing.Threading.NoneCancellationTokenProvider.Token">
+            <summary>
+            异步任务取消令牌
+            </summary>
+        </member>
         <member name="T:Bing.Configurations.BingConfig">
             <summary>
             Bing 框架配置
@@ -13621,168 +13889,6 @@
             <summary>
             配置
             </summary>
-        </member>
-        <member name="T:Bing.Events.Event">
-            <summary>
-            事件
-            </summary>
-        </member>
-        <member name="M:Bing.Events.Event.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Events.Event"/>类型的实例
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Event.Id">
-            <summary>
-            事件标识
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Event.Time">
-            <summary>
-            事件时间
-            </summary>
-        </member>
-        <member name="M:Bing.Events.Event.ToString">
-            <summary>
-            输出日志
-            </summary>
-        </member>
-        <member name="T:Bing.Events.Handlers.IEventHandler">
-            <summary>
-            事件处理器
-            </summary>
-        </member>
-        <member name="T:Bing.Events.Handlers.IEventHandler`1">
-            <summary>
-            事件处理器
-            </summary>
-            <typeparam name="TEvent">事件类型</typeparam>
-        </member>
-        <member name="M:Bing.Events.Handlers.IEventHandler`1.HandleAsync(`0)">
-            <summary>
-            处理事件
-            </summary>
-            <param name="event">事件</param>
-        </member>
-        <member name="T:Bing.Events.Handlers.IEventHandlerManager">
-            <summary>
-            事件处理器服务
-            </summary>
-        </member>
-        <member name="M:Bing.Events.Handlers.IEventHandlerManager.GetHandlers``1">
-            <summary>
-            获取事件处理器列表
-            </summary>
-            <typeparam name="TEvent">事件类型</typeparam>
-        </member>
-        <member name="T:Bing.Events.IEvent">
-            <summary>
-            事件
-            </summary>
-        </member>
-        <member name="P:Bing.Events.IEvent.Id">
-            <summary>
-            事件标识
-            </summary>
-        </member>
-        <member name="P:Bing.Events.IEvent.Time">
-            <summary>
-            事件时间
-            </summary>
-        </member>
-        <member name="T:Bing.Events.IEventBus">
-            <summary>
-            事件总线
-            </summary>
-        </member>
-        <member name="M:Bing.Events.IEventBus.PublishAsync``1(``0)">
-            <summary>
-            发布事件
-            </summary>
-            <typeparam name="TEvent">事件类型</typeparam>
-            <param name="event">事件</param>
-        </member>
-        <member name="T:Bing.Events.ISimpleEventBus">
-            <summary>
-            基于内存的简单事件总线
-            </summary>
-        </member>
-        <member name="T:Bing.Events.Messages.IMessageEvent">
-            <summary>
-            消息事件
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.IMessageEvent.Name">
-            <summary>
-            消息名称
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.IMessageEvent.Data">
-            <summary>
-            事件数据
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.IMessageEvent.Callback">
-            <summary>
-            回调名称
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.IMessageEvent.Send">
-            <summary>
-            是否立即发送消息
-            </summary>
-        </member>
-        <member name="T:Bing.Events.Messages.IMessageEventBus">
-            <summary>
-            消息事件总线
-            </summary>
-        </member>
-        <member name="M:Bing.Events.Messages.IMessageEventBus.PublishAsync``1(``0)">
-            <summary>
-            发布事件
-            </summary>
-            <typeparam name="TEvent">事件类型</typeparam>
-            <param name="event">事件</param>
-        </member>
-        <member name="M:Bing.Events.Messages.IMessageEventBus.PublishAsync(System.String,System.Object,System.String,System.Boolean)">
-            <summary>
-            发布事件
-            </summary>
-            <param name="name">消息名称</param>
-            <param name="data">事件数据</param>
-            <param name="callback">回调名称</param>
-            <param name="send">是否立即发送消息</param>
-        </member>
-        <member name="T:Bing.Events.Messages.MessageEvent">
-            <summary>
-            消息事件
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.MessageEvent.Name">
-            <summary>
-            消息名称
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.MessageEvent.Data">
-            <summary>
-            事件数据
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.MessageEvent.Callback">
-            <summary>
-            回调名称
-            </summary>
-        </member>
-        <member name="P:Bing.Events.Messages.MessageEvent.Send">
-            <summary>
-            是否立即发送消息
-            </summary>
-        </member>
-        <member name="M:Bing.Events.Messages.MessageEvent.ToString">
-            <summary>
-            输出日志
-            </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Exceptions.ConcurrencyException">
             <summary>
@@ -14695,7 +14801,6 @@
             <summary>
             转换
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Abstractions.ILogFactory">
             <summary>
@@ -14707,7 +14812,6 @@
             获取日志
             </summary>
             <param name="name">日志名称</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Abstractions.ILogFormat">
             <summary>
@@ -14719,7 +14823,6 @@
             格式化
             </summary>
             <param name="content">日志内容</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Abstractions.ILogProvider">
             <summary>
@@ -14764,7 +14867,6 @@
             </summary>
             <param name="logName">日志名称</param>
             <param name="format">日志格式化器</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Core.DefaultLogFactory">
             <summary>
@@ -14864,14 +14966,12 @@
             </summary>
             <typeparam name="T">日志内容类型</typeparam>
             <param name="action">设置内容操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.LogBase`1.Get``1">
             <summary>
             获取内容
             </summary>
             <typeparam name="T">日志内容类型</typeparam>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.LogBase`1.Trace">
             <summary>
@@ -15081,7 +15181,6 @@
             获取内容
             </summary>
             <typeparam name="TContent">日志内容类型</typeparam>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.NullLog.Trace">
             <summary>
@@ -15209,7 +15308,6 @@
             格式化
             </summary>
             <param name="content">日志内容</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Core.NullLogProvider">
             <summary>
@@ -15264,7 +15362,6 @@
             </summary>
             <param name="logName">日志名称</param>
             <param name="format">日志格式化器</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Extensions.LogContentExtensions">
             <summary>
@@ -17488,7 +17585,6 @@
             验证
             </summary>
             <param name="target">验证目标</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Validations.Handlers.NothingHandler">
             <summary>
@@ -17521,7 +17617,6 @@
             <summary>
             验证
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Validations.IValidationHandler">
             <summary>
@@ -17543,7 +17638,6 @@
             <summary>
             验证
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Validations.ValidationResultCollection">
             <summary>
@@ -17597,13 +17691,11 @@
             <summary>
             获取迭代器
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Validations.ValidationResultCollection.System#Collections#IEnumerable#GetEnumerator">
             <summary>
             获取迭代器
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Validations.Validators.ValidatePattern">
             <summary>
