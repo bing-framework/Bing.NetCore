@@ -49,7 +49,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 服务提供器
         /// </summary>
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         #endregion
 
@@ -108,15 +108,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// 创建实例
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
-        /// <returns></returns>
         private T Create<T>()
         {
             var result = _serviceProvider.GetService(typeof(T));
             if (result == null)
-            {
-                return default(T);
-            }
-
+                return default;
             return (T)result;
         }
 
@@ -138,9 +134,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             var log = GetLog();
             if (IsEnabled(log) == false)
-            {
                 return;
-            }
             builder.EnableSensitiveDataLogging();
             builder.EnableDetailedErrors();
             builder.UseLoggerFactory(LoggerFactory);
@@ -171,15 +165,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             var config = GetConfig();
             if (config.LogLevel == DataLogLevel.Off)
-            {
                 return false;
-            }
-
             if (log.IsTraceEnabled == false)
-            {
                 return false;
-            }
-
             return true;
         }
 
@@ -231,10 +219,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             var result = new List<IMap>();
             foreach (var assembly in GetAssemblies())
-            {
                 result.AddRange(GetMapInstances(assembly));
-            }
-
             return result;
         }
 
@@ -242,18 +227,12 @@ namespace Bing.Datas.EntityFramework.Core
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly)
-        {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
-        }
+        protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly) => Reflection.GetInstancesByInterface<IMap>(assembly);
 
         /// <summary>
         /// 获取定义映射配置的程序集列表
         /// </summary>
-        protected virtual Assembly[] GetAssemblies()
-        {
-            return new[] { GetType().Assembly };
-        }        
+        protected virtual Assembly[] GetAssemblies() => new[] { GetType().Assembly };
 
         #endregion
 
@@ -370,10 +349,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化修改审计信息
         /// </summary>
         /// <param name="entry">输入实体</param>
-        private void InitModificationAudited(EntityEntry entry)
-        {
-            ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-        }
+        private void InitModificationAudited(EntityEntry entry) => ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
 
         /// <summary>
         /// 拦截修改操作
@@ -385,10 +361,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 拦截删除操作
         /// </summary>
         /// <param name="entry">输入实体</param>
-        protected virtual void InterceptDeletedOperation(EntityEntry entry)
-        {
-            DeletionAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-        }
+        protected virtual void InterceptDeletedOperation(EntityEntry entry) => DeletionAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
 
         #endregion
 
@@ -398,7 +371,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 异步保存更改
         /// </summary>
         /// <param name="cancellationToken">取消令牌</param>
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SaveChangesBefore();
             var transactionActionManager = Create<ITransactionActionManager>();
@@ -449,9 +422,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected void InitVersion(EntityEntry entry)
         {
             if (!(entry.Entity is IVersion entity))
-            {
                 return;
-            }
             entity.Version = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
         }
 
@@ -462,11 +433,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取数据库连接
         /// </summary>
-        /// <returns></returns>
-        public IDbConnection GetConnection()
-        {
-            return Database.GetDbConnection();
-        }
+        public IDbConnection GetConnection() => Database.GetDbConnection();
 
         #endregion
 
@@ -479,10 +446,7 @@ namespace Bing.Datas.EntityFramework.Core
         public string GetTable(Type entity)
         {
             if (entity == null)
-            {
                 return null;
-            }
-
             try
             {
                 var entityType = Model.FindEntityType(entity);
@@ -501,10 +465,7 @@ namespace Bing.Datas.EntityFramework.Core
         public string GetSchema(Type entity)
         {
             if (entity == null)
-            {
                 return null;
-            }
-
             try
             {
                 var entityType = Model.FindEntityType(entity);
@@ -524,10 +485,7 @@ namespace Bing.Datas.EntityFramework.Core
         public string GetColumn(Type entity, string property)
         {
             if (entity == null || string.IsNullOrWhiteSpace(property))
-            {
                 return null;
-            }
-
             try
             {
                 var entityType = Model.FindEntityType(entity);
