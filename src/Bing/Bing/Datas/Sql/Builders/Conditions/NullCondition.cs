@@ -3,7 +3,7 @@
     /// <summary>
     /// 空查询条件
     /// </summary>
-    public class NullCondition:ICondition
+    public class NullCondition : ICondition
     {
         /// <summary>
         /// 初始化一个<see cref="NullCondition"/>类型的实例
@@ -18,10 +18,6 @@
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
-        public string GetCondition()
-        {
-            return null;
-        }
+        public string GetCondition() => null;
     }
 }

@@ -19,8 +19,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器列表</param>
-        /// <returns></returns>
-        public static T Union<T>(this T source, params ISqlBuilder[] builders) where T : IUnion
+        public static T Union<T>(this T source, params ISqlBuilder[] builders)
+            where T : IUnion
         {
             Union(source, "Union", builders);
             return source;
@@ -33,23 +33,15 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="operation">操作方式</param>
         /// <param name="builders">Sql生成器集合</param>
-        private static void Union<T>(T source, string operation, IEnumerable<ISqlBuilder> builders) where T : IUnion
+        private static void Union<T>(T source, string operation, IEnumerable<ISqlBuilder> builders)
+            where T : IUnion
         {
             if (source == null)
-            {
                 throw new ArgumentNullException(nameof(source));
-            }
-
             if (builders == null)
-            {
                 return;
-            }
-
             if (!(source is IUnionAccessor accessor))
-            {
                 return;
-            }
-
             foreach (var builder in builders)
             {
                 builder.ClearOrderBy();
@@ -64,8 +56,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器集合</param>
-        /// <returns></returns>
-        public static T Union<T>(this T source, IEnumerable<ISqlBuilder> builders) where T : IUnion
+        public static T Union<T>(this T source, IEnumerable<ISqlBuilder> builders)
+            where T : IUnion
         {
             Union(source, "Union", builders);
             return source;
@@ -81,8 +73,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器列表</param>
-        /// <returns></returns>
-        public static T UnionAll<T>(this T source, params ISqlBuilder[] builders) where T : IUnion
+        public static T UnionAll<T>(this T source, params ISqlBuilder[] builders)
+            where T : IUnion
         {
             Union(source, "Union All", builders);
             return source;
@@ -94,8 +86,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器集合</param>
-        /// <returns></returns>
-        public static T UnionAll<T>(this T source, IEnumerable<ISqlBuilder> builders) where T : IUnion
+        public static T UnionAll<T>(this T source, IEnumerable<ISqlBuilder> builders)
+            where T : IUnion
         {
             Union(source, "Union All", builders);
             return source;
@@ -111,8 +103,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器列表</param>
-        /// <returns></returns>
-        public static T Intersect<T>(this T source, params ISqlBuilder[] builders) where T : IUnion
+        public static T Intersect<T>(this T source, params ISqlBuilder[] builders)
+            where T : IUnion
         {
             Union(source, "Intersect", builders);
             return source;
@@ -124,8 +116,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器集合</param>
-        /// <returns></returns>
-        public static T Intersect<T>(this T source, IEnumerable<ISqlBuilder> builders) where T : IUnion
+        public static T Intersect<T>(this T source, IEnumerable<ISqlBuilder> builders)
+            where T : IUnion
         {
             Union(source, "Intersect", builders);
             return source;
@@ -141,8 +133,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器列表</param>
-        /// <returns></returns>
-        public static T Except<T>(this T source, params ISqlBuilder[] builders) where T : IUnion
+        public static T Except<T>(this T source, params ISqlBuilder[] builders)
+            where T : IUnion
         {
             Union(source, "Except", builders);
             return source;
@@ -154,8 +146,8 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builders">Sql生成器集合</param>
-        /// <returns></returns>
-        public static T Except<T>(this T source, IEnumerable<ISqlBuilder> builders) where T : IUnion
+        public static T Except<T>(this T source, IEnumerable<ISqlBuilder> builders)
+            where T : IUnion
         {
             Union(source, "Except", builders);
             return source;

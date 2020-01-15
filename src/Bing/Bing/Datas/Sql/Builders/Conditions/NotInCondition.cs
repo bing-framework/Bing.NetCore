@@ -33,14 +33,10 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         public string GetCondition()
         {
             if (string.IsNullOrWhiteSpace(_name) || _values == null || _values.Count == 0)
-            {
                 return null;
-            }
-
             var result = new StringBuilder();
             result.Append($"{_name} Not In (");
             result.Append(_values.Join());

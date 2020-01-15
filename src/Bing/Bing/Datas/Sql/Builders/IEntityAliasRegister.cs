@@ -29,20 +29,17 @@ namespace Bing.Datas.Sql.Builders
         /// 是否包含实体
         /// </summary>
         /// <param name="entity">实体类型</param>
-        /// <returns></returns>
         bool Contains(Type entity);
 
         /// <summary>
         /// 获取实体别名
         /// </summary>
         /// <param name="entity">实体类型</param>
-        /// <returns></returns>
         string GetAlias(Type entity);
 
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
         IEntityAliasRegister Clone();
     }
 }

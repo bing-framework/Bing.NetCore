@@ -15,10 +15,7 @@ namespace Bing.Datas.Sql.Builders.Filters
         /// <summary>
         /// 初始化一个<see cref="SqlFilterCollection"/>类型的静态实例
         /// </summary>
-        static SqlFilterCollection()
-        {
-            Filters = new List<ISqlFilter>() {new IsDeletedFilter()};
-        }
+        static SqlFilterCollection() => Filters = new List<ISqlFilter>() {new IsDeletedFilter()};
 
         /// <summary>
         /// 添加Sql过滤器
@@ -27,10 +24,7 @@ namespace Bing.Datas.Sql.Builders.Filters
         public static void Add(ISqlFilter filter)
         {
             if (filter == null)
-            {
                 return;
-            }
-
             Filters.Add(filter);
         }
     }

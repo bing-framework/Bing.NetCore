@@ -10,7 +10,7 @@ namespace Bing.Datas.Sql.Builders.Core
     /// <summary>
     /// 表连接项
     /// </summary>
-    public class JoinItem:IJoinOn
+    public class JoinItem : IJoinOn
     {
         #region 字段
 
@@ -58,7 +58,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="isSplit">是否用句点分割表名</param>
         /// <param name="type">表实体类型</param>
         public JoinItem(string joinType, string table, string schema = null, string alias = null, bool raw = false,
-            bool isSplit = true,Type type = null)
+            bool isSplit = true, Type type = null)
         {
             JoinType = joinType;
             Table = new SqlItem(table, schema, alias, raw, isSplit);
@@ -88,10 +88,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 设置依赖项
         /// </summary>
         /// <param name="helper">辅助操作</param>
-        public void SetDependency(Helper helper)
-        {
-            _helper = helper;
-        }
+        public void SetDependency(Helper helper) => _helper = helper;
 
         #endregion
 
@@ -104,10 +101,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public void On(ICondition condition)
         {
             if (condition == null)
-            {
                 return;
-            }
-
             Condition = new AndCondition(Condition, condition);
         }
 
@@ -120,10 +114,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public void On(string column, object value, Operator @operator = Operator.Equal)
         {
             if (_helper == null)
-            {
                 return;
-            }
-
             var condition = _helper.CreateCondition(column, value, @operator);
             On(condition);
         }
@@ -136,20 +127,13 @@ namespace Bing.Datas.Sql.Builders.Core
         public void On(List<List<OnItem>> items, IDialect dialect)
         {
             if (items == null)
-            {
                 return;
-            }
-
             ICondition orCondition = null;
             foreach (var onItems in items)
             {
                 ICondition condition = null;
                 foreach (var item in onItems)
-                {
-                    condition = new AndCondition(condition,
-                        SqlConditionFactory.Create(item.Left.ToSql(dialect), item.Right.ToSql(dialect), item.Operator));
-                }
-
+                    condition = new AndCondition(condition, SqlConditionFactory.Create(item.Left.ToSql(dialect), item.Right.ToSql(dialect), item.Operator));
                 orCondition = new OrCondition(orCondition, condition);
             }
             On(orCondition);
@@ -167,10 +151,7 @@ namespace Bing.Datas.Sql.Builders.Core
         public void AppendOn(string sql, IDialect dialect)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             sql = Helper.ResolveSql(sql, dialect);
             On(new SqlCondition(sql));
         }
@@ -182,7 +163,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
         public JoinItem Clone(Helper helper)
         {
             var result = new JoinItem(JoinType, Table, Type, new SqlCondition(Condition?.GetCondition()));
@@ -199,7 +179,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="tableDatabase">表数据表</param>
-        /// <returns></returns>
         public string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null)
         {
             var table = Table.ToSql(dialect, tableDatabase);
@@ -209,11 +188,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取On语句
         /// </summary>
-        /// <returns></returns>
-        private string GetOn()
-        {
-            return Condition == null ? null : $" On {Condition.GetCondition()}";
-        }
+        private string GetOn() => Condition == null ? null : $" On {Condition.GetCondition()}";
 
         #endregion       
     }

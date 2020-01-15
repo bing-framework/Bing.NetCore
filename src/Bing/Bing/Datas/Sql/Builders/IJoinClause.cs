@@ -16,14 +16,12 @@ namespace Bing.Datas.Sql.Builders
         /// <param name="sqlBuilder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
-        /// <returns></returns>
         IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager);
 
         /// <summary>
         /// 查找连接项
         /// </summary>
         /// <param name="type">表实体类型</param>
-        /// <returns></returns>
         IJoinOn Find(Type type);
 
         /// <summary>
@@ -174,7 +172,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 输出Sql
         /// </summary>
-        /// <returns></returns>
         string ToSql();
     }
 }

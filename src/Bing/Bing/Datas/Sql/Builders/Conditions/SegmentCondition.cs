@@ -6,7 +6,7 @@ namespace Bing.Datas.Sql.Builders.Conditions
     /// <summary>
     /// 范围过滤条件
     /// </summary>
-    public class SegmentCondition:ICondition
+    public class SegmentCondition : ICondition
     {
         /// <summary>
         /// 列名
@@ -45,13 +45,10 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         public string GetCondition()
         {
             if (string.IsNullOrWhiteSpace(_name))
-            {
                 return null;
-            }
             var condition = new AndCondition(CreateLeftCondition(), CreateRightCondition());
             return condition.GetCondition();
         }
@@ -59,21 +56,16 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// <summary>
         /// 创建左条件
         /// </summary>
-        /// <returns></returns>
         private ICondition CreateLeftCondition()
         {
             if (string.IsNullOrWhiteSpace(_min))
-            {
                 return NullCondition.Instance;
-            }
-
             return SqlConditionFactory.Create(_name, _min, CreateLeftOperator());
         }
 
         /// <summary>
         /// 创建左操作符
         /// </summary>
-        /// <returns></returns>
         private Operator CreateLeftOperator()
         {
             switch (_boundary)
@@ -90,21 +82,16 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// <summary>
         /// 创建右条件
         /// </summary>
-        /// <returns></returns>
         private ICondition CreateRightCondition()
         {
             if (string.IsNullOrWhiteSpace(_max))
-            {
                 return NullCondition.Instance;
-            }
-
             return SqlConditionFactory.Create(_name, _max, CreateRightOperator());
         }
 
         /// <summary>
         /// 创建右操作符
         /// </summary>
-        /// <returns></returns>
         private Operator CreateRightOperator()
         {
             switch (_boundary)

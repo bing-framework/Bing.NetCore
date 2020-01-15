@@ -8,7 +8,6 @@
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         string GetCondition();
     }
 }

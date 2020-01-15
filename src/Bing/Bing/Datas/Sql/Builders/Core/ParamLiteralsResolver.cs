@@ -12,14 +12,10 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 获取参数字面值
         /// </summary>
         /// <param name="value">参数值</param>
-        /// <returns></returns>
         public string GetParamLiterals(object value)
         {
             if (value == null)
-            {
                 return "''";
-            }
-
             switch (value.GetType().Name.ToLower())
             {
                 case "boolean":

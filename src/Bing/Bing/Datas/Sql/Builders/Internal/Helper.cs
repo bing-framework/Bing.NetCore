@@ -57,13 +57,10 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="expression">表达式</param>
         /// <param name="type">实体类型</param>
-        /// <returns></returns>
         public string GetColumn(Expression expression, Type type)
         {
             if (expression == null)
-            {
                 return null;
-            }
             return GetColumn(_resolver.GetColumn(expression, type), type);
         }
 
@@ -72,13 +69,10 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
-        /// <returns></returns>
         public string GetColumn<TEntity>(Expression<Func<TEntity, object>> expression)
         {
             if (expression == null)
-            {
                 return null;
-            }
             return GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
         }
         
@@ -87,13 +81,10 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="column">列名</param>
         /// <param name="type">实体类型</param>
-        /// <returns></returns>
         public string GetColumn(string column, Type type)
         {
             if (string.IsNullOrWhiteSpace(column))
-            {
                 return column;
-            }
             return new SqlItem(column,_register.GetAlias(type)).ToSql(_dialect);
         }
 
@@ -101,13 +92,10 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// 获取处理后的列名
         /// </summary>
         /// <param name="column">列名</param>
-        /// <returns></returns>
         public string GetColumn(string column)
         {
             if (string.IsNullOrWhiteSpace(column))
-            {
                 return column;
-            }
             return new SqlItem(column).ToSql(_dialect);
         }
 
@@ -115,26 +103,16 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// 获取值
         /// </summary>
         /// <param name="expression">表达式</param>
-        /// <returns></returns>
         public object GetValue(Expression expression)
         {
             if (expression == null)
-            {
                 return null;
-            }
-
             var result = Lambda.GetValue(expression);
             if (result == null)
-            {
                 return null;
-            }
-
             var type = result.GetType();
             if (type.IsEnum)
-            {
                 return Bing.Utils.Helpers.Enum.GetValue(type, result);
-            }
-
             return result;
         }
 
@@ -143,12 +121,7 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="expression">列名</param>
         /// <param name="type">实体类型</param>
-        /// <returns></returns>
-        public ICondition CreateCondition(Expression expression, Type type)
-        {
-            return CreateCondition(GetColumn(expression, type), GetValue(expression),
-                Lambda.GetOperator(expression).SafeValue());
-        }
+        public ICondition CreateCondition(Expression expression, Type type) => CreateCondition(GetColumn(expression, type), GetValue(expression), Lambda.GetOperator(expression).SafeValue());
 
         /// <summary>
         /// 创建查询条件并添加参数
@@ -156,29 +129,17 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
-        /// <returns></returns>
         public ICondition CreateCondition(string column, object value, Operator @operator)
         {
             if (string.IsNullOrWhiteSpace(column))
-            {
                 throw new ArgumentNullException(nameof(column));
-            }
-
             if (_parameterManager == null)
-            {
                 return null;
-            }
-
             column = GetColumn(column);
             if (IsInCondition(@operator, value))
-            {
                 return CreateInCondition(column, value as IEnumerable);
-            }
-
             if (IsNotInCondition(@operator, value))
-            {
                 return CreateInCondition(column, value as IEnumerable, true);
-            }            
             var paramName = GenerateParamName(value, @operator);
             _parameterManager.Add(paramName, value, @operator);
             return SqlConditionFactory.Create(column, paramName, @operator);
@@ -189,19 +150,12 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
         private bool IsInCondition(Operator @operator, object value)
         {
             if (@operator == Operator.In)
-            {
                 return true;
-            }
-
             if (@operator == Operator.Contains && value != null && Reflection.IsCollection(value.GetType()))
-            {
                 return true;
-            }
-
             return false;
         }
 
@@ -210,14 +164,10 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
         private bool IsNotInCondition(Operator @operator, object value)
         {
             if (@operator == Operator.NotIn)
-            {
                 return true;
-            }            
-
             return false;
         }
 
@@ -227,14 +177,10 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// <param name="column">列名</param>
         /// <param name="values">值列表</param>
         /// <param name="notIn">是否Not In条件</param>
-        /// <returns></returns>
         private ICondition CreateInCondition(string column, IEnumerable values, bool notIn = false)
         {
             if (values == null)
-            {
                 return NullCondition.Instance;
-            }
-
             var paramNames = new List<string>();
             foreach (var value in values)
             {
@@ -242,12 +188,8 @@ namespace Bing.Datas.Sql.Builders.Internal
                 paramNames.Add(name);
                 _parameterManager.Add(name, value);
             }
-
             if (notIn)
-            {
                 return new NotInCondition(column, paramNames);
-            }
-
             return new InCondition(column, paramNames);
         }
 
@@ -256,23 +198,15 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
-        /// <returns></returns>
         public string GenerateParamName(object value, Operator @operator)
         {
             if (_parameterManager == null)
-            {
                 return string.Empty;
-            }
-
             var result = _parameterManager.GenerateName();
             if (value != null)
-            {
                 return result;
-            }
             if (@operator == Operator.Equal || @operator == Operator.NotEqual)
-            {
                 return null;
-            }
             return result;
         }
 
@@ -283,7 +217,6 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        /// <returns></returns>
         public ICondition Between(string column, object min, object max, Boundary boundary)
         {
             column = GetColumn(column);
@@ -294,13 +227,11 @@ namespace Bing.Datas.Sql.Builders.Internal
                 minParamName = _parameterManager.GenerateName();
                 _parameterManager.Add(minParamName, min);
             }
-
             if (string.IsNullOrWhiteSpace(max.SafeString()) == false)
             {
                 maxParamName = _parameterManager.GenerateName();
                 _parameterManager.Add(maxParamName, max);
             }
-
             return new SegmentCondition(column, minParamName, maxParamName, boundary);
         }
 
@@ -309,10 +240,6 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="sql">Sql语句</param>
         /// <param name="dialect">Sql方言</param>
-        /// <returns></returns>
-        public static string ResolveSql(string sql, IDialect dialect)
-        {
-            return sql?.Replace('[', dialect.OpeningIdentifier).Replace(']', dialect.ClosingIdentifier);
-        }
+        public static string ResolveSql(string sql, IDialect dialect) => sql?.Replace('[', dialect.OpeningIdentifier).Replace(']', dialect.ClosingIdentifier);
     }
 }

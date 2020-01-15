@@ -17,9 +17,7 @@ namespace Bing.Datas.Sql.Builders.Filters
         public void Filter(SqlContext context)
         {
             foreach (var item in context.EntityAliasRegister.Data)
-            {
                 Filter(context.Dialect, context.Matedata, context.EntityAliasRegister, context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
-            }
         }
 
         /// <summary>
@@ -36,27 +34,17 @@ namespace Bing.Datas.Sql.Builders.Filters
             IWhereClause where, Type type, string alias)
         {
             if (type == null)
-            {
                 return;
-            }
-
             if (string.IsNullOrWhiteSpace(alias))
-            {
                 return;
-            }
-
             if (typeof(IDelete).IsAssignableFrom(type) == false)
-            {
                 return;
-            }
-
             var isDeleted = $"{dialect.SafeName(alias)}.{dialect.SafeName(matedata.GetColumn(type, "IsDeleted"))}";
             if (register.FromType == type)
             {
                 where.Where(isDeleted, false);
                 return;
             }
-
             join.Find(type)?.On(isDeleted, false);
         }
     }

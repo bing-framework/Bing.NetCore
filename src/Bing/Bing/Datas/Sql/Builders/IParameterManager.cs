@@ -11,13 +11,11 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 创建参数名
         /// </summary>
-        /// <returns></returns>
         string GenerateName();
 
         /// <summary>
         /// 获取参数列表
         /// </summary>
-        /// <returns></returns>
         IReadOnlyDictionary<string, object> GetParams();
 
         /// <summary>
@@ -31,7 +29,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
         IParameterManager Clone();
 
         /// <summary>

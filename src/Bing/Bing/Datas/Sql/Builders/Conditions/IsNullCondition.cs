@@ -3,7 +3,7 @@
     /// <summary>
     /// Is Null查询条件
     /// </summary>
-    public class IsNullCondition:ICondition
+    public class IsNullCondition : ICondition
     {
         /// <summary>
         /// 列名
@@ -14,18 +14,11 @@
         /// 初始化一个<see cref="IsNullCondition"/>类型的实例
         /// </summary>
         /// <param name="name">列名</param>
-        public IsNullCondition(string name)
-        {
-            _name = name;
-        }
+        public IsNullCondition(string name) => _name = name;
 
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
-        public string GetCondition()
-        {
-            return string.IsNullOrWhiteSpace(_name) ? null : $"{_name} Is Null";
-        }
+        public string GetCondition() => string.IsNullOrWhiteSpace(_name) ? null : $"{_name} Is Null";
     }
 }

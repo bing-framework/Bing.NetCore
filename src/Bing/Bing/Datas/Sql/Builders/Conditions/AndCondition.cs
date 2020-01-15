@@ -3,7 +3,7 @@
     /// <summary>
     /// And连接条件
     /// </summary>
-    public class AndCondition:ICondition
+    public class AndCondition : ICondition
     {
         /// <summary>
         /// 左操作数
@@ -40,19 +40,12 @@
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         public string GetCondition()
         {
             if (string.IsNullOrWhiteSpace(_left))
-            {
                 return _right;
-            }
-
             if (string.IsNullOrWhiteSpace(_right))
-            {
                 return _left;
-            }
-
             return $"{_left} And {_right}";
         }
     }

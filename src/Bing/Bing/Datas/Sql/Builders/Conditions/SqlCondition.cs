@@ -3,7 +3,7 @@
     /// <summary>
     /// Sql查询条件
     /// </summary>
-    public class SqlCondition:ICondition
+    public class SqlCondition : ICondition
     {
         /// <summary>
         /// Sql查询条件
@@ -14,18 +14,11 @@
         /// 初始化一个<see cref="SqlCondition"/>类型的实例
         /// </summary>
         /// <param name="condition">查询条件</param>
-        public SqlCondition(string condition)
-        {
-            _condition = condition;
-        }
+        public SqlCondition(string condition) => _condition = condition;
 
         /// <summary>
         ///  获取查询条件
         /// </summary>
-        /// <returns></returns>
-        public string GetCondition()
-        {
-            return _condition;
-        }
+        public string GetCondition() => _condition;
     }
 }

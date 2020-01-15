@@ -12,7 +12,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
     /// <summary>
     /// Group By子句
     /// </summary>
-    public class GroupByClause:IGroupByClause
+    public class GroupByClause : IGroupByClause
     {
         /// <summary>
         /// Sql方言
@@ -37,7 +37,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <summary>
         /// 分组条件
         /// </summary>
-        private string _having;        
+        private string _having;
 
         /// <summary>
         /// 是否存在分组
@@ -65,17 +65,13 @@ namespace Bing.Datas.Sql.Builders.Clauses
             _register = register;
             _group = group ?? new List<SqlItem>();
             _having = having;
-        }        
+        }
 
         /// <summary>
         /// 克隆
         /// </summary>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
-        public virtual IGroupByClause Clone(IEntityAliasRegister register)
-        {
-            return new GroupByClause(_dialect, _resolver, register, new List<SqlItem>(_group), _having);
-        }
+        public virtual IGroupByClause Clone(IEntityAliasRegister register) => new GroupByClause(_dialect, _resolver, register, new List<SqlItem>(_group), _having);
 
         /// <summary>
         /// 分组
@@ -85,10 +81,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void GroupBy(string columns, string having = null)
         {
             if (string.IsNullOrWhiteSpace(columns))
-            {
                 return;
-            }
-            _group.AddRange(columns.Split(',').Select(item=>new SqlItem(item)));
+            _group.AddRange(columns.Split(',').Select(item => new SqlItem(item)));
             _having = having;
         }
 
@@ -100,14 +94,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns)
         {
             if (columns == null)
-            {
                 return;
-            }
-
             foreach (var column in columns)
-            {
                 GroupBy(column);
-            }
         }
 
         /// <summary>
@@ -145,20 +134,14 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <summary>
         /// 获取Sql
         /// </summary>
-        /// <returns></returns>
         public string ToSql()
         {
             if (IsGroup == false)
-            {
                 return null;
-            }
-
             var result = new StringBuilder();
             result.Append($"Group By {GroupColumns}");
             if (string.IsNullOrWhiteSpace(_having))
-            {
                 return result.ToString();
-            }
             result.Append($" Having {_having}");
             return result.ToString();
         }

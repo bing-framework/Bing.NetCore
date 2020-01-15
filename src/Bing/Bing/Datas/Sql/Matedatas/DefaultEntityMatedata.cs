@@ -11,31 +11,19 @@ namespace Bing.Datas.Sql.Matedatas
         /// 获取表名
         /// </summary>
         /// <param name="type">实体类型</param>
-        /// <returns></returns>
-        public string GetTable(Type type)
-        {
-            return type?.Name;
-        }
+        public string GetTable(Type type) => type?.Name;
 
         /// <summary>
         /// 获取架构
         /// </summary>
         /// <param name="type">实体类型</param>
-        /// <returns></returns>
-        public string GetSchema(Type type)
-        {
-            return string.Empty;
-        }
+        public string GetSchema(Type type) => string.Empty;
 
         /// <summary>
         /// 获取列名
         /// </summary>
         /// <param name="type">实体类型</param>
         /// <param name="property">属性名</param>
-        /// <returns></returns>
-        public string GetColumn(Type type, string property)
-        {
-            return property;
-        }
+        public string GetColumn(Type type, string property) => property;
     }
 }

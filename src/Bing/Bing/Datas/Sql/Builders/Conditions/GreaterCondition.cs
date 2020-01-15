@@ -3,7 +3,7 @@
     /// <summary>
     /// Sql大于查询条件
     /// </summary>
-    public class GreaterCondition:ICondition
+    public class GreaterCondition : ICondition
     {
         /// <summary>
         /// 左操作数
@@ -29,10 +29,6 @@
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
-        public string GetCondition()
-        {
-            return $"{_left}>{_right}";
-        }
+        public string GetCondition() => $"{_left}>{_right}";
     }
 }

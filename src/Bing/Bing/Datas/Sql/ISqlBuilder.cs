@@ -23,19 +23,16 @@ namespace Bing.Datas.Sql
         /// <summary>
         /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
         /// </summary>
-        /// <returns></returns>
         string ToDebugSql();
 
         /// <summary>
         /// 生成Sql语句
         /// </summary>
-        /// <returns></returns>
         string ToSql();
 
         /// <summary>
         /// 创建Sql生成器
         /// </summary>
-        /// <returns></returns>
         ISqlBuilder New();
 
         /// <summary>
@@ -103,28 +100,24 @@ namespace Bing.Datas.Sql
         /// <summary>
         /// 获取参数列表
         /// </summary>
-        /// <returns></returns>
         IReadOnlyDictionary<string, object> GetParams();
 
         /// <summary>
         /// 设置分页
         /// </summary>
         /// <param name="pager">分页参数</param>
-        /// <returns></returns>
         ISqlBuilder Page(IPager pager);
 
         /// <summary>
         /// 设置跳过行数
         /// </summary>
         /// <param name="count">跳过的行数</param>
-        /// <returns></returns>
         ISqlBuilder Skip(int count);
 
         /// <summary>
         /// 设置获取行数
         /// </summary>
         /// <param name="count">获取的行数</param>
-        /// <returns></returns>
         ISqlBuilder Take(int count);
 
         /// <summary>

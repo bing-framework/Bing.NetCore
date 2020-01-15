@@ -17,24 +17,14 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="name">公用表达式CTE的名称</param>
         /// <param name="builder">Sql生成器</param>
-        /// <returns></returns>
         public static T With<T>(this T source, string name, ISqlBuilder builder) where T : ICte
         {
             if (source == null)
-            {
                 throw new ArgumentNullException(nameof(source));
-            }
-
             if (string.IsNullOrWhiteSpace(name) || builder == null)
-            {
                 return source;
-            }
-
             if (source is ICteAccessor accessor)
-            {
                 accessor.CteItems.Add(new BuilderItem(name, builder));
-            }
-
             return source;
         }
     }

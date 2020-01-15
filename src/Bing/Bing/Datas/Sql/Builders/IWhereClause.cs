@@ -441,7 +441,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 输出Sql
         /// </summary>
-        /// <returns></returns>
         string ToSql();
     }
 }

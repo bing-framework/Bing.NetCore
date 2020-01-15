@@ -57,23 +57,18 @@ namespace Bing.Datas.Sql.Builders.Core
         public NameItem(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
                 return;
-            }
-
             var list = IsComplex(name) ? ResolveByPattern(name) : ResolveBySplit(name);
             if (list.Count == 1)
             {
                 Name = list[0];
                 return;
             }
-
             if (list.Count == 2)
             {
                 Prefix = list[0];
                 Name = list[1];
             }
-
             if (list.Count == 3)
             {
                 DatabaseName = list[0];
@@ -86,27 +81,18 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 是否复杂名称
         /// </summary>
         /// <param name="name">名称</param>
-        /// <returns></returns>
-        private bool IsComplex(string name)
-        {
-            return name.Contains("[") || name.Contains("`") || name.Contains("\"");
-        }
+        private bool IsComplex(string name) => name.Contains("[") || name.Contains("`") || name.Contains("\"");
 
         /// <summary>
         /// 分割句点
         /// </summary>
         /// <param name="name">名称</param>
-        /// <returns></returns>
-        private List<string> ResolveBySplit(string name)
-        {
-            return name.Split('.').ToList();
-        }
+        private List<string> ResolveBySplit(string name) => name.Split('.').ToList();
 
         /// <summary>
         /// 通过正则表达式进行解析
         /// </summary>
         /// <param name="name">名称</param>
-        /// <returns></returns>
         private List<string> ResolveByPattern(string name)
         {
             var pattern = "^(([\\[`\"]\\S+?[\\]`\"]).)?(([\\[`\"]\\S+[\\]`\"]).)?([\\[`\"]\\S+[\\]`\"])$";
@@ -124,7 +110,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="dialect">Sql方言</param>
         /// <param name="prefix">前缀</param>
         /// <param name="tableDatabase">表数据库</param>
-        /// <returns></returns>
         public string ToSql(IDialect dialect, string prefix = null, ITableDatabase tableDatabase = null)
         {
             var name = GetName(dialect, prefix);
@@ -136,7 +121,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 获取前缀
         /// </summary>
         /// <param name="prefix">前缀</param>
-        /// <returns></returns>
         private string GetPrefix(string prefix) => string.IsNullOrWhiteSpace(Prefix) ? prefix : Prefix;
 
         /// <summary>
@@ -145,13 +129,10 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="dialect">Sql方言</param>
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="prefix">前缀</param>
-        /// <returns></returns>
         private string GetDatabase(IDialect dialect, ITableDatabase tableDatabase, string prefix)
         {
             if (string.IsNullOrWhiteSpace(DatabaseName) == false)
-            {
                 return dialect.SafeName(DatabaseName);
-            }
             return tableDatabase == null ? null : dialect.SafeName(tableDatabase.GetDatabase(GetName(prefix)));
         }
 
@@ -160,7 +141,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="prefix">前缀</param>
-        /// <returns></returns>
         private string GetName(IDialect dialect, string prefix)
         {
             prefix = GetPrefix(prefix);
@@ -170,7 +150,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 获取名称
         /// </summary>
         /// <param name="prefix">前缀</param>
-        /// <returns></returns>
         private string GetName(string prefix)
         {
             prefix = GetPrefix(prefix);

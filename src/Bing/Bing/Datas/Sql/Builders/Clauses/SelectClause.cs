@@ -63,19 +63,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// </summary>
         /// <param name="builder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
-        public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
-        {
-            return new SelectClause(builder, _dialect, _resolver, register, _columns.Clone());
-        }
+        public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register) => new SelectClause(builder, _dialect, _resolver, register, _columns.Clone());
 
         /// <summary>
         /// 过滤重复记录
         /// </summary>
-        public void Distinct()
-        {
-            _distinct = true;
-        }
+        public void Distinct() => _distinct = true;
 
         /// <summary>
         /// 求总行数

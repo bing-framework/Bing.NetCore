@@ -22,7 +22,6 @@ namespace Bing.Datas.Sql
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
         ISqlQuery Clone();
         
         /// <summary>
@@ -34,7 +33,6 @@ namespace Bing.Datas.Sql
         /// <summary>
         /// 获取Sql生成器
         /// </summary>
-        /// <returns></returns>
         ISqlBuilder GetBuilder();
 
         /// <summary>
@@ -43,7 +41,6 @@ namespace Bing.Datas.Sql
         /// <typeparam name="TResult">实体类型</typeparam>
         /// <param name="func">查询操作</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         TResult Query<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, TResult> func,
             IDbConnection connection = null);
 
@@ -53,7 +50,6 @@ namespace Bing.Datas.Sql
         /// <typeparam name="TResult">实体类型</typeparam>
         /// <param name="func">查询操作</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, Task<TResult>> func,
             IDbConnection connection = null);
 
@@ -64,7 +60,6 @@ namespace Bing.Datas.Sql
         /// <param name="func">获取列表操作</param>
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter,
             IDbConnection connection = null);
 
@@ -75,7 +70,6 @@ namespace Bing.Datas.Sql
         /// <param name="func">获取列表操作</param>
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter,
             IDbConnection connection = null);
 
@@ -96,7 +90,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         TResult To<TResult>(IDbConnection connection = null);
 
         /// <summary>
@@ -104,7 +97,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<TResult> ToAsync<TResult>(IDbConnection connection = null);
 
         /// <summary>
@@ -112,7 +104,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         List<TResult> ToList<TResult>(IDbConnection connection = null);
 
         /// <summary>
@@ -120,7 +111,6 @@ namespace Bing.Datas.Sql
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null);
 
         /// <summary>
@@ -129,7 +119,6 @@ namespace Bing.Datas.Sql
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="sql">Sql语句</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null);
 
         /// <summary>
@@ -138,7 +127,6 @@ namespace Bing.Datas.Sql
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null);
 
         /// <summary>
@@ -147,7 +135,6 @@ namespace Bing.Datas.Sql
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null);
 
         /// <summary>
@@ -157,7 +144,6 @@ namespace Bing.Datas.Sql
         /// <param name="page">页数</param>
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         PagerList<TResult> ToPagerList<TResult>(int page, int pageSize, IDbConnection connection = null);
 
         /// <summary>
@@ -167,7 +153,6 @@ namespace Bing.Datas.Sql
         /// <param name="page">页数</param>
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);        
 
         /// <summary>
@@ -178,7 +163,6 @@ namespace Bing.Datas.Sql
         /// <param name="page">页数</param>
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
-        /// <returns></returns>
         Task<PagerList<TResult>> ToPagerListAsync<TResult>(string sql, int page, int pageSize,
             IDbConnection connection = null);
     }

@@ -73,30 +73,21 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="builder">Sql生成器</param>
         /// <param name="register">实体别名注册器</param>
         /// <param name="parameterManager">参数管理器</param>
-        /// <returns></returns>
-        public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager)
-        {
-            return new WhereClause(builder, _dialect, _resolver, register, parameterManager,
+        public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager) =>
+            new WhereClause(builder, _dialect, _resolver, register, parameterManager,
                 new SqlCondition(_condition?.GetCondition()));
-        }
 
         /// <summary>
         /// And连接条件
         /// </summary>
         /// <param name="condition">查询条件</param>
-        public void And(ICondition condition)
-        {
-            _condition = new AndCondition(_condition, condition);
-        }
+        public void And(ICondition condition) => _condition = new AndCondition(_condition, condition);
 
         /// <summary>
         /// Or连接条件
         /// </summary>
         /// <param name="condition">查询条件</param>
-        public void Or(ICondition condition)
-        {
-            _condition = new OrCondition(_condition, condition);
-        }
+        public void Or(ICondition condition) => _condition = new OrCondition(_condition, condition);
 
         /// <summary>
         /// Or连接条件
@@ -106,22 +97,14 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
         {
             if (conditions == null)
-            {
                 return;
-            }
-
             foreach (var condition in conditions)
             {
                 if (condition == null)
-                {
                     continue;
-                }
-
                 var predicate = _expressionResolver.Resolve(condition);
                 if (predicate == null)
-                {
                     continue;
-                }
                 Or(predicate);
             }
         }
@@ -134,32 +117,18 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
         {
             if (conditions == null)
-            {
                 return;
-            }
-
             foreach (var condition in conditions)
             {
                 if (condition == null)
-                {
                     continue;
-                }
-
                 if (Lambda.GetConditionCount(condition) > 1)
-                {
                     throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, condition));
-                }
-
                 if (string.IsNullOrWhiteSpace(Lambda.GetValue(condition).SafeString()))
-                {
                     continue;
-                }
-
                 var predicate = _expressionResolver.Resolve(condition);
                 if (predicate == null)
-                {
                     continue;
-                }
                 Or(predicate);
             }
         }
@@ -168,10 +137,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// 设置查询条件
         /// </summary>
         /// <param name="condition">查询条件</param>
-        public void Where(ICondition condition)
-        {
-            And(condition);
-        }
+        public void Where(ICondition condition) => And(condition);
 
         /// <summary>
         /// 设置查询条件
@@ -179,10 +145,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
-        public void Where(string column, object value, Operator @operator = Operator.Equal)
-        {
-            And(_helper.CreateCondition(column, value, @operator));
-        }        
+        public void Where(string column, object value, Operator @operator = Operator.Equal) => And(_helper.CreateCondition(column, value, @operator));
 
         /// <summary>
         /// 设置查询条件
@@ -191,10 +154,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="expression">列名表达式</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
-        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal) where TEntity : class
-        {
-            Where(_helper.GetColumn(expression), value, @operator);
-        }
+        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), value, @operator);
 
         /// <summary>
         /// 设置查询条件
@@ -204,10 +164,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Where<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
         {
             if (expression == null)
-            {
                 throw new ArgumentNullException(nameof(expression));
-            }
-
             var condition = _expressionResolver.Resolve(expression);
             And(condition);
         }
@@ -221,10 +178,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
         {
             if (builder == null)
-            {
                 return;
-            }
-
             column = _helper.GetColumn(column);
             var sql = $"({builder.ToSql()})";
             And(SqlConditionFactory.Create(column, sql, @operator));
@@ -237,10 +191,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="expression">列名表达式</param>
         /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
-        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) where TEntity : class
-        {
-            Where(_helper.GetColumn(expression), builder, @operator);
-        }
+        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), builder, @operator);
 
         /// <summary>
         /// 设置子查询条件
@@ -251,10 +202,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
         {
             if (action == null)
-            {
                 return;
-            }
-
             var builder = Builder.New();
             action(builder);
             Where(column, builder, @operator);
@@ -267,10 +215,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="expression">列名表达式</param>
         /// <param name="action">子查询操作</param>
         /// <param name="operator">运算符</param>
-        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) where TEntity : class
-        {
-            Where(_helper.GetColumn(expression), action, @operator);
-        }        
+        public void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), action, @operator);
 
         /// <summary>
         /// 设置查询条件
@@ -281,9 +226,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void WhereIfNotEmpty(string column, object value, Operator @operator = Operator.Equal)
         {
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return;
-            }
             Where(column,value,@operator);
         }
 
@@ -297,13 +240,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void WhereIfNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal) where TEntity : class
         {
             if (expression == null)
-            {
                 throw new ArgumentNullException(nameof(expression));
-            }
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return;
-            }
             Where(expression, value, @operator);
         }
 
@@ -315,18 +254,11 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void WhereIfNotEmpty<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
         {
             if (expression == null)
-            {
                 throw new ArgumentNullException(nameof(expression));
-            }
-
             if (Lambda.GetConditionCount(expression) > 1)
-            {
                 throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate,expression));
-            }
             if (string.IsNullOrWhiteSpace(Lambda.GetValue(expression).SafeString()))
-            {
                 return;
-            }
             Where(expression);
         }
 
@@ -334,20 +266,14 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// 设置Is Null条件
         /// </summary>
         /// <param name="column">列名</param>
-        public void IsNull(string column)
-        {
-            And(_helper.CreateCondition(column, null, Operator.Equal));
-        }
+        public void IsNull(string column) => And(_helper.CreateCondition(column, null, Operator.Equal));
 
         /// <summary>
         /// 设置Is Null条件
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
-        public void IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
-        {
-            IsNull(_helper.GetColumn(expression));
-        }
+        public void IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class => IsNull(_helper.GetColumn(expression));
 
         /// <summary>
         /// 设置Is Not Null条件
@@ -417,10 +343,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// </summary>
         /// <param name="column">列名</param>
         /// <param name="values">值集合</param>
-        public void In(string column, IEnumerable<object> values)
-        {
-            Where(column, values, Operator.In);
-        }
+        public void In(string column, IEnumerable<object> values) => Where(column, values, Operator.In);
 
         /// <summary>
         /// 设置In条件
@@ -429,20 +352,15 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="expression">列名表达式</param>
         /// <param name="values">值集合</param>
         public void In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
-            where TEntity : class
-        {
+            where TEntity : class =>
             Where(expression, values, Operator.In);
-        }
 
         /// <summary>
         /// 设置In条件
         /// </summary>
         /// <param name="column">列名</param>
         /// <param name="builder">Sql生成器</param>
-        public void In(string column, ISqlBuilder builder)
-        {
-            AppendSqlBuilder("In", column, builder);
-        }
+        public void In(string column, ISqlBuilder builder) => AppendSqlBuilder("In", column, builder);
 
         /// <summary>
         /// 添加子查询
@@ -453,15 +371,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         private void AppendSqlBuilder(string operation, string column, ISqlBuilder builder)
         {
             if (string.IsNullOrWhiteSpace(column))
-            {
                 return;
-            }
-
             if (builder == null)
-            {
                 return;
-            }
-
             var result = $"{_helper.GetColumn(column)} {operation} ({builder.ToSql()})";
             AppendSql(result);
         }
@@ -472,10 +384,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="builder">Sql生成器</param>
-        public void In<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder)
-        {
-            In(_helper.GetColumn(expression), builder);
-        }
+        public void In<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => In(_helper.GetColumn(expression), builder);
 
         /// <summary>
         /// 设置In条件
@@ -485,10 +394,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void In(string column, Action<ISqlBuilder> action)
         {
             if (action == null)
-            {
                 return;
-            }
-
             var builder = Builder.New();
             action(builder);
             In(column, builder);
@@ -500,20 +406,14 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="action">子查询操作</param>
-        public void In<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action)
-        {
-            In(_helper.GetColumn(expression), action);
-        }
+        public void In<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => In(_helper.GetColumn(expression), action);
 
         /// <summary>
         /// 设置Not In条件
         /// </summary>
         /// <param name="column">列名</param>
         /// <param name="values">值集合</param>
-        public void NotIn(string column, IEnumerable<object> values)
-        {
-            Where(column, values, Operator.NotIn);
-        }
+        public void NotIn(string column, IEnumerable<object> values) => Where(column, values, Operator.NotIn);
 
         /// <summary>
         /// 设置Not In条件
@@ -521,20 +421,14 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="values">值集合</param>
-        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class
-        {
-            Where(expression, values, Operator.NotIn);
-        }
+        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class => Where(expression, values, Operator.NotIn);
 
         /// <summary>
         /// 设置Not In条件
         /// </summary>
         /// <param name="column">列名</param>
         /// <param name="builder">Sql生成器</param>
-        public void NotIn(string column, ISqlBuilder builder)
-        {
-            AppendSqlBuilder("Not In", column, builder);
-        }
+        public void NotIn(string column, ISqlBuilder builder) => AppendSqlBuilder("Not In", column, builder);
 
         /// <summary>
         /// 设置Not In条件
@@ -542,10 +436,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="builder">Sql生成器</param>
-        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder)
-        {
-            NotIn(_helper.GetColumn(expression), builder);
-        }
+        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => NotIn(_helper.GetColumn(expression), builder);
 
         /// <summary>
         /// 设置Not In条件
@@ -555,10 +446,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void NotIn(string column, Action<ISqlBuilder> action)
         {
             if (action == null)
-            {
                 return;
-            }
-
             var builder = Builder.New();
             action(builder);
             NotIn(column, builder);
@@ -570,10 +458,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="action">子查询操作</param>
-        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action)
-        {
-            NotIn(_helper.GetColumn(expression), action);
-        }
+        public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => NotIn(_helper.GetColumn(expression), action);
 
         /// <summary>
         /// 设置Exists条件
@@ -582,10 +467,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Exists(ISqlBuilder builder)
         {
             if (builder == null)
-            {
                 return;
-            }
-
             var result = $"Exists ({builder.ToSql()})";
             AppendSql(result);
         }
@@ -597,10 +479,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Exists(Action<ISqlBuilder> action)
         {
             if (action == null)
-            {
                 return;
-            }
-
             var builder = Builder.New();
             action(builder);
             Exists(builder);
@@ -613,10 +492,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void NotExists(ISqlBuilder builder)
         {
             if (builder == null)
-            {
                 return;
-            }
-
             var result = $"Not Exists ({builder.ToSql()})";
             AppendSql(result);
         }
@@ -628,10 +504,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void NotExists(Action<ISqlBuilder> action)
         {
             if (action == null)
-            {
                 return;
-            }
-
             var builder = Builder.New();
             action(builder);
             NotExists(builder);
@@ -815,11 +688,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
-        public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary)
-        {
+        public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) =>
             Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime),
                 GetBoundary(boundary, includeTime)));
-        }
 
         /// <summary>
         /// 获取最小日期
@@ -831,18 +702,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         private DateTime? GetMin(DateTime? min, DateTime? max, bool includeTime)
         {
             if (min == null)
-            {
                 return null;
-            }
             DateTime? result = min;
             if (min > max)
-            {
                 result = min;
-            }
             if (includeTime)
-            {
                 return result;
-            }
             return result.SafeValue().Date;
         }
 
@@ -856,18 +721,12 @@ namespace Bing.Datas.Sql.Builders.Clauses
         private DateTime? GetMax(DateTime? min, DateTime? max, bool includeTime)
         {
             if (max == null)
-            {
                 return null;
-            }
             DateTime? result = max;
             if (min > max)
-            {
                 result = min;
-            }
             if (includeTime)
-            {
                 return result;
-            }
             return result.SafeValue().Date.AddDays(1);
         }
         /// <summary>
@@ -879,13 +738,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         private Boundary GetBoundary(Boundary? boundary, bool includeTime)
         {
             if (boundary != null)
-            {
                 return boundary.SafeValue();
-            }
             if (includeTime)
-            {
                 return Boundary.Both;
-            }
             return Boundary.Left;
         }
 
@@ -896,10 +751,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void AppendSql(string sql)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             sql = Helper.ResolveSql(sql, _dialect);
             And(new SqlCondition(sql));
         }
@@ -907,24 +759,17 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <summary>
         /// 输出Sql
         /// </summary>
-        /// <returns></returns>
         public string ToSql()
         {
             var condition = GetCondition();
             if (string.IsNullOrWhiteSpace(condition))
-            {
                 return null;
-            }
             return $"Where {condition}";
         }
 
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
-        public string GetCondition()
-        {
-            return _condition?.GetCondition();
-        }
+        public string GetCondition() => _condition?.GetCondition();
     }
 }

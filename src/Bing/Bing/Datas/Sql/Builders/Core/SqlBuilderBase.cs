@@ -420,10 +420,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
         /// </summary>
-        public virtual string ToDebugSql()
-        {
-            return GetDebugSql(ToSql());
-        }
+        public virtual string ToDebugSql() => GetDebugSql(ToSql());
 
         /// <summary>
         /// 获取调试Sql
@@ -433,11 +430,7 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             var parameters = GetParams();
             foreach (var parameter in parameters)
-            {
-                sql = Regex.Replace(sql, $@"{parameter.Key}\b",
-                    ParamLiteralsResolver.GetParamLiterals(parameter.Value));
-            }
-
+                sql = Regex.Replace(sql, $@"{parameter.Key}\b", ParamLiteralsResolver.GetParamLiterals(parameter.Value));
             return sql;
         }
 
@@ -460,10 +453,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 初始化
         /// </summary>
-        public virtual void Init()
-        {
-            OrderByClause.OrderBy(Pager?.Order);
-        }
+        public virtual void Init() => OrderByClause.OrderBy(Pager?.Order);
 
         /// <summary>
         /// 验证
@@ -482,9 +472,7 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             CreateCte(result);
             if (_isAddFilters == false)
-            {
                 AddFilters();
-            }
             if (IsUnion)
             {
                 CreateSqlByUnion(result);
@@ -564,10 +552,7 @@ namespace Bing.Datas.Sql.Builders.Core
         protected void AppendSql(StringBuilder result, string sql)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             result.AppendLine($"{sql} ");
         }
 
@@ -579,10 +564,7 @@ namespace Bing.Datas.Sql.Builders.Core
         {
             var sql = SelectClause.ToSql();
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 throw new InvalidOperationException("必须设置Select子句");
-            }
-
             AppendSql(result, sql);
         }
 
@@ -650,10 +632,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取参数
         /// </summary>
-        public IReadOnlyDictionary<string, object> GetParams()
-        {
-            return ParameterManager.GetParams();
-        }
+        public IReadOnlyDictionary<string, object> GetParams() => ParameterManager.GetParams();
 
         #endregion
 
@@ -662,10 +641,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        public virtual string GetCondition()
-        {
-            return WhereClause.GetCondition();
-        }
+        public virtual string GetCondition() => WhereClause.GetCondition();
 
         #endregion
 
@@ -675,7 +651,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// 设置跳过行数
         /// </summary>
         /// <param name="count">跳过的行数</param>
-        /// <returns></returns>
         public ISqlBuilder Skip(int count)
         {
             var param = GetOffsetParam();

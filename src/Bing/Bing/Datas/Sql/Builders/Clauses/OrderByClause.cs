@@ -55,11 +55,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// 克隆
         /// </summary>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
-        public virtual IOrderByClause Clone(IEntityAliasRegister register)
-        {
-            return new OrderByClause(_dialect, _resolver, register, new List<OrderByItem>(_items));
-        }
+        public virtual IOrderByClause Clone(IEntityAliasRegister register) => new OrderByClause(_dialect, _resolver, register, new List<OrderByItem>(_items));
 
         /// <summary>
         /// 排序
@@ -69,10 +65,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void OrderBy(string order, string tableAlias = null)
         {
             if (string.IsNullOrWhiteSpace(order))
-            {
                 return;
-            }
-
             order.Split(',').ToList().ForEach(column => AddItem(column, tableAlias: tableAlias));
         }
 
@@ -86,15 +79,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         protected void AddItem(string column, bool desc = false, Type type = null, string tableAlias = null)
         {
             if (column.IsEmpty())
-            {
                 return;
-            }
-
             if (Exists(column, tableAlias))
-            {
                 return;
-            }
-
             _items.Add(new OrderByItem(column, desc, type, prefix: tableAlias));
         }
 
@@ -103,7 +90,6 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// </summary>
         /// <param name="column">排序列</param>
         /// <param name="tableAlias">表别名</param>
-        /// <returns></returns>
         protected bool Exists(string column, string tableAlias)
         {
             var item = new OrderByItem(column, prefix: tableAlias);
@@ -121,10 +107,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void OrderBy<TEntity>(Expression<Func<TEntity, object>> column, bool desc = false)
         {
             if (column == null)
-            {
                 return;
-            }
-
             AddItem(_resolver.GetColumn(column), desc, typeof(TEntity));
         }
 
@@ -135,10 +118,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void AppendSql(string sql)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             sql = Helper.ResolveSql(sql, _dialect);
             _items.Add(new OrderByItem(sql, raw: true));
         }
@@ -150,27 +130,18 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void Validate(bool isPage)
         {
             if (isPage == false)
-            {
                 return;
-            }
-
             if (_items.Count == 0)
-            {
                 throw new ArgumentException(LibraryResource.OrderIsEmptyForPage);
-            }
         }
 
         /// <summary>
         /// 获取Sql
         /// </summary>
-        /// <returns></returns>
         public string ToSql()
         {
             if (_items.Count == 0)
-            {
                 return null;
-            }
-
             return $"Order By {_items.Select(t => t.ToSql(_dialect, _register)).Join()}";
         }
     }

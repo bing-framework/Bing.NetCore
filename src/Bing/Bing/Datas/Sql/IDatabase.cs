@@ -12,7 +12,6 @@ namespace Bing.Datas.Sql
         /// <summary>
         /// 获取数据库连接
         /// </summary>
-        /// <returns></returns>
         IDbConnection GetConnection();
     }
 }

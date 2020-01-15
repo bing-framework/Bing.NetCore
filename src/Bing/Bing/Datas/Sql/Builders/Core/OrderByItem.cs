@@ -71,7 +71,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="dialect">Sql方言</param>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
         public string ToSql(IDialect dialect, IEntityAliasRegister register)
         {
             if (Raw)

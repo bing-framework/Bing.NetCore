@@ -22,7 +22,6 @@ namespace Bing.Datas.Sql.Builders
         /// 克隆
         /// </summary>
         /// <param name="register">实体别名注册器</param>
-        /// <returns></returns>
         IGroupByClause Clone(IEntityAliasRegister register);
 
         /// <summary>
@@ -56,7 +55,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 获取Sql
         /// </summary>
-        /// <returns></returns>
         string ToSql();
     }
 }

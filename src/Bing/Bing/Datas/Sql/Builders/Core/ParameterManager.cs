@@ -50,7 +50,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 创建参数名
         /// </summary>
-        /// <returns></returns>
         public string GenerateName()
         {
             var result = _dialect.GenerateName(_paramIndex);
@@ -61,11 +60,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 获取参数列表
         /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, object> GetParams()
-        {
-            return new ReadOnlyDictionary<string, object>(_params);
-        }
+        public IReadOnlyDictionary<string, object> GetParams() => new ReadOnlyDictionary<string, object>(_params);
 
         /// <summary>
         /// 添加参数，如果参数已存在则替换
@@ -89,13 +84,10 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         /// <param name="value">参数值</param>
         /// <param name="operator">运算符</param>
-        /// <returns></returns>
         private object GetValue(object value, Operator? @operator)
         {
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return value;
-            }
             switch (@operator)
             {
                 case Operator.Contains:
@@ -112,11 +104,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 克隆
         /// </summary>
-        /// <returns></returns>
-        public IParameterManager Clone()
-        {
-            return new ParameterManager(this);
-        }
+        public IParameterManager Clone() => new ParameterManager(this);
 
         /// <summary>
         /// 清空参数
