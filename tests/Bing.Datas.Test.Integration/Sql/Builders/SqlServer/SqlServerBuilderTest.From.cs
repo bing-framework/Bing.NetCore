@@ -139,26 +139,5 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
         }
-
-        /// <summary>
-        /// 设置表 - 多个表
-        /// </summary>
-        [Fact]
-        public void Test_From_7()
-        {
-            //结果
-            var result = new Str();
-            result.AppendLine("Select [c] ");
-            result.Append("From [b].[Sample] As [a], [b].[Sample2] As [b]");
-
-            //执行
-            _builder.Select("c")
-                .From<Sample>("a", "b")
-                .From<Sample2>("b", "b");
-            Output.WriteLine(_builder.ToSql());
-
-            //验证
-            Assert.Equal(result.ToString(), _builder.ToSql());
-        }
     }
 }

@@ -237,20 +237,13 @@ namespace Bing.Datas.Sql
         /// <param name="source">Sql生成器</param>
         /// <param name="alias">别名</param>
         /// <param name="schema">架构名</param>
-        /// <returns></returns>
         public static ISqlBuilder From<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
             where TEntity : class
         {
             if (source == null)
-            {
                 throw new ArgumentNullException(nameof(source));
-            }
-
             if (source is IClauseAccessor accessor)
-            {
                 accessor.FromClause.From<TEntity>(alias, schema);
-            }
-
             return source;
         }
 

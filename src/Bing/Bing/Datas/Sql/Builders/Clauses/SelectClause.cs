@@ -122,7 +122,8 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="func">函数名</param>
         /// <param name="column">列名</param>
         /// <param name="columnAlias">列别名</param>
-        private void Aggregate(string func, string column, string columnAlias) => Aggregate($"{func}({_dialect.SafeName(column)})", columnAlias);
+        private void Aggregate(string func, string column, string columnAlias) => Aggregate(
+            $"{func}({_dialect.SafeName(column)})", string.IsNullOrWhiteSpace(columnAlias) ? column : columnAlias);
 
         /// <summary>
         /// 求和
