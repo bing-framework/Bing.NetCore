@@ -39,6 +39,7 @@ namespace Bing.AspNetCore
         public virtual IServiceScope CreateScope()
         {
             var httpContext = HttpContextAccessor?.HttpContext;
+            // 不在HttpRequest作用域中
             if (httpContext == null)
                 return ServiceScopeFactory.CreateScope();
             return new NonDisposedHttpContextServiceScope(httpContext.RequestServices);
