@@ -31,10 +31,7 @@ namespace Bing.AspNetCore
         /// 初始化一个<see cref="RequestScopedServiceResolver"/>类型的实例
         /// </summary>
         /// <param name="httpContextAccessor">Http上下文访问器</param>
-        public RequestScopedServiceResolver(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-        }
+        public RequestScopedServiceResolver(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
         /// <summary>
         /// 获取指定服务类型的实例
