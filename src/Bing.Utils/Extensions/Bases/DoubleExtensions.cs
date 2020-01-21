@@ -106,5 +106,45 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
+        #region Round(精确小数位数)
+
+        /// <summary>
+        /// 精确小数位数
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="length">小数点后位数</param>
+        /// <param name="multiple">倍数。如果是百分制则乘以100</param>
+        public static double Round(this double value, int length, int multiple = 1) => Math.Round(value * multiple, length);
+
+        #endregion
+
+        #region IsNaN(是否NaN)
+
+        /// <summary>
+        /// 判断是否0/0的接口，不是一个数字
+        /// </summary>
+        /// <param name="value">值</param>
+        public static bool IsNaN(this double value) => double.IsNaN(value);
+
+        #endregion
+
+        #region FixValue(修复当被除数为0时的异常)
+
+        /// <summary>
+        /// 修复double类型当被除数为0时的异常
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="defValue">默认值</param>
+        public static double FixValue(this double value, double defValue = 0D)
+        {
+            if (double.IsNaN(value))
+                return defValue;
+            if (double.IsInfinity(value))
+                return defValue;
+            return value;
+        }
+
+        #endregion
     }
 }

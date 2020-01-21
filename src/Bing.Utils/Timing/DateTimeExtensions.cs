@@ -377,7 +377,6 @@ namespace Bing.Utils.Timing
         /// <param name="current">当前时间</param>
         /// <param name="begin">开始时间</param>
         /// <param name="end">结束时间</param>
-        /// <returns></returns>
         public static bool IsBetween(this DateTime current, DateTime begin, DateTime end)
         {
             var ticks = current.Ticks;

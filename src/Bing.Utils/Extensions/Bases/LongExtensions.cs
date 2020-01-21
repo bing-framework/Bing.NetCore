@@ -261,10 +261,9 @@ namespace Bing.Utils.Extensions
         /// 将给定 Unix 时间戳 转换为 DateTime 时间。
         /// </summary>
         /// <param name="unixTimeStamp">Unix 时间戳。</param>
-        /// <returns></returns>
         public static DateTime ToDateTime(this long unixTimeStamp)
         {
-            long value = (unixTimeStamp + 8 * 60 * 60) * 10000000;
+            var value = (unixTimeStamp + 8 * 60 * 60) * 10000000;
             return DateTimeExtensions.Date1970.AddTicks(value);
         }
 

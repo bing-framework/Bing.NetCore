@@ -188,7 +188,7 @@ namespace Bing.Utils.Timing
         /// <summary>
         /// 转换星期的表示方法
         /// </summary>
-        /// <param name="index">The index.</param>
+        /// <param name="dayOfWeek">The index.</param>
         /// <returns>System.String.</returns>
         public static string GetChineseWeekDay(DayOfWeek dayOfWeek)
         {

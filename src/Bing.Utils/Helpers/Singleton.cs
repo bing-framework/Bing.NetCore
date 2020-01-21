@@ -19,9 +19,7 @@ namespace Bing.Utils.Helpers
         static Singleton()
         {
             if (AllSingletons == null)
-            {
                 AllSingletons = new Dictionary<Type, object>();
-            }
         }
     }
 
