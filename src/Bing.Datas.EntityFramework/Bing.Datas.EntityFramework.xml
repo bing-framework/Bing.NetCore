@@ -1003,7 +1003,6 @@
             创建实例
             </summary>
             <typeparam name="T">对象类型</typeparam>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.UnitOfWorkBase.OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder)">
             <summary>
@@ -1161,7 +1160,6 @@
             <summary>
             获取数据库连接
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.UnitOfWorkBase.GetTable(System.Type)">
             <summary>

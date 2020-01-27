@@ -10,7 +10,7 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 空日志提供程序实例
         /// </summary>
-        public static readonly ILogProvider Instance = new NullLogProvider();
+        public static ILogProvider Instance { get; } = new NullLogProvider();
 
         /// <summary>
         /// 日志名称
@@ -31,6 +31,11 @@ namespace Bing.Logs.Core
         /// 是否分布式日志
         /// </summary>
         public bool IsDistributedLog => false;
+
+        /// <summary>
+        /// 初始化一个<see cref="NullLogProvider"/>类型的实例
+        /// </summary>
+        private NullLogProvider() { }
 
         /// <summary>
         /// 写日志

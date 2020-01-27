@@ -69,6 +69,8 @@
 
   <ItemGroup>
     <Folder Include="Bing\Events\Local\" />
+    <Folder Include="Bing\Localization\" />
+    <Folder Include="Bing\DependencyInjection\" />
   </ItemGroup>
 
 </Project>

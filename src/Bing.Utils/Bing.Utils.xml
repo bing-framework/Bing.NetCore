@@ -577,6 +577,27 @@
             <param name="milliseconds">double</param>
             <returns>毫秒间隔</returns>
         </member>
+        <member name="M:Bing.Utils.Extensions.DoubleExtensions.Round(System.Double,System.Int32,System.Int32)">
+            <summary>
+            精确小数位数
+            </summary>
+            <param name="value">值</param>
+            <param name="length">小数点后位数</param>
+            <param name="multiple">倍数。如果是百分制则乘以100</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.DoubleExtensions.IsNaN(System.Double)">
+            <summary>
+            判断是否0/0的接口，不是一个数字
+            </summary>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.DoubleExtensions.FixValue(System.Double,System.Double)">
+            <summary>
+            修复double类型当被除数为0时的异常
+            </summary>
+            <param name="value">值</param>
+            <param name="defValue">默认值</param>
+        </member>
         <member name="T:Bing.Utils.Extensions.FloatExtensions">
             <summary>
             单精度浮点型(<see cref="T:System.Single"/>) 扩展
@@ -895,7 +916,6 @@
             将给定 Unix 时间戳 转换为 DateTime 时间。
             </summary>
             <param name="unixTimeStamp">Unix 时间戳。</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Extensions.ObjectExtensions">
             <summary>
@@ -2203,7 +2223,6 @@
             <param name="dictionary">字典</param>
             <param name="key">键</param>
             <param name="defaultValue">默认值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.AddRange``2(System.Collections.Generic.IDictionary{``0,``1},System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{``0,``1}},System.Boolean)">
             <summary>
@@ -2214,7 +2233,6 @@
             <param name="dict">字典</param>
             <param name="values">键值对集合</param>
             <param name="replaceExisted">是否替换已存在的键值对</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.GetOrAdd``2(System.Collections.Generic.IDictionary{``0,``1},``0,System.Func{``0,``1})">
             <summary>
@@ -2225,7 +2243,6 @@
             <param name="dict">字典</param>
             <param name="key">键</param>
             <param name="setValue">添加值的委托</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.GetOrAdd``2(System.Collections.Generic.IDictionary{``0,``1},``0,System.Func{``1})">
             <summary>
@@ -2236,7 +2253,6 @@
             <param name="dictionary">字典</param>
             <param name="key">键</param>
             <param name="addFunc">添加值的委托</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.Sort``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2245,7 +2261,6 @@
             <typeparam name="TKey">键类型</typeparam>
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns>排序后的字典</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.Sort``2(System.Collections.Generic.IDictionary{``0,``1},System.Collections.Generic.IComparer{``0})">
             <summary>
@@ -2255,7 +2270,6 @@
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
             <param name="comparer">比较器，用于排序字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.SortByValue``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2264,7 +2278,6 @@
             <typeparam name="TKey">键类型</typeparam>
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.ToQueryString``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2273,7 +2286,6 @@
             <typeparam name="TKey">键类型</typeparam>
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.GetKey``2(System.Collections.Generic.IDictionary{``0,``1},``1)">
             <summary>
@@ -2283,7 +2295,6 @@
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.TryAdd``2(System.Collections.Generic.IDictionary{``0,``1},``0,``1)">
             <summary>
@@ -2294,7 +2305,6 @@
             <param name="dictionary">字典</param>
             <param name="key">键</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.ToHashTable``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2303,7 +2313,6 @@
             <typeparam name="TKey">键类型</typeparam>
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.Reverse``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2312,7 +2321,6 @@
             <typeparam name="TKey">键类型</typeparam>
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.AsReadOnly``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2321,7 +2329,6 @@
             <typeparam name="TKey">键类型</typeparam>
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.DictionaryExtensions.EqualsTo``2(System.Collections.Generic.IDictionary{``0,``1},System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2332,6 +2339,20 @@
             <param name="sourceDict">源字典</param>
             <param name="targetDict">目标字典</param>
             <exception cref="T:System.ArgumentNullException">源字典对象为空、目标字典对象为空</exception>
+        </member>
+        <member name="M:Bing.Utils.Extensions.DictionaryExtensions.FillFormDataStream(System.Collections.Generic.IDictionary{System.String,System.String},System.IO.Stream)">
+            <summary>
+            填充表单信息的Stream
+            </summary>
+            <param name="formData">表单数据</param>
+            <param name="stream">流</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.DictionaryExtensions.FillFormDataStreamAsync(System.Collections.Generic.IDictionary{System.String,System.String},System.IO.Stream)">
+            <summary>
+            填充表单信息的Stream
+            </summary>
+            <param name="formData">表单数据</param>
+            <param name="stream">流</param>
         </member>
         <member name="T:Bing.Utils.Extensions.EnumerableExtensions">
             <summary>
@@ -5056,7 +5077,7 @@
             检查参数不能为负数或零，否则抛出<see cref="T:System.ArgumentOutOfRangeException"/>异常
             </summary>
             <param name="timeSpan">时间戳</param>
-            <param name="paramaName">参数名</param>
+            <param name="paramName">参数名</param>
             <exception cref="T:System.ArgumentOutOfRangeException"></exception>
         </member>
         <member name="M:Bing.Utils.Helpers.Check.DirectoryExists(System.String,System.String)">
@@ -7649,7 +7670,7 @@
             <param name="param">参数，范例：b=1</param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Bing.Utils.Helpers.Url.Join(System.String,System.String[])" -->
+        <!-- 对于成员“M:Bing.Utils.Helpers.Url.Join(System.String,System.String[])”忽略有格式错误的 XML 注释 -->
         <member name="M:Bing.Utils.Helpers.Url.GetUrl(System.String)">
             <summary>
             获取Url
@@ -7665,7 +7686,7 @@
             <param name="param">参数，范例：b=1</param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Bing.Utils.Helpers.Url.Join(System.Uri,System.String[])" -->
+        <!-- 对于成员“M:Bing.Utils.Helpers.Url.Join(System.Uri,System.String[])”忽略有格式错误的 XML 注释 -->
         <member name="M:Bing.Utils.Helpers.Url.GetMainDomain(System.String)">
             <summary>
             获取主域名
@@ -12094,7 +12115,6 @@
             <param name="current">当前时间</param>
             <param name="begin">开始时间</param>
             <param name="end">结束时间</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Timing.DateTimeExtensions.IsValid(System.DateTime)">
             <summary>
@@ -12232,7 +12252,7 @@
             <summary>
             转换星期的表示方法
             </summary>
-            <param name="index">The index.</param>
+            <param name="dayOfWeek">The index.</param>
             <returns>System.String.</returns>
         </member>
         <member name="M:Bing.Utils.Timing.DateTimeHelper.GetMaxWeekOfYear(System.Int32)">

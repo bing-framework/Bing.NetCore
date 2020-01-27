@@ -451,6 +451,35 @@
             </summary>
             <param name="args">参数</param>
         </member>
+        <member name="T:Bing.Caching.IListCache`1">
+            <summary>
+            列表缓存
+            </summary>
+            <typeparam name="T">类型</typeparam>
+        </member>
+        <member name="P:Bing.Caching.IListCache`1.Count">
+            <summary>
+            缓存键数量
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.IListCache`1.Add(`0)">
+            <summary>
+            添加。如果存在则不添加，返回false
+            </summary>
+            <param name="item">列表项</param>
+        </member>
+        <member name="M:Bing.Caching.IListCache`1.Remove(`0)">
+            <summary>
+            移除。如果存在则删除并返回true，否则返回false
+            </summary>
+            <param name="item">列表项</param>
+        </member>
+        <member name="M:Bing.Caching.IListCache`1.Exists(`0)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="item">列表项</param>
+        </member>
         <member name="T:Bing.Caching.Internal.Helper">
             <summary>
             帮助类
@@ -472,6 +501,183 @@
             创建字典生成器
             </summary>
             <param name="type">类型</param>
+        </member>
+        <member name="T:Bing.Caching.ISingleTypeCache`2">
+            <summary>
+            单类型缓存
+            </summary>
+            <typeparam name="TKey">键类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+        </member>
+        <member name="P:Bing.Caching.ISingleTypeCache`2.Count">
+            <summary>
+            缓存键数量
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.ISingleTypeCache`2.Add(`0,`1)">
+            <summary>
+            添加。如果存在则不添加，返回false
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Caching.ISingleTypeCache`2.Update(`0,`1)">
+            <summary>
+            更新。如果不存在则不更新，返回false
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Caching.ISingleTypeCache`2.Set(`0,`1)">
+            <summary>
+            设置。如果村则则更新，不存在则添加
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Caching.ISingleTypeCache`2.Remove(`0)">
+            <summary>
+            移除
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="M:Bing.Caching.ISingleTypeCache`2.Remove(`0[])">
+            <summary>
+            移除集合
+            </summary>
+            <param name="keys">键数组</param>
+        </member>
+        <member name="M:Bing.Caching.ISingleTypeCache`2.Exists(`0)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="T:Bing.Caching.ListLocalMemoryBase`1">
+            <summary>
+            基于本地内存的列表缓存基类
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Bing.Caching.ListLocalMemoryBase`1.Count">
+            <summary>
+            缓存键数量
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.ReaderAll">
+            <summary>
+            读取全部
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.Clear">
+            <summary>
+            清空
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.Add(`0)">
+            <summary>
+            添加。如果存在则不添加，返回false
+            </summary>
+            <param name="item">列表项</param>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.Remove(`0)">
+            <summary>
+            移除。如果存在则删除并返回true，否则返回false
+            </summary>
+            <param name="item">列表项</param>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.Exists(`0)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="item">列表项</param>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.GetCache">
+            <summary>
+            获取缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.ListLocalMemoryBase`1.GetSyncCache">
+            <summary>
+            获取同步的缓存对象。用于线程安全
+            </summary>
+        </member>
+        <member name="T:Bing.Caching.SingleTypeLocalMemoryBase`2">
+            <summary>
+            基于本地内存的单类型缓存基类
+            </summary>
+            <typeparam name="TKey">键类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+        </member>
+        <member name="P:Bing.Caching.SingleTypeLocalMemoryBase`2.Count">
+            <summary>
+            缓存键数量
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Get(`0)">
+            <summary>
+            根据键获取值
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Clear">
+            <summary>
+            清空
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Reader">
+            <summary>
+            读取
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Add(`0,`1)">
+            <summary>
+            添加。如果存在则不添加，返回false
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Update(`0,`1)">
+            <summary>
+            更新。如果不存在则不更新，返回false
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Set(`0,`1)">
+            <summary>
+            设置。如果村则则更新，不存在则添加
+            </summary>
+            <param name="key">键</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Remove(`0)">
+            <summary>
+            移除
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Remove(`0[])">
+            <summary>
+            移除集合
+            </summary>
+            <param name="keys">键数组</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.Exists(`0)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.GetCache">
+            <summary>
+            获取缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Caching.SingleTypeLocalMemoryBase`2.GetSyncCache">
+            <summary>
+            获取同步的缓存对象。用于线程安全
+            </summary>
         </member>
         <member name="T:Bing.Caching.StringCacheKeyGenerator">
             <summary>
@@ -683,6 +889,113 @@
             添加Bing选项配置
             </summary>
             <param name="optionsAction">选项操作</param>
+        </member>
+        <member name="T:Bing.Core.Data.DataHandler">
+            <summary>
+            数据处理委托
+            </summary>
+            <param name="o">引发对象</param>
+            <param name="e">数据事件参数</param>
+        </member>
+        <member name="T:Bing.Core.Data.DataEventArgs">
+            <summary>
+            数据事件参数
+            </summary>
+        </member>
+        <member name="P:Bing.Core.Data.DataEventArgs.Data">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="M:Bing.Core.Data.DataEventArgs.#ctor(System.Object)">
+            <summary>
+            初始化一个<see cref="T:Bing.Core.Data.DataEventArgs"/>类型的实例
+            </summary>
+            <param name="data">数据</param>
+        </member>
+        <member name="T:Bing.Core.Data.IGetable`2">
+            <summary>
+            可获取
+            </summary>
+            <typeparam name="TKey">键类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+        </member>
+        <member name="M:Bing.Core.Data.IGetable`2.Get(`0)">
+            <summary>
+            根据键获取值
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="T:Bing.Core.Data.IGetObject`1">
+            <summary>
+            获取对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+        </member>
+        <member name="M:Bing.Core.Data.IGetObject`1.Get">
+            <summary>
+            获取对象
+            </summary>
+        </member>
+        <member name="T:Bing.Core.Data.IReader`1">
+            <summary>
+            读取
+            </summary>
+            <typeparam name="T">数据类型</typeparam>
+        </member>
+        <member name="M:Bing.Core.Data.IReader`1.Reader">
+            <summary>
+            读取
+            </summary>
+        </member>
+        <member name="T:Bing.Core.Data.IReaderAll`1">
+            <summary>
+            读取全部
+            </summary>
+            <typeparam name="T">数据类型</typeparam>
+        </member>
+        <member name="M:Bing.Core.Data.IReaderAll`1.ReaderAll">
+            <summary>
+            读取全部
+            </summary>
+        </member>
+        <member name="T:Bing.Core.Data.IReaderDictionary`2">
+            <summary>
+            读取字典
+            </summary>
+            <typeparam name="TKey">键类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+        </member>
+        <member name="M:Bing.Core.Data.IReaderDictionary`2.Reader(`0)">
+            <summary>
+            读取
+            </summary>
+            <param name="key">键</param>
+        </member>
+        <member name="T:Bing.Core.Enums.EnvironmentType">
+            <summary>
+            环境类型
+            </summary>
+        </member>
+        <member name="F:Bing.Core.Enums.EnvironmentType.Development">
+            <summary>
+            开发环境
+            </summary>
+        </member>
+        <member name="F:Bing.Core.Enums.EnvironmentType.Test">
+            <summary>
+            测试环境
+            </summary>
+        </member>
+        <member name="F:Bing.Core.Enums.EnvironmentType.Preview">
+            <summary>
+            预览环境
+            </summary>
+        </member>
+        <member name="F:Bing.Core.Enums.EnvironmentType.Prod">
+            <summary>
+            生产环境
+            </summary>
         </member>
         <member name="T:Bing.Core.Modularity.BingCoreModule">
             <summary>
@@ -907,6 +1220,11 @@
         <member name="T:Bing.Core.Options.BingOptions">
             <summary>
             Bing框架配置选项信息
+            </summary>
+        </member>
+        <member name="P:Bing.Core.Options.BingOptions.Environment">
+            <summary>
+            环境类型
             </summary>
         </member>
         <member name="T:Bing.Core.ServiceExtensions">
@@ -1226,7 +1544,6 @@
             克隆
             </summary>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Clauses.GroupByClause.GroupBy(System.String,System.String)">
             <summary>
@@ -1260,7 +1577,6 @@
             <summary>
             获取Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Clauses.JoinClause">
             <summary>
@@ -1618,7 +1934,6 @@
             克隆
             </summary>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Clauses.OrderByClause.OrderBy(System.String,System.String)">
             <summary>
@@ -1642,7 +1957,6 @@
             </summary>
             <param name="column">排序列</param>
             <param name="tableAlias">表别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Clauses.OrderByClause.OrderBy``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Boolean)">
             <summary>
@@ -1668,7 +1982,6 @@
             <summary>
             获取Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Clauses.SelectClause">
             <summary>
@@ -1721,7 +2034,6 @@
             </summary>
             <param name="builder">Sql生成器</param>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Clauses.SelectClause.Distinct">
             <summary>
@@ -1964,7 +2276,6 @@
             <param name="builder">Sql生成器</param>
             <param name="register">实体别名注册器</param>
             <param name="parameterManager">参数管理器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.And(Bing.Datas.Sql.Builders.ICondition)">
             <summary>
@@ -2406,13 +2717,11 @@
             <summary>
             输出Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.GetCondition">
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.AndCondition">
             <summary>
@@ -2447,7 +2756,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.EqualCondition">
             <summary>
@@ -2475,7 +2783,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.GreaterCondition">
             <summary>
@@ -2503,7 +2810,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.GreaterEqualCondition">
             <summary>
@@ -2531,7 +2837,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.InCondition">
             <summary>
@@ -2559,7 +2864,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.IsNotNullCondition">
             <summary>
@@ -2581,7 +2885,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.IsNullCondition">
             <summary>
@@ -2603,7 +2906,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.LessCondition">
             <summary>
@@ -2631,7 +2933,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.LessEqualCondition">
             <summary>
@@ -2659,7 +2960,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.LikeCondition">
             <summary>
@@ -2687,7 +2987,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.NotEqualCondition">
             <summary>
@@ -2715,7 +3014,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.NotInCondition">
             <summary>
@@ -2743,7 +3041,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.NullCondition">
             <summary>
@@ -2764,7 +3061,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.OrCondition">
             <summary>
@@ -2799,7 +3095,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.SegmentCondition">
             <summary>
@@ -2839,31 +3134,26 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Conditions.SegmentCondition.CreateLeftCondition">
             <summary>
             创建左条件
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Conditions.SegmentCondition.CreateLeftOperator">
             <summary>
             创建左操作符
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Conditions.SegmentCondition.CreateRightCondition">
             <summary>
             创建右条件
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Conditions.SegmentCondition.CreateRightOperator">
             <summary>
             创建右操作符
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.SqlCondition">
             <summary>
@@ -2885,7 +3175,6 @@
             <summary>
              获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Conditions.SqlConditionFactory">
             <summary>
@@ -2899,7 +3188,6 @@
             <param name="left">左操作数</param>
             <param name="right">右操作数</param>
             <param name="operator">操作符</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.BuilderItem">
             <summary>
@@ -3031,7 +3319,6 @@
             </summary>
             <param name="dialect">Sql方言</param>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.ColumnItem">
             <summary>
@@ -3195,20 +3482,17 @@
             是否包含实体
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityAliasRegister.GetAlias(System.Type)">
             <summary>
             获取实体别名
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityAliasRegister.Clone">
             <summary>
             克隆
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.EntityResolver">
             <summary>
@@ -3231,14 +3515,12 @@
             获取表
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetSchema(System.Type)">
             <summary>
             获取架构
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetColumns``1(System.Boolean)">
             <summary>
@@ -3246,7 +3528,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetProperties(System.Type)">
             <summary>
@@ -3261,7 +3542,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="columns">列名表达式</param>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetColumns``1(System.Collections.Generic.List{System.String},System.Boolean)">
             <summary>
@@ -3270,7 +3550,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="names">列名集合</param>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetColumn``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -3278,7 +3557,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="column">列名表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetExpressionColumn``1(System.Linq.Expressions.Expression)">
             <summary>
@@ -3286,7 +3564,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">列名表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetSingleColumn``1(System.Linq.Expressions.Expression)">
             <summary>
@@ -3294,7 +3571,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">列名表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetDictionaryColumns``1(System.Linq.Expressions.ListInitExpression)">
             <summary>
@@ -3302,21 +3578,18 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">列表表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetDictionaryByListInitExpression(System.Linq.Expressions.ListInitExpression)">
             <summary>
             获取字典
             </summary>
             <param name="expression">列表表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetKeyValue(System.Collections.Generic.IEnumerable{System.Linq.Expressions.Expression})">
             <summary>
             获取键值对
             </summary>
             <param name="arguments">参数表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetColumnsByMatedata``1(System.Collections.Generic.IDictionary{System.Object,System.String})">
             <summary>
@@ -3324,14 +3597,12 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetColumns(System.Collections.Generic.IDictionary{System.Object,System.String})">
             <summary>
             通过字典创建列
             </summary>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetColumn(System.Linq.Expressions.Expression,System.Type,System.Boolean)">
             <summary>
@@ -3340,7 +3611,6 @@
             <param name="expression">表达式</param>
             <param name="entity">实体类型</param>
             <param name="right">是否取右侧操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.EntityResolver.GetType(System.Linq.Expressions.Expression,System.Boolean)">
             <summary>
@@ -3348,7 +3618,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="right">是否取右侧操作数</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.JoinItem">
             <summary>
@@ -3439,7 +3708,6 @@
             <summary>
             克隆
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.JoinItem.ToSql(Bing.Datas.Sql.Builders.IDialect,Bing.Datas.Sql.Matedatas.ITableDatabase)">
             <summary>
@@ -3447,13 +3715,11 @@
             </summary>
             <param name="dialect">Sql方言</param>
             <param name="tableDatabase">表数据表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.JoinItem.GetOn">
             <summary>
             获取On语句
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.NameItem">
             <summary>
@@ -3496,21 +3762,18 @@
             是否复杂名称
             </summary>
             <param name="name">名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.ResolveBySplit(System.String)">
             <summary>
             分割句点
             </summary>
             <param name="name">名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.ResolveByPattern(System.String)">
             <summary>
             通过正则表达式进行解析
             </summary>
             <param name="name">名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.ToSql(Bing.Datas.Sql.Builders.IDialect,System.String,Bing.Datas.Sql.Matedatas.ITableDatabase)">
             <summary>
@@ -3519,14 +3782,12 @@
             <param name="dialect">Sql方言</param>
             <param name="prefix">前缀</param>
             <param name="tableDatabase">表数据库</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.GetPrefix(System.String)">
             <summary>
             获取前缀
             </summary>
             <param name="prefix">前缀</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.GetDatabase(Bing.Datas.Sql.Builders.IDialect,Bing.Datas.Sql.Matedatas.ITableDatabase,System.String)">
             <summary>
@@ -3535,7 +3796,6 @@
             <param name="dialect">Sql方言</param>
             <param name="tableDatabase">表数据库</param>
             <param name="prefix">前缀</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.GetName(Bing.Datas.Sql.Builders.IDialect,System.String)">
             <summary>
@@ -3543,14 +3803,12 @@
             </summary>
             <param name="dialect">Sql方言</param>
             <param name="prefix">前缀</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.NameItem.GetName(System.String)">
             <summary>
             获取名称
             </summary>
             <param name="prefix">前缀</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.OnItem">
             <summary>
@@ -3639,7 +3897,6 @@
             </summary>
             <param name="dialect">Sql方言</param>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.OrderByItem.GetPrefix(Bing.Datas.Sql.Builders.IEntityAliasRegister)">
             <summary>
@@ -3683,13 +3940,11 @@
             <summary>
             创建参数名
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.GetParams">
             <summary>
             获取参数列表
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.Add(System.String,System.Object,System.Nullable{Bing.Utils.Operator})">
             <summary>
@@ -3705,13 +3960,11 @@
             </summary>
             <param name="value">参数值</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.Clone">
             <summary>
             克隆
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.Clear">
             <summary>
@@ -3728,7 +3981,6 @@
             获取参数字面值
             </summary>
             <param name="value">参数值</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.PredicateExpressionResolver">
             <summary>
@@ -3755,7 +4007,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">谓词表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.PredicateExpressionResolver.ResolveExpression(System.Linq.Expressions.Expression,System.Type)">
             <summary>
@@ -3763,7 +4014,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.PredicateExpressionResolver.ResolveOrExpression(System.Linq.Expressions.BinaryExpression,System.Type)">
             <summary>
@@ -3771,7 +4021,6 @@
             </summary>
             <param name="expression">二元表达式</param>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.PredicateExpressionResolver.ResolveAndExpression(System.Linq.Expressions.BinaryExpression,System.Type)">
             <summary>
@@ -3779,7 +4028,6 @@
             </summary>
             <param name="expression">二元表达式</param>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Core.SqlBuilderBase">
             <summary>
@@ -4182,7 +4430,6 @@
             设置跳过行数
             </summary>
             <param name="count">跳过的行数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Core.SqlBuilderBase.GetOffsetParam">
             <summary>
@@ -4390,7 +4637,6 @@
             </summary>
             <param name="resolver">实体解析器</param>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Extensions.EntityResolverExtensions.GetAlias(Bing.Datas.Sql.Builders.IEntityResolver,System.Type,System.String)">
             <summary>
@@ -4399,7 +4645,6 @@
             <param name="resolver">实体解析器</param>
             <param name="entity">实体类型</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.Filters.IsDeletedFilter">
             <summary>
@@ -4489,7 +4734,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.ICte">
             <summary>
@@ -4587,20 +4831,17 @@
             是否包含实体
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityAliasRegister.GetAlias(System.Type)">
             <summary>
             获取实体别名
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityAliasRegister.Clone">
             <summary>
             克隆
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IEntityResolver">
             <summary>
@@ -4612,14 +4853,12 @@
             获取表
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityResolver.GetSchema(System.Type)">
             <summary>
             获取架构
             </summary>
             <param name="entity">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityResolver.GetColumns``1(System.Boolean)">
             <summary>
@@ -4627,7 +4866,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityResolver.GetColumns``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object[]}},System.Boolean)">
             <summary>
@@ -4636,7 +4874,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="columns">列名表达式</param>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityResolver.GetColumn``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -4644,7 +4881,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="column">列名表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityResolver.GetColumn(System.Linq.Expressions.Expression,System.Type,System.Boolean)">
             <summary>
@@ -4653,7 +4889,6 @@
             <param name="expression">表达式</param>
             <param name="entity">实体类型</param>
             <param name="right">是否取右侧操作数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IEntityResolver.GetType(System.Linq.Expressions.Expression,System.Boolean)">
             <summary>
@@ -4661,7 +4896,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="right">是否取右侧操作数</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IFrom">
             <summary>
@@ -4679,7 +4913,6 @@
             </summary>
             <param name="builder">Sql生成器</param>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IFromClause.From(System.String,System.String)">
             <summary>
@@ -4725,7 +4958,6 @@
             <summary>
             输出Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IGroupBy">
             <summary>
@@ -4752,7 +4984,6 @@
             克隆
             </summary>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IGroupByClause.GroupBy(System.String,System.String)">
             <summary>
@@ -4786,7 +5017,6 @@
             <summary>
             获取Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IJoin">
             <summary>
@@ -4805,14 +5035,12 @@
             <param name="sqlBuilder">Sql生成器</param>
             <param name="register">实体别名注册器</param>
             <param name="parameterManager">参数管理器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IJoinClause.Find(System.Type)">
             <summary>
             查找连接项
             </summary>
             <param name="type">表实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IJoinClause.Join(System.String,System.String)">
             <summary>
@@ -4961,7 +5189,6 @@
             <summary>
             输出Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IJoinOn">
             <summary>
@@ -5022,7 +5249,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GetColumn``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -5030,7 +5256,6 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">列名表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GetColumn(System.String,System.Type)">
             <summary>
@@ -5038,21 +5263,18 @@
             </summary>
             <param name="column">列名</param>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GetColumn(System.String)">
             <summary>
             获取处理后的列名
             </summary>
             <param name="column">列名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GetValue(System.Linq.Expressions.Expression)">
             <summary>
             获取值
             </summary>
             <param name="expression">表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.CreateCondition(System.Linq.Expressions.Expression,System.Type)">
             <summary>
@@ -5060,7 +5282,6 @@
             </summary>
             <param name="expression">列名</param>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.CreateCondition(System.String,System.Object,Bing.Utils.Operator)">
             <summary>
@@ -5069,7 +5290,6 @@
             <param name="column">列名</param>
             <param name="value">值</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.IsInCondition(Bing.Utils.Operator,System.Object)">
             <summary>
@@ -5077,7 +5297,6 @@
             </summary>
             <param name="operator">运算符</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.IsNotInCondition(Bing.Utils.Operator,System.Object)">
             <summary>
@@ -5085,7 +5304,6 @@
             </summary>
             <param name="operator">运算符</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.CreateInCondition(System.String,System.Collections.IEnumerable,System.Boolean)">
             <summary>
@@ -5094,7 +5312,6 @@
             <param name="column">列名</param>
             <param name="values">值列表</param>
             <param name="notIn">是否Not In条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GenerateParamName(System.Object,Bing.Utils.Operator)">
             <summary>
@@ -5102,7 +5319,6 @@
             </summary>
             <param name="value">值</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.Between(System.String,System.Object,System.Object,Bing.Datas.Queries.Boundary)">
             <summary>
@@ -5112,7 +5328,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.ResolveSql(System.String,Bing.Datas.Sql.Builders.IDialect)">
             <summary>
@@ -5120,7 +5335,6 @@
             </summary>
             <param name="sql">Sql语句</param>
             <param name="dialect">Sql方言</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IOrderBy">
             <summary>
@@ -5137,7 +5351,6 @@
             克隆
             </summary>
             <param name="register">实体别名注册器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IOrderByClause.OrderBy(System.String,System.String)">
             <summary>
@@ -5170,7 +5383,6 @@
             <summary>
             获取Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.IParameterManager">
             <summary>
@@ -5181,13 +5393,11 @@
             <summary>
             创建参数名
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IParameterManager.GetParams">
             <summary>
             获取参数列表
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IParameterManager.Add(System.String,System.Object,System.Nullable{Bing.Utils.Operator})">
             <summary>
@@ -5201,7 +5411,6 @@
             <summary>
             克隆
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Builders.IParameterManager.Clear">
             <summary>
@@ -5218,7 +5427,6 @@
             获取参数字面值
             </summary>
             <param name="value">参数值</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Builders.ISelect">
             <summary>
@@ -5856,7 +6064,6 @@
             <summary>
             输出Sql
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Configs.SqlOptions">
             <summary>
@@ -5972,7 +6179,6 @@
             <param name="source">源</param>
             <param name="name">公用表达式CTE的名称</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.From``1(``0,System.String,System.String)">
             <summary>
@@ -5982,7 +6188,6 @@
             <param name="source">源</param>
             <param name="table">表名</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.From``1(``0,Bing.Datas.Sql.ISqlBuilder,System.String)">
             <summary>
@@ -5992,7 +6197,6 @@
             <param name="source">源</param>
             <param name="builder">Sql生成器</param>
             <param name="alias">表别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.From``1(``0,System.Action{Bing.Datas.Sql.ISqlBuilder},System.String)">
             <summary>
@@ -6002,7 +6206,6 @@
             <param name="source">源</param>
             <param name="action">子查询操作</param>
             <param name="alias">表别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendFrom``1(``0,System.String)">
             <summary>
@@ -6011,7 +6214,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendFrom``1(``0,System.String,System.Boolean)">
             <summary>
@@ -6021,7 +6223,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GroupBy``1(``0,System.String,System.String)">
             <summary>
@@ -6031,7 +6232,6 @@
             <param name="source">源</param>
             <param name="columns">分组字段，范例：a.Id,b.Name</param>
             <param name="having">分组条件，范例：Count(*) > 1</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendGroupBy``1(``0,System.String)">
             <summary>
@@ -6040,7 +6240,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendGroupBy``1(``0,System.String,System.Boolean)">
             <summary>
@@ -6050,7 +6249,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Join``1(``0,System.String,System.String)">
             <summary>
@@ -6060,7 +6258,6 @@
             <param name="source">源</param>
             <param name="table">表名</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Join``1(``0,Bing.Datas.Sql.ISqlBuilder,System.String)">
             <summary>
@@ -6070,7 +6267,6 @@
             <param name="source">源</param>
             <param name="builder">Sql生成器</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Join``1(``0,System.Action{Bing.Datas.Sql.ISqlBuilder},System.String)">
             <summary>
@@ -6080,7 +6276,6 @@
             <param name="source">源</param>
             <param name="action">子查询操作</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendJoin``1(``0,System.String)">
             <summary>
@@ -6089,7 +6284,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendJoin``1(``0,System.String,System.Boolean)">
             <summary>
@@ -6099,7 +6293,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LeftJoin``1(``0,System.String,System.String)">
             <summary>
@@ -6109,7 +6302,6 @@
             <param name="source">源</param>
             <param name="table">表名</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LeftJoin``1(``0,Bing.Datas.Sql.ISqlBuilder,System.String)">
             <summary>
@@ -6119,7 +6311,6 @@
             <param name="source">源</param>
             <param name="builder">Sql生成器</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LeftJoin``1(``0,System.Action{Bing.Datas.Sql.ISqlBuilder},System.String)">
             <summary>
@@ -6129,7 +6320,6 @@
             <param name="source">源</param>
             <param name="action">子查询操作</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendLeftJoin``1(``0,System.String)">
             <summary>
@@ -6138,7 +6328,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendLeftJoin``1(``0,System.String,System.Boolean)">
             <summary>
@@ -6148,7 +6337,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.RightJoin``1(``0,System.String,System.String)">
             <summary>
@@ -6158,7 +6346,6 @@
             <param name="source">源</param>
             <param name="table">表名</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.RightJoin``1(``0,Bing.Datas.Sql.ISqlBuilder,System.String)">
             <summary>
@@ -6168,7 +6355,6 @@
             <param name="source">源</param>
             <param name="builder">Sql生成器</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.RightJoin``1(``0,System.Action{Bing.Datas.Sql.ISqlBuilder},System.String)">
             <summary>
@@ -6178,7 +6364,6 @@
             <param name="source">源</param>
             <param name="action">子查询操作</param>
             <param name="alias">别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendRightJoin``1(``0,System.String)">
             <summary>
@@ -6187,7 +6372,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendRightJoin``1(``0,System.String,System.Boolean)">
             <summary>
@@ -6197,7 +6381,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.On``1(``0,Bing.Datas.Sql.Builders.ICondition)">
             <summary>
@@ -6206,7 +6389,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="condition">连接条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.On``1(``0,System.String,System.Object,Bing.Utils.Operator)">
             <summary>
@@ -6217,7 +6399,6 @@
             <param name="left">左表列名</param>
             <param name="value">值</param>
             <param name="operator">条件运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendOn``1(``0,System.String)">
             <summary>
@@ -6226,7 +6407,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrderBy``1(``0,System.String,System.String)">
             <summary>
@@ -6236,7 +6416,6 @@
             <param name="source">源</param>
             <param name="order">排序列表。范例：a.Id, b.Name desc</param>
             <param name="tableAlias">表别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendOrderBy``1(``0,System.String)">
             <summary>
@@ -6245,7 +6424,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendOrderBy``1(``0,System.String,System.Boolean)">
             <summary>
@@ -6255,7 +6433,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Distinct``1(``0)">
             <summary>
@@ -6378,7 +6555,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Sum``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -6388,7 +6564,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Avg``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -6398,7 +6573,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Max``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -6408,7 +6582,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Min``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -6418,7 +6591,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Select``1(Bing.Datas.Sql.ISqlBuilder,System.Boolean)">
             <summary>
@@ -6427,7 +6599,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Select``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object[]}},System.Boolean)">
             <summary>
@@ -6481,7 +6652,6 @@
             <param name="source">Sql生成器</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LeftJoin``1(Bing.Datas.Sql.ISqlBuilder,System.String,System.String)">
             <summary>
@@ -6491,7 +6661,6 @@
             <param name="source">Sql生成器</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.RightJoin``1(Bing.Datas.Sql.ISqlBuilder,System.String,System.String)">
             <summary>
@@ -6501,7 +6670,6 @@
             <param name="source">Sql生成器</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Utils.Operator)">
             <summary>
@@ -6511,7 +6679,6 @@
             <param name="left">左表列名,范例：t => t.Name</param>
             <param name="right">右表列名,范例：t => t.Name</param>
             <param name="operator">条件运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,``1,System.Boolean}})">
             <summary>
@@ -6519,7 +6686,6 @@
             </summary>
             <param name="source">Sql生成器</param>
             <param name="expression">条件表达式,范例：(l,r) => l.Id == r.OrderId</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Or``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}}[])">
             <summary>
@@ -6528,7 +6694,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="conditions">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
             <summary>
@@ -6538,7 +6703,6 @@
             <param name="source">Sql生成器</param>
             <param name="predicate">查询条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrIf``1(Bing.Datas.Sql.ISqlBuilder,System.Boolean,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}}[])">
             <summary>
@@ -6548,7 +6712,6 @@
             <param name="source">Sql生成器</param>
             <param name="predicates">查询条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrIfNotEmpty``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}}[])">
             <summary>
@@ -6557,7 +6720,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="conditions">查询条件,如果表达式中的值为空，则忽略该查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
             <summary>
@@ -6568,7 +6730,6 @@
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -6577,7 +6738,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="expression">查询条件表达式。范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
             <summary>
@@ -6588,7 +6748,6 @@
             <param name="expression">列名表达式</param>
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
             <summary>
@@ -6599,7 +6758,6 @@
             <param name="expression">列名表达式</param>
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -6621,7 +6779,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">查询条件表达式,范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -6633,7 +6790,6 @@
             <param name="subBuilder">子查询Sql生成器</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -6656,7 +6812,6 @@
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值,如果值为空，则忽略该查询条件</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -6665,7 +6820,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="expression">查询条件表达式。如果参数值为空，则忽略该查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Equal``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6675,7 +6829,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotEqual``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6685,7 +6838,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Greater``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6695,7 +6847,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Less``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6705,7 +6856,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GreaterEqual``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6715,7 +6865,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LessEqual``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6725,7 +6874,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Contains``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6735,7 +6883,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Starts``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6745,7 +6892,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Ends``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -6755,7 +6901,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNull``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -6764,7 +6909,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNotNull``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -6773,7 +6917,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsEmpty``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -6782,7 +6925,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNotEmpty``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -6791,7 +6933,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
@@ -6801,7 +6942,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="values">值集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -6811,7 +6951,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -6821,7 +6960,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
@@ -6831,7 +6969,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="values">值集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -6841,7 +6978,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -6851,7 +6987,6 @@
             <param name="source">Sql生成器</param>
             <param name="expression">列名表达式。范例：t => t.Name</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -6863,7 +6998,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Int64},System.Nullable{System.Int64},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -6875,7 +7009,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Single},System.Nullable{System.Single},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -6887,7 +7020,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -6899,7 +7031,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -6911,7 +7042,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
             <summary>
@@ -6924,7 +7054,6 @@
             <param name="max">最大值</param>
             <param name="includeTime">是否包含时间</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GroupBy``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -6934,7 +7063,6 @@
             <param name="source">Sql生成器</param>
             <param name="column">分组字段。范例：a.Id,b.Name</param>
             <param name="having">分组条件。范例：Count(*) > 1</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GroupBy``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}}[])">
             <summary>
@@ -6943,7 +7071,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">Sql生成器</param>
             <param name="columns">分组字段</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrderBy``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Boolean)">
             <summary>
@@ -6953,7 +7080,6 @@
             <param name="source">Sql生成器</param>
             <param name="column">排序列。范例：t => t.Name</param>
             <param name="desc">是否倒排</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.ClearAfterExecution(Bing.Datas.Sql.ISqlQuery,System.Boolean)">
             <summary>
@@ -7273,7 +7399,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Sum``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -7283,7 +7408,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Avg``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -7293,7 +7417,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Max``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -7303,7 +7426,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Min``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -7313,7 +7435,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Select``1(Bing.Datas.Sql.ISqlQuery,System.Boolean)">
             <summary>
@@ -7322,7 +7443,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Select``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object[]}},System.Boolean)">
             <summary>
@@ -7332,7 +7452,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="columns">列名，范例：t => new object[] { t.Id, t.Name }</param>
             <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Select``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.String)">
             <summary>
@@ -7343,7 +7462,6 @@
             <param name="column">列名，范例：t => t.A，支持字典批量设置列和列别名，
             范例：Select&lt;Sample&gt;( t => new Dictionary&lt;object, string&gt; { { t.Email, "e" }, { t.Url, "u" } } );</param>
             <param name="columnAlias">列别名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.RemoveSelect``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object[]}})">
             <summary>
@@ -7370,7 +7488,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Join``1(Bing.Datas.Sql.ISqlQuery,System.String,System.String)">
             <summary>
@@ -7380,7 +7497,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LeftJoin``1(Bing.Datas.Sql.ISqlQuery,System.String,System.String)">
             <summary>
@@ -7390,7 +7506,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.RightJoin``1(Bing.Datas.Sql.ISqlQuery,System.String,System.String)">
             <summary>
@@ -7400,7 +7515,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Utils.Operator)">
             <summary>
@@ -7412,7 +7526,6 @@
             <param name="left">左表列名</param>
             <param name="right">右表列名</param>
             <param name="operator">条件运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,``1,System.Boolean}})">
             <summary>
@@ -7422,7 +7535,6 @@
             <typeparam name="TRight">右表实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">条件表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Or``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}}[])">
             <summary>
@@ -7439,7 +7551,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="predicate">查询条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrIf``1(Bing.Datas.Sql.ISqlQuery,System.Boolean,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}}[])">
             <summary>
@@ -7449,7 +7560,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="predicates">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrIfNotEmpty``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}}[])">
             <summary>
@@ -7467,7 +7577,6 @@
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -7476,7 +7585,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
             <summary>
@@ -7508,7 +7616,6 @@
             <param name="value">值</param>
             <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
             <summary>
@@ -7518,7 +7625,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
             <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -7551,7 +7657,6 @@
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值，如果该值为空，则忽略该查询条件</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -7560,7 +7665,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">查询条件表达式，如果参数值为空，则忽略该查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Equal``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7570,7 +7674,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotEqual``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7580,7 +7683,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Greater``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7590,7 +7692,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GreaterEqual``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7600,7 +7701,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Less``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7610,7 +7710,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LessEqual``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7620,7 +7719,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Contains``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7630,7 +7728,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Starts``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7640,7 +7737,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Ends``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object)">
             <summary>
@@ -7650,7 +7746,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNull``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -7659,7 +7754,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNotNull``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -7668,7 +7762,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsEmpty``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -7677,7 +7770,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNotEmpty``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
             <summary>
@@ -7686,7 +7778,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
@@ -7696,7 +7787,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="values">值集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -7706,7 +7796,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -7716,7 +7805,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
@@ -7734,7 +7822,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -7744,7 +7831,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">列名表达式，范例：t => t.Name</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -7756,7 +7842,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Int64},System.Nullable{System.Int64},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -7768,7 +7853,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Single},System.Nullable{System.Single},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -7780,7 +7864,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -7792,7 +7875,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -7804,7 +7886,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
             <summary>
@@ -7817,7 +7898,6 @@
             <param name="max">最大值</param>
             <param name="includeTime">是否包含时间</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GroupBy``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}}[])">
             <summary>
@@ -7835,7 +7915,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="column">分组字段，范例：t => t.Name</param>
             <param name="having">分组条件，范例：Count(*) > 1</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrderBy``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Boolean)">
             <summary>
@@ -7845,7 +7924,6 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="column">排序列</param>
             <param name="desc">是否倒序</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Skip(Bing.Datas.Sql.ISqlQuery,System.Int32)">
             <summary>
@@ -7853,7 +7931,6 @@
             </summary>
             <param name="sqlQuery">Sql查询对象</param>
             <param name="count">跳过的行数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Take(Bing.Datas.Sql.ISqlQuery,System.Int32)">
             <summary>
@@ -7869,7 +7946,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Union``1(``0,System.String,System.Collections.Generic.IEnumerable{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -7887,7 +7963,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.UnionAll``1(``0,Bing.Datas.Sql.ISqlBuilder[])">
             <summary>
@@ -7896,7 +7971,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.UnionAll``1(``0,System.Collections.Generic.IEnumerable{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -7905,7 +7979,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Intersect``1(``0,Bing.Datas.Sql.ISqlBuilder[])">
             <summary>
@@ -7914,7 +7987,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Intersect``1(``0,System.Collections.Generic.IEnumerable{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -7923,7 +7995,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Except``1(``0,Bing.Datas.Sql.ISqlBuilder[])">
             <summary>
@@ -7932,7 +8003,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Except``1(``0,System.Collections.Generic.IEnumerable{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -7941,7 +8011,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builders">Sql生成器集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.And``1(``0,Bing.Datas.Sql.Builders.ICondition)">
             <summary>
@@ -7950,7 +8019,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="condition">条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Or``1(``0,Bing.Datas.Sql.Builders.ICondition)">
             <summary>
@@ -7959,7 +8027,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="condition">条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.OrIf``1(``0,Bing.Datas.Sql.Builders.ICondition,System.Boolean)">
             <summary>
@@ -7969,7 +8036,6 @@
             <param name="source">源</param>
             <param name="predicate">条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,Bing.Datas.Sql.Builders.ICondition)">
             <summary>
@@ -7978,7 +8044,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="condition">条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,System.Object,Bing.Utils.Operator)">
             <summary>
@@ -7989,7 +8054,6 @@
             <param name="column">列名</param>
             <param name="value">值</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
             <summary>
@@ -8000,7 +8064,6 @@
             <param name="column">列名</param>
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
             <summary>
@@ -8011,7 +8074,6 @@
             <param name="column">列名</param>
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,System.Object,System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -8023,7 +8085,6 @@
             <param name="value">值</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -8035,7 +8096,6 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Utils.Operator)">
             <summary>
@@ -8047,7 +8107,6 @@
             <param name="action">子查询操作</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(``0,System.String,System.Object,Bing.Utils.Operator)">
             <summary>
@@ -8058,7 +8117,6 @@
             <param name="column">列名</param>
             <param name="value">值。如果值为空，则忽略该查询条件</param>
             <param name="operator">运算符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Equal``1(``0,System.String,System.Object)">
             <summary>
@@ -8068,7 +8126,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotEqual``1(``0,System.String,System.Object)">
             <summary>
@@ -8078,7 +8135,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Greater``1(``0,System.String,System.Object)">
             <summary>
@@ -8088,7 +8144,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Less``1(``0,System.String,System.Object)">
             <summary>
@@ -8098,7 +8153,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.GreaterEqual``1(``0,System.String,System.Object)">
             <summary>
@@ -8108,7 +8162,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.LessEqual``1(``0,System.String,System.Object)">
             <summary>
@@ -8118,7 +8171,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Contains``1(``0,System.String,System.Object)">
             <summary>
@@ -8128,7 +8180,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Starts``1(``0,System.String,System.Object)">
             <summary>
@@ -8138,7 +8189,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Ends``1(``0,System.String,System.Object)">
             <summary>
@@ -8148,7 +8198,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNull``1(``0,System.String)">
             <summary>
@@ -8157,7 +8206,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="column">列名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNotNull``1(``0,System.String)">
             <summary>
@@ -8166,7 +8214,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="column">列名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsEmpty``1(``0,System.String)">
             <summary>
@@ -8175,7 +8222,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="column">列名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.IsNotEmpty``1(``0,System.String)">
             <summary>
@@ -8184,7 +8230,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="column">列名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(``0,System.String,System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
@@ -8194,7 +8239,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="values">值集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -8204,7 +8248,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.In``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -8214,7 +8257,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(``0,System.String,System.Collections.Generic.IEnumerable{System.Object})">
             <summary>
@@ -8224,7 +8266,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="values">值集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -8234,7 +8275,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotIn``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -8244,7 +8284,6 @@
             <param name="source">源</param>
             <param name="column">列名</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Exists``1(``0,Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -8253,7 +8292,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Exists``1(``0,System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -8262,7 +8300,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotExists``1(``0,Bing.Datas.Sql.ISqlBuilder)">
             <summary>
@@ -8271,7 +8308,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="builder">Sql生成器</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.NotExists``1(``0,System.Action{Bing.Datas.Sql.ISqlBuilder})">
             <summary>
@@ -8280,7 +8316,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="action">子查询操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(``0,System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -8292,7 +8327,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(``0,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -8304,7 +8338,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(``0,System.String,System.Nullable{System.Single},System.Nullable{System.Single},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -8316,7 +8349,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(``0,System.String,System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -8328,7 +8360,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(``0,System.String,System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -8340,7 +8371,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.Between``1(``0,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
             <summary>
@@ -8353,7 +8383,6 @@
             <param name="max">最大值</param>
             <param name="includeTime">是否包含时间</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendWhere``1(``0,System.String)">
             <summary>
@@ -8362,7 +8391,6 @@
             <typeparam name="T">源类型</typeparam>
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：原样添加到Sql中，不会进行任何处理</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Extensions.AppendWhere``1(``0,System.String,System.Boolean)">
             <summary>
@@ -8372,7 +8400,6 @@
             <param name="source">源</param>
             <param name="sql">Sql语句。说明：原样添加到Sql中，不会进行任何处理</param>
             <param name="condition">该值为true时添加Sql，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.IDatabase">
             <summary>
@@ -8383,7 +8410,6 @@
             <summary>
             获取数据库连接
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.ISqlBuilder">
             <summary>
@@ -8405,19 +8431,16 @@
             <summary>
             生成调试Sql语句，Sql语句中的参数被替换为参数值
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.ToSql">
             <summary>
             生成Sql语句
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.New">
             <summary>
             创建Sql生成器
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.Clear">
             <summary>
@@ -8485,28 +8508,24 @@
             <summary>
             获取参数列表
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.Page(Bing.Domains.Repositories.IPager)">
             <summary>
             设置分页
             </summary>
             <param name="pager">分页参数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.Skip(System.Int32)">
             <summary>
             设置跳过行数
             </summary>
             <param name="count">跳过的行数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.Take(System.Int32)">
             <summary>
             设置获取行数
             </summary>
             <param name="count">获取的行数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlBuilder.IgnoreFilter``1">
             <summary>
@@ -8554,7 +8573,6 @@
             <summary>
             克隆
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.Config(System.Action{Bing.Datas.Sql.Configs.SqlOptions})">
             <summary>
@@ -8566,7 +8584,6 @@
             <summary>
             获取Sql生成器
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.Query``1(System.Func{System.Data.IDbConnection,System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object},``0},System.Data.IDbConnection)">
             <summary>
@@ -8575,7 +8592,6 @@
             <typeparam name="TResult">实体类型</typeparam>
             <param name="func">查询操作</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.QueryAsync``1(System.Func{System.Data.IDbConnection,System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object},System.Threading.Tasks.Task{``0}},System.Data.IDbConnection)">
             <summary>
@@ -8584,7 +8600,6 @@
             <typeparam name="TResult">实体类型</typeparam>
             <param name="func">查询操作</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.PagerQuery``1(System.Func{System.Collections.Generic.List{``0}},Bing.Domains.Repositories.IPager,System.Data.IDbConnection)">
             <summary>
@@ -8594,7 +8609,6 @@
             <param name="func">获取列表操作</param>
             <param name="parameter">分页参数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.PagerQueryAsync``1(System.Func{System.Threading.Tasks.Task{System.Collections.Generic.List{``0}}},Bing.Domains.Repositories.IPager,System.Data.IDbConnection)">
             <summary>
@@ -8604,7 +8618,6 @@
             <param name="func">获取列表操作</param>
             <param name="parameter">分页参数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToScalar(System.Data.IDbConnection)">
             <summary>
@@ -8624,7 +8637,6 @@
             </summary>
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToAsync``1(System.Data.IDbConnection)">
             <summary>
@@ -8632,7 +8644,6 @@
             </summary>
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToList``1(System.Data.IDbConnection)">
             <summary>
@@ -8640,7 +8651,6 @@
             </summary>
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToListAsync``1(System.Data.IDbConnection)">
             <summary>
@@ -8648,7 +8658,6 @@
             </summary>
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToListAsync``1(System.String,System.Data.IDbConnection)">
             <summary>
@@ -8657,7 +8666,6 @@
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="sql">Sql语句</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToPagerList``1(Bing.Domains.Repositories.IPager,System.Data.IDbConnection)">
             <summary>
@@ -8666,7 +8674,6 @@
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="parameter">分页参数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToPagerListAsync``1(Bing.Domains.Repositories.IPager,System.Data.IDbConnection)">
             <summary>
@@ -8675,7 +8682,6 @@
             <typeparam name="TResult">返回结果类型</typeparam>
             <param name="parameter">分页参数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToPagerList``1(System.Int32,System.Int32,System.Data.IDbConnection)">
             <summary>
@@ -8685,7 +8691,6 @@
             <param name="page">页数</param>
             <param name="pageSize">每页显示行数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToPagerListAsync``1(System.Int32,System.Int32,System.Data.IDbConnection)">
             <summary>
@@ -8695,7 +8700,6 @@
             <param name="page">页数</param>
             <param name="pageSize">每页显示行数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.ISqlQuery.ToPagerListAsync``1(System.String,System.Int32,System.Int32,System.Data.IDbConnection)">
             <summary>
@@ -8706,7 +8710,6 @@
             <param name="page">页数</param>
             <param name="pageSize">每页显示行数</param>
             <param name="connection">数据库连接</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Matedatas.DefaultEntityMatedata">
             <summary>
@@ -8718,14 +8721,12 @@
             获取表名
             </summary>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Matedatas.DefaultEntityMatedata.GetSchema(System.Type)">
             <summary>
             获取架构
             </summary>
             <param name="type">实体类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Sql.Matedatas.DefaultEntityMatedata.GetColumn(System.Type,System.String)">
             <summary>
@@ -8733,7 +8734,6 @@
             </summary>
             <param name="type">实体类型</param>
             <param name="property">属性名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Matedatas.DefaultTableDatabase">
             <summary>
@@ -8745,7 +8745,6 @@
             获取数据库
             </summary>
             <param name="table">表</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Sql.Matedatas.IEntityMatedata">
             <summary>
@@ -11164,7 +11163,6 @@
             <summary>
             当前是否处于<see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"/>生命周期中
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Dependency.ServiceLocator.SetServiceCollection(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
@@ -11713,6 +11711,27 @@
             <param name="type">对象类型</param>
             <param name="name">服务名称</param>
             <returns></returns>
+        </member>
+        <member name="T:Bing.DisposeAction">
+            <summary>
+            释放操作
+            </summary>
+        </member>
+        <member name="F:Bing.DisposeAction._action">
+            <summary>
+            操作
+            </summary>
+        </member>
+        <member name="M:Bing.DisposeAction.#ctor(System.Action)">
+            <summary>
+            初始化一个<see cref="T:Bing.DisposeAction"/>类型的实例
+            </summary>
+            <param name="action">操作</param>
+        </member>
+        <member name="M:Bing.DisposeAction.Dispose">
+            <summary>
+            释放资源
+            </summary>
         </member>
         <member name="T:Bing.Domains.Entities.AggregateRoot`2">
             <summary>
@@ -13660,221 +13679,19 @@
             错误详情
             </summary>
         </member>
-        <member name="T:Bing.Mapping.IMapper">
+        <member name="T:Bing.ExceptionHandling.ILocalizeErrorMessage">
             <summary>
-            对象映射
+            本地化错误消息
             </summary>
         </member>
-        <member name="M:Bing.Mapping.IMapper.MapTo``1(System.Object)">
+        <member name="T:Bing.Exceptions.IBusinessException">
             <summary>
-            将对象映射为指定类型
-            </summary>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.MapTo``2(``0,``1)">
-            <summary>
-            将源对象的对象更新目标类型的对象
-            </summary>
-            <typeparam name="TSource">源类型</typeparam>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-            <param name="destination">目标对象</param>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.MapToList``1(System.Collections.IEnumerable)">
-            <summary>
-            将源集合映射到目标列表
-            </summary>
-            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
-            <param name="source">源集合</param>
-        </member>
-        <member name="M:Bing.Mapping.IMapper.ToOutput``1(System.Linq.IQueryable,System.Linq.Expressions.Expression{System.Func{``0,System.Object}}[])">
-            <summary>
-            将数据源映射为指定输出DTO的集合
-            </summary>
-            <typeparam name="TOutputDto">输出DTO类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="membersToExpand">成员展开</param>
-        </member>
-        <member name="T:Bing.Mapping.MapperExtensions">
-            <summary>
-            对象映射扩展
+            业务异常
             </summary>
         </member>
-        <member name="F:Bing.Mapping.MapperExtensions._mapper">
+        <member name="T:Bing.Exceptions.IUserFriendlyException">
             <summary>
-            对象映射执行者
-            </summary>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.SetMapper(Bing.Mapping.IMapper)">
-            <summary>
-            设置对象映射执行者
-            </summary>
-            <param name="mapper">对象映射执行者</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.MapTo``2(``0,``1)">
-            <summary>
-            将源对象映射到目标对象
-            </summary>
-            <typeparam name="TSource">源类型</typeparam>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-            <param name="destination">目标对象</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.CheckMapper">
-            <summary>
-            检查映射执行者是否为空
-            </summary>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.MapTo``1(System.Object)">
-            <summary>
-            将源对象映射到目标对象
-            </summary>
-            <typeparam name="TDestination">目标类型</typeparam>
-            <param name="source">源对象</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.MapToList``1(System.Collections.IEnumerable)">
-            <summary>
-            将源集合映射到目标列表
-            </summary>
-            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
-            <param name="source">源集合</param>
-        </member>
-        <member name="M:Bing.Mapping.MapperExtensions.ToOutput``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``1,System.Object}}[])">
-            <summary>
-            将数据源映射为指定<typeparamref name="TOutputDto"/>集合
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TOutputDto">输出Dto类型</typeparam>
-            <param name="source">源类型</param>
-            <param name="membersToExpand">成员展开</param>
-        </member>
-        <member name="T:Bing.Threading.ICancellationTokenProvider">
-            <summary>
-            异步任务取消令牌提供程序
-            </summary>
-        </member>
-        <member name="P:Bing.Threading.ICancellationTokenProvider.Token">
-            <summary>
-            异步任务取消令牌
-            </summary>
-        </member>
-        <member name="T:Bing.Threading.NoneCancellationTokenProvider">
-            <summary>
-            空异步任务取消令牌提供程序
-            </summary>
-        </member>
-        <member name="F:Bing.Threading.NoneCancellationTokenProvider.Instance">
-            <summary>
-            空异步任务取消令牌提供程序实例
-            </summary>
-        </member>
-        <member name="P:Bing.Threading.NoneCancellationTokenProvider.Token">
-            <summary>
-            异步任务取消令牌
-            </summary>
-        </member>
-        <member name="T:Bing.Configurations.BingConfig">
-            <summary>
-            Bing 框架配置
-            </summary>
-        </member>
-        <member name="F:Bing.Configurations.BingConfig._instance">
-            <summary>
-            框架配置实例
-            </summary>
-        </member>
-        <member name="F:Bing.Configurations.BingConfig._lockObj">
-            <summary>
-            对象锁
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.BingConfig.Current">
-            <summary>
-            当前框架配置
-            </summary>
-        </member>
-        <member name="F:Bing.Configurations.BingConfig.ValidationHandler">
-            <summary>
-            验证
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.BingConfig.EnabledDebug">
-            <summary>
-            是否启用调试日志
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.BingConfig.EnabledTrace">
-            <summary>
-            是否启用跟踪日志
-            </summary>
-        </member>
-        <member name="T:Bing.Configurations.ConfigurationBuilderOptions">
-            <summary>
-            配置构建器选项
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.ConfigurationBuilderOptions.FileName">
-            <summary>
-            文件名。默认值：appsettings
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.ConfigurationBuilderOptions.EnvironmentName">
-            <summary>
-            环境名称。支持：Development(开发环境)、Staging(演示环境)、Production(生产环境)
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.ConfigurationBuilderOptions.BasePath">
-            <summary>
-            基本路径。用于读取配置文件的根路径
-            </summary>
-        </member>
-        <member name="T:Bing.Configurations.ConfigurationUtil">
-            <summary>
-            配置工具
-            </summary>
-        </member>
-        <member name="M:Bing.Configurations.ConfigurationUtil.BuildConfiguration(Bing.Configurations.ConfigurationBuilderOptions)">
-            <summary>
-            构建配置
-            </summary>
-            <param name="options">配置构建起选项</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Configurations.DefaultConfigurationAccessor">
-            <summary>
-            默认配置访问器
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.DefaultConfigurationAccessor.Empty">
-            <summary>
-            空
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.DefaultConfigurationAccessor.Configuration">
-            <summary>
-            配置
-            </summary>
-        </member>
-        <member name="M:Bing.Configurations.DefaultConfigurationAccessor.#cctor">
-            <summary>
-            静态构造函数
-            </summary>
-        </member>
-        <member name="M:Bing.Configurations.DefaultConfigurationAccessor.#ctor(Microsoft.Extensions.Configuration.IConfigurationRoot)">
-            <summary>
-            初始化一耳光<see cref="T:Bing.Configurations.DefaultConfigurationAccessor"/>类型的实例
-            </summary>
-            <param name="configuration">配置</param>
-        </member>
-        <member name="T:Bing.Configurations.IConfigurationAccessor">
-            <summary>
-            配置访问器
-            </summary>
-        </member>
-        <member name="P:Bing.Configurations.IConfigurationAccessor.Configuration">
-            <summary>
-            配置
+            用户友好提示异常
             </summary>
         </member>
         <member name="T:Bing.Exceptions.ConcurrencyException">
@@ -14089,6 +13906,268 @@
             </summary>
             <param name="level">日志级别</param>
             <returns></returns>
+        </member>
+        <member name="T:Bing.Mapping.IMapper">
+            <summary>
+            对象映射
+            </summary>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.MapTo``1(System.Object)">
+            <summary>
+            将对象映射为指定类型
+            </summary>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.MapTo``2(``0,``1)">
+            <summary>
+            将源对象的对象更新目标类型的对象
+            </summary>
+            <typeparam name="TSource">源类型</typeparam>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+            <param name="destination">目标对象</param>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.MapToList``1(System.Collections.IEnumerable)">
+            <summary>
+            将源集合映射到目标列表
+            </summary>
+            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
+            <param name="source">源集合</param>
+        </member>
+        <member name="M:Bing.Mapping.IMapper.ToOutput``1(System.Linq.IQueryable,System.Linq.Expressions.Expression{System.Func{``0,System.Object}}[])">
+            <summary>
+            将数据源映射为指定输出DTO的集合
+            </summary>
+            <typeparam name="TOutputDto">输出DTO类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="membersToExpand">成员展开</param>
+        </member>
+        <member name="T:Bing.Mapping.MapperExtensions">
+            <summary>
+            对象映射扩展
+            </summary>
+        </member>
+        <member name="F:Bing.Mapping.MapperExtensions._mapper">
+            <summary>
+            对象映射执行者
+            </summary>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.SetMapper(Bing.Mapping.IMapper)">
+            <summary>
+            设置对象映射执行者
+            </summary>
+            <param name="mapper">对象映射执行者</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.MapTo``2(``0,``1)">
+            <summary>
+            将源对象映射到目标对象
+            </summary>
+            <typeparam name="TSource">源类型</typeparam>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+            <param name="destination">目标对象</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.CheckMapper">
+            <summary>
+            检查映射执行者是否为空
+            </summary>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.MapTo``1(System.Object)">
+            <summary>
+            将源对象映射到目标对象
+            </summary>
+            <typeparam name="TDestination">目标类型</typeparam>
+            <param name="source">源对象</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.MapToList``1(System.Collections.IEnumerable)">
+            <summary>
+            将源集合映射到目标列表
+            </summary>
+            <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
+            <param name="source">源集合</param>
+        </member>
+        <member name="M:Bing.Mapping.MapperExtensions.ToOutput``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``1,System.Object}}[])">
+            <summary>
+            将数据源映射为指定<typeparamref name="TOutputDto"/>集合
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TOutputDto">输出Dto类型</typeparam>
+            <param name="source">源类型</param>
+            <param name="membersToExpand">成员展开</param>
+        </member>
+        <member name="T:Bing.NullDisposable">
+            <summary>
+            空释放器
+            </summary>
+        </member>
+        <member name="P:Bing.NullDisposable.Instance">
+            <summary>
+            空释放器实例
+            </summary>
+        </member>
+        <member name="M:Bing.NullDisposable.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.NullDisposable"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.NullDisposable.Dispose">
+            <summary>
+            释放资源
+            </summary>
+        </member>
+        <member name="T:Bing.Release.IClearable">
+            <summary>
+            可清空的接口
+            </summary>
+        </member>
+        <member name="M:Bing.Release.IClearable.Clear">
+            <summary>
+            清空
+            </summary>
+        </member>
+        <member name="T:Bing.Release.ICloseable">
+            <summary>
+            可关闭的接口
+            </summary>
+        </member>
+        <member name="M:Bing.Release.ICloseable.Close">
+            <summary>
+            关闭
+            </summary>
+        </member>
+        <member name="E:Bing.Release.ICloseable.Closed">
+            <summary>
+            关闭后事件
+            </summary>
+        </member>
+        <member name="T:Bing.Threading.ICancellationTokenProvider">
+            <summary>
+            异步任务取消令牌提供程序
+            </summary>
+        </member>
+        <member name="P:Bing.Threading.ICancellationTokenProvider.Token">
+            <summary>
+            异步任务取消令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Threading.NoneCancellationTokenProvider">
+            <summary>
+            空异步任务取消令牌提供程序
+            </summary>
+        </member>
+        <member name="F:Bing.Threading.NoneCancellationTokenProvider.Instance">
+            <summary>
+            空异步任务取消令牌提供程序实例
+            </summary>
+        </member>
+        <member name="P:Bing.Threading.NoneCancellationTokenProvider.Token">
+            <summary>
+            异步任务取消令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Configurations.BingConfig">
+            <summary>
+            Bing 框架配置
+            </summary>
+        </member>
+        <member name="F:Bing.Configurations.BingConfig._instance">
+            <summary>
+            框架配置实例
+            </summary>
+        </member>
+        <member name="F:Bing.Configurations.BingConfig._lockObj">
+            <summary>
+            对象锁
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.BingConfig.Current">
+            <summary>
+            当前框架配置
+            </summary>
+        </member>
+        <member name="F:Bing.Configurations.BingConfig.ValidationHandler">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.BingConfig.EnabledDebug">
+            <summary>
+            是否启用调试日志
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.BingConfig.EnabledTrace">
+            <summary>
+            是否启用跟踪日志
+            </summary>
+        </member>
+        <member name="T:Bing.Configurations.ConfigurationBuilderOptions">
+            <summary>
+            配置构建器选项
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.ConfigurationBuilderOptions.FileName">
+            <summary>
+            文件名。默认值：appsettings
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.ConfigurationBuilderOptions.EnvironmentName">
+            <summary>
+            环境名称。支持：Development(开发环境)、Staging(演示环境)、Production(生产环境)
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.ConfigurationBuilderOptions.BasePath">
+            <summary>
+            基本路径。用于读取配置文件的根路径
+            </summary>
+        </member>
+        <member name="T:Bing.Configurations.ConfigurationUtil">
+            <summary>
+            配置工具
+            </summary>
+        </member>
+        <member name="M:Bing.Configurations.ConfigurationUtil.BuildConfiguration(Bing.Configurations.ConfigurationBuilderOptions)">
+            <summary>
+            构建配置
+            </summary>
+            <param name="options">配置构建起选项</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Configurations.DefaultConfigurationAccessor">
+            <summary>
+            默认配置访问器
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.DefaultConfigurationAccessor.Empty">
+            <summary>
+            空
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.DefaultConfigurationAccessor.Configuration">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="M:Bing.Configurations.DefaultConfigurationAccessor.#cctor">
+            <summary>
+            静态构造函数
+            </summary>
+        </member>
+        <member name="M:Bing.Configurations.DefaultConfigurationAccessor.#ctor(Microsoft.Extensions.Configuration.IConfigurationRoot)">
+            <summary>
+            初始化一耳光<see cref="T:Bing.Configurations.DefaultConfigurationAccessor"/>类型的实例
+            </summary>
+            <param name="configuration">配置</param>
+        </member>
+        <member name="T:Bing.Configurations.IConfigurationAccessor">
+            <summary>
+            配置访问器
+            </summary>
+        </member>
+        <member name="P:Bing.Configurations.IConfigurationAccessor.Configuration">
+            <summary>
+            配置
+            </summary>
         </member>
         <member name="T:Bing.DomainExtensions">
             <summary>
@@ -14397,7 +14476,7 @@
             容器操作
             </summary>
         </member>
-        <member name="F:Bing.Helpers.Ioc.DefaultContainer">
+        <member name="P:Bing.Helpers.Ioc.DefaultContainer">
             <summary>
             默认容器
             </summary>
@@ -14407,7 +14486,6 @@
             创建容器
             </summary>
             <param name="configs">依赖配置</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.CreateList``1(System.String)">
             <summary>
@@ -14415,7 +14493,6 @@
             </summary>
             <typeparam name="T">对象类型</typeparam>
             <param name="name">服务名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.CreateList``1(System.Type,System.String)">
             <summary>
@@ -14424,7 +14501,6 @@
             <typeparam name="TResult">对象类型</typeparam>
             <param name="type">对象类型</param>
             <param name="name">服务名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.Create``1(System.String)">
             <summary>
@@ -14432,7 +14508,6 @@
             </summary>
             <typeparam name="T">对象类型</typeparam>
             <param name="name">服务名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.Create(System.Type,System.String)">
             <summary>
@@ -14440,7 +14515,6 @@
             </summary>
             <param name="type">对象类型</param>
             <param name="name">服务名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.Create``1(System.Type,System.String)">
             <summary>
@@ -14449,13 +14523,11 @@
             <typeparam name="TResult">对象类型</typeparam>
             <param name="type">对象类型</param>
             <param name="name">服务名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.BeginScope">
             <summary>
             作用域开始
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.Register(Bing.Dependency.IConfig[])">
             <summary>
@@ -14469,7 +14541,6 @@
             </summary>
             <param name="services">服务集合</param>
             <param name="configs">依赖配置</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Helpers.Ioc.Dispose">
             <summary>
@@ -14599,9 +14670,14 @@
             空分布式锁
             </summary>
         </member>
-        <member name="F:Bing.Locks.NullDistributedLock.Instance">
+        <member name="P:Bing.Locks.NullDistributedLock.Instance">
             <summary>
             空分布式锁
+            </summary>
+        </member>
+        <member name="M:Bing.Locks.NullDistributedLock.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Locks.NullDistributedLock"/>类型的实例
             </summary>
         </member>
         <member name="M:Bing.Locks.NullDistributedLock.TryLock(System.String,System.Nullable{System.TimeSpan})">
@@ -14641,9 +14717,14 @@
             空业务锁
             </summary>
         </member>
-        <member name="F:Bing.Locks.NullLock.Instance">
+        <member name="P:Bing.Locks.NullLock.Instance">
             <summary>
             空业务锁
+            </summary>
+        </member>
+        <member name="M:Bing.Locks.NullLock.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Locks.NullLock"/>类型的实例
             </summary>
         </member>
         <member name="M:Bing.Locks.NullLock.Lock(System.String,System.Nullable{System.TimeSpan})">
@@ -14652,7 +14733,6 @@
             </summary>
             <param name="key">锁定标识</param>
             <param name="expiration">锁定时间间隔</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Locks.NullLock.UnLock">
             <summary>
@@ -14876,7 +14956,6 @@
             获取日志
             </summary>
             <param name="name">日志名称</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Core.LogBase`1">
             <summary>
@@ -15135,7 +15214,7 @@
             空日志操作
             </summary>
         </member>
-        <member name="F:Bing.Logs.Core.NullLog.Instance">
+        <member name="P:Bing.Logs.Core.NullLog.Instance">
             <summary>
             日志操作实例
             </summary>
@@ -15155,13 +15234,17 @@
             名称
             </summary>
         </member>
+        <member name="M:Bing.Logs.Core.NullLog.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.Core.NullLog"/>类型的实例
+            </summary>
+        </member>
         <member name="M:Bing.Logs.Core.NullLog.Set``1(System.Action{``0})">
             <summary>
             设置内容
             </summary>
             <typeparam name="TContent">日志内容类型</typeparam>
             <param name="action">设置内容操作</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Core.NullLog.Get``1">
             <summary>
@@ -15275,9 +15358,14 @@
             请求地址
             </summary>
         </member>
-        <member name="F:Bing.Logs.Core.NullLogContext.Instance">
+        <member name="P:Bing.Logs.Core.NullLogContext.Instance">
             <summary>
             空日志上下文实例
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Core.NullLogContext.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.Core.NullLogContext"/>类型的实例
             </summary>
         </member>
         <member name="T:Bing.Logs.Core.NullLogFormat">
@@ -15285,9 +15373,14 @@
             空日志格式器
             </summary>
         </member>
-        <member name="F:Bing.Logs.Core.NullLogFormat.Instance">
+        <member name="P:Bing.Logs.Core.NullLogFormat.Instance">
             <summary>
             空日志格式器实例
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Core.NullLogFormat.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.Core.NullLogFormat"/>类型的实例
             </summary>
         </member>
         <member name="M:Bing.Logs.Core.NullLogFormat.Format(Bing.Logs.Abstractions.ILogContent)">
@@ -15301,7 +15394,7 @@
             空日志提供程序
             </summary>
         </member>
-        <member name="F:Bing.Logs.Core.NullLogProvider.Instance">
+        <member name="P:Bing.Logs.Core.NullLogProvider.Instance">
             <summary>
             空日志提供程序实例
             </summary>
@@ -15326,6 +15419,11 @@
             是否分布式日志
             </summary>
         </member>
+        <member name="M:Bing.Logs.Core.NullLogProvider.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.Core.NullLogProvider"/>类型的实例
+            </summary>
+        </member>
         <member name="M:Bing.Logs.Core.NullLogProvider.WriteLog(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
             <summary>
             写日志
@@ -15338,9 +15436,14 @@
             空日志提供程序工厂
             </summary>
         </member>
-        <member name="F:Bing.Logs.Core.NullLogProviderFactory.Instance">
+        <member name="P:Bing.Logs.Core.NullLogProviderFactory.Instance">
             <summary>
             空日志提供程序工厂实例
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Core.NullLogProviderFactory.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Logs.Core.NullLogProviderFactory"/>类型的实例
             </summary>
         </member>
         <member name="M:Bing.Logs.Core.NullLogProviderFactory.Create(System.String,Bing.Logs.Abstractions.ILogFormat)">

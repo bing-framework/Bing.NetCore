@@ -71,7 +71,6 @@ namespace Bing.Dependency
         /// <summary>
         /// 当前是否处于<see cref="ServiceLifetime.Scoped"/>生命周期中
         /// </summary>
-        /// <returns></returns>
         public static bool InScoped() => Instance.ScopedProvider != null;
 
         #endregion

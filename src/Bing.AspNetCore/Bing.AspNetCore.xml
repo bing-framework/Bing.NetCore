@@ -80,6 +80,54 @@
             异步任务取消令牌
             </summary>
         </member>
+        <member name="T:Bing.AspNetCore.HttpContextServiceScopeFactory">
+            <summary>
+            基于当前HttpContext的<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>工厂。如果当前操作处于HttpRequest作用域中，直接使用HttpRequest的作用域，否则创建新的作用域
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.ServiceScopeFactory">
+            <summary>
+            服务作用域工厂
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.HttpContextAccessor">
+            <summary>
+            当前请求的<see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/>对象
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.HttpContextServiceScopeFactory"/>类型的实例
+            </summary>
+            <param name="serviceScopeFactory">服务作用域工厂</param>
+            <param name="httpContextAccessor">Http上下文访问器</param>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.CreateScope">
+            <summary>
+            创建依赖注入服务的作用域。如果当前操作处于HttpRequest作用域中，直接使用HttpReqeust的作用域，否则创建新的作用域
+            </summary>
+        </member>
+        <member name="T:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope">
+            <summary>
+            当前HttpRequest的<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>的包装，保持HttpContext.RequestServices的可传递性，并且不释放
+            </summary>
+        </member>
+        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.ServiceProvider">
+            <summary>
+            服务提供程序
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.#ctor(System.IServiceProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope"/>类型的实例
+            </summary>
+            <param name="serviceProvider">服务提供程序</param>
+        </member>
+        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.Dispose">
+            <summary>
+            释放资源。因为是HttpContext的，啥也不做，避免在using使用时被释放
+            </summary>
+        </member>
         <member name="T:Bing.AspNetCore.Logs.SysLogger">
             <summary>
             系统日志记录器
@@ -155,141 +203,27 @@
             </summary>
             <param name="name">名称</param>
         </member>
-        <member name="T:Bing.AspNetCore.ApplicationBuilderExtensions">
+        <member name="T:Bing.AspNetCore.Mvc.ModelBinding.StringTrimModelBinder">
             <summary>
-            应用程序构建器(<see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/>) 扩展
+            字符串前后空白进行Trim操作的模型绑定器
             </summary>
         </member>
-        <member name="M:Bing.AspNetCore.ApplicationBuilderExtensions.UseBing(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+        <member name="M:Bing.AspNetCore.Mvc.ModelBinding.StringTrimModelBinder.BindModelAsync(Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingContext)">
             <summary>
-            Bing框架初始化。适用于AspNetCore环境
+            绑定模型
             </summary>
-            <param name="app">应用程序构建器</param>
+            <param name="bindingContext">模型绑定上下文</param>
         </member>
-        <member name="M:Bing.AspNetCore.ApplicationBuilderExtensions.UseMvcWithAreaRoute(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.Boolean)">
+        <member name="T:Bing.AspNetCore.Mvc.ModelBinding.StringTrimModelBinderProvider">
             <summary>
-            添加MVC并支持Area路由
-            </summary>
-            <param name="app">应用程序构建器</param>
-            <param name="area">是否支持Area路由</param>
-        </member>
-        <member name="T:Bing.AspNetCore.Extensions">
-            <summary>
-            服务扩展
+            <see cref="T:Bing.AspNetCore.Mvc.ModelBinding.StringTrimModelBinder"/>提供程序。提供对字符串前后空白进行Trim操作的模型绑定能力
             </summary>
         </member>
-        <member name="M:Bing.AspNetCore.Extensions.AddUploadService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Bing.AspNetCore.Mvc.ModelBinding.StringTrimModelBinderProvider.GetBinder(Microsoft.AspNetCore.Mvc.ModelBinding.ModelBinderProviderContext)">
             <summary>
-            注册上传服务
+            获取绑定器
             </summary>
-            <param name="services">服务集合</param>
-        </member>
-        <member name="M:Bing.AspNetCore.Extensions.AddUploadService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
-            <summary>
-            注册上传服务
-            </summary>
-            <typeparam name="TFileUploadService">文件上传服务类型</typeparam>
-            <param name="services">服务集合</param>
-        </member>
-        <member name="M:Bing.AspNetCore.Extensions.AddApiInterfaceService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
-            <summary>
-            注册Api接口服务
-            </summary>
-            <param name="services">服务集合</param>
-        </member>
-        <member name="M:Bing.AspNetCore.Extensions.AddApiInterfaceService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
-            <summary>
-            注册Api接口服务
-            </summary>
-            <typeparam name="TApiInterfaceService">Api接口服务类型</typeparam>
-            <param name="services">服务集合</param>
-        </member>
-        <member name="T:Bing.AspNetCore.ServiceCollectionExtensions">
-            <summary>
-            服务集合(<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>) 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.AspNetCore.ServiceCollectionExtensions.GetHostingEnvironment(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
-            <summary>
-            获取<see cref="T:Microsoft.AspNetCore.Hosting.IHostingEnvironment"/>环境信息
-            </summary>
-            <param name="services">服务集合</param>
-        </member>
-        <member name="T:Bing.AspNetCore.ServiceProviderExtensions">
-            <summary>
-            服务提供程序(<see cref="T:System.IServiceProvider"/>) 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.AspNetCore.ServiceProviderExtensions.HttpContext(System.IServiceProvider)">
-            <summary>
-            获取HttpContext实例
-            </summary>
-            <param name="provider">服务提供程序</param>
-        </member>
-        <member name="M:Bing.AspNetCore.ServiceProviderExtensions.InHttpRequest(System.IServiceProvider)">
-            <summary>
-            当前业务是否处于HttpRequest中
-            </summary>
-            <param name="provider">服务提供程序</param>
-        </member>
-        <member name="T:Bing.AspNetCore.HttpContextServiceScopeFactory">
-            <summary>
-            基于当前HttpContext的<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>工厂。如果当前操作处于HttpRequest作用域中，直接使用HttpRequest的作用域，否则创建新的作用域
-            </summary>
-        </member>
-        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.ServiceScopeFactory">
-            <summary>
-            服务作用域工厂
-            </summary>
-        </member>
-        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.HttpContextAccessor">
-            <summary>
-            当前请求的<see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/>对象
-            </summary>
-        </member>
-        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.#ctor(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
-            <summary>
-            初始化一个<see cref="T:Bing.AspNetCore.HttpContextServiceScopeFactory"/>类型的实例
-            </summary>
-            <param name="serviceScopeFactory">服务作用域工厂</param>
-            <param name="httpContextAccessor">Http上下文访问器</param>
-        </member>
-        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.CreateScope">
-            <summary>
-            创建依赖注入服务的作用域。如果当前操作处于HttpRequest作用域中，直接使用HttpReqeust的作用域，否则创建新的作用域
-            </summary>
-        </member>
-        <member name="T:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope">
-            <summary>
-            当前HttpRequest的<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>的包装，保持HttpContext.RequestServices的可传递性，并且不释放
-            </summary>
-        </member>
-        <member name="P:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.ServiceProvider">
-            <summary>
-            服务提供程序
-            </summary>
-        </member>
-        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.#ctor(System.IServiceProvider)">
-            <summary>
-            初始化一个<see cref="T:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope"/>类型的实例
-            </summary>
-            <param name="serviceProvider">服务提供程序</param>
-        </member>
-        <member name="M:Bing.AspNetCore.HttpContextServiceScopeFactory.NonDisposedHttpContextServiceScope.Dispose">
-            <summary>
-            释放资源。因为是HttpContext的，啥也不做，避免在using使用时被释放
-            </summary>
-        </member>
-        <member name="T:Bing.AspNetCore.IAspNetCoreUseModule">
-            <summary>
-            AspNetCore环境下的应用模块服务
-            </summary>
-        </member>
-        <member name="M:Bing.AspNetCore.IAspNetCoreUseModule.UseModule(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
-            <summary>
-            应用模块服务。仅在AspNetCore环境下调用，非AspNetCore环境请求执行 UseModule(IServiceProvider) 功能
-            </summary>
-            <param name="app">应用程序构建器</param>
+            <param name="context">模型绑定提供程序上下文</param>
         </member>
         <member name="T:Bing.AspNetCore.Mvc.DefaultApiInterfaceService">
             <summary>
@@ -489,6 +423,87 @@
             获取指定服务类型的所有实例
             </summary>
             <param name="serviceType">服务类型</param>
+        </member>
+        <member name="T:Bing.AspNetCore.ApplicationBuilderExtensions">
+            <summary>
+            应用程序构建器(<see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.ApplicationBuilderExtensions.UseBing(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Bing框架初始化。适用于AspNetCore环境
+            </summary>
+            <param name="app">应用程序构建器</param>
+        </member>
+        <member name="T:Bing.AspNetCore.Extensions">
+            <summary>
+            服务扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddUploadService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册上传服务
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddUploadService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册上传服务
+            </summary>
+            <typeparam name="TFileUploadService">文件上传服务类型</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddApiInterfaceService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册Api接口服务
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="M:Bing.AspNetCore.Extensions.AddApiInterfaceService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            注册Api接口服务
+            </summary>
+            <typeparam name="TApiInterfaceService">Api接口服务类型</typeparam>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="T:Bing.AspNetCore.ServiceCollectionExtensions">
+            <summary>
+            服务集合(<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.ServiceCollectionExtensions.GetHostingEnvironment(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            获取<see cref="T:Microsoft.AspNetCore.Hosting.IHostingEnvironment"/>环境信息
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
+        <member name="T:Bing.AspNetCore.ServiceProviderExtensions">
+            <summary>
+            服务提供程序(<see cref="T:System.IServiceProvider"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.ServiceProviderExtensions.HttpContext(System.IServiceProvider)">
+            <summary>
+            获取HttpContext实例
+            </summary>
+            <param name="provider">服务提供程序</param>
+        </member>
+        <member name="M:Bing.AspNetCore.ServiceProviderExtensions.InHttpRequest(System.IServiceProvider)">
+            <summary>
+            当前业务是否处于HttpRequest中
+            </summary>
+            <param name="provider">服务提供程序</param>
+        </member>
+        <member name="T:Bing.AspNetCore.IAspNetCoreUseModule">
+            <summary>
+            AspNetCore环境下的应用模块服务
+            </summary>
+        </member>
+        <member name="M:Bing.AspNetCore.IAspNetCoreUseModule.UseModule(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            应用模块服务。仅在AspNetCore环境下调用，非AspNetCore环境请求执行 UseModule(IServiceProvider) 功能
+            </summary>
+            <param name="app">应用程序构建器</param>
         </member>
         <member name="T:Bing.AspNetCore.Tracing.AspNetCoreCorrelationIdProvider">
             <summary>
@@ -756,6 +771,18 @@
             <param name="image">图片</param>
             <param name="id">验证码编号</param>
             <returns></returns>
+        </member>
+        <member name="T:Microsoft.AspNetCore.Builder.ApplicationBuilderExtensions">
+            <summary>
+            应用程序构建器(<see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.Builder.ApplicationBuilderExtensions.UseMvcWithAreaRoute(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.Boolean)">
+            <summary>
+            添加MVC并支持Area路由
+            </summary>
+            <param name="app">应用程序构建器</param>
+            <param name="area">是否支持Area路由</param>
         </member>
         <member name="T:Microsoft.Extensions.Logging.LoggerFactoryExtensions">
             <summary>

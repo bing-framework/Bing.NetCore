@@ -194,9 +194,9 @@ namespace Bing.Utils.Helpers
         /// 检查参数不能为负数或零，否则抛出<see cref="ArgumentOutOfRangeException"/>异常
         /// </summary>
         /// <param name="timeSpan">时间戳</param>
-        /// <param name="paramaName">参数名</param>
+        /// <param name="paramName">参数名</param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static void NotNegativeOrZero(TimeSpan timeSpan, string paramaName) => Require<ArgumentOutOfRangeException>(timeSpan > TimeSpan.Zero, paramaName);
+        public static void NotNegativeOrZero(TimeSpan timeSpan, string paramName) => Require<ArgumentOutOfRangeException>(timeSpan > TimeSpan.Zero, paramName);
 
         #endregion
 

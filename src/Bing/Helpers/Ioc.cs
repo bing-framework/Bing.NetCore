@@ -14,13 +14,12 @@ namespace Bing.Helpers
         /// <summary>
         /// 默认容器
         /// </summary>
-        internal static readonly Container DefaultContainer = new Container();
+        internal static Container DefaultContainer { get; } = new Container();
 
         /// <summary>
         /// 创建容器
         /// </summary>
         /// <param name="configs">依赖配置</param>
-        /// <returns></returns>
         public static IContainer CreateContainer(params IConfig[] configs)
         {
             var container = new Container();
@@ -33,7 +32,6 @@ namespace Bing.Helpers
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="name">服务名称</param>
-        /// <returns></returns>
         public static List<T> CreateList<T>(string name = null)
         {
             //return DefaultContainer.CreateList<T>(name);
@@ -46,7 +44,6 @@ namespace Bing.Helpers
         /// <typeparam name="TResult">对象类型</typeparam>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
-        /// <returns></returns>
         public static List<TResult> CreateList<TResult>(Type type, string name = null)
         {
             return ((IEnumerable<TResult>)DefaultContainer.CreateList(type, name)).ToList();
@@ -57,7 +54,6 @@ namespace Bing.Helpers
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="name">服务名称</param>
-        /// <returns></returns>
         public static T Create<T>(string name = null)
         {
             //return DefaultContainer.Create<T>(name);
@@ -69,7 +65,6 @@ namespace Bing.Helpers
         /// </summary>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
-        /// <returns></returns>
         public static object Create(Type type, string name = null)
         {
             //return DefaultContainer.Create(type, name);
@@ -82,7 +77,6 @@ namespace Bing.Helpers
         /// <typeparam name="TResult">对象类型</typeparam>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
-        /// <returns></returns>
         public static TResult Create<TResult>(Type type, string name = null)
         {
             return (TResult)DefaultContainer.Create(type, name);
@@ -91,7 +85,6 @@ namespace Bing.Helpers
         /// <summary>
         /// 作用域开始
         /// </summary>
-        /// <returns></returns>
         public static IScope BeginScope()
         {
             return DefaultContainer.BeginScope();
@@ -111,7 +104,6 @@ namespace Bing.Helpers
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="configs">依赖配置</param>
-        /// <returns></returns>
         public static IServiceProvider Register(IServiceCollection services, params IConfig[] configs)
         {
             return DefaultContainer.Register(services, builder => builder.EnableAop(), configs);

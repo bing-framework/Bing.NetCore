@@ -46,6 +46,11 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 空日志上下文实例
         /// </summary>
-        public static readonly ILogContext Instance = new NullLogContext();
+        public static ILogContext Instance { get; } = new NullLogContext();
+
+        /// <summary>
+        /// 初始化一个<see cref="NullLogContext"/>类型的实例
+        /// </summary>
+        private NullLogContext() { }
     }
 }

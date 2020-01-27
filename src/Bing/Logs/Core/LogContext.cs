@@ -69,6 +69,7 @@ namespace Bing.Logs.Core
         /// 上下文
         /// </summary>
         public IContext Context => _context ?? (_context = ContextFactory.Create());
+
         #endregion
 
         #region 构造函数

@@ -11,7 +11,12 @@ namespace Bing.Locks
         /// <summary>
         /// 空分布式锁
         /// </summary>
-        public static readonly IDistributedLock Instance = new NullDistributedLock();
+        public static IDistributedLock Instance { get; } = new NullDistributedLock();
+
+        /// <summary>
+        /// 初始化一个<see cref="NullDistributedLock"/>类型的实例
+        /// </summary>
+        private NullDistributedLock() { }
 
         /// <summary>
         /// 尝试获取锁。成功锁定返回true，false代表之前已被锁定

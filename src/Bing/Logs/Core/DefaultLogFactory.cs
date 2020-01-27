@@ -25,7 +25,6 @@ namespace Bing.Logs.Core
         /// 获取日志
         /// </summary>
         /// <param name="name">日志名称</param>
-        /// <returns></returns>
         public ILog GetLog(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

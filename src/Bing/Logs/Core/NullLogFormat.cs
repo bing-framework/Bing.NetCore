@@ -10,7 +10,12 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 空日志格式器实例
         /// </summary>
-        public static readonly ILogFormat Instance = new NullLogFormat();
+        public static ILogFormat Instance { get; } = new NullLogFormat();
+
+        /// <summary>
+        /// 初始化一个<see cref="NullLogFormat"/>类型的实例
+        /// </summary>
+        private NullLogFormat() { }
 
         /// <summary>
         /// 格式化
