@@ -17,23 +17,19 @@ namespace Bing.Reflections
         /// </summary>
         /// <param name="folderPath">目录路径</param>
         /// <param name="searchOption">查询选项</param>
-        public static List<Assembly> LoadAssemblies(string folderPath, SearchOption searchOption)
-        {
-            return GetAssemblyFiles(folderPath, searchOption)
+        public static List<Assembly> LoadAssemblies(string folderPath, SearchOption searchOption) =>
+            GetAssemblyFiles(folderPath, searchOption)
                 .Select(AssemblyLoadContext.Default.LoadFromAssemblyPath)
                 .ToList();
-        }
 
         /// <summary>
         /// 获取程序集文件列表
         /// </summary>
         /// <param name="folderPath">目录路径</param>
         /// <param name="searchOption">查询选项</param>
-        public static IEnumerable<string> GetAssemblyFiles(string folderPath, SearchOption searchOption)
-        {
-            return Directory.EnumerateFiles(folderPath, "*.*", searchOption)
+        public static IEnumerable<string> GetAssemblyFiles(string folderPath, SearchOption searchOption) =>
+            Directory.EnumerateFiles(folderPath, "*.*", searchOption)
                 .Where(s => s.EndsWith(".dll") || s.EndsWith(".exe"));
-        }
 
         /// <summary>
         /// 获取程序集中所有类型

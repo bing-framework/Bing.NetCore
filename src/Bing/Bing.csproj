@@ -27,6 +27,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19" />
@@ -69,8 +70,6 @@
 
   <ItemGroup>
     <Folder Include="Bing\Events\Local\" />
-    <Folder Include="Bing\Localization\" />
-    <Folder Include="Bing\DependencyInjection\" />
   </ItemGroup>
 
 </Project>
