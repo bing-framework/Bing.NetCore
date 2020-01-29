@@ -18,11 +18,7 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <typeparam name="T">数据类型</typeparam>
         /// <param name="value">可空值</param>
-        /// <returns></returns>
-        public static T SafeValue<T>(this T? value) where T : struct
-        {
-            return value ?? default(T);
-        }
+        public static T SafeValue<T>(this T? value) where T : struct => value ?? default;
 
         #endregion
 

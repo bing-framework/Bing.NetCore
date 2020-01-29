@@ -16,20 +16,15 @@ namespace Bing.Utils.Extensions
         /// 判断指定路径是否图片文件
         /// </summary>
         /// <param name="fileName">文件名</param>
-        /// <returns>结果</returns>
         public static bool IsImageFile(this string fileName)
         {
             if (!File.Exists(fileName))
-            {
                 return false;
-            }
 
-            byte[] filedata = File.ReadAllBytes(fileName);
-            if (filedata.Length == 0)
-            {
+            byte[] fileData = File.ReadAllBytes(fileName);
+            if (fileData.Length == 0)
                 return false;
-            }
-            ushort code = BitConverter.ToUInt16(filedata, 0);
+            ushort code = BitConverter.ToUInt16(fileData, 0);
             switch (code)
             {
                 case 0x4D42://bmp
@@ -51,38 +46,23 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="patterns">模式</param>
-        /// <returns></returns>
-        public static bool IsLikeAny(this string value, params string[] patterns)
-        {
-            return patterns.Any(value.IsLike);
-        }
+        public static bool IsLikeAny(this string value, params string[] patterns) => patterns.Any(value.IsLike);
 
         /// <summary>
         /// 通配符比较
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="pattern">模式</param>
-        /// <returns></returns>
         public static bool IsLike(this string value, string pattern)
         {
             if (value == pattern)
-            {
                 return true;
-            }
             if (pattern[0] == '*' && pattern.Length > 1)
-            {
                 return value.Where((t, index) => value.Substring(index).IsLike(pattern.Substring(1))).Any();
-            }
-
             if (pattern[0] == '*')
-            {
                 return true;
-            }
-
             if (pattern[0] == value[0])
-            {
                 return value.Substring(1).IsLike(pattern.Substring(1));
-            }
             return false;
         }
 
@@ -95,11 +75,7 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <typeparam name="TEnum">泛型枚举</typeparam>
         /// <param name="value">匹配的枚举</param>
-        /// <returns>匿名方法条件</returns>
-        public static Func<bool> IsItemInEnum<TEnum>(this string value) where TEnum : struct
-        {
-            return () => string.IsNullOrEmpty(value) || !Enum.IsDefined(typeof(TEnum), value);
-        }
+        public static Func<bool> IsItemInEnum<TEnum>(this string value) where TEnum : struct => () => string.IsNullOrEmpty(value) || !Enum.IsDefined(typeof(TEnum), value);
 
         #endregion
 
@@ -111,11 +87,7 @@ namespace Bing.Utils.Extensions
         /// <param name="source">源字符串</param>
         /// <param name="minLength">最小长度</param>
         /// <param name="maxLength">最大长度</param>
-        /// <returns></returns>
-        public static bool IsRangeLength(this string source, int minLength, int maxLength)
-        {
-            return source.Length >= minLength && source.Length <= maxLength;
-        }
+        public static bool IsRangeLength(this string source, int minLength, int maxLength) => source.Length >= minLength && source.Length <= maxLength;
 
         #endregion
 
@@ -127,11 +99,7 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="comparisonType">区域性比较</param>
         /// <param name="values">提供的值</param>
-        /// <returns></returns>
-        public static bool EqualsAny(this string value, StringComparison comparisonType, params string[] values)
-        {
-            return values.Any(v => value.Equals(v, comparisonType));
-        }
+        public static bool EqualsAny(this string value, StringComparison comparisonType, params string[] values) => values.Any(v => value.Equals(v, comparisonType));
 
         #endregion
 
@@ -143,11 +111,7 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="whateverCaseString">比较字符串</param>
         /// <param name="comparison">区域性</param>
-        /// <returns></returns>
-        public static bool EquivalentTo(this string value, string whateverCaseString, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
-        {
-            return string.Equals(value, whateverCaseString, comparison);
-        }
+        public static bool EquivalentTo(this string value, string whateverCaseString, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase) => string.Equals(value, whateverCaseString, comparison);
 
         #endregion
 
@@ -159,56 +123,37 @@ namespace Bing.Utils.Extensions
         /// <param name="inputValue">输入字符串</param>
         /// <param name="comparisonValue">包含字符串</param>
         /// <param name="comparisonType">区域</param>
-        /// <returns></returns>
-        public static bool Contains(this string inputValue, string comparisonValue, StringComparison comparisonType)
-        {
-            return (inputValue.IndexOf(comparisonValue, comparisonType) != -1);
-        }
+        public static bool Contains(this string inputValue, string comparisonValue, StringComparison comparisonType) => (inputValue.IndexOf(comparisonValue, comparisonType) != -1);
 
         /// <summary>
         /// 确定输入字符串是否包含指定字符串，且字符串不为空
         /// </summary>
         /// <param name="inputValue">输入字符串</param>
         /// <param name="comparisonValue">指定字符串</param>
-        /// <returns></returns>
-        public static bool ContainsEquivalenceTo(this string inputValue, string comparisonValue)
-        {
-            return BothStringsAreEmpty(inputValue, comparisonValue) ||
-                   StringContainsEquivalence(inputValue, comparisonValue);
-        }
+        public static bool ContainsEquivalenceTo(this string inputValue, string comparisonValue) =>
+            BothStringsAreEmpty(inputValue, comparisonValue) ||
+            StringContainsEquivalence(inputValue, comparisonValue);
 
         /// <summary>
         /// 两个字符串是否均为空
         /// </summary>
         /// <param name="inputValue">字符串1</param>
         /// <param name="comparisonValue">字符串2</param>
-        /// <returns></returns>
-        private static bool BothStringsAreEmpty(string inputValue, string comparisonValue)
-        {
-            return (inputValue.IsEmpty() && comparisonValue.IsEmpty());
-        }
+        private static bool BothStringsAreEmpty(string inputValue, string comparisonValue) => (inputValue.IsEmpty() && comparisonValue.IsEmpty());
 
         /// <summary>
         /// 确定输入字符串是否包含指定字符串，且两个字符串不为空
         /// </summary>
         /// <param name="inputValue">输入字符串</param>
         /// <param name="comparisonValue">指定字符串</param>
-        /// <returns></returns>
-        private static bool StringContainsEquivalence(string inputValue, string comparisonValue)
-        {
-            return ((!inputValue.IsEmpty()) && inputValue.Contains(comparisonValue, StringComparison.InvariantCultureIgnoreCase));
-        }
+        private static bool StringContainsEquivalence(string inputValue, string comparisonValue) => !inputValue.IsEmpty() && inputValue.Contains(comparisonValue, StringComparison.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// 确定字符串是否包含所提供的值
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="values">提供的值</param>
-        /// <returns></returns>
-        public static bool ContainsAny(this string value, params string[] values)
-        {
-            return value.ContainsAny(StringComparison.CurrentCulture, values);
-        }
+        public static bool ContainsAny(this string value, params string[] values) => value.ContainsAny(StringComparison.CurrentCulture, values);
 
         /// <summary>
         /// 确定字符串是否包含所提供的值
@@ -216,22 +161,14 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="comparisonType">区域性比较</param>
         /// <param name="values">提供的值</param>
-        /// <returns></returns>
-        public static bool ContainsAny(this string value, StringComparison comparisonType, params string[] values)
-        {
-            return values.Any(v => value.IndexOf(v, comparisonType) > -1);
-        }
+        public static bool ContainsAny(this string value, StringComparison comparisonType, params string[] values) => values.Any(v => value.IndexOf(v, comparisonType) > -1);
 
         /// <summary>
         /// 确定字符串是否包含所有提供的值
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="values">提供的值</param>
-        /// <returns></returns>
-        public static bool ContainsAll(this string value, params string[] values)
-        {
-            return value.ContainsAll(StringComparison.CurrentCulture, values);
-        }
+        public static bool ContainsAll(this string value, params string[] values) => value.ContainsAll(StringComparison.CurrentCulture, values);
 
         /// <summary>
         /// 确定字符串是否包含所有提供的值
@@ -239,11 +176,7 @@ namespace Bing.Utils.Extensions
         /// <param name="value">值</param>
         /// <param name="comparisonType">区域性比较</param>
         /// <param name="values">提供的值</param>
-        /// <returns></returns>
-        public static bool ContainsAll(this string value, StringComparison comparisonType, params string[] values)
-        {
-            return values.All(v => value.IndexOf(v, comparisonType) > -1);
-        }
+        public static bool ContainsAll(this string value, StringComparison comparisonType, params string[] values) => values.All(v => value.IndexOf(v, comparisonType) > -1);
 
         #endregion
     }

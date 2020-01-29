@@ -1143,7 +1143,7 @@
             字符串(<see cref="T:System.String"/>) 扩展 - 转换
             </summary>
             <summary>
-            字符串(<see cref="T:System.String"/>) 扩展
+            字符串(<see cref="T:System.String"/>) 扩展 - 操作
             </summary>
             <summary>
             字符串(<see cref="T:System.String"/>) 扩展 - 格式化
@@ -1164,49 +1164,42 @@
             </summary>
             <param name="value">字符串</param>
             <param name="encoding">编码格式</param>
-            <returns>byte[]数组</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToXDocument(System.String)">
             <summary>
             字符串转为XDocument（Linq to Xml Dom）
             </summary>
             <param name="xml">xml字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToXElement(System.String)">
             <summary>
             字符串转为XElement对象（Linq to Xml XElement）
             </summary>
             <param name="xml">xml字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToXmlDocument(System.String)">
             <summary>
             字符串转为XmlDocument对象（Xml Dom）
             </summary>
             <param name="xml">xml字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToXPath(System.String)">
             <summary>
             字符串转为XmlPathDom对象（Xml XPath Dom）
             </summary>
             <param name="xml">xml字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.HexStringToBytes(System.String)">
             <summary>
             16进制字符串转换为字节数组
             </summary>
             <param name="value">16进制字符串</param>
-            <returns>字节数组</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToUnicodeString(System.String)">
             <summary>
             转换成Unicode字符串
             </summary>
             <param name="source">源字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToSecureString(System.String,System.Boolean)">
             <summary>
@@ -1214,35 +1207,77 @@
             </summary>
             <param name="value">普通字符串</param>
             <param name="markReadOnly">是否只读</param>
-            <returns>安全字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToUnSecureString(System.Security.SecureString)">
             <summary>
             将安全字符串转为普通字符串
             </summary>
             <param name="value">安全字符串</param>
-            <returns>普通字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToSbcCase(System.String)">
             <summary>
             将字符串转换成全角字符串(SBC Case)
             </summary>
             <param name="input">任意字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToDbcCase(System.String)">
             <summary>
             将字符串转换成半角字符串(DBC Case)
             </summary>
             <param name="input">任意字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToDateTime(System.String)">
             <summary>
             将时间戳转换成时间
             </summary>
             <param name="timeStamp">时间戳格式字符串</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.Repeat(System.String,System.Int32)">
+            <summary>
+            重复指定字符串，根据指定重复次数
+            </summary>
+            <param name="value">值</param>
+            <param name="repeatCount">重复次数</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.ExtractAround(System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            提取指定范围字符串
+            </summary>
+            <param name="value">值</param>
+            <param name="index">索引值</param>
+            <param name="left">左偏移值</param>
+            <param name="right">右偏移值</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.ExtractLettersNumbers(System.String)">
+            <summary>
+            提取字符串中所有字母以及数字
+            </summary>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.ExtractNumbers(System.String)">
+            <summary>
+            提取字符串中所有数字
+            </summary>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.ExtractLetters(System.String)">
+            <summary>
+            提取字符串中所有字母
+            </summary>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.ExtractChinese(System.String)">
+            <summary>
+            提取字符串中所有汉字
+            </summary>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.FilterChars(System.String,System.Predicate{System.Char})">
+            <summary>
+            过滤字符
+            </summary>
+            <param name="value">值</param>
+            <param name="predicate">过滤字符条件</param>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.Remove(System.String,System.Char[])">
             <summary>
@@ -1292,14 +1327,6 @@
             <param name="tag">标签</param>
             <param name="options">选项</param>
             <returns></returns>
-        </member>
-        <member name="M:Bing.Utils.Extensions.StringExtensions.FormatWith(System.String,System.Object[])">
-            <summary>
-            将指定字符串中的格式项替换为指定数组中相应对象的字符串表示形式
-            </summary>
-            <param name="format">字符串格式，占位符以{n}表示</param>
-            <param name="args">用于填充占位符的参数</param>
-            <returns>格式化后的字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ReverseString(System.String)">
             <summary>
@@ -1374,21 +1401,6 @@
             </summary>
             <param name="value">值</param>
             <param name="suffix">后缀</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Utils.Extensions.StringExtensions.Repeat(System.String,System.Int32)">
-            <summary>
-            重复指定字符串，根据指定重复次数
-            </summary>
-            <param name="value">值</param>
-            <param name="repeatCount">重复次数</param>
-            <returns>重复字符串</returns>
-        </member>
-        <member name="M:Bing.Utils.Extensions.StringExtensions.ExtractNumber(System.String)">
-            <summary>
-            提取指定字符串中所有数字
-            </summary>
-            <param name="value">值</param>
             <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ConcatWith(System.String,System.String[])">
@@ -1639,6 +1651,13 @@
             <exception cref="T:System.ArgumentNullException"></exception>
             <exception cref="T:System.ArgumentOutOfRangeException"></exception>
         </member>
+        <member name="M:Bing.Utils.Extensions.StringExtensions.FormatWith(System.String,System.Object[])">
+            <summary>
+            将指定字符串中的格式项替换为指定数组中相应对象的字符串表示形式
+            </summary>
+            <param name="format">字符串格式，占位符以{n}表示</param>
+            <param name="args">用于填充占位符的参数</param>
+        </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.RegexSplit(System.String,System.String,System.Text.RegularExpressions.RegexOptions)">
             <summary>
             根据正则表达式将字符串拆分为字符串数组
@@ -1646,14 +1665,12 @@
             <param name="value">值</param>
             <param name="pattern">正则表达式</param>
             <param name="options">比较规则</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.GetWords(System.String)">
             <summary>
             将给定的字符串拆分为单词并返回一个字符串数组
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.GetWordByIndex(System.String,System.Int32)">
             <summary>
@@ -1661,14 +1678,12 @@
             </summary>
             <param name="value">值</param>
             <param name="index">索引</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.SpaceOnUpper(System.String)">
             <summary>
             在每个大写字母上添加空格
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ReplaceWith(System.String,System.String,System.String)">
             <summary>
@@ -1677,7 +1692,6 @@
             <param name="value">值</param>
             <param name="pattern">正则表达式</param>
             <param name="replaceValue">替换值</param>
-            <returns></returns>
             <example>
             	<code>
             		var s = "12345";
@@ -1693,7 +1707,6 @@
             <param name="pattern">正则表达式</param>
             <param name="replaceValue">替换值</param>
             <param name="options">比较规则</param>
-            <returns></returns>
             <example>
             	<code>
             		var s = "12345";
@@ -1708,7 +1721,6 @@
             <param name="value">值</param>
             <param name="pattern">正则表达式</param>
             <param name="evaluator">替换方法/Lambda表达式</param>
-            <returns></returns>
             <example>
             	<code>
             		var s = "12345";
@@ -1724,7 +1736,6 @@
             <param name="pattern">正则表达式</param>
             <param name="options">比较规则</param>
             <param name="evaluator">替换方法/Lambda表达式</param>
-            <returns></returns>
             <example>
             	<code>
             		var s = "12345";
@@ -1738,7 +1749,6 @@
             </summary>
             <param name="source">url编码字符串</param>
             <param name="encoding">编码格式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.UrlDecode(System.String,System.Text.Encoding)">
             <summary>
@@ -1746,31 +1756,27 @@
             </summary>
             <param name="source">url编码字符串</param>
             <param name="encoding">编码格式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToHtmlSafe(System.String)">
             <summary>
-            Html字符串进行安全编码
+            Html字符串进行安全编码。返回安全的Html字符串
             </summary>
             <param name="value">当前Html字符串实例</param>
-            <returns>安全的Html字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToHtmlSafe(System.String,System.Boolean)">
             <summary>
-            Html字符串进行安全编码
+            Html字符串进行安全编码。返回安全的Html字符串
             </summary>
             <param name="value">当前Html字符串实例</param>
             <param name="all">是否所有字符进行安全编码，或只是部分需要</param>
-            <returns>安全的Html字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ToHtmlSafe(System.String,System.Boolean,System.Boolean)">
             <summary>
-            Html字符串进行安全编码
+            Html字符串进行安全编码。返回安全的Html字符串
             </summary>
             <param name="value">当前Html字符串实例</param>
             <param name="all">是否所有字符进行安全编码，或只是部分需要</param>
             <param name="replace">是否对空格以及换行符进行编码</param>
-            <returns>安全的Html字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.EncodeBase64(System.String,System.Text.Encoding)">
             <summary>
@@ -1778,7 +1784,6 @@
             </summary>
             <param name="value">字符串</param>
             <param name="encoding">编码格式</param>
-            <returns>Base64编码字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.DecodeBase64(System.String,System.Text.Encoding)">
             <summary>
@@ -1786,7 +1791,6 @@
             </summary>
             <param name="value">字符串</param>
             <param name="encoding">编码格式</param>
-            <returns>解码字符串</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.EncryptToBytes(System.String,System.String)">
             <summary>
@@ -1794,7 +1798,6 @@
             </summary>
             <param name="value">值，需要加密的字符串</param>
             <param name="pwd">密匙，使用密匙来加密字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.CryptBytes(System.String,System.Byte[],System.Boolean)">
             <summary>
@@ -1803,7 +1806,6 @@
             <param name="pwd">需要加密或解密的密码字符串</param>
             <param name="bytes">用来加密的字节数组</param>
             <param name="encrypt">true：加密，false：解密</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.MakeKeyAndIv(System.String,System.Byte[],System.Int32,System.Int32,System.Byte[]@,System.Byte[]@)">
             <summary>
@@ -1822,7 +1824,6 @@
             </summary>
             <param name="value">值，要解密的字节数组</param>
             <param name="pwd">密匙，使用密匙来解密字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.EncryptToString(System.String,System.String)">
             <summary>
@@ -1830,7 +1831,6 @@
             </summary>
             <param name="value">值，需要加密的字符串</param>
             <param name="pwd">密匙，使用密匙来加密字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.DecryptFromString(System.String,System.String)">
             <summary>
@@ -1838,7 +1838,6 @@
             </summary>
             <param name="value">值，要解密的字符串</param>
             <param name="pwd">密匙，使用密匙来解密字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.FilterHtml(System.String)">
             <summary>
@@ -1851,7 +1850,6 @@
             判断指定路径是否图片文件
             </summary>
             <param name="fileName">文件名</param>
-            <returns>结果</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.IsLikeAny(System.String,System.String[])">
             <summary>
@@ -1859,7 +1857,6 @@
             </summary>
             <param name="value">值</param>
             <param name="patterns">模式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.IsLike(System.String,System.String)">
             <summary>
@@ -1867,7 +1864,6 @@
             </summary>
             <param name="value">值</param>
             <param name="pattern">模式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.IsItemInEnum``1(System.String)">
             <summary>
@@ -1875,7 +1871,6 @@
             </summary>
             <typeparam name="TEnum">泛型枚举</typeparam>
             <param name="value">匹配的枚举</param>
-            <returns>匿名方法条件</returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.IsRangeLength(System.String,System.Int32,System.Int32)">
             <summary>
@@ -1884,7 +1879,6 @@
             <param name="source">源字符串</param>
             <param name="minLength">最小长度</param>
             <param name="maxLength">最大长度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.EqualsAny(System.String,System.StringComparison,System.String[])">
             <summary>
@@ -1893,7 +1887,6 @@
             <param name="value">值</param>
             <param name="comparisonType">区域性比较</param>
             <param name="values">提供的值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.EquivalentTo(System.String,System.String,System.StringComparison)">
             <summary>
@@ -1902,7 +1895,6 @@
             <param name="value">值</param>
             <param name="whateverCaseString">比较字符串</param>
             <param name="comparison">区域性</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.Contains(System.String,System.String,System.StringComparison)">
             <summary>
@@ -1911,7 +1903,6 @@
             <param name="inputValue">输入字符串</param>
             <param name="comparisonValue">包含字符串</param>
             <param name="comparisonType">区域</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ContainsEquivalenceTo(System.String,System.String)">
             <summary>
@@ -1919,7 +1910,6 @@
             </summary>
             <param name="inputValue">输入字符串</param>
             <param name="comparisonValue">指定字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.BothStringsAreEmpty(System.String,System.String)">
             <summary>
@@ -1927,7 +1917,6 @@
             </summary>
             <param name="inputValue">字符串1</param>
             <param name="comparisonValue">字符串2</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.StringContainsEquivalence(System.String,System.String)">
             <summary>
@@ -1935,7 +1924,6 @@
             </summary>
             <param name="inputValue">输入字符串</param>
             <param name="comparisonValue">指定字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ContainsAny(System.String,System.String[])">
             <summary>
@@ -1943,7 +1931,6 @@
             </summary>
             <param name="value">值</param>
             <param name="values">提供的值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ContainsAny(System.String,System.StringComparison,System.String[])">
             <summary>
@@ -1952,7 +1939,6 @@
             <param name="value">值</param>
             <param name="comparisonType">区域性比较</param>
             <param name="values">提供的值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ContainsAll(System.String,System.String[])">
             <summary>
@@ -1960,7 +1946,6 @@
             </summary>
             <param name="value">值</param>
             <param name="values">提供的值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.StringExtensions.ContainsAll(System.String,System.StringComparison,System.String[])">
             <summary>
@@ -1969,7 +1954,6 @@
             <param name="value">值</param>
             <param name="comparisonType">区域性比较</param>
             <param name="values">提供的值</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Extensions.ArrayExtensions">
             <summary>
@@ -2660,7 +2644,6 @@
             </summary>
             <typeparam name="T">数据类型</typeparam>
             <param name="value">可空值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Value(System.Enum)">
             <summary>

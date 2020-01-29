@@ -1,12 +1,12 @@
 ﻿namespace Bing.Domains.Entities
 {
     /// <summary>
-    /// 数据锁定
+    /// 是否已锁定
     /// </summary>
     public interface ILockable
     {
         /// <summary>
-        /// 是否锁定当前信息
+        /// 是否已锁定
         /// </summary>
         bool IsLocked { get; set; }
     }

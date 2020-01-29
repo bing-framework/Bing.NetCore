@@ -21,13 +21,10 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="source">url编码字符串</param>
         /// <param name="encoding">编码格式</param>
-        /// <returns></returns>
         public static string UrlEncode(this string source, Encoding encoding = null)
         {
             if (encoding == null)
-            {
                 encoding = Encoding.UTF8;
-            }
             return HttpUtility.UrlEncode(source, encoding);
         }
 
@@ -40,13 +37,10 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="source">url编码字符串</param>
         /// <param name="encoding">编码格式</param>
-        /// <returns></returns>
         public static string UrlDecode(this string source, Encoding encoding = null)
         {
             if (encoding == null)
-            {
                 encoding = Encoding.UTF8;
-            }
             return HttpUtility.UrlDecode(source, encoding);
         }
 
@@ -55,39 +49,28 @@ namespace Bing.Utils.Extensions
         #region ToHtmlSafe(Html字符串进行安全编码)
 
         /// <summary>
-        /// Html字符串进行安全编码
+        /// Html字符串进行安全编码。返回安全的Html字符串
         /// </summary>
         /// <param name="value">当前Html字符串实例</param>
-        /// <returns>安全的Html字符串</returns>
-        public static string ToHtmlSafe(this string value)
-        {
-            return value.ToHtmlSafe(false, false);
-        }
+        public static string ToHtmlSafe(this string value) => value.ToHtmlSafe(false, false);
 
         /// <summary>
-        /// Html字符串进行安全编码
+        /// Html字符串进行安全编码。返回安全的Html字符串
         /// </summary>
         /// <param name="value">当前Html字符串实例</param>
         /// <param name="all">是否所有字符进行安全编码，或只是部分需要</param>
-        /// <returns>安全的Html字符串</returns>
-        public static string ToHtmlSafe(this string value, bool all)
-        {
-            return value.ToHtmlSafe(all, false);
-        }
+        public static string ToHtmlSafe(this string value, bool all) => value.ToHtmlSafe(all, false);
 
         /// <summary>
-        /// Html字符串进行安全编码
+        /// Html字符串进行安全编码。返回安全的Html字符串
         /// </summary>
         /// <param name="value">当前Html字符串实例</param>
         /// <param name="all">是否所有字符进行安全编码，或只是部分需要</param>
         /// <param name="replace">是否对空格以及换行符进行编码</param>
-        /// <returns>安全的Html字符串</returns>
         public static string ToHtmlSafe(this string value, bool all, bool replace)
         {
             if (value.IsEmpty())
-            {
                 return string.Empty;
-            }
             var entities = new[]
             {
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29,
@@ -105,17 +88,13 @@ namespace Bing.Utils.Extensions
                 8218, 8220, 8221, 8222, 8224, 8225, 8226, 8230, 8240, 8242, 8243, 8249, 8250, 8254, 8364, 8482, 8592,
                 8593, 8594, 8595, 8596, 8629, 8968, 8969, 8970, 8971, 9674, 9824, 9827, 9829, 9830
             };
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             foreach (var item in value)
             {
                 if (all || entities.Contains(item))
-                {
                     sb.Append("&#" + ((int)item) + ";");
-                }
                 else
-                {
                     sb.Append(item);
-                }
             }
             return replace
                 ? sb.Replace("", "<br />").Replace("\n", "<br />").Replace(" ", "&nbsp;").ToString()
@@ -131,10 +110,9 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">字符串</param>
         /// <param name="encoding">编码格式</param>
-        /// <returns>Base64编码字符串</returns>
         public static string EncodeBase64(this string value, Encoding encoding = null)
         {
-            encoding = (encoding ?? Encoding.UTF8);
+            encoding = encoding ?? Encoding.UTF8;
             var bytes = encoding.GetBytes(value);
             return Convert.ToBase64String(bytes);
         }
@@ -148,10 +126,9 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">字符串</param>
         /// <param name="encoding">编码格式</param>
-        /// <returns>解码字符串</returns>
         public static string DecodeBase64(this string value, Encoding encoding = null)
         {
-            encoding = (encoding ?? Encoding.UTF8);
+            encoding = encoding ?? Encoding.UTF8;
             var bytes = Convert.FromBase64String(value);
             return encoding.GetString(bytes);
         }
@@ -165,7 +142,6 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">值，需要加密的字符串</param>
         /// <param name="pwd">密匙，使用密匙来加密字符串</param>
-        /// <returns></returns>
         public static byte[] EncryptToBytes(this string value, string pwd)
         {
             var asciiEncoder = new ASCIIEncoding();
@@ -179,7 +155,6 @@ namespace Bing.Utils.Extensions
         /// <param name="pwd">需要加密或解密的密码字符串</param>
         /// <param name="bytes">用来加密的字节数组</param>
         /// <param name="encrypt">true：加密，false：解密</param>
-        /// <returns></returns>
         private static byte[] CryptBytes(string pwd, byte[] bytes, bool encrypt)
         {
             //第三方加密服务商
@@ -205,7 +180,7 @@ namespace Bing.Utils.Extensions
             };
             MakeKeyAndIv(pwd, salt, keySizeBits, blockSizeBits, ref key, ref iv);
             //进行加密或解密
-            ICryptoTransform cryptoTransform = encrypt
+            var cryptoTransform = encrypt
                 ? desProvider.CreateEncryptor(key, iv)
                 : desProvider.CreateDecryptor(key, iv);
             //创建输出流
@@ -263,7 +238,6 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">值，要解密的字节数组</param>
         /// <param name="pwd">密匙，使用密匙来解密字符串</param>
-        /// <returns></returns>
         public static string DecryptFromBytes(this byte[] value, string pwd)
         {
             byte[] bytes = CryptBytes(pwd, value, false);
@@ -280,11 +254,7 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">值，需要加密的字符串</param>
         /// <param name="pwd">密匙，使用密匙来加密字符串</param>
-        /// <returns></returns>
-        public static string EncryptToString(this string value, string pwd)
-        {
-            return value.EncryptToBytes(pwd).ToString();
-        }
+        public static string EncryptToString(this string value, string pwd) => value.EncryptToBytes(pwd).ToString();
 
         #endregion
 
@@ -295,7 +265,6 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">值，要解密的字符串</param>
         /// <param name="pwd">密匙，使用密匙来解密字符串</param>
-        /// <returns></returns>
         public static string DecryptFromString(this string value, string pwd)
         {
             var asciiEncoder = new ASCIIEncoding();
@@ -330,5 +299,6 @@ namespace Bing.Utils.Extensions
         }
 
         #endregion
+
     }
 }

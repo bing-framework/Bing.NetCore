@@ -24,10 +24,9 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">字符串</param>
         /// <param name="encoding">编码格式</param>
-        /// <returns>byte[]数组</returns>
         public static byte[] ToBytes(this string value, Encoding encoding = null)
         {
-            encoding = (encoding ?? Encoding.UTF8);
+            encoding = encoding ?? Encoding.UTF8;
             return encoding.GetBytes(value);
         }
 
@@ -39,11 +38,7 @@ namespace Bing.Utils.Extensions
         /// 字符串转为XDocument（Linq to Xml Dom）
         /// </summary>
         /// <param name="xml">xml字符串</param>
-        /// <returns></returns>
-        public static XDocument ToXDocument(this string xml)
-        {
-            return XDocument.Parse(xml);
-        }
+        public static XDocument ToXDocument(this string xml) => XDocument.Parse(xml);
 
         #endregion
 
@@ -53,11 +48,7 @@ namespace Bing.Utils.Extensions
         /// 字符串转为XElement对象（Linq to Xml XElement）
         /// </summary>
         /// <param name="xml">xml字符串</param>
-        /// <returns></returns>
-        public static XElement ToXElement(this string xml)
-        {
-            return XElement.Parse(xml);
-        }
+        public static XElement ToXElement(this string xml) => XElement.Parse(xml);
 
         #endregion
 
@@ -67,12 +58,11 @@ namespace Bing.Utils.Extensions
         /// 字符串转为XmlDocument对象（Xml Dom）
         /// </summary>
         /// <param name="xml">xml字符串</param>
-        /// <returns></returns>
         public static XmlDocument ToXmlDocument(this string xml)
         {
-            var documnet = new XmlDocument();
-            documnet.LoadXml(xml);
-            return documnet;
+            var document = new XmlDocument();
+            document.LoadXml(xml);
+            return document;
         }
 
         #endregion
@@ -83,11 +73,10 @@ namespace Bing.Utils.Extensions
         /// 字符串转为XmlPathDom对象（Xml XPath Dom）
         /// </summary>
         /// <param name="xml">xml字符串</param>
-        /// <returns></returns>
         public static XPathNavigator ToXPath(this string xml)
         {
-            var documnet = new XPathDocument(new StringReader(xml));
-            return documnet.CreateNavigator();
+            var document = new XPathDocument(new StringReader(xml));
+            return document.CreateNavigator();
         }
 
         #endregion        
@@ -98,16 +87,13 @@ namespace Bing.Utils.Extensions
         /// 16进制字符串转换为字节数组
         /// </summary>
         /// <param name="value">16进制字符串</param>
-        /// <returns>字节数组</returns>
         public static byte[] HexStringToBytes(this string value)
         {
             value = value.Replace(" ", "");
-            int maxByte = value.Length / 2 - 1;
+            var maxByte = value.Length / 2 - 1;
             var bytes = new byte[maxByte + 1];
-            for (int i = 0; i <= maxByte; i++)
-            {
+            for (var i = 0; i <= maxByte; i++)
                 bytes[i] = byte.Parse(value.Substring(2 * i, 2), NumberStyles.AllowHexSpecifier);
-            }
             return bytes;
         }
 
@@ -119,14 +105,11 @@ namespace Bing.Utils.Extensions
         /// 转换成Unicode字符串
         /// </summary>
         /// <param name="source">源字符串</param>
-        /// <returns></returns>
         public static string ToUnicodeString(this string source)
         {
             string outString = "";
             if (!string.IsNullOrEmpty(source))
-            {
                 outString = source.Aggregate(outString, (current, t) => current + (@"\u" + ((int)t).ToString("x").ToUpper()));
-            }
             return outString;
         }
 
@@ -139,22 +122,15 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="value">普通字符串</param>
         /// <param name="markReadOnly">是否只读</param>
-        /// <returns>安全字符串</returns>
         public static SecureString ToSecureString(this string value, bool markReadOnly = true)
         {
-            if (value.IsEmpty())
-            {
+            if (string.IsNullOrWhiteSpace(value))
                 return null;
-            }
-            SecureString temp = new SecureString();
-            foreach (char c in value)
-            {
+            var temp = new SecureString();
+            foreach (var c in value)
                 temp.AppendChar(c);
-            }
             if (markReadOnly)
-            {
                 temp.MakeReadOnly();
-            }
             return temp;
         }
 
@@ -166,14 +142,11 @@ namespace Bing.Utils.Extensions
         /// 将安全字符串转为普通字符串
         /// </summary>
         /// <param name="value">安全字符串</param>
-        /// <returns>普通字符串</returns>
         public static string ToUnSecureString(this SecureString value)
         {
             if (ReferenceEquals(value, null))
-            {
                 return null;
-            }
-            IntPtr unmanagedString = IntPtr.Zero;
+            var unmanagedString = IntPtr.Zero;
             try
             {
                 unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(value);
@@ -193,11 +166,10 @@ namespace Bing.Utils.Extensions
         /// 将字符串转换成全角字符串(SBC Case)
         /// </summary>
         /// <param name="input">任意字符串</param>
-        /// <returns></returns>
         public static string ToSbcCase(this string input)
         {
-            char[] c = input.ToCharArray();
-            for (int i = 0; i < c.Length; i++)
+            var c = input.ToCharArray();
+            for (var i = 0; i < c.Length; i++)
             {
                 if (c[i] == 32)
                 {
@@ -220,11 +192,10 @@ namespace Bing.Utils.Extensions
         /// 将字符串转换成半角字符串(DBC Case)
         /// </summary>
         /// <param name="input">任意字符串</param>
-        /// <returns></returns>
         public static string ToDbcCase(this string input)
         {
-            char[] c = input.ToCharArray();
-            for (int i = 0; i < c.Length; i++)
+            var c = input.ToCharArray();
+            for (var i = 0; i < c.Length; i++)
             {
                 if (c[i] == 12288)
                 {
@@ -247,16 +218,13 @@ namespace Bing.Utils.Extensions
         /// 将时间戳转换成时间
         /// </summary>
         /// <param name="timeStamp">时间戳格式字符串</param>
-        /// <returns></returns>
         public static DateTime ToDateTime(this string timeStamp)
         {
             if (timeStamp.Length > 10)
-            {
                 timeStamp = timeStamp.Substring(0, 10);
-            }
-            DateTime dateTimeStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            long lIime = long.Parse(timeStamp + "0000000");
-            TimeSpan toNow = new TimeSpan(lIime);
+            var dateTimeStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            var lIime = long.Parse(timeStamp + "0000000");
+            var toNow = new TimeSpan(lIime);
             return dateTimeStart.Add(toNow);
         }
 

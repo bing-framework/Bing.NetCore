@@ -1,4 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
+﻿using System.Globalization;
+
+// ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
 {
     /// <summary>
@@ -6,5 +8,19 @@ namespace Bing.Utils.Extensions
     /// </summary>
     public static partial class StringExtensions
     {
+        #region FormatWith(格式化填充)
+
+        /// <summary>
+        /// 将指定字符串中的格式项替换为指定数组中相应对象的字符串表示形式
+        /// </summary>
+        /// <param name="format">字符串格式，占位符以{n}表示</param>
+        /// <param name="args">用于填充占位符的参数</param>
+        public static string FormatWith(this string format, params object[] args)
+        {
+            format.CheckNotNull("format");
+            return string.Format(CultureInfo.CurrentCulture, format, args);
+        }
+
+        #endregion
     }
 }

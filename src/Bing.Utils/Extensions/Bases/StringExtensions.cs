@@ -11,10 +11,126 @@ using Enum = System.Enum;
 namespace Bing.Utils.Extensions
 {
     /// <summary>
-    /// 字符串(<see cref="string"/>) 扩展
+    /// 字符串(<see cref="string"/>) 扩展 - 操作
     /// </summary>
     public static partial class StringExtensions
     {
+        #region Repeat(重复指定字符串)
+
+        /// <summary>
+        /// 重复指定字符串，根据指定重复次数
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="repeatCount">重复次数</param>
+        public static string Repeat(this string value, int repeatCount)
+        {
+            if (string.IsNullOrEmpty(value) || repeatCount == 0)
+                return string.Empty;
+            if (value.Length == 1)
+                return new string(value[0], repeatCount);
+            switch (repeatCount)
+            {
+                case 1:
+                    return value;
+                case 2:
+                    return string.Concat(value, value);
+                case 3:
+                    return string.Concat(value, value, value);
+                case 4:
+                    return string.Concat(value, value, value, value);
+            }
+            var sb = new StringBuilder(value.Length * repeatCount);
+            while (repeatCount-- > 0)
+                sb.Append(value);
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region ExtractAround(提取指定范围字符串)
+
+        /// <summary>
+        /// 提取指定范围字符串
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="index">索引值</param>
+        /// <param name="left">左偏移值</param>
+        /// <param name="right">右偏移值</param>
+        public static string ExtractAround(this string value, int index, int left, int right)
+        {
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+            if(index>=value.Length)
+                throw new IndexOutOfRangeException("参数索引值超出字符串的最大长度");
+            var startIndex = Math.Max(0, index - left);
+            var length = Math.Min(value.Length - startIndex, index - startIndex + right);
+            return value.Substring(startIndex, length);
+        }
+
+        #endregion
+
+        #region ExtractLettersNumbers(提取字符串中所有字母以及数字)
+
+        /// <summary>
+        /// 提取字符串中所有字母以及数字
+        /// </summary>
+        /// <param name="value">值</param>
+        public static string ExtractLettersNumbers(this string value) => value.Where(x=> !x.IsChinese() && char.IsLetterOrDigit(x))
+            .Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c))
+            .ToString();
+
+        #endregion
+
+        #region ExtractNumber(提取字符串中所有数字)
+
+        /// <summary>
+        /// 提取字符串中所有数字
+        /// </summary>
+        /// <param name="value">值</param>
+        public static string ExtractNumbers(this string value) => value.Where(char.IsDigit)
+            .Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c))
+            .ToString();
+
+        #endregion
+
+        #region ExtractLetters(提取字符串中所有字母)
+
+        /// <summary>
+        /// 提取字符串中所有字母
+        /// </summary>
+        /// <param name="value">值</param>
+        public static string ExtractLetters(this string value) => value.Where(x => !x.IsChinese() && char.IsLetter(x))
+            .Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c))
+            .ToString();
+
+        #endregion
+
+        #region ExtractChinese(提取字符串中所有汉字)
+
+        /// <summary>
+        /// 提取字符串中所有汉字
+        /// </summary>
+        /// <param name="value">值</param>
+        public static string ExtractChinese(this string value) => value.Where(x => x.IsChinese())
+            .Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c))
+            .ToString();
+
+        #endregion
+
+        #region FilterChars(过滤字符)
+
+        /// <summary>
+        /// 过滤字符
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="predicate">过滤字符条件</param>
+        public static string FilterChars(this string value, Predicate<char> predicate) =>
+            value.Where(x => predicate(x))
+                .Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c))
+                .ToString();
+
+        #endregion
+
         #region Remove(移除字符串)
         /// <summary>
         /// 从当前字符串中移除任何指定的字符
@@ -117,20 +233,6 @@ namespace Bing.Utils.Extensions
                 return string.Empty;
             }
             return tag.IsEmpty() ? str : Regex.Replace(str, tag, "", options);
-        }
-        #endregion
-
-        #region FormatWith(格式化填充)
-        /// <summary>
-        /// 将指定字符串中的格式项替换为指定数组中相应对象的字符串表示形式
-        /// </summary>
-        /// <param name="format">字符串格式，占位符以{n}表示</param>
-        /// <param name="args">用于填充占位符的参数</param>
-        /// <returns>格式化后的字符串</returns>
-        public static string FormatWith(this string format, params object[] args)
-        {
-            format.CheckNotNull("format");
-            return string.Format(CultureInfo.CurrentCulture, format, args);
         }
         #endregion
 
@@ -283,41 +385,6 @@ namespace Bing.Utils.Extensions
         public static string EnsureEndWith(this string value, string suffix)
         {
             return value.EndsWith(suffix) ? value : string.Concat(value, suffix);
-        }
-        #endregion
-
-        #region Repeat(重复指定字符串)
-        /// <summary>
-        /// 重复指定字符串，根据指定重复次数
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="repeatCount">重复次数</param>
-        /// <returns>重复字符串</returns>
-        public static string Repeat(this string value, int repeatCount)
-        {
-            if (value.Length == 1)
-            {
-                return new string(value[0], repeatCount);
-            }
-            StringBuilder sb = new StringBuilder(repeatCount * value.Length);
-            while (repeatCount-- > 0)
-            {
-                sb.Append(value);
-            }
-            return sb.ToString();
-        }
-        #endregion
-
-        #region ExtractNumber(提取字符串中所有数字)
-        /// <summary>
-        /// 提取指定字符串中所有数字
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public static string ExtractNumber(this string value)
-        {
-            return
-                value.Where(Char.IsDigit).Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c)).ToString();
         }
         #endregion
 

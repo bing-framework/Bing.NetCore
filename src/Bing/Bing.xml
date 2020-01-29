@@ -10910,6 +10910,101 @@
             树型查询参数
             </summary>
         </member>
+        <member name="T:Bing.DependencyInjection.ConventionalRegistrarBase">
+            <summary>
+            通用注册器基类
+            </summary>
+        </member>
+        <member name="M:Bing.DependencyInjection.ConventionalRegistrarBase.AddAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Reflection.Assembly)">
+            <summary>
+            添加程序集
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="assembly">程序集</param>
+        </member>
+        <member name="M:Bing.DependencyInjection.ConventionalRegistrarBase.AddTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Type[])">
+            <summary>
+            添加类型数组
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="types">类型数组</param>
+        </member>
+        <member name="M:Bing.DependencyInjection.ConventionalRegistrarBase.AddType(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Type)">
+            <summary>
+            添加类型
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="type">类型</param>
+        </member>
+        <member name="T:Bing.DependencyInjection.IConventionalRegistrar">
+            <summary>
+            通用注册器
+            </summary>
+        </member>
+        <member name="M:Bing.DependencyInjection.IConventionalRegistrar.AddAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Reflection.Assembly)">
+            <summary>
+            添加程序集
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="assembly">程序集</param>
+        </member>
+        <member name="M:Bing.DependencyInjection.IConventionalRegistrar.AddTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Type[])">
+            <summary>
+            添加类型数组
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="types">类型数组</param>
+        </member>
+        <member name="M:Bing.DependencyInjection.IConventionalRegistrar.AddType(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Type)">
+            <summary>
+            添加类型
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="type">类型</param>
+        </member>
+        <member name="T:Bing.DependencyInjection.IObjectAccessor`1">
+            <summary>
+            对象访问器
+            </summary>
+            <typeparam name="T">类型</typeparam>
+        </member>
+        <member name="P:Bing.DependencyInjection.IObjectAccessor`1.Value">
+            <summary>
+            值
+            </summary>
+        </member>
+        <member name="T:Bing.DependencyInjection.IServiceProviderAccessor">
+            <summary>
+            服务提供程序访问器
+            </summary>
+        </member>
+        <member name="P:Bing.DependencyInjection.IServiceProviderAccessor.ServiceProvider">
+            <summary>
+            服务提供程序
+            </summary>
+        </member>
+        <member name="T:Bing.DependencyInjection.ObjectAccessor`1">
+            <summary>
+            对象访问器
+            </summary>
+            <typeparam name="T">类型</typeparam>
+        </member>
+        <member name="P:Bing.DependencyInjection.ObjectAccessor`1.Value">
+            <summary>
+            值
+            </summary>
+        </member>
+        <member name="M:Bing.DependencyInjection.ObjectAccessor`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.DependencyInjection.ObjectAccessor`1"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.DependencyInjection.ObjectAccessor`1.#ctor(`0)">
+            <summary>
+            初始化一个<see cref="T:Bing.DependencyInjection.ObjectAccessor`1"/>类型的实例
+            </summary>
+            <param name="value">值</param>
+        </member>
         <member name="T:Bing.Dependency.DefaultServiceScopeFactory">
             <summary>
             默认<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScope"/>工厂，行为和<see cref="T:Microsoft.Extensions.DependencyInjection.IServiceScopeFactory"/>一样
@@ -11733,6 +11828,213 @@
             释放资源
             </summary>
         </member>
+        <member name="T:Bing.Domains.ChangeTracking.ChangedValueDescriptor">
+            <summary>
+            变更值
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptor.#ctor(System.String,System.String,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.ChangeTracking.ChangedValueDescriptor"/>类型的实例
+            </summary>
+            <param name="propertyName">属性名</param>
+            <param name="description">描述</param>
+            <param name="oldValue">旧值</param>
+            <param name="newValue">新值</param>
+        </member>
+        <member name="P:Bing.Domains.ChangeTracking.ChangedValueDescriptor.PropertyName">
+            <summary>
+            属性名
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.ChangeTracking.ChangedValueDescriptor.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.ChangeTracking.ChangedValueDescriptor.OldValue">
+            <summary>
+            旧值
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.ChangeTracking.ChangedValueDescriptor.NewValue">
+            <summary>
+            新值
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptor.ToString">
+            <summary>
+            输出变更信息
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection">
+            <summary>
+            变更值集合
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection._list">
+            <summary>
+            变更值列表
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection._changedNameList">
+            <summary>
+            变更值名称列表
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.#ctor(Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection"/>类型的实例
+            </summary>
+            <param name="descriptors">变更值描述符集合</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.GetEnumerator">
+            <summary>
+            获取迭代器
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            获取迭代器
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.Add(Bing.Domains.ChangeTracking.ChangedValueDescriptor)">
+            <summary>
+            添加
+            </summary>
+            <param name="descriptor">变更值描述符</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.Add(System.String,System.String,System.String,System.String)">
+            <summary>
+            添加
+            </summary>
+            <param name="propertyName">属性名</param>
+            <param name="description">描述</param>
+            <param name="oldValue">旧值</param>
+            <param name="newValue">新值</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.AddRange(System.Collections.Generic.IEnumerable{Bing.Domains.ChangeTracking.ChangedValueDescriptor})">
+            <summary>
+            添加集合
+            </summary>
+            <param name="descriptors">变更值描述符集合</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.Populate(System.Collections.Generic.IEnumerable{Bing.Domains.ChangeTracking.ChangedValueDescriptor})">
+            <summary>
+            填充
+            </summary>
+            <param name="descriptors">变更值描述符集合</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.FlushCache">
+            <summary>
+            刷新缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection.ToString">
+            <summary>
+            输出变更信息
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.ChangeTracking.ChangeTrackingContext">
+            <summary>
+            变更跟踪上下文
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.ChangeTracking.ChangeTrackingContext._changedValueCollection">
+            <summary>
+            变更值集合
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.ChangeTracking.ChangeTrackingContext"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.#ctor(Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.ChangeTracking.ChangeTrackingContext"/>类型的实例
+            </summary>
+            <param name="collection">变更值集合</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.Add``1(System.String,System.String,``0,``0)">
+            <summary>
+            添加
+            </summary>
+            <typeparam name="TValue">值类型</typeparam>
+            <param name="propertyName">属性名</param>
+            <param name="description">描述</param>
+            <param name="valueBeforeChange">变更前的值。范例：this.Name</param>
+            <param name="valueAfterChange">变更后的值。范例：newEntity.Name</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.Add``1(Bing.Domains.ChangeTracking.IChangeTrackable{``0},``0)">
+            <summary>
+            添加
+            </summary>
+            <typeparam name="TObject">领域对象类型</typeparam>
+            <param name="leftObj">左对象</param>
+            <param name="rightObj">右对象</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.Add``3(System.Linq.Expressions.Expression{System.Func{``0,``1}},``2)">
+            <summary>
+            添加
+            </summary>
+            <typeparam name="TObject">领域对象类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+            <param name="expression">属性表达式。范例：t => t.Name</param>
+            <param name="newValue">新值。范例：newEntity.Name</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.Add``1(System.Collections.Generic.IEnumerable{Bing.Domains.ChangeTracking.IChangeTrackable{``0}},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            添加
+            </summary>
+            <typeparam name="TObject">领域对象类型</typeparam>
+            <param name="leftObjs">左对象列表</param>
+            <param name="rightObjs">右对象列表</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.Populate(Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection)">
+            <summary>
+            填充
+            </summary>
+            <param name="collection">变更值集合</param>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.FlushCache">
+            <summary>
+            刷新缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.GetChangedValueDescriptor">
+            <summary>
+            获取变更值集合
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.Output">
+            <summary>
+            输出
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.ChangeTrackingContext.ToString">
+            <summary>
+            输出字符串
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.ChangeTracking.IChangeTrackable`1">
+            <summary>
+            变更跟踪
+            </summary>
+            <typeparam name="TObject"></typeparam>
+        </member>
+        <member name="M:Bing.Domains.ChangeTracking.IChangeTrackable`1.GetChanges(`0)">
+            <summary>
+            获取变更值集合
+            </summary>
+            <param name="otherObj">其它对象</param>
+        </member>
         <member name="T:Bing.Domains.Entities.AggregateRoot`2">
             <summary>
             聚合根
@@ -11762,6 +12064,12 @@
             初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`1"/>类型的实例
             </summary>
             <param name="id">标识</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.DomainObjectBase`1">
+            <summary>
+            领域对象基类
+            </summary>
+            <typeparam name="TObject">领域对象</typeparam>
         </member>
         <member name="T:Bing.Domains.Entities.EntityBase`1">
             <summary>
@@ -11875,7 +12183,12 @@
         </member>
         <member name="P:Bing.Domains.Entities.IDelete.IsDeleted">
             <summary>
-            是否删除
+            是否已删除
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.IDomainObject">
+            <summary>
+            领域对象
             </summary>
         </member>
         <member name="T:Bing.Domains.Entities.IEntity">
@@ -11901,6 +12214,54 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <typeparam name="TKey">标识类型</typeparam>
         </member>
+        <member name="T:Bing.Domains.Entities.IExpirable">
+            <summary>
+            有效期
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.IExpirable.ExpireLimitedFromTime">
+            <summary>
+            有效期 - 开始时间
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.IExpirable.ExpireLimitedToTime">
+            <summary>
+            有效期 - 结束时间
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsStart">
+            <summary>
+            是否开始
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsStart(System.DateTime)">
+            <summary>
+            是否开始
+            </summary>
+            <param name="targetTime">目标时间</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsExpired">
+            <summary>
+            是否已过期
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsExpired(System.DateTime)">
+            <summary>
+            是否已过期
+            </summary>
+            <param name="targetTime">目标时间</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsActive">
+            <summary>
+            是否生效
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsActive(System.DateTime)">
+            <summary>
+            是否生效
+            </summary>
+            <param name="targetTime">目标时间</param>
+        </member>
         <member name="T:Bing.Domains.Entities.IKey`1">
             <summary>
             标识
@@ -11910,6 +12271,16 @@
         <member name="P:Bing.Domains.Entities.IKey`1.Id">
             <summary>
             标识
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.ILockable">
+            <summary>
+            是否已锁定
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.ILockable.IsLocked">
+            <summary>
+            是否已锁定
             </summary>
         </member>
         <member name="T:Bing.Domains.Entities.IVersion">
@@ -12590,40 +12961,10 @@
             </summary>
             <param name="other">其它领域对象</param>
         </member>
-        <member name="T:Bing.Domains.Entities.IDomainObject">
-            <summary>
-            领域对象
-            </summary>
-        </member>
         <member name="T:Bing.Domains.Entities.IEntityHash">
             <summary>
             实体Hash。对实体的属性值进行Hash，确定实体是否存在变化。
             这些变化可用于系统初始化时确定是否需要进行数据同步
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.IExpirable">
-            <summary>
-            有效时间
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.IExpirable.BeginTime">
-            <summary>
-            生效时间
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.IExpirable.EndTime">
-            <summary>
-            过期时间
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.ILockable">
-            <summary>
-            数据锁定
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.ILockable.IsLocked">
-            <summary>
-            是否锁定当前信息
             </summary>
         </member>
         <member name="T:Bing.Domains.Entities.KeyListComparator`1">
@@ -13907,6 +14248,27 @@
             <param name="level">日志级别</param>
             <returns></returns>
         </member>
+        <member name="T:Bing.Localization.LocalizationContext">
+            <summary>
+            本地化上下文
+            </summary>
+        </member>
+        <member name="P:Bing.Localization.LocalizationContext.ServiceProvider">
+            <summary>
+            服务提供程序
+            </summary>
+        </member>
+        <member name="P:Bing.Localization.LocalizationContext.LocalizerFactory">
+            <summary>
+            本地化工厂
+            </summary>
+        </member>
+        <member name="M:Bing.Localization.LocalizationContext.#ctor(System.IServiceProvider)">
+            <summary>
+            初始化一个<see cref="T:Bing.Localization.LocalizationContext"/>类型的实例
+            </summary>
+            <param name="serviceProvider">服务提供程序</param>
+        </member>
         <member name="T:Bing.Mapping.IMapper">
             <summary>
             对象映射
@@ -14016,6 +14378,198 @@
             释放资源
             </summary>
         </member>
+        <member name="T:Bing.Reflections.AssemblyHelper">
+            <summary>
+            程序集操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.AssemblyHelper.LoadAssemblies(System.String,System.IO.SearchOption)">
+            <summary>
+            加载程序集列表
+            </summary>
+            <param name="folderPath">目录路径</param>
+            <param name="searchOption">查询选项</param>
+        </member>
+        <member name="M:Bing.Reflections.AssemblyHelper.GetAssemblyFiles(System.String,System.IO.SearchOption)">
+            <summary>
+            获取程序集文件列表
+            </summary>
+            <param name="folderPath">目录路径</param>
+            <param name="searchOption">查询选项</param>
+        </member>
+        <member name="M:Bing.Reflections.AssemblyHelper.GetAllTypes(System.Reflection.Assembly)">
+            <summary>
+            获取程序集中所有类型
+            </summary>
+            <param name="assembly">程序集</param>
+        </member>
+        <member name="T:Bing.Reflections.AppDomainAllAssemblyFinder">
+            <summary>
+            应用程序目录程序集查找器
+            </summary>
+        </member>
+        <member name="F:Bing.Reflections.AppDomainAllAssemblyFinder.SkipAssemblies">
+            <summary>
+            跳过的程序集
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.FindAllItems">
+            <summary>
+            重写已实现所有项的查找
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.LoadAssemblies(System.String)">
+            <summary>
+            加载程序集到当前应用程序域
+            </summary>
+            <param name="path">目录绝对路径</param>
+        </member>
+        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.Match(System.String)">
+            <summary>
+            程序集是否匹配
+            </summary>
+            <param name="assemblyName">程序集名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.LoadAssemblyToAppDomain(System.String)">
+            <summary>
+            将程序集添加到当前应用程序域
+            </summary>
+            <param name="file">程序集文件</param>
+        </member>
+        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.GetAssembliesFromCurrentAppDomain">
+            <summary>
+            从当前应用程序域获取程序集列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.Match(System.Reflection.Assembly)">
+            <summary>
+            程序集是否匹配
+            </summary>
+            <param name="assembly">程序集</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Reflections.BaseTypeFinderBase`1">
+            <summary>
+            指定基类的实现类型查找器基类
+            </summary>
+            <typeparam name="TBaseType">要查找类型的基类</typeparam>
+        </member>
+        <member name="F:Bing.Reflections.BaseTypeFinderBase`1._allAssemblyFinder">
+            <summary>
+            所有程序集查找器
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.#ctor(Bing.Reflections.IAllAssemblyFinder)">
+            <summary>
+            初始化一个<see cref="T:Bing.Reflections.BaseTypeFinderBase`1"/>类型的实例
+            </summary>
+            <param name="allAssemblyFinder">所有程序集查找器</param>
+        </member>
+        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.FindAllItems">
+            <summary>
+            重写已实现所有项的查找
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.Find``1(System.Collections.Generic.List{System.Reflection.Assembly})">
+            <summary>
+            查找类型列表
+            </summary>
+            <typeparam name="T">查找类型</typeparam>
+            <param name="assemblies">在指定的程序集列表中查找</param>
+        </member>
+        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.Find(System.Type,System.Collections.Generic.List{System.Reflection.Assembly})">
+            <summary>
+            查找类型列表
+            </summary>
+            <param name="findType">查找类型</param>
+            <param name="assemblies">在指定的程序集列表中查找</param>
+        </member>
+        <member name="T:Bing.Reflections.IAllAssemblyFinder">
+            <summary>
+            定义所有程序集查找器
+            </summary>
+        </member>
+        <member name="T:Bing.Reflections.IAssemblyFinder">
+            <summary>
+            定义程序集查找器
+            </summary>
+        </member>
+        <member name="T:Bing.Reflections.IMethodInfoFinder">
+            <summary>
+            方法信息查找器
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.IMethodInfoFinder.Find(System.Type,System.Func{System.Reflection.MethodInfo,System.Boolean})">
+            <summary>
+            查找指定条件的项
+            </summary>
+            <param name="type">要查找的类型</param>
+            <param name="predicate">筛选条件</param>
+        </member>
+        <member name="M:Bing.Reflections.IMethodInfoFinder.FindAll(System.Type)">
+            <summary>
+            查找所有项
+            </summary>
+            <param name="type">要查找的类型</param>
+        </member>
+        <member name="T:Bing.Reflections.ITypeFinder">
+            <summary>
+            定义类型查找器
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.ITypeFinder.Find``1(System.Collections.Generic.List{System.Reflection.Assembly})">
+            <summary>
+            查找类型列表
+            </summary>
+            <typeparam name="T">查找类型</typeparam>
+            <param name="assemblies">在指定的程序集列表中查找</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Reflections.ITypeFinder.Find(System.Type,System.Collections.Generic.List{System.Reflection.Assembly})">
+            <summary>
+            查找类型列表
+            </summary>
+            <param name="findType">查找类型</param>
+            <param name="assemblies">在指定的程序集列表中查找</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Reflections.TypeFinder">
+            <summary>
+            类型查找器
+            </summary>
+        </member>
+        <member name="F:Bing.Reflections.TypeFinder._allAssemblyFinder">
+            <summary>
+            所有程序集查找器
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.TypeFinder.#ctor(Bing.Reflections.IAllAssemblyFinder)">
+            <summary>
+            初始化一个<see cref="T:Bing.Reflections.TypeFinder"/>类型的实例
+            </summary>
+            <param name="allAssemblyFinder">所有程序集查找器</param>
+        </member>
+        <member name="M:Bing.Reflections.TypeFinder.FindAllItems">
+            <summary>
+            重写已实现所有项的查找
+            </summary>
+        </member>
+        <member name="M:Bing.Reflections.TypeFinder.Find``1(System.Collections.Generic.List{System.Reflection.Assembly})">
+            <summary>
+            查找类型列表
+            </summary>
+            <typeparam name="T">查找类型</typeparam>
+            <param name="assemblies">在指定的程序集列表中查找</param>
+        </member>
+        <member name="M:Bing.Reflections.TypeFinder.Find(System.Type,System.Collections.Generic.List{System.Reflection.Assembly})">
+            <summary>
+            查找类型列表
+            </summary>
+            <param name="findType">查找类型</param>
+            <param name="assemblies">在指定的程序集列表中查找</param>
+        </member>
         <member name="T:Bing.Release.IClearable">
             <summary>
             可清空的接口
@@ -14064,6 +14618,460 @@
         <member name="P:Bing.Threading.NoneCancellationTokenProvider.Token">
             <summary>
             异步任务取消令牌
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidatable">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidatable`1">
+            <summary>
+            验证
+            </summary>
+            <typeparam name="TObject">对象类型</typeparam>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidatable`1.SetValidateHandler(Bing.Validations.Abstractions.IValidationHandler)">
+            <summary>
+            设置验证处理器
+            </summary>
+            <param name="handler">验证处理器</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidatable`1.AddStrategy(Bing.Validations.Abstractions.IValidateStrategy{`0})">
+            <summary>
+            添加验证策略
+            </summary>
+            <param name="strategy">验证策略</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidatable`1.AddStrategyList(System.Collections.Generic.IEnumerable{Bing.Validations.Abstractions.IValidateStrategy{`0}})">
+            <summary>
+            添加验证策略集合
+            </summary>
+            <param name="strategies">验证策略集合</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidatable`1.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidateStrategy">
+            <summary>
+            验证策略
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.Abstractions.IValidateStrategy.StrategyName">
+            <summary>
+            策略名称
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidateStrategy`1">
+            <summary>
+            验证策略
+            </summary>
+            <typeparam name="TObject">对象类型</typeparam>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidateStrategy`1.Validate(`0)">
+            <summary>
+            验证
+            </summary>
+            <param name="obj">对象</param>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidationHandler">
+            <summary>
+            验证处理器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidationHandler.Handle(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            处理验证错误
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidationResult">
+            <summary>
+            验证结果集合
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.Abstractions.IValidationResult.Count">
+            <summary>
+            验证结果计数
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.Abstractions.IValidationResult.IsValid">
+            <summary>
+            是否已验证
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.Abstractions.IValidationResult.ErrorCode">
+            <summary>
+            错误码
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.Abstractions.IValidationResult.Flag">
+            <summary>
+            标识
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidationResult.Add(System.ComponentModel.DataAnnotations.ValidationResult)">
+            <summary>
+            添加
+            </summary>
+            <param name="result">验证结果</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidationResult.AddRange(System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult})">
+            <summary>
+            添加集合
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidationResult.ToMessage">
+            <summary>
+            转换为消息
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidationResult.ToValidationMessages">
+            <summary>
+            转换为验证消息集合
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidator">
+            <summary>
+            验证器
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Abstractions.IValidator`1">
+            <summary>
+            验证器
+            </summary>
+            <typeparam name="TObject">对象类型</typeparam>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidator`1.Validate(Bing.Validations.Abstractions.IValidateStrategy{`0})">
+            <summary>
+            验证
+            </summary>
+            <param name="strategy">验证策略</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidator`1.Validate(System.Collections.Generic.IEnumerable{Bing.Validations.Abstractions.IValidateStrategy{`0}})">
+            <summary>
+            验证
+            </summary>
+            <param name="strategies">验证策略集合</param>
+        </member>
+        <member name="M:Bing.Validations.Abstractions.IValidator`1.GetValidationResult">
+            <summary>
+            获取验证结果集合
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.ValidationContext`1">
+            <summary>
+            验证上下文
+            </summary>
+            <typeparam name="TObject">对象类型</typeparam>
+        </member>
+        <member name="P:Bing.Validations.ValidationContext`1.Instance">
+            <summary>
+            对象实例
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.ValidationContext`1.ValidateStrategyList">
+            <summary>
+            验证策略列表
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.ValidationContext`1.ResultCollection">
+            <summary>
+            验证结果集合
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.ValidationHandleOperation">
+            <summary>
+            验证处理操作
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationHandleOperation._collection">
+            <summary>
+            验证结果集合
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationHandleOperation.#ctor(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationHandleOperation"/>
+            </summary>
+            <param name="collection">验证结果集合</param>
+        </member>
+        <member name="T:Bing.Validations.ValidationResultCollection">
+            <summary>
+            验证结果集合
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationResultCollection.NoName">
+            <summary>
+            无名称
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationResultCollection._results">
+            <summary>
+            验证结果集合
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationResultCollection._resultsFlaggedByStrategy">
+            <summary>
+            策略验证结果。策略 - 验证结果集合
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.#ctor(System.ComponentModel.DataAnnotations.ValidationResult)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
+            </summary>
+            <param name="result">验证结果</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.#ctor(System.ComponentModel.DataAnnotations.ValidationResult,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
+            </summary>
+            <param name="result">验证结果</param>
+            <param name="strategyName">策略名称</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.#ctor(System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult})">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.#ctor(System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult},System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
+            </summary>
+            <param name="results">验证结果集合</param>
+            <param name="strategyName">策略名称</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.#ctor(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
+            </summary>
+            <param name="collection">验证结果集合</param>
+        </member>
+        <member name="P:Bing.Validations.ValidationResultCollection.Count">
+            <summary>
+            验证结果计数
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.ValidationResultCollection.IsValid">
+            <summary>
+            是否已验证
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.ValidationResultCollection.ErrorCode">
+            <summary>
+            错误码
+            </summary>
+        </member>
+        <member name="P:Bing.Validations.ValidationResultCollection.Flag">
+            <summary>
+            标识
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.GetEnumerator">
+            <summary>Returns an enumerator that iterates through the collection.</summary>
+            <returns>An enumerator that can be used to iterate through the collection.</returns>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.System#Collections#IEnumerable#GetEnumerator">
+            <summary>Returns an enumerator that iterates through a collection.</summary>
+            <returns>An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.</returns>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.Add(System.ComponentModel.DataAnnotations.ValidationResult)">
+            <summary>
+            添加
+            </summary>
+            <param name="result">验证结果</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.AddRange(System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult})">
+            <summary>
+            添加集合
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.ToMessage">
+            <summary>
+            转换为消息
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.ToValidationMessages">
+            <summary>
+            转换为验证消息集合
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.UpdateResultFlaggedByStrategy(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            更新指定策略的验证结果
+            </summary>
+            <param name="collection">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.UpdateResultFlaggedByStrategy(System.String,System.Collections.Generic.List{System.ComponentModel.DataAnnotations.ValidationResult})">
+            <summary>
+            更新指定策略的验证结果
+            </summary>
+            <param name="name">策略名称</param>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.UpdateResultFlaggedByStrategy(System.String,System.ComponentModel.DataAnnotations.ValidationResult)">
+            <summary>
+            更新指定策略的验证结果
+            </summary>
+            <param name="name">策略名称</param>
+            <param name="result">验证结果</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.Filter(System.Action{System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult}})">
+            <summary>
+            
+            </summary>
+            <param name="filter"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Validations.Aspects.ValidAttribute">
+            <summary>
+            验证拦截器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Aspects.ValidAttribute.Invoke(AspectCore.DynamicProxy.Parameters.ParameterAspectContext,AspectCore.DynamicProxy.Parameters.ParameterAspectDelegate)">
+            <summary>
+            执行
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Aspects.ValidAttribute.Validate(AspectCore.DynamicProxy.Parameters.Parameter)">
+            <summary>
+            验证
+            </summary>
+            <param name="parameter">参数</param>
+        </member>
+        <member name="M:Bing.Validations.Aspects.ValidAttribute.ValidateCollection(AspectCore.DynamicProxy.Parameters.Parameter)">
+            <summary>
+            验证集合
+            </summary>
+            <param name="parameter">参数</param>
+        </member>
+        <member name="T:Bing.Validations.DataAnnotationValidation">
+            <summary>
+            DataAnnotation 验证操作
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.DataAnnotationValidation.Validate(System.Object)">
+            <summary>
+            验证
+            </summary>
+            <param name="target">验证目标</param>
+        </member>
+        <member name="T:Bing.Validations.Handlers.NothingHandler">
+            <summary>
+            验证失败，不做任何处理
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Handlers.NothingHandler.Handle(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            处理验证错误
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="T:Bing.Validations.Handlers.ThrowHandler">
+            <summary>
+            验证失败，抛出异常 - 默认验证处理器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Handlers.ThrowHandler.Handle(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            处理验证错误
+            </summary>
+            <param name="results">验证错误集合</param>
+        </member>
+        <member name="T:Bing.Validations.IValidation">
+            <summary>
+            验证操作
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.IValidation.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.IValidationHandler">
+            <summary>
+            验证处理器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.IValidationHandler.Handle(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            处理验证错误
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="T:Bing.Validations.IValidationRule">
+            <summary>
+            验证规则
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.IValidationRule.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.Validators.ValidatePattern">
+            <summary>
+            验证正则
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.MobilePhonePattern">
+            <summary>
+            手机号验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.IdCardPattern">
+            <summary>
+            身份证验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.ChinesePattern">
+            <summary>
+            中文验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.UrlPattern">
+            <summary>
+            Url验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.LetterPattern">
+            <summary>
+            英文字母验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.PlateNumberOfChinaPatter">
+            <summary>
+            车牌号验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.PostalCodeOfChinaPatter">
+            <summary>
+            邮政编码验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.QQPatter">
+            <summary>
+            QQ验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.WechatNoPatter">
+            <summary>
+            微信号验证正则表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.Validators.ValidatePattern.TelNoOfChinaPatter">
+            <summary>
+            固话验证正则表达式
             </summary>
         </member>
         <member name="T:Bing.Configurations.BingConfig">
@@ -16560,198 +17568,6 @@
               查找类似 请不要重复提交 的本地化字符串。
             </summary>
         </member>
-        <member name="T:Bing.Reflections.AppDomainAllAssemblyFinder">
-            <summary>
-            应用程序目录程序集查找器
-            </summary>
-        </member>
-        <member name="F:Bing.Reflections.AppDomainAllAssemblyFinder.SkipAssemblies">
-            <summary>
-            跳过的程序集
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.FindAllItems">
-            <summary>
-            重写已实现所有项的查找
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.LoadAssemblies(System.String)">
-            <summary>
-            加载程序集到当前应用程序域
-            </summary>
-            <param name="path">目录绝对路径</param>
-        </member>
-        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.Match(System.String)">
-            <summary>
-            程序集是否匹配
-            </summary>
-            <param name="assemblyName">程序集名称</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.LoadAssemblyToAppDomain(System.String)">
-            <summary>
-            将程序集添加到当前应用程序域
-            </summary>
-            <param name="file">程序集文件</param>
-        </member>
-        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.GetAssembliesFromCurrentAppDomain">
-            <summary>
-            从当前应用程序域获取程序集列表
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Reflections.AppDomainAllAssemblyFinder.Match(System.Reflection.Assembly)">
-            <summary>
-            程序集是否匹配
-            </summary>
-            <param name="assembly">程序集</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Reflections.AssemblyHelper">
-            <summary>
-            程序集操作辅助类
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.AssemblyHelper.LoadAssemblies(System.String,System.IO.SearchOption)">
-            <summary>
-            加载程序集列表
-            </summary>
-            <param name="folderPath">目录路径</param>
-            <param name="searchOption">查询选项</param>
-        </member>
-        <member name="M:Bing.Reflections.AssemblyHelper.GetAssemblyFiles(System.String,System.IO.SearchOption)">
-            <summary>
-            获取程序集文件列表
-            </summary>
-            <param name="folderPath">目录路径</param>
-            <param name="searchOption">查询选项</param>
-        </member>
-        <member name="M:Bing.Reflections.AssemblyHelper.GetAllTypes(System.Reflection.Assembly)">
-            <summary>
-            获取程序集中所有类型
-            </summary>
-            <param name="assembly">程序集</param>
-        </member>
-        <member name="T:Bing.Reflections.BaseTypeFinderBase`1">
-            <summary>
-            指定基类的实现类型查找器基类
-            </summary>
-            <typeparam name="TBaseType">要查找类型的基类</typeparam>
-        </member>
-        <member name="F:Bing.Reflections.BaseTypeFinderBase`1._allAssemblyFinder">
-            <summary>
-            所有程序集查找器
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.#ctor(Bing.Reflections.IAllAssemblyFinder)">
-            <summary>
-            初始化一个<see cref="T:Bing.Reflections.BaseTypeFinderBase`1"/>类型的实例
-            </summary>
-            <param name="allAssemblyFinder">所有程序集查找器</param>
-        </member>
-        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.FindAllItems">
-            <summary>
-            重写已实现所有项的查找
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.Find``1(System.Collections.Generic.List{System.Reflection.Assembly})">
-            <summary>
-            查找类型列表
-            </summary>
-            <typeparam name="T">查找类型</typeparam>
-            <param name="assemblies">在指定的程序集列表中查找</param>
-        </member>
-        <member name="M:Bing.Reflections.BaseTypeFinderBase`1.Find(System.Type,System.Collections.Generic.List{System.Reflection.Assembly})">
-            <summary>
-            查找类型列表
-            </summary>
-            <param name="findType">查找类型</param>
-            <param name="assemblies">在指定的程序集列表中查找</param>
-        </member>
-        <member name="T:Bing.Reflections.IAllAssemblyFinder">
-            <summary>
-            定义所有程序集查找器
-            </summary>
-        </member>
-        <member name="T:Bing.Reflections.IAssemblyFinder">
-            <summary>
-            定义程序集查找器
-            </summary>
-        </member>
-        <member name="T:Bing.Reflections.IMethodInfoFinder">
-            <summary>
-            方法信息查找器
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.IMethodInfoFinder.Find(System.Type,System.Func{System.Reflection.MethodInfo,System.Boolean})">
-            <summary>
-            查找指定条件的项
-            </summary>
-            <param name="type">要查找的类型</param>
-            <param name="predicate">筛选条件</param>
-        </member>
-        <member name="M:Bing.Reflections.IMethodInfoFinder.FindAll(System.Type)">
-            <summary>
-            查找所有项
-            </summary>
-            <param name="type">要查找的类型</param>
-        </member>
-        <member name="T:Bing.Reflections.ITypeFinder">
-            <summary>
-            定义类型查找器
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.ITypeFinder.Find``1(System.Collections.Generic.List{System.Reflection.Assembly})">
-            <summary>
-            查找类型列表
-            </summary>
-            <typeparam name="T">查找类型</typeparam>
-            <param name="assemblies">在指定的程序集列表中查找</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Reflections.ITypeFinder.Find(System.Type,System.Collections.Generic.List{System.Reflection.Assembly})">
-            <summary>
-            查找类型列表
-            </summary>
-            <param name="findType">查找类型</param>
-            <param name="assemblies">在指定的程序集列表中查找</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Reflections.TypeFinder">
-            <summary>
-            类型查找器
-            </summary>
-        </member>
-        <member name="F:Bing.Reflections.TypeFinder._allAssemblyFinder">
-            <summary>
-            所有程序集查找器
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.TypeFinder.#ctor(Bing.Reflections.IAllAssemblyFinder)">
-            <summary>
-            初始化一个<see cref="T:Bing.Reflections.TypeFinder"/>类型的实例
-            </summary>
-            <param name="allAssemblyFinder">所有程序集查找器</param>
-        </member>
-        <member name="M:Bing.Reflections.TypeFinder.FindAllItems">
-            <summary>
-            重写已实现所有项的查找
-            </summary>
-        </member>
-        <member name="M:Bing.Reflections.TypeFinder.Find``1(System.Collections.Generic.List{System.Reflection.Assembly})">
-            <summary>
-            查找类型列表
-            </summary>
-            <typeparam name="T">查找类型</typeparam>
-            <param name="assemblies">在指定的程序集列表中查找</param>
-        </member>
-        <member name="M:Bing.Reflections.TypeFinder.Find(System.Type,System.Collections.Generic.List{System.Reflection.Assembly})">
-            <summary>
-            查找类型列表
-            </summary>
-            <param name="findType">查找类型</param>
-            <param name="assemblies">在指定的程序集列表中查找</param>
-        </member>
         <member name="T:Bing.Schedulers.IJob">
             <summary>
             作业
@@ -17641,205 +18457,6 @@
         <member name="M:Bing.Tracing.ICorrelationIdProvider.Get">
             <summary>
             获取跟踪关联ID
-            </summary>
-        </member>
-        <member name="T:Bing.Validations.Aspects.ValidAttribute">
-            <summary>
-            验证拦截器
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.Aspects.ValidAttribute.Invoke(AspectCore.DynamicProxy.Parameters.ParameterAspectContext,AspectCore.DynamicProxy.Parameters.ParameterAspectDelegate)">
-            <summary>
-            执行
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.Aspects.ValidAttribute.Validate(AspectCore.DynamicProxy.Parameters.Parameter)">
-            <summary>
-            验证
-            </summary>
-            <param name="parameter">参数</param>
-        </member>
-        <member name="M:Bing.Validations.Aspects.ValidAttribute.ValidateCollection(AspectCore.DynamicProxy.Parameters.Parameter)">
-            <summary>
-            验证集合
-            </summary>
-            <param name="parameter">参数</param>
-        </member>
-        <member name="T:Bing.Validations.DataAnnotationValidation">
-            <summary>
-            DataAnnotation 验证操作
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.DataAnnotationValidation.Validate(System.Object)">
-            <summary>
-            验证
-            </summary>
-            <param name="target">验证目标</param>
-        </member>
-        <member name="T:Bing.Validations.Handlers.NothingHandler">
-            <summary>
-            验证失败，不做任何处理
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.Handlers.NothingHandler.Handle(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            处理验证错误
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="T:Bing.Validations.Handlers.ThrowHandler">
-            <summary>
-            验证失败，抛出异常 - 默认验证处理器
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.Handlers.ThrowHandler.Handle(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            处理验证错误
-            </summary>
-            <param name="results">验证错误集合</param>
-        </member>
-        <member name="T:Bing.Validations.IValidation">
-            <summary>
-            验证操作
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.IValidation.Validate">
-            <summary>
-            验证
-            </summary>
-        </member>
-        <member name="T:Bing.Validations.IValidationHandler">
-            <summary>
-            验证处理器
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.IValidationHandler.Handle(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            处理验证错误
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="T:Bing.Validations.IValidationRule">
-            <summary>
-            验证规则
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.IValidationRule.Validate">
-            <summary>
-            验证
-            </summary>
-        </member>
-        <member name="T:Bing.Validations.ValidationResultCollection">
-            <summary>
-            验证结果集合
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.ValidationResultCollection._results">
-            <summary>
-            验证结果
-            </summary>
-        </member>
-        <member name="P:Bing.Validations.ValidationResultCollection.IsValid">
-            <summary>
-            是否有效
-            </summary>
-        </member>
-        <member name="P:Bing.Validations.ValidationResultCollection.Count">
-            <summary>
-            验证结果个数
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.ValidationResultCollection.Success">
-            <summary>
-            成功验证结果集合
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.#ctor(System.String)">
-            <summary>
-            初始化一个<see cref="T:Bing.Validations.ValidationResultCollection"/>类型的实例
-            </summary>
-            <param name="result">验证结果</param>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.Add(System.ComponentModel.DataAnnotations.ValidationResult)">
-            <summary>
-            添加验证结果
-            </summary>
-            <param name="result">验证结果</param>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.AddList(System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult})">
-            <summary>
-            添加验证结果集合
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.System#Collections#Generic#IEnumerable{System#ComponentModel#DataAnnotations#ValidationResult}#GetEnumerator">
-            <summary>
-            获取迭代器
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.System#Collections#IEnumerable#GetEnumerator">
-            <summary>
-            获取迭代器
-            </summary>
-        </member>
-        <member name="T:Bing.Validations.Validators.ValidatePattern">
-            <summary>
-            验证正则
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.MobilePhonePattern">
-            <summary>
-            手机号验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.IdCardPattern">
-            <summary>
-            身份证验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.ChinesePattern">
-            <summary>
-            中文验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.UrlPattern">
-            <summary>
-            Url验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.LetterPattern">
-            <summary>
-            英文字母验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.PlateNumberOfChinaPatter">
-            <summary>
-            车牌号验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.PostalCodeOfChinaPatter">
-            <summary>
-            邮政编码验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.QQPatter">
-            <summary>
-            QQ验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.WechatNoPatter">
-            <summary>
-            微信号验证正则表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Validations.Validators.ValidatePattern.TelNoOfChinaPatter">
-            <summary>
-            固话验证正则表达式
             </summary>
         </member>
         <member name="T:Microsoft.Extensions.DependencyInjection.ServiceCollectionCommonExtensions">

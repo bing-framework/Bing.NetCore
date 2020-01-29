@@ -22,7 +22,7 @@ namespace Bing.Validations
             var context=new ValidationContext(target,null,null);
             var isValid = Validator.TryValidateObject(target, context, validationResults, true);
             if (!isValid)
-                result.AddList(validationResults);
+                result.AddRange(validationResults);
             return result;
         }
     }

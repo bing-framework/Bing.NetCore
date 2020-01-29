@@ -14,18 +14,12 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="member">成员信息</param>
         /// <param name="instance">成员所在的类实例</param>
-        /// <returns></returns>
         public static object GetPropertyValue(this MemberInfo member, object instance)
         {
             if (member == null)
-            {
                 throw new ArgumentNullException(nameof(member));
-            }
-
             if (instance == null)
-            {
                 throw new ArgumentNullException(nameof(instance));
-            }
             return instance.GetType().GetProperty(member.Name)?.GetValue(instance);
         }
     }
