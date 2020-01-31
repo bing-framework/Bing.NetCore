@@ -3260,7 +3260,6 @@
             </summary>
             <param name="member">成员信息</param>
             <param name="instance">成员所在的类实例</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.IsNullableType(System.Type)">
             <summary>
@@ -8661,6 +8660,254 @@
             </summary>
             <param name="xmlFile">Xml文件</param>
             <param name="schemaFile">架构文件</param>
+        </member>
+        <member name="T:Bing.Utils.TypeClass">
+            <summary>
+            类类型
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.ObjectClass">
+            <summary>
+            object
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.Int32Class">
+            <summary>
+            int32
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.Int32NullableClass">
+            <summary>
+            int32?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.Int64Class">
+            <summary>
+            int64
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.Int64NullableClass">
+            <summary>
+            int64?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.IntClass">
+            <summary>
+            int
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.IntNullableClass">
+            <summary>
+            int?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.LongClass">
+            <summary>
+            long
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.LongNullableClass">
+            <summary>
+            long?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.FloatClass">
+            <summary>
+            float
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.FloatNullableClass">
+            <summary>
+            float?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.DoubleClass">
+            <summary>
+            double
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.DoubleNullableClass">
+            <summary>
+            double?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.DecimalClass">
+            <summary>
+            decimal
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.DecimalNullableClass">
+            <summary>
+            decimal?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.StringClass">
+            <summary>
+            string
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.DateTimeClass">
+            <summary>
+            DateTime
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.DateTimeNullableClass">
+            <summary>
+            DateTime?
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.TimeSpanClass">
+            <summary>
+            TimeSpan
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeClass.TimeSpanNullableClass">
+            <summary>
+            TimeSpan?
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.TypeDefault">
+            <summary>
+            类型默认值
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.TypeDefault.Of``1">
+            <summary>
+            获取指定类型默认值
+            </summary>
+            <typeparam name="TValue">值类型</typeparam>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.Int">
+            <summary>
+            int
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.Long">
+            <summary>
+            long
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.Float">
+            <summary>
+            float
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.Double">
+            <summary>
+            double
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.Decimal">
+            <summary>
+            decimal
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.Char">
+            <summary>
+            char
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.String">
+            <summary>
+            string
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.StringEmpty">
+            <summary>
+            empty
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.DateTime">
+            <summary>
+            DateTime
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.TypeDefault.TimeSpan">
+            <summary>
+            TimeSpan
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.Types">
+            <summary>
+            类型 操作
+            </summary>
+            <summary>
+            类型 操作 - 实例创建者
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Types.Of``1">
+            <summary>
+            获取类型
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+        </member>
+        <member name="M:Bing.Utils.Types.Of(System.Object[])">
+            <summary>
+            获取类型数组
+            </summary>
+            <param name="objColl">对象数组</param>
+        </member>
+        <member name="M:Bing.Utils.Types.DefaultValue``1">
+            <summary>
+            获取默认值
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstance``1(System.Object[])">
+            <summary>
+            创建实例
+            </summary>
+            <typeparam name="TInstance">实例类型</typeparam>
+            <param name="args">参数</param>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstance``1(System.String,System.Object[])">
+            <summary>
+            创建实例
+            </summary>
+            <typeparam name="TInstance">实例类型</typeparam>
+            <param name="className">实例名称</param>
+            <param name="args">参数</param>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstance``1(System.Type,System.Object[])">
+            <summary>
+            创建实例
+            </summary>
+            <typeparam name="TInstance">实例类型</typeparam>
+            <param name="type">实例类型</param>
+            <param name="args">参数</param>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstance(System.Type,System.Object[])">
+            <summary>
+            创建实例
+            </summary>
+            <param name="type">实例类型</param>
+            <param name="args">参数</param>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstanceCore``1">
+            <summary>
+            创建实例
+            </summary>
+            <typeparam name="TInstance">实例类型</typeparam>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstanceCore``1(System.Object[])">
+            <summary>
+            创建实例
+            </summary>
+            <typeparam name="TInstance">实例类型</typeparam>
+            <param name="args">参数</param>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstanceCore(System.Type)">
+            <summary>
+            创建实例
+            </summary>
+            <param name="type">实例类型</param>
+        </member>
+        <member name="M:Bing.Utils.Types.CreateInstanceCore(System.Type,System.Object[])">
+            <summary>
+            创建实例
+            </summary>
+            <param name="type">实例类型</param>
+            <param name="args">参数</param>
         </member>
         <member name="T:Bing.Utils.IdGenerators.Abstractions.IGuidGenerator">
             <summary>

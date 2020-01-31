@@ -12,7 +12,7 @@ namespace Bing.Domains.Entities
     /// 领域实体
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
-    public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : IEntity
+    public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : class, IEntity
     {
         /// <summary>
         /// 初始化一个<see cref="EntityBase{TEntity}"/>类型的实例
@@ -28,8 +28,8 @@ namespace Bing.Domains.Entities
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public abstract class EntityBase<TEntity, TKey> : DomainBase<TEntity>, IEntity<TEntity, TKey>
-        where TEntity : IEntity
+    public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEntity<TEntity, TKey>
+        where TEntity : class, IEntity
     {
         /// <summary>
         /// 标识

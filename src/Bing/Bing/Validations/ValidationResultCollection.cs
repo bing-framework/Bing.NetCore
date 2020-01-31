@@ -39,9 +39,12 @@ namespace Bing.Validations
             UpdateResultFlaggedByStrategy(NoName, new List<ValidationResult>());
         }
 
-        public ValidationResultCollection(string value)
+        public ValidationResultCollection(string result)
         {
-
+            _results = new List<ValidationResult>();
+            if(string.IsNullOrWhiteSpace(result))
+                return;
+            _results.Add(new ValidationResult(result));
         }
 
         /// <summary>
@@ -131,7 +134,7 @@ namespace Bing.Validations
         /// <summary>
         /// 成功验证结果集合
         /// </summary>
-        public static ValidationResultCollection Success { get; }= new ValidationResultCollection();
+        public static ValidationResultCollection Success { get; } = new ValidationResultCollection();
 
         /// <summary>
         /// 添加
@@ -150,7 +153,7 @@ namespace Bing.Validations
         /// <param name="results">验证结果集合</param>
         public void AddRange(IEnumerable<ValidationResult> results)
         {
-            if(results==null)
+            if (results == null)
                 return;
             _results.AddRange(results);
         }
@@ -234,7 +237,7 @@ namespace Bing.Validations
             if (collection == null)
                 return;
             foreach (var set in collection._resultsFlaggedByStrategy)
-                UpdateResultFlaggedByStrategy(set.Key,set.Value);
+                UpdateResultFlaggedByStrategy(set.Key, set.Value);
         }
 
         /// <summary>

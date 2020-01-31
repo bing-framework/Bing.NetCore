@@ -3,7 +3,7 @@
 namespace Bing.Domains.Entities.Auditing
 {
     /// <summary>
-    /// 创建时间审计
+    /// 创建时间
     /// </summary>
     public interface ICreationTime
     {

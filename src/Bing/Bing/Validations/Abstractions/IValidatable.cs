@@ -7,6 +7,10 @@ namespace Bing.Validations.Abstractions
     /// </summary>
     public interface IValidatable
     {
+        /// <summary>
+        /// 验证
+        /// </summary>
+        ValidationResultCollection Validate();
     }
 
     /// <summary>
@@ -32,10 +36,5 @@ namespace Bing.Validations.Abstractions
         /// </summary>
         /// <param name="strategies">验证策略集合</param>
         void AddStrategyList(IEnumerable<IValidateStrategy<TObject>> strategies);
-
-        /// <summary>
-        /// 验证
-        /// </summary>
-        ValidationResultCollection Validate();
     }
 }

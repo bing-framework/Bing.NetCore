@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
 using Bing.Utils.Extensions;
+using Bing.Validations.Abstractions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing

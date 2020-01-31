@@ -1,4 +1,6 @@
-﻿namespace Bing.Validations.Handlers
+﻿using Bing.Validations.Abstractions;
+
+namespace Bing.Validations.Handlers
 {
     /// <summary>
     /// 验证失败，不做任何处理

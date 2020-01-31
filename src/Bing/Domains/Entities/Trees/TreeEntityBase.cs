@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bing.Utils.Extensions;
+using Bing.Validations.Abstractions;
 
 namespace Bing.Domains.Entities.Trees
 {
@@ -9,7 +10,8 @@ namespace Bing.Domains.Entities.Trees
     /// 树型实体
     /// </summary>
     /// <typeparam name="TEntity">树型实体类型</typeparam>
-    public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid, Guid?> where TEntity : ITreeEntity<TEntity, Guid, Guid?>
+    public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid, Guid?> 
+        where TEntity : class, ITreeEntity<TEntity, Guid, Guid?>, IValidatable<TEntity>
     {
         /// <summary>
         /// 初始化一个<see cref="TreeEntityBase{TEntity}"/>类型的实例
@@ -29,7 +31,8 @@ namespace Bing.Domains.Entities.Trees
     /// <typeparam name="TKey">标识类型</typeparam>
     /// <typeparam name="TParentId">父编号类型</typeparam>
     public abstract class TreeEntityBase<TEntity, TKey, TParentId> : AggregateRoot<TEntity, TKey>,
-        ITreeEntity<TEntity, TKey, TParentId> where TEntity : ITreeEntity<TEntity, TKey, TParentId>
+        ITreeEntity<TEntity, TKey, TParentId> 
+        where TEntity : class,ITreeEntity<TEntity, TKey, TParentId>,IValidatable<TEntity>
     {
 
         /// <summary>

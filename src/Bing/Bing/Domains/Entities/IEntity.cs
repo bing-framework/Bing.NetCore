@@ -1,4 +1,6 @@
-﻿namespace Bing.Domains.Entities
+﻿using Bing.Domains.ChangeTracking;
+
+namespace Bing.Domains.Entities
 {
     /// <summary>
     /// 实体
@@ -15,16 +17,12 @@
     /// 实体
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public interface IEntity<out TKey> : IKey<TKey>, IEntity
-    {
-    }
+    public interface IEntity<out TKey> : IKey<TKey>, IEntity { }
 
     /// <summary>
     /// 实体
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public interface IEntity<in TEntity, out TKey> : ICompareChange<TEntity>, IEntity<TKey> where TEntity : IEntity
-    {
-    }
+    public interface IEntity<in TEntity, out TKey> : IChangeTrackable<TEntity>, IEntity<TKey> where TEntity : IEntity { }
 }

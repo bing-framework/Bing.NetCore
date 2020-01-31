@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Bing.Configurations;
+using Bing.Validations.Abstractions;
 
 namespace Bing.Validations.Handlers
 {

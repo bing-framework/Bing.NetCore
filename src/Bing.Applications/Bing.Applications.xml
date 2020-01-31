@@ -292,7 +292,7 @@
             </summary>
             <param name="entity">实体</param>
         </member>
-        <member name="M:Bing.Applications.CrudServiceBase`7.UpdateAfter(`0,Bing.Domains.Entities.ChangeValueCollection)">
+        <member name="M:Bing.Applications.CrudServiceBase`7.UpdateAfter(`0,Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection)">
             <summary>
             修改后操作
             </summary>
@@ -317,7 +317,7 @@
             </summary>
             <param name="entity">实体</param>
         </member>
-        <member name="M:Bing.Applications.CrudServiceBase`7.UpdateAfterAsync(`0,Bing.Domains.Entities.ChangeValueCollection)">
+        <member name="M:Bing.Applications.CrudServiceBase`7.UpdateAfterAsync(`0,Bing.Domains.ChangeTracking.ChangedValueDescriptorCollection)">
             <summary>
             修改后操作
             </summary>

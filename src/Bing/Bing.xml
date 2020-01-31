@@ -266,6 +266,106 @@
             执行
             </summary>
         </member>
+        <member name="T:Bing.BingException">
+            <summary>
+            Bing框架异常
+            </summary>
+        </member>
+        <member name="F:Bing.BingException.EmptyFlag">
+            <summary>
+            空标识
+            </summary>
+        </member>
+        <member name="F:Bing.BingException.DefaultErrorMessage">
+            <summary>
+            默认错误消息
+            </summary>
+        </member>
+        <member name="F:Bing.BingException.DefaultErrorCode">
+            <summary>
+            默认错误编码
+            </summary>
+        </member>
+        <member name="F:Bing.BingException.DefaultExtendErrorCode">
+            <summary>
+            默认扩展错误编码
+            </summary>
+        </member>
+        <member name="M:Bing.BingException.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.BingException.#ctor(System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+            <param name="errorMessage">错误消息</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.BingException.#ctor(System.String,System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+            <param name="errorMessage">错误消息</param>
+            <param name="flag">错误标识</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.BingException.#ctor(System.Int64,System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="errorMessage">错误消息</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.BingException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+            <param name="info">序列化信息</param>
+            <param name="context">流上下文</param>
+        </member>
+        <member name="M:Bing.BingException.#ctor(System.Int64,System.String,System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="errorMessage">错误消息</param>
+            <param name="flag">错误标识</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.BingException.#ctor(Bing.Exceptions.BingExceptionOptions)">
+            <summary>
+            初始化一个<see cref="T:Bing.BingException"/>类型的实例
+            </summary>
+            <param name="options">Bing框架异常选项配置</param>
+        </member>
+        <member name="P:Bing.BingException.Code">
+            <summary>
+            错误码
+            </summary>
+        </member>
+        <member name="P:Bing.BingException.Flag">
+            <summary>
+            错误标识
+            </summary>
+        </member>
+        <member name="P:Bing.BingException.ExtraData">
+            <summary>
+            额外数据
+            </summary>
+        </member>
+        <member name="M:Bing.BingException.GetFullMessage">
+            <summary>
+            获取完整的消息
+            </summary>
+        </member>
+        <member name="M:Bing.BingException.Throw">
+            <summary>
+            抛出异常
+            </summary>
+        </member>
         <member name="T:Bing.Caching.CacheAttribute">
             <summary>
             缓存 属性
@@ -12035,6 +12135,58 @@
             </summary>
             <param name="otherObj">其它对象</param>
         </member>
+        <member name="T:Bing.Domains.Core.DescriptionContext">
+            <summary>
+            描述上下文
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.Core.DescriptionContext._stringBuilder">
+            <summary>
+            字符串拼接器
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Core.DescriptionContext"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.Add(System.String)">
+            <summary>
+            添加描述
+            </summary>
+            <param name="description">描述</param>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.Add``1(System.String,``0)">
+            <summary>
+            添加描述
+            </summary>
+            <typeparam name="TValue">值类型</typeparam>
+            <param name="name">属性名</param>
+            <param name="value">属性值</param>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.Add``2(System.Linq.Expressions.Expression{System.Func{``0,``1}})">
+            <summary>
+            添加描述
+            </summary>
+            <typeparam name="T">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="expression">属性表达式，范例：t => t.Name</param>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.FlushCache">
+            <summary>
+            刷新缓存
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.Output">
+            <summary>
+            输出
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Core.DescriptionContext.ToString">
+            <summary>
+            输出字符串
+            </summary>
+        </member>
         <member name="T:Bing.Domains.Entities.AggregateRoot`2">
             <summary>
             聚合根
@@ -12064,234 +12216,6 @@
             初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`1"/>类型的实例
             </summary>
             <param name="id">标识</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.DomainObjectBase`1">
-            <summary>
-            领域对象基类
-            </summary>
-            <typeparam name="TObject">领域对象</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.EntityBase`1">
-            <summary>
-            领域实体
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`1.#ctor(System.Guid)">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.EntityBase`1"/>类型的实例
-            </summary>
-            <param name="id">标识</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.EntityBase`2">
-            <summary>
-            领域实体
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">标识类型</typeparam>
-        </member>
-        <member name="P:Bing.Domains.Entities.EntityBase`2.Id">
-            <summary>
-            标识
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.EntityBase`2.Session">
-            <summary>
-            用户会话
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.#ctor(`1)">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.EntityBase`2"/>类型的实例
-            </summary>
-            <param name="id">标识</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.Equals(System.Object)">
-            <summary>
-            判断两个实体是否同一数据记录的实体
-            </summary>
-            <param name="other">领域实体</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.GetHashCode">
-            <summary>
-            用作特定类型的哈希函数。
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.op_Equality(Bing.Domains.Entities.EntityBase{`0,`1},Bing.Domains.Entities.EntityBase{`0,`1})">
-            <summary>
-            相等比较
-            </summary>
-            <param name="left">领域实体</param>
-            <param name="right">领域实体</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.op_Inequality(Bing.Domains.Entities.EntityBase{`0,`1},Bing.Domains.Entities.EntityBase{`0,`1})">
-            <summary>
-            不相等比较
-            </summary>
-            <param name="left">领域实体</param>
-            <param name="right">领域实体</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.Init">
-            <summary>
-            初始化
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.InitId">
-            <summary>
-            初始化标识
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.CreateId">
-            <summary>
-            创建标识
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.Validate(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            验证
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityBase`2.ValidateId(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            验证标识
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.IAggregateRoot">
-            <summary>
-            聚合根
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.IAggregateRoot`1">
-            <summary>
-            聚合根
-            </summary>
-            <typeparam name="TKey">标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.IAggregateRoot`2">
-            <summary>
-            聚合根
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.IDelete">
-            <summary>
-            逻辑删除
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.IDelete.IsDeleted">
-            <summary>
-            是否已删除
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.IDomainObject">
-            <summary>
-            领域对象
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.IEntity">
-            <summary>
-            实体
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.IEntity.Init">
-            <summary>
-            初始化
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.IEntity`1">
-            <summary>
-            实体
-            </summary>
-            <typeparam name="TKey">标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.IEntity`2">
-            <summary>
-            实体
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.IExpirable">
-            <summary>
-            有效期
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.IExpirable.ExpireLimitedFromTime">
-            <summary>
-            有效期 - 开始时间
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.IExpirable.ExpireLimitedToTime">
-            <summary>
-            有效期 - 结束时间
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.IExpirable.IsStart">
-            <summary>
-            是否开始
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.IExpirable.IsStart(System.DateTime)">
-            <summary>
-            是否开始
-            </summary>
-            <param name="targetTime">目标时间</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.IExpirable.IsExpired">
-            <summary>
-            是否已过期
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.IExpirable.IsExpired(System.DateTime)">
-            <summary>
-            是否已过期
-            </summary>
-            <param name="targetTime">目标时间</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.IExpirable.IsActive">
-            <summary>
-            是否生效
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.IExpirable.IsActive(System.DateTime)">
-            <summary>
-            是否生效
-            </summary>
-            <param name="targetTime">目标时间</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.IKey`1">
-            <summary>
-            标识
-            </summary>
-            <typeparam name="TKey">标识类型</typeparam>
-        </member>
-        <member name="P:Bing.Domains.Entities.IKey`1.Id">
-            <summary>
-            标识
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.ILockable">
-            <summary>
-            是否已锁定
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.ILockable.IsLocked">
-            <summary>
-            是否已锁定
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.IVersion">
-            <summary>
-            乐观锁
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.IVersion.Version">
-            <summary>
-            版本号
-            </summary>
         </member>
         <member name="T:Bing.Domains.Entities.Auditing.CreationAuditedInitializer">
             <summary>
@@ -12505,7 +12429,7 @@
         </member>
         <member name="T:Bing.Domains.Entities.Auditing.ICreationTime">
             <summary>
-            创建时间审计
+            创建时间
             </summary>
         </member>
         <member name="P:Bing.Domains.Entities.Auditing.ICreationTime.CreationTime">
@@ -12515,7 +12439,7 @@
         </member>
         <member name="T:Bing.Domains.Entities.Auditing.ICreator">
             <summary>
-            创建人审计
+            创建人
             </summary>
         </member>
         <member name="P:Bing.Domains.Entities.Auditing.ICreator.Creator">
@@ -12610,7 +12534,7 @@
         </member>
         <member name="T:Bing.Domains.Entities.Auditing.IModificationTime">
             <summary>
-            修改时间审计
+            修改时间
             </summary>
         </member>
         <member name="P:Bing.Domains.Entities.Auditing.IModificationTime.LastModificationTime">
@@ -12620,7 +12544,7 @@
         </member>
         <member name="T:Bing.Domains.Entities.Auditing.IModifier">
             <summary>
-            修改人审计
+            修改人
             </summary>
         </member>
         <member name="P:Bing.Domains.Entities.Auditing.IModifier.LastModifier">
@@ -12725,6 +12649,379 @@
             初始化字符串
             </summary>
         </member>
+        <member name="T:Bing.Domains.Entities.DeleteOperationTypes">
+            <summary>
+            删除操作类型
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.Entities.DeleteOperationTypes.LogicDelete">
+            <summary>
+            逻辑删除，也称为软删除
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.Entities.DeleteOperationTypes.Restore">
+            <summary>
+            还原。用于逻辑删除实体
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.Entities.DeleteOperationTypes.PhysicalDelete">
+            <summary>
+            物理删除，也称为硬删除
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.DomainObjectBase`1">
+            <summary>
+            领域对象基类
+            </summary>
+            <typeparam name="TObject">领域对象</typeparam>
+        </member>
+        <member name="F:Bing.Domains.Entities.DomainObjectBase`1._validationContext">
+            <summary>
+            验证上下文
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.Entities.DomainObjectBase`1._descriptionContext">
+            <summary>
+            描述上下文
+            </summary>
+        </member>
+        <member name="F:Bing.Domains.Entities.DomainObjectBase`1._changeTrackingContext">
+            <summary>
+            变更跟踪上下文
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.DomainObjectBase`1"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.SetValidateHandler(Bing.Validations.Abstractions.IValidationHandler)">
+            <summary>
+            设置验证处理器
+            </summary>
+            <param name="handler">验证处理器</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddStrategy(Bing.Validations.Abstractions.IValidateStrategy{`0})">
+            <summary>
+            添加验证策略
+            </summary>
+            <param name="strategy">验证策略</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddStrategyList(System.Collections.Generic.IEnumerable{Bing.Validations.Abstractions.IValidateStrategy{`0}})">
+            <summary>
+            添加验证策略集合
+            </summary>
+            <param name="strategies">验证策略集合</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.Validate(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            验证并添加到验证结果集合
+            </summary>
+            <param name="results"></param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChanges(`0)">
+            <summary>
+            添加变更列表
+            </summary>
+            <param name="newObj">新对象</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange``2(System.Linq.Expressions.Expression{System.Func{`0,``0}},``1)">
+            <summary>
+            添加变更
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+            <param name="expression">属性表达式。范例：t => t.Name</param>
+            <param name="newValue">新值。范例：newEntity.Name</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange(Bing.Domains.ChangeTracking.IChangeTrackable{`0},`0)">
+            <summary>
+            添加变更
+            </summary>
+            <param name="objectBeforeChangeTrackable">对象变更前跟踪</param>
+            <param name="objectAfterChange">变更后的对象</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange(System.Collections.Generic.IEnumerable{Bing.Domains.ChangeTracking.IChangeTrackable{`0}},System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            添加变更
+            </summary>
+            <param name="leftObjs">左对象列表</param>
+            <param name="rightObjs">右对象列表</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange``1(System.String,System.String,``0,``0)">
+            <summary>
+            添加变更
+            </summary>
+            <typeparam name="TValue">值类型</typeparam>
+            <param name="propertyName">属性名</param>
+            <param name="description">描述</param>
+            <param name="valueBeforeChange">变更前的值。范例：this.Name</param>
+            <param name="valueAfterChange">变更后的值。范例：newEntity.Name</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.GetChanges(`0)">
+            <summary>
+            获取变更值集合
+            </summary>
+            <param name="otherObj">其它对象</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddDescriptions">
+            <summary>
+            添加描述
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddDescription(System.String)">
+            <summary>
+            添加描述
+            </summary>
+            <param name="description">描述</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddDescription``1(System.String,``0)">
+            <summary>
+            添加描述
+            </summary>
+            <typeparam name="TValue">属性类型</typeparam>
+            <param name="name">属性名</param>
+            <param name="value">属性值</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddDescription``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            添加描述
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="expression">属性表达式。范例：t => t.Name</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AssignableType(Bing.Domains.Entities.DomainObjectBase{`0})">
+            <summary>
+            分配类型
+            </summary>
+            <param name="me">领域对象基类</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.ToString">
+            <summary>
+            输出对象状态
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.EntityBase`1">
+            <summary>
+            领域实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`1.#ctor(System.Guid)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.EntityBase`1"/>类型的实例
+            </summary>
+            <param name="id">标识</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.EntityBase`2">
+            <summary>
+            领域实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Domains.Entities.EntityBase`2.Id">
+            <summary>
+            标识
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.EntityBase`2.Session">
+            <summary>
+            用户会话
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.#ctor(`1)">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.EntityBase`2"/>类型的实例
+            </summary>
+            <param name="id">标识</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.Equals(System.Object)">
+            <summary>
+            判断两个实体是否同一数据记录的实体
+            </summary>
+            <param name="other">领域实体</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.GetHashCode">
+            <summary>
+            用作特定类型的哈希函数。
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.op_Equality(Bing.Domains.Entities.EntityBase{`0,`1},Bing.Domains.Entities.EntityBase{`0,`1})">
+            <summary>
+            相等比较
+            </summary>
+            <param name="left">领域实体</param>
+            <param name="right">领域实体</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.op_Inequality(Bing.Domains.Entities.EntityBase{`0,`1},Bing.Domains.Entities.EntityBase{`0,`1})">
+            <summary>
+            不相等比较
+            </summary>
+            <param name="left">领域实体</param>
+            <param name="right">领域实体</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.InitId">
+            <summary>
+            初始化标识
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.CreateId">
+            <summary>
+            创建标识
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.ValidateId(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            验证标识
+            </summary>
+            <param name="results">验证结果集合</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.IAggregateRoot">
+            <summary>
+            聚合根
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.IAggregateRoot`1">
+            <summary>
+            聚合根
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Domains.Entities.IAggregateRoot`2">
+            <summary>
+            聚合根
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Domains.Entities.IDelete">
+            <summary>
+            逻辑删除
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.IDelete.IsDeleted">
+            <summary>
+            是否已删除
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.IDomainObject">
+            <summary>
+            领域对象
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.IEntity">
+            <summary>
+            实体
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IEntity.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.IEntity`1">
+            <summary>
+            实体
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Domains.Entities.IEntity`2">
+            <summary>
+            实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Domains.Entities.IExpirable">
+            <summary>
+            有效期
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.IExpirable.ExpireLimitedFromTime">
+            <summary>
+            有效期 - 开始时间
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.IExpirable.ExpireLimitedToTime">
+            <summary>
+            有效期 - 结束时间
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsStart">
+            <summary>
+            是否开始
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsStart(System.DateTime)">
+            <summary>
+            是否开始
+            </summary>
+            <param name="targetTime">目标时间</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsExpired">
+            <summary>
+            是否已过期
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsExpired(System.DateTime)">
+            <summary>
+            是否已过期
+            </summary>
+            <param name="targetTime">目标时间</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsActive">
+            <summary>
+            是否生效
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IExpirable.IsActive(System.DateTime)">
+            <summary>
+            是否生效
+            </summary>
+            <param name="targetTime">目标时间</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.IKey`1">
+            <summary>
+            标识
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Domains.Entities.IKey`1.Id">
+            <summary>
+            标识
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.ILockable">
+            <summary>
+            是否已锁定
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.ILockable.IsLocked">
+            <summary>
+            是否已锁定
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Entities.IVersion">
+            <summary>
+            乐观锁
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Entities.IVersion.Version">
+            <summary>
+            版本号
+            </summary>
+        </member>
         <member name="T:Bing.Domains.Entities.ChangeValue">
             <summary>
             变更值
@@ -12814,7 +13111,7 @@
             初始化一个<see cref="T:Bing.Domains.Entities.DomainBase`1"/>类型的实例
             </summary>
         </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.SetValidationHandler(Bing.Validations.IValidationHandler)">
+        <member name="M:Bing.Domains.Entities.DomainBase`1.SetValidationHandler(Bing.Validations.Abstractions.IValidationHandler)">
             <summary>
             设置验证处理器
             </summary>
@@ -14025,6 +14322,62 @@
             本地化错误消息
             </summary>
         </member>
+        <member name="T:Bing.Exceptions.BingExceptionOptions">
+            <summary>
+            Bing框架异常选项配置
+            </summary>
+        </member>
+        <member name="F:Bing.Exceptions.BingExceptionOptions.EmptyFlag">
+            <summary>
+            空标识
+            </summary>
+        </member>
+        <member name="F:Bing.Exceptions.BingExceptionOptions.DefaultErrorMessage">
+            <summary>
+            默认错误消息
+            </summary>
+        </member>
+        <member name="F:Bing.Exceptions.BingExceptionOptions.DefaultExtendErrorCode">
+            <summary>
+            默认扩展错误编码
+            </summary>
+        </member>
+        <member name="P:Bing.Exceptions.BingExceptionOptions.Message">
+            <summary>
+            错误消息。默认值：<see cref="F:Bing.Exceptions.BingExceptionOptions.DefaultErrorMessage"/>
+            </summary>
+        </member>
+        <member name="P:Bing.Exceptions.BingExceptionOptions.Flag">
+            <summary>
+            错误标识。默认值：<see cref="F:Bing.Exceptions.BingExceptionOptions.EmptyFlag"/>
+            </summary>
+        </member>
+        <member name="P:Bing.Exceptions.BingExceptionOptions.ErrorCode">
+            <summary>
+            错误码。默认值：<see cref="F:Bing.Exceptions.BingExceptionOptions.DefaultExtendErrorCode"/>
+            </summary>
+        </member>
+        <member name="P:Bing.Exceptions.BingExceptionOptions.InnerException">
+            <summary>
+            内部异常
+            </summary>
+        </member>
+        <member name="P:Bing.Exceptions.BingExceptionOptions.ExtraErrors">
+            <summary>
+            额外错误
+            </summary>
+        </member>
+        <member name="T:Bing.Exceptions.ExceptionHelper">
+            <summary>
+            异常操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Exceptions.ExceptionHelper.PrepareForRethrow(System.Exception)">
+            <summary>
+            捕抓异常并重新抛出
+            </summary>
+            <param name="exception">异常</param>
+        </member>
         <member name="T:Bing.Exceptions.IBusinessException">
             <summary>
             业务异常
@@ -14625,6 +14978,11 @@
             验证
             </summary>
         </member>
+        <member name="M:Bing.Validations.Abstractions.IValidatable.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
         <member name="T:Bing.Validations.Abstractions.IValidatable`1">
             <summary>
             验证
@@ -14648,11 +15006,6 @@
             添加验证策略集合
             </summary>
             <param name="strategies">验证策略集合</param>
-        </member>
-        <member name="M:Bing.Validations.Abstractions.IValidatable`1.Validate">
-            <summary>
-            验证
-            </summary>
         </member>
         <member name="T:Bing.Validations.Abstractions.IValidateStrategy">
             <summary>
@@ -14762,6 +15115,39 @@
             获取验证结果集合
             </summary>
         </member>
+        <member name="T:Bing.Validations.Aspects.ValidAttribute">
+            <summary>
+            验证拦截器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Aspects.ValidAttribute.Invoke(AspectCore.DynamicProxy.Parameters.ParameterAspectContext,AspectCore.DynamicProxy.Parameters.ParameterAspectDelegate)">
+            <summary>
+            执行
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.Aspects.ValidAttribute.Validate(AspectCore.DynamicProxy.Parameters.Parameter)">
+            <summary>
+            验证
+            </summary>
+            <param name="parameter">参数</param>
+        </member>
+        <member name="M:Bing.Validations.Aspects.ValidAttribute.ValidateCollection(AspectCore.DynamicProxy.Parameters.Parameter)">
+            <summary>
+            验证集合
+            </summary>
+            <param name="parameter">参数</param>
+        </member>
+        <member name="T:Bing.Validations.DataAnnotationValidation">
+            <summary>
+            DataAnnotation 验证操作
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.DataAnnotationValidation.Validate(System.Object)">
+            <summary>
+            验证
+            </summary>
+            <param name="target">验证目标</param>
+        </member>
         <member name="T:Bing.Validations.ValidationContext`1">
             <summary>
             验证上下文
@@ -14783,6 +15169,326 @@
             验证结果集合
             </summary>
         </member>
+        <member name="P:Bing.Validations.ValidationContext`1.Handle">
+            <summary>
+            处理操作
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.#ctor(`0)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationContext`1"/>类型的实例
+            </summary>
+            <param name="instanceToValidate">验证实例</param>
+        </member>
+        <member name="P:Bing.Validations.ValidationContext`1.IsValid">
+            <summary>
+            是否已验证
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.AddStrategy(Bing.Validations.Abstractions.IValidateStrategy{`0})">
+            <summary>
+            添加验证策略
+            </summary>
+            <param name="strategy">验证策略</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.AddStrategyList(System.Collections.Generic.IEnumerable{Bing.Validations.Abstractions.IValidateStrategy{`0}})">
+            <summary>
+            添加验证策略列表
+            </summary>
+            <param name="strategies">验证策略列表</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.SetHandler(System.Action{Bing.Validations.ValidationHandleOperation})">
+            <summary>
+            设置验证处理器
+            </summary>
+            <param name="action">操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.RaiseException``1(System.Action{``0,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            引发异常
+            </summary>
+            <typeparam name="TException">异常类型</typeparam>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.Validate(System.Action{Bing.Validations.ValidationResultCollection})">
+            <summary>
+            验证
+            </summary>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.ValidateAndRaise``1(System.Action{``0,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            验证并引发异常
+            </summary>
+            <typeparam name="TException">异常类型</typeparam>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationContext`1.GetValidationResultCollection">
+            <summary>
+            获取验证结果集合
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Validations.ValidationException">
+            <summary>
+            验证异常
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationException.ValidationFlag">
+            <summary>
+            验证标识
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationException.ValidationMessageInfoKey">
+            <summary>
+            验证消息键
+            </summary>
+        </member>
+        <member name="F:Bing.Validations.ValidationException._validationMessage">
+            <summary>
+            验证消息集合
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="message">错误消息</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="message">错误消息</param>
+            <param name="flag">错误标识</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="message">错误消息</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.String,System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="message">错误消息</param>
+            <param name="flag">错误标识</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="validationMessage">验证消息集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="validationMessage">验证消息集合</param>
+            <param name="flag">错误标识</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="message">错误消息</param>
+            <param name="validationMessage">验证消息集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="message">错误消息</param>
+            <param name="validationMessage">验证消息集合</param>
+            <param name="flag">错误标识</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="message">错误消息</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="message">错误消息</param>
+            <param name="flag">错误标识</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="message">错误消息</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.String,System.String,System.Exception)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="message">错误消息</param>
+            <param name="flag">错误标识</param>
+            <param name="innerException">内部异常</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="validationMessage">验证消息集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="validationMessage">验证消息集合</param>
+            <param name="flag">错误标识</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="message">错误消息</param>
+            <param name="validationMessage">验证消息集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Int64,System.String,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="errorCode">错误码</param>
+            <param name="message">错误消息</param>
+            <param name="validationMessage">验证消息集合</param>
+            <param name="flag">错误标识</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="info">序列化信息</param>
+            <param name="streamingContext">流上下文</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.#ctor(Bing.Exceptions.BingExceptionOptions)">
+            <summary>
+            初始化一个<see cref="T:Bing.Validations.ValidationException"/>类型的实例
+            </summary>
+            <param name="options">Bing框架异常选项配置</param>
+        </member>
+        <member name="P:Bing.Validations.ValidationException.ValidationMessage">
+            <summary>
+            验证消息集合
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            获取对象数据
+            </summary>
+            <param name="info">序列化信息</param>
+            <param name="streamingContext">流上下文</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.GetFullMessage">
+            <summary>
+            获取完整的消息
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationException.ToString">
+            <summary>
+            输出字符串
+            </summary>
+        </member>
+        <member name="T:Bing.Validations.ValidationExceptionExtensions">
+            <summary>
+            验证异常扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.ToException``1(Bing.Validations.ValidationResultCollection,System.Action{``0,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            转换异常
+            </summary>
+            <typeparam name="TException">异常类型</typeparam>
+            <param name="resultCollection">验证结果集合</param>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.ToException(Bing.Validations.ValidationResultCollection,System.Action{Bing.Validations.ValidationException,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            转换为异常
+            </summary>
+            <param name="resultCollection">验证结果集合</param>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.ToException``1(Bing.Validations.Abstractions.IValidationResult,System.Action{``0,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            转换为异常
+            </summary>
+            <typeparam name="TException">异常类型</typeparam>
+            <param name="result">验证结果</param>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.ToException(Bing.Validations.Abstractions.IValidationResult,System.Action{Bing.Validations.ValidationException,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            转换为异常
+            </summary>
+            <param name="result">验证结果</param>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.CreateBasicException``1(Bing.Validations.Abstractions.IValidationResult)">
+            <summary>
+            创建基础异常
+            </summary>
+            <param name="result">验证结果</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.CreateValidationException(Bing.Validations.Abstractions.IValidationResult)">
+            <summary>
+            创建验证异常
+            </summary>
+            <param name="result">验证结果</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.RaiseException``1(Bing.Validations.ValidationResultCollection,System.Action{``0,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            引发异常
+            </summary>
+            <typeparam name="TException">异常类型</typeparam>
+            <param name="resultCollection">验证结果集合</param>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationExceptionExtensions.RaiseException(Bing.Validations.ValidationResultCollection,System.Action{Bing.Validations.ValidationException,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            引发异常
+            </summary>
+            <param name="resultCollection">验证结果集合</param>
+            <param name="appendAction">追加操作</param>
+        </member>
+        <member name="T:Bing.Validations.ValidationHandleExceptionExtensions">
+            <summary>
+            验证处理异常扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationHandleExceptionExtensions.Handle(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            处理
+            </summary>
+            <param name="collection">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationHandleExceptionExtensions.HandleAll(Bing.Validations.ValidationHandleOperation,Bing.Validations.Abstractions.IValidationHandler)">
+            <summary>
+            处理所有验证
+            </summary>
+            <param name="op">验证处理操作</param>
+            <param name="handler">验证处理器</param>
+        </member>
         <member name="T:Bing.Validations.ValidationHandleOperation">
             <summary>
             验证处理操作
@@ -14798,6 +15504,27 @@
             初始化一个<see cref="T:Bing.Validations.ValidationHandleOperation"/>
             </summary>
             <param name="collection">验证结果集合</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationHandleOperation.Handle(Bing.Validations.Abstractions.IValidationHandler,System.Action{System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult}})">
+            <summary>
+            处理
+            </summary>
+            <param name="handler">验证处理器</param>
+            <param name="filterFunc">过滤函数</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationHandleOperation.Handle(Bing.Validations.Abstractions.IValidationHandler,System.String)">
+            <summary>
+            处理
+            </summary>
+            <param name="handler">验证处理器</param>
+            <param name="strategyName">策略名称</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationHandleOperation.RaiseException``1(System.Action{``0,Bing.Validations.ValidationResultCollection})">
+            <summary>
+            引发异常
+            </summary>
+            <typeparam name="TException">异常类型</typeparam>
+            <param name="appendAction">追加操作</param>
         </member>
         <member name="T:Bing.Validations.ValidationResultCollection">
             <summary>
@@ -14876,13 +15603,10 @@
             标识
             </summary>
         </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.GetEnumerator">
-            <summary>Returns an enumerator that iterates through the collection.</summary>
-            <returns>An enumerator that can be used to iterate through the collection.</returns>
-        </member>
-        <member name="M:Bing.Validations.ValidationResultCollection.System#Collections#IEnumerable#GetEnumerator">
-            <summary>Returns an enumerator that iterates through a collection.</summary>
-            <returns>An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.</returns>
+        <member name="P:Bing.Validations.ValidationResultCollection.Success">
+            <summary>
+            成功验证结果集合
+            </summary>
         </member>
         <member name="M:Bing.Validations.ValidationResultCollection.Add(System.ComponentModel.DataAnnotations.ValidationResult)">
             <summary>
@@ -14904,6 +15628,27 @@
         <member name="M:Bing.Validations.ValidationResultCollection.ToValidationMessages">
             <summary>
             转换为验证消息集合
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.GetErrorString(System.Int32)">
+            <summary>
+            获取错误字符串
+            </summary>
+            <param name="spaceCount">空格数量</param>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.GetEnumerator">
+            <summary>
+            获取迭代器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            获取迭代器
+            </summary>
+        </member>
+        <member name="M:Bing.Validations.ValidationResultCollection.ToString">
+            <summary>
+            输出字符串
             </summary>
         </member>
         <member name="M:Bing.Validations.ValidationResultCollection.UpdateResultFlaggedByStrategy(Bing.Validations.ValidationResultCollection)">
@@ -14928,43 +15673,15 @@
         </member>
         <member name="M:Bing.Validations.ValidationResultCollection.Filter(System.Action{System.Collections.Generic.IEnumerable{System.ComponentModel.DataAnnotations.ValidationResult}})">
             <summary>
-            
+            过滤
             </summary>
-            <param name="filter"></param>
-            <returns></returns>
+            <param name="filter">过滤操作</param>
         </member>
-        <member name="T:Bing.Validations.Aspects.ValidAttribute">
+        <member name="M:Bing.Validations.ValidationResultCollection.Filter(System.String)">
             <summary>
-            验证拦截器
+            过滤
             </summary>
-        </member>
-        <member name="M:Bing.Validations.Aspects.ValidAttribute.Invoke(AspectCore.DynamicProxy.Parameters.ParameterAspectContext,AspectCore.DynamicProxy.Parameters.ParameterAspectDelegate)">
-            <summary>
-            执行
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.Aspects.ValidAttribute.Validate(AspectCore.DynamicProxy.Parameters.Parameter)">
-            <summary>
-            验证
-            </summary>
-            <param name="parameter">参数</param>
-        </member>
-        <member name="M:Bing.Validations.Aspects.ValidAttribute.ValidateCollection(AspectCore.DynamicProxy.Parameters.Parameter)">
-            <summary>
-            验证集合
-            </summary>
-            <param name="parameter">参数</param>
-        </member>
-        <member name="T:Bing.Validations.DataAnnotationValidation">
-            <summary>
-            DataAnnotation 验证操作
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.DataAnnotationValidation.Validate(System.Object)">
-            <summary>
-            验证
-            </summary>
-            <param name="target">验证目标</param>
+            <param name="strategyName">策略名称</param>
         </member>
         <member name="T:Bing.Validations.Handlers.NothingHandler">
             <summary>
@@ -14997,17 +15714,6 @@
             <summary>
             验证
             </summary>
-        </member>
-        <member name="T:Bing.Validations.IValidationHandler">
-            <summary>
-            验证处理器
-            </summary>
-        </member>
-        <member name="M:Bing.Validations.IValidationHandler.Handle(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            处理验证错误
-            </summary>
-            <param name="results">验证结果集合</param>
         </member>
         <member name="T:Bing.Validations.IValidationRule">
             <summary>

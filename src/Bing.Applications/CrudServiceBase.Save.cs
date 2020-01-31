@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Bing.Domains.ChangeTracking;
 using Bing.Domains.Entities;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
@@ -154,7 +155,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        protected virtual void UpdateAfter(TEntity entity, ChangeValueCollection changeValues) => Log
+        protected virtual void UpdateAfter(TEntity entity, ChangedValueDescriptorCollection changeValues) => Log
             .BussinessId(entity.Id.SafeString())
             .Content(changeValues.SafeString());
 
@@ -200,7 +201,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        protected virtual Task UpdateAfterAsync(TEntity entity, ChangeValueCollection changeValues) => Task.CompletedTask;
+        protected virtual Task UpdateAfterAsync(TEntity entity, ChangedValueDescriptorCollection changeValues) => Task.CompletedTask;
 
         #endregion
 

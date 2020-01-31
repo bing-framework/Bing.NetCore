@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Bing.Utils.Extensions;
 using Bing.Validations;
+using Bing.Validations.Abstractions;
 using Bing.Validations.Handlers;
 
 namespace Bing.Domains.Entities

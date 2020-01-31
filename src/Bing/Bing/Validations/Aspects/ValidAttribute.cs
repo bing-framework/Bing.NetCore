@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects.Base;
 using Bing.Utils.Helpers;
+using Bing.Validations.Abstractions;
 
 namespace Bing.Validations.Aspects
 {
@@ -31,7 +32,7 @@ namespace Bing.Validations.Aspects
                 ValidateCollection(parameter);
                 return;
             }
-            var validation=parameter.Value as IValidation;
+            var validation = parameter.Value as IValidatable;
             validation?.Validate();
         }
 
@@ -41,7 +42,7 @@ namespace Bing.Validations.Aspects
         /// <param name="parameter">参数</param>
         private void ValidateCollection(Parameter parameter)
         {
-            if (!(parameter.Value is IEnumerable<IValidation> validations))
+            if (!(parameter.Value is IEnumerable<IValidatable> validations))
                 return;
             foreach (var validation in validations)
                 validation.Validate();

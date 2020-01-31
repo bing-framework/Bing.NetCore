@@ -3,7 +3,7 @@
 namespace Bing.Domains.Entities.Auditing
 {
     /// <summary>
-    /// 修改时间审计
+    /// 修改时间
     /// </summary>
     public interface IModificationTime
     {

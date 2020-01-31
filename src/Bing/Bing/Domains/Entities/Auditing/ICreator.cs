@@ -1,13 +1,13 @@
 ﻿namespace Bing.Domains.Entities.Auditing
 {
     /// <summary>
-    /// 修改人审计
+    /// 创建人
     /// </summary>
-    public interface IModifier
+    public interface ICreator
     {
         /// <summary>
-        /// 最后修改人
+        /// 创建人
         /// </summary>
-        string LastModifier { get; set; }
+        string Creator { get; set; }
     }
 }

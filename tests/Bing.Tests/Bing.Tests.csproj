@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\..\src\Bing.Utils\Bing.Utils.csproj" />
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
