@@ -59,8 +59,9 @@ namespace Bing.Domains.ChangeTracking
         {
             if (descriptor == null || string.IsNullOrWhiteSpace(descriptor.Description))
                 return;
-            if (_changedNameList.Contains(descriptor.PropertyName))
-                return;
+            // TODO: 此处会导致无法显示导航属性变更信息
+            //if (_changedNameList.Contains(descriptor.PropertyName))
+            //    return;
             _list.Add(descriptor);
             _changedNameList.Add(descriptor.PropertyName);
         }
@@ -76,8 +77,9 @@ namespace Bing.Domains.ChangeTracking
         {
             if (string.IsNullOrWhiteSpace(propertyName))
                 return;
-            if (_changedNameList.Contains(propertyName))
-                return;
+            // TODO: 此处会导致无法显示导航属性变更信息
+            //if (_changedNameList.Contains(propertyName))
+            //    return;
             _list.Add(new ChangedValueDescriptor(propertyName, description, oldValue, newValue));
             _changedNameList.Add(propertyName);
         }

@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\..\src\Bing.Utils\Bing.Utils.csproj" />
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
+    <ProjectReference Include="..\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
   </ItemGroup>
 
   <ItemGroup>

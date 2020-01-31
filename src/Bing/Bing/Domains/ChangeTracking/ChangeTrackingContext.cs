@@ -77,8 +77,9 @@ namespace Bing.Domains.ChangeTracking
         /// <param name="newValue">新值。范例：newEntity.Name</param>
         public void Add<TObject, TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) where TObject : IDomainObject
         {
-            var name = Lambda.GetName(expression);
-            var desc = Reflection.GetDescription(Lambda.GetMember(expression));
+            var member = Lambda.GetMemberExpression(expression);
+            var name = Lambda.GetMemberName(member);
+            var desc = Reflection.GetDisplayNameOrDescription(member.Member);
             var value = Lambda.GetValue(expression);
             Add(name, desc, Conv.To<TValue>(value), newValue);
         }

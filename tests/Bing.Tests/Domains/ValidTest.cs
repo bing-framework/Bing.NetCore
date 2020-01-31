@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
@@ -60,6 +58,17 @@ namespace Bing.Tests.Domains
             var entity = new EntitySample();
             var repository = _serviceProvider.GetService<IRepositorySample>();
             AssertHelper.Throws<Warning>(() => repository.Add(entity), "名称不能为空");
+        }
+
+        /// <summary>
+        /// 测试 - 添加时验证有效
+        /// </summary>
+        [Fact]
+        public void Test_Add_Valid()
+        {
+            var entity = new EntitySample {Name = "a"};
+            var repository = _serviceProvider.GetService<IRepositorySample>();
+            repository.Add(entity);
         }
     }
 }

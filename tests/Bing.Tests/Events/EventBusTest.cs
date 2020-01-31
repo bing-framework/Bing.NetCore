@@ -11,7 +11,7 @@ namespace Bing.Tests.Events
     /// <summary>
     /// 事件总线测试
     /// </summary>
-    public class EventBusTest:TestBase
+    public class EventBusTest : TestBase
     {
         /// <summary>
         /// 事件处理器2
@@ -30,9 +30,9 @@ namespace Bing.Tests.Events
         //[Fact]
         public async Task TestPublish()
         {
-            var manager=new EventHandlerManagerSample(_handler);
+            var manager = new EventHandlerManagerSample(_handler);
             var eventBus = new EventBus(manager);
-            var @event=new EventSample(){Name = "A"};
+            var @event = new EventSample() { Name = "A" };
             await eventBus.PublishAsync(@event);
             await _handler.Received(1).HandleAsync(@event);
         }

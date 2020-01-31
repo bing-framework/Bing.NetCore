@@ -12739,14 +12739,14 @@
             <param name="expression">属性表达式。范例：t => t.Name</param>
             <param name="newValue">新值。范例：newEntity.Name</param>
         </member>
-        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange(Bing.Domains.ChangeTracking.IChangeTrackable{`0},`0)">
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange``1(Bing.Domains.ChangeTracking.IChangeTrackable{``0},``0)">
             <summary>
             添加变更
             </summary>
             <param name="objectBeforeChangeTrackable">对象变更前跟踪</param>
             <param name="objectAfterChange">变更后的对象</param>
         </member>
-        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange(System.Collections.Generic.IEnumerable{Bing.Domains.ChangeTracking.IChangeTrackable{`0}},System.Collections.Generic.IEnumerable{`0})">
+        <member name="M:Bing.Domains.Entities.DomainObjectBase`1.AddChange``1(System.Collections.Generic.IEnumerable{Bing.Domains.ChangeTracking.IChangeTrackable{``0}},System.Collections.Generic.IEnumerable{``0})">
             <summary>
             添加变更
             </summary>
@@ -12880,6 +12880,12 @@
             <summary>
             创建标识
             </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.Validate(Bing.Validations.ValidationResultCollection)">
+            <summary>
+            验证
+            </summary>
+            <param name="results">验证结果集合</param>
         </member>
         <member name="M:Bing.Domains.Entities.EntityBase`2.ValidateId(Bing.Validations.ValidationResultCollection)">
             <summary>
@@ -13022,213 +13028,6 @@
             版本号
             </summary>
         </member>
-        <member name="T:Bing.Domains.Entities.ChangeValue">
-            <summary>
-            变更值
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.ChangeValue.PropertyName">
-            <summary>
-            属性名
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.ChangeValue.Description">
-            <summary>
-            描述
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.ChangeValue.OldValue">
-            <summary>
-            旧值
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.ChangeValue.NewValue">
-            <summary>
-            新值
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.ChangeValue.#ctor(System.String,System.String,System.String,System.String)">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.ChangeValue"/>类型的实例
-            </summary>
-            <param name="propertyName">属性名</param>
-            <param name="description">描述</param>
-            <param name="oldValue">旧值</param>
-            <param name="newValue">新值</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.ChangeValue.ToString">
-            <summary>
-            输出变更信息
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.ChangeValueCollection">
-            <summary>
-            变更值集合
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.ChangeValueCollection.Add(System.String,System.String,System.String,System.String)">
-            <summary>
-            添加
-            </summary>
-            <param name="propertyName">属性名</param>
-            <param name="description">描述</param>
-            <param name="oldValue">旧值</param>
-            <param name="newValue">新值</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.ChangeValueCollection.ToString">
-            <summary>
-            输出变更信息
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.DomainBase`1">
-            <summary>
-            领域层顶级基类
-            </summary>
-            <typeparam name="T">对象类型</typeparam>
-        </member>
-        <member name="F:Bing.Domains.Entities.DomainBase`1._description">
-            <summary>
-            描述
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.DomainBase`1._rules">
-            <summary>
-            验证规则集合
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.DomainBase`1._handler">
-            <summary>
-            验证处理器
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.DomainBase`1._changeValues">
-            <summary>
-            变更值集合
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.DomainBase`1"/>类型的实例
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.SetValidationHandler(Bing.Validations.Abstractions.IValidationHandler)">
-            <summary>
-            设置验证处理器
-            </summary>
-            <param name="handler">验证处理器</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddValidationRules(System.Collections.Generic.IEnumerable{Bing.Validations.IValidationRule})">
-            <summary>
-            添加验证规则列表
-            </summary>
-            <param name="rules">验证规则列表</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddValidationRule(Bing.Validations.IValidationRule)">
-            <summary>
-            添加验证规则
-            </summary>
-            <param name="rule">验证规则</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.Validate">
-            <summary>
-            验证
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.GetValidationResults">
-            <summary>
-            获取验证结果
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.Validate(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            验证并添加到验证结果集合
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.HandleValidationResults(Bing.Validations.ValidationResultCollection)">
-            <summary>
-            处理验证结果
-            </summary>
-            <param name="results">验证结果集合</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.GetChanges(`0)">
-            <summary>
-            获取变更属性
-            </summary>
-            <param name="newEntity">新对象</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddChanges(`0)">
-            <summary>
-            添加变更列表
-            </summary>
-            <param name="newEntity">新对象</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddChange``2(System.Linq.Expressions.Expression{System.Func{`0,``0}},``1)">
-            <summary>
-            添加变更
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <typeparam name="TValue">值类型</typeparam>
-            <param name="expression">属性表达式，范例：t => t.Name</param>
-            <param name="newValue">新值，范例：newEntity.Name</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddChange``1(System.String,System.String,``0,``0)">
-            <summary>
-            添加变更
-            </summary>
-            <typeparam name="TValue">值类型</typeparam>
-            <param name="propertyName">属性名</param>
-            <param name="description">描述</param>
-            <param name="oldValue">旧值，范例：this.Name</param>
-            <param name="newValue">新值，范例：newEntity.Name</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddChange``1(Bing.Domains.Entities.ICompareChange{``0},``0)">
-            <summary>
-            添加变更
-            </summary>
-            <typeparam name="TDomainObject">领域对象类型</typeparam>
-            <param name="oldObject">旧对象</param>
-            <param name="newObject">新对象</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddChange``1(System.Collections.Generic.IEnumerable{Bing.Domains.Entities.ICompareChange{``0}},System.Collections.Generic.IEnumerable{``0})">
-            <summary>
-            添加变更
-            </summary>
-            <typeparam name="TDomainObject">领域对象类型</typeparam>
-            <param name="oldObjects">旧对象列表</param>
-            <param name="newObjects">新对象列表</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddDescriptions">
-            <summary>
-            添加描述
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddDescription(System.String)">
-            <summary>
-            添加描述
-            </summary>
-            <param name="description">描述内容</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddDescription``1(System.String,``0)">
-            <summary>
-            添加描述
-            </summary>
-            <typeparam name="TValue">值类型</typeparam>
-            <param name="name">属性名</param>
-            <param name="value">属性值</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.AddDescription``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
-            <summary>
-            添加描述
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="expression">属性表达式，范例：t => t.Name</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.DomainBase`1.ToString">
-            <summary>
-            输出对象状态
-            </summary>
-        </member>
         <member name="T:Bing.Domains.Entities.EntityExtensions">
             <summary>
             实体扩展
@@ -13245,18 +13044,6 @@
             取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Domains.Entities.Auditing.IDeletionAudited"/>属性设置为空
             </summary>
             <param name="entity">逻辑删除实体</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.ICompareChange`1">
-            <summary>
-            通过对象比较获取变更属性集
-            </summary>
-            <typeparam name="T">领域对象类型</typeparam>
-        </member>
-        <member name="M:Bing.Domains.Entities.ICompareChange`1.GetChanges(`0)">
-            <summary>
-            获取变更属性
-            </summary>
-            <param name="other">其它领域对象</param>
         </member>
         <member name="T:Bing.Domains.Entities.IEntityHash">
             <summary>

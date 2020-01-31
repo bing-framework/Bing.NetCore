@@ -76,7 +76,7 @@ namespace Bing.Utils.Helpers
             if (member == null)
                 return string.Empty;
             if (member.GetCustomAttribute<DisplayAttribute>() is DisplayAttribute displayAttribute)
-                return displayAttribute.Description; ;
+                return displayAttribute.Name; ;
             if (member.GetCustomAttribute<DisplayNameAttribute>() is DisplayNameAttribute displayNameAttribute)
                 return displayNameAttribute.DisplayName;
             return string.Empty;

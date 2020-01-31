@@ -6,7 +6,6 @@ using Bing.Domains.Core;
 using Bing.Validations;
 using Bing.Validations.Abstractions;
 using Bing.Validations.Handlers;
-using IValidationHandler = Bing.Validations.Abstractions.IValidationHandler;
 
 namespace Bing.Domains.Entities
 {
@@ -95,21 +94,25 @@ namespace Bing.Domains.Entities
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="expression">属性表达式。范例：t => t.Name</param>
         /// <param name="newValue">新值。范例：newEntity.Name</param>
-        protected void AddChange<TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) => _changeTrackingContext.Add(expression,newValue);
+        protected void AddChange<TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) => _changeTrackingContext.Add(expression, newValue);
 
         /// <summary>
         /// 添加变更
         /// </summary>
         /// <param name="objectBeforeChangeTrackable">对象变更前跟踪</param>
         /// <param name="objectAfterChange">变更后的对象</param>
-        protected void AddChange(IChangeTrackable<TObject> objectBeforeChangeTrackable, TObject objectAfterChange) => _changeTrackingContext.Add(objectBeforeChangeTrackable,objectAfterChange);
+        protected void AddChange<TDomainObject>(IChangeTrackable<TDomainObject> objectBeforeChangeTrackable,
+            TDomainObject objectAfterChange) where TDomainObject : IDomainObject =>
+            _changeTrackingContext.Add(objectBeforeChangeTrackable, objectAfterChange);
 
         /// <summary>
         /// 添加变更
         /// </summary>
         /// <param name="leftObjs">左对象列表</param>
         /// <param name="rightObjs">右对象列表</param>
-        protected void AddChange(IEnumerable<IChangeTrackable<TObject>> leftObjs, IEnumerable<TObject> rightObjs) => _changeTrackingContext.Add(leftObjs,rightObjs);
+        protected void AddChange<TDomainObject>(IEnumerable<IChangeTrackable<TDomainObject>> leftObjs,
+            IEnumerable<TDomainObject> rightObjs) where TDomainObject : IDomainObject =>
+            _changeTrackingContext.Add(leftObjs, rightObjs);
 
         /// <summary>
         /// 添加变更
@@ -121,7 +124,7 @@ namespace Bing.Domains.Entities
         /// <param name="valueAfterChange">变更后的值。范例：newEntity.Name</param>
         protected void AddChange<TValue>(string propertyName, string description, TValue valueBeforeChange,
             TValue valueAfterChange) =>
-            _changeTrackingContext.Add(propertyName,description,valueBeforeChange,valueAfterChange);
+            _changeTrackingContext.Add(propertyName, description, valueBeforeChange, valueAfterChange);
 
         /// <summary>
         /// 获取变更值集合
