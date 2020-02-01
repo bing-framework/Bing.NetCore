@@ -224,7 +224,7 @@ namespace Bing.Datas.Queries
         /// <param name="query">查询对象</param>
         public IQuery<TEntity, TKey> Or(IQuery<TEntity, TKey> query)
         {
-            Or(query.GetPredicate());
+            _predicate = _predicate.Or(query.GetPredicate());
             OrderBy(query.GetOrder());
             return this;
         }

@@ -2236,7 +2236,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">数据源</param>
             <param name="criteria">查询条件对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIf``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
             <summary>
@@ -2246,7 +2245,6 @@
             <param name="source">数据源</param>
             <param name="predicate">查询条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIfNotEmpty``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
             <summary>
@@ -2256,7 +2254,6 @@
             <param name="source">数据源</param>
             <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
             注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -2314,7 +2311,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">数据源</param>
             <param name="pager">分页对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.QueryableExtensions.ToPagerList``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
             <summary>
@@ -2323,7 +2319,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="source">数据源</param>
             <param name="pager">分页对象</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.QueryParameter">
             <summary>
