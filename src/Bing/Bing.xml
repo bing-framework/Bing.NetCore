@@ -1483,6 +1483,1018 @@
             排序号
             </summary>
         </member>
+        <member name="T:Bing.Datas.Queries.Criterias.AndCriteria`1">
+            <summary>
+            与查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.AndCriteria`1.#ctor(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.AndCriteria`1"/>类型的实例
+            </summary>
+            <param name="left">查询条件1</param>
+            <param name="right">查询条件2</param>
+        </member>
+        <member name="P:Bing.Datas.Queries.Criterias.AndCriteria`1.Predicate">
+            <summary>
+            查询条件
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.AndCriteria`1.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2">
+            <summary>
+            日期范围过滤条件 - 不包含时间
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Bing.Datas.Queries.Boundary)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2"/>类型的实例
+            </summary>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            最小值是否大于最大值
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.GetMinValueExpression">
+            <summary>
+            获取最小值表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.GetMaxValueExpression">
+            <summary>
+            获取最大值表达式
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2">
+            <summary>
+            日期范围过滤条件 - 包含时间
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Bing.Datas.Queries.Boundary)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2"/>类型的实例
+            </summary>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            最小值是否大于最大值
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.GetMinValueExpression">
+            <summary>
+            获取最小值表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.GetMaxValueExpression">
+            <summary>
+            获取最大值表达式
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2">
+            <summary>
+            decimal范围过滤条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2"/>类型的实例
+            </summary>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.Decimal},System.Nullable{System.Decimal})">
+            <summary>
+            最小值是否大于最大值
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.DefaultCriteria`1">
+            <summary>
+            默认查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DefaultCriteria`1.#ctor(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DefaultCriteria`1"/>类型的实例
+            </summary>
+            <param name="predicate">查询条件</param>
+        </member>
+        <member name="P:Bing.Datas.Queries.Criterias.DefaultCriteria`1.Predicate">
+            <summary>
+            查询条件
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DefaultCriteria`1.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2">
+            <summary>
+            double范围过滤条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2"/>类型的实例
+            </summary>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.Double},System.Nullable{System.Double})">
+            <summary>
+            最小值是否大于最大值
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2">
+            <summary>
+            整数范围过滤条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2"/>类型的实例
+            </summary>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            最小值是否大于最大值
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.OrCriteria`1">
+            <summary>
+            或查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.OrCriteria`1.#ctor(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.OrCriteria`1"/>类型的实例
+            </summary>
+            <param name="left">查询条件1</param>
+            <param name="right">查询条件2</param>
+        </member>
+        <member name="P:Bing.Datas.Queries.Criterias.OrCriteria`1.Predicate">
+            <summary>
+            查询条件
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.OrCriteria`1.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3">
+            <summary>
+            范围过滤条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <typeparam name="TValue">值类型</typeparam>
+        </member>
+        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._propertyExpression">
+            <summary>
+            属性表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._builder">
+            <summary>
+            表达式生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._min">
+            <summary>
+            最小值
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._max">
+            <summary>
+            最大值
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._boundary">
+            <summary>
+            包含边界
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{`2},System.Nullable{`2},Bing.Datas.Queries.Boundary)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3"/>类型的实例
+            </summary>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetPropertyType">
+            <summary>
+            获取属性类型
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.Adjust(System.Nullable{`2},System.Nullable{`2})">
+            <summary>
+            当最小值大于最大值时进行校正
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.IsMinGreaterMax(System.Nullable{`2},System.Nullable{`2})">
+            <summary>
+            最小值是否大于最大值
+            </summary>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateLeftExpression">
+            <summary>
+            创建左操作数，即 t => t.Property >= Min
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateLeftOperator(System.Nullable{Bing.Datas.Queries.Boundary})">
+            <summary>
+            创建左操作符
+            </summary>
+            <param name="boundary">查询边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMinValue">
+            <summary>
+            获取最小值
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMinValueExpression">
+            <summary>
+            获取最小值表达式
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateRightExpression">
+            <summary>
+            创建右操作数，即 t => t.Property &lt;= Max
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateRightOperator(System.Nullable{Bing.Datas.Queries.Boundary})">
+            <summary>
+            创建右操作符
+            </summary>
+            <param name="boundary">查询边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMaxValue">
+            <summary>
+            获取最大值
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMaxValueExpression">
+            <summary>
+            获取最大值表达式
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Criterias.ValueExpressionHelper">
+            <summary>
+            值表达式操作
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.ValueExpressionHelper.CreateDateTimeExpression(System.Object,System.Boolean)">
+            <summary>
+            创建日期常量表达式
+            </summary>
+            <param name="value">日期值</param>
+            <param name="isNull">日期是否可空</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Criterias.ValueExpressionHelper.CreateDateTimeExpression(System.Object,System.Type)">
+            <summary>
+            创建日期常量表达式
+            </summary>
+            <param name="value">日期值</param>
+            <param name="targetType">目标类型</param>
+        </member>
+        <member name="T:Bing.Datas.Queries.Boundary">
+            <summary>
+            查询边界
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Left">
+            <summary>
+            包含左边
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Right">
+            <summary>
+            包含右边
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Both">
+            <summary>
+            包含两边
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Neither">
+            <summary>
+            不包含
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Internal.Helper">
+            <summary>
+            查询工具类
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Internal.Helper.GetWhereIfNotEmptyExpression``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            获取查询条件表达式
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="predicate">查询条件,如果参数值为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。
+            注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Internal.Helper.InitOrder``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
+            <summary>
+            初始化排序
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">查询对象</param>
+            <param name="pager">分页</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Internal.Helper.GetOrderedQueryable``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
+            <summary>
+            获取排序查询对象
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">查询对象</param>
+            <param name="pager">分页</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.IQuery`1">
+            <summary>
+            查询对象
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="T:Bing.Datas.Queries.IQuery`2">
+            <summary>
+            查询对象
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">实体标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Where(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="predicate">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Where(Bing.Domains.Repositories.ICriteria{`0})">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="criteria">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.WhereIf(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Boolean)">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="predicate">查询条件</param>
+            <param name="condition">该值为true时添加查询条件，否则忽略</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.WhereIfNotEmpty(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
+            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界，默认：包含两边</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界，默认：包含两边</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界，默认：包含两边</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="includeTime">是否包含时间，默认：包含</param>
+            <param name="boundary">包含边界</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.OrderBy``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Boolean)">
+            <summary>
+            添加排序
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="desc">是否降序</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.OrderBy(System.String,System.Boolean)">
+            <summary>
+            添加排序
+            </summary>
+            <param name="propertyName">排序属性</param>
+            <param name="desc">是否降序</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.And(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            与连接
+            </summary>
+            <param name="predicate">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.And(Bing.Datas.Queries.IQuery{`0,`1})">
+            <summary>
+            与连接
+            </summary>
+            <param name="query">查询对象</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Or(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}}[])">
+            <summary>
+            或连接
+            </summary>
+            <param name="predicates">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.IQuery`2.Or(Bing.Datas.Queries.IQuery{`0,`1})">
+            <summary>
+            或连接
+            </summary>
+            <param name="query">查询对象</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.IQueryParameter">
+            <summary>
+            查询参数
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.IQueryParameter.Keyword">
+            <summary>
+            搜索关键字
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.OrderByBuilder">
+            <summary>
+            排序生成器
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.OrderByBuilder._items">
+            <summary>
+            排序项列表
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.OrderByBuilder.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.OrderByBuilder"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.OrderByBuilder.Add(System.String,System.Boolean)">
+            <summary>
+            添加排序
+            </summary>
+            <param name="name">排序属相</param>
+            <param name="desc">是否降序</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.OrderByBuilder.Generate">
+            <summary>
+            生成排序字符串
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.OrderByItem">
+            <summary>
+            排序项
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.OrderByItem.Name">
+            <summary>
+            排序属性
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.OrderByItem.Desc">
+            <summary>
+            是否降序
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.OrderByItem.#ctor(System.String,System.Boolean)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.OrderByItem"/>类型的实例
+            </summary>
+            <param name="name">排序属性</param>
+            <param name="desc">是否降序</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.OrderByItem.Generate">
+            <summary>
+            创建排序字符串
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.Query`1">
+            <summary>
+            查询对象
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Query`1"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`1.#ctor(Bing.Datas.Queries.IQueryParameter)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Query`1"/>类型的实例
+            </summary>
+            <param name="queryParameter">查询参数</param>
+        </member>
+        <member name="T:Bing.Datas.Queries.Query`2">
+            <summary>
+            查询对象
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">实体标识类型</typeparam>
+        </member>
+        <member name="F:Bing.Datas.Queries.Query`2._parameter">
+            <summary>
+            查询参数
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Query`2._predicate">
+            <summary>
+            查询条件
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Query`2._orderByBuilder">
+            <summary>
+            排序生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Query`2"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.#ctor(Bing.Datas.Queries.IQueryParameter)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Query`2"/>类型的实例
+            </summary>
+            <param name="parameter">查询参数</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.GetOrder">
+            <summary>
+            获取排序条件
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.GetPager">
+            <summary>
+            获取分页
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Where(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="predicate">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Where(Bing.Domains.Repositories.ICriteria{`0})">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="criteria">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.WhereIf(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Boolean)">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="predicate">查询条件</param>
+            <param name="condition">该值为true时添加查询条件，否则忽略</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.WhereIfNotEmpty(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            添加查询条件
+            </summary>
+            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
+            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界，默认：包含两边</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界，默认：包含两边</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界，默认：包含两边</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="includeTime">是否包含时间，默认：包含</param>
+            <param name="boundary">包含边界</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.OrderBy``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Boolean)">
+            <summary>
+            添加排序
+            </summary>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式</param>
+            <param name="desc">是否降序</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.OrderBy(System.String,System.Boolean)">
+            <summary>
+            添加排序
+            </summary>
+            <param name="propertyName">排序属性</param>
+            <param name="desc">是否降序</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.And(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            与连接
+            </summary>
+            <param name="predicate">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.And(Bing.Datas.Queries.IQuery{`0,`1})">
+            <summary>
+            与连接
+            </summary>
+            <param name="query">查询对象</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Or(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}}[])">
+            <summary>
+            或连接
+            </summary>
+            <param name="predicates">查询条件</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Query`2.Or(Bing.Datas.Queries.IQuery{`0,`1})">
+            <summary>
+            或连接
+            </summary>
+            <param name="query">查询对象</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.QueryableExtensions">
+            <summary>
+            <see cref="T:System.Linq.IQueryable`1"/> 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.Where``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.ICriteria{``0})">
+            <summary>
+            添加查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="criteria">查询条件对象</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIf``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
+            <summary>
+            添加查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="predicate">查询条件</param>
+            <param name="condition">该值为true时添加查询条件，否则忽略</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIfNotEmpty``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            添加查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
+            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="includeTime">是否包含时间</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.Pager``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
+            <summary>
+            分页
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="pager">分页对象</param>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.QueryableExtensions.ToPagerList``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
+            <summary>
+            转换为分页列表
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="source">数据源</param>
+            <param name="pager">分页对象</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.QueryParameter">
+            <summary>
+            查询参数
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.QueryParameter.Keyword">
+            <summary>
+            搜索关键字
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Trees.ITreeQueryParameter`1">
+            <summary>
+            树型查询参数
+            </summary>
+            <typeparam name="TParentId">父编号类型</typeparam>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.ParentId">
+            <summary>
+            父编号
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.Level">
+            <summary>
+            级数
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.Path">
+            <summary>
+            路径
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.Enabled">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.IsSearch">
+            <summary>
+            是否搜索
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.Trees.ITreeQueryParameter">
+            <summary>
+            树型查询参数
+            </summary>
+        </member>
+        <member name="T:Bing.Datas.Queries.Trees.TreeCriteria`1">
+            <summary>
+            树型查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.TreeCriteria`1.#ctor(Bing.Datas.Queries.Trees.ITreeQueryParameter{System.Nullable{System.Guid}})">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Trees.TreeCriteria`1"/>类型的实例
+            </summary>
+            <param name="parameter">查询参数</param>
+        </member>
+        <member name="T:Bing.Datas.Queries.Trees.TreeCriteria`2">
+            <summary>
+            树型查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TParentId">父标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.TreeCriteria`2.#ctor(Bing.Datas.Queries.Trees.ITreeQueryParameter{`1})">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Trees.TreeCriteria`2"/>类型的实例
+            </summary>
+            <param name="parameter">查询参数</param>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.TreeCriteria`2.Predicate">
+            <summary>
+            查询条件
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.TreeCriteria`2.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.Trees.TreeQueryParameter`1">
+            <summary>
+            树型查询参数
+            </summary>
+            <typeparam name="TParentId">父标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.ParentId">
+            <summary>
+            父编号
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.Level">
+            <summary>
+            级数
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Trees.TreeQueryParameter`1._path">
+            <summary>
+            路径
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.Path">
+            <summary>
+            路径
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.Enabled">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.Trees.TreeQueryParameter`1"/>类型的实例
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.IsSearch">
+            <summary>
+            是否搜索
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.IsSearchProperty(System.String,System.Object)">
+            <summary>
+            是否搜索属性
+            </summary>
+            <param name="name">属性名</param>
+            <param name="value">属性值</param>
+            <returns></returns>
+        </member>
+        <member name="T:Bing.Datas.Queries.Trees.TreeQueryParameter">
+            <summary>
+            树型查询参数
+            </summary>
+        </member>
         <member name="T:Bing.Datas.Sql.Builders.Clauses.FromClause">
             <summary>
             From子句
@@ -9977,1036 +10989,6 @@
         <member name="F:Bing.Datas.Configs.DataLogLevel.Off">
             <summary>
             关闭日志
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.Boundary">
-            <summary>
-            查询边界
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Left">
-            <summary>
-            包含左边
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Right">
-            <summary>
-            包含右边
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Both">
-            <summary>
-            包含两边
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Neither">
-            <summary>
-            不包含
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.AndCriteria`1">
-            <summary>
-            与查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.AndCriteria`1.#ctor(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.AndCriteria`1"/>类型的实例
-            </summary>
-            <param name="left">查询条件1</param>
-            <param name="right">查询条件2</param>
-        </member>
-        <member name="P:Bing.Datas.Queries.Criterias.AndCriteria`1.Predicate">
-            <summary>
-            查询条件
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.AndCriteria`1.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2">
-            <summary>
-            日期范围过滤条件 - 不包含时间
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Bing.Datas.Queries.Boundary)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2"/>类型的实例
-            </summary>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
-            <summary>
-            最小值是否大于最大值
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.GetMinValueExpression">
-            <summary>
-            获取最小值表达式
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.GetMaxValueExpression">
-            <summary>
-            获取最大值表达式
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2">
-            <summary>
-            日期范围过滤条件 - 包含时间
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Bing.Datas.Queries.Boundary)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2"/>类型的实例
-            </summary>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
-            <summary>
-            最小值是否大于最大值
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.GetMinValueExpression">
-            <summary>
-            获取最小值表达式
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DateTimeSegmentCriteria`2.GetMaxValueExpression">
-            <summary>
-            获取最大值表达式
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2">
-            <summary>
-            decimal范围过滤条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2"/>类型的实例
-            </summary>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DecimalSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.Decimal},System.Nullable{System.Decimal})">
-            <summary>
-            最小值是否大于最大值
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.DefaultCriteria`1">
-            <summary>
-            默认查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DefaultCriteria`1.#ctor(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DefaultCriteria`1"/>类型的实例
-            </summary>
-            <param name="predicate">查询条件</param>
-        </member>
-        <member name="P:Bing.Datas.Queries.Criterias.DefaultCriteria`1.Predicate">
-            <summary>
-            查询条件
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DefaultCriteria`1.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2">
-            <summary>
-            double范围过滤条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2"/>类型的实例
-            </summary>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.DoubleSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.Double},System.Nullable{System.Double})">
-            <summary>
-            最小值是否大于最大值
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2">
-            <summary>
-            整数范围过滤条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2"/>类型的实例
-            </summary>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.IntSegmentCriteria`2.IsMinGreaterMax(System.Nullable{System.Int32},System.Nullable{System.Int32})">
-            <summary>
-            最小值是否大于最大值
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.OrCriteria`1">
-            <summary>
-            或查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.OrCriteria`1.#ctor(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.OrCriteria`1"/>类型的实例
-            </summary>
-            <param name="left">查询条件1</param>
-            <param name="right">查询条件2</param>
-        </member>
-        <member name="P:Bing.Datas.Queries.Criterias.OrCriteria`1.Predicate">
-            <summary>
-            查询条件
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.OrCriteria`1.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3">
-            <summary>
-            范围过滤条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <typeparam name="TValue">值类型</typeparam>
-        </member>
-        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._propertyExpression">
-            <summary>
-            属性表达式
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._builder">
-            <summary>
-            表达式生成器
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._min">
-            <summary>
-            最小值
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._max">
-            <summary>
-            最大值
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3._boundary">
-            <summary>
-            包含边界
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.#ctor(System.Linq.Expressions.Expression{System.Func{`0,`1}},System.Nullable{`2},System.Nullable{`2},Bing.Datas.Queries.Boundary)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3"/>类型的实例
-            </summary>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetPropertyType">
-            <summary>
-            获取属性类型
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.Adjust(System.Nullable{`2},System.Nullable{`2})">
-            <summary>
-            当最小值大于最大值时进行校正
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.IsMinGreaterMax(System.Nullable{`2},System.Nullable{`2})">
-            <summary>
-            最小值是否大于最大值
-            </summary>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateLeftExpression">
-            <summary>
-            创建左操作数，即 t=> t.Property >= Min
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateLeftOperator(System.Nullable{Bing.Datas.Queries.Boundary})">
-            <summary>
-            创建左操作符
-            </summary>
-            <param name="boundary">查询边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMinValue">
-            <summary>
-            获取最小值
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMinValueExpression">
-            <summary>
-            获取最小值表达式
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateRightExpression">
-            <summary>
-            创建右操作数，即 t => t.Property &lt;= Max
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.CreateRightOperator(System.Nullable{Bing.Datas.Queries.Boundary})">
-            <summary>
-            创建右操作符
-            </summary>
-            <param name="boundary">查询边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMaxValue">
-            <summary>
-            获取最大值
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.SegmentCriteriaBase`3.GetMaxValueExpression">
-            <summary>
-            获取最大值表达式
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Criterias.ValueExpressionHelper">
-            <summary>
-            值表达式操作
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.ValueExpressionHelper.CreateDateTimeExpression(System.Object,System.Boolean)">
-            <summary>
-            创建日期常量表达式
-            </summary>
-            <param name="value">日期值</param>
-            <param name="isNull">日期是否可空</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Criterias.ValueExpressionHelper.CreateDateTimeExpression(System.Object,System.Type)">
-            <summary>
-            创建日期常量表达式
-            </summary>
-            <param name="value">日期值</param>
-            <param name="targetType">目标类型</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Internal.Helper">
-            <summary>
-            查询工具类
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Internal.Helper.GetWhereIfNotEmptyExpression``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
-            <summary>
-            获取查询条件表达式
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="predicate">查询条件,如果参数值为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。
-            注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Internal.Helper.InitOrder``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            初始化排序
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">查询对象</param>
-            <param name="pager">分页</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Internal.Helper.GetOrderedQueryable``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            获取排序查询对象
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">查询对象</param>
-            <param name="pager">分页</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.IQuery`1">
-            <summary>
-            查询对象
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="T:Bing.Datas.Queries.IQuery`2">
-            <summary>
-            查询对象
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">实体标识类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Where(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="predicate">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Where(Bing.Domains.Repositories.ICriteria{`0})">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="criteria">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.WhereIf(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Boolean)">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="predicate">查询条件</param>
-            <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.WhereIfNotEmpty(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
-            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="includeTime">是否包含时间，默认：包含</param>
-            <param name="boundary">包含边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.OrderBy``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Boolean)">
-            <summary>
-            添加排序
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="desc">是否降序</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.OrderBy(System.String,System.Boolean)">
-            <summary>
-            添加排序
-            </summary>
-            <param name="propertyName">排序属性</param>
-            <param name="desc">是否降序</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.And(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            与连接
-            </summary>
-            <param name="predicate">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.And(Bing.Datas.Queries.IQuery{`0,`1})">
-            <summary>
-            与连接
-            </summary>
-            <param name="query">查询对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Or(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}}[])">
-            <summary>
-            或连接
-            </summary>
-            <param name="predicates">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.IQuery`2.Or(Bing.Datas.Queries.IQuery{`0,`1})">
-            <summary>
-            或连接
-            </summary>
-            <param name="query">查询对象</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.IQueryParameter">
-            <summary>
-            查询参数
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.IQueryParameter.Keyword">
-            <summary>
-            搜索关键字
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.OrderByBuilder">
-            <summary>
-            排序生成器
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.OrderByBuilder._items">
-            <summary>
-            排序项列表
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.OrderByBuilder.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.OrderByBuilder"/>类型的实例
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.OrderByBuilder.Add(System.String,System.Boolean)">
-            <summary>
-            添加排序
-            </summary>
-            <param name="name">排序属相</param>
-            <param name="desc">是否降序</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.OrderByBuilder.Generate">
-            <summary>
-            生成排序字符串
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.OrderByItem">
-            <summary>
-            排序项
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.OrderByItem.Name">
-            <summary>
-            排序属性
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.OrderByItem.Desc">
-            <summary>
-            是否降序
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.OrderByItem.#ctor(System.String,System.Boolean)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.OrderByItem"/>类型的实例
-            </summary>
-            <param name="name">排序属性</param>
-            <param name="desc">是否降序</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.OrderByItem.Generate">
-            <summary>
-            创建排序字符串
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Query`1">
-            <summary>
-            查询对象
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`1.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Query`1"/>类型的实例
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`1.#ctor(Bing.Datas.Queries.IQueryParameter)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Query`1"/>类型的实例
-            </summary>
-            <param name="queryParameter">查询参数</param>
-        </member>
-        <member name="T:Bing.Datas.Queries.Query`2">
-            <summary>
-            查询对象
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">实体标识类型</typeparam>
-        </member>
-        <member name="F:Bing.Datas.Queries.Query`2._parameter">
-            <summary>
-            查询参数
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Query`2._predicate">
-            <summary>
-            查询条件
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Query`2._orderByBuilder">
-            <summary>
-            排序生成器
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Query`2"/>类型的实例
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.#ctor(Bing.Datas.Queries.IQueryParameter)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Query`2"/>类型的实例
-            </summary>
-            <param name="parameter">查询参数</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.GetOrder">
-            <summary>
-            获取排序条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.GetPager">
-            <summary>
-            获取分页
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Where(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="predicate">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Where(Bing.Domains.Repositories.ICriteria{`0})">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="criteria">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.WhereIf(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Boolean)">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="predicate">查询条件</param>
-            <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.WhereIfNotEmpty(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
-            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="includeTime">是否包含时间，默认：包含</param>
-            <param name="boundary">包含边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.OrderBy``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Boolean)">
-            <summary>
-            添加排序
-            </summary>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式</param>
-            <param name="desc">是否降序</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.OrderBy(System.String,System.Boolean)">
-            <summary>
-            添加排序
-            </summary>
-            <param name="propertyName">排序属性</param>
-            <param name="desc">是否降序</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.And(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
-            <summary>
-            与连接
-            </summary>
-            <param name="predicate">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.And(Bing.Datas.Queries.IQuery{`0,`1})">
-            <summary>
-            与连接
-            </summary>
-            <param name="query">查询对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Or(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}}[])">
-            <summary>
-            或连接
-            </summary>
-            <param name="predicates">查询条件</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Query`2.Or(Bing.Datas.Queries.IQuery{`0,`1})">
-            <summary>
-            或连接
-            </summary>
-            <param name="query">查询对象</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.QueryableExtensions">
-            <summary>
-            <see cref="T:System.Linq.IQueryable`1"/> 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Where``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.ICriteria{``0})">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="criteria">查询条件对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIf``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="predicate">查询条件</param>
-            <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIfNotEmpty``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
-            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="includeTime">是否包含时间</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Pager``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            分页
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="pager">分页对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.ToPagerList``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            转换为分页列表
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="pager">分页对象</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.QueryParameter">
-            <summary>
-            查询参数
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.QueryParameter.Keyword">
-            <summary>
-            搜索关键字
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.Trees.ITreeQueryParameter`1">
-            <summary>
-            树型查询参数
-            </summary>
-            <typeparam name="TParentId">父编号类型</typeparam>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.ParentId">
-            <summary>
-            父编号
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.Level">
-            <summary>
-            级数
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.Path">
-            <summary>
-            路径
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.Enabled">
-            <summary>
-            启用
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.ITreeQueryParameter`1.IsSearch">
-            <summary>
-            是否搜索
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Trees.ITreeQueryParameter">
-            <summary>
-            树型查询参数
-            </summary>
-        </member>
-        <member name="T:Bing.Datas.Queries.Trees.TreeCriteria`1">
-            <summary>
-            树型查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.TreeCriteria`1.#ctor(Bing.Datas.Queries.Trees.ITreeQueryParameter{System.Nullable{System.Guid}})">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Trees.TreeCriteria`1"/>类型的实例
-            </summary>
-            <param name="parameter">查询参数</param>
-        </member>
-        <member name="T:Bing.Datas.Queries.Trees.TreeCriteria`2">
-            <summary>
-            树型查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TParentId">父标识类型</typeparam>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.TreeCriteria`2.#ctor(Bing.Datas.Queries.Trees.ITreeQueryParameter{`1})">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Trees.TreeCriteria`2"/>类型的实例
-            </summary>
-            <param name="parameter">查询参数</param>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.TreeCriteria`2.Predicate">
-            <summary>
-            查询条件
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.TreeCriteria`2.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Trees.TreeQueryParameter`1">
-            <summary>
-            树型查询参数
-            </summary>
-            <typeparam name="TParentId">父标识类型</typeparam>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.ParentId">
-            <summary>
-            父编号
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.Level">
-            <summary>
-            级数
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Trees.TreeQueryParameter`1._path">
-            <summary>
-            路径
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.Path">
-            <summary>
-            路径
-            </summary>
-        </member>
-        <member name="P:Bing.Datas.Queries.Trees.TreeQueryParameter`1.Enabled">
-            <summary>
-            启用
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.#ctor">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.Trees.TreeQueryParameter`1"/>类型的实例
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.IsSearch">
-            <summary>
-            是否搜索
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.IsSearchProperty(System.String,System.Object)">
-            <summary>
-            是否搜索属性
-            </summary>
-            <param name="name">属性名</param>
-            <param name="value">属性值</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Datas.Queries.Trees.TreeQueryParameter">
-            <summary>
-            树型查询参数
             </summary>
         </member>
         <member name="T:Bing.DependencyInjection.ConventionalRegistrarBase">

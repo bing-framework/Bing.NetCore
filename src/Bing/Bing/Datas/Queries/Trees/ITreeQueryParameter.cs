@@ -31,7 +31,6 @@ namespace Bing.Datas.Queries.Trees
         /// <summary>
         /// 是否搜索
         /// </summary>
-        /// <returns></returns>
         bool IsSearch();
     }
 
