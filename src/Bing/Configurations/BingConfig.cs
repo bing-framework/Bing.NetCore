@@ -1,5 +1,5 @@
-﻿using System;
-using Bing.Exceptions;
+﻿using Bing.Validations.Abstractions;
+using Bing.Validations.Handlers;
 
 namespace Bing.Configurations
 {
@@ -38,9 +38,9 @@ namespace Bing.Configurations
         }
 
         /// <summary>
-        /// 验证
+        /// 验证处理器
         /// </summary>
-        public Action<string> ValidationHandler = (message) => throw new Warning(message);
+        public IValidationHandler ValidationHandler { get; set; } = new ThrowHandler();
 
         /// <summary>
         /// 是否启用调试日志

@@ -39,7 +39,6 @@ namespace Bing.Domains.Entities
             _validationContext = new ValidationContext<TObject>(AssignableType(this));
             _descriptionContext = new DescriptionContext();
             _changeTrackingContext = new ChangeTrackingContext();
-            SetValidateHandler(new ThrowHandler());
         }
 
         #region Validation(验证)

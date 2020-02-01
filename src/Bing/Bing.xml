@@ -13028,29 +13028,6 @@
             版本号
             </summary>
         </member>
-        <member name="T:Bing.Domains.Entities.EntityExtensions">
-            <summary>
-            实体扩展
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityExtensions.IsNullOrDeleted(Bing.Domains.Entities.IDelete)">
-            <summary>
-            是否空对象或是否已删除
-            </summary>
-            <param name="entity">逻辑删除实体</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityExtensions.UnDelete(Bing.Domains.Entities.IDelete)">
-            <summary>
-            取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Domains.Entities.Auditing.IDeletionAudited"/>属性设置为空
-            </summary>
-            <param name="entity">逻辑删除实体</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.IEntityHash">
-            <summary>
-            实体Hash。对实体的属性值进行Hash，确定实体是否存在变化。
-            这些变化可用于系统初始化时确定是否需要进行数据同步
-            </summary>
-        </member>
         <member name="T:Bing.Domains.Entities.KeyListComparator`1">
             <summary>
             键列表比较器
@@ -13182,6 +13159,29 @@
             <param name="createList">创建列表</param>
             <param name="updateList">更新列表</param>
             <param name="deleteList">删除列表</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.EntityExtensions">
+            <summary>
+            实体扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityExtensions.IsNullOrDeleted(Bing.Domains.Entities.IDelete)">
+            <summary>
+            是否空对象或是否已删除
+            </summary>
+            <param name="entity">逻辑删除实体</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityExtensions.UnDelete(Bing.Domains.Entities.IDelete)">
+            <summary>
+            取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Domains.Entities.Auditing.IDeletionAudited"/>属性设置为空
+            </summary>
+            <param name="entity">逻辑删除实体</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.IEntityHash">
+            <summary>
+            实体Hash。对实体的属性值进行Hash，确定实体是否存在变化。
+            这些变化可用于系统初始化时确定是否需要进行数据同步
+            </summary>
         </member>
         <member name="T:Bing.Domains.Entities.Tenants.ITenant">
             <summary>
@@ -15587,9 +15587,9 @@
             当前框架配置
             </summary>
         </member>
-        <member name="F:Bing.Configurations.BingConfig.ValidationHandler">
+        <member name="P:Bing.Configurations.BingConfig.ValidationHandler">
             <summary>
-            验证
+            验证处理器
             </summary>
         </member>
         <member name="P:Bing.Configurations.BingConfig.EnabledDebug">

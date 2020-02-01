@@ -70,7 +70,6 @@
 
   <ItemGroup>
     <Folder Include="Bing\Events\Local\" />
-    <Folder Include="Bing\Validations\Handlers\" />
   </ItemGroup>
 
 </Project>

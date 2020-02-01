@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Validations.Abstractions;
 
 namespace Bing.Validations
 {
@@ -18,7 +19,7 @@ namespace Bing.Validations
         /// </summary>
         /// <param name="op">验证处理操作</param>
         /// <param name="handler">验证处理器</param>
-        public static ValidationHandleOperation HandleAll(this ValidationHandleOperation op, Bing.Validations.Abstractions.IValidationHandler handler)
+        public static ValidationHandleOperation HandleAll(this ValidationHandleOperation op, IValidationHandler handler)
         {
             if (op == null)
                 throw new ArgumentNullException(nameof(op));

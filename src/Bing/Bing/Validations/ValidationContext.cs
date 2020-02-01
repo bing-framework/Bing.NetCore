@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Bing.Configurations;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations
@@ -111,7 +112,9 @@ namespace Bing.Validations
                 ResultCollection.AddRange(tempList);
             if (ResultCollection.IsValid)
                 return;
-            Handle?.Invoke(ResultCollection.Handle());
+            if (Handle == null)
+                Handle = op => op.HandleAll(BingConfig.Current.ValidationHandler);// 如果没有处理器操作，则使用默认操作
+            Handle.Invoke(ResultCollection.Handle());
         }
 
         /// <summary>

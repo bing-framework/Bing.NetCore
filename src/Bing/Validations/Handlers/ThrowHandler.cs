@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Bing.Configurations;
+using Bing.Exceptions;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations.Handlers
@@ -17,8 +17,7 @@ namespace Bing.Validations.Handlers
         {
             if (results.IsValid)
                 return;
-            BingConfig.Current.ValidationHandler(results.First().ErrorMessage);
-            //throw new Warning(results.First().ErrorMessage);
+            throw new Warning(results.First().ErrorMessage);
         }
     }
 }

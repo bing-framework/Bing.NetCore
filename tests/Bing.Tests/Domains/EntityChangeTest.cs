@@ -19,6 +19,9 @@ namespace Bing.Tests.Domains
         /// </summary>
         private readonly AggregateRootSample _sample2;
 
+        /// <summary>
+        /// 初始化一个<see cref="EntityChangeTest"/>类型的实例
+        /// </summary>
         public EntityChangeTest()
         {
             _sample = new AggregateRootSample();
