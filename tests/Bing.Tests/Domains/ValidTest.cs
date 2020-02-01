@@ -1,12 +1,9 @@
 ﻿using System;
-using AspectCore.DynamicProxy;
-using AspectCore.DynamicProxy.Parameters;
-using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
+using Bing.DependencyInjection;
 using Bing.Exceptions;
 using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;
-using Bing.Utils.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -29,16 +26,7 @@ namespace Bing.Tests.Domains
         {
             var services = new ServiceCollection();
             services.AddScoped<IRepositorySample, RepositorySample>();
-            services.ConfigureDynamicProxy(config =>
-            {
-                config.EnableParameterAspect();
-                config.NonAspectPredicates.Add(t =>
-                    Bing.Utils.Helpers.Reflection.GetTopBaseType(t.DeclaringType).SafeString() ==
-                    "Microsoft.EntityFrameworkCore.DbContext");
-            });
-            services.AddScoped<IAspectScheduler, ScopeAspectScheduler>();
-            services.AddScoped<IAspectBuilderFactory, ScopeAspectBuilderFactory>();
-            services.AddScoped<IAspectContextFactory, ScopeAspectContextFactory>();
+            services.EnableAop();
             _serviceProvider = services.BuildServiceContextProvider();
         }
 

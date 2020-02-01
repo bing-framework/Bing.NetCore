@@ -11036,6 +11036,24 @@
             <param name="services">服务集合</param>
             <param name="type">类型</param>
         </member>
+        <member name="T:Bing.DependencyInjection.Extensions">
+            <summary>
+            AspectCore扩展
+            </summary>
+        </member>
+        <member name="M:Bing.DependencyInjection.Extensions.EnableAop(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{AspectCore.Configuration.IAspectConfiguration})">
+            <summary>
+            启用Aop
+            </summary>
+            <param name="services">服务集合</param>
+            <param name="configAction">Aop配置</param>
+        </member>
+        <member name="M:Bing.DependencyInjection.Extensions.EnableAspectScoped(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            启用Aop作用域
+            </summary>
+            <param name="services">服务集合</param>
+        </member>
         <member name="T:Bing.DependencyInjection.IConventionalRegistrar">
             <summary>
             通用注册器

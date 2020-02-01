@@ -1,10 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
-using AspectCore.DynamicProxy;
-using AspectCore.DynamicProxy.Parameters;
-using AspectCore.Extensions.AspectScope;
-using AspectCore.Extensions.DependencyInjection;
-using Bing.Utils.Extensions;
+using Bing.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore
@@ -42,17 +38,7 @@ namespace Bing.AspNetCore
             services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.Session>();
             // 注册编码
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            services.ConfigureDynamicProxy(config =>
-            {
-                config.EnableParameterAspect();
-                config.NonAspectPredicates.Add(t =>
-                    Bing.Utils.Helpers.Reflection.GetTopBaseType(t.DeclaringType).SafeString() ==
-                    "Microsoft.EntityFrameworkCore.DbContext");
-            });
-            services.AddScoped<IAspectScheduler, ScopeAspectScheduler>();
-            services.AddScoped<IAspectBuilderFactory, ScopeAspectBuilderFactory>();
-            services.AddScoped<IAspectContextFactory, ScopeAspectContextFactory>();
-
+            services.EnableAop();
             return services;
         }
 
@@ -60,9 +46,6 @@ namespace Bing.AspNetCore
         /// 应用模块服务
         /// </summary>
         /// <param name="provider">服务提供程序</param>
-        public override void UseModule(IServiceProvider provider)
-        {
-            Enabled = true;
-        }
+        public override void UseModule(IServiceProvider provider) => Enabled = true;
     }
 }
