@@ -44,13 +44,10 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <param name="expression">表达式</param>
         /// <param name="right">取表达式右侧，(l,r)=> l.LId == r.RId，设置为true，返回 RID</param>
-        /// <returns></returns>
         public static MemberExpression GetMemberExpression(Expression expression,bool right=false)
         {
             if (expression == null)
-            {
                 return null;
-            }
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:

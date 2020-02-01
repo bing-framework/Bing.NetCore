@@ -1,7 +1,8 @@
 ﻿using Bing.Utils.Extensions.Common;
 using Xunit;
 
-namespace Bing.Utils.Tests.Extensions.Common
+// ReSharper disable once CheckNamespace
+namespace Bing.Utils.Tests.Extensions
 {
     /// <summary>
     /// 系统扩展测试 - 数字

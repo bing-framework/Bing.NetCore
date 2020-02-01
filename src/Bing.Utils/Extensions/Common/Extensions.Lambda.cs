@@ -20,13 +20,10 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="expression">表达式</param>
         /// <param name="propertyName">属性名，支持多级属性名，与句点分隔，范例：Customer.Name</param>
-        /// <returns></returns>
         public static Expression Property(this Expression expression, string propertyName)
         {
             if (propertyName.All(t => t != '.'))
-            {
                 return Expression.Property(expression, propertyName);
-            }
             var propertyNameList = propertyName.Split('.');
             Expression result = null;
             for (int i = 0; i < propertyName.Length; i++)
@@ -46,11 +43,7 @@ namespace Bing.Utils.Extensions
         /// </summary>
         /// <param name="expression">表达式</param>
         /// <param name="member">属性</param>
-        /// <returns></returns>
-        public static Expression Property(this Expression expression, MemberInfo member)
-        {
-            return Expression.MakeMemberAccess(expression, member);
-        }
+        public static Expression Property(this Expression expression, MemberInfo member) => Expression.MakeMemberAccess(expression, member);
 
         #endregion
 
@@ -402,10 +395,15 @@ namespace Bing.Utils.Extensions
         /// <param name="instance">调用的实例</param>
         /// <param name="methodName">方法名</param>
         /// <param name="values">参数值列表</param>
-        /// <returns></returns>
         public static Expression Call(this Expression instance, string methodName, params Expression[] values)
         {
-            return Expression.Call(instance, instance.Type.GetTypeInfo().GetMethod(methodName), values);
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+            // TODO: 存在问题，netcore2.2环境下，string 会有多个值
+            var methodInfo = instance.Type.GetMethod(methodName);
+            if (methodInfo == null)
+                return null;
+            return Expression.Call(instance, methodInfo, values);
         }
 
         /// <summary>
@@ -414,15 +412,16 @@ namespace Bing.Utils.Extensions
         /// <param name="instance">调用的实例</param>
         /// <param name="methodName">方法名</param>
         /// <param name="values">参数值列表</param>
-        /// <returns></returns>
         public static Expression Call(this Expression instance, string methodName, params object[] values)
         {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+            var methodInfo = instance.Type.GetMethod(methodName);
+            if (methodInfo == null)
+                return null;
             if (values == null || values.Length == 0)
-            {
-                return Expression.Call(instance, instance.Type.GetTypeInfo().GetMethod(methodName));
-            }
-            return Expression.Call(instance, instance.Type.GetTypeInfo().GetMethod(methodName),
-                values.Select(Expression.Constant));
+                return Expression.Call(instance, methodInfo);
+            return Expression.Call(instance, methodInfo, values.Select(Expression.Constant));
         }
 
         /// <summary>
@@ -432,16 +431,17 @@ namespace Bing.Utils.Extensions
         /// <param name="methodName">方法名</param>
         /// <param name="paramTypes">参数类型列表</param>
         /// <param name="values">参数值列表</param>
-        /// <returns></returns>
         public static Expression Call(this Expression instance, string methodName, Type[] paramTypes,
             params object[] values)
         {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+            var methodInfo = instance.Type.GetMethod(methodName, paramTypes);
+            if (methodInfo == null)
+                return null;
             if (values == null || values.Length == 0)
-            {
-                return Expression.Call(instance, instance.Type.GetTypeInfo().GetMethod(methodName, paramTypes));
-            }
-            return Expression.Call(instance, instance.Type.GetTypeInfo().GetMethod(methodName, paramTypes),
-                values.Select(Expression.Constant));
+                return Expression.Call(instance, methodInfo);
+            return Expression.Call(instance, methodInfo, values.Select(Expression.Constant));
         }
 
         #endregion

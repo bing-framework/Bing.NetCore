@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Tests;
+using Bing.Tests.Samples;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
-using Bing.Utils.Tests.Samples;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -12,7 +12,7 @@ namespace Bing.Utils.Tests.Extensions
     public partial class ExtensionsTest
     {
         /// <summary>
-        /// 测试获取格式化日期时间字符串
+        /// 测试 - 获取格式化日期时间字符串
         /// </summary>
         [Fact]
         public void Test_ToDateTimeString()
@@ -25,7 +25,7 @@ namespace Bing.Utils.Tests.Extensions
         }
 
         /// <summary>
-        /// 测试获取格式化日期字符串
+        /// 测试 - 获取格式化日期字符串
         /// </summary>
         [Fact]
         public void Test_ToDateString()
@@ -37,7 +37,7 @@ namespace Bing.Utils.Tests.Extensions
         }
 
         /// <summary>
-        /// 测试获取格式化时间字符串
+        /// 测试 - 获取格式化时间字符串
         /// </summary>
         [Fact]
         public void Test_ToTimeString()
@@ -49,7 +49,7 @@ namespace Bing.Utils.Tests.Extensions
         }
 
         /// <summary>
-        /// 测试获取格式化毫秒字符串
+        /// 测试 - 获取格式化毫秒字符串
         /// </summary>
         [Fact]
         public void Test_ToMillisecondString()
@@ -61,7 +61,7 @@ namespace Bing.Utils.Tests.Extensions
         }
 
         /// <summary>
-        /// 测试获取格式化中文日期字符串
+        /// 测试 - 获取格式化中文日期字符串
         /// </summary>
         [Fact]
         public void Test_ToChineseDateString()
@@ -74,7 +74,7 @@ namespace Bing.Utils.Tests.Extensions
         }
 
         /// <summary>
-        /// 测试获取格式化中文日期时间字符串
+        /// 测试 - 获取格式化中文日期时间字符串
         /// </summary>
         [Fact]
         public void Test_ToChineseDateTimeString()
@@ -89,10 +89,10 @@ namespace Bing.Utils.Tests.Extensions
         }
 
         /// <summary>
-        /// 测试获取时间间隔描述
+        /// 测试 - 获取时间间隔描述
         /// </summary>
         [Fact]
-        public void Test_Description_Sapn()
+        public void Test_Description_Span()
         {
             TimeSpan span = new DateTime(2000, 1, 1, 1, 0, 1) - new DateTime(2000, 1, 1, 1, 0, 0);
             Assert.Equal("1秒", span.Description());

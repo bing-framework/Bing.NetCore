@@ -2983,7 +2983,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="propertyName">属性名，支持多级属性名，与句点分隔，范例：Customer.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Property(System.Linq.Expressions.Expression,System.Reflection.MemberInfo)">
             <summary>
@@ -2991,7 +2990,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="member">属性</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.And(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)">
             <summary>
@@ -3174,7 +3172,6 @@
             <param name="instance">调用的实例</param>
             <param name="methodName">方法名</param>
             <param name="values">参数值列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Call(System.Linq.Expressions.Expression,System.String,System.Object[])">
             <summary>
@@ -3183,7 +3180,6 @@
             <param name="instance">调用的实例</param>
             <param name="methodName">方法名</param>
             <param name="values">参数值列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Call(System.Linq.Expressions.Expression,System.String,System.Type[],System.Object[])">
             <summary>
@@ -3193,7 +3189,6 @@
             <param name="methodName">方法名</param>
             <param name="paramTypes">参数类型列表</param>
             <param name="values">参数值列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Extensions.Extensions.Compose``1(System.Linq.Expressions.Expression{``0},System.Linq.Expressions.Expression{``0},System.Func{System.Linq.Expressions.Expression,System.Linq.Expressions.Expression,System.Linq.Expressions.Expression})">
             <summary>
@@ -6394,7 +6389,6 @@
             </summary>
             <param name="expression">表达式</param>
             <param name="right">取表达式右侧，(l,r)=> l.LId == r.RId，设置为true，返回 RID</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Helpers.Lambda.GetMethodCallExpressionName(System.Linq.Expressions.Expression)">
             <summary>
