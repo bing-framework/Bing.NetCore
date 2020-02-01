@@ -11888,13 +11888,11 @@
             <summary>
             获取私钥
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Signatures.ISignKey.GetPublicKey">
             <summary>
             获取公钥
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Signatures.ISignManager">
             <summary>
@@ -11907,20 +11905,17 @@
             </summary>
             <param name="key">键</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Signatures.ISignManager.Sign">
             <summary>
             签名
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Signatures.ISignManager.Verify(System.String)">
             <summary>
             验证签名
             </summary>
             <param name="sign">签名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Signatures.SignKey">
             <summary>
@@ -11948,13 +11943,11 @@
             <summary>
             获取私钥
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Signatures.SignKey.GetPublicKey">
             <summary>
             获取公钥
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Signatures.SignManager">
             <summary>
@@ -11984,20 +11977,17 @@
             </summary>
             <param name="key">键</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Signatures.SignManager.Sign">
             <summary>
             签名
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Signatures.SignManager.Verify(System.String)">
             <summary>
             验证签名
             </summary>
             <param name="sign">签名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Threading.Asyncs.AsyncLock">
             <summary>

@@ -3,7 +3,7 @@
     /// <summary>
     /// 签名密钥
     /// </summary>
-    public class SignKey:ISignKey
+    public class SignKey : ISignKey
     {
         /// <summary>
         /// 私钥
@@ -29,13 +29,11 @@
         /// <summary>
         /// 获取私钥
         /// </summary>
-        /// <returns></returns>
         public string GetKey() => _key;
 
         /// <summary>
         /// 获取公钥
         /// </summary>
-        /// <returns></returns>
         public string GetPublicKey() => _publicKey;
     }
 }

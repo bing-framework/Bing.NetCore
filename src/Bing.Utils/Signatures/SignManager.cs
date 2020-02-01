@@ -7,7 +7,7 @@ namespace Bing.Utils.Signatures
     /// <summary>
     /// 签名管理器
     /// </summary>
-    public class SignManager:ISignManager
+    public class SignManager : ISignManager
     {
         /// <summary>
         /// 签名密钥
@@ -36,7 +36,6 @@ namespace Bing.Utils.Signatures
         /// </summary>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public ISignManager Add(string key, object value)
         {
             _builder.Add(key, value);
@@ -46,14 +45,12 @@ namespace Bing.Utils.Signatures
         /// <summary>
         /// 签名
         /// </summary>
-        /// <returns></returns>
         public string Sign() => Encrypt.Rsa2Sign(_builder.Result(true), _key.GetKey());
 
         /// <summary>
         /// 验证签名
         /// </summary>
         /// <param name="sign">签名</param>
-        /// <returns></returns>
         public bool Verify(string sign) => Encrypt.Rsa2Verify(_builder.Result(true), _key.GetPublicKey(), sign);
     }
 }
