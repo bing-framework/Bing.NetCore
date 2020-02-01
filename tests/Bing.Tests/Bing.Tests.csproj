@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Folder Include="Dependency\" />
+    <Folder Include="Domains\Trees\" />
   </ItemGroup>
 
   <ItemGroup>
