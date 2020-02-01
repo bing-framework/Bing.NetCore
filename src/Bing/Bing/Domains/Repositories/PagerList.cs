@@ -126,27 +126,18 @@ namespace Bing.Domains.Repositories
         /// 添加元素
         /// </summary>
         /// <param name="item">元素</param>
-        public void Add(T item)
-        {
-            Data.Add(item);
-        }
+        public void Add(T item) => Data.Add(item);
 
         /// <summary>
         /// 添加元素集合
         /// </summary>
         /// <param name="collection">元素集合</param>
-        public void AddRange(IEnumerable<T> collection)
-        {
-            Data.AddRange(collection);
-        }
+        public void AddRange(IEnumerable<T> collection) => Data.AddRange(collection);
 
         /// <summary>
         /// 清空
         /// </summary>
-        public void Clear()
-        {
-            Data.Clear();
-        }
+        public void Clear() => Data.Clear();
 
         /// <summary>
         /// 转换为分页集合
@@ -165,9 +156,6 @@ namespace Bing.Domains.Repositories
         /// </summary>
         /// <typeparam name="TResult">目标元素类型</typeparam>
         /// <param name="data">数据</param>
-        public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data)
-        {
-            return new PagerList<TResult>(Page, PageSize, TotalCount, Order, data);
-        }
+        public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data) => new PagerList<TResult>(Page, PageSize, TotalCount, Order, data);
     }
 }

@@ -13446,123 +13446,6 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <typeparam name="TKey">实体标识类型</typeparam>
         </member>
-        <member name="T:Bing.Domains.Repositories.ICriteria`1">
-            <summary>
-            查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Domains.Repositories.ICriteria`1.GetPredicate">
-            <summary>
-            获取查询条件
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Repositories.IPager">
-            <summary>
-            分页
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Repositories.IPager.Order">
-            <summary>
-            排序条件
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Repositories.IPager.GetPageCount">
-            <summary>
-            获取总页数
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Repositories.IPager.GetSkipCount">
-            <summary>
-            获取跳过的行数
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Repositories.IPager.GetStartNumber">
-            <summary>
-            获取起始行数
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Repositories.IPager.GetEndNumber">
-            <summary>
-            获取结束行数
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Repositories.IPagerBase">
-            <summary>
-            分页基类
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Repositories.IPagerBase.Page">
-            <summary>
-            页数，即第几页，从1开始
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Repositories.IPagerBase.PageSize">
-            <summary>
-            每页显示行数
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Repositories.IPagerBase.TotalCount">
-            <summary>
-            总行数
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Repositories.IQueryBase`1">
-            <summary>
-            查询对象
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="M:Bing.Domains.Repositories.IQueryBase`1.GetOrder">
-            <summary>
-            获取排序条件
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Repositories.IQueryBase`1.GetPager">
-            <summary>
-            获取分页参数
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Repositories.ITreeCompactRepository`1">
-            <summary>
-            树型仓储
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Repositories.ITreeCompactRepository`3">
-            <summary>
-            树型仓储
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">实体类型标识</typeparam>
-            <typeparam name="TParentId">父标识类型</typeparam>
-        </member>
-        <member name="M:Bing.Domains.Repositories.ITreeCompactRepository`3.GenerateSortIdAsync(`2)">
-            <summary>
-            生成排序号
-            </summary>
-            <param name="parentId">父标识</param>
-        </member>
-        <member name="M:Bing.Domains.Repositories.ITreeCompactRepository`3.GetAllChildrenAsync(`0)">
-            <summary>
-            获取全部下级实体
-            </summary>
-            <param name="parent">父实体</param>
-        </member>
-        <member name="T:Bing.Domains.Repositories.ITreeRepository`1">
-            <summary>
-            树型仓储
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Repositories.ITreeRepository`3">
-            <summary>
-            树型仓储
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">实体标识类型</typeparam>
-            <typeparam name="TParentId">父标识类型</typeparam>
-        </member>
         <member name="T:Bing.Domains.Repositories.Pager">
             <summary>
             分页参数
@@ -13780,6 +13663,123 @@
             </summary>
             <typeparam name="TResult">目标元素类型</typeparam>
             <param name="data">数据</param>
+        </member>
+        <member name="T:Bing.Domains.Repositories.ICriteria`1">
+            <summary>
+            查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Domains.Repositories.ICriteria`1.GetPredicate">
+            <summary>
+            获取查询条件
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Repositories.IPager">
+            <summary>
+            分页
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Repositories.IPager.Order">
+            <summary>
+            排序条件
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Repositories.IPager.GetPageCount">
+            <summary>
+            获取总页数
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Repositories.IPager.GetSkipCount">
+            <summary>
+            获取跳过的行数
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Repositories.IPager.GetStartNumber">
+            <summary>
+            获取起始行数
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Repositories.IPager.GetEndNumber">
+            <summary>
+            获取结束行数
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Repositories.IPagerBase">
+            <summary>
+            分页基类
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Repositories.IPagerBase.Page">
+            <summary>
+            页数，即第几页，从1开始
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Repositories.IPagerBase.PageSize">
+            <summary>
+            每页显示行数
+            </summary>
+        </member>
+        <member name="P:Bing.Domains.Repositories.IPagerBase.TotalCount">
+            <summary>
+            总行数
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Repositories.IQueryBase`1">
+            <summary>
+            查询对象
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Domains.Repositories.IQueryBase`1.GetOrder">
+            <summary>
+            获取排序条件
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Repositories.IQueryBase`1.GetPager">
+            <summary>
+            获取分页参数
+            </summary>
+        </member>
+        <member name="T:Bing.Domains.Repositories.ITreeCompactRepository`1">
+            <summary>
+            树型仓储
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="T:Bing.Domains.Repositories.ITreeCompactRepository`3">
+            <summary>
+            树型仓储
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">实体类型标识</typeparam>
+            <typeparam name="TParentId">父标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Domains.Repositories.ITreeCompactRepository`3.GenerateSortIdAsync(`2)">
+            <summary>
+            生成排序号
+            </summary>
+            <param name="parentId">父标识</param>
+        </member>
+        <member name="M:Bing.Domains.Repositories.ITreeCompactRepository`3.GetAllChildrenAsync(`0)">
+            <summary>
+            获取全部下级实体
+            </summary>
+            <param name="parent">父实体</param>
+        </member>
+        <member name="T:Bing.Domains.Repositories.ITreeRepository`1">
+            <summary>
+            树型仓储
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="T:Bing.Domains.Repositories.ITreeRepository`3">
+            <summary>
+            树型仓储
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">实体标识类型</typeparam>
+            <typeparam name="TParentId">父标识类型</typeparam>
         </member>
         <member name="T:Bing.Domains.Services.DomainServiceBase">
             <summary>

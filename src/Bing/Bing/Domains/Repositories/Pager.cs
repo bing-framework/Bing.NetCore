@@ -83,14 +83,12 @@ namespace Bing.Domains.Repositories
         /// </summary>
         public string Order { get; set; }
 
-        
-
         /// <summary>
         /// 获取总页数
         /// </summary>
         public int GetPageCount()
         {
-            if ((TotalCount % PageSize) == 0)
+            if (TotalCount % PageSize == 0)
                 return TotalCount / PageSize;
             return (TotalCount / PageSize) + 1;
         }
