@@ -1483,6 +1483,31 @@
             排序号
             </summary>
         </member>
+        <member name="T:Bing.Datas.Queries.Boundary">
+            <summary>
+            查询边界
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Left">
+            <summary>
+            包含左边
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Right">
+            <summary>
+            包含右边
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Both">
+            <summary>
+            包含两边
+            </summary>
+        </member>
+        <member name="F:Bing.Datas.Queries.Boundary.Neither">
+            <summary>
+            不包含
+            </summary>
+        </member>
         <member name="T:Bing.Datas.Queries.Criterias.AndCriteria`1">
             <summary>
             与查询条件
@@ -1813,31 +1838,6 @@
             <param name="value">日期值</param>
             <param name="targetType">目标类型</param>
         </member>
-        <member name="T:Bing.Datas.Queries.Boundary">
-            <summary>
-            查询边界
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Left">
-            <summary>
-            包含左边
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Right">
-            <summary>
-            包含右边
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Both">
-            <summary>
-            包含两边
-            </summary>
-        </member>
-        <member name="F:Bing.Datas.Queries.Boundary.Neither">
-            <summary>
-            不包含
-            </summary>
-        </member>
         <member name="T:Bing.Datas.Queries.Internal.Helper">
             <summary>
             查询工具类
@@ -1887,7 +1887,6 @@
             添加查询条件
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Where(Bing.Domains.Repositories.ICriteria{`0})">
             <summary>
@@ -1902,7 +1901,6 @@
             </summary>
             <param name="predicate">查询条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.WhereIfNotEmpty(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
@@ -1910,7 +1908,6 @@
             </summary>
             <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
             注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -1921,7 +1918,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -1932,7 +1928,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -1943,7 +1938,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
             <summary>
@@ -1955,7 +1949,6 @@
             <param name="max">最大值</param>
             <param name="includeTime">是否包含时间，默认：包含</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.OrderBy``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Boolean)">
             <summary>
@@ -1964,7 +1957,6 @@
             <typeparam name="TProperty">属性类型</typeparam>
             <param name="propertyExpression">属性表达式</param>
             <param name="desc">是否降序</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.OrderBy(System.String,System.Boolean)">
             <summary>
@@ -1972,35 +1964,30 @@
             </summary>
             <param name="propertyName">排序属性</param>
             <param name="desc">是否降序</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.And(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             与连接
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.And(Bing.Datas.Queries.IQuery{`0,`1})">
             <summary>
             与连接
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Or(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}}[])">
             <summary>
             或连接
             </summary>
             <param name="predicates">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.IQuery`2.Or(Bing.Datas.Queries.IQuery{`0,`1})">
             <summary>
             或连接
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.IQueryParameter">
             <summary>
@@ -2038,12 +2025,18 @@
             <summary>
             生成排序字符串
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.OrderByItem">
             <summary>
             排序项
             </summary>
+        </member>
+        <member name="M:Bing.Datas.Queries.OrderByItem.#ctor(System.String,System.Boolean)">
+            <summary>
+            初始化一个<see cref="T:Bing.Datas.Queries.OrderByItem"/>类型的实例
+            </summary>
+            <param name="name">排序属性</param>
+            <param name="desc">是否降序</param>
         </member>
         <member name="P:Bing.Datas.Queries.OrderByItem.Name">
             <summary>
@@ -2055,18 +2048,10 @@
             是否降序
             </summary>
         </member>
-        <member name="M:Bing.Datas.Queries.OrderByItem.#ctor(System.String,System.Boolean)">
-            <summary>
-            初始化一个<see cref="T:Bing.Datas.Queries.OrderByItem"/>类型的实例
-            </summary>
-            <param name="name">排序属性</param>
-            <param name="desc">是否降序</param>
-        </member>
         <member name="M:Bing.Datas.Queries.OrderByItem.Generate">
             <summary>
             创建排序字符串
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.Query`1">
             <summary>
@@ -2122,33 +2107,28 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.GetOrder">
             <summary>
             获取排序条件
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.GetPager">
             <summary>
             获取分页
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Where(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             添加查询条件
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Where(Bing.Domains.Repositories.ICriteria{`0})">
             <summary>
             添加查询条件
             </summary>
             <param name="criteria">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.WhereIf(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Boolean)">
             <summary>
@@ -2156,7 +2136,6 @@
             </summary>
             <param name="predicate">查询条件</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.WhereIfNotEmpty(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
@@ -2164,7 +2143,6 @@
             </summary>
             <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
             注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -2175,7 +2153,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -2186,7 +2163,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
             <summary>
@@ -2197,7 +2173,6 @@
             <param name="min">最小值</param>
             <param name="max">最大值</param>
             <param name="boundary">包含边界，默认：包含两边</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Between``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
             <summary>
@@ -2209,7 +2184,6 @@
             <param name="max">最大值</param>
             <param name="includeTime">是否包含时间，默认：包含</param>
             <param name="boundary">包含边界</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.OrderBy``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Boolean)">
             <summary>
@@ -2218,7 +2192,6 @@
             <typeparam name="TProperty">属性类型</typeparam>
             <param name="propertyExpression">属性表达式</param>
             <param name="desc">是否降序</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.OrderBy(System.String,System.Boolean)">
             <summary>
@@ -2226,35 +2199,30 @@
             </summary>
             <param name="propertyName">排序属性</param>
             <param name="desc">是否降序</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.And(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             与连接
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.And(Bing.Datas.Queries.IQuery{`0,`1})">
             <summary>
             与连接
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Or(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}}[])">
             <summary>
             或连接
             </summary>
             <param name="predicates">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Query`2.Or(Bing.Datas.Queries.IQuery{`0,`1})">
             <summary>
             或连接
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.QueryableExtensions">
             <summary>
@@ -2397,7 +2365,6 @@
             <summary>
             是否搜索
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.Trees.ITreeQueryParameter">
             <summary>
@@ -2438,7 +2405,6 @@
             <summary>
             获取查询条件
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.Trees.TreeQueryParameter`1">
             <summary>
@@ -2480,7 +2446,6 @@
             <summary>
             是否搜索
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Trees.TreeQueryParameter`1.IsSearchProperty(System.String,System.Object)">
             <summary>
@@ -2488,7 +2453,6 @@
             </summary>
             <param name="name">属性名</param>
             <param name="value">属性值</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Queries.Trees.TreeQueryParameter">
             <summary>

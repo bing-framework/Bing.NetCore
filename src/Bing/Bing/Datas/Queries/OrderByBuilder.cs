@@ -17,10 +17,7 @@ namespace Bing.Datas.Queries
         /// <summary>
         /// 初始化一个<see cref="OrderByBuilder"/>类型的实例
         /// </summary>
-        public OrderByBuilder()
-        {
-            _items = new List<OrderByItem>();
-        }
+        public OrderByBuilder() => _items = new List<OrderByItem>();
 
         /// <summary>
         /// 添加排序
@@ -30,19 +27,13 @@ namespace Bing.Datas.Queries
         public void Add(string name, bool desc = false)
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
                 return;
-            }
             _items.Add(new OrderByItem(name, desc));
         }
 
         /// <summary>
         /// 生成排序字符串
         /// </summary>
-        /// <returns></returns>
-        public string Generate()
-        {
-            return _items.Select(t => t.Generate()).ToList().Join();
-        }
+        public string Generate() => _items.Select(t => t.Generate()).ToList().Join();
     }
 }

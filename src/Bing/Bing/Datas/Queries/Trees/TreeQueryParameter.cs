@@ -44,10 +44,7 @@ namespace Bing.Datas.Queries.Trees
         /// <summary>
         /// 初始化一个<see cref="TreeQueryParameter{TParentId}"/>类型的实例
         /// </summary>
-        protected TreeQueryParameter()
-        {
-            Order = "SortId";
-        }
+        protected TreeQueryParameter() => Order = "SortId";
 
         /// <summary>
         /// 是否搜索

@@ -22,6 +22,7 @@ namespace Bing.Tests.Datas.Queries.Criterias
         /// 最小日期
         /// </summary>
         private readonly DateTime? _min;
+
         /// <summary>
         /// 最大日期
         /// </summary>
