@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Bing.Tests;
 using Bing.Utils.Extensions;
 using Bing.Utils.Tests.Samples;
 using Xunit;

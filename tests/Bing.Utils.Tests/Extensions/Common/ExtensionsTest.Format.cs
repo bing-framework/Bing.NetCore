@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Tests;
 using Bing.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;

@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security;
 using System.Text;
+using Bing.Tests;
 using Bing.Utils.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;

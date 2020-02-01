@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.Tests;
 using Bing.Utils.Develops;
 using Bing.Utils.IdGenerators.Core;
 using Xunit;

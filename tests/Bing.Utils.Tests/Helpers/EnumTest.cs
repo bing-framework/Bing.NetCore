@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Bing.Tests;
 using Bing.Tests.XUnitHelpers;
 using Bing.Utils.Tests.Samples;
 using Xunit;

@@ -1,4 +1,5 @@
-﻿using Bing.Utils.Extensions;
+﻿using Bing.Tests;
+using Bing.Utils.Extensions;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
@@ -7,7 +8,7 @@ namespace Bing.Utils.Tests.Extensions
     /// <summary>
     /// 扩展测试 - 类型转换
     /// </summary>
-    public partial class ExtensionsTest:TestBase
+    public partial class ExtensionsTest : TestBase
     {
         /// <summary>
         /// 测试安全转换为字符串

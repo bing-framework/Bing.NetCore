@@ -1,7 +1,6 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Bing.Tests;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,7 +10,7 @@ namespace Bing.Utils.Tests.Helpers
     /// <summary>
     /// Unix时间操作测试
     /// </summary>
-    public class UnixTimeTest:TestBase
+    public class UnixTimeTest : TestBase
     {
         public UnixTimeTest(ITestOutputHelper output) : base(output)
         {
@@ -26,7 +25,5 @@ namespace Bing.Utils.Tests.Helpers
             Output.WriteLine(result.ToString());
             Assert.Equal(dto, result);
         }
-
-
     }
 }

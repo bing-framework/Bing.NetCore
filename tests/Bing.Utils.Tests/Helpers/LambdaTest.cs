@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Tests;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Tests.Samples;
@@ -12,7 +13,7 @@ namespace Bing.Utils.Tests.Helpers
     /// <summary>
     /// 测试Lambda表达式操作
     /// </summary>
-    public class LambdaTest:TestBase
+    public class LambdaTest : TestBase
     {
         public LambdaTest(ITestOutputHelper output) : base(output)
         {
