@@ -10050,7 +10050,6 @@
             </summary>
             <param name="min">最小值</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Queries.Criterias.DateSegmentCriteria`2.GetMinValueExpression">
             <summary>

@@ -18,8 +18,11 @@ namespace Bing.Datas.Queries.Criterias
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public DateSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min,
-            DateTime? max, Boundary boundary = Boundary.Both) : base(propertyExpression, min, max, boundary)
+        public DateSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression
+            , DateTime? min
+            , DateTime? max
+            , Boundary boundary = Boundary.Left) 
+            : base(propertyExpression, min, max, boundary)
         {
         }
 
@@ -28,26 +31,16 @@ namespace Bing.Datas.Queries.Criterias
         /// </summary>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
-        /// <returns></returns>
-        protected override bool IsMinGreaterMax(DateTime? min, DateTime? max)
-        {
-            return min > max;
-        }
+        protected override bool IsMinGreaterMax(DateTime? min, DateTime? max) => min > max;
 
         /// <summary>
         /// 获取最小值表达式
         /// </summary>
-        protected override Expression GetMinValueExpression()
-        {
-            return ValueExpressionHelper.CreateDateTimeExpression(GetMinValue().SafeValue().Date, GetPropertyType());
-        }
+        protected override Expression GetMinValueExpression() => ValueExpressionHelper.CreateDateTimeExpression(GetMinValue().SafeValue().Date, GetPropertyType());
 
         /// <summary>
         /// 获取最大值表达式
         /// </summary>
-        protected override Expression GetMaxValueExpression()
-        {
-            return ValueExpressionHelper.CreateDateTimeExpression(GetMaxValue().SafeValue().Date.AddDays(1), GetPropertyType());
-        }
+        protected override Expression GetMaxValueExpression() => ValueExpressionHelper.CreateDateTimeExpression(GetMaxValue().SafeValue().Date.AddDays(1), GetPropertyType());
     }
 }

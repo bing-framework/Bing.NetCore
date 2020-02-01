@@ -17,8 +17,11 @@ namespace Bing.Datas.Queries.Criterias
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public DoubleSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max,
-            Boundary boundary = Boundary.Both) : base(propertyExpression, min, max, boundary)
+        public DoubleSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression
+            , double? min
+            , double? max
+            , Boundary boundary = Boundary.Both) 
+            : base(propertyExpression, min, max, boundary)
         {
         }
 
@@ -27,10 +30,6 @@ namespace Bing.Datas.Queries.Criterias
         /// </summary>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
-        /// <returns></returns>
-        protected override bool IsMinGreaterMax(double? min, double? max)
-        {
-            return min > max;
-        }
+        protected override bool IsMinGreaterMax(double? min, double? max) => min > max;
     }
 }

@@ -14,10 +14,9 @@ namespace Bing.Datas.Queries.Criterias
         /// </summary>
         /// <param name="value">日期值</param>
         /// <param name="isNull">日期是否可空</param>
-        /// <returns></returns>
         public static Expression CreateDateTimeExpression(object value, bool isNull = true)
         {
-            Type type = isNull ? typeof(DateTime?) : typeof(DateTime);
+            var type = isNull ? typeof(DateTime?) : typeof(DateTime);
             return CreateDateTimeExpression(value, type);
         }
 
@@ -26,15 +25,11 @@ namespace Bing.Datas.Queries.Criterias
         /// </summary>
         /// <param name="value">日期值</param>
         /// <param name="targetType">目标类型</param>
-        /// <returns></returns>
         public static Expression CreateDateTimeExpression(object value, Type targetType)
         {
             var parse = typeof(DateTime).GetMethod("Parse", new[] {typeof(string)});
             if (parse == null)
-            {
                 return null;
-            }
-
             var parseExpression = Expression.Call(parse, Expression.Constant(value.SafeString()));
             return Expression.Convert(parseExpression, targetType);
         }

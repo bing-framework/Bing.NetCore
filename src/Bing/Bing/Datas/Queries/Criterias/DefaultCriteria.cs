@@ -14,10 +14,7 @@ namespace Bing.Datas.Queries.Criterias
         /// 初始化一个<see cref="DefaultCriteria{TEntity}"/>类型的实例
         /// </summary>
         /// <param name="predicate">查询条件</param>
-        public DefaultCriteria(Expression<Func<TEntity, bool>> predicate)
-        {
-            Predicate = predicate;
-        }
+        public DefaultCriteria(Expression<Func<TEntity, bool>> predicate) => Predicate = predicate;
 
         /// <summary>
         /// 查询条件
@@ -27,10 +24,6 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
-        public virtual Expression<Func<TEntity, bool>> GetPredicate()
-        {
-            return Predicate;
-        }
+        public virtual Expression<Func<TEntity, bool>> GetPredicate() => Predicate;
     }
 }

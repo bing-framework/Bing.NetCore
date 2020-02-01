@@ -47,8 +47,10 @@ namespace Bing.Datas.Queries.Criterias
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        protected SegmentCriteriaBase(Expression<Func<TEntity, TProperty>> propertyExpression, TValue? min, TValue? max,
-            Boundary boundary)
+        protected SegmentCriteriaBase(Expression<Func<TEntity, TProperty>> propertyExpression
+            , TValue? min
+            , TValue? max
+            , Boundary boundary)
         {
             _builder = new PredicateExpressionBuilder<TEntity>();
             _propertyExpression = propertyExpression;
@@ -60,16 +62,11 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取属性类型
         /// </summary>
-        /// <returns></returns>
-        protected Type GetPropertyType()
-        {
-            return Lambda.GetType(_propertyExpression);
-        }
+        protected Type GetPropertyType() => Lambda.GetType(_propertyExpression);
 
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        /// <returns></returns>
         public Expression<Func<TEntity, bool>> GetPredicate()
         {
             _builder.Clear();
@@ -87,9 +84,7 @@ namespace Bing.Datas.Queries.Criterias
         private void Adjust(TValue? min, TValue? max)
         {
             if (IsMinGreaterMax(min, max) == false)
-            {
                 return;
-            }
             _min = max;
             _max = min;
         }
@@ -99,18 +94,15 @@ namespace Bing.Datas.Queries.Criterias
         /// </summary>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
-        /// <returns></returns>
         protected abstract bool IsMinGreaterMax(TValue? min, TValue? max);
 
         /// <summary>
-        /// 创建左操作数，即 t=> t.Property >= Min
+        /// 创建左操作数，即 t => t.Property >= Min
         /// </summary>
         private void CreateLeftExpression()
         {
             if (_min == null)
-            {
                 return;
-            }
             _builder.Append(_propertyExpression, CreateLeftOperator(_boundary), GetMinValueExpression());
         }
 
@@ -118,7 +110,6 @@ namespace Bing.Datas.Queries.Criterias
         /// 创建左操作符
         /// </summary>
         /// <param name="boundary">查询边界</param>
-        /// <returns></returns>
         protected virtual Operator CreateLeftOperator(Boundary? boundary)
         {
             switch (boundary)
@@ -135,20 +126,12 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取最小值
         /// </summary>
-        /// <returns></returns>
-        protected TValue? GetMinValue()
-        {
-            return _min;
-        }
+        protected TValue? GetMinValue() => _min;
 
         /// <summary>
         /// 获取最小值表达式
         /// </summary>
-        /// <returns></returns>
-        protected virtual Expression GetMinValueExpression()
-        {
-            return Lambda.Constant(_min, _propertyExpression);
-        }
+        protected virtual Expression GetMinValueExpression() => Lambda.Constant(_min, _propertyExpression);
 
         /// <summary>
         /// 创建右操作数，即 t => t.Property &lt;= Max
@@ -156,9 +139,7 @@ namespace Bing.Datas.Queries.Criterias
         private void CreateRightExpression()
         {
             if (_max == null)
-            {
                 return;
-            }
             _builder.Append(_propertyExpression, CreateRightOperator(_boundary), GetMaxValueExpression());
         }
 
@@ -166,7 +147,6 @@ namespace Bing.Datas.Queries.Criterias
         /// 创建右操作符
         /// </summary>
         /// <param name="boundary">查询边界</param>
-        /// <returns></returns>
         protected virtual Operator CreateRightOperator(Boundary? boundary)
         {
             switch (boundary)
@@ -183,19 +163,11 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取最大值
         /// </summary>
-        /// <returns></returns>
-        protected TValue? GetMaxValue()
-        {
-            return _max;
-        }
+        protected TValue? GetMaxValue() => _max;
 
         /// <summary>
         /// 获取最大值表达式
         /// </summary>
-        /// <returns></returns>
-        protected virtual Expression GetMaxValueExpression()
-        {
-            return Lambda.Constant(_max, _propertyExpression);
-        }
+        protected virtual Expression GetMaxValueExpression() => Lambda.Constant(_max, _propertyExpression);
     }
 }
