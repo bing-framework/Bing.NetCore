@@ -39,20 +39,12 @@ namespace Bing.Utils.Files
         /// 获取描述
         /// </summary>
         /// <param name="unit">文件大小单位</param>
-        /// <returns></returns>
-        public static string Description(this FileSizeUnit? unit)
-        {
-            return unit == null ? string.Empty : unit.Value.Description();
-        }
+        public static string Description(this FileSizeUnit? unit) => unit == null ? string.Empty : unit.Value.Description();
 
         /// <summary>
         /// 获取值
         /// </summary>
         /// <param name="unit">文件大小单位</param>
-        /// <returns></returns>
-        public static int? Value(this FileSizeUnit? unit)
-        {
-            return unit?.Value();
-        }
+        public static int? Value(this FileSizeUnit? unit) => unit?.Value();
     }
 }

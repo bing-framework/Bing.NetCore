@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
+using Bing.Tests.XUnitHelpers;
 using Bing.Utils.Tests.Samples;
-using Bing.Utils.Tests.XUnitHelpers;
 using Xunit;
 using Xunit.Abstractions;
 

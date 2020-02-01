@@ -10,7 +10,6 @@ namespace Bing.Utils.Files
         /// <summary>
         /// 保存文件，返回完整文件路径
         /// </summary>
-        /// <returns></returns>
         Task<string> SaveAsync();
     }
 }

@@ -8,7 +8,6 @@
         /// <summary>
         /// 获取基路径
         /// </summary>
-        /// <returns></returns>
         string GetPath();
     }
 }

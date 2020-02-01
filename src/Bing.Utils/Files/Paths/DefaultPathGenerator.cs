@@ -17,19 +17,12 @@ namespace Bing.Utils.Files.Paths
         /// </summary>
         /// <param name="basePath">基路径</param>
         /// <param name="randomGenerator">随机数生成器</param>
-        public DefaultPathGenerator(IBasePath basePath,IRandomGenerator randomGenerator) : base(randomGenerator)
-        {
-            _basePath = basePath;
-        }
+        public DefaultPathGenerator(IBasePath basePath,IRandomGenerator randomGenerator) : base(randomGenerator) => _basePath = basePath;
 
         /// <summary>
         /// 创建完整路径
         /// </summary>
         /// <param name="fileName">被处理过的安全有效的文件名</param>
-        /// <returns></returns>
-        protected override string GeneratePath(string fileName)
-        {
-            return $"{_basePath.GetPath()}/{fileName}";
-        }
+        protected override string GeneratePath(string fileName) => $"{_basePath.GetPath()}/{fileName}";
     }
 }

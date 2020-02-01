@@ -4609,12 +4609,20 @@
             <summary>
             保存文件，返回完整文件路径
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.FileInfo">
             <summary>
             文件信息
             </summary>
+        </member>
+        <member name="M:Bing.Utils.Files.FileInfo.#ctor(System.String,System.Nullable{System.Int64},System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Utils.Files.FileInfo"/>类型的实例
+            </summary>
+            <param name="path">文件路径</param>
+            <param name="size">文件大小</param>
+            <param name="fileName">文件名</param>
+            <param name="id">文件标识</param>
         </member>
         <member name="P:Bing.Utils.Files.FileInfo.Id">
             <summary>
@@ -4661,22 +4669,12 @@
             完整存储路径。不包含根路径
             </summary>
         </member>
-        <member name="M:Bing.Utils.Files.FileInfo.#ctor(System.String,System.Nullable{System.Int64},System.String,System.String)">
-            <summary>
-            初始化一个<see cref="T:Bing.Utils.Files.FileInfo"/>类型的实例
-            </summary>
-            <param name="path">文件路径</param>
-            <param name="size">文件大小</param>
-            <param name="fileName">文件名</param>
-            <param name="id">文件标识</param>
-        </member>
         <member name="M:Bing.Utils.Files.FileInfo.GetExtension(System.String,System.String)">
             <summary>
             获取扩展名
             </summary>
             <param name="path">文件路径</param>
             <param name="fileName">文件名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.FileSize">
             <summary>
@@ -4762,14 +4760,12 @@
             获取描述
             </summary>
             <param name="unit">文件大小单位</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Files.FileSizeUnitExtensions.Value(System.Nullable{Bing.Utils.Files.FileSizeUnit})">
             <summary>
             获取值
             </summary>
             <param name="unit">文件大小单位</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.IFileStore">
             <summary>
@@ -4780,7 +4776,6 @@
             <summary>
             保存文件，返回完整文件路径
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.Paths.DefaultBasePath">
             <summary>
@@ -4802,7 +4797,6 @@
             <summary>
             获取基路径
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.Paths.DefaultPathGenerator">
             <summary>
@@ -4826,7 +4820,6 @@
             创建完整路径
             </summary>
             <param name="fileName">被处理过的安全有效的文件名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.Paths.IBasePath">
             <summary>
@@ -4837,7 +4830,6 @@
             <summary>
             获取基路径
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.Paths.IPathGenerator">
             <summary>
@@ -4849,7 +4841,6 @@
             生成路径
             </summary>
             <param name="fileName">文件名，必须包含扩展名，如果仅传入扩展名则生成随机文件名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Files.Paths.PathGeneratorBase">
             <summary>
@@ -4872,28 +4863,24 @@
             生成路径
             </summary>
             <param name="fileName">文件名，必须包含扩展名，如果仅传入扩展名则生成随机文件名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Files.Paths.PathGeneratorBase.GeneratePath(System.String)">
             <summary>
             创建完整路径
             </summary>
             <param name="fileName">被处理过的安全有效的文件名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Files.Paths.PathGeneratorBase.GetFileName(System.String)">
             <summary>
             获取文件名
             </summary>
-            <param name="fileName"></param>
-            <returns></returns>
+            <param name="fileName">文件名</param>
         </member>
         <member name="M:Bing.Utils.Files.Paths.PathGeneratorBase.FilterFileName(System.String)">
             <summary>
             过滤文件名
             </summary>
             <param name="fileName">文件名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Helpers.AmountUnitConv">
             <summary>
@@ -11866,7 +11853,6 @@
             <summary>
             生成随机数
             </summary>
-            <returns></returns>
         </member>
         <member name="F:Bing.Utils.Randoms.GuidRandomGenerator.Instance">
             <summary>
@@ -11876,6 +11862,21 @@
         <member name="T:Bing.Utils.Randoms.IRandomGenerator">
             <summary>
             随机数生成器
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Randoms.IRandomGenerator.Generate">
+            <summary>
+            生成随机数
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.Randoms.StubRandomGenerator">
+            <summary>
+            伪随机数生成器。用于单元测试，固定返回字符串"random"
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Randoms.StubRandomGenerator.Generate">
+            <summary>
+            生成随机数
             </summary>
         </member>
         <member name="T:Bing.Utils.Signatures.ISignKey">
