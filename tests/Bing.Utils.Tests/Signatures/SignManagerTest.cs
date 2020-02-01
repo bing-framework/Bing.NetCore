@@ -9,7 +9,7 @@ namespace Bing.Utils.Tests.Signatures
     /// <summary>
     /// 签名管理器测试
     /// </summary>
-    public class SignManagerTest:TestBase
+    public class SignManagerTest : TestBase
     {
         /// <summary>
         /// 签名管理器
