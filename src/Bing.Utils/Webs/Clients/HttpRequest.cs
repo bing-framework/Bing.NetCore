@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Json;

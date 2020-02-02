@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 using Bing.Utils.Parameters.Formats;
 

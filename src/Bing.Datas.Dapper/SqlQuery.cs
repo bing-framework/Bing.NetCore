@@ -7,6 +7,7 @@ using Bing.Datas.Sql;
 using Bing.Datas.Sql.Configs;
 using Bing.Datas.Sql.Queries;
 using Bing.Domains.Repositories;
+using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Helpers;

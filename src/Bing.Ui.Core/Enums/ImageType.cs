@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Bing.Helpers;
 using Bing.Ui.Helpers;
 
 namespace Bing.Ui.Enums
@@ -40,7 +41,7 @@ namespace Bing.Ui.Enums
         /// </summary>
         public static string GetExtensions(this ImageType fileType)
         {
-            var name = Bing.Utils.Helpers.Enum.GetName<ImageType>(fileType);
+            var name = Enum.GetName<ImageType>(fileType);
             return FileTypeHelper.GetExtensions(name);
         }
     }

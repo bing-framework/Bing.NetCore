@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bing.Helpers;
 using Bing.Tests;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;

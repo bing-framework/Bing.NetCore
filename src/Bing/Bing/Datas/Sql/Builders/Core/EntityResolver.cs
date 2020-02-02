@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Bing.Datas.Sql.Matedatas;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 

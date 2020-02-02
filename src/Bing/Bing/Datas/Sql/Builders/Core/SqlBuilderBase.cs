@@ -7,6 +7,7 @@ using Bing.Datas.Sql.Builders.Clauses;
 using Bing.Datas.Sql.Builders.Filters;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Domains.Repositories;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 

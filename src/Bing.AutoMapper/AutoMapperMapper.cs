@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 
 namespace Bing.AutoMapper

@@ -1,4 +1,5 @@
 ﻿using Bing.Exceptions;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc.Filters;

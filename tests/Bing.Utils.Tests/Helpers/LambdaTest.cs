@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Helpers;
 using Bing.Tests;
 using Bing.Tests.Samples;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
+using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Utils.Tests.Helpers
 {
@@ -240,7 +242,7 @@ namespace Bing.Utils.Tests.Helpers
             var test1 = new Sample { NullableEnumValue = EnumSample.C };
 
             Expression<Func<Sample, bool>> expression = test => test.EnumValue == EnumSample.D;
-            Assert.Equal(EnumSample.D.Value(), Bing.Utils.Helpers.Enum.GetValue<EnumSample>(Lambda.GetValue(expression)));
+            Assert.Equal(EnumSample.D.Value(), Enum.GetValue<EnumSample>(Lambda.GetValue(expression)));
 
             expression = test => test.EnumValue == test1.NullableEnumValue;
             Assert.Equal(EnumSample.C, Lambda.GetValue(expression));

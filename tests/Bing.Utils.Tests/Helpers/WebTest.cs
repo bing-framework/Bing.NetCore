@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Bing.Helpers;
 using Bing.Tests;
 using Bing.Utils.Develops;
 using Bing.Utils.Extensions;

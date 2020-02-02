@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AspectCore.DynamicProxy.Parameters;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 

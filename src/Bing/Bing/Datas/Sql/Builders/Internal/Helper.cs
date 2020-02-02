@@ -5,9 +5,11 @@ using System.Linq.Expressions;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Helpers;
 using Bing.Utils;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
+using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Datas.Sql.Builders.Internal
 {
@@ -112,7 +114,7 @@ namespace Bing.Datas.Sql.Builders.Internal
                 return null;
             var type = result.GetType();
             if (type.IsEnum)
-                return Bing.Utils.Helpers.Enum.GetValue(type, result);
+                return Enum.GetValue(type, result);
             return result;
         }
 

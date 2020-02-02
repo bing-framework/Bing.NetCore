@@ -4,6 +4,7 @@ using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +26,7 @@ namespace Bing.DependencyInjection
             {
                 config.EnableParameterAspect();
                 config.NonAspectPredicates.Add(t =>
-                    Bing.Utils.Helpers.Reflection.GetTopBaseType(t.DeclaringType).SafeString() ==
+                    Reflection.GetTopBaseType(t.DeclaringType).SafeString() ==
                     "Microsoft.EntityFrameworkCore.DbContext");
                 configAction?.Invoke(config);
             });

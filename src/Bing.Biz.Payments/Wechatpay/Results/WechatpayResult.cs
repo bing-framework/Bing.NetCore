@@ -10,6 +10,7 @@ using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Parameters;
 using Bing.Validations;
+using Xml = Bing.Helpers.Xml;
 
 namespace Bing.Biz.Payments.Wechatpay.Results
 {

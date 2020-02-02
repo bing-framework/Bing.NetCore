@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+﻿using Bing.Helpers;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Bing.Ui.Extensions
 {
@@ -26,7 +27,7 @@ namespace Bing.Ui.Extensions
                 return default(T);
             }
 
-            return Bing.Utils.Helpers.Conv.To<T>(tagHelperAttribute?.Value);
+            return Conv.To<T>(tagHelperAttribute?.Value);
         }
 
         /// <summary>
@@ -45,10 +46,10 @@ namespace Bing.Ui.Extensions
 
             if (!(value is TagHelperAttribute tagHelperAttribute))
             {
-                return Bing.Utils.Helpers.Conv.To<T>(value);
+                return Conv.To<T>(value);
             }
 
-            return Bing.Utils.Helpers.Conv.To<T>(tagHelperAttribute?.Value);
+            return Conv.To<T>(tagHelperAttribute?.Value);
         }
 
         /// <summary>

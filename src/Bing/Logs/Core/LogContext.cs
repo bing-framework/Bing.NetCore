@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Net;
 using Bing.Contexts;
+using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
-using Bing.Utils.Helpers;
 
 namespace Bing.Logs.Core
 {

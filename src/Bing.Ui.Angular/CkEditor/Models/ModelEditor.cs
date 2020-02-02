@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Bing.Helpers;
 using Bing.Ui.Angular.Internal;
 using Bing.Utils.Helpers;
 

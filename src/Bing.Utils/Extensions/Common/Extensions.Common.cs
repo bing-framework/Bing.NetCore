@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bing.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Utils.Extensions
@@ -31,7 +32,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static int Value(this System.Enum instance)
         {
-            return Utils.Helpers.Enum.GetValue(instance.GetType(), instance);
+            return Enum.GetValue(instance.GetType(), instance);
         }
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static TResult Value<TResult>(this System.Enum instance)
         {
-            return Utils.Helpers.Conv.To<TResult>(Value(instance));
+            return Conv.To<TResult>(Value(instance));
         }
 
         #endregion
@@ -56,7 +57,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string Description(this System.Enum instance)
         {
-            return Utils.Helpers.Enum.GetDescription(instance.GetType(), instance);
+            return Enum.GetDescription(instance.GetType(), instance);
         }
 
         #endregion
@@ -73,7 +74,7 @@ namespace Bing.Utils.Extensions
         /// <returns></returns>
         public static string Join<T>(this IEnumerable<T> list, string quotes = "", string separator = ",")
         {
-            return Utils.Helpers.Str.Join(list, quotes, separator);
+            return Str.Join(list, quotes, separator);
         }
 
         #endregion

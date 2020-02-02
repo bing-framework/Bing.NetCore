@@ -13118,29 +13118,6 @@
             <param name="updateList">更新列表</param>
             <param name="deleteList">删除列表</param>
         </member>
-        <member name="T:Bing.Domains.Entities.EntityExtensions">
-            <summary>
-            实体扩展
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityExtensions.IsNullOrDeleted(Bing.Domains.Entities.IDelete)">
-            <summary>
-            是否空对象或是否已删除
-            </summary>
-            <param name="entity">逻辑删除实体</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.EntityExtensions.UnDelete(Bing.Domains.Entities.IDelete)">
-            <summary>
-            取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Domains.Entities.Auditing.IDeletionAudited"/>属性设置为空
-            </summary>
-            <param name="entity">逻辑删除实体</param>
-        </member>
-        <member name="T:Bing.Domains.Entities.IEntityHash">
-            <summary>
-            实体Hash。对实体的属性值进行Hash，确定实体是否存在变化。
-            这些变化可用于系统初始化时确定是否需要进行数据同步
-            </summary>
-        </member>
         <member name="T:Bing.Domains.Entities.Tenants.ITenant">
             <summary>
             租户
@@ -13336,6 +13313,29 @@
             </summary>
             <param name="parent">父节点</param>
             <param name="children">子节点</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.EntityExtensions">
+            <summary>
+            实体扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityExtensions.IsNullOrDeleted(Bing.Domains.Entities.IDelete)">
+            <summary>
+            是否空对象或是否已删除
+            </summary>
+            <param name="entity">逻辑删除实体</param>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityExtensions.UnDelete(Bing.Domains.Entities.IDelete)">
+            <summary>
+            取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Domains.Entities.Auditing.IDeletionAudited"/>属性设置为空
+            </summary>
+            <param name="entity">逻辑删除实体</param>
+        </member>
+        <member name="T:Bing.Domains.Entities.IEntityHash">
+            <summary>
+            实体Hash。对实体的属性值进行Hash，确定实体是否存在变化。
+            这些变化可用于系统初始化时确定是否需要进行数据同步
+            </summary>
         </member>
         <member name="T:Bing.Domains.Repositories.ICompactRepository`1">
             <summary>
@@ -14718,6 +14718,38 @@
             异步任务取消令牌
             </summary>
         </member>
+        <member name="T:Bing.TreeExtensions">
+            <summary>
+            树型扩展
+            </summary>
+        </member>
+        <member name="M:Bing.TreeExtensions.UpdatePathAsync``3(Bing.Domains.Repositories.ITreeCompactRepository{``0,``1,``2},``0)">
+            <summary>
+            更新实体以及所有下级节点路径
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+            <typeparam name="TParentId">父标识类型</typeparam>
+            <param name="repository">仓储</param>
+            <param name="entity">实体</param>
+        </member>
+        <member name="M:Bing.TreeExtensions.SwapSort(Bing.Domains.Entities.Trees.ISortId,Bing.Domains.Entities.Trees.ISortId)">
+            <summary>
+            交换排序
+            </summary>
+            <param name="entity">实体</param>
+            <param name="swapEntity">交换实体</param>
+        </member>
+        <member name="M:Bing.TreeExtensions.GetMissingParentIds``3(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            获取缺失的父标识列表
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+            <typeparam name="TParentId">父标识类型</typeparam>
+            <param name="entities">实体列表</param>
+            <returns></returns>
+        </member>
         <member name="T:Bing.Validations.Abstractions.IValidatable">
             <summary>
             验证
@@ -15837,39 +15869,6 @@
             获取身份标识
             </summary>
             <param name="context">Http上下文</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.TreeExtensions">
-            <summary>
-            树型扩展
-            </summary>
-        </member>
-        <member name="M:Bing.TreeExtensions.UpdatePathAsync``3(Bing.Domains.Repositories.ITreeCompactRepository{``0,``1,``2},``0)">
-            <summary>
-            更新实体以及所有下级节点路径
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">标识类型</typeparam>
-            <typeparam name="TParentId">父标识类型</typeparam>
-            <param name="repository">仓储</param>
-            <param name="entity">实体</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.TreeExtensions.SwapSort(Bing.Domains.Entities.Trees.ISortId,Bing.Domains.Entities.Trees.ISortId)">
-            <summary>
-            交换排序
-            </summary>
-            <param name="entity">实体</param>
-            <param name="swapEntity">交换实体</param>
-        </member>
-        <member name="M:Bing.TreeExtensions.GetMissingParentIds``3(System.Collections.Generic.IEnumerable{``0})">
-            <summary>
-            获取缺失的父标识列表
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">标识类型</typeparam>
-            <typeparam name="TParentId">父标识类型</typeparam>
-            <param name="entities">实体列表</param>
             <returns></returns>
         </member>
         <member name="T:Bing.Finders.FinderBase`1">

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Github.Configs;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 using Bing.Utils.Parameters.Parsers;

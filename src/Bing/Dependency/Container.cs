@@ -5,6 +5,7 @@ using Autofac;
 using Bing.Utils.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Autofac.Extensions.DependencyInjection;
+using Bing.Helpers;
 
 namespace Bing.Dependency
 {

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 using Bing.Utils.Randoms;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Utils.Files.Paths
 {

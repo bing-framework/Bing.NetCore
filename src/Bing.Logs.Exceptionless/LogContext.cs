@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Helpers;
 using Bing.Logs.Internal;
 using Bing.Utils.Helpers;
 

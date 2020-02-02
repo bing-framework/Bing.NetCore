@@ -1,5 +1,6 @@
 ﻿using Bing.Caching;
 using Bing.EasyCaching;
+using Bing.Helpers;
 using EasyCaching.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -34,7 +35,7 @@ namespace Bing.Tests.Caching
         public void Test_1()
         {
             int i = 0;
-            Bing.Utils.Helpers.Thread.ParallelExecute(() =>
+            Thread.ParallelExecute(() =>
             {
                 _cache.Get("EasyCachingCacheTest_1", () => i++);
             }, 20);

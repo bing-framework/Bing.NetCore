@@ -1,4 +1,4 @@
-﻿using Bing.Utils.Helpers;
+﻿using Bing.Helpers;
 
 namespace Bing.Utils.Randoms
 {

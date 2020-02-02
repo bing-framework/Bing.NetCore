@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Bing.Helpers;
 using Bing.Utils.Files.Paths;
 using Bing.Utils.Helpers;
 

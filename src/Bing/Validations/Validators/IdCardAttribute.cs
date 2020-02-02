@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Bing.Helpers;
 using Bing.Properties;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;

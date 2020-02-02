@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 

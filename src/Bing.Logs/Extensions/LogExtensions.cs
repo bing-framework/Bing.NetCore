@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Bing.Exceptions;
+using Bing.Helpers;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
 using Bing.Utils.Extensions;

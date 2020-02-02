@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Core;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Parameters;

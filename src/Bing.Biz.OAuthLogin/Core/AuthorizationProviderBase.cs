@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;

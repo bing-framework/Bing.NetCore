@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects.Base;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 using Bing.Validations.Abstractions;
 

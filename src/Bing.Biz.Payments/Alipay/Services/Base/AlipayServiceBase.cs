@@ -4,6 +4,7 @@ using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Parameters;
 using Bing.Biz.Payments.Alipay.Results;
 using Bing.Biz.Payments.Core;
+using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;

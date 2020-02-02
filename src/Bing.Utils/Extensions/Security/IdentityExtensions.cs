@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 
 // ReSharper disable once CheckNamespace

@@ -195,7 +195,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIds(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return FindByIds(idList);
         }
 
@@ -228,7 +228,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsAsync(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return await FindByIdsAsync(idList);
         }
 
@@ -297,7 +297,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIdsNoTracking(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return FindByIdsNoTracking(idList);
         }
 
@@ -334,7 +334,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return await FindByIdsNoTrackingAsync(idList);
         }
 

@@ -103,7 +103,7 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 创建标识
         /// </summary>
-        protected virtual TKey CreateId() => Utils.Helpers.Conv.To<TKey>(Guid.NewGuid());
+        protected virtual TKey CreateId() => Conv.To<TKey>(Guid.NewGuid());
 
         /// <summary>
         /// 验证

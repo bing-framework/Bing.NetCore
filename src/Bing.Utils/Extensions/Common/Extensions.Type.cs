@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 
 // ReSharper disable once CheckNamespace

@@ -7,6 +7,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
+using Bing.Helpers;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;

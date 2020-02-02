@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
+using Bing.Helpers;
 using Bing.Ui.Angular.Enums;
 using Bing.Ui.Configs;
 using Bing.Ui.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Ui.Angular.Tables.Resolvers
 {
@@ -58,7 +60,7 @@ namespace Bing.Ui.Angular.Tables.Resolvers
         /// </summary>
         private void Init()
         {
-            _config.SetAttribute(UiConst.Column, Bing.Utils.Helpers.Str.FirstLower(_expression.Name));
+            _config.SetAttribute(UiConst.Column, Str.FirstLower(_expression.Name));
             _config.SetAttribute(UiConst.Title, Reflection.GetDisplayNameOrDescription(_memberInfo));
             InitType();
         }

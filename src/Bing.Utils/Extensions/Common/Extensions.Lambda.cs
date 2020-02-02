@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Bing.Helpers;
 using Bing.Utils.Expressions;
 using Bing.Utils.Helpers;
 

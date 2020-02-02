@@ -1,4 +1,5 @@
-﻿using Bing.Utils.Extensions;
+﻿using Bing.Helpers;
+using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;

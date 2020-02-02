@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Bing.Finders;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 
 namespace Bing.Reflections

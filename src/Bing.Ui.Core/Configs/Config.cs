@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using Bing.Helpers;
 using Bing.Ui.TagHelpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Ui.Configs
 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Queries.Trees
@@ -51,7 +52,7 @@ namespace Bing.Datas.Queries.Trees
         /// </summary>
         public virtual bool IsSearch()
         {
-            var items = Bing.Utils.Helpers.Reflection.GetPublicProperties(this);
+            var items = Reflection.GetPublicProperties(this);
             return items.Any(t => IsSearchProperty(t.Text, t.Value));
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Bing.Domains.Repositories;
+using Bing.Helpers;
 using Bing.Utils;
 using Bing.Utils.Expressions;
 using Bing.Utils.Helpers;

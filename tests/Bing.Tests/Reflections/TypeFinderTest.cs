@@ -1,4 +1,5 @@
-﻿using Bing.Reflections;
+﻿using Bing.Helpers;
+using Bing.Reflections;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -86,7 +87,7 @@ namespace Bing.Tests.Reflections
         [Fact]
         public void Test_Find_6()
         {
-            Bing.Utils.Helpers.Thread.ParallelExecute(() =>
+            Thread.ParallelExecute(() =>
             {
                 var types = _typeFinder.Find<IA>();
                 Assert.Single(types);

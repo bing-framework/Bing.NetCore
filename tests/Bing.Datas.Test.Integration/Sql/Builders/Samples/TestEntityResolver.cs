@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Builders;
 using Bing.Datas.Test.Integration.Samples;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 

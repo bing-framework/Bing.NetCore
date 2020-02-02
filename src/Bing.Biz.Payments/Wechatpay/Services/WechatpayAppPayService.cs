@@ -6,7 +6,7 @@ using Bing.Biz.Payments.Wechatpay.Parameters;
 using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Biz.Payments.Wechatpay.Services.Base;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Biz.Payments.Wechatpay.Services
 {

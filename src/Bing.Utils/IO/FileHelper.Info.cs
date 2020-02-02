@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Bing.Helpers;
 using Bing.Utils.Files;
 using Bing.Utils.Helpers;
 using FileInfo = System.IO.FileInfo;

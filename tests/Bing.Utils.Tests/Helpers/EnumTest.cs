@@ -5,6 +5,7 @@ using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;
 using Xunit;
 using Xunit.Abstractions;
+using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Utils.Tests.Helpers
 {
@@ -28,7 +29,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData("3", EnumSample.C)]
         public void Test_Parse(string member, EnumSample sample)
         {
-            Assert.Equal(sample, Bing.Utils.Helpers.Enum.Parse<EnumSample>(member));
+            Assert.Equal(sample, Enum.Parse<EnumSample>(member));
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace Bing.Utils.Tests.Helpers
         {
             AssertHelper.Throws<ArgumentNullException>(() =>
             {
-                Bing.Utils.Helpers.Enum.Parse<EnumSample>(member);
+                Enum.Parse<EnumSample>(member);
             }, "member");
         }
 
@@ -56,7 +57,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData("3", EnumSample.C)]
         public void Test_Parse_Nullable(string member, EnumSample? sample)
         {
-            Assert.Equal(sample, Bing.Utils.Helpers.Enum.Parse<EnumSample?>(member));
+            Assert.Equal(sample, Enum.Parse<EnumSample?>(member));
         }
 
         /// <summary>
@@ -69,7 +70,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData("E5", EnumSample.E)]
         public void Test_ParseByDescription(string desc, EnumSample sample)
         {
-            Assert.Equal(sample, Bing.Utils.Helpers.Enum.ParseByDescription<EnumSample>(desc));
+            Assert.Equal(sample, Enum.ParseByDescription<EnumSample>(desc));
         }
 
         /// <summary>
@@ -82,7 +83,7 @@ namespace Bing.Utils.Tests.Helpers
         {
             AssertHelper.Throws<ArgumentNullException>(() =>
             {
-                Bing.Utils.Helpers.Enum.ParseByDescription<EnumSample>(desc);
+                Enum.ParseByDescription<EnumSample>(desc);
             }, "desc");
         }
 
@@ -96,7 +97,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData("C3", EnumSample.C)]
         public void Test_ParseByDescription_Nullable(string member, EnumSample? sample)
         {
-            Assert.Equal(sample, Bing.Utils.Helpers.Enum.ParseByDescription<EnumSample?>(member));
+            Assert.Equal(sample, Enum.ParseByDescription<EnumSample?>(member));
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData(EnumSample.C, "C")]
         public void Test_GetName(object member, string name)
         {
-            Assert.Equal(name, Bing.Utils.Helpers.Enum.GetName<EnumSample>(member));
+            Assert.Equal(name, Enum.GetName<EnumSample>(member));
         }
 
         /// <summary>
@@ -120,7 +121,7 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetName_Validate()
         {
-            Assert.Equal(string.Empty, Bing.Utils.Helpers.Enum.GetName(typeof(Sample), 3));
+            Assert.Equal(string.Empty, Enum.GetName(typeof(Sample), 3));
         }
 
         /// <summary>
@@ -135,7 +136,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData(EnumSample.C, "C")]
         public void Test_GetName_Nullable(object member, string name)
         {
-            Assert.Equal(name, Bing.Utils.Helpers.Enum.GetName<EnumSample?>(member));
+            Assert.Equal(name, Enum.GetName<EnumSample?>(member));
         }
 
         /// <summary>
@@ -144,9 +145,9 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetValue_Validate()
         {
-            AssertHelper.Throws<ArgumentNullException>(() => Bing.Utils.Helpers.Enum.GetValue<EnumSample>(null), "member");
-            AssertHelper.Throws<ArgumentNullException>(() => Bing.Utils.Helpers.Enum.GetValue<EnumSample>(string.Empty), "member");
-            AssertHelper.Throws<ArgumentNullException>(() => Bing.Utils.Helpers.Enum.GetValue<Sample>(string.Empty), "member");
+            AssertHelper.Throws<ArgumentNullException>(() => Enum.GetValue<EnumSample>(null), "member");
+            AssertHelper.Throws<ArgumentNullException>(() => Enum.GetValue<EnumSample>(string.Empty), "member");
+            AssertHelper.Throws<ArgumentNullException>(() => Enum.GetValue<Sample>(string.Empty), "member");
         }
 
         /// <summary>
@@ -158,7 +159,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData(EnumSample.C, 3)]
         public void Test_GetValue(object member, int value)
         {
-            Assert.Equal(value, Bing.Utils.Helpers.Enum.GetValue<EnumSample>(member));
+            Assert.Equal(value, Enum.GetValue<EnumSample>(member));
         }
 
         /// <summary>
@@ -170,7 +171,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData(EnumSample.C, 3)]
         public void Test_GetValue_Nullable(object member, int value)
         {
-            Assert.Equal(value, Bing.Utils.Helpers.Enum.GetValue<EnumSample?>(member));
+            Assert.Equal(value, Enum.GetValue<EnumSample?>(member));
         }
 
         /// <summary>
@@ -185,7 +186,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData(EnumSample.B, "B2")]
         public void Test_GetDescription(object member, string description)
         {
-            Assert.Equal(description, Bing.Utils.Helpers.Enum.GetDescription<EnumSample>(member));
+            Assert.Equal(description, Enum.GetDescription<EnumSample>(member));
         }
 
         /// <summary>
@@ -200,7 +201,7 @@ namespace Bing.Utils.Tests.Helpers
         [InlineData(EnumSample.B, "B2")]
         public void Test_GetDescription_Nullable(object member, string description)
         {
-            Assert.Equal(description, Bing.Utils.Helpers.Enum.GetDescription<EnumSample?>(member));
+            Assert.Equal(description, Enum.GetDescription<EnumSample?>(member));
         }
 
         /// <summary>
@@ -209,7 +210,7 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetItems()
         {
-            var items = Bing.Utils.Helpers.Enum.GetItems<EnumSample>();
+            var items = Enum.GetItems<EnumSample>();
             Assert.Equal(5, items.Count);
             Assert.Equal("A", items[0].Text);
             Assert.Equal(1, items[0].Value);
@@ -225,7 +226,7 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetItems_Type()
         {
-            var items = Bing.Utils.Helpers.Enum.GetItems(typeof(EnumSample));
+            var items = Enum.GetItems(typeof(EnumSample));
             Assert.Equal(5, items.Count);
             Assert.Equal("A", items[0].Text);
             Assert.Equal(1, items[0].Value);
@@ -241,7 +242,7 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetItems_Nullable()
         {
-            var items = Bing.Utils.Helpers.Enum.GetItems<EnumSample?>();
+            var items = Enum.GetItems<EnumSample?>();
             Assert.Equal(5, items.Count);
             Assert.Equal("A", items[0].Text);
             Assert.Equal(1, items[0].Value);
@@ -257,7 +258,7 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetItems_Nullable_Type()
         {
-            var items = Bing.Utils.Helpers.Enum.GetItems(typeof(EnumSample?));
+            var items = Enum.GetItems(typeof(EnumSample?));
             Assert.Equal(5, items.Count);
             Assert.Equal("A", items[0].Text);
             Assert.Equal(1, items[0].Value);
@@ -274,7 +275,7 @@ namespace Bing.Utils.Tests.Helpers
         public void Test_GetItems_Validate()
         {
             AssertHelper.Throws<InvalidOperationException>(() => {
-                Bing.Utils.Helpers.Enum.GetItems<Sample>();
+                Enum.GetItems<Sample>();
             }, "类型 Bing.Utils.Tests.Samples.Sample 不是枚举");
         }
 
@@ -284,7 +285,7 @@ namespace Bing.Utils.Tests.Helpers
         [Fact]
         public void Test_GetNames()
         {
-            var names = Bing.Utils.Helpers.Enum.GetNames<EnumSample>().OrderBy(t => t).ToList();
+            var names = Enum.GetNames<EnumSample>().OrderBy(t => t).ToList();
             Assert.Equal(5, names.Count);
             Assert.Equal("A", names[0]);
             Assert.Equal("D", names[3]);

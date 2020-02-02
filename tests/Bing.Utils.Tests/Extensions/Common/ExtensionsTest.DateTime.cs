@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;
 using Xunit;

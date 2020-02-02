@@ -7,6 +7,7 @@ using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Trees;
+using Bing.Helpers;
 using Bing.Utils.Helpers;
 
 namespace Bing.Applications.Trees

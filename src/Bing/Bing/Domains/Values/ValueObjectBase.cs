@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Bing.Domains.Entities;
+using Bing.Helpers;
 
 namespace Bing.Domains.Values
 {
@@ -60,6 +61,6 @@ namespace Bing.Domains.Values
         /// <summary>
         /// 克隆副本
         /// </summary>
-        public virtual TValueObject Clone() => Utils.Helpers.Conv.To<TValueObject>(MemberwiseClone());
+        public virtual TValueObject Clone() => Conv.To<TValueObject>(MemberwiseClone());
     }
 }

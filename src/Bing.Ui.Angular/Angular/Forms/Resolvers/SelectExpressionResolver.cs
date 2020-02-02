@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Bing.Helpers;
 using Bing.Ui.Angular.Forms.Configs;
 using Bing.Ui.Extensions;
 using Bing.Utils.Helpers;
