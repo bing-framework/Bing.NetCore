@@ -34,8 +34,8 @@ namespace Bing.Utils.Tests.Extensions
         public ExtensionsTest(ITestOutputHelper output) : base(output)
         {
             _parameterExpression = Expression.Parameter(typeof(Sample), "t");
-            //_expression1 = _parameterExpression.Property("StringValue").Call("Contains", Expression.Constant("A"));
-            _expression1 = _parameterExpression.Property("StringValue").Call("Contains", new[] { typeof(string) }, "A");
+            _expression1 = _parameterExpression.Property("StringValue").Call("Contains", Expression.Constant("A"));
+            //_expression1 = _parameterExpression.Property("StringValue").Call("Contains", new[] { typeof(string) }, "A");
             _expression2 = _parameterExpression.Property("NullableDateValue")
                 .Property("Value")
                 .Property("Year")

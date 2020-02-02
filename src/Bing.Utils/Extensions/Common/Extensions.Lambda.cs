@@ -400,7 +400,10 @@ namespace Bing.Utils.Extensions
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
             // TODO: 存在问题，netcore2.2环境下，string 会有多个值
-            var methodInfo = instance.Type.GetMethod(methodName);
+            var types = values?.Select(x => x.Type).ToArray();
+            var methodInfo = types == null
+                ? instance.Type.GetMethod(methodName)
+                : instance.Type.GetMethod(methodName, types);
             if (methodInfo == null)
                 return null;
             return Expression.Call(instance, methodInfo, values);

@@ -6374,14 +6374,12 @@
             获取类型
             </summary>
             <param name="expression">表达式，范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Helpers.Lambda.GetMember(System.Linq.Expressions.Expression)">
             <summary>
             获取成员
             </summary>
             <param name="expression">表达式，范例：t => t.Name</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Helpers.Lambda.GetMemberExpression(System.Linq.Expressions.Expression,System.Boolean)">
             <summary>
@@ -6395,7 +6393,6 @@
             获取方法调用表达式的成员名称
             </summary>
             <param name="expression">表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.Helpers.Lambda.GetName(System.Linq.Expressions.Expression)">
             <summary>

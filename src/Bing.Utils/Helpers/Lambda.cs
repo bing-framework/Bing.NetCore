@@ -18,7 +18,6 @@ namespace Bing.Utils.Helpers
         /// 获取类型
         /// </summary>
         /// <param name="expression">表达式，范例：t => t.Name</param>
-        /// <returns></returns>
         public static Type GetType(Expression expression)
         {
             var memberExpression = GetMemberExpression(expression);
@@ -32,7 +31,6 @@ namespace Bing.Utils.Helpers
         /// 获取成员
         /// </summary>
         /// <param name="expression">表达式，范例：t => t.Name</param>
-        /// <returns></returns>
         public static MemberInfo GetMember(Expression expression)
         {
             var memberExpression = GetMemberExpression(expression);
@@ -76,7 +74,6 @@ namespace Bing.Utils.Helpers
         /// 获取方法调用表达式的成员名称
         /// </summary>
         /// <param name="expression">表达式</param>
-        /// <returns></returns>
         private static MemberExpression GetMethodCallExpressionName(Expression expression)
         {
             var methodCallExpression = (MethodCallExpression) expression;
@@ -85,9 +82,7 @@ namespace Bing.Utils.Helpers
             {
                 var argumentExpression = methodCallExpression.Arguments.FirstOrDefault();
                 if (argumentExpression != null && argumentExpression.NodeType == ExpressionType.MemberAccess)
-                {
-                    return (MemberExpression) argumentExpression;
-                }
+                    return (MemberExpression)argumentExpression;
             }
             return left;
         }
