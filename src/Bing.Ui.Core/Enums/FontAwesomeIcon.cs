@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Ui.Enums

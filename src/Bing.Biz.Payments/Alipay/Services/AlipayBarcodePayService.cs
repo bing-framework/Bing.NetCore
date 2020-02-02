@@ -7,6 +7,7 @@ using Bing.Biz.Payments.Alipay.Services.Base;
 using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Properties;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Biz.Payments.Alipay.Services

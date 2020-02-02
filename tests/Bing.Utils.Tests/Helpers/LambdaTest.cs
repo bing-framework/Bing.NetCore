@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Tests;
 using Bing.Tests.Samples;

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Tests;
 using Bing.Utils.Extensions;

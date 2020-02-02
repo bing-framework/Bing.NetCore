@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Queries.Trees
 {

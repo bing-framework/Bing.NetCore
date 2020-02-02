@@ -6,9 +6,9 @@ using Bing.AutoMapper;
 using Bing.Datas.UnitOfWorks;
 using Bing.Mapping;
 using Bing.Tests.Samples;
-using Bing.Utils.Extensions;
 using NSubstitute;
 using Xunit;
+using Bing.Extensions;
 
 namespace Bing.Tests.Applications
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Extensions;
 using Bing.Sessions;

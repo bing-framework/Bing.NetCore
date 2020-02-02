@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Queries.Criterias

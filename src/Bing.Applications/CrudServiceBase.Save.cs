@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Domains.ChangeTracking;
 using Bing.Domains.Entities;
+using Bing.Extensions;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;
 

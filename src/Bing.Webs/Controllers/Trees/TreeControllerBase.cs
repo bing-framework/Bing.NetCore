@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;
 

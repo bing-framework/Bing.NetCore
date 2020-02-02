@@ -1,4 +1,5 @@
-﻿using Bing.Ui.Angular.Forms.Configs;
+﻿using Bing.Extensions;
+using Bing.Ui.Angular.Forms.Configs;
 using Bing.Ui.Angular.Forms.Resolvers;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;

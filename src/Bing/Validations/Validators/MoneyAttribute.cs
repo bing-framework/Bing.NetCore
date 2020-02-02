@@ -1,4 +1,5 @@
-﻿using Bing.Utils.Extensions;
+﻿using Bing.Extensions;
+using Bing.Utils.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace System.ComponentModel.DataAnnotations

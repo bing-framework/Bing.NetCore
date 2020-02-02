@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Internal;
+using Bing.Extensions;
 using Bing.Properties;
 using Bing.Utils.Extensions;
 

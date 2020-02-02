@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Bing.Domains.Services;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Permissions.Identity.Extensions;
 using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Repositories;

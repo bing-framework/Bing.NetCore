@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Internal;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {

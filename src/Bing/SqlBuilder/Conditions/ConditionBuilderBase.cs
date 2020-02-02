@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.SqlBuilder.Conditions

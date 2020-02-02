@@ -6,6 +6,7 @@ using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
+using Bing.Extensions;
 using Bing.Utils;
 using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;

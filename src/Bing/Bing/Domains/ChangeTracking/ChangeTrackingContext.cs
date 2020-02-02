@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Bing.Domains.Entities;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Utils.Extensions;
 using Bing.Utils.Helpers;

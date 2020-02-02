@@ -1,4 +1,5 @@
-﻿using Bing.Helpers;
+﻿using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Ui.Builders;
 using Bing.Utils.Extensions;
 

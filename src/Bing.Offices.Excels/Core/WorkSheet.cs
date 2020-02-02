@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Bing.Extensions;
 using Bing.Offices.Excels.Abstractions;
 using Bing.Utils.Extensions;
 

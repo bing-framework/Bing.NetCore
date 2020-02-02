@@ -2224,102 +2224,6 @@
             </summary>
             <param name="query">查询对象</param>
         </member>
-        <member name="T:Bing.Datas.Queries.QueryableExtensions">
-            <summary>
-            <see cref="T:System.Linq.IQueryable`1"/> 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Where``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.ICriteria{``0})">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="criteria">查询条件对象</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIf``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="predicate">查询条件</param>
-            <param name="condition">该值为true时添加查询条件，否则忽略</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.WhereIfNotEmpty``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
-            注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Boolean,System.Nullable{Bing.Datas.Queries.Boundary})">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="includeTime">是否包含时间</param>
-            <param name="boundary">包含边界</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.Pager``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            分页
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="pager">分页对象</param>
-        </member>
-        <member name="M:Bing.Datas.Queries.QueryableExtensions.ToPagerList``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            转换为分页列表
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="source">数据源</param>
-            <param name="pager">分页对象</param>
-        </member>
         <member name="T:Bing.Datas.Queries.QueryParameter">
             <summary>
             查询参数
@@ -2902,7 +2806,7 @@
             </summary>
             <param name="condition">连接条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.JoinClause.On(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.JoinClause.On(System.String,System.Object,Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -2910,7 +2814,7 @@
             <param name="value">值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.JoinClause.On``2(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.JoinClause.On``2(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -3380,7 +3284,7 @@
             </summary>
             <param name="condition">查询条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where(System.String,System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -3388,7 +3292,7 @@
             <param name="value">值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -3404,7 +3308,7 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">查询条件表达式</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where(System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where(System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -3412,7 +3316,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -3421,7 +3325,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where(System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where(System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -3429,7 +3333,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -3438,7 +3342,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.WhereIfNotEmpty(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.WhereIfNotEmpty(System.String,System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -3446,7 +3350,7 @@
             <param name="value">值，如果该值为空，则忽略该查询条件</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.WhereIfNotEmpty``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Clauses.WhereClause.WhereIfNotEmpty``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -4252,7 +4156,7 @@
             Sql查询条件工厂
             </summary>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Conditions.SqlConditionFactory.Create(System.String,System.String,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Conditions.SqlConditionFactory.Create(System.String,System.String,Bing.Operator)">
             <summary>
             创建Sql查询条件
             </summary>
@@ -4753,7 +4657,7 @@
             </summary>
             <param name="condition">连接条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Core.JoinItem.On(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Core.JoinItem.On(System.String,System.Object,Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -4901,7 +4805,7 @@
             条件运算符
             </summary>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Core.OnItem.#ctor(System.String,System.String,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Core.OnItem.#ctor(System.String,System.String,Bing.Operator)">
             <summary>
             初始化一个<see cref="T:Bing.Datas.Sql.Builders.Core.OnItem"/>类型的实例
             </summary>
@@ -4909,7 +4813,7 @@
             <param name="right">右表列名</param>
             <param name="operator">条件运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Core.OnItem.#ctor(Bing.Datas.Sql.Builders.Core.SqlItem,Bing.Datas.Sql.Builders.Core.SqlItem,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Core.OnItem.#ctor(Bing.Datas.Sql.Builders.Core.SqlItem,Bing.Datas.Sql.Builders.Core.SqlItem,Bing.Operator)">
             <summary>
             初始化一个<see cref="T:Bing.Datas.Sql.Builders.Core.OnItem"/>类型的实例
             </summary>
@@ -5017,7 +4921,7 @@
             获取参数列表
             </summary>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.Add(System.String,System.Object,System.Nullable{Bing.Utils.Operator})">
+        <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.Add(System.String,System.Object,System.Nullable{Bing.Operator})">
             <summary>
             添加参数，如果参数已存在则替换
             </summary>
@@ -5025,7 +4929,7 @@
             <param name="value">参数值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.GetValue(System.Object,System.Nullable{Bing.Utils.Operator})">
+        <member name="M:Bing.Datas.Sql.Builders.Core.ParameterManager.GetValue(System.Object,System.Nullable{Bing.Operator})">
             <summary>
             获取值
             </summary>
@@ -6224,7 +6128,7 @@
             </summary>
             <param name="condition">连接条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IJoinClause.On(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IJoinClause.On(System.String,System.Object,Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -6232,7 +6136,7 @@
             <param name="value">值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IJoinClause.On``2(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IJoinClause.On``2(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -6272,7 +6176,7 @@
             </summary>
             <param name="condition">连接条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IJoinOn.On(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IJoinOn.On(System.String,System.Object,Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -6354,7 +6258,7 @@
             <param name="expression">列名</param>
             <param name="type">实体类型</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.CreateCondition(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.CreateCondition(System.String,System.Object,Bing.Operator)">
             <summary>
             创建查询条件并添加参数
             </summary>
@@ -6362,14 +6266,14 @@
             <param name="value">值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.IsInCondition(Bing.Utils.Operator,System.Object)">
+        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.IsInCondition(Bing.Operator,System.Object)">
             <summary>
             是否In条件
             </summary>
             <param name="operator">运算符</param>
             <param name="value">值</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.IsNotInCondition(Bing.Utils.Operator,System.Object)">
+        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.IsNotInCondition(Bing.Operator,System.Object)">
             <summary>
             是否Not In条件
             </summary>
@@ -6384,7 +6288,7 @@
             <param name="values">值列表</param>
             <param name="notIn">是否Not In条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GenerateParamName(System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.Internal.Helper.GenerateParamName(System.Object,Bing.Operator)">
             <summary>
             获取参数名
             </summary>
@@ -6470,7 +6374,7 @@
             获取参数列表
             </summary>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IParameterManager.Add(System.String,System.Object,System.Nullable{Bing.Utils.Operator})">
+        <member name="M:Bing.Datas.Sql.Builders.IParameterManager.Add(System.String,System.Object,System.Nullable{Bing.Operator})">
             <summary>
             添加参数，如果参数已存在则替换
             </summary>
@@ -6761,7 +6665,7 @@
             </summary>
             <param name="condition">查询条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where(System.String,System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -6769,7 +6673,7 @@
             <param name="value">值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -6785,7 +6689,7 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <param name="expression">查询条件表达式</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where(System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where(System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -6793,7 +6697,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -6802,7 +6706,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where(System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where(System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -6810,7 +6714,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.Where``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -6819,7 +6723,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.WhereIfNotEmpty(System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.WhereIfNotEmpty(System.String,System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -6827,7 +6731,7 @@
             <param name="value">值，如果该值为空，则忽略该查询条件</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.WhereIfNotEmpty``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Builders.IWhereClause.WhereIfNotEmpty``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -7461,7 +7365,7 @@
             <param name="source">源</param>
             <param name="condition">连接条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.On``1(``0,System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.On``1(``0,System.String,System.Object,Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -7742,7 +7646,7 @@
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -7792,7 +7696,7 @@
             <param name="source">Sql生成器</param>
             <param name="conditions">查询条件,如果表达式中的值为空，则忽略该查询条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -7810,7 +7714,7 @@
             <param name="source">Sql生成器</param>
             <param name="expression">查询条件表达式。范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -7820,7 +7724,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -7830,7 +7734,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,System.Boolean,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -7851,7 +7755,7 @@
             <param name="expression">查询条件表达式,范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -7862,7 +7766,7 @@
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -7874,7 +7778,7 @@
             <param name="operator">运算符</param>
             <returns></returns>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(Bing.Datas.Sql.ISqlBuilder,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -8587,7 +8491,7 @@
             <param name="alias">别名</param>
             <param name="schema">架构名</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.On``2(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Linq.Expressions.Expression{System.Func{``1,System.Object}},Bing.Operator)">
             <summary>
             设置连接条件
             </summary>
@@ -8639,7 +8543,7 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="conditions">查询条件。如果表达式中的值为空，则忽略该查询条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -8657,7 +8561,7 @@
             <param name="sqlQuery">Sql查询对象</param>
             <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -8667,7 +8571,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -8677,7 +8581,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,System.Boolean,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -8697,7 +8601,7 @@
             <param name="expression">查询条件表达式，范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
             <param name="condition">拼接条件，该值为true时添加查询条件，否则忽略</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -8708,7 +8612,7 @@
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -8719,7 +8623,7 @@
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(Bing.Datas.Sql.ISqlQuery,System.Linq.Expressions.Expression{System.Func{``0,System.Object}},System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -9116,7 +9020,7 @@
             <param name="source">源</param>
             <param name="condition">条件</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -9126,7 +9030,7 @@
             <param name="value">值</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -9136,7 +9040,7 @@
             <param name="builder">子查询Sql生成器</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.Where``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -9146,7 +9050,7 @@
             <param name="action">子查询操作</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,System.Object,System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,System.Object,System.Boolean,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -9157,7 +9061,7 @@
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,Bing.Datas.Sql.ISqlBuilder,System.Boolean,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -9168,7 +9072,7 @@
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIf``1(``0,System.String,System.Action{Bing.Datas.Sql.ISqlBuilder},System.Boolean,Bing.Operator)">
             <summary>
             设置子查询条件
             </summary>
@@ -9179,7 +9083,7 @@
             <param name="condition">该值为true时添加查询条件，否则忽略</param>
             <param name="operator">运算符</param>
         </member>
-        <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(``0,System.String,System.Object,Bing.Utils.Operator)">
+        <member name="M:Bing.Datas.Sql.Extensions.WhereIfNotEmpty``1(``0,System.String,System.Object,Bing.Operator)">
             <summary>
             设置查询条件
             </summary>
@@ -14346,6 +14250,186 @@
             <param name="level">日志级别</param>
             <returns></returns>
         </member>
+        <member name="T:Bing.DomainExtensions">
+            <summary>
+            领域实体扩展
+            </summary>
+        </member>
+        <member name="M:Bing.DomainExtensions.Compare``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            比较
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="newList">新实体集合</param>
+            <param name="oldList">旧实体集合</param>
+        </member>
+        <member name="M:Bing.DomainExtensions.Compare``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            比较
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+            <param name="newList">新实体集合</param>
+            <param name="oldList">旧实体集合</param>
+        </member>
+        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.Guid},System.Collections.Generic.IEnumerable{System.Guid})">
+            <summary>
+            比较
+            </summary>
+            <param name="newList">新实体标识集合</param>
+            <param name="oldList">旧实体标识集合</param>
+        </member>
+        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            比较
+            </summary>
+            <param name="newList">新实体标识集合</param>
+            <param name="oldList">旧实体标识集合</param>
+        </member>
+        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            比较
+            </summary>
+            <param name="newList">新实体标识集合</param>
+            <param name="oldList">旧实体标识集合</param>
+        </member>
+        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.Int64},System.Collections.Generic.IEnumerable{System.Int64})">
+            <summary>
+            比较
+            </summary>
+            <param name="newList">新实体标识集合</param>
+            <param name="oldList">旧实体标识集合</param>
+        </member>
+        <member name="M:Bing.DomainExtensions.CompareKey``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            比较键
+            </summary>
+            <typeparam name="TKey">键类型</typeparam>
+            <param name="newList">新实体标识集合</param>
+            <param name="oldList">旧实体标识集合</param>
+        </member>
+        <member name="T:Bing.ExceptionExtensions">
+            <summary>
+            异常扩展
+            </summary>
+        </member>
+        <member name="M:Bing.ExceptionExtensions.GetRawException(System.Exception)">
+            <summary>
+            获取原始异常
+            </summary>
+            <param name="exception">异常</param>
+        </member>
+        <member name="M:Bing.ExceptionExtensions.GetPrompt(System.Exception)">
+            <summary>
+            获取异常提示
+            </summary>
+            <param name="exception">异常</param>
+        </member>
+        <member name="T:Bing.QueryableExtensions">
+            <summary>
+            <see cref="T:System.Linq.IQueryable`1"/> 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.QueryableExtensions.Where``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.ICriteria{``0})">
+            <summary>
+            添加查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="criteria">查询条件对象</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.WhereIf``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
+            <summary>
+            添加查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="predicate">查询条件</param>
+            <param name="condition">判断条件，该值为true时添加查询条件，否则忽略</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.WhereIfNotEmpty``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            添加查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="predicate">查询条件，如果参数为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Bing.Datas.Queries.Boundary)">
+            <summary>
+            添加范围查询条件
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TProperty">属性类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
+            <param name="min">最小值</param>
+            <param name="max">最大值</param>
+            <param name="boundary">包含边界</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.Page``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
+            <summary>
+            分页，包含排序
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="pager">分页对象</param>
+        </member>
+        <member name="M:Bing.QueryableExtensions.ToPagerList``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
+            <summary>
+            转换为分页列表，包含排序分页操作
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <param name="query">数据源</param>
+            <param name="pager">分页对象</param>
+        </member>
+        <member name="T:Bing.SecurityExtensions">
+            <summary>
+            安全扩展
+            </summary>
+        </member>
+        <member name="M:Bing.SecurityExtensions.GetIdentity(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            获取身份标识
+            </summary>
+            <param name="context">Http上下文</param>
+        </member>
         <member name="T:Bing.Localization.LocalizationContext">
             <summary>
             本地化上下文
@@ -15659,217 +15743,6 @@
             <summary>
             配置
             </summary>
-        </member>
-        <member name="T:Bing.DomainExtensions">
-            <summary>
-            领域实体扩展
-            </summary>
-        </member>
-        <member name="M:Bing.DomainExtensions.Compare``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
-            <summary>
-            比较
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="newList">新实体集合</param>
-            <param name="oldList">旧实体集合</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.DomainExtensions.Compare``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
-            <summary>
-            比较
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TKey">标识类型</typeparam>
-            <param name="newList">新实体集合</param>
-            <param name="oldList">旧实体集合</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.Guid},System.Collections.Generic.IEnumerable{System.Guid})">
-            <summary>
-            比较
-            </summary>
-            <param name="newList">新实体标识集合</param>
-            <param name="oldList">旧实体标识集合</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
-            <summary>
-            比较
-            </summary>
-            <param name="newList">新实体标识集合</param>
-            <param name="oldList">旧实体标识集合</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
-            <summary>
-            比较
-            </summary>
-            <param name="newList">新实体标识集合</param>
-            <param name="oldList">旧实体标识集合</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.DomainExtensions.Compare(System.Collections.Generic.IEnumerable{System.Int64},System.Collections.Generic.IEnumerable{System.Int64})">
-            <summary>
-            比较
-            </summary>
-            <param name="newList">新实体标识集合</param>
-            <param name="oldList">旧实体标识集合</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.ExceptionExtensions">
-            <summary>
-            异常扩展
-            </summary>
-        </member>
-        <member name="M:Bing.ExceptionExtensions.GetRawException(System.Exception)">
-            <summary>
-            获取原始异常
-            </summary>
-            <param name="exception">异常</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.ExceptionExtensions.GetPrompt(System.Exception)">
-            <summary>
-            获取异常提示
-            </summary>
-            <param name="exception">异常</param>
-        </member>
-        <member name="T:Bing.InfrastructureExtensions">
-            <summary>
-            基础设施扩展
-            </summary>
-        </member>
-        <member name="M:Bing.InfrastructureExtensions.AddBing(Microsoft.Extensions.DependencyInjection.IServiceCollection,Bing.Dependency.IConfig[])">
-            <summary>
-            注册Bing基础设施服务
-            </summary>
-            <param name="services">服务集合</param>
-            <param name="configs">依赖配置</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.InfrastructureExtensions.AddBing(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{AspectCore.Configuration.IAspectConfiguration},Bing.Dependency.IConfig[])">
-            <summary>
-            注册Bing基础设施服务
-            </summary>
-            <param name="services">服务集合</param>
-            <param name="aopConfigAction">Aop配置操作</param>
-            <param name="configs">依赖配置</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.QueryableExtensions">
-            <summary>
-            <see cref="T:System.Linq.IQueryable`1"/> 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.QueryableExtensions.Page``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            分页，包含排序
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="pager">分页对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.ToPagerList``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.IPager)">
-            <summary>
-            转换为分页列表，包含排序分页操作
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="pager">分页对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.Where``1(System.Linq.IQueryable{``0},Bing.Domains.Repositories.ICriteria{``0})">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="criteria">查询条件对象</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.WhereIf``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}},System.Boolean)">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="predicate">查询条件</param>
-            <param name="condition">判断条件，该值为true时添加查询条件，否则忽略</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.WhereIfNotEmpty``1(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
-            <summary>
-            添加查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="predicate">查询条件，如果参数为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Int32},System.Nullable{System.Int32},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Double},System.Nullable{System.Double},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.Decimal},System.Nullable{System.Decimal},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="propertyExpression">属性表达式，范例：t => t.Age</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.QueryableExtensions.Between``2(System.Linq.IQueryable{``0},System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Bing.Datas.Queries.Boundary)">
-            <summary>
-            添加范围查询条件
-            </summary>
-            <typeparam name="TEntity">实体类型</typeparam>
-            <typeparam name="TProperty">属性类型</typeparam>
-            <param name="query">数据源</param>
-            <param name="propertyExpression">属性表达式，范例：t => t.Time</param>
-            <param name="min">最小值</param>
-            <param name="max">最大值</param>
-            <param name="boundary">包含边界</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.SecurityExtensions">
-            <summary>
-            安全扩展
-            </summary>
-        </member>
-        <member name="M:Bing.SecurityExtensions.GetIdentity(Microsoft.AspNetCore.Http.HttpContext)">
-            <summary>
-            获取身份标识
-            </summary>
-            <param name="context">Http上下文</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Finders.FinderBase`1">
             <summary>

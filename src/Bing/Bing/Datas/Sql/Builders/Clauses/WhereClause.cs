@@ -5,6 +5,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Internal;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
 using Bing.Utils;

@@ -3,6 +3,7 @@ using Bing.Applications;
 using Bing.Datas.Queries;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Repositories;
+using Bing.Extensions;
 using Bing.Mapping;
 using Bing.Utils.Extensions;
 

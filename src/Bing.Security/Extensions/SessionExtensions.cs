@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Security.Claims;
 using Bing.Sessions;

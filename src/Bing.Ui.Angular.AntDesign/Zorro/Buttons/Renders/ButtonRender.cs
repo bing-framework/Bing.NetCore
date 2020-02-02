@@ -1,4 +1,5 @@
-﻿using Bing.Ui.Angular;
+﻿using Bing.Extensions;
+using Bing.Ui.Angular;
 using Bing.Ui.Angular.Base;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;

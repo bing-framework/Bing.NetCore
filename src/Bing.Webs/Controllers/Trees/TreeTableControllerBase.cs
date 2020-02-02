@@ -5,6 +5,7 @@ using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Domains.Repositories;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;
 

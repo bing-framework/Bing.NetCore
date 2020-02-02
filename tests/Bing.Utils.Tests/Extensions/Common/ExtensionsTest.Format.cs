@@ -1,4 +1,5 @@
-﻿using Bing.Tests;
+﻿using Bing.Extensions;
+using Bing.Tests;
 using Bing.Utils.Extensions;
 using Xunit;
 

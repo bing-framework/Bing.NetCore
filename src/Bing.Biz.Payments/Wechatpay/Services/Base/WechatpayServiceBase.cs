@@ -4,6 +4,7 @@ using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
 using Bing.Biz.Payments.Wechatpay.Results;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;

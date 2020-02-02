@@ -5,6 +5,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.Sql;
 using Bing.Domains.Repositories;
 using Bing.Events.Messages;
+using Bing.Extensions;
 using Bing.Mapping;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Events;

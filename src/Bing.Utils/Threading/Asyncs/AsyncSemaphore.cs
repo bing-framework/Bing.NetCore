@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Utils.Threading.Asyncs

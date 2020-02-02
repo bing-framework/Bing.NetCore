@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.UnitOfWorks;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;

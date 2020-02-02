@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Bing.Extensions;
 using Bing.Utils;
 using Bing.Utils.Extensions;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.Extensions;
 using Bing.Ui.Angular;
 using Bing.Ui.Angular.Base;
 using Bing.Ui.Builders;

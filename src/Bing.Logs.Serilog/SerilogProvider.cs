@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
 using Bing.Utils.Extensions;

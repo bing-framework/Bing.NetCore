@@ -9,7 +9,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Json;
 using Bing.Utils.Webs.Clients.Internal;
 using Bing.Utils.Webs.Clients.Parameters;

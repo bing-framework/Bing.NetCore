@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing
 {

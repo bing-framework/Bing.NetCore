@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Domains.Repositories

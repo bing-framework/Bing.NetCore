@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Extensions;
 using Bing.Permissions.Identity.JwtBearer;
 using Bing.Security;
 using Bing.Utils.Extensions;

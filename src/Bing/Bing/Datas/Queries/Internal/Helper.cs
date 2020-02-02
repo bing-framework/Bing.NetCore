@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using Bing.Extensions;
 using Bing.Helpers;
 
 namespace Bing.Datas.Queries.Internal

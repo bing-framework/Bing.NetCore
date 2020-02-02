@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Bing.Exceptions;
 using Bing.Logs.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Logs.Formats
 {

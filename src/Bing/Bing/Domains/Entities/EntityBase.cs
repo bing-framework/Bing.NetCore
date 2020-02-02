@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
 using Bing.Sessions;

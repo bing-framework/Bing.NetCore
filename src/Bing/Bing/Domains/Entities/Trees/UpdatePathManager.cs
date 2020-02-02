@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bing.Domains.Repositories;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Properties;
 using Bing.Utils.Extensions;
 

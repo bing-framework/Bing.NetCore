@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Signatures;
+using Bing.Extensions;
 using Bing.Logs;
 using Bing.Logs.Extensions;
 using Bing.Utils.Extensions;

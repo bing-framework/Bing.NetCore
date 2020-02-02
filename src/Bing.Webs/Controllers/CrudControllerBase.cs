@@ -3,6 +3,7 @@ using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Mvc;
 

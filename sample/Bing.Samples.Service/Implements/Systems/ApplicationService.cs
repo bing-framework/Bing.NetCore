@@ -3,6 +3,7 @@ using Bing.Applications;
 using Bing.Datas.Sql;
 using Bing.Domains.Repositories;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Mapping;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Models;

@@ -15,6 +15,7 @@ using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Auditing;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Security.Extensions;

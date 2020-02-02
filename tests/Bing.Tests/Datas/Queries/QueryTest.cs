@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Bing.Datas.Queries;
 using Bing.Datas.Queries.Criterias;
+using Bing.Extensions;
 using Bing.Properties;
 using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;

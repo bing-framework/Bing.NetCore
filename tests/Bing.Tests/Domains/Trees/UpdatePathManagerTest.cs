@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Domains.Entities.Trees;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Properties;
 using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;

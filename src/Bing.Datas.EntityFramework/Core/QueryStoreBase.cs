@@ -14,6 +14,7 @@ using Bing.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 using Bing.Datas.Sql;
+using Bing.Extensions;
 using Bing.Helpers;
 
 namespace Bing.Datas.EntityFramework.Core

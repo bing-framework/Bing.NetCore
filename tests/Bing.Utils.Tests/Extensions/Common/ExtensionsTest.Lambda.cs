@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Bing.Extensions;
 using Bing.Tests.Samples;
 using Xunit.Abstractions;
 using Bing.Utils.Extensions;

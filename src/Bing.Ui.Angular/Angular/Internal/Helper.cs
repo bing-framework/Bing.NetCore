@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
 using Bing.Ui.Angular.Forms.Configs;

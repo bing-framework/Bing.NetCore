@@ -1,6 +1,6 @@
-﻿using Bing.Utils.Extensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Bing.Extensions;
 
 namespace Bing.Datas.Queries
 {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Ui.TagHelpers;
 using Bing.Utils.Extensions;

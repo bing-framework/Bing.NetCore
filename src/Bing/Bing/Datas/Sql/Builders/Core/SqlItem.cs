@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Bing.Datas.Sql.Builders.Extensions;
 using Bing.Datas.Sql.Matedatas;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core

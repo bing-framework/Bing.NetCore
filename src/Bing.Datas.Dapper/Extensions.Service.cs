@@ -9,6 +9,7 @@ using Bing.Datas.Enums;
 using Bing.Datas.Sql;
 using Bing.Datas.Sql.Configs;
 using Bing.Datas.Sql.Matedatas;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;

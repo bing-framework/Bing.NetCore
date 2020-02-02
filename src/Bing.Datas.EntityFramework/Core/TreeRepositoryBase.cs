@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 

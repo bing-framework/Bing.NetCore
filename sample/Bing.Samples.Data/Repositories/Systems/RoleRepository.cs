@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Bing.Datas.EntityFramework.Core;
+using Bing.Extensions;
 using Bing.Samples.Domain.Models;
 using Bing.Samples.Domain.Repositories;
 using Bing.Utils.Extensions;

@@ -7,6 +7,7 @@ using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
+using Bing.Extensions;
 using Bing.Utils.Extensions;
 using Bing.Validations.Abstractions;
 using Microsoft.EntityFrameworkCore;
