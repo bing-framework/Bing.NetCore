@@ -3,7 +3,7 @@ using Bing.Configurations;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Exceptionless;
 using el = global::Exceptionless;
 

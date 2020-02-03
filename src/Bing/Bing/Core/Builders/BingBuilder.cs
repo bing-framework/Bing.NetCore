@@ -4,7 +4,7 @@ using System.Linq;
 using Bing.Core.Modularity;
 using Bing.Core.Options;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Core.Builders

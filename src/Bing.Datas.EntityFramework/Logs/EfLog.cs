@@ -8,7 +8,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

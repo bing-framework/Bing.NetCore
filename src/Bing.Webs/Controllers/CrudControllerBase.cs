@@ -4,7 +4,7 @@ using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers

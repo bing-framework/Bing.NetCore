@@ -1,7 +1,7 @@
 ﻿using Bing.Datas.Sql.Builders;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Dapper.PgSql

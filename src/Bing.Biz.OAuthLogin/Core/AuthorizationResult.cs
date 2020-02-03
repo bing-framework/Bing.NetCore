@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Parameters.Parsers;
 
 namespace Bing.Biz.OAuthLogin.Core

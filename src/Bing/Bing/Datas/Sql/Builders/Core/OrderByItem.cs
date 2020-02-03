@@ -1,6 +1,6 @@
 ﻿using System;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
 {

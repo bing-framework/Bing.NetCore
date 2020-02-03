@@ -1,5 +1,5 @@
 ﻿using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Str = Bing.Helpers.Str;
 

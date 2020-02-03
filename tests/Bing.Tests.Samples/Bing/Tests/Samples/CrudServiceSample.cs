@@ -5,7 +5,7 @@ using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Repositories;
 using Bing.Extensions;
 using Bing.Mapping;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Tests.Samples
 {

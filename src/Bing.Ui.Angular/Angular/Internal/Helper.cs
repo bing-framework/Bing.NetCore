@@ -9,7 +9,7 @@ using Bing.Properties;
 using Bing.Ui.Angular.Forms.Configs;
 using Bing.Ui.Attributes;
 using Bing.Ui.Configs;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Validations.Validators;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;

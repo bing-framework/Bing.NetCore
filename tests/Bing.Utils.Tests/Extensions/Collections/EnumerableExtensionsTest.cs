@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Xunit;
 
 namespace Bing.Utils.Tests.Extensions

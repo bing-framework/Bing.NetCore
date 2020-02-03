@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Bing.Extensions;
 using Bing.Utils;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Helpers
 {

@@ -3,7 +3,7 @@ using System.Linq;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Logs.Extensions

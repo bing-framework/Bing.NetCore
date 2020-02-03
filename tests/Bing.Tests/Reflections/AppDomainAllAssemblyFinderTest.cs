@@ -1,5 +1,5 @@
 ﻿using Bing.Reflections;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 

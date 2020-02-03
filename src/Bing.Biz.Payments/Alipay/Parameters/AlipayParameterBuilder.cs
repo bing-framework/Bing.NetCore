@@ -3,7 +3,7 @@ using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Core;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;

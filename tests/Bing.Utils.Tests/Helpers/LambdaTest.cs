@@ -5,7 +5,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Tests;
 using Bing.Tests.Samples;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;

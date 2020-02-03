@@ -7,7 +7,7 @@ using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Services;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Biz.Payments.Factories
 {

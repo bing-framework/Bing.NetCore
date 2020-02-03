@@ -1,7 +1,7 @@
 ﻿using System;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Events
 {

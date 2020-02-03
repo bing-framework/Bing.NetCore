@@ -8,7 +8,7 @@ using Bing.Datas.Sql.Builders.Filters;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core

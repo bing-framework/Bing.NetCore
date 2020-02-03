@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using Bing.Domains.Entities;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Domains.ChangeTracking

@@ -4,7 +4,7 @@ using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Extensions;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Logs.Core

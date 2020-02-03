@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Permissions.Identity.JwtBearer;
 using Bing.Security;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;

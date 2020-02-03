@@ -6,7 +6,7 @@ using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core

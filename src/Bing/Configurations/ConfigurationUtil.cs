@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.Extensions.Configuration;
 
 namespace Bing.Configurations

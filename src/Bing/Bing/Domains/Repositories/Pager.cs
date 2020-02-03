@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Domains.Repositories
 {

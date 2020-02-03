@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Timing;
 using Microsoft.Extensions.Options;

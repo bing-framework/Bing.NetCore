@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Shouldly;
 using Xunit;
 

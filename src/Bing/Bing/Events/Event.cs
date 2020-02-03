@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Json;
 
 namespace Bing.Events

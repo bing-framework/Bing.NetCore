@@ -7,7 +7,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Logs.Extensions

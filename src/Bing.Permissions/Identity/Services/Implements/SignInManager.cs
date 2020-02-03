@@ -4,7 +4,7 @@ using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Results;
 using Bing.Permissions.Identity.Services.Abstractions;
 using Bing.Permissions.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Permissions.Identity.Services.Implements
 {

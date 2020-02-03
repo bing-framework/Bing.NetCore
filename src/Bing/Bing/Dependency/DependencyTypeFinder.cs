@@ -6,7 +6,7 @@ using Bing.Extensions;
 using Bing.Finders;
 using Bing.Helpers;
 using Bing.Reflections;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Dependency

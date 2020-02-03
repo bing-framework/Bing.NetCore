@@ -10,7 +10,7 @@ using Bing.Domains.Entities;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Applications

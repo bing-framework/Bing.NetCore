@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Bing.Extensions;
 using Bing.Helpers.Internal;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Helpers
 {

@@ -10,7 +10,7 @@ using Bing.Datas.Sql;
 using Bing.Datas.Sql.Configs;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

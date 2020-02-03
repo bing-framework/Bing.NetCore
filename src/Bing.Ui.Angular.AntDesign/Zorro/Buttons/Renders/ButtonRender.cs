@@ -6,7 +6,7 @@ using Bing.Ui.Configs;
 using Bing.Ui.Zorro.Buttons.Builders;
 using Bing.Ui.Zorro.Enums;
 using Bing.Ui.Zorro.Icons.Builders;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Ui.Zorro.Buttons.Renders
 {

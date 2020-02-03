@@ -5,7 +5,7 @@ using Bing.Domains.Repositories;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Domains.Entities.Trees
 {

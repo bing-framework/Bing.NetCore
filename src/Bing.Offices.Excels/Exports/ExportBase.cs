@@ -10,7 +10,7 @@ using Bing.Helpers;
 using Bing.Offices.Excels.Abstractions;
 using Bing.Offices.Excels.Core;
 using Bing.Offices.Excels.Core.Styles;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.IO;
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Net.Mail.Configs;
 using Bing.Net.Mail.Core;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Net.Mail.Smtp
 {

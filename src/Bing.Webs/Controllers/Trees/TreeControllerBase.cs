@@ -5,7 +5,7 @@ using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers.Trees

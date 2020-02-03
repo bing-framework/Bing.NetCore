@@ -6,7 +6,7 @@ using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Internal;
 using Bing.Extensions;
 using Bing.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {

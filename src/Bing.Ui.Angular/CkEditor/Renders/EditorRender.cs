@@ -6,7 +6,7 @@ using Bing.Ui.CkEditor.Builders;
 using Bing.Ui.CkEditor.Configs;
 using Bing.Ui.CkEditor.Resolvers;
 using Bing.Ui.Configs;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Bing.Ui.CkEditor.Renders

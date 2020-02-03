@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Tests;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.IdGenerators.Core;
 using Bing.Utils.IO;

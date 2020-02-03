@@ -9,7 +9,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
 using Bing.Utils;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Clauses

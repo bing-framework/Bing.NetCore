@@ -8,7 +8,7 @@ using Bing.Permissions.Identity.Options;
 using Bing.Permissions.Identity.Purposes;
 using Bing.Permissions.Identity.Repositories;
 using Bing.Permissions.Identity.Services.Abstractions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 

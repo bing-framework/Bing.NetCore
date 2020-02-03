@@ -7,7 +7,7 @@ using Bing.Extensions;
 using Bing.Properties;
 using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Xunit;

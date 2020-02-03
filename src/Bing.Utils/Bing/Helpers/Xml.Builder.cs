@@ -3,7 +3,7 @@ using System.Data;
 using System.IO;
 using System.Xml;
 using Bing.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Helpers
 {

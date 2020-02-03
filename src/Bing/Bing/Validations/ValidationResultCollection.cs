@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations

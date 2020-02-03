@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 

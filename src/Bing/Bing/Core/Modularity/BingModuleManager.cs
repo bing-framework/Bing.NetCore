@@ -6,7 +6,7 @@ using Bing.Dependency;
 using Bing.Exceptions;
 using Bing.Logs;
 using Bing.Logs.Core;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Modularity

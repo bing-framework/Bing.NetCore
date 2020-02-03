@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using Bing.Extensions;
 using Bing.Utils;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
 {

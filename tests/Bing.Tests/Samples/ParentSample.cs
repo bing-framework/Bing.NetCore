@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Tests.Samples
 {

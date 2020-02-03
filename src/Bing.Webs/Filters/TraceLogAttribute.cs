@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;
 using Bing.Webs.Commons;

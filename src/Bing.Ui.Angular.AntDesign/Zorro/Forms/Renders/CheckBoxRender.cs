@@ -5,7 +5,7 @@ using Bing.Ui.Angular.Forms.Resolvers;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;
 using Bing.Ui.Zorro.Forms.Builders;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Bing.Ui.Zorro.Forms.Renders

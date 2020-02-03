@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.AspNetCore.Uploads.Params;
 using Bing.Exceptions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Http;
 using FileInfo = Bing.Utils.Files.FileInfo;
 

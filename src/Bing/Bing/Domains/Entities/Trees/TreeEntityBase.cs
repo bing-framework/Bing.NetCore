@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Domains.Entities.Trees

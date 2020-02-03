@@ -14,7 +14,7 @@ using Bing.Ui.Zorro.Buttons.Builders;
 using Bing.Ui.Zorro.Enums;
 using Bing.Ui.Zorro.Forms.Builders;
 using Bing.Ui.Zorro.Icons.Builders;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 

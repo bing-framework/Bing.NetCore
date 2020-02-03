@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Bing.Extensions;
 using Bing.Tests;
 using Bing.Tests.Samples;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Xunit;
 
 // ReSharper disable once CheckNamespace

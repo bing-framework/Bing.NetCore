@@ -4,7 +4,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Security.Claims;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using IdentityModel;
 

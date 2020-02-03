@@ -3,7 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 
 // ReSharper disable once CheckNamespace

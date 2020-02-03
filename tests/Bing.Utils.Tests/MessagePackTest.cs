@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using Bing.Tests;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;
 using ComponentAce.Compression.Libs.zlib;

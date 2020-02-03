@@ -1,7 +1,7 @@
 ﻿using Bing.Extensions;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Ui.Extensions
 {

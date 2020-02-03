@@ -1,6 +1,6 @@
 ﻿using Bing.Domains.Repositories;
 using Bing.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using System;
 using System.Linq;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Bing.Helpers;
 using Bing.Tests;
 using Bing.Utils.Develops;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;

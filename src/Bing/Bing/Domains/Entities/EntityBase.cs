@@ -4,7 +4,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Validations;
 
 namespace Bing.Domains.Entities

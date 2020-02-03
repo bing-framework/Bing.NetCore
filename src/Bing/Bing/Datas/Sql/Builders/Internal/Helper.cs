@@ -8,7 +8,7 @@ using Bing.Datas.Sql.Builders.Core;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Utils;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Enum = Bing.Helpers.Enum;
 

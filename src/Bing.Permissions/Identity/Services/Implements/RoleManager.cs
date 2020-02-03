@@ -7,7 +7,7 @@ using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Repositories;
 using Bing.Permissions.Identity.Services.Abstractions;
 using Bing.Permissions.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Identity;
 
 namespace Bing.Permissions.Identity.Services.Implements

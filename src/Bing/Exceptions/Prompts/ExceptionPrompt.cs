@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Hosting;
 

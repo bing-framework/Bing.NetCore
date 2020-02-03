@@ -20,7 +20,7 @@ using Bing.Helpers;
 using Bing.Logs;
 using Bing.Security.Extensions;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
