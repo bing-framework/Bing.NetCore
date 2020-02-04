@@ -16,15 +16,12 @@ namespace Bing.Extensions
         /// 获取程序集的文件版本
         /// </summary>
         /// <param name="assembly">程序集</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static Version GetFileVersion(this Assembly assembly)
         {
             if (assembly == null)
-            {
                 throw new ArgumentNullException(nameof(assembly));
-            }
-
-            FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var info = FileVersionInfo.GetVersionInfo(assembly.Location);
             return new Version(info.FileVersion);
         }
 
@@ -36,15 +33,12 @@ namespace Bing.Extensions
         /// 获取程序集的产品版本
         /// </summary>
         /// <param name="assembly">程序集</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static Version GetProductVersion(this Assembly assembly)
         {
             if (assembly == null)
-            {
                 throw new ArgumentNullException(nameof(assembly));
-            }
-
-            FileVersionInfo info=FileVersionInfo.GetVersionInfo(assembly.Location);
+            var info = FileVersionInfo.GetVersionInfo(assembly.Location);
             return new Version(info.ProductVersion);
         }
 

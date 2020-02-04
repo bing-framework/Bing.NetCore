@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Bing.Extensions;
 using Enum = System.Enum;
 
 // ReSharper disable once CheckNamespace
@@ -133,19 +132,17 @@ namespace Bing.Extensions
         #endregion
 
         #region Remove(移除字符串)
+
         /// <summary>
         /// 从当前字符串中移除任何指定的字符
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="removeChar">需要移除的字符</param>
-        /// <returns></returns>
         public static string Remove(this string value, params char[] removeChar)
         {
             var result = value;
             if (!string.IsNullOrEmpty(result) && removeChar != null)
-            {
                 Array.ForEach(removeChar, c => result = result.Remove(c.ToString()));
-            }
             return result;
         }
 
@@ -154,11 +151,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="strings">需要移除的字符串</param>
-        /// <returns></returns>
-        public static string Remove(this string value, params string[] strings)
-        {
-            return strings.Aggregate(value, (current, c) => current.Replace(c, string.Empty));
-        }
+        public static string Remove(this string value, params string[] strings) => strings.Aggregate(value, (current, c) => current.Replace(c, string.Empty));
 
         /// <summary>
         /// 从当前字符串中移除指定索引的字符串
@@ -166,17 +159,12 @@ namespace Bing.Extensions
         /// <param name="value">值</param>
         /// <param name="index">索引</param>
         /// <param name="isLeft">是否左侧</param>
-        /// <returns></returns>
         public static string Remove(this string value, int index, bool isLeft = true)
         {
             if (value.Length <= index)
-            {
-                return "";
-            }
+                return string.Empty;
             if (isLeft)
-            {
                 return value.Substring(index);
-            }
             return value.Substring(0, value.Length - index);
         }
 
@@ -184,14 +172,11 @@ namespace Bing.Extensions
         /// 移除当前字符串中的所有特殊字符
         /// </summary>
         /// <param name="value">输入字符串</param>
-        /// <returns>调整后的字符串</returns>
         public static string RemoveAllSpecialCharacters(this string value)
         {
-            StringBuilder sb = new StringBuilder(value.Length);
-            foreach (var c in value.Where(Char.IsLetterOrDigit))
-            {
+            var sb = new StringBuilder(value.Length);
+            foreach (var c in value.Where(char.IsLetterOrDigit))
                 sb.Append(c);
-            }
             return sb.ToString();
         }
 
@@ -200,23 +185,14 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="defaultChar">需要去除的符号，默认：,</param>
-        /// <returns></returns>
         public static string RemoveEnd(this string value, string defaultChar = ",")
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return string.Empty;
-            }
-
             if (string.IsNullOrWhiteSpace(defaultChar))
-            {
                 return value.SafeString();
-            }
-
             if (value.ToLower().EndsWith(defaultChar.ToLower()))
-            {
                 return value.Remove(value.Length - defaultChar.Length, defaultChar.Length);
-            }
             return value;
         }
 
@@ -226,46 +202,45 @@ namespace Bing.Extensions
         /// <param name="str">内容</param>
         /// <param name="tag">标签</param>
         /// <param name="options">选项</param>
-        /// <returns></returns>
         public static string Remove(this string str, string tag, RegexOptions options = RegexOptions.None)
         {
             if (string.IsNullOrWhiteSpace(str))
-            {
                 return string.Empty;
-            }
             return tag.IsEmpty() ? str : Regex.Replace(str, tag, "", options);
         }
+
         #endregion
 
         #region ReverseString(反转字符串)
+
         /// <summary>
         /// 反转字符串
         /// </summary>
         /// <param name="value">要反转的字符串</param>
-        /// <returns>反转后的字符串</returns>
         public static string ReverseString(this string value)
         {
             value.CheckNotNull("value");
             return new string(value.Reverse().ToArray());
         }
+
         #endregion
 
         #region Split(字符串分割成数组)
+
         /// <summary>
         /// 以指定字符串作为分隔符将指定字符串分隔成数组
         /// </summary>
         /// <param name="value">要分割的字符串</param>
         /// <param name="strSplit">字符串类型的分隔符</param>
         /// <param name="removeEmptyEntries">是否移除数据中元素为空字符串的项</param>
-        /// <returns>分割后的数据</returns>
-        public static string[] Split(this string value, string strSplit, bool removeEmptyEntries = false)
-        {
-            return value.Split(new[] { strSplit },
+        public static string[] Split(this string value, string strSplit, bool removeEmptyEntries = false) =>
+            value.Split(new[] { strSplit },
                 removeEmptyEntries ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
-        }
+
         #endregion
 
         #region GetTextLength(获取字符串长度)
+
         /// <summary>
         /// 获取字符串长度，支持汉字，每个汉字长度为2个字节
         /// </summary>
@@ -278,30 +253,21 @@ namespace Bing.Extensions
             byte[] bytes = ascii.GetBytes(value);
             foreach (byte b in bytes)
             {
-                if (b == 63)
-                {
-                    tempLen += 2;
-                }
-                else
-                {
-                    tempLen += 1;
-                }
+                tempLen += b == 63 ? 2 : 1;
             }
             return tempLen;
         }
+
         #endregion
 
         #region TrimToMaxLength(切割字符串)
+
         /// <summary>
         /// 切割字符串，指定最大长度
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="maxLength">指定最大长度</param>
-        /// <returns></returns>
-        public static string TrimToMaxLength(this string value, int maxLength)
-        {
-            return (value == null || value.Length <= maxLength ? value : value.Substring(0, maxLength));
-        }
+        public static string TrimToMaxLength(this string value, int maxLength) => (value == null || value.Length <= maxLength ? value : value.Substring(0, maxLength));
 
         /// <summary>
         /// 切割字符串，并指定最大长度和添加后缀
@@ -309,37 +275,33 @@ namespace Bing.Extensions
         /// <param name="value">值</param>
         /// <param name="maxLength">指定最大长度</param>
         /// <param name="suffix">后缀</param>
-        /// <returns></returns>
-        public static string TrimToMaxLength(this string value, int maxLength, string suffix)
-        {
-            return (value == null || value.Length <= maxLength ? value : string.Concat(value.Substring(0, maxLength), suffix));
-        }
+        public static string TrimToMaxLength(this string value, int maxLength, string suffix) =>
+            value == null || value.Length <= maxLength ? value : string.Concat(value.Substring(0, maxLength), suffix);
+
         #endregion
 
         #region Truncate(截断字符串)
+
         /// <summary>
         /// 截断字符串，是否添加圆点
         /// </summary>
         /// <param name="value">字符串</param>
         /// <param name="length">截断长度</param>
         /// <param name="userElipse">是否使用圆点</param>
-        /// <returns></returns>
         public static string Truncate(this string value, int length, bool userElipse = false)
         {
             int e = userElipse ? 3 : 0;
             if (length - e <= 0)
-            {
                 throw new InvalidOperationException($"Length must be greater than {e}.");
-            }
             if (value.IsEmpty() || value.Length <= length)
-            {
                 return value;
-            }
             return value.Substring(0, length - e) + new string('.', e);
         }
+
         #endregion
 
         #region PadBoth(指定字符串长度)
+
         /// <summary>
         /// 指定字符串长度，如果字符串长度大于指定的字符串长度，则截断字符串，若字符串长度小于指定字符串长度，则填充字符到指定字符串长度
         /// </summary>
@@ -347,62 +309,49 @@ namespace Bing.Extensions
         /// <param name="width">指定字符串长度</param>
         /// <param name="padChar">填充字符</param>
         /// <param name="truncate">是否截断</param>
-        /// <returns></returns>
         public static string PadBoth(this string value, int width, char padChar, bool truncate = false)
         {
             int diff = width - value.Length;
             if (diff == 0 || diff < 0 && !(truncate))
-            {
                 return value;
-            }
-            else if (diff < 0)
-            {
+            if (diff < 0)
                 return value.Substring(0, width);
-            }
-            else
-            {
-                return value.PadLeft(width - diff / 2, padChar).PadRight(width, padChar);
-            }
+            return value.PadLeft(width - diff / 2, padChar).PadRight(width, padChar);
         }
+
         #endregion
 
         #region Ensure(确保字符串包含指定字符串)
+
         /// <summary>
         /// 确保字符串包含指定前缀
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="prefix">前缀</param>
-        /// <returns></returns>
-        public static string EnsureStartsWith(this string value, string prefix)
-        {
-            return value.StartsWith(prefix) ? value : string.Concat(prefix, value);
-        }
+        public static string EnsureStartsWith(this string value, string prefix) => value.StartsWith(prefix) ? value : string.Concat(prefix, value);
+
         /// <summary>
         /// 确保字符串包含指定后缀
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="suffix">后缀</param>
-        /// <returns></returns>
-        public static string EnsureEndWith(this string value, string suffix)
-        {
-            return value.EndsWith(suffix) ? value : string.Concat(value, suffix);
-        }
+        public static string EnsureEndWith(this string value, string suffix) => value.EndsWith(suffix) ? value : string.Concat(value, suffix);
+
         #endregion
 
         #region ConcatWith(连接字符串)
+
         /// <summary>
         /// 连接两个字符串
         /// </summary>
         /// <param name="value">目标字符串</param>
         /// <param name="values">源字符串</param>
-        /// <returns>连接后的字符串</returns>
-        public static string ConcatWith(this string value, params string[] values)
-        {
-            return string.Concat(value, string.Concat(values));
-        }
+        public static string ConcatWith(this string value, params string[] values) => string.Concat(value, string.Concat(values));
+
         #endregion
 
         #region Join(连接元素)
+
         /// <summary>
         /// 连接字符串数组的所有元素，根据指定分隔符
         /// </summary>
@@ -410,19 +359,13 @@ namespace Bing.Extensions
         /// <param name="value">值</param>
         /// <param name="separator">分隔符</param>
         /// <param name="obj">对象数组</param>
-        /// <returns></returns>
         public static string Join<T>(this string value, string separator, T[] obj)
         {
             if (obj == null || obj.Length == 0)
-            {
                 return value;
-            }
-            if (separator == null)
-            {
-                separator = string.Empty;
-            }
+            if (separator == null) separator = string.Empty;
             Converter<T, string> converter = o => o.ToString();
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append(value);
             sb.Append(separator);
             sb.Append(string.Join(separator, Array.ConvertAll(obj, converter)));
@@ -434,21 +377,21 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="values">字符串数组</param>
         /// <param name="separator">分隔符</param>
-        /// <returns>字符串</returns>
         public static string JoinNotNullOrEmpty(this string[] values, string separator)
         {
             var items = values.Where(s => !string.IsNullOrEmpty(s)).ToList();
             return string.Join(separator, items.ToArray());
         }
+
         #endregion
 
         #region Get(获取范围字符串)
+
         /// <summary>
         /// 获取指定字符串参数之前的字符串
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="x">指定字符串参数</param>
-        /// <returns></returns>
         public static string GetBefore(this string value, string x)
         {
             var xPos = value.IndexOf(x, StringComparison.Ordinal);
@@ -461,15 +404,12 @@ namespace Bing.Extensions
         /// <param name="value">值</param>
         /// <param name="x">指定左侧字符串参数</param>
         /// <param name="y">指定右侧字符串参数</param>
-        /// <returns></returns>
         public static string GetBetween(this string value, string x, string y)
         {
             var xPos = value.IndexOf(x, StringComparison.Ordinal);
             var yPos = value.LastIndexOf(y, StringComparison.Ordinal);
             if (xPos == -1 || yPos == -1)
-            {
                 return string.Empty;
-            }
             var startIndex = xPos + x.Length;
             return startIndex >= yPos ? string.Empty : value.Substring(startIndex, yPos - startIndex).Trim();
         }
@@ -479,14 +419,11 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="x">指定字符串参数</param>
-        /// <returns></returns>
         public static string GetAfter(this string value, string x)
         {
             var xPos = value.IndexOf(x, StringComparison.Ordinal);
             if (xPos == -1)
-            {
                 return string.Empty;
-            }
             var startIndex = xPos + x.Length;
             return startIndex >= value.Length ? string.Empty : value.Substring(startIndex).Trim();
         }
@@ -496,11 +433,8 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="index">指定索引</param>
-        /// <returns></returns>
-        public static string SubstringFrom(this string value, int index)
-        {
-            return index < 0 && index < value.Length ? value : value.Substring(index, value.Length - index);
-        }
+        public static string SubstringFrom(this string value, int index) => index < 0 && index < value.Length ? value : value.Substring(index, value.Length - index);
+
         #endregion
 
         #region WordCase(单词大小写)
@@ -508,43 +442,25 @@ namespace Bing.Extensions
         /// 首字母大写
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static string ToUpperFirstLetter(this string value)
-        {
-            return ToFirstLetter(value);
-        }
+        public static string ToUpperFirstLetter(this string value) => ToFirstLetter(value);
 
         /// <summary>
         /// 首字母小写
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static string ToLowerFirstLetter(this string value)
-        {
-            return ToFirstLetter(value, false);
-        }
+        public static string ToLowerFirstLetter(this string value) => ToFirstLetter(value, false);
 
         /// <summary>
         /// 首字母大小写
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="isUpper">是否大写</param>
-        /// <returns></returns>
         private static string ToFirstLetter(string value, bool isUpper = true)
         {
             if (value.IsEmpty())
-            {
                 return string.Empty;
-            }
-            char[] valueChars = value.ToCharArray();
-            if (isUpper)
-            {
-                valueChars[0] = char.ToUpper(valueChars[0]);
-            }
-            else
-            {
-                valueChars[0] = char.ToLower(valueChars[0]);
-            }
+            var valueChars = value.ToCharArray();
+            valueChars[0] = isUpper ? char.ToUpper(valueChars[0]) : char.ToLower(valueChars[0]);
             return new string(valueChars);
         }
 
@@ -552,22 +468,14 @@ namespace Bing.Extensions
         /// 将指定字符串转为词首字母大写
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static string ToTitleCase(this string value)
-        {
-            return value.ToTitleCase(CultureInfo.CurrentCulture);
-        }
+        public static string ToTitleCase(this string value) => value.ToTitleCase(CultureInfo.CurrentCulture);
 
         /// <summary>
         /// 将指定字符串转为词首字母大写
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="culture">区域性信息</param>
-        /// <returns></returns>
-        public static string ToTitleCase(this string value, CultureInfo culture)
-        {
-            return culture.TextInfo.ToTitleCase(value);
-        }
+        public static string ToTitleCase(this string value, CultureInfo culture) => culture.TextInfo.ToTitleCase(value);
 
         /// <summary>
         /// 将单词的单数形式转为复数形式
@@ -579,31 +487,25 @@ namespace Bing.Extensions
             //多个单词的形式 B A：适用于第一单词只有（A）的复数形式
             int index = singular.LastIndexOf(" of ", StringComparison.Ordinal);
             if (index > 0)
-            {
                 return (singular.Substring(0, index)) + singular.Remove(0, index).ToPlural();
-            }
             //单数形式单词规则
             //-es为后缀结束规则
             if (singular.EndsWith("sh") || singular.EndsWith("ch") || singular.EndsWith("us") || singular.EndsWith("ss"))
-            {
                 return singular + "es";
-            }
             //-ies为后缀结束规则
             if (singular.EndsWith("y"))
-            {
                 return singular.Remove(singular.Length - 1, 1) + "ies";
-            }
             //-oes为后缀结束规则
             if (singular.EndsWith("o"))
-            {
                 return singular.Remove(singular.Length - 1, 1) + "oes";
-            }
             //-s为后缀结束规则
             return singular + "s";
         }
+
         #endregion
 
         #region ReplaceAll(替换字符串指定的所有值)
+
         /// <summary>
         /// 替换字符串中指定的所有值
         /// </summary>
@@ -618,11 +520,10 @@ namespace Bing.Extensions
         ///         // str == "[White] Red Blue Green Yellow [Black] [Gray]"
         /// </code>
         /// </example>
-        /// <returns></returns>
         public static string ReplaceAll(this string value, IEnumerable<string> oldValues,
             Func<string, string> replacePredicate)
         {
-            StringBuilder sb = new StringBuilder(value);
+            var sb = new StringBuilder(value);
             foreach (var oldValue in oldValues)
             {
                 var newValue = replacePredicate(oldValue);
@@ -630,6 +531,7 @@ namespace Bing.Extensions
             }
             return sb.ToString();
         }
+
         /// <summary>
         /// 替换字符串中指定的所有值
         /// </summary>
@@ -644,16 +546,14 @@ namespace Bing.Extensions
         ///         // str == "[AchromaticColor] Red Blue Green Yellow [AchromaticColor] [AchromaticColor]"
         /// 	</code>
         /// </example>
-        /// <returns></returns>
         public static string ReplaceAll(this string value, IEnumerable<string> oldValues, string newValue)
         {
-            StringBuilder sb = new StringBuilder(value);
+            var sb = new StringBuilder(value);
             foreach (var oldValue in oldValues)
-            {
                 sb.Replace(oldValue, newValue);
-            }
             return sb.ToString();
         }
+
         /// <summary>
         /// 替换字符串中指定的所有值
         /// </summary>
@@ -669,7 +569,6 @@ namespace Bing.Extensions
         ///         // str == "FloralWhite Red Blue Green Yellow Bistre DavyGrey"
         /// 	</code>
         /// </example>
-        /// <returns></returns>
         public static string ReplaceAll(this string value, IEnumerable<string> oldValues, IEnumerable<string> newValues)
         {
             StringBuilder sb = new StringBuilder(value);
@@ -677,20 +576,20 @@ namespace Bing.Extensions
             foreach (var oldValue in oldValues)
             {
                 if (!newValueEnum.MoveNext())
-                {
-                    throw new ArgumentOutOfRangeException("newValues", "newValues sequence is shorter than oldValues sequence");
-                }
+                    throw new ArgumentOutOfRangeException("newValues",
+                        "newValues sequence is shorter than oldValues sequence");
                 sb.Replace(oldValue, newValueEnum.Current);
             }
             if (newValueEnum.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException("newValues", "newValues sequence is longer than oldValues sequence");
-            }
+                throw new ArgumentOutOfRangeException("newValues",
+                    "newValues sequence is longer than oldValues sequence");
             return sb.ToString();
         }
+
         #endregion
 
         #region ParseCommandlineParams(解析命令行参数)
+
         /// <summary>
         /// 解析命令行参数
         /// </summary>
@@ -761,9 +660,11 @@ namespace Bing.Extensions
             }
             return parameters;
         }
+
         #endregion
 
         #region ParseStringToEnum(解析字符串到枚举项)
+
         /// <summary>
         /// 如果存在该枚举，解析字符串到字符串枚举项，否则返回默认枚举
         /// </summary>
@@ -784,14 +685,15 @@ namespace Bing.Extensions
                 ? default(TEnum)
                 : (TEnum)Enum.Parse(typeof(TEnum), value, ignorecase);
         }
+
         #endregion
 
         #region EncodeEmailAddress(编码电子邮件地址)
+
         /// <summary>
         /// 将电子邮件地址进行编码，以便于链接仍然有效
         /// </summary>
         /// <param name="emailAddress">邮箱地址</param>
-        /// <returns>编码后的邮箱地址</returns>
         public static string EncodeEmailAddress(this string emailAddress)
         {
             string tempHtmlEncode = emailAddress;
@@ -833,21 +735,21 @@ namespace Bing.Extensions
                                      repl + tempHtmlEncode.Substring(i);
                 }
             }
+
             return tempHtmlEncode;
         }
+
         #endregion
 
         #region RepairZero(补足位数)
+
         /// <summary>
         /// 补足位数，指定字符串的固定长度，如果字符串小于固定长度，则在字符串的前面补足零，可设置的固定长度最大为9位
         /// </summary>
         /// <param name="text">原始字符串</param>
         /// <param name="limitedLength">字符串的固定长度</param>
-        /// <returns></returns>
-        public static string RepairZero(this string text, int limitedLength)
-        {
-            return text.PadLeft(limitedLength, '0');
-        }
+        public static string RepairZero(this string text, int limitedLength) => text.PadLeft(limitedLength, '0');
+
         #endregion
 
         #region ReplaceFirst(替换字符串-首匹配)
@@ -858,15 +760,11 @@ namespace Bing.Extensions
         /// <param name="this">当前值</param>
         /// <param name="oldValue">旧值</param>
         /// <param name="newValue">新值</param>
-        /// <returns></returns>
         public static string ReplaceFirst(this string @this, string oldValue, string newValue)
         {
             var startIndex = @this.IndexOf(oldValue, StringComparison.Ordinal);
             if (startIndex == -1)
-            {
                 return @this;
-            }
-
             return @this.Remove(startIndex, oldValue.Length).Insert(startIndex, newValue);
         }
 
@@ -877,13 +775,12 @@ namespace Bing.Extensions
         /// <param name="number">替换数</param>
         /// <param name="oldValue">旧值</param>
         /// <param name="newValue">新值</param>
-        /// <returns></returns>
         public static string ReplaceFirst(this string @this, int number, string oldValue, string newValue)
         {
-            List<string> list = @this.Split(oldValue).ToList();
+            var list = @this.Split(oldValue).ToList();
             var old = number + 1;
-            IEnumerable<string> listStart = list.Take(old);
-            IEnumerable<string> listEnd = list.Skip(old);
+            var listStart = list.Take(old);
+            var listEnd = list.Skip(old);
 
             return string.Join(newValue, listStart) 
                    + (listEnd.Any() ? oldValue : "") 
@@ -900,15 +797,11 @@ namespace Bing.Extensions
         /// <param name="this">当前值</param>
         /// <param name="oldValue">旧值</param>
         /// <param name="newValue">新值</param>
-        /// <returns></returns>
         public static string ReplaceLast(this string @this, string oldValue, string newValue)
         {
             var startIndex = @this.LastIndexOf(oldValue, StringComparison.Ordinal);
             if (startIndex == -1)
-            {
                 return @this;
-            }
-
             return @this.Remove(startIndex, oldValue.Length).Insert(startIndex, newValue);
         }
 
@@ -919,13 +812,12 @@ namespace Bing.Extensions
         /// <param name="number">替换数</param>
         /// <param name="oldValue">旧值</param>
         /// <param name="newValue">新值</param>
-        /// <returns></returns>
         public static string ReplaceLast(this string @this, int number, string oldValue, string newValue)
         {
-            List<string> list = @this.Split(oldValue).ToList();
+            var list = @this.Split(oldValue).ToList();
             var old = Math.Max(0, list.Count - number - 1);
-            IEnumerable<string> listStart = list.Take(old);
-            IEnumerable<string> listEnd = list.Skip(old);
+            var listStart = list.Take(old);
+            var listEnd = list.Skip(old);
 
             return string.Join(oldValue, listStart)
                    + (old > 0 ? oldValue : "")

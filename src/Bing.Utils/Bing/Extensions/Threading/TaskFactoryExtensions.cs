@@ -21,25 +21,14 @@ namespace Bing.Extensions
         {
             // 校验参数
             if (factory == null)
-            {
                 throw new ArgumentNullException(nameof(factory));
-            }
-
             if (millisecondsDelay < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(millisecondsDelay));
-            }
-
             if (action == null)
-            {
                 throw new ArgumentNullException(nameof(action));
-            }
-
             // 检查预先取消令牌
             if (factory.CancellationToken.IsCancellationRequested)
-            {
                 return new Task(() => { }, factory.CancellationToken);
-            }
 
             // 创建定时任务
             var tcs = new TaskCompletionSource<object>(factory.CreationOptions);

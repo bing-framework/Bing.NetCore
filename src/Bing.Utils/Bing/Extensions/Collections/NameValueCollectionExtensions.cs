@@ -15,20 +15,13 @@ namespace Bing.Extensions
         /// 将键值对集合转换成查询字符串
         /// </summary>
         /// <param name="collection">键值对集合</param>
-        /// <returns></returns>
         public static string ToQueryString(this NameValueCollection collection)
         {
             if (collection == null || !collection.HasKeys())
-            {
                 return string.Empty;
-            }
-
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             foreach (string key in collection.Keys)
-            {
                 sb.Append($"{key}={collection[key]}&");
-            }
-
             sb.TrimEnd("&");
             return sb.ToString();
         }

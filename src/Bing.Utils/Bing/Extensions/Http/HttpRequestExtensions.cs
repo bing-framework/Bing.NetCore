@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Bing.Extensions;
 using Microsoft.AspNetCore.Http;
 
 // ReSharper disable once CheckNamespace
@@ -94,15 +93,9 @@ namespace Bing.Extensions
         public static string Params(this HttpRequest request, string key)
         {
             if (request.Query.ContainsKey(key))
-            {
                 return request.Query[key];
-            }
-
             if (request.HasFormContentType)
-            {
                 return request.Form[key];
-            }
-
             return null;
         }
 

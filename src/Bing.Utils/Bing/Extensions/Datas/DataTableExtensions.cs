@@ -16,6 +16,7 @@ namespace Bing.Extensions.Datas
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="dataTable">数据表</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IList<T> ToList<T>(this DataTable dataTable)
         {
             if (dataTable == null)

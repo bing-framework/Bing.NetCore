@@ -15,15 +15,13 @@ namespace Bing.Extensions
         /// 将XmlNode转换为XElement
         /// </summary>
         /// <param name="node">Xml节点</param>
-        /// <returns></returns>
         public static XElement ToXElement(this XmlNode node)
         {
-            XDocument xdoc = new XDocument();
+            var xdoc = new XDocument();
             using (var xmlWriter = xdoc.CreateWriter())
             {
                 node.WriteTo(xmlWriter);
             }
-
             return xdoc.Root;
         }
 
@@ -35,7 +33,6 @@ namespace Bing.Extensions
         /// 将XElement转换为XmlNode
         /// </summary>
         /// <param name="element">Xml元素</param>
-        /// <returns></returns>
         public static XmlNode ToXmlNode(this XElement element)
         {
             using (var xmlReader = element.CreateReader())

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions
@@ -19,14 +18,10 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="path">文件路径</param>
-        /// <returns></returns>
         public static bool ToFile(this Stream stream, string path)
         {
             if (stream == null)
-            {
                 return false;
-            }
-
             const int bufferSize = 32768;
             bool result = true;
             Stream fileStream = null;
@@ -67,16 +62,13 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="other">待比较的流</param>
-        /// <returns></returns>
         public static bool ContentsEqual(this Stream stream, Stream other)
         {
             stream.CheckNotNull(nameof(stream));
             other.CheckNotNull(nameof(other));
 
             if (stream.Length != other.Length)
-            {
                 return false;
-            }
 
             const int bufferSize = 2048;
             byte[] streamBuffer = new byte[bufferSize];
@@ -88,23 +80,16 @@ namespace Bing.Extensions
                 int otherLen = other.Read(otherBuffer, 0, bufferSize);
 
                 if (streamLen != otherLen)
-                {
                     return false;
-                }
-
                 if (streamLen == 0)
-                {
                     return true;
-                }
 
                 int iterations = (int)Math.Ceiling((double)streamLen / sizeof(Int64));
                 for (int i = 0; i < iterations; i++)
                 {
                     if (BitConverter.ToInt64(streamBuffer, i * sizeof(Int64)) !=
                         BitConverter.ToInt64(otherBuffer, i * sizeof(Int64)))
-                    {
                         return false;
-                    }
                 }
             }
         }
@@ -117,24 +102,18 @@ namespace Bing.Extensions
         /// 获取流读取器，默认编码：UTF-8
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static StreamReader GetReader(this Stream stream)
-        {
-            return GetReader(stream, null);
-        }
+        public static StreamReader GetReader(this Stream stream) => GetReader(stream, Encoding.UTF8);
 
         /// <summary>
         /// 获取流读取器，使用指定编码
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="encoding">编码，默认：UTF-8</param>
-        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public static StreamReader GetReader(this Stream stream, Encoding encoding)
         {
             if (stream.CanRead == false)
-            {
                 throw new InvalidOperationException("Stream 不支持读取操作");
-            }
             encoding = encoding ?? Encoding.UTF8;
             return new StreamReader(stream, encoding);
         }
@@ -147,25 +126,18 @@ namespace Bing.Extensions
         /// 获取流写入器，默认编码：UTF-8
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static StreamWriter GetWriter(this Stream stream)
-        {
-            return GetWriter(stream, null);
-        }
+        public static StreamWriter GetWriter(this Stream stream) => GetWriter(stream, Encoding.UTF8);
 
         /// <summary>
         /// 获取流写入器，使用指定编码
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="encoding">编码，默认编码：UTF-8</param>
-        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public static StreamWriter GetWriter(this Stream stream, Encoding encoding)
         {
             if (stream.CanWrite == false)
-            {
                 throw new InvalidOperationException("Stream 不支持写入操作");
-            }
-
             encoding = encoding ?? Encoding.UTF8;
             return new StreamWriter(stream, encoding);
         }
@@ -178,18 +150,13 @@ namespace Bing.Extensions
         /// 从流中读取所有文本，默认编码：UTF-8
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static string ReadToEnd(this Stream stream)
-        {
-            return ReadToEnd(stream, null);
-        }
+        public static string ReadToEnd(this Stream stream) => ReadToEnd(stream, Encoding.UTF8);
 
         /// <summary>
         /// 从流中读取所有文本，使用指定编码
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="encoding">编码，默认编码：UTF-8</param>
-        /// <returns></returns>
         public static string ReadToEnd(this Stream stream, Encoding encoding)
         {
             using (var reader = stream.GetReader(encoding))
@@ -206,14 +173,11 @@ namespace Bing.Extensions
         /// 设置流指针指向流的开始位置
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public static Stream SeekToBegin(this Stream stream)
         {
             if (stream.CanSeek == false)
-            {
                 throw new InvalidOperationException("Stream 不支持寻址操作");
-            }
-
             stream.Seek(0, SeekOrigin.Begin);
             return stream;
         }
@@ -226,14 +190,11 @@ namespace Bing.Extensions
         /// 设置流指针指向流的结束位置
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public static Stream SeekToEnd(this Stream stream)
         {
             if (stream.CanSeek == false)
-            {
                 throw new InvalidOperationException("Stream 不支持寻址操作");
-            }
-
             stream.Seek(0, SeekOrigin.End);
             return stream;
         }
@@ -246,7 +207,6 @@ namespace Bing.Extensions
         /// 将流复制到内存流中
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
         public static MemoryStream CopyToMemory(this Stream stream)
         {
             var memoryStream = new MemoryStream((int)stream.Length);
@@ -262,7 +222,6 @@ namespace Bing.Extensions
         /// 将流写入字节数组
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
         public static byte[] ReadAllBytes(this Stream stream)
         {
             using (var memoryStream = stream.CopyToMemory())
@@ -280,10 +239,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="stream">流</param>
         /// <param name="bytes">字节数组</param>
-        public static void Write(this Stream stream, byte[] bytes)
-        {
-            stream.Write(bytes, 0, bytes.Length);
-        }
+        public static void Write(this Stream stream, byte[] bytes) => stream.Write(bytes, 0, bytes.Length);
 
         #endregion
 
@@ -292,12 +248,12 @@ namespace Bing.Extensions
         /// <summary>
         /// 将字符串写以指定编码方式写入流
         /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="context"></param>
-        /// <param name="encoding"></param>
-        public static void Write(this Stream stream, string context, Encoding encoding)
+        /// <param name="stream">流</param>
+        /// <param name="content">内容</param>
+        /// <param name="encoding">编码类型</param>
+        public static void Write(this Stream stream, string content, Encoding encoding)
         {
-            byte[] buffer = encoding.GetBytes(context);
+            byte[] buffer = encoding.GetBytes(content);
             stream.Write(buffer, 0, buffer.Length);
         }
 
@@ -316,10 +272,7 @@ namespace Bing.Extensions
                 var buffer = md5.ComputeHash(stream);
                 var md5Builder = new StringBuilder();
                 foreach (var b in buffer)
-                {
                     md5Builder.Append(b.ToString("x2"));
-                }
-
                 return md5Builder.ToString();
             }
         }

@@ -18,9 +18,7 @@ namespace Bing.Extensions.Http
         public static void Set<T>(this ISession session, string key, T value)
         {
             if (string.IsNullOrWhiteSpace(key))
-            {
                 return;
-            }
             session.Set(key, JsonHelper.ToJson(value));
         }
 
@@ -30,7 +28,6 @@ namespace Bing.Extensions.Http
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="session">会话</param>
         /// <param name="key">键名</param>
-        /// <returns></returns>
         public static T Get<T>(this ISession session, string key)
         {
             var value = session.GetString(key);

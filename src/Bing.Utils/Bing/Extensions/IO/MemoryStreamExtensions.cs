@@ -17,10 +17,7 @@ namespace Bing.Extensions
         /// <returns></returns>
         public static string AsString(this MemoryStream ms, Encoding encoding = null)
         {
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
+            if (encoding == null) encoding = Encoding.UTF8;
             return encoding.GetString(ms.ToArray());
         }
 
@@ -32,10 +29,7 @@ namespace Bing.Extensions
         /// <param name="encoding">字符编码，默认值：UTF-8</param>
         public static void FromString(this MemoryStream ms, string input, Encoding encoding = null)
         {
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
+            if (encoding == null) encoding = Encoding.UTF8;
             byte[] buffer = encoding.GetBytes(input);
             ms.Write(buffer, 0, buffer.Length);
         }

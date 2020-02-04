@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions
@@ -20,20 +19,15 @@ namespace Bing.Extensions
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="obj">值</param>
-        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
         public static T DeepClone<T>(this T obj) where T : class
         {
             if (obj == null)
-            {
-                return default(T);
-            }
-
+                return default;
             if (!typeof(T).HasAttribute<SerializableAttribute>(true))
-            {
                 throw new NotSupportedException($"当前对象未标记特性“{typeof(SerializableAttribute)}”，无法进行DeepClone操作");
-            }
-            BinaryFormatter formatter = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream())
+            var formatter = new BinaryFormatter();
+            using (var ms = new MemoryStream())
             {
                 formatter.Serialize(ms, obj);
                 ms.Seek(0, SeekOrigin.Begin);
@@ -51,10 +45,7 @@ namespace Bing.Extensions
         /// <param name="destination">当前对象</param>
         /// <param name="source">数据源对象</param>
         /// <returns>成功复制的值个数</returns>
-        public static int ClonePropertyFrom(this object destination, object source)
-        {
-            return destination.ClonePropertyFrom(source, null);
-        }
+        public static int ClonePropertyFrom(this object destination, object source) => destination.ClonePropertyFrom(source, null);
 
         /// <summary>
         /// 从源对象赋值到当前对象
@@ -66,9 +57,7 @@ namespace Bing.Extensions
         public static int ClonePropertyFrom(this object destination, object source, IEnumerable<string> excludeName)
         {
             if (source == null)
-            {
                 return 0;
-            }
             return destination.ClonePropertyFrom(source, source.GetType(), excludeName);
         }
 
@@ -83,28 +72,17 @@ namespace Bing.Extensions
         public static int ClonePropertyFrom(this object @this, object source, Type type, IEnumerable<string> excludeName)
         {
             if (@this == null || source == null)
-            {
                 return 0;
-            }
-
             if (@this == source)
-            {
                 return 0;
-            }
-
             if (excludeName == null)
-            {
                 excludeName = new List<string>();
-            }
-
-            int i = 0;
+            var i = 0;
             var desType = @this.GetType();
             foreach (var mi in type.GetFields())
             {
                 if (excludeName.Contains(mi.Name))
-                {
                     continue;
-                }
                 try
                 {
                     var des = desType.GetField(mi.Name);
@@ -122,9 +100,7 @@ namespace Bing.Extensions
             foreach (var pi in type.GetProperties())
             {
                 if (excludeName.Contains(pi.Name))
-                {
                     continue;
-                }
                 try
                 {
                     var des = desType.GetProperty(pi.Name);
@@ -147,10 +123,7 @@ namespace Bing.Extensions
         /// <param name="source">当前对象</param>
         /// <param name="destination">目标对象</param>
         /// <returns>成功复制的值个数</returns>
-        public static int ClonePropertyTo(this object source, object destination)
-        {
-            return source.ClonePropertyTo(destination, null);
-        }
+        public static int ClonePropertyTo(this object source, object destination) => source.ClonePropertyTo(destination, null);
 
         /// <summary>
         /// 从当前对象赋值到目标对象
@@ -162,9 +135,7 @@ namespace Bing.Extensions
         public static int ClonePropertyTo(this object source, object destination, IEnumerable<string> excludeName)
         {
             if (destination == null)
-            {
                 return 0;
-            }
             return destination.ClonePropertyFrom(source, source.GetType(), excludeName);
         }
 
@@ -209,11 +180,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static T? ToNullable<T>(this T value) where T : struct
-        {
-            return value.IsNull() ? null : (T?)value;
-        }
+        public static T? ToNullable<T>(this T value) where T : struct => value.IsNull() ? null : (T?)value;
 
         #endregion
 

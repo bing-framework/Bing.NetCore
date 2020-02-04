@@ -16,11 +16,7 @@ namespace Bing.Extensions
         /// <param name="value">float</param>
         /// <param name="minValue">最小值</param>
         /// <param name="maxValue">最大值</param>
-        /// <returns>bool</returns>
-        public static bool InRange(this float value, float minValue, float maxValue)
-        {
-            return (value >= minValue && value <= maxValue);
-        }
+        public static bool InRange(this float value, float minValue, float maxValue) => (value >= minValue && value <= maxValue);
 
         /// <summary>
         /// 判断值是否在指定范围内，否则返回默认值
@@ -29,11 +25,7 @@ namespace Bing.Extensions
         /// <param name="minValue">最小值</param>
         /// <param name="maxValue">最大值</param>
         /// <param name="defaultValue">默认值</param>
-        /// <returns>float</returns>
-        public static float InRange(this float value, float minValue, float maxValue, float defaultValue)
-        {
-            return value.InRange(minValue, maxValue) ? value : defaultValue;
-        }
+        public static float InRange(this float value, float minValue, float maxValue, float defaultValue) => value.InRange(minValue, maxValue) ? value : defaultValue;
 
         #endregion
 
@@ -43,11 +35,7 @@ namespace Bing.Extensions
         /// 获取日期间隔，根据数值获取时间间隔
         /// </summary>
         /// <param name="days">float</param>
-        /// <returns>日期间隔</returns>
-        public static TimeSpan Days(this float days)
-        {
-            return TimeSpan.FromDays(days);
-        }
+        public static TimeSpan Days(this float days) => TimeSpan.FromDays(days);
 
         #endregion
 
@@ -57,11 +45,7 @@ namespace Bing.Extensions
         /// 获取小时间隔，根据数值获取时间间隔
         /// </summary>
         /// <param name="hours">float</param>
-        /// <returns>小时间隔</returns>
-        public static TimeSpan Hours(this float hours)
-        {
-            return TimeSpan.FromHours(hours);
-        }
+        public static TimeSpan Hours(this float hours) => TimeSpan.FromHours(hours);
 
         #endregion
 
@@ -71,11 +55,7 @@ namespace Bing.Extensions
         /// 获取分钟间隔，根据数值获取时间间隔
         /// </summary>
         /// <param name="minutes">float</param>
-        /// <returns>分钟间隔</returns>
-        public static TimeSpan Minutes(this float minutes)
-        {
-            return TimeSpan.FromMinutes(minutes);
-        }
+        public static TimeSpan Minutes(this float minutes) => TimeSpan.FromMinutes(minutes);
 
         #endregion
 
@@ -85,11 +65,7 @@ namespace Bing.Extensions
         /// 获取秒间隔，根据数值获取时间间隔
         /// </summary>
         /// <param name="seconds">float</param>
-        /// <returns>秒间隔</returns>
-        public static TimeSpan Seconds(this float seconds)
-        {
-            return TimeSpan.FromSeconds(seconds);
-        }
+        public static TimeSpan Seconds(this float seconds) => TimeSpan.FromSeconds(seconds);
 
         #endregion
 
@@ -99,11 +75,7 @@ namespace Bing.Extensions
         /// 获取毫秒间隔，根据数值获取时间间隔
         /// </summary>
         /// <param name="milliseconds">float</param>
-        /// <returns>毫秒间隔</returns>
-        public static TimeSpan Milliseconds(this float milliseconds)
-        {
-            return TimeSpan.FromMilliseconds(milliseconds);
-        }
+        public static TimeSpan Milliseconds(this float milliseconds) => TimeSpan.FromMilliseconds(milliseconds);
 
         #endregion
     }

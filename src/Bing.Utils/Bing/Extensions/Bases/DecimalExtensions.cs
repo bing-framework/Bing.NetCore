@@ -15,22 +15,14 @@ namespace Bing.Extensions.Bases
         /// 将数值四舍五入，保留两位小数
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static decimal Rounding(this decimal value)
-        {
-            return Math.Round(value, 2);
-        }
+        public static decimal Rounding(this decimal value) => Math.Round(value, 2);
 
         /// <summary>
         /// 将数值四舍五入，保留指定小数位数
         /// </summary>
         /// <param name="value">值</param>
         /// <param name="decimals">小数位数</param>
-        /// <returns></returns>
-        public static decimal Rounding(this decimal value, int decimals)
-        {
-            return Math.Round(value, decimals);
-        }
+        public static decimal Rounding(this decimal value, int decimals) => Math.Round(value, decimals);
 
         #endregion
 
@@ -40,21 +32,13 @@ namespace Bing.Extensions.Bases
         /// 返回数字的绝对值
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static decimal Abs(this decimal value)
-        {
-            return Math.Abs(value);
-        }
+        public static decimal Abs(this decimal value) => Math.Abs(value);
 
         /// <summary>
         /// 返回数字的绝对值
         /// </summary>
         /// <param name="values">值</param>
-        /// <returns></returns>
-        public static IEnumerable<decimal> Abs(this IEnumerable<decimal> values)
-        {
-            return values.Select(x => x.Abs());
-        }
+        public static IEnumerable<decimal> Abs(this IEnumerable<decimal> values) => values.Select(x => x.Abs());
 
         #endregion
     }

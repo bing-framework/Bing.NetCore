@@ -16,11 +16,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="source">数组</param>
         /// <param name="index">索引</param>
-        /// <returns></returns>
-        public static bool WithInIndex(this Array source, int index)
-        {
-            return source != null && index >= 0 && index < source.Length;
-        }
+        public static bool WithInIndex(this Array source, int index) => source != null && index >= 0 && index < source.Length;
 
         /// <summary>
         /// 判断索引是否在数组中
@@ -28,12 +24,9 @@ namespace Bing.Extensions
         /// <param name="source">数组</param>
         /// <param name="index">索引</param>
         /// <param name="dimension">数组维度</param>
-        /// <returns></returns>
-        public static bool WithInIndex(this Array source, int index, int dimension)
-        {
-            return source != null && index >= source.GetLowerBound(dimension) &&
-                   index <= source.GetUpperBound(dimension);
-        }
+        public static bool WithInIndex(this Array source, int index, int dimension) =>
+            source != null && index >= source.GetLowerBound(dimension) &&
+            index <= source.GetUpperBound(dimension);
 
         #endregion
 
@@ -52,7 +45,6 @@ namespace Bing.Extensions
         /// 		Array combinedArray = arrayOne.CombineArray&lt;int&gt;(arrayTwo);
         /// 	</code>
         /// </example>
-        /// <returns></returns>
         public static T[] CombineArray<T>(this T[] combineWith, T[] arrayToCombine)
         {
             if (combineWith != default(T[]) && arrayToCombine != default(T[]))
@@ -73,14 +65,10 @@ namespace Bing.Extensions
         /// 清空数组内容
         /// </summary>
         /// <param name="source">源数组</param>
-        /// <returns></returns>
         public static Array ClearAll(this Array source)
         {
             if (source != null)
-            {
                 Array.Clear(source, 0, source.Length);
-            }
-
             return source;
         }
 
@@ -89,17 +77,13 @@ namespace Bing.Extensions
         /// </summary>
         /// <typeparam name="T">数组类型</typeparam>
         /// <param name="source">源数组</param>
-        /// <returns></returns>
         public static T[] ClearAll<T>(this T[] source)
         {
             if (source != null)
             {
-                for (int i = source.GetLowerBound(0); i <= source.GetUpperBound(0); ++i)
-                {
+                for (var i = source.GetLowerBound(0); i <= source.GetUpperBound(0); ++i)
                     source[i] = default(T);
-                }
             }
-
             return source;
         }
 
@@ -112,16 +96,13 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="array">数组</param>
         /// <param name="index">索引</param>
-        /// <returns></returns>
         public static Array ClearAt(this Array array, int index)
         {
             if (array != null)
             {
                 var arrayIndex = index.GetArrayIndex();
                 if (arrayIndex.IsIndexInArray(array))
-                {
                     Array.Clear(array, arrayIndex, 1);
-                }
             }
 
             return array;
@@ -133,16 +114,13 @@ namespace Bing.Extensions
         /// <typeparam name="T">数组类型</typeparam>
         /// <param name="array">数组</param>
         /// <param name="index">索引</param>
-        /// <returns></returns>
         public static T[] ClearAt<T>(this T[] array, int index)
         {
             if (array != null)
             {
                 var arrayIndex = index.GetArrayIndex();
                 if (arrayIndex.IsIndexInArray(array))
-                {
-                    array[arrayIndex] = default(T);
-                }
+                    array[arrayIndex] = default;
             }
 
             return array;
@@ -159,11 +137,7 @@ namespace Bing.Extensions
         /// <param name="source">数据源</param>
         /// <param name="index">索引</param>
         /// <param name="length">复制长度</param>
-        /// <returns></returns>
-        public static T[] BlockCopy<T>(this T[] source, int index, int length)
-        {
-            return BlockCopy(source, index, length, false);
-        }
+        public static T[] BlockCopy<T>(this T[] source, int index, int length) => BlockCopy(source, index, length, false);
 
         /// <summary>
         /// 复制数据块，复制数组内容到新数组
@@ -173,30 +147,22 @@ namespace Bing.Extensions
         /// <param name="index">索引</param>
         /// <param name="length">复制长度</param>
         /// <param name="padToLength">是否填充指定长度</param>
-        /// <returns></returns>
         public static T[] BlockCopy<T>(this T[] source, int index, int length, bool padToLength)
         {
             if (source == null)
-            {
                 throw new NullReferenceException(nameof(source));
-            }
-
-            int n = length;
+            var n = length;
             T[] b = null;
             if (source.Length < index + length)
             {
                 n = source.Length - index;// n=source数组剩余长度
                 if (padToLength)
-                {
-                    b=new T[length];
-                }
+                    b = new T[length];
             }
 
             if (b == null)
-            {
-                b=new T[n];
-            }
-            Array.Copy(source,index,b,0,n);// 从source数组指定索引开始复制数据到b数组当中，直至到达指定长度结束复制
+                b = new T[n];
+            Array.Copy(source, index, b, 0, n);// 从source数组指定索引开始复制数据到b数组当中，直至到达指定长度结束复制
             return b;
         }
 
@@ -207,13 +173,10 @@ namespace Bing.Extensions
         /// <param name="source">数据源</param>
         /// <param name="length">复制长度</param>
         /// <param name="padToLength">是否填充指定长度</param>
-        /// <returns></returns>
         public static IEnumerable<T[]> BlockCopy<T>(this T[] source, int length, bool padToLength)
         {
-            for (int i = 0; i < source.Length; i+= length)
-            {
+            for (var i = 0; i < source.Length; i += length)
                 yield return source.BlockCopy(i, length, padToLength);
-            }
         }
 
         #endregion

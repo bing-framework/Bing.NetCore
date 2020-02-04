@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bing.Extensions;
 using Bing.Helpers;
 
 // ReSharper disable once CheckNamespace
@@ -23,11 +22,8 @@ namespace Bing.Extensions
         public static bool AddIfNotContains<T>(this ICollection<T> source, T item)
         {
             Check.NotNull(source, nameof(source));
-
             if (source.Contains(item))
-            {
                 return false;
-            }
             source.Add(item);
             return true;
         }
@@ -43,18 +39,13 @@ namespace Bing.Extensions
             Check.NotNull(source, nameof(source));
 
             var addedItems = new List<T>();
-
             foreach (var item in items)
             {
                 if (source.Contains(item))
-                {
                     continue;
-                }
-
                 source.Add(item);
                 addedItems.Add(item);
             }
-
             return addedItems;
         }
 
@@ -65,7 +56,6 @@ namespace Bing.Extensions
         /// <param name="source">集合</param>
         /// <param name="predicate">条件</param>
         /// <param name="itemFactory">获取项函数</param>
-        /// <returns></returns>
         public static bool AddIfNotContains<T>(this ICollection<T> source, Func<T, bool> predicate, Func<T> itemFactory)
         {
             Check.NotNull(source, nameof(source));
@@ -73,10 +63,7 @@ namespace Bing.Extensions
             Check.NotNull(itemFactory, nameof(itemFactory));
 
             if (source.Any(predicate))
-            {
                 return false;
-            }
-
             source.Add(itemFactory());
             return true;
         }
@@ -93,13 +80,11 @@ namespace Bing.Extensions
         /// <param name="items">集合项</param>
         public static void RemoveAll<T>(this ICollection<T> source, IEnumerable<T> items)
         {
-            Check.NotNull(source,nameof(source));
+            Check.NotNull(source, nameof(source));
             Check.NotNull(items, nameof(items));
 
             foreach (var item in items)
-            {
                 source.Remove(item);
-            }
         }
 
         /// <summary>
@@ -108,18 +93,14 @@ namespace Bing.Extensions
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="source">集合</param>
         /// <param name="predicate">条件</param>
-        /// <returns></returns>
         public static IList<T> RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
         {
             Check.NotNull(source, nameof(source));
             Check.NotNull(predicate, nameof(predicate));
-            
+
             var items = source.Where(predicate).ToList();
             foreach (var item in items)
-            {
                 source.Remove(item);
-            }
-
             return items;
         }
 
@@ -138,7 +119,7 @@ namespace Bing.Extensions
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $@"源{typeof(T).Name}集合对象不可为空！");
-            if(enumerable==null)
+            if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable), $@"要添加的{typeof(T).Name}集合项不可为空！");
             enumerable.ForEach(collection.Add);
         }
@@ -156,7 +137,7 @@ namespace Bing.Extensions
         public static void Sort<T>(this ICollection<T> collection, IComparer<T> comparer = null)
         {
             comparer = comparer ?? Comparer<T>.Default;
-            var list=new List<T>(collection);
+            var list = new List<T>(collection);
             list.Sort(comparer);
             collection.ReplaceItems(list);
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions
@@ -15,27 +14,18 @@ namespace Bing.Extensions
         /// 提取属性信息
         /// </summary>
         /// <param name="expression">表达式</param>
-        /// <returns></returns>
-        public static PropertyInfo ExtractPropertyInfo(this LambdaExpression expression)
-        {
-            return expression.ExtractMemberInfo() as PropertyInfo;
-        }
+        public static PropertyInfo ExtractPropertyInfo(this LambdaExpression expression) => expression.ExtractMemberInfo() as PropertyInfo;
 
         /// <summary>
         /// 提取字段信息
         /// </summary>
         /// <param name="expression">表达式</param>
-        /// <returns></returns>
-        public static FieldInfo ExtractFieldInfo(this LambdaExpression expression)
-        {
-            return expression.ExtractMemberInfo() as FieldInfo;
-        }
+        public static FieldInfo ExtractFieldInfo(this LambdaExpression expression) => expression.ExtractMemberInfo() as FieldInfo;
 
         /// <summary>
         /// 提取成员信息
         /// </summary>
         /// <param name="expression">表达式</param>
-        /// <returns></returns>
         public static MemberInfo ExtractMemberInfo(this LambdaExpression expression)
         {
             expression.CheckNotNull(nameof(expression));
@@ -43,18 +33,12 @@ namespace Bing.Extensions
             MemberInfo info;
             try
             {
-                MemberExpression operand;
-                LambdaExpression lambda = expression;
-                if (lambda.Body is UnaryExpression body)
-                {
-                    operand=body.Operand as MemberExpression;
-                }
-                else
-                {
-                    operand = lambda.Body as MemberExpression;
-                }
+                var lambda = expression;
+                var operand = lambda.Body is UnaryExpression body
+                    ? body.Operand as MemberExpression
+                    : lambda.Body as MemberExpression;
 
-                MemberInfo member = operand.Member;
+                var member = operand.Member;
                 info = member;
             }
             catch (Exception e)

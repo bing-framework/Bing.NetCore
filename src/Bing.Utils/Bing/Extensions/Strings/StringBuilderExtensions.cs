@@ -15,13 +15,10 @@ namespace Bing.Extensions
         /// 去除<see cref="StringBuilder"/>开头空格
         /// </summary>
         /// <param name="sb">StringBuilder</param>
-        /// <returns></returns>
         public static StringBuilder TrimStart(this StringBuilder sb)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
             return sb.TrimStart(' ');
         }
 
@@ -30,24 +27,14 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="c">字符</param>
-        /// <returns></returns>
         public static StringBuilder TrimStart(this StringBuilder sb,char c)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (sb.Length == 0)
-            {
                 return sb;
-            }
-
             while (c.Equals(sb[0]))
-            {
                 sb.Remove(0, 1);
-            }
-
             return sb;
         }
 
@@ -56,19 +43,12 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="chars">字符数组</param>
-        /// <returns></returns>
         public static StringBuilder TrimStart(this StringBuilder sb, char[] chars)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (chars == null)
-            {
                 throw new ArgumentNullException(nameof(chars));
-            }
-
             return sb.TrimStart(new string(chars));
         }
 
@@ -77,28 +57,18 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="str">字符串</param>
-        /// <returns></returns>
         public static StringBuilder TrimStart(this StringBuilder sb, string str)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (string.IsNullOrEmpty(str) || sb.Length == 0 || str.Length > sb.Length)
-            {
                 return sb;
-            }
-
             while (sb.SubString(0,str.Length).Equals(str))
             {
                 sb.Remove(0, str.Length);
                 if (str.Length > sb.Length)
-                {
                     break;
-                }
             }
-
             return sb;
         }
 
@@ -110,13 +80,10 @@ namespace Bing.Extensions
         /// 去除<see cref="StringBuilder"/>尾部空格
         /// </summary>
         /// <param name="sb">StringBuilder</param>
-        /// <returns></returns>
         public static StringBuilder TrimEnd(this StringBuilder sb)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
             return sb.TrimEnd(' ');
         }
 
@@ -125,24 +92,14 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="c">字符</param>
-        /// <returns></returns>
         public static StringBuilder TrimEnd(this StringBuilder sb, char c)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (sb.Length == 0)
-            {
                 return sb;
-            }
-
             while (c.Equals(sb[sb.Length-1]))
-            {
-                sb.Remove(sb.Length-1, 1);
-            }
-
+                sb.Remove(sb.Length - 1, 1);
             return sb;
         }
 
@@ -151,19 +108,12 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="chars">字符数组</param>
-        /// <returns></returns>
         public static StringBuilder TrimEnd(this StringBuilder sb, char[] chars)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (chars == null)
-            {
                 throw new ArgumentNullException(nameof(chars));
-            }
-
             return sb.TrimEnd(new string(chars));
         }
 
@@ -172,26 +122,17 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="str">字符串</param>
-        /// <returns></returns>
         public static StringBuilder TrimEnd(this StringBuilder sb, string str)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (string.IsNullOrEmpty(str) || sb.Length == 0 || str.Length > sb.Length)
-            {
                 return sb;
-            }
-
             while (sb.SubString(sb.Length-str.Length, str.Length).Equals(str))
             {
                 sb.Remove(sb.Length - str.Length, str.Length);
                 if (sb.Length < str.Length)
-                {
                     break;
-                }
             }
 
             return sb;
@@ -205,19 +146,12 @@ namespace Bing.Extensions
         /// 去除<see cref="StringBuilder"/>两端的空格
         /// </summary>
         /// <param name="sb">StringBuilder</param>
-        /// <returns></returns>
         public static StringBuilder Trim(this StringBuilder sb)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (sb.Length == 0)
-            {
                 return sb;
-            }
-
             return sb.TrimEnd().TrimStart();
         }
 
@@ -231,23 +165,15 @@ namespace Bing.Extensions
         /// <param name="sb">StringBuilder</param>
         /// <param name="start">起始位置</param>
         /// <param name="length">长度</param>
-        /// <returns></returns>
         public static string SubString(this StringBuilder sb, int start, int length)
         {
             if (sb == null)
-            {
                 throw new ArgumentNullException(nameof(sb));
-            }
-
             if (start + length > sb.Length)
-            {
                 throw new IndexOutOfRangeException("超出字符串索引长度");
-            }
             char[] chars=new char[length];
             for (int i = 0; i < length; i++)
-            {
                 chars[i] = sb[start + i];
-            }
             return new string(chars);
         }
 
@@ -261,11 +187,7 @@ namespace Bing.Extensions
         /// <param name="sb">StringBuilder</param>
         /// <param name="value">内容</param>
         /// <param name="parameters">参数</param>
-        /// <returns></returns>
-        public static StringBuilder AppendLine(this StringBuilder sb, string value, params object[] parameters)
-        {
-            return sb.AppendLine(string.Format(value, parameters));
-        }
+        public static StringBuilder AppendLine(this StringBuilder sb, string value, params object[] parameters) => sb.AppendLine(string.Format(value, parameters));
 
         #endregion
 
@@ -278,7 +200,6 @@ namespace Bing.Extensions
         /// <param name="sb">StringBuilder</param>
         /// <param name="separator">分隔符</param>
         /// <param name="values">数组内容</param>
-        /// <returns></returns>
         public static StringBuilder AppendJoin<T>(this StringBuilder sb, string separator, params T[] values)
         {
             sb.Append(string.Join(separator, values));
@@ -295,14 +216,10 @@ namespace Bing.Extensions
         /// <param name="sb">StringBuilder</param>
         /// <param name="condition">拼接条件</param>
         /// <param name="value">内容</param>
-        /// <returns></returns>
         public static StringBuilder AppendIf(this StringBuilder sb, bool condition, object value)
         {
             if (condition)
-            {
                 sb.Append(value.ToString());
-            }
-
             return sb;
         }
 
@@ -317,15 +234,11 @@ namespace Bing.Extensions
         /// <param name="condition">拼接条件</param>
         /// <param name="value">内容</param>
         /// <param name="parameters">参数</param>
-        /// <returns></returns>
         public static StringBuilder AppendFormatIf(this StringBuilder sb, bool condition, string value,
             params object[] parameters)
         {
             if (condition)
-            {
                 sb.AppendFormat(value, parameters);
-            }
-
             return sb;
         }
 
@@ -339,14 +252,10 @@ namespace Bing.Extensions
         /// <param name="sb">StringBuiler</param>
         /// <param name="condition">拼接条件</param>
         /// <param name="value">内容</param>
-        /// <returns></returns>
         public static StringBuilder AppendLineIf(this StringBuilder sb, bool condition, object value)
         {
             if (condition)
-            {
                 sb.AppendLine(value.ToString());
-            }
-
             return sb;
         }
 
@@ -356,16 +265,12 @@ namespace Bing.Extensions
         /// <param name="sb">StringBuilder</param>
         /// <param name="condition">拼接条件</param>
         /// <param name="value">内容</param>
-        /// <param name="parmaeters">参数</param>
-        /// <returns></returns>
+        /// <param name="parameters">参数</param>
         public static StringBuilder AppendLine(this StringBuilder sb, bool condition, string value,
-            params object[] parmaeters)
+            params object[] parameters)
         {
             if (condition)
-            {
-                sb.AppendFormat(value, parmaeters).AppendLine();
-            }
-
+                sb.AppendFormat(value, parameters).AppendLine();
             return sb;
         }
 

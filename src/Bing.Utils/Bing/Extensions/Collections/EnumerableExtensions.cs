@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Bing.Extensions;
 using Bing.Utils.Json;
 
 // ReSharper disable once CheckNamespace

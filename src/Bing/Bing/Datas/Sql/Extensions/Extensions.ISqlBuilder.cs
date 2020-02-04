@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders;
-using Bing.Utils;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Datas.Sql

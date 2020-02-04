@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions

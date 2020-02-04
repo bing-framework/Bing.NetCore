@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Bing.Extensions;
 using Bing.Helpers;
 
 // ReSharper disable once CheckNamespace
@@ -21,7 +20,6 @@ namespace Bing.Extensions
         /// <param name="source">要查询的源</param>
         /// <param name="predicate">查询条件</param>
         /// <param name="condition">第三方条件</param>
-        /// <returns>查询结果</returns>
         public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, Expression<Func<T, bool>> predicate,
             bool condition)
         {
@@ -42,7 +40,6 @@ namespace Bing.Extensions
         /// <param name="queryable">数据源</param>
         /// <param name="skipCount">跳过的行数</param>
         /// <param name="pageSize">每页记录数</param>
-        /// <returns></returns>
         public static IQueryable<T> PageBy<T>(this IQueryable<T> queryable, int skipCount, int pageSize)
         {
             Check.NotNull(queryable, nameof(queryable));
@@ -58,7 +55,6 @@ namespace Bing.Extensions
         /// <param name="queryable">数据源</param>
         /// <param name="skipCount">跳过的行数</param>
         /// <param name="pageSize">每页记录数</param>
-        /// <returns></returns>
         public static TQueryable PageBy<T, TQueryable>(this IQueryable<T> queryable, int skipCount, int pageSize)
             where TQueryable : IQueryable
         {

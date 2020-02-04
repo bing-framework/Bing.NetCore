@@ -120,6 +120,7 @@ namespace Bing.Extensions
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="dictionary">字典</param>
         /// <param name="comparer">比较器，用于排序字典</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IDictionary<TKey, TValue> Sort<TKey, TValue>(this IDictionary<TKey, TValue> dictionary,
             IComparer<TKey> comparer)
         {
@@ -176,7 +177,7 @@ namespace Bing.Extensions
         {
             foreach (var item in dictionary.Where(x => x.Value.Equals(value)))
                 return item.Key;
-            return default(TKey);
+            return default;
         }
 
         #endregion

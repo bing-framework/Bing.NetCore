@@ -31,15 +31,11 @@ namespace Bing.Extensions
         /// 将byte[]转换成16进制字符串表示形式
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public static string ToHexString(this byte[] value)
         {
-            var sb=new StringBuilder();
+            var sb = new StringBuilder();
             foreach (var b in value)
-            {
                 sb.AppendFormat(" {0}", b.ToString("X2").PadLeft(2, '0'));
-            }
-
             return sb.Length > 0 ? sb.ToString().Substring(1) : sb.ToString();
         }
 
@@ -51,15 +47,11 @@ namespace Bing.Extensions
         /// 将byte[]转换成int
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public static int ToInt(this byte[] value)
         {
             // 如果传入的字节数组长度小于4,则返回0
             if (value.Length < 4)
-            {
                 return 0;
-            }
-
             int num = 0;
             // 如果传入的字节数组长度大于4,需要进行处理
             if (value.Length >= 4)
@@ -83,14 +75,11 @@ namespace Bing.Extensions
         /// 将byte[]转换成long
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public static long ToLong(this byte[] value)
         {
             // 如果传入的字节数组长度小于8,则返回0
             if (value.Length < 8)
-            {
                 return 0;
-            }
             long num = 0;
             if (value.Length >= 8)
             {
@@ -112,11 +101,7 @@ namespace Bing.Extensions
         /// 将byte[]转换成Base64字符串
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static string ToBase64String(this byte[] value)
-        {
-            return Convert.ToBase64String(value);
-        }
+        public static string ToBase64String(this byte[] value) => Convert.ToBase64String(value);
 
         #endregion
 
@@ -126,11 +111,7 @@ namespace Bing.Extensions
         /// 将byte[]转换成内存流
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static MemoryStream ToMemoryStream(this byte[] value)
-        {
-            return new MemoryStream(value);
-        }
+        public static MemoryStream ToMemoryStream(this byte[] value) => new MemoryStream(value);
 
         #endregion
 
@@ -140,7 +121,6 @@ namespace Bing.Extensions
         /// 复制一份二维数组的副本
         /// </summary>
         /// <param name="bytes">二维数组</param>
-        /// <returns></returns>
         public static byte[,] Copy(this byte[,] bytes)
         {
             int width = bytes.GetLength(0), height = bytes.GetLength(1);

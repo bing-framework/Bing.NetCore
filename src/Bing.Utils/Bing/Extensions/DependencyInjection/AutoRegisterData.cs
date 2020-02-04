@@ -71,9 +71,7 @@ namespace Bing.Extensions
             {
                 var interfaces = classType.GetTypeInfo().ImplementedInterfaces.Where(x => x != typeof(IDisposable) && x.IsPublic);
                 foreach (var @interface in interfaces)
-                {
                     autoRegisterData.Services.Add(new ServiceDescriptor(@interface, classType, lifetime));
-                }
             }
 
             return autoRegisterData.Services;
