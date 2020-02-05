@@ -266,6 +266,549 @@
             执行
             </summary>
         </member>
+        <member name="T:Bing.Auditing.AuditingContractResolver">
+            <summary>
+            审计契约解析器
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.AuditingContractResolver._ignoredTypes">
+            <summary>
+            忽略类型列表
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.AuditingContractResolver.#ctor(System.Collections.Generic.List{System.Type})">
+            <summary>
+            初始化一个<see cref="T:Bing.Auditing.AuditingContractResolver"/>类型的实例
+            </summary>
+            <param name="ignoredTypes"></param>
+        </member>
+        <member name="M:Bing.Auditing.AuditingContractResolver.CreateProperty(System.Reflection.MemberInfo,Newtonsoft.Json.MemberSerialization)">
+            <summary>
+            创建属性
+            </summary>
+            <param name="member">成员信息</param>
+            <param name="memberSerialization">成员序列化器</param>
+        </member>
+        <member name="T:Bing.Auditing.CreationAuditedInitializer">
+            <summary>
+            创建操作审计初始化器
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.CreationAuditedInitializer._entity">
+            <summary>
+            实体
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.CreationAuditedInitializer._userId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.CreationAuditedInitializer._userName">
+            <summary>
+            用户名称
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.#ctor(System.Object,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Auditing.CreationAuditedInitializer"/>类型的实例
+            </summary>
+            <param name="entity">实体</param>
+            <param name="userId">用户标识</param>
+            <param name="userName">用户名称</param>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.Init(System.Object,System.String,System.String)">
+            <summary>
+            初始化
+            </summary>
+            <param name="entity">实体</param>
+            <param name="userId">用户标识</param>
+            <param name="userName">用户名称</param>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitCreationTime">
+            <summary>
+            初始化创建时间
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitCreator">
+            <summary>
+            初始化创建人
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitCreatorId">
+            <summary>
+            初始化创建人标识
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitGuid">
+            <summary>
+            初始化Guid
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitNullableGuid">
+            <summary>
+            初始化可空Guid
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitInt">
+            <summary>
+            初始化int
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitNullableInt">
+            <summary>
+            初始化可空int
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitLong">
+            <summary>
+            初始化Long
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitNullableLong">
+            <summary>
+            初始化可空Long
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.CreationAuditedInitializer.InitString">
+            <summary>
+            初始化字符串
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.DeletionAuditedInitializer">
+            <summary>
+            删除操作审计初始化器
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.DeletionAuditedInitializer._entity">
+            <summary>
+            实体
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.DeletionAuditedInitializer._userId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.DeletionAuditedInitializer._userName">
+            <summary>
+            用户名称
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.#ctor(System.Object,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Auditing.DeletionAuditedInitializer"/>类型的实例
+            </summary>
+            <param name="entity">实体</param>
+            <param name="userId">用户标识</param>
+            <param name="userName">用户名称</param>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.Init(System.Object,System.String,System.String)">
+            <summary>
+            初始化
+            </summary>
+            <param name="entity">实体</param>
+            <param name="userId">用户标识</param>
+            <param name="userName">用户名称</param>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitDeletionTime">
+            <summary>
+            初始化删除时间
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitDeleter">
+            <summary>
+            初始化删除人
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitDeleterId">
+            <summary>
+            初始化删除人标识
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitGuid">
+            <summary>
+            初始化Guid
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitNullableGuid">
+            <summary>
+            初始化可空Guid
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitInt">
+            <summary>
+            初始化int
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitNullableInt">
+            <summary>
+            初始化可空int
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitLong">
+            <summary>
+            初始化Long
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitNullableLong">
+            <summary>
+            初始化可空Long
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.DeletionAuditedInitializer.InitString">
+            <summary>
+            初始化字符串
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.DisableAuditingAttribute">
+            <summary>
+            禁用审计 特性
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IAuditedObject">
+            <summary>
+            操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IAuditedObject`1">
+            <summary>
+            操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.IAuditedWithNameObject">
+            <summary>
+            操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IAuditedWithNameObject`1">
+            <summary>
+            操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.IAuditingEnabled">
+            <summary>
+            启用审计
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IAuditSerializer">
+            <summary>
+            审计序列化器
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.IAuditSerializer.Serialize(System.Object)">
+            <summary>
+            序列化
+            </summary>
+            <param name="obj">对象</param>
+        </member>
+        <member name="T:Bing.Auditing.ICreationAuditedObject">
+            <summary>
+            创建操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.ICreationAuditedObject`1">
+            <summary>
+            创建操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Auditing.ICreationAuditedObject`1.CreatorId">
+            <summary>
+            创建人标识
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.ICreationAuditedWithNameObject">
+            <summary>
+            创建操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.ICreationAuditedWithNameObject`1">
+            <summary>
+            创建操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.IDeletionAuditedObject">
+            <summary>
+            删除操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IDeletionAuditedObject`1">
+            <summary>
+            删除操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Auditing.IDeletionAuditedObject`1.DeleterId">
+            <summary>
+            删除人标识
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IDeletionAuditedWithNameObject">
+            <summary>
+            删除操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IDeletionAuditedWithNameObject`1">
+            <summary>
+            删除操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.IFullAuditedObject">
+            <summary>
+            完整操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IFullAuditedObject`1">
+            <summary>
+            完整操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.IFullAuditedWithNameObject">
+            <summary>
+            完整操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IFullAuditedWithNameObject`1">
+            <summary>
+            完整操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.IHasCreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Bing.Auditing.IHasCreationTime.CreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasCreator">
+            <summary>
+            创建人
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasCreator`1">
+            <summary>
+            创建人
+            </summary>
+        </member>
+        <member name="P:Bing.Auditing.IHasCreator`1.Creator">
+            <summary>
+            创建人
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasDeleter">
+            <summary>
+            删除人
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasDeleter`1">
+            <summary>
+            删除人
+            </summary>
+        </member>
+        <member name="P:Bing.Auditing.IHasDeleter`1.Deleter">
+            <summary>
+            删除人
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasDeletionTime">
+            <summary>
+            删除时间
+            </summary>
+        </member>
+        <member name="P:Bing.Auditing.IHasDeletionTime.DeletionTime">
+            <summary>
+            删除时间
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasModificationTime">
+            <summary>
+            修改时间
+            </summary>
+        </member>
+        <member name="P:Bing.Auditing.IHasModificationTime.LastModificationTime">
+            <summary>
+            最后修改时间
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasModifier">
+            <summary>
+            修改人
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IHasModifier`1">
+            <summary>
+            修改人
+            </summary>
+        </member>
+        <member name="P:Bing.Auditing.IHasModifier`1.LastModifier">
+            <summary>
+            最后修改人
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IModificationAuditedObject">
+            <summary>
+            修改操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IModificationAuditedObject`1">
+            <summary>
+            修改操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Auditing.IModificationAuditedObject`1.LastModifierId">
+            <summary>
+            最后修改人标识
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IModificationAuditedWithNameObject">
+            <summary>
+            修改操作审计对象
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.IModificationAuditedWithNameObject`1">
+            <summary>
+            修改操作审计对象
+            </summary>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="T:Bing.Auditing.JsonAuditSerializer">
+            <summary>
+            基于JSON的审计序列化器
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.JsonAuditSerializer.SyncObj">
+            <summary>
+            同步锁对象
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.JsonAuditSerializer._sharedJsonSerializerSettings">
+            <summary>
+            共享的JSON序列化器设置
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.JsonAuditSerializer.Serialize(System.Object)">
+            <summary>
+            序列化
+            </summary>
+            <param name="obj">对象</param>
+        </member>
+        <member name="M:Bing.Auditing.JsonAuditSerializer.GetSharedJsonSerializerSettings">
+            <summary>
+            获取共享的JSON序列化器设置
+            </summary>
+        </member>
+        <member name="T:Bing.Auditing.ModificationAuditedInitializer">
+            <summary>
+            修改操作审计初始化器
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.ModificationAuditedInitializer._entity">
+            <summary>
+            实体
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.ModificationAuditedInitializer._userId">
+            <summary>
+            用户标识
+            </summary>
+        </member>
+        <member name="F:Bing.Auditing.ModificationAuditedInitializer._userName">
+            <summary>
+            用户名称
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.#ctor(System.Object,System.String,System.String)">
+            <summary>
+            初始化一个<see cref="T:Bing.Auditing.ModificationAuditedInitializer"/>类型的实例
+            </summary>
+            <param name="entity">实体</param>
+            <param name="userId">用户标识</param>
+            <param name="userName">用户名称</param>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.Init(System.Object,System.String,System.String)">
+            <summary>
+            初始化
+            </summary>
+            <param name="entity">实体</param>
+            <param name="userId">用户标识</param>
+            <param name="userName">用户名称</param>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitLastModificationTime">
+            <summary>
+            初始化修改时间
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitLastModifier">
+            <summary>
+            初始化修改人
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitLastModifierId">
+            <summary>
+            初始化修改人标识
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitGuid">
+            <summary>
+            初始化Guid
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitNullableGuid">
+            <summary>
+            初始化可空Guid
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitInt">
+            <summary>
+            初始化int
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitNullableInt">
+            <summary>
+            初始化可空int
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitLong">
+            <summary>
+            初始化Long
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitNullableLong">
+            <summary>
+            初始化可空Long
+            </summary>
+        </member>
+        <member name="M:Bing.Auditing.ModificationAuditedInitializer.InitString">
+            <summary>
+            初始化字符串
+            </summary>
+        </member>
         <member name="T:Bing.BingException">
             <summary>
             Bing框架异常
@@ -12056,6 +12599,11 @@
             <typeparam name="TEntity">实体类型</typeparam>
             <typeparam name="TKey">标识类型</typeparam>
         </member>
+        <member name="M:Bing.Domains.Entities.AggregateRoot`2.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`2"/>类型的实例
+            </summary>
+        </member>
         <member name="M:Bing.Domains.Entities.AggregateRoot`2.#ctor(`1)">
             <summary>
             初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`2"/>类型的实例
@@ -12073,442 +12621,71 @@
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
         </member>
+        <member name="M:Bing.Domains.Entities.AggregateRoot`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`1"/>类型的实例
+            </summary>
+        </member>
         <member name="M:Bing.Domains.Entities.AggregateRoot`1.#ctor(System.Guid)">
             <summary>
             初始化一个<see cref="T:Bing.Domains.Entities.AggregateRoot`1"/>类型的实例
             </summary>
             <param name="id">标识</param>
         </member>
-        <member name="T:Bing.Domains.Entities.Auditing.CreationAuditedInitializer">
+        <member name="T:Bing.Domains.Entities.Auditing.CreationAuditedEntity`1">
             <summary>
-            创建操作审计初始化器
+            创建审计实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="P:Bing.Domains.Entities.Auditing.CreationAuditedEntity`1.CreationTime">
+            <summary>
+            创建时间
             </summary>
         </member>
-        <member name="F:Bing.Domains.Entities.Auditing.CreationAuditedInitializer._entity">
-            <summary>
-            实体
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.CreationAuditedInitializer._userId">
-            <summary>
-            用户标识
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.CreationAuditedInitializer._userName">
-            <summary>
-            用户名称
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.#ctor(System.Object,System.String,System.String)">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.Auditing.CreationAuditedInitializer"/>类型的实例
-            </summary>
-            <param name="entity">实体</param>
-            <param name="userId">用户标识</param>
-            <param name="userName">用户名称</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.Init(System.Object,System.String,System.String)">
-            <summary>
-            初始化
-            </summary>
-            <param name="entity">实体</param>
-            <param name="userId">用户标识</param>
-            <param name="userName">用户名称</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.Init">
-            <summary>
-            初始化
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitCreationTime">
-            <summary>
-            初始化创建时间
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitCreator">
-            <summary>
-            初始化创建人
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitGuid">
-            <summary>
-            初始化Guid
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitNullableGuid">
-            <summary>
-            初始化可空Guid
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitInt">
-            <summary>
-            初始化int
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitNullableInt">
-            <summary>
-            初始化可空int
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitLong">
-            <summary>
-            初始化Long
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitNullableLong">
-            <summary>
-            初始化可空Long
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.CreationAuditedInitializer.InitString">
-            <summary>
-            初始化字符串
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer">
-            <summary>
-            删除操作审计初始化器
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer._entity">
-            <summary>
-            实体
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer._userId">
-            <summary>
-            用户标识
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer._userName">
-            <summary>
-            用户名称
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.#ctor(System.Object,System.String,System.String)">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer"/>类型的实例
-            </summary>
-            <param name="entity">实体</param>
-            <param name="userId">用户标识</param>
-            <param name="userName">用户名称</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.Init(System.Object,System.String,System.String)">
-            <summary>
-            初始化
-            </summary>
-            <param name="entity">实体</param>
-            <param name="userId">用户标识</param>
-            <param name="userName">用户名称</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.Init">
-            <summary>
-            初始化
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitDeletionTime">
-            <summary>
-            初始化删除时间
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitDeleter">
-            <summary>
-            初始化删除人
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitGuid">
-            <summary>
-            初始化Guid
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitNullableGuid">
-            <summary>
-            初始化可空Guid
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitInt">
-            <summary>
-            初始化int
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitNullableInt">
-            <summary>
-            初始化可空int
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitLong">
-            <summary>
-            初始化Long
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitNullableLong">
-            <summary>
-            初始化可空Long
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.DeletionAuditedInitializer.InitString">
-            <summary>
-            初始化字符串
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IAudited">
-            <summary>
-            操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IAudited`1">
-            <summary>
-            操作审计
-            </summary>
-            <typeparam name="TKey">操作人编号类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IAuditor">
-            <summary>
-            操作人审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IAuditor`1">
-            <summary>
-            操作人审计
-            </summary>
-            <typeparam name="TKey">操作人标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ICreationAudited">
-            <summary>
-            创建操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ICreationAudited`1">
-            <summary>
-            创建操作审计
-            </summary>
-            <typeparam name="TKey">创建人标识类型</typeparam>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.ICreationAudited`1.CreatorId">
+        <member name="P:Bing.Domains.Entities.Auditing.CreationAuditedEntity`1.CreatorId">
             <summary>
             创建人标识
             </summary>
         </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ICreationTime">
+        <member name="T:Bing.Domains.Entities.Auditing.CreationAuditedEntity`2">
+            <summary>
+            创建审计实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Domains.Entities.Auditing.CreationAuditedEntity`2.CreationTime">
             <summary>
             创建时间
             </summary>
         </member>
-        <member name="P:Bing.Domains.Entities.Auditing.ICreationTime.CreationTime">
+        <member name="P:Bing.Domains.Entities.Auditing.CreationAuditedEntity`2.CreatorId">
             <summary>
-            创建时间
+            创建人标识
             </summary>
         </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ICreator">
+        <member name="T:Bing.Domains.Entities.Auditing.CreationAuditedWithNameEntity`1">
+            <summary>
+            创建审计实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="P:Bing.Domains.Entities.Auditing.CreationAuditedWithNameEntity`1.Creator">
             <summary>
             创建人
             </summary>
         </member>
-        <member name="P:Bing.Domains.Entities.Auditing.ICreator.Creator">
+        <member name="T:Bing.Domains.Entities.Auditing.CreationAuditedWithNameEntity`2">
+            <summary>
+            创建审计实体
+            </summary>
+            <typeparam name="TEntity">实体类型</typeparam>
+            <typeparam name="TKey">标识类型</typeparam>
+        </member>
+        <member name="P:Bing.Domains.Entities.Auditing.CreationAuditedWithNameEntity`2.Creator">
             <summary>
             创建人
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ICreatorAudited">
-            <summary>
-            创建人操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ICreatorAudited`1">
-            <summary>
-            创建人操作审计
-            </summary>
-            <typeparam name="TKey">创建人标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IDeleter">
-            <summary>
-            删除人审计
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.IDeleter.Deleter">
-            <summary>
-            删除人
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IDeleterAudited">
-            <summary>
-            删除人操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IDeleterAudited`1">
-            <summary>
-            删除人操作审计
-            </summary>
-            <typeparam name="TKey">删除人标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IDeletionAudited">
-            <summary>
-            删除操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IDeletionAudited`1">
-            <summary>
-            删除操作审计
-            </summary>
-            <typeparam name="TKey">删除人编号类型</typeparam>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.IDeletionAudited`1.DeleterId">
-            <summary>
-            删除人编号
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IDeletionTime">
-            <summary>
-            删除时间审计
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.IDeletionTime.DeletionTime">
-            <summary>
-            删除时间
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IFullAudited">
-            <summary>
-            全部操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IFullAudited`1">
-            <summary>
-            全部审计操作
-            </summary>
-            <typeparam name="TKey">操作人编号类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IModificationAudited">
-            <summary>
-            修改操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IModificationAudited`1">
-            <summary>
-            修改操作审计
-            </summary>
-            <typeparam name="TKey">最后修改人标识类型</typeparam>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.IModificationAudited`1.LastModifierId">
-            <summary>
-            最后修改人标识
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IModificationTime">
-            <summary>
-            修改时间
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.IModificationTime.LastModificationTime">
-            <summary>
-            最后修改时间
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IModifier">
-            <summary>
-            修改人
-            </summary>
-        </member>
-        <member name="P:Bing.Domains.Entities.Auditing.IModifier.LastModifier">
-            <summary>
-            最后修改人
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IModifierAudited">
-            <summary>
-            修改人操作审计
-            </summary>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.IModifierAudited`1">
-            <summary>
-            修改人操作审计
-            </summary>
-            <typeparam name="TKey">最后修改人标识类型</typeparam>
-        </member>
-        <member name="T:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer">
-            <summary>
-            修改操作审计初始化器
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer._entity">
-            <summary>
-            实体
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer._userId">
-            <summary>
-            用户标识
-            </summary>
-        </member>
-        <member name="F:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer._userName">
-            <summary>
-            用户名称
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.#ctor(System.Object,System.String,System.String)">
-            <summary>
-            初始化一个<see cref="T:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer"/>类型的实例
-            </summary>
-            <param name="entity">实体</param>
-            <param name="userId">用户标识</param>
-            <param name="userName">用户名称</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.Init(System.Object,System.String,System.String)">
-            <summary>
-            初始化
-            </summary>
-            <param name="entity">实体</param>
-            <param name="userId">用户标识</param>
-            <param name="userName">用户名称</param>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.Init">
-            <summary>
-            初始化
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitLastModificationTime">
-            <summary>
-            初始化创建时间
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitLastModifier">
-            <summary>
-            初始化创建人
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitGuid">
-            <summary>
-            初始化Guid
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitNullableGuid">
-            <summary>
-            初始化可空Guid
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitInt">
-            <summary>
-            初始化int
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitNullableInt">
-            <summary>
-            初始化可空int
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitLong">
-            <summary>
-            初始化Long
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitNullableLong">
-            <summary>
-            初始化可空Long
-            </summary>
-        </member>
-        <member name="M:Bing.Domains.Entities.Auditing.ModificationAuditedInitializer.InitString">
-            <summary>
-            初始化字符串
             </summary>
         </member>
         <member name="T:Bing.Domains.Entities.DeleteOperationTypes">
@@ -12668,11 +12845,41 @@
             输出对象状态
             </summary>
         </member>
+        <member name="T:Bing.Domains.Entities.EntityBase">
+            <summary>
+            领域实体
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase.Validate">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase.Init">
+            <summary>
+            初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase.GetKeys">
+            <summary>
+            获取标识列表
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase.ToString">
+            <summary>
+            输出字符串
+            </summary>
+        </member>
         <member name="T:Bing.Domains.Entities.EntityBase`1">
             <summary>
             领域实体
             </summary>
             <typeparam name="TEntity">实体类型</typeparam>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`1.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.EntityBase`1"/>类型的实例
+            </summary>
         </member>
         <member name="M:Bing.Domains.Entities.EntityBase`1.#ctor(System.Guid)">
             <summary>
@@ -12695,6 +12902,11 @@
         <member name="P:Bing.Domains.Entities.EntityBase`2.Session">
             <summary>
             用户会话
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Domains.Entities.EntityBase`2"/>类型的实例
             </summary>
         </member>
         <member name="M:Bing.Domains.Entities.EntityBase`2.#ctor(`1)">
@@ -12731,6 +12943,11 @@
         <member name="M:Bing.Domains.Entities.EntityBase`2.Init">
             <summary>
             初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.EntityBase`2.GetKeys">
+            <summary>
+            获取标识列表
             </summary>
         </member>
         <member name="M:Bing.Domains.Entities.EntityBase`2.InitId">
@@ -12796,6 +13013,11 @@
         <member name="M:Bing.Domains.Entities.IEntity.Init">
             <summary>
             初始化
+            </summary>
+        </member>
+        <member name="M:Bing.Domains.Entities.IEntity.GetKeys">
+            <summary>
+            获取标识列表
             </summary>
         </member>
         <member name="T:Bing.Domains.Entities.IEntity`1">
@@ -13231,7 +13453,7 @@
         </member>
         <member name="M:Bing.Domains.Entities.EntityExtensions.UnDelete(Bing.Domains.Entities.IDelete)">
             <summary>
-            取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Domains.Entities.Auditing.IDeletionAudited"/>属性设置为空
+            取消删除。将<see cref="P:Bing.Domains.Entities.IDelete.IsDeleted"/>设为false，并且将<see cref="T:Bing.Auditing.IDeletionAuditedObject"/>属性设置为空
             </summary>
             <param name="entity">逻辑删除实体</param>
         </member>

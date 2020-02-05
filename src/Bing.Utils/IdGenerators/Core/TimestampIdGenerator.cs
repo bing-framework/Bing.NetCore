@@ -6,12 +6,12 @@ namespace Bing.Utils.IdGenerators.Core
     /// <summary>
     /// 时间戳ID 生成器
     /// </summary>
-    public class TimestampIdGenerator:IStringGenerator
+    public class TimestampIdGenerator : IStringGenerator
     {
         /// <summary>
         /// 时间戳ID
         /// </summary>
-        private readonly TimestampId _id=TimestampId.GetInstance();
+        private readonly TimestampId _id = TimestampId.GetInstance();
 
         /// <summary>
         /// 获取<see cref="TimestampIdGenerator"/>类型的实例
@@ -21,10 +21,6 @@ namespace Bing.Utils.IdGenerators.Core
         /// <summary>
         /// 创建ID
         /// </summary>
-        /// <returns></returns>
-        public string Create()
-        {
-            return _id.GetId();
-        }
+        public string Create() => _id.GetId();
     }
 }

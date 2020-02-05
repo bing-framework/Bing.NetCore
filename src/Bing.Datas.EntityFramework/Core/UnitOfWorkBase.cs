@@ -13,15 +13,13 @@ using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.Transactions;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
-using Bing.Domains.Entities.Auditing;
+using Bing.Auditing;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Security.Extensions;
 using Bing.Sessions;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -76,7 +74,7 @@ namespace Bing.Datas.EntityFramework.Core
         static UnitOfWorkBase()
         {
             Maps = new ConcurrentDictionary<Type, IEnumerable<IMap>>();
-            LoggerFactory = new LoggerFactory(new[] {new EfLogProvider(),});
+            LoggerFactory = new LoggerFactory(new[] { new EfLogProvider(), });
         }
 
         #endregion
@@ -88,7 +86,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="options">配置</param>
         /// <param name="serviceProvider">服务提供器</param>
-        protected UnitOfWorkBase(DbContextOptions options,IServiceProvider serviceProvider):base(options)
+        protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) : base(options)
         {
             TraceId = Guid.NewGuid().ToString();
             Session = Bing.Sessions.Session.Instance;
@@ -327,13 +325,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取用户标识
         /// </summary>
-        /// <returns></returns>
         protected virtual string GetUserId() => GetSession().UserId;
 
         /// <summary>
         /// 获取用户名称
         /// </summary>
-        /// <returns></returns>
         protected virtual string GetUserName()
         {
             var name = GetSession().GetFullName();
@@ -343,7 +339,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取用户会话
         /// </summary>
-        /// <returns></returns>
         protected virtual ISession GetSession() => Session;
 
         /// <summary>

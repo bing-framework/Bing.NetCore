@@ -1,13 +1,12 @@
 ﻿using System;
 using Bing.Extensions;
-using Bing.Extensions;
 
-namespace Bing.Domains.Entities.Auditing
+namespace Bing.Auditing
 {
     /// <summary>
     /// 修改操作审计初始化器
     /// </summary>
-    public class ModificationAuditedInitializer
+    public sealed class ModificationAuditedInitializer
     {
         /// <summary>
         /// 实体
@@ -54,63 +53,60 @@ namespace Bing.Domains.Entities.Auditing
                 return;
             InitLastModificationTime();
             InitLastModifier();
-            if (string.IsNullOrWhiteSpace(_userId))
-                return;
-            if (_entity is IModificationAudited<Guid>)
-            {
-                InitGuid();
-                return;
-            }
-            if (_entity is IModificationAudited<Guid?>)
-            {
-                InitNullableGuid();
-                return;
-            }
-            if (_entity is IModificationAudited<int>)
-            {
-                InitInt();
-                return;
-            }
-            if (_entity is IModificationAudited<int?>)
-            {
-                InitNullableInt();
-                return;
-            }
-            if (_entity is IModificationAudited<string>)
-            {
-                InitString();
-                return;
-            }
-            if (_entity is IModificationAudited<long>)
-            {
-                InitLong();
-                return;
-            }
-            if (_entity is IModificationAudited<long?>)
-            {
-                InitNullableLong();
-                return;
-            }
+            InitLastModifierId();
         }
 
         /// <summary>
-        /// 初始化创建时间
+        /// 初始化修改时间
         /// </summary>
         private void InitLastModificationTime()
         {
-            if (_entity is IModificationTime result)
+            if (_entity is IHasModificationTime result)
                 result.LastModificationTime = DateTime.Now;
         }
 
         /// <summary>
-        /// 初始化创建人
+        /// 初始化修改人
         /// </summary>
         private void InitLastModifier()
         {
             if (string.IsNullOrWhiteSpace(_userName))
                 return;
-            if (_entity is IModifier result)
+            if (_entity is IHasModifier result)
                 result.LastModifier = _userName;
+        }
+
+        /// <summary>
+        /// 初始化修改人标识
+        /// </summary>
+        private void InitLastModifierId()
+        {
+            if (string.IsNullOrWhiteSpace(_userId))
+                return;
+            switch (_entity)
+            {
+                case IModificationAuditedObject<Guid> _:
+                    InitGuid();
+                    return;
+                case IModificationAuditedObject<Guid?> _:
+                    InitNullableGuid();
+                    return;
+                case IModificationAuditedObject<int> _:
+                    InitInt();
+                    return;
+                case IModificationAuditedObject<int?> _:
+                    InitNullableInt();
+                    return;
+                case IModificationAuditedObject<string> _:
+                    InitString();
+                    return;
+                case IModificationAuditedObject<long> _:
+                    InitLong();
+                    return;
+                case IModificationAuditedObject<long?> _:
+                    InitNullableLong();
+                    return;
+            }
         }
 
         /// <summary>
@@ -118,7 +114,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitGuid()
         {
-            var result = (IModificationAudited<Guid>)_entity;
+            var result = (IModificationAuditedObject<Guid>)_entity;
             result.LastModifierId = _userId.ToGuid();
         }
 
@@ -127,7 +123,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableGuid()
         {
-            var result = (IModificationAudited<Guid?>)_entity;
+            var result = (IModificationAuditedObject<Guid?>)_entity;
             result.LastModifierId = _userId.ToGuidOrNull();
         }
 
@@ -136,7 +132,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitInt()
         {
-            var result = (IModificationAudited<int>)_entity;
+            var result = (IModificationAuditedObject<int>)_entity;
             result.LastModifierId = _userId.ToInt();
         }
 
@@ -145,7 +141,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableInt()
         {
-            var result = (IModificationAudited<int?>)_entity;
+            var result = (IModificationAuditedObject<int?>)_entity;
             result.LastModifierId = _userId.ToIntOrNull();
         }
 
@@ -154,7 +150,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitLong()
         {
-            var result = (IModificationAudited<long>)_entity;
+            var result = (IModificationAuditedObject<long>)_entity;
             result.LastModifierId = _userId.ToLong();
         }
 
@@ -163,7 +159,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableLong()
         {
-            var result = (IModificationAudited<long?>)_entity;
+            var result = (IModificationAuditedObject<long?>)_entity;
             result.LastModifierId = _userId.ToLongOrNull();
         }
 
@@ -172,7 +168,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitString()
         {
-            var result = (IModificationAudited<string>)_entity;
+            var result = (IModificationAuditedObject<string>)_entity;
             result.LastModifierId = _userId.SafeString();
         }
     }

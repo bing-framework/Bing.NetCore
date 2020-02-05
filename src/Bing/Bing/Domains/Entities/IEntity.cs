@@ -11,6 +11,11 @@ namespace Bing.Domains.Entities
         /// 初始化
         /// </summary>
         void Init();
+
+        /// <summary>
+        /// 获取标识列表
+        /// </summary>
+        object[] GetKeys();
     }
 
     /// <summary>

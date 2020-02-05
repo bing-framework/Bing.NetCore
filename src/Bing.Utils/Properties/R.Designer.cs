@@ -39,7 +39,7 @@ namespace Bing.Utils.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bing.Utils.Properties.R", typeof(R).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Properties.R", typeof(R).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

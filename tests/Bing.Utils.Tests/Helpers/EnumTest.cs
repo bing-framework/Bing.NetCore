@@ -276,7 +276,7 @@ namespace Bing.Utils.Tests.Helpers
         {
             AssertHelper.Throws<InvalidOperationException>(() => {
                 Enum.GetItems<Sample>();
-            }, "类型 Bing.Utils.Tests.Samples.Sample 不是枚举");
+            }, "类型 Bing.Tests.Samples.Sample 不是枚举");
         }
 
         /// <summary>

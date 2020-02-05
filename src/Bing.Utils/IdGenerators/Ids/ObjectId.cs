@@ -21,7 +21,8 @@ namespace Bing.Utils.IdGenerators.Ids
         private static int __staticMachine;
         private static short __staticPid;
         private static int __staticIncrement; // high byte will be masked out when generating new ObjectId
-        private static uint[] _lookup32 = Enumerable.Range(0, 256).Select(i => {
+        private static uint[] _lookup32 = Enumerable.Range(0, 256).Select(i =>
+        {
             string s = i.ToString("x2");
             return ((uint)s[0]) + ((uint)s[1] << 16);
         }).ToArray();

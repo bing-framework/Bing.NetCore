@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Validations.Abstractions;
+using Bing.Auditing;
 
 namespace Bing.Domains.Entities
 {
@@ -8,9 +8,14 @@ namespace Bing.Domains.Entities
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public abstract class AggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, IAggregateRoot<TEntity, TKey> 
+    public abstract class AggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, IAggregateRoot<TEntity, TKey>
         where TEntity : class, IAggregateRoot
     {
+        /// <summary>
+        /// 初始化一个<see cref="AggregateRoot{TEntity,TKey}"/>类型的实例
+        /// </summary>
+        protected AggregateRoot() : this(default) { }
+
         /// <summary>
         /// 初始化一个<see cref="AggregateRoot{TEntity,TKey}"/>类型的实例
         /// </summary>
@@ -22,6 +27,7 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 版本号（乐观锁）
         /// </summary>
+        [DisableAuditing]
         public byte[] Version { get; set; }
     }
 
@@ -29,9 +35,16 @@ namespace Bing.Domains.Entities
     /// 聚合根
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
-    public abstract class AggregateRoot<TEntity> : AggregateRoot<TEntity, Guid> 
+    public abstract class AggregateRoot<TEntity> : AggregateRoot<TEntity, Guid>
         where TEntity : class, IAggregateRoot
     {
+        /// <summary>
+        /// 初始化一个<see cref="AggregateRoot{TEntity}"/>类型的实例
+        /// </summary>
+        protected AggregateRoot() : this(Guid.Empty)
+        {
+        }
+
         /// <summary>
         /// 初始化一个<see cref="AggregateRoot{TEntity}"/>类型的实例
         /// </summary>

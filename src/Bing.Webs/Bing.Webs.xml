@@ -130,7 +130,6 @@
             <summary>
             获取日志操作
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Webs.Controllers.ApiControllerBase.Success(System.Object,System.String)">
             <summary>
@@ -138,14 +137,12 @@
             </summary>
             <param name="data">数据</param>
             <param name="message">消息</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Webs.Controllers.ApiControllerBase.Fail(System.String)">
             <summary>
             返回失败消息
             </summary>
             <param name="message">消息</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Webs.Controllers.AreaApiControllerBase">
             <summary>

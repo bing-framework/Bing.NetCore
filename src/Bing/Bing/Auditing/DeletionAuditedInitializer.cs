@@ -1,13 +1,12 @@
 ﻿using System;
 using Bing.Extensions;
-using Bing.Extensions;
 
-namespace Bing.Domains.Entities.Auditing
+namespace Bing.Auditing
 {
     /// <summary>
     /// 删除操作审计初始化器
     /// </summary>
-    public class DeletionAuditedInitializer
+    public sealed class DeletionAuditedInitializer
     {
         /// <summary>
         /// 实体
@@ -54,43 +53,7 @@ namespace Bing.Domains.Entities.Auditing
                 return;
             InitDeletionTime();
             InitDeleter();
-            if (string.IsNullOrWhiteSpace(_userId))
-                return;
-            if (_entity is IDeletionAudited<Guid>)
-            {
-                InitGuid();
-                return;
-            }
-            if (_entity is IDeletionAudited<Guid?>)
-            {
-                InitNullableGuid();
-                return;
-            }
-            if (_entity is IDeletionAudited<int>)
-            {
-                InitInt();
-                return;
-            }
-            if (_entity is IDeletionAudited<int?>)
-            {
-                InitNullableInt();
-                return;
-            }
-            if (_entity is IDeletionAudited<string>)
-            {
-                InitString();
-                return;
-            }
-            if (_entity is IDeletionAudited<long>)
-            {
-                InitLong();
-                return;
-            }
-            if (_entity is IDeletionAudited<long?>)
-            {
-                InitNullableLong();
-                return;
-            }
+            InitDeleterId();
         }
 
         /// <summary>
@@ -98,7 +61,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitDeletionTime()
         {
-            if (_entity is IDeletionTime result)
+            if (_entity is IHasDeletionTime result)
                 result.DeletionTime = DateTime.Now;
         }
 
@@ -107,8 +70,41 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitDeleter()
         {
-            if (_entity is IDeleter result)
+            if (_entity is IHasDeleter result)
                 result.Deleter = _userName;
+        }
+
+        /// <summary>
+        /// 初始化删除人标识
+        /// </summary>
+        private void InitDeleterId()
+        {
+            if (string.IsNullOrWhiteSpace(_userId))
+                return;
+            switch (_entity)
+            {
+                case IDeletionAuditedObject<Guid> _:
+                    InitGuid();
+                    return;
+                case IDeletionAuditedObject<Guid?> _:
+                    InitNullableGuid();
+                    return;
+                case IDeletionAuditedObject<int> _:
+                    InitInt();
+                    return;
+                case IDeletionAuditedObject<int?> _:
+                    InitNullableInt();
+                    return;
+                case IDeletionAuditedObject<string> _:
+                    InitString();
+                    return;
+                case IDeletionAuditedObject<long> _:
+                    InitLong();
+                    return;
+                case IDeletionAuditedObject<long?> _:
+                    InitNullableLong();
+                    return;
+            }
         }
 
         /// <summary>
@@ -116,7 +112,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitGuid()
         {
-            var result = (IDeletionAudited<Guid>)_entity;
+            var result = (IDeletionAuditedObject<Guid>)_entity;
             result.DeleterId = _userId.ToGuid();
         }
 
@@ -125,7 +121,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableGuid()
         {
-            var result = (IDeletionAudited<Guid?>)_entity;
+            var result = (IDeletionAuditedObject<Guid?>)_entity;
             result.DeleterId = _userId.ToGuidOrNull();
         }
 
@@ -134,7 +130,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitInt()
         {
-            var result = (IDeletionAudited<int>)_entity;
+            var result = (IDeletionAuditedObject<int>)_entity;
             result.DeleterId = _userId.ToInt();
         }
 
@@ -143,7 +139,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableInt()
         {
-            var result = (IDeletionAudited<int?>)_entity;
+            var result = (IDeletionAuditedObject<int?>)_entity;
             result.DeleterId = _userId.ToIntOrNull();
         }
 
@@ -152,7 +148,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitLong()
         {
-            var result = (IDeletionAudited<long>)_entity;
+            var result = (IDeletionAuditedObject<long>)_entity;
             result.DeleterId = _userId.ToLong();
         }
 
@@ -161,7 +157,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableLong()
         {
-            var result = (IDeletionAudited<long?>)_entity;
+            var result = (IDeletionAuditedObject<long?>)_entity;
             result.DeleterId = _userId.ToLongOrNull();
         }
 
@@ -170,7 +166,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitString()
         {
-            var result = (IDeletionAudited<string>)_entity;
+            var result = (IDeletionAuditedObject<string>)_entity;
             result.DeleterId = _userId.SafeString();
         }
     }

@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Bing.Domains.Entities.Auditing
+namespace Bing.Auditing
 {
     /// <summary>
     /// 创建时间
     /// </summary>
-    public interface ICreationTime
+    public interface IHasCreationTime
     {
         /// <summary>
         /// 创建时间

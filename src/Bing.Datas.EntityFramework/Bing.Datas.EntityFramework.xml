@@ -1105,19 +1105,16 @@
             <summary>
             获取用户标识
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.UnitOfWorkBase.GetUserName">
             <summary>
             获取用户名称
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.UnitOfWorkBase.GetSession">
             <summary>
             获取用户会话
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.UnitOfWorkBase.InitModificationAudited(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry)">
             <summary>

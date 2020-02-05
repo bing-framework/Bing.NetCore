@@ -1,11 +1,12 @@
 ﻿using System;
+using Bing.Domains.Entities;
 
-namespace Bing.Domains.Entities.Auditing
+namespace Bing.Auditing
 {
     /// <summary>
-    /// 删除时间审计
+    /// 删除时间
     /// </summary>
-    public interface IDeletionTime : IDelete
+    public interface IHasDeletionTime: IDelete
     {
         /// <summary>
         /// 删除时间

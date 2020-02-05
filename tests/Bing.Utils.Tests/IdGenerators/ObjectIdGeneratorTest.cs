@@ -13,56 +13,43 @@ namespace Bing.Utils.Tests.IdGenerators
     {
         public ObjectIdGeneratorTest(ITestOutputHelper output) : base(output)
         {
-            CodeTimer.Initialize();
         }
 
         [Fact]
         public void Test_Create()
         {
-            CodeTimer.CodeExecuteTime(() =>
-            {
-                var result = ObjectIdGenerator.Current.Create();
-                Output.WriteLine(result.ToString());
-            });
+            var result = ObjectIdGenerator.Current.Create();
+            Output.WriteLine(result.ToString());
         }
 
         [Fact]
         public void Test_Create_100()
         {
-            CodeTimer.CodeExecuteTime(() =>
+            for (int i = 0; i < 100; i++)
             {
-                for (int i = 0; i < 100; i++)
-                {
-                    var result = ObjectIdGenerator.Current.Create();
-                    Output.WriteLine(result.ToString());
-                }
-            });
+                var result = ObjectIdGenerator.Current.Create();
+                Output.WriteLine(result.ToString());
+            }
         }
 
         [Fact]
         public void Test_Create_1000()
         {
-            CodeTimer.CodeExecuteTime(() =>
+            for (int i = 0; i < 1000; i++)
             {
-                for (int i = 0; i < 1000; i++)
-                {
-                    var result = ObjectIdGenerator.Current.Create();
-                    Output.WriteLine(result.ToString());
-                }
-            });
+                var result = ObjectIdGenerator.Current.Create();
+                Output.WriteLine(result.ToString());
+            }
         }
 
         [Fact]
         public void Test_Create_10000()
         {
-            CodeTimer.CodeExecuteTime(() =>
+            for (int i = 0; i < 10000; i++)
             {
-                for (int i = 0; i < 10000; i++)
-                {
-                    var result = ObjectIdGenerator.Current.Create();
-                    Output.WriteLine(result.ToString());
-                }
-            });
+                var result = ObjectIdGenerator.Current.Create();
+                Output.WriteLine(result.ToString());
+            }
         }
 
         [Fact]
@@ -87,24 +74,21 @@ namespace Bing.Utils.Tests.IdGenerators
 
         private void Create(long length)
         {
-            CodeTimer.CodeExecuteTime(() =>
+            for (int i = 0; i < length; i++)
             {
-                for (int i = 0; i < length; i++)
+                var result = ObjectIdGenerator.Current.Create();
+                lock (_lock)
                 {
-                    var result = ObjectIdGenerator.Current.Create();
-                    lock (_lock)
+                    if (_set.Contains(result))
                     {
-                        if (_set.Contains(result))
-                        {
-                            Output.WriteLine("发现重复项：{0}", result);
-                        }
-                        else
-                        {
-                            _set.Add(result);
-                        }
+                        Output.WriteLine("发现重复项：{0}", result);
+                    }
+                    else
+                    {
+                        _set.Add(result);
                     }
                 }
-            });
+            }
         }
     }
 }

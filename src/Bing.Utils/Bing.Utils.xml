@@ -144,7 +144,6 @@
             </summary>
             <param name="value1">值1</param>
             <param name="value2">值2</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ByteExtensions.Min(System.Byte,System.Byte)">
             <summary>
@@ -152,7 +151,6 @@
             </summary>
             <param name="value1">值1</param>
             <param name="value2">值2</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.CharExtensions">
             <summary>
@@ -165,7 +163,6 @@
             </summary>
             <param name="this">字符</param>
             <param name="values">字符数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.NotIn(System.Char,System.Char[])">
             <summary>
@@ -173,7 +170,6 @@
             </summary>
             <param name="this">字符</param>
             <param name="values">字符数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.Repeat(System.Char,System.Int32)">
             <summary>
@@ -181,49 +177,42 @@
             </summary>
             <param name="this">字符</param>
             <param name="repeatCount">重复数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.GetAsciiCode(System.Char)">
             <summary>
             获取ASCII编码
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.IsChinese(System.Char)">
             <summary>
             是否中文字符串
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.IsLine(System.Char)">
             <summary>
             是否行标识
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.IsDoubleByte(System.Char)">
             <summary>
             是否双字节字符
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.ToDBC(System.Char)">
             <summary>
             转换为半角字符
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.ToSBC(System.Char)">
             <summary>
             转换为全角字符
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.Bases.DecimalExtensions">
             <summary>
@@ -235,7 +224,6 @@
             将数值四舍五入，保留两位小数
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.Bases.DecimalExtensions.Rounding(System.Decimal,System.Int32)">
             <summary>
@@ -243,21 +231,18 @@
             </summary>
             <param name="value">值</param>
             <param name="decimals">小数位数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.Bases.DecimalExtensions.Abs(System.Decimal)">
             <summary>
             返回数字的绝对值
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.Bases.DecimalExtensions.Abs(System.Collections.Generic.IEnumerable{System.Decimal})">
             <summary>
             返回数字的绝对值
             </summary>
             <param name="values">值</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.DoubleExtensions">
             <summary>
@@ -271,7 +256,6 @@
             <param name="value">double</param>
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.InRange(System.Double,System.Double,System.Double,System.Double)">
             <summary>
@@ -281,42 +265,36 @@
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
             <param name="defaultValue">默认值</param>
-            <returns>double</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.Days(System.Double)">
             <summary>
             获取日期间隔，根据数值获取时间间隔
             </summary>
             <param name="days">double</param>
-            <returns>日期间隔</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.Hours(System.Double)">
             <summary>
             获取小时间隔，根据数值获取时间间隔
             </summary>
             <param name="hours">double</param>
-            <returns>小时间隔</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.Minutes(System.Double)">
             <summary>
             获取分钟间隔，根据数值获取时间间隔
             </summary>
             <param name="minutes">double</param>
-            <returns>分钟间隔</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.Seconds(System.Double)">
             <summary>
             获取秒间隔，根据数值获取时间间隔
             </summary>
             <param name="seconds">double</param>
-            <returns>秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.Milliseconds(System.Double)">
             <summary>
             获取毫秒间隔，根据数值获取时间间隔
             </summary>
             <param name="milliseconds">double</param>
-            <returns>毫秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.DoubleExtensions.Round(System.Double,System.Int32,System.Int32)">
             <summary>
@@ -351,7 +329,6 @@
             <param name="value">float</param>
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.FloatExtensions.InRange(System.Single,System.Single,System.Single,System.Single)">
             <summary>
@@ -361,42 +338,36 @@
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
             <param name="defaultValue">默认值</param>
-            <returns>float</returns>
         </member>
         <member name="M:Bing.Extensions.FloatExtensions.Days(System.Single)">
             <summary>
             获取日期间隔，根据数值获取时间间隔
             </summary>
             <param name="days">float</param>
-            <returns>日期间隔</returns>
         </member>
         <member name="M:Bing.Extensions.FloatExtensions.Hours(System.Single)">
             <summary>
             获取小时间隔，根据数值获取时间间隔
             </summary>
             <param name="hours">float</param>
-            <returns>小时间隔</returns>
         </member>
         <member name="M:Bing.Extensions.FloatExtensions.Minutes(System.Single)">
             <summary>
             获取分钟间隔，根据数值获取时间间隔
             </summary>
             <param name="minutes">float</param>
-            <returns>分钟间隔</returns>
         </member>
         <member name="M:Bing.Extensions.FloatExtensions.Seconds(System.Single)">
             <summary>
             获取秒间隔，根据数值获取时间间隔
             </summary>
             <param name="seconds">float</param>
-            <returns>秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.FloatExtensions.Milliseconds(System.Single)">
             <summary>
             获取毫秒间隔，根据数值获取时间间隔
             </summary>
             <param name="milliseconds">float</param>
-            <returns>毫秒间隔</returns>
         </member>
         <member name="T:Bing.Extensions.IntExtensions">
             <summary>
@@ -422,14 +393,12 @@
             是否偶数
             </summary>
             <param name="value">int</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.IsOdd(System.Int32)">
             <summary>
             是否奇数
             </summary>
             <param name="value">int</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.InRange(System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -438,7 +407,6 @@
             <param name="value">int</param>
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.InRange(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -448,14 +416,12 @@
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
             <param name="defaultValue">默认值</param>
-            <returns>int</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.IsPrime(System.Int32)">
             <summary>
             是否质数（素数），一个质数（或素数）是具有两个不同约束的自然数：1和它本身
             </summary>
             <param name="value">int</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.ToOrdinal(System.Int32)">
             <summary>
@@ -477,7 +443,6 @@
             Int转为Long类型
             </summary>
             <param name="i">int</param>
-            <returns>long</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.IsIndexInArray(System.Int32,System.Array)">
             <summary>
@@ -485,56 +450,48 @@
             </summary>
             <param name="index">索引</param>
             <param name="array">数组</param>
-            <returns>bool</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.GetArrayIndex(System.Int32)">
             <summary>
             获取真实数组索引
             </summary>
             <param name="at">int</param>
-            <returns>数组索引</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.Days(System.Int32)">
             <summary>
             获取日期间隔，根据数值获取时间间隔
             </summary>
             <param name="days">int</param>
-            <returns>日期间隔</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.Hours(System.Int32)">
             <summary>
             获取小时间隔，根据数值获取时间间隔
             </summary>
             <param name="hours">int</param>
-            <returns>小时间隔</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.Minutes(System.Int32)">
             <summary>
             获取分钟间隔，根据数值获取时间间隔
             </summary>
             <param name="minutes">int</param>
-            <returns>分钟间隔</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.Seconds(System.Int32)">
             <summary>
             获取秒间隔，根据数值获取时间间隔
             </summary>
             <param name="seconds">int</param>
-            <returns>秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.Milliseconds(System.Int32)">
             <summary>
             获取毫秒间隔，根据数值获取时间间隔
             </summary>
             <param name="milliseconds">int</param>
-            <returns>毫秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.IntExtensions.Ticks(System.Int32)">
             <summary>
             获取刻度间隔，根据数值获取时间间隔
             </summary>
             <param name="ticks">int</param>
-            <returns>刻度间隔</returns>
         </member>
         <member name="T:Bing.Extensions.LongExtensions">
             <summary>
@@ -560,14 +517,12 @@
             是否偶数
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.IsOdd(System.Int64)">
             <summary>
             是否奇数
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.InRange(System.Int64,System.Int64,System.Int64)">
             <summary>
@@ -576,7 +531,6 @@
             <param name="value">值</param>
             <param name="minValue">最小值</param>
             <param name="maxValue">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.InRange(System.Int64,System.Int64,System.Int64,System.Int64)">
             <summary>
@@ -593,7 +547,6 @@
             是否质数（素数），一个质数（或素数）是具有两个不同约束的自然数：1和它本身
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.ToOrdinal(System.Int64)">
             <summary>
@@ -615,42 +568,36 @@
             获取日期间隔，根据数值获取时间间隔
             </summary>
             <param name="days">值</param>
-            <returns>日期间隔</returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.Hours(System.Int64)">
             <summary>
             获取小时间隔，根据数值获取时间间隔
             </summary>
             <param name="hours">值</param>
-            <returns>小时间隔</returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.Minutes(System.Int64)">
             <summary>
             获取分钟间隔，根据数值获取时间间隔
             </summary>
             <param name="minutes">值</param>
-            <returns>分钟间隔</returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.Seconds(System.Int64)">
             <summary>
             获取秒间隔，根据数值获取时间间隔
             </summary>
             <param name="seconds">long</param>
-            <returns>秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.Milliseconds(System.Int64)">
             <summary>
             获取毫秒间隔，根据数值获取时间间隔
             </summary>
             <param name="milliseconds">long</param>
-            <returns>毫秒间隔</returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.Ticks(System.Int64)">
             <summary>
             获取刻度间隔，根据数值获取时间间隔
             </summary>
             <param name="ticks">long</param>
-            <returns>刻度间隔</returns>
         </member>
         <member name="M:Bing.Extensions.LongExtensions.ToDateTime(System.Int64)">
             <summary>
@@ -669,7 +616,7 @@
             </summary>
             <typeparam name="T">对象类型</typeparam>
             <param name="obj">值</param>
-            <returns></returns>
+            <exception cref="T:System.NotSupportedException"></exception>
         </member>
         <member name="M:Bing.Extensions.ObjectExtensions.ClonePropertyFrom(System.Object,System.Object)">
             <summary>
@@ -721,7 +668,6 @@
             </summary>
             <typeparam name="T">类型</typeparam>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ObjectExtensions.Locking(System.Object,System.Action)">
             <summary>
@@ -765,7 +711,6 @@
             获取下一个随机数。范围：[0,long.MaxValue]
             </summary>
             <param name="random">范围</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextLong(System.Random,System.Int64)">
             <summary>
@@ -773,7 +718,6 @@
             </summary>
             <param name="random">随机数</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextLong(System.Random,System.Int64,System.Int64)">
             <summary>
@@ -782,7 +726,6 @@
             <param name="random">随机数</param>
             <param name="min">最小值</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextDouble(System.Random,System.Double)">
             <summary>
@@ -790,7 +733,6 @@
             </summary>
             <param name="random">随机数</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextDouble(System.Random,System.Double,System.Double)">
             <summary>
@@ -799,14 +741,12 @@
             <param name="random">随机数</param>
             <param name="min">最小值</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NormalDouble(System.Random)">
             <summary>
             标准正态分布生成随机双精度浮点数
             </summary>
             <param name="random">随机数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NormalDouble(System.Random,System.Double,System.Double)">
             <summary>
@@ -815,14 +755,12 @@
             <param name="random">随机数</param>
             <param name="mean">均值</param>
             <param name="deviation">偏差</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextFloat(System.Random)">
             <summary>
             获取下一个随机数。范围：[0.0,1.0]
             </summary>
             <param name="random">随机数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextFloat(System.Random,System.Single)">
             <summary>
@@ -830,7 +768,6 @@
             </summary>
             <param name="random">随机数</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextFloat(System.Random,System.Single,System.Single)">
             <summary>
@@ -839,14 +776,12 @@
             <param name="random">随机数</param>
             <param name="min">最小值</param>
             <param name="max">最大值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NormalFloat(System.Random)">
             <summary>
             标准正态分布生成随机单精度浮点数
             </summary>
             <param name="random">随机数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NormalFloat(System.Random,System.Single,System.Single)">
             <summary>
@@ -855,21 +790,18 @@
             <param name="random">随机数</param>
             <param name="mean">均值</param>
             <param name="deviation">偏差</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextSign(System.Random)">
             <summary>
             获取下一个随机数。范围：[-1,1]
             </summary>
             <param name="random">随机数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextBool(System.Random)">
             <summary>
             获取下一个随机数。范围：[true,false]
             </summary>
             <param name="random">随机数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.RandomExtensions.NextBool(System.Random,System.Double)">
             <summary>
@@ -877,7 +809,6 @@
             </summary>
             <param name="random">随机数</param>
             <param name="probability">true的概率。范围：[0.0,1.0]</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.StringExtensions">
             <summary>
@@ -1026,7 +957,6 @@
             </summary>
             <param name="value">值</param>
             <param name="removeChar">需要移除的字符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Remove(System.String,System.String[])">
             <summary>
@@ -1034,7 +964,6 @@
             </summary>
             <param name="value">值</param>
             <param name="strings">需要移除的字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Remove(System.String,System.Int32,System.Boolean)">
             <summary>
@@ -1043,14 +972,12 @@
             <param name="value">值</param>
             <param name="index">索引</param>
             <param name="isLeft">是否左侧</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.RemoveAllSpecialCharacters(System.String)">
             <summary>
             移除当前字符串中的所有特殊字符
             </summary>
             <param name="value">输入字符串</param>
-            <returns>调整后的字符串</returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.RemoveEnd(System.String,System.String)">
             <summary>
@@ -1058,7 +985,6 @@
             </summary>
             <param name="value">值</param>
             <param name="defaultChar">需要去除的符号，默认：,</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Remove(System.String,System.String,System.Text.RegularExpressions.RegexOptions)">
             <summary>
@@ -1067,14 +993,12 @@
             <param name="str">内容</param>
             <param name="tag">标签</param>
             <param name="options">选项</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReverseString(System.String)">
             <summary>
             反转字符串
             </summary>
             <param name="value">要反转的字符串</param>
-            <returns>反转后的字符串</returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Split(System.String,System.String,System.Boolean)">
             <summary>
@@ -1083,7 +1007,6 @@
             <param name="value">要分割的字符串</param>
             <param name="strSplit">字符串类型的分隔符</param>
             <param name="removeEmptyEntries">是否移除数据中元素为空字符串的项</param>
-            <returns>分割后的数据</returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.GetTextLength(System.String)">
             <summary>
@@ -1098,7 +1021,6 @@
             </summary>
             <param name="value">值</param>
             <param name="maxLength">指定最大长度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.TrimToMaxLength(System.String,System.Int32,System.String)">
             <summary>
@@ -1107,7 +1029,6 @@
             <param name="value">值</param>
             <param name="maxLength">指定最大长度</param>
             <param name="suffix">后缀</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Truncate(System.String,System.Int32,System.Boolean)">
             <summary>
@@ -1116,7 +1037,6 @@
             <param name="value">字符串</param>
             <param name="length">截断长度</param>
             <param name="userElipse">是否使用圆点</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.PadBoth(System.String,System.Int32,System.Char,System.Boolean)">
             <summary>
@@ -1126,7 +1046,6 @@
             <param name="width">指定字符串长度</param>
             <param name="padChar">填充字符</param>
             <param name="truncate">是否截断</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.EnsureStartsWith(System.String,System.String)">
             <summary>
@@ -1134,7 +1053,6 @@
             </summary>
             <param name="value">值</param>
             <param name="prefix">前缀</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.EnsureEndWith(System.String,System.String)">
             <summary>
@@ -1142,7 +1060,6 @@
             </summary>
             <param name="value">值</param>
             <param name="suffix">后缀</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ConcatWith(System.String,System.String[])">
             <summary>
@@ -1150,7 +1067,6 @@
             </summary>
             <param name="value">目标字符串</param>
             <param name="values">源字符串</param>
-            <returns>连接后的字符串</returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Join``1(System.String,System.String,``0[])">
             <summary>
@@ -1160,7 +1076,6 @@
             <param name="value">值</param>
             <param name="separator">分隔符</param>
             <param name="obj">对象数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.JoinNotNullOrEmpty(System.String[],System.String)">
             <summary>
@@ -1168,7 +1083,6 @@
             </summary>
             <param name="values">字符串数组</param>
             <param name="separator">分隔符</param>
-            <returns>字符串</returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.GetBefore(System.String,System.String)">
             <summary>
@@ -1176,7 +1090,6 @@
             </summary>
             <param name="value">值</param>
             <param name="x">指定字符串参数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.GetBetween(System.String,System.String,System.String)">
             <summary>
@@ -1185,7 +1098,6 @@
             <param name="value">值</param>
             <param name="x">指定左侧字符串参数</param>
             <param name="y">指定右侧字符串参数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.GetAfter(System.String,System.String)">
             <summary>
@@ -1193,7 +1105,6 @@
             </summary>
             <param name="value">值</param>
             <param name="x">指定字符串参数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.SubstringFrom(System.String,System.Int32)">
             <summary>
@@ -1201,21 +1112,18 @@
             </summary>
             <param name="value">值</param>
             <param name="index">指定索引</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ToUpperFirstLetter(System.String)">
             <summary>
             首字母大写
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ToLowerFirstLetter(System.String)">
             <summary>
             首字母小写
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ToFirstLetter(System.String,System.Boolean)">
             <summary>
@@ -1223,14 +1131,12 @@
             </summary>
             <param name="value">值</param>
             <param name="isUpper">是否大写</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ToTitleCase(System.String)">
             <summary>
             将指定字符串转为词首字母大写
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ToTitleCase(System.String,System.Globalization.CultureInfo)">
             <summary>
@@ -1238,7 +1144,6 @@
             </summary>
             <param name="value">值</param>
             <param name="culture">区域性信息</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ToPlural(System.String)">
             <summary>
@@ -1262,7 +1167,6 @@
                     // str == "[White] Red Blue Green Yellow [Black] [Gray]"
             </code>
             </example>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReplaceAll(System.String,System.Collections.Generic.IEnumerable{System.String},System.String)">
             <summary>
@@ -1279,7 +1183,6 @@
                     // str == "[AchromaticColor] Red Blue Green Yellow [AchromaticColor] [AchromaticColor]"
             	</code>
             </example>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReplaceAll(System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
@@ -1297,7 +1200,6 @@
                     // str == "FloralWhite Red Blue Green Yellow Bistre DavyGrey"
             	</code>
             </example>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ParseCommandlineParams(System.String[])">
             <summary>
@@ -1326,7 +1228,6 @@
             将电子邮件地址进行编码，以便于链接仍然有效
             </summary>
             <param name="emailAddress">邮箱地址</param>
-            <returns>编码后的邮箱地址</returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.RepairZero(System.String,System.Int32)">
             <summary>
@@ -1334,7 +1235,6 @@
             </summary>
             <param name="text">原始字符串</param>
             <param name="limitedLength">字符串的固定长度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReplaceFirst(System.String,System.String,System.String)">
             <summary>
@@ -1343,7 +1243,6 @@
             <param name="this">当前值</param>
             <param name="oldValue">旧值</param>
             <param name="newValue">新值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReplaceFirst(System.String,System.Int32,System.String,System.String)">
             <summary>
@@ -1353,7 +1252,6 @@
             <param name="number">替换数</param>
             <param name="oldValue">旧值</param>
             <param name="newValue">新值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReplaceLast(System.String,System.String,System.String)">
             <summary>
@@ -1362,7 +1260,6 @@
             <param name="this">当前值</param>
             <param name="oldValue">旧值</param>
             <param name="newValue">新值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.ReplaceLast(System.String,System.Int32,System.String,System.String)">
             <summary>
@@ -1372,7 +1269,6 @@
             <param name="number">替换数</param>
             <param name="oldValue">旧值</param>
             <param name="newValue">新值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringExtensions.Left(System.String,System.Int32)">
             <summary>
@@ -1707,7 +1603,6 @@
             </summary>
             <param name="source">数组</param>
             <param name="index">索引</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.WithInIndex(System.Array,System.Int32,System.Int32)">
             <summary>
@@ -1716,7 +1611,6 @@
             <param name="source">数组</param>
             <param name="index">索引</param>
             <param name="dimension">数组维度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.CombineArray``1(``0[],``0[])">
             <summary>
@@ -1732,14 +1626,12 @@
             		Array combinedArray = arrayOne.CombineArray&lt;int&gt;(arrayTwo);
             	</code>
             </example>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.ClearAll(System.Array)">
             <summary>
             清空数组内容
             </summary>
             <param name="source">源数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.ClearAll``1(``0[])">
             <summary>
@@ -1747,7 +1639,6 @@
             </summary>
             <typeparam name="T">数组类型</typeparam>
             <param name="source">源数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.ClearAt(System.Array,System.Int32)">
             <summary>
@@ -1755,7 +1646,6 @@
             </summary>
             <param name="array">数组</param>
             <param name="index">索引</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.ClearAt``1(``0[],System.Int32)">
             <summary>
@@ -1764,7 +1654,6 @@
             <typeparam name="T">数组类型</typeparam>
             <param name="array">数组</param>
             <param name="index">索引</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.BlockCopy``1(``0[],System.Int32,System.Int32)">
             <summary>
@@ -1774,7 +1663,6 @@
             <param name="source">数据源</param>
             <param name="index">索引</param>
             <param name="length">复制长度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.BlockCopy``1(``0[],System.Int32,System.Int32,System.Boolean)">
             <summary>
@@ -1785,7 +1673,6 @@
             <param name="index">索引</param>
             <param name="length">复制长度</param>
             <param name="padToLength">是否填充指定长度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.BlockCopy``1(``0[],System.Int32,System.Boolean)">
             <summary>
@@ -1795,7 +1682,6 @@
             <param name="source">数据源</param>
             <param name="length">复制长度</param>
             <param name="padToLength">是否填充指定长度</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.ByteArrayExtensions">
             <summary>
@@ -1814,42 +1700,36 @@
             将byte[]转换成16进制字符串表示形式
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ByteArrayExtensions.ToInt(System.Byte[])">
             <summary>
             将byte[]转换成int
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ByteArrayExtensions.ToLong(System.Byte[])">
             <summary>
             将byte[]转换成long
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ByteArrayExtensions.ToBase64String(System.Byte[])">
             <summary>
             将byte[]转换成Base64字符串
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ByteArrayExtensions.ToMemoryStream(System.Byte[])">
             <summary>
             将byte[]转换成内存流
             </summary>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ByteArrayExtensions.Copy(System.Byte[0:,0:])">
             <summary>
             复制一份二维数组的副本
             </summary>
             <param name="bytes">二维数组</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.CollectionExtensions">
             <summary>
@@ -1880,7 +1760,6 @@
             <param name="source">集合</param>
             <param name="predicate">条件</param>
             <param name="itemFactory">获取项函数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CollectionExtensions.RemoveAll``1(System.Collections.Generic.ICollection{``0},System.Collections.Generic.IEnumerable{``0})">
             <summary>
@@ -1897,7 +1776,6 @@
             <typeparam name="T">对象类型</typeparam>
             <param name="source">集合</param>
             <param name="predicate">条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.CollectionExtensions.AddRange``1(System.Collections.Generic.ICollection{``0},System.Collections.Generic.IEnumerable{``0})">
             <summary>
@@ -1995,6 +1873,7 @@
             <typeparam name="TValue">值类型</typeparam>
             <param name="dictionary">字典</param>
             <param name="comparer">比较器，用于排序字典</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="M:Bing.Extensions.DictionaryExtensions.SortByValue``2(System.Collections.Generic.IDictionary{``0,``1})">
             <summary>
@@ -2171,7 +2050,6 @@
             <param name="list">列表</param>
             <param name="index">索引</param>
             <param name="item">项</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.InsertIfNotExists``1(System.Collections.Generic.IList{``0},System.Int32,System.Collections.Generic.IEnumerable{``0})">
             <summary>
@@ -2181,7 +2059,6 @@
             <param name="list">列表</param>
             <param name="startIndex">开始位置索引</param>
             <param name="items">列表项</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.IndexOf``1(System.Collections.Generic.IList{``0},System.Func{``0,System.Boolean})">
             <summary>
@@ -2190,7 +2067,6 @@
             <typeparam name="T">泛型类型</typeparam>
             <param name="list">列表</param>
             <param name="comparison">条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.Join``1(System.Collections.Generic.IList{``0},System.Char)">
             <summary>
@@ -2199,7 +2075,6 @@
             <typeparam name="T">泛型类型</typeparam>
             <param name="list">列表</param>
             <param name="joinChar">分割符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.Join``1(System.Collections.Generic.IList{``0},System.String)">
             <summary>
@@ -2208,7 +2083,6 @@
             <typeparam name="T">泛型类型</typeparam>
             <param name="list">列表</param>
             <param name="joinString">分割字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.EqualsAll``1(System.Collections.Generic.IList{``0},System.Collections.Generic.IList{``0})">
             <summary>
@@ -2217,7 +2091,6 @@
             <typeparam name="T">实体类型</typeparam>
             <param name="list">待比较列表</param>
             <param name="other">待比较列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.Slice``1(System.Collections.Generic.IList{``0},System.Nullable{System.Int32},System.Nullable{System.Int32})">
             <summary>
@@ -2227,7 +2100,6 @@
             <param name="list">列表</param>
             <param name="start">开始索引</param>
             <param name="end">结束索引</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.ListExtensions.Slice``1(System.Collections.Generic.IList{``0},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
             <summary>
@@ -2238,7 +2110,8 @@
             <param name="start">开始索引</param>
             <param name="end">结束索引</param>
             <param name="step">递增值</param>
-            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
+            <exception cref="T:System.ArgumentException"></exception>
         </member>
         <member name="T:Bing.Extensions.NameValueCollectionExtensions">
             <summary>
@@ -2250,7 +2123,6 @@
             将键值对集合转换成查询字符串
             </summary>
             <param name="collection">键值对集合</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.BingExtensions">
             <summary>
@@ -3343,6 +3215,7 @@
             </summary>
             <typeparam name="T">类型</typeparam>
             <param name="dataTable">数据表</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="T:Bing.Extensions.AutoRegisterData">
             <summary>
@@ -3714,7 +3587,6 @@
             <typeparam name="T">对象类型</typeparam>
             <param name="session">会话</param>
             <param name="key">键名</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.FileInfoExtensions">
             <summary>
@@ -3727,21 +3599,21 @@
             </summary>
             <param name="file1">文件1</param>
             <param name="file2">文件2</param>
-            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="M:Bing.Extensions.FileInfoExtensions.Read(System.IO.FileInfo)">
             <summary>
             读取文件并转换为字符串
             </summary>
             <param name="file">文件</param>
-            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="M:Bing.Extensions.FileInfoExtensions.ReadBinary(System.IO.FileInfo)">
             <summary>
             读取文件并转换为二进制数组
             </summary>
             <param name="file">文件</param>
-            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="T:Bing.Extensions.MemoryStreamExtensions">
             <summary>
@@ -3775,7 +3647,6 @@
             </summary>
             <param name="stream">流</param>
             <param name="path">文件路径</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.ContentsEqual(System.IO.Stream,System.IO.Stream)">
             <summary>
@@ -3783,14 +3654,12 @@
             </summary>
             <param name="stream">流</param>
             <param name="other">待比较的流</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.GetReader(System.IO.Stream)">
             <summary>
             获取流读取器，默认编码：UTF-8
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.GetReader(System.IO.Stream,System.Text.Encoding)">
             <summary>
@@ -3798,14 +3667,13 @@
             </summary>
             <param name="stream">流</param>
             <param name="encoding">编码，默认：UTF-8</param>
-            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.GetWriter(System.IO.Stream)">
             <summary>
             获取流写入器，默认编码：UTF-8
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.GetWriter(System.IO.Stream,System.Text.Encoding)">
             <summary>
@@ -3813,14 +3681,13 @@
             </summary>
             <param name="stream">流</param>
             <param name="encoding">编码，默认编码：UTF-8</param>
-            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.ReadToEnd(System.IO.Stream)">
             <summary>
             从流中读取所有文本，默认编码：UTF-8
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.ReadToEnd(System.IO.Stream,System.Text.Encoding)">
             <summary>
@@ -3828,35 +3695,32 @@
             </summary>
             <param name="stream">流</param>
             <param name="encoding">编码，默认编码：UTF-8</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.SeekToBegin(System.IO.Stream)">
             <summary>
             设置流指针指向流的开始位置
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.SeekToEnd(System.IO.Stream)">
             <summary>
             设置流指针指向流的结束位置
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.CopyToMemory(System.IO.Stream)">
             <summary>
             将流复制到内存流中
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.ReadAllBytes(System.IO.Stream)">
             <summary>
             将流写入字节数组
             </summary>
             <param name="stream">流</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.Write(System.IO.Stream,System.Byte[])">
             <summary>
@@ -3869,9 +3733,9 @@
             <summary>
             将字符串写以指定编码方式写入流
             </summary>
-            <param name="stream"></param>
-            <param name="context"></param>
-            <param name="encoding"></param>
+            <param name="stream">流</param>
+            <param name="content">内容</param>
+            <param name="encoding">编码类型</param>
         </member>
         <member name="M:Bing.Extensions.StreamExtensions.GetMd5(System.IO.Stream)">
             <summary>
@@ -3889,21 +3753,18 @@
             提取属性信息
             </summary>
             <param name="expression">表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.LambdaExpressionExtensions.ExtractFieldInfo(System.Linq.Expressions.LambdaExpression)">
             <summary>
             提取字段信息
             </summary>
             <param name="expression">表达式</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.LambdaExpressionExtensions.ExtractMemberInfo(System.Linq.Expressions.LambdaExpression)">
             <summary>
             提取成员信息
             </summary>
             <param name="expression">表达式</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.QueryableExtensions">
             <summary>
@@ -3918,7 +3779,6 @@
             <param name="source">要查询的源</param>
             <param name="predicate">查询条件</param>
             <param name="condition">第三方条件</param>
-            <returns>查询结果</returns>
         </member>
         <member name="M:Bing.Extensions.QueryableExtensions.PageBy``1(System.Linq.IQueryable{``0},System.Int32,System.Int32)">
             <summary>
@@ -3928,7 +3788,6 @@
             <param name="queryable">数据源</param>
             <param name="skipCount">跳过的行数</param>
             <param name="pageSize">每页记录数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.QueryableExtensions.PageBy``2(System.Linq.IQueryable{``0},System.Int32,System.Int32)">
             <summary>
@@ -3939,7 +3798,6 @@
             <param name="queryable">数据源</param>
             <param name="skipCount">跳过的行数</param>
             <param name="pageSize">每页记录数</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.AssemblyExtensions">
             <summary>
@@ -3951,14 +3809,14 @@
             获取程序集的文件版本
             </summary>
             <param name="assembly">程序集</param>
-            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="M:Bing.Extensions.AssemblyExtensions.GetProductVersion(System.Reflection.Assembly)">
             <summary>
             获取程序集的产品版本
             </summary>
             <param name="assembly">程序集</param>
-            <returns></returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="T:Bing.Extensions.PropertyInfoExtensions">
             <summary>
@@ -4029,7 +3887,6 @@
             去除<see cref="T:System.Text.StringBuilder"/>开头空格
             </summary>
             <param name="sb">StringBuilder</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimStart(System.Text.StringBuilder,System.Char)">
             <summary>
@@ -4037,7 +3894,6 @@
             </summary>
             <param name="sb">StringBuilder</param>
             <param name="c">字符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimStart(System.Text.StringBuilder,System.Char[])">
             <summary>
@@ -4045,7 +3901,6 @@
             </summary>
             <param name="sb">StringBuilder</param>
             <param name="chars">字符数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimStart(System.Text.StringBuilder,System.String)">
             <summary>
@@ -4053,14 +3908,12 @@
             </summary>
             <param name="sb">StringBuilder</param>
             <param name="str">字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimEnd(System.Text.StringBuilder)">
             <summary>
             去除<see cref="T:System.Text.StringBuilder"/>尾部空格
             </summary>
             <param name="sb">StringBuilder</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimEnd(System.Text.StringBuilder,System.Char)">
             <summary>
@@ -4068,7 +3921,6 @@
             </summary>
             <param name="sb">StringBuilder</param>
             <param name="c">字符</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimEnd(System.Text.StringBuilder,System.Char[])">
             <summary>
@@ -4076,7 +3928,6 @@
             </summary>
             <param name="sb">StringBuilder</param>
             <param name="chars">字符数组</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimEnd(System.Text.StringBuilder,System.String)">
             <summary>
@@ -4084,14 +3935,12 @@
             </summary>
             <param name="sb">StringBuilder</param>
             <param name="str">字符串</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.Trim(System.Text.StringBuilder)">
             <summary>
             去除<see cref="T:System.Text.StringBuilder"/>两端的空格
             </summary>
             <param name="sb">StringBuilder</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.SubString(System.Text.StringBuilder,System.Int32,System.Int32)">
             <summary>
@@ -4100,7 +3949,6 @@
             <param name="sb">StringBuilder</param>
             <param name="start">起始位置</param>
             <param name="length">长度</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.AppendLine(System.Text.StringBuilder,System.String,System.Object[])">
             <summary>
@@ -4109,7 +3957,6 @@
             <param name="sb">StringBuilder</param>
             <param name="value">内容</param>
             <param name="parameters">参数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.AppendJoin``1(System.Text.StringBuilder,System.String,``0[])">
             <summary>
@@ -4119,7 +3966,6 @@
             <param name="sb">StringBuilder</param>
             <param name="separator">分隔符</param>
             <param name="values">数组内容</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.AppendIf(System.Text.StringBuilder,System.Boolean,System.Object)">
             <summary>
@@ -4128,7 +3974,6 @@
             <param name="sb">StringBuilder</param>
             <param name="condition">拼接条件</param>
             <param name="value">内容</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.AppendFormatIf(System.Text.StringBuilder,System.Boolean,System.String,System.Object[])">
             <summary>
@@ -4138,7 +3983,6 @@
             <param name="condition">拼接条件</param>
             <param name="value">内容</param>
             <param name="parameters">参数</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.AppendLineIf(System.Text.StringBuilder,System.Boolean,System.Object)">
             <summary>
@@ -4147,7 +3991,6 @@
             <param name="sb">StringBuiler</param>
             <param name="condition">拼接条件</param>
             <param name="value">内容</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.AppendLine(System.Text.StringBuilder,System.Boolean,System.String,System.Object[])">
             <summary>
@@ -4156,8 +3999,7 @@
             <param name="sb">StringBuilder</param>
             <param name="condition">拼接条件</param>
             <param name="value">内容</param>
-            <param name="parmaeters">参数</param>
-            <returns></returns>
+            <param name="parameters">参数</param>
         </member>
         <member name="T:Bing.Extensions.TaskExtensions">
             <summary>
@@ -4171,7 +4013,6 @@
             <typeparam name="TResult">结果类型</typeparam>
             <param name="task">异步操作</param>
             <param name="timeout">超时时间。单位：毫秒</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.TaskExtensions.TimeoutAfter(System.Threading.Tasks.Task,System.Int32)">
             <summary>
@@ -4179,7 +4020,6 @@
             </summary>
             <param name="task">异步操作</param>
             <param name="millisecondsDelay">超时时间。单位：毫秒</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.TaskExtensions.TimeoutAfter``1(System.Threading.Tasks.Task{``0},System.Int32)">
             <summary>
@@ -4188,7 +4028,6 @@
             <typeparam name="TResult">结果类型</typeparam>
             <param name="task">异步操作</param>
             <param name="millisecondsDelay">超时时间。单位：毫秒</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.TaskFactoryExtensions">
             <summary>
@@ -4214,14 +4053,12 @@
             将XmlNode转换为XElement
             </summary>
             <param name="node">Xml节点</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.XmlExtensions.ToXmlNode(System.Xml.Linq.XElement)">
             <summary>
             将XElement转换为XmlNode
             </summary>
             <param name="element">Xml元素</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Extensions.XmlNodeExtensions">
             <summary>
@@ -4235,7 +4072,6 @@
             <param name="parentNode">父节点</param>
             <param name="name">子节点的名称</param>
             <param name="namespaceUri">节点的命名空间</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.XmlNodeExtensions.CreateCDataSection(System.Xml.XmlNode,System.String)">
             <summary>
@@ -4243,14 +4079,12 @@
             </summary>
             <param name="parentNode">父节点</param>
             <param name="data">CData节</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.XmlNodeExtensions.GetCdataSection(System.Xml.XmlNode)">
             <summary>
             获取CData节点的内容
             </summary>
             <param name="parentNode">父节点</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.XmlNodeExtensions.GetAttribute(System.Xml.XmlNode,System.String,System.String)">
             <summary>
@@ -4259,7 +4093,6 @@
             <param name="node">节点</param>
             <param name="name">属性名</param>
             <param name="defaultValue">默认值。如果没有匹配属性存在</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.XmlNodeExtensions.GetAttribute``1(System.Xml.XmlNode,System.String,``0)">
             <summary>
@@ -4269,7 +4102,6 @@
             <param name="node">节点</param>
             <param name="name">属性名</param>
             <param name="defaultValue">>默认值。如果没有匹配属性存在</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Extensions.XmlNodeExtensions.SetAttribute(System.Xml.XmlNode,System.String,System.Object)">
             <summary>
@@ -8166,6 +7998,249 @@
             <param name="type">实例类型</param>
             <param name="args">参数</param>
         </member>
+        <member name="T:Bing.Utils.Develops.CodeTimer">
+            <summary>
+            代码性能计时器
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Develops.CodeTimer._msBase">
+            <summary>
+            基准时间
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Develops.CodeTimer._supportCycle">
+            <summary>
+            是否支持CPU周期
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Develops.CodeTimer._cpuCycles">
+            <summary>
+            CPU周期
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Develops.CodeTimer._threadTime">
+            <summary>
+            线程时间。单位：毫秒
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Develops.CodeTimer._gen">
+            <summary>
+            GC代数
+            </summary>
+        </member>
+        <member name="F:Bing.Utils.Develops.CodeTimer._thread">
+            <summary>
+            线程
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.#ctor">
+            <summary>
+            初始化一个<see cref="T:Bing.Utils.Develops.CodeTimer"/>类型的实例
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.WriteLine">
+            <summary>
+            输出内容
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.Times">
+            <summary>
+            次数
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.Action">
+            <summary>
+            迭代方法。如不指定，则使用Time(int index)
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.ShowProgress">
+            <summary>
+            是否显示控制台进度
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.Index">
+            <summary>
+            进度
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.CpuCycles">
+            <summary>
+            CPU周期
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.ThreadTime">
+            <summary>
+            线程时间。单位：毫秒
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.Gen">
+            <summary>
+            GC代数
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeTimer.Elapsed">
+            <summary>
+            执行时间
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Time">
+            <summary>
+            计时。核心方法，处理进程和线程优先级
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.TimeTrue">
+            <summary>
+            实际计时
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.TimeOne">
+            <summary>
+            执行一次迭代，预热所有方法
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Init">
+            <summary>
+            迭代前执行，计算时间
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Time(System.Int32)">
+            <summary>
+            每一次迭代，计算时间
+            </summary>
+            <param name="index">迭代索引</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Finish">
+            <summary>
+            迭代后执行，计算时间
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.StartProgress">
+            <summary>
+            开始进程
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.StopProgress">
+            <summary>
+            停止进程
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Progress(System.Object)">
+            <summary>
+            执行进程中
+            </summary>
+            <param name="state">状态</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.ToString">
+            <summary>
+            输出字符串。输出依次分别是：执行时间、CPU线程时间、时钟周期、GC代数
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Time(System.Int32,System.Action{System.Int32},System.Boolean)">
+            <summary>
+            计时
+            </summary>
+            <param name="times">次数</param>
+            <param name="action">需要计时的委托</param>
+            <param name="needTimeOne">是否需要预热</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Timeline(System.String,System.Int32,System.Action{System.Int32},System.Boolean)">
+            <summary>
+            计时，并用控制台输出行
+            </summary>
+            <param name="title">标题</param>
+            <param name="times">次数</param>
+            <param name="action">需要计时的委托</param>
+            <param name="needTimeOne">是否需要预热</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.ShowHeader(System.String)">
+            <summary>
+            显示头部
+            </summary>
+            <param name="title">标题</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.Write(System.String,System.Int32)">
+            <summary>
+            写入
+            </summary>
+            <param name="name">名称</param>
+            <param name="max">最大长度</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.GetCycleCount">
+            <summary>
+            获取CPU周期计数
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeTimer.GetCurrentThreadTimes">
+            <summary>
+            获取当前线程时间
+            </summary>
+        </member>
+        <member name="T:Bing.Utils.Develops.NativeMethods">
+            <summary>
+            本地方法
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.NativeMethods.QueryThreadCycleTime(System.IntPtr,System.UInt64@)">
+            <summary>
+            查询线程循环时间
+            </summary>
+            <param name="threadHandle">线程句柄</param>
+            <param name="cycleTime">循环时间</param>
+        </member>
+        <member name="M:Bing.Utils.Develops.NativeMethods.GetCurrentThread">
+            <summary>
+            获取当前线程
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.NativeMethods.GetThreadTimes(System.IntPtr,System.Int64@,System.Int64@,System.Int64@,System.Int64@)">
+            <summary>
+            获取线程时间
+            </summary>
+            <param name="hThread">线程句柄</param>
+            <param name="lpCreationTime">创建时间</param>
+            <param name="lpExitTime">退出时间</param>
+            <param name="lpKernelTime">内核时间</param>
+            <param name="lpUserTime">使用时间</param>
+        </member>
+        <member name="T:Bing.Utils.Develops.CodeRamer">
+            <summary>
+            代码性能测试内存计算工具
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.CodeRamer.WriteLine">
+            <summary>
+            输出内容
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeRamer.Initialize">
+            <summary>
+            内存计算初始化，同时后续操作进行预热，以避免初次操作带来的性能影响
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.CodeRamer.Ram(System.String,System.Action)">
+            <summary>
+            内存计算，传入操作标识名，重复次数，操作过程获取操作的性能数据
+            </summary>
+            <param name="name">操作标识名</param>
+            <param name="action">操作过程的Action</param>
+        </member>
+        <member name="T:Bing.Utils.Develops.UnitTester">
+            <summary>
+            单元测试辅助操作
+            </summary>
+        </member>
+        <member name="P:Bing.Utils.Develops.UnitTester.WriteLine">
+            <summary>
+            输出内容
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Develops.UnitTester.TestConcurrency(System.Action,System.Int32)">
+            <summary>
+            并发测试
+            </summary>
+            <param name="action">各线程执行的方法</param>
+            <param name="threadNumber">启动线程数，默认1个</param>
+        </member>
         <member name="T:Bing.Utils.Expressions.ParameterRebinder">
             <summary>
             参数重绑定操作
@@ -9268,6 +9343,63 @@
             <param name="oldFullPath">旧的文件全路径</param>
             <param name="oldName">旧的文件名称</param>
         </member>
+        <member name="T:Bing.Utils.Judgments.GuidJudgment">
+            <summary>
+            Guid判断
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Judgments.GuidJudgment.IsNullOrEmpty(System.Guid)">
+            <summary>
+            判断 <see cref="T:System.Guid"/> 是否为空、null或Guid.Empty
+            </summary>
+            <param name="guid">Guid</param>
+        </member>
+        <member name="M:Bing.Utils.Judgments.GuidJudgment.IsNullOrEmpty(System.Nullable{System.Guid})">
+            <summary>
+            判断 <see cref="T:System.Guid"/> 是否为空、null或Guid.Empty
+            </summary>
+            <param name="guid">Guid</param>
+        </member>
+        <member name="F:Bing.Utils.Judgments.GuidJudgment.GuidSchema">
+            <summary>
+            Guid 架构正则
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Judgments.GuidJudgment.IsValid(System.String)">
+            <summary>
+            判断 字符串是否有效<see cref="T:System.Guid"/>
+            </summary>
+            <param name="guidStr">Guid字符串</param>
+        </member>
+        <member name="T:Bing.Utils.Judgments.TypeJudgment">
+            <summary>
+            类型判断
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Judgments.TypeJudgment.IsNumericType(System.Type)">
+            <summary>
+            判断类型是否为数值类型
+            </summary>
+            <param name="type">类型</param>
+        </member>
+        <member name="M:Bing.Utils.Judgments.TypeJudgment.IsNumericType(System.Reflection.TypeInfo)">
+            <summary>
+            判断类型是否为数值类型
+            </summary>
+            <param name="typeInfo">类型信息</param>
+        </member>
+        <member name="M:Bing.Utils.Judgments.TypeJudgment.IsNullableType(System.Type)">
+            <summary>
+            判断类型是否为可空类型
+            </summary>
+            <param name="type">类型</param>
+        </member>
+        <member name="M:Bing.Utils.Judgments.TypeJudgment.IsNullableType(System.Reflection.TypeInfo)">
+            <summary>
+            判断类型是否为可空类型
+            </summary>
+            <param name="typeInfo">类型信息</param>
+        </member>
         <member name="T:Bing.Utils.Maths.HexConv">
             <summary>
             进制转换
@@ -10226,131 +10358,6 @@
             <param name="basePath">基路径</param>
             <returns></returns>
         </member>
-        <member name="T:Bing.Utils.Develops.CodeRamer">
-            <summary>
-            代码性能测试内存计算工具
-            </summary>
-        </member>
-        <member name="P:Bing.Utils.Develops.CodeRamer.WriteLine">
-            <summary>
-            输出内容
-            </summary>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeRamer.Initialize">
-            <summary>
-            内存计算初始化，同时后续操作进行预热，以避免初次操作带来的性能影响
-            </summary>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeRamer.Ram(System.String,System.Action)">
-            <summary>
-            内存计算，传入操作标识名，重复次数，操作过程获取操作的性能数据
-            </summary>
-            <param name="name">操作标识名</param>
-            <param name="action">操作过程的Action</param>
-        </member>
-        <member name="T:Bing.Utils.Develops.CodeTimer">
-            <summary>
-            代码性能测试计时器
-            </summary>
-        </member>
-        <member name="P:Bing.Utils.Develops.CodeTimer.WriteLine">
-            <summary>
-            输出内容
-            </summary>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.GetCycleCount">
-            <summary>
-            获取当前CPU循环次数
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.Initialize">
-            <summary>
-            计时器初始化，对计时器进行初始化操作，同时对后续操作进行预热，以避免初次操作带来的性能影响
-            </summary>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.Time(System.String,System.Int32,System.Action)">
-            <summary>
-            计时器，传入操作标识名，重复次数，操作过程获取操作的性能数据
-            </summary>
-            <param name="name">操作标识名</param>
-            <param name="iteration">重复次数</param>
-            <param name="action">操作过程的Action</param>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.InvokeAndGetTimeSpan(System.Action)">
-            <summary>
-            获取调用方法时间戳，执行一个方法并返回执行时间戳
-            </summary>
-            <param name="action">执行方法</param>
-            <returns>执行时间戳</returns>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.InvokeAndWriteTimeSpan(System.Action)">
-            <summary>
-            输出调用方法实际执行时间间隔（毫秒）
-            </summary>
-            <param name="action">执行方法</param>                
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.InvokeAndGetmemoryUsed(System.Action)">
-            <summary>
-            获取调用方法托管内存使用大小（可能内存回收会导致不准确）
-            </summary>
-            <param name="action">执行方法</param>
-            <returns>托管内存使用大小</returns>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.InvokeAndWriteMemoryUsed(System.Action)">
-            <summary>
-            输出调用方法实际执行托管内存使用大小（字节）
-            </summary>
-            <param name="action">执行方法</param>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.InvokeAndWriteAll(System.Action)">
-            <summary>
-            输出调用方法实际执行的时间以及托管内存使用大小
-            </summary>
-            <param name="action">执行方法</param>
-        </member>
-        <member name="M:Bing.Utils.Develops.CodeTimer.CodeExecuteTime(System.Action)">
-            <summary>
-            输出代码执行时间
-            </summary>
-            <param name="action">执行方法</param>
-        </member>
-        <member name="T:Bing.Utils.Develops.NativeMethods">
-            <summary>
-            本地方法
-            </summary>
-        </member>
-        <member name="M:Bing.Utils.Develops.NativeMethods.QueryThreadCycleTime(System.IntPtr,System.UInt64@)">
-            <summary>
-            查询线程循环时间
-            </summary>
-            <param name="threadHandle">线程句柄</param>
-            <param name="cycleTime">循环时间</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Utils.Develops.NativeMethods.GetCurrentThread">
-            <summary>
-            获取当前线程
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Utils.Develops.UnitTester">
-            <summary>
-            单元测试辅助操作
-            </summary>
-        </member>
-        <member name="P:Bing.Utils.Develops.UnitTester.WriteLine">
-            <summary>
-            输出内容
-            </summary>
-        </member>
-        <member name="M:Bing.Utils.Develops.UnitTester.TestConcurrency(System.Action,System.Int32)">
-            <summary>
-            并发测试
-            </summary>
-            <param name="action">各线程执行的方法</param>
-            <param name="threadNumber">启动线程数，默认1个</param>
-        </member>
         <member name="T:Bing.Utils.DisposeAction">
             <summary>
             释放操作
@@ -10527,7 +10534,6 @@
             <summary>
             创建ID
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.IdGenerators.Core.SequentialGuidGenerator">
             <summary>
@@ -10559,7 +10565,6 @@
             <summary>
             创建有序的 Guid
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Utils.IdGenerators.Core.SequentialGuidGenerator.Create(Bing.Utils.IdGenerators.Core.SequentialGuidDatabaseType)">
             <summary>
@@ -10639,7 +10644,6 @@
             <summary>
             创建ID
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.IdGenerators.Core.TimestampIdGenerator">
             <summary>
@@ -10660,7 +10664,6 @@
             <summary>
             创建ID
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.IdGenerators.Ids.ObjectId">
             <summary>
@@ -11121,7 +11124,6 @@
             <summary>
             创建 ID
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Utils.Json.Converters.ChinaDateTimeConverter">
             <summary>

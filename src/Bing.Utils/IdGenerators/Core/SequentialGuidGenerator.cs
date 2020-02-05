@@ -28,19 +28,12 @@ namespace Bing.Utils.IdGenerators.Core
         /// <summary>
         /// 初始化一个<see cref="SequentialGuidGenerator"/>类型的实例
         /// </summary>
-        private SequentialGuidGenerator()
-        {
-            DatabaseType = SequentialGuidDatabaseType.SqlServer;
-        }
+        private SequentialGuidGenerator() => DatabaseType = SequentialGuidDatabaseType.SqlServer;
 
         /// <summary>
         /// 创建有序的 Guid
         /// </summary>
-        /// <returns></returns>
-        public Guid Create()
-        {
-            return Create(DatabaseType);
-        }
+        public Guid Create() => Create(DatabaseType);
 
         /// <summary>
         /// 创建有序的 Guid
@@ -105,9 +98,7 @@ namespace Bing.Utils.IdGenerators.Core
             // Since we're converting from an Int64, we have to reverse on
             // little-endian systems.
             if (BitConverter.IsLittleEndian)
-            {
                 Array.Reverse(timestampBytes);
-            }
 
             byte[] guidBytes = new byte[16];
 

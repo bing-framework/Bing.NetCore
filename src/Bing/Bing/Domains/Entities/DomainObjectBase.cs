@@ -5,7 +5,6 @@ using Bing.Domains.ChangeTracking;
 using Bing.Domains.Core;
 using Bing.Validations;
 using Bing.Validations.Abstractions;
-using Bing.Validations.Handlers;
 
 namespace Bing.Domains.Entities
 {

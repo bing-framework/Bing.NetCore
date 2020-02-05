@@ -1,13 +1,12 @@
 ﻿using System;
 using Bing.Extensions;
-using Bing.Extensions;
 
-namespace Bing.Domains.Entities.Auditing
+namespace Bing.Auditing
 {
     /// <summary>
     /// 创建操作审计初始化器
     /// </summary>
-    public class CreationAuditedInitializer
+    public sealed class CreationAuditedInitializer
     {
         /// <summary>
         /// 实体
@@ -54,43 +53,7 @@ namespace Bing.Domains.Entities.Auditing
                 return;
             InitCreationTime();
             InitCreator();
-            if (string.IsNullOrWhiteSpace(_userId))
-                return;
-            if (_entity is ICreationAudited<Guid>)
-            {
-                InitGuid();
-                return;
-            }
-            if (_entity is ICreationAudited<Guid?>)
-            {
-                InitNullableGuid();
-                return;
-            }
-            if (_entity is ICreationAudited<int>)
-            {
-                InitInt();
-                return;
-            }
-            if (_entity is ICreationAudited<int?>)
-            {
-                InitNullableInt();
-                return;
-            }
-            if (_entity is ICreationAudited<string>)
-            {
-                InitString();
-                return;
-            }
-            if (_entity is ICreationAudited<long>)
-            {
-                InitLong();
-                return;
-            }
-            if (_entity is ICreationAudited<long?>)
-            {
-                InitNullableLong();
-                return;
-            }
+            InitCreatorId();
         }
 
         /// <summary>
@@ -98,7 +61,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitCreationTime()
         {
-            if (_entity is ICreationTime result)
+            if (_entity is IHasCreationTime result)
                 result.CreationTime = DateTime.Now;
         }
 
@@ -109,8 +72,41 @@ namespace Bing.Domains.Entities.Auditing
         {
             if (string.IsNullOrWhiteSpace(_userName))
                 return;
-            if (_entity is ICreator result)
+            if (_entity is IHasCreator result)
                 result.Creator = _userName;
+        }
+
+        /// <summary>
+        /// 初始化创建人标识
+        /// </summary>
+        private void InitCreatorId()
+        {
+            if (string.IsNullOrWhiteSpace(_userId))
+                return;
+            switch (_entity)
+            {
+                case ICreationAuditedObject<Guid> _:
+                    InitGuid();
+                    return;
+                case ICreationAuditedObject<Guid?> _:
+                    InitNullableGuid();
+                    return;
+                case ICreationAuditedObject<int> _:
+                    InitInt();
+                    return;
+                case ICreationAuditedObject<int?> _:
+                    InitNullableInt();
+                    return;
+                case ICreationAuditedObject<string> _:
+                    InitString();
+                    return;
+                case ICreationAuditedObject<long> _:
+                    InitLong();
+                    return;
+                case ICreationAuditedObject<long?> _:
+                    InitNullableLong();
+                    return;
+            }
         }
 
         /// <summary>
@@ -118,7 +114,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitGuid()
         {
-            var result = (ICreationAudited<Guid>)_entity;
+            var result = (ICreationAuditedObject<Guid>)_entity;
             result.CreatorId = _userId.ToGuid();
         }
 
@@ -127,7 +123,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableGuid()
         {
-            var result = (ICreationAudited<Guid?>)_entity;
+            var result = (ICreationAuditedObject<Guid?>)_entity;
             result.CreatorId = _userId.ToGuidOrNull();
         }
 
@@ -136,7 +132,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitInt()
         {
-            var result = (ICreationAudited<int>)_entity;
+            var result = (ICreationAuditedObject<int>)_entity;
             result.CreatorId = _userId.ToInt();
         }
 
@@ -145,7 +141,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableInt()
         {
-            var result = (ICreationAudited<int?>)_entity;
+            var result = (ICreationAuditedObject<int?>)_entity;
             result.CreatorId = _userId.ToIntOrNull();
         }
 
@@ -154,7 +150,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitLong()
         {
-            var result = (ICreationAudited<long>)_entity;
+            var result = (ICreationAuditedObject<long>)_entity;
             result.CreatorId = _userId.ToLong();
         }
 
@@ -163,7 +159,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitNullableLong()
         {
-            var result = (ICreationAudited<long?>)_entity;
+            var result = (ICreationAuditedObject<long?>)_entity;
             result.CreatorId = _userId.ToLongOrNull();
         }
 
@@ -172,7 +168,7 @@ namespace Bing.Domains.Entities.Auditing
         /// </summary>
         private void InitString()
         {
-            var result = (ICreationAudited<string>)_entity;
+            var result = (ICreationAuditedObject<string>)_entity;
             result.CreatorId = _userId.SafeString();
         }
     }

@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Bing.Domains.Entities.Auditing
+namespace Bing.Auditing
 {
     /// <summary>
     /// 修改时间
     /// </summary>
-    public interface IModificationTime
+    public interface IHasModificationTime
     {
         /// <summary>
         /// 最后修改时间
