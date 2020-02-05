@@ -2,9 +2,7 @@
 using System.Linq.Expressions;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
-using Bing.Utils;
 using Bing.Utils.Expressions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Queries.Criterias
 {
@@ -117,8 +115,10 @@ namespace Bing.Datas.Queries.Criterias
             {
                 case Boundary.Left:
                     return Operator.GreaterEqual;
+
                 case Boundary.Both:
                     return Operator.GreaterEqual;
+
                 default:
                     return Operator.Greater;
             }
@@ -154,8 +154,10 @@ namespace Bing.Datas.Queries.Criterias
             {
                 case Boundary.Right:
                     return Operator.LessEqual;
+
                 case Boundary.Both:
                     return Operator.LessEqual;
+
                 default:
                     return Operator.Less;
             }

@@ -11,7 +11,7 @@ namespace Bing.Datas.Sql
     /// <summary>
     /// Sql查询对象
     /// </summary>
-    public interface ISqlQuery: ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
+    public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
     {
         /// <summary>
         /// 设置数据库连接
@@ -23,7 +23,7 @@ namespace Bing.Datas.Sql
         /// 克隆
         /// </summary>
         ISqlQuery Clone();
-        
+
         /// <summary>
         /// 配置
         /// </summary>
@@ -153,7 +153,7 @@ namespace Bing.Datas.Sql
         /// <param name="page">页数</param>
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
-        Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);        
+        Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null);
 
         /// <summary>
         /// 获取分页列表

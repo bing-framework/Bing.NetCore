@@ -6,7 +6,6 @@ using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.DependencyInjection

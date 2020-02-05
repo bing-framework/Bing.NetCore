@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
 
 namespace Bing.Datas.Queries.Trees
 {

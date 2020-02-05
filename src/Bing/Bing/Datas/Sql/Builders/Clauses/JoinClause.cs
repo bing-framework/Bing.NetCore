@@ -10,9 +10,6 @@ using Bing.Datas.Sql.Builders.Internal;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {

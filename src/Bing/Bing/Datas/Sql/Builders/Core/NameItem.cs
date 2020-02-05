@@ -3,8 +3,6 @@ using System.Linq;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -148,6 +146,7 @@ namespace Bing.Datas.Sql.Builders.Core
             prefix = GetPrefix(prefix);
             return string.IsNullOrWhiteSpace(prefix) ? dialect.SafeName(Name) : $"{dialect.SafeName(prefix)}.{dialect.SafeName(Name)}";
         }
+
         /// <summary>
         /// 获取名称
         /// </summary>
@@ -159,6 +158,5 @@ namespace Bing.Datas.Sql.Builders.Core
         }
 
         #endregion
-
     }
 }

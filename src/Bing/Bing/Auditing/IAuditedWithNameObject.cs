@@ -3,7 +3,7 @@
     /// <summary>
     /// 操作审计对象
     /// </summary>
-    public interface IAuditedWithNameObject: ICreationAuditedWithNameObject, IModificationAuditedWithNameObject { }
+    public interface IAuditedWithNameObject : ICreationAuditedWithNameObject, IModificationAuditedWithNameObject { }
 
     /// <summary>
     /// 操作审计对象

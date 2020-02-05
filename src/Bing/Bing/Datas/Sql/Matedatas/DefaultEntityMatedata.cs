@@ -5,7 +5,7 @@ namespace Bing.Datas.Sql.Matedatas
     /// <summary>
     /// 实体元数据
     /// </summary>
-    public class DefaultEntityMatedata: IEntityMatedata
+    public class DefaultEntityMatedata : IEntityMatedata
     {
         /// <summary>
         /// 获取表名

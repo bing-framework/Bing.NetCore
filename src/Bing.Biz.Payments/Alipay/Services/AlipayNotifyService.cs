@@ -3,7 +3,6 @@ using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Enums;
 using Bing.Biz.Payments.Alipay.Services.Base;
 using Bing.Extensions;
-using Bing.Extensions;
 using Bing.Utils.Parameters;
 using Bing.Validations;
 

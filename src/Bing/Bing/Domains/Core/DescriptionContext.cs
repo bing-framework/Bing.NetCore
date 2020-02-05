@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using System.Text;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
 
 namespace Bing.Domains.Core
 {

@@ -8,16 +8,13 @@ using Bing.Datas.Sql.Builders.Internal;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
-using Bing.Utils;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {
     /// <summary>
     /// Where子句
     /// </summary>
-    public class WhereClause:IWhereClause
+    public class WhereClause : IWhereClause
     {
         /// <summary>
         /// Sql生成器
@@ -42,7 +39,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <summary>
         /// 实体解析器
         /// </summary>
-        private readonly IEntityResolver _resolver;     
+        private readonly IEntityResolver _resolver;
 
         /// <summary>
         /// 查询条件
@@ -229,7 +226,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         {
             if (string.IsNullOrWhiteSpace(value.SafeString()))
                 return;
-            Where(column,value,@operator);
+            Where(column, value, @operator);
         }
 
         /// <summary>
@@ -258,7 +255,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
             if (Lambda.GetConditionCount(expression) > 1)
-                throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate,expression));
+                throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, expression));
             if (string.IsNullOrWhiteSpace(Lambda.GetValue(expression).SafeString()))
                 return;
             Where(expression);
@@ -731,6 +728,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
                 return result;
             return result.SafeValue().Date.AddDays(1);
         }
+
         /// <summary>
         /// 获取日期范围查询条件边界
         /// </summary>

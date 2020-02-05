@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Bing.Core.Modularity;
 using Bing.Core.Options;
-using Bing.Helpers;
 using Bing.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Core.Builders
 {
@@ -25,7 +24,7 @@ namespace Bing.Core.Builders
             ExceptModules = new List<Type>();
         }
 
-        #endregion
+        #endregion 构造函数
 
         #region 属性
 
@@ -44,7 +43,7 @@ namespace Bing.Core.Builders
         /// </summary>
         public Action<BingOptions> OptionsAction { get; private set; }
 
-        #endregion
+        #endregion 属性
 
         #region AddModule(添加模块)
 
@@ -60,7 +59,7 @@ namespace Bing.Core.Builders
             return this;
         }
 
-        #endregion
+        #endregion AddModule(添加模块)
 
         #region ExceptModule(排除模块)
 
@@ -76,7 +75,7 @@ namespace Bing.Core.Builders
             return this;
         }
 
-        #endregion
+        #endregion ExceptModule(排除模块)
 
         #region AddOptions(添加选项配置)
 
@@ -91,6 +90,6 @@ namespace Bing.Core.Builders
             return this;
         }
 
-        #endregion
+        #endregion AddOptions(添加选项配置)
     }
 }

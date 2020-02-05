@@ -16,7 +16,7 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 实体别名
         /// </summary>
-        IDictionary<Type,string> Data { get; }
+        IDictionary<Type, string> Data { get; }
 
         /// <summary>
         /// 注册实体别名

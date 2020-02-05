@@ -3,7 +3,7 @@
     /// <summary>
     /// 创建操作审计对象
     /// </summary>
-    public interface ICreationAuditedWithNameObject: ICreationAuditedObject, IHasCreator { }
+    public interface ICreationAuditedWithNameObject : ICreationAuditedObject, IHasCreator { }
 
     /// <summary>
     /// 创建操作审计对象

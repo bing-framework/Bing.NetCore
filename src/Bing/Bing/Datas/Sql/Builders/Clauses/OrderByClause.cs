@@ -6,14 +6,13 @@ using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Internal;
 using Bing.Extensions;
 using Bing.Properties;
-using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {
     /// <summary>
     /// Order By子句
     /// </summary>
-    public class OrderByClause:IOrderByClause
+    public class OrderByClause : IOrderByClause
     {
         /// <summary>
         /// 排序项列表
@@ -50,7 +49,6 @@ namespace Bing.Datas.Sql.Builders.Clauses
             _resolver = resolver;
             _register = register;
         }
-
 
         /// <summary>
         /// 克隆

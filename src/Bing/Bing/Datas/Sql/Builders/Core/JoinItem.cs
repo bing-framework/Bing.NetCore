@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Internal;
 using Bing.Datas.Sql.Matedatas;
-using Bing.Utils;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -190,6 +189,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// </summary>
         private string GetOn() => Condition == null ? null : $" On {Condition.GetCondition()}";
 
-        #endregion       
+        #endregion
+
     }
 }

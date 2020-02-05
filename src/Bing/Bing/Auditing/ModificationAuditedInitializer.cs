@@ -88,21 +88,27 @@ namespace Bing.Auditing
                 case IModificationAuditedObject<Guid> _:
                     InitGuid();
                     return;
+
                 case IModificationAuditedObject<Guid?> _:
                     InitNullableGuid();
                     return;
+
                 case IModificationAuditedObject<int> _:
                     InitInt();
                     return;
+
                 case IModificationAuditedObject<int?> _:
                     InitNullableInt();
                     return;
+
                 case IModificationAuditedObject<string> _:
                     InitString();
                     return;
+
                 case IModificationAuditedObject<long> _:
                     InitLong();
                     return;
+
                 case IModificationAuditedObject<long?> _:
                     InitNullableLong();
                     return;

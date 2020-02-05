@@ -6,7 +6,7 @@ namespace Bing.Datas.Queries.Trees
     /// 树型查询参数
     /// </summary>
     /// <typeparam name="TParentId">父编号类型</typeparam>
-    public interface ITreeQueryParameter<TParentId>:IQueryParameter
+    public interface ITreeQueryParameter<TParentId> : IQueryParameter
     {
         /// <summary>
         /// 父编号

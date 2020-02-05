@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Datas.Queries;
-using Bing.Utils;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Datas.Sql
@@ -363,7 +362,7 @@ namespace Bing.Datas.Sql
 
         #endregion
 
-        #region Where(设置查询条件)        
+        #region Where(设置查询条件)
 
         /// <summary>
         /// 设置查询条件

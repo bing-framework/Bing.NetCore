@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Bing.Extensions;
-using Bing.Extensions;
 
 namespace Bing.Datas.Queries.Criterias
 {
@@ -22,7 +21,7 @@ namespace Bing.Datas.Queries.Criterias
         public DateSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression
             , DateTime? min
             , DateTime? max
-            , Boundary boundary = Boundary.Left) 
+            , Boundary boundary = Boundary.Left)
             : base(propertyExpression, min, max, boundary)
         {
         }

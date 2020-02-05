@@ -7,9 +7,6 @@ using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Utils;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Datas.Sql.Builders.Internal
@@ -78,7 +75,7 @@ namespace Bing.Datas.Sql.Builders.Internal
                 return null;
             return GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
         }
-        
+
         /// <summary>
         /// 获取处理后的列名
         /// </summary>
@@ -88,7 +85,7 @@ namespace Bing.Datas.Sql.Builders.Internal
         {
             if (string.IsNullOrWhiteSpace(column))
                 return column;
-            return new SqlItem(column,_register.GetAlias(type)).ToSql(_dialect);
+            return new SqlItem(column, _register.GetAlias(type)).ToSql(_dialect);
         }
 
         /// <summary>

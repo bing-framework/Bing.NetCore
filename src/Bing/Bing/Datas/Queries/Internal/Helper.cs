@@ -1,13 +1,11 @@
-﻿using Bing.Domains.Repositories;
-using Bing.Properties;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
-using System;
+﻿using System;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using Bing.Domains.Repositories;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Properties;
 
 namespace Bing.Datas.Queries.Internal
 {

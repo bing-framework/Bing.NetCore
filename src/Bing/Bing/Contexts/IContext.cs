@@ -5,7 +5,7 @@ namespace Bing.Contexts
     /// <summary>
     /// 上下文
     /// </summary>
-    public interface IContext: ISingletonDependency
+    public interface IContext : ISingletonDependency
     {
         /// <summary>
         /// 跟踪号

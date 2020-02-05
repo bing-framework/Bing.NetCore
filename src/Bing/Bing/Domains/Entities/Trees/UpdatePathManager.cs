@@ -5,7 +5,6 @@ using Bing.Domains.Repositories;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Properties;
-using Bing.Extensions;
 
 namespace Bing.Domains.Entities.Trees
 {
@@ -15,7 +14,7 @@ namespace Bing.Domains.Entities.Trees
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
-    public class UpdatePathManager<TEntity, TKey, TParentId> 
+    public class UpdatePathManager<TEntity, TKey, TParentId>
         where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>
     {
         /// <summary>

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Bing.Datas.Sql.Queries;
-using Bing.Utils;
 
 namespace Bing.Datas.Sql.Builders
 {
@@ -141,7 +139,7 @@ namespace Bing.Datas.Sql.Builders
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
-        void On(string column, object value, Operator @operator = Operator.Equal);        
+        void On(string column, object value, Operator @operator = Operator.Equal);
 
         /// <summary>
         /// 设置连接条件

@@ -86,7 +86,7 @@ namespace Bing.Datas.Sql.Queries
         /// <summary>
         /// 公用表表达式CTE集合
         /// </summary>
-        public List<BuilderItem> CteItems => ((ICteAccessor) Builder).CteItems;
+        public List<BuilderItem> CteItems => ((ICteAccessor)Builder).CteItems;
 
         #endregion
 
@@ -135,7 +135,6 @@ namespace Bing.Datas.Sql.Queries
             Connection = connection;
             return this;
         }
-
 
         #endregion
 
@@ -342,7 +341,7 @@ namespace Bing.Datas.Sql.Queries
             var result = await func(GetConnection(connection), sql, Params);
             ClearAfterExecution();
             return result;
-        }        
+        }
 
         /// <summary>
         /// 写日志

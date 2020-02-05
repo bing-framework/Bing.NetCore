@@ -7,7 +7,7 @@ namespace Bing.Domains.Entities.Auditing
     /// 创建审计实体
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
-    public abstract class CreationAuditedEntity<TEntity> : EntityBase<TEntity>, ICreationAuditedObject 
+    public abstract class CreationAuditedEntity<TEntity> : EntityBase<TEntity>, ICreationAuditedObject
         where TEntity : class, IEntity
     {
         /// <summary>

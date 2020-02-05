@@ -16,13 +16,13 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <summary>
         /// 实体别名注册器
         /// </summary>
-        public IEntityAliasRegister EntityAliasRegister { get; }        
+        public IEntityAliasRegister EntityAliasRegister { get; }
 
         /// <summary>
         /// 实体元数据解析器
         /// </summary>
         public IEntityMatedata Matedata { get; }
-        
+
         /// <summary>
         /// 参数管理器
         /// </summary>

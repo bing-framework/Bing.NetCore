@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Bing.Extensions;
-using Bing.Extensions;
 
 namespace Bing.Datas.Queries.Criterias
 {
@@ -28,7 +27,7 @@ namespace Bing.Datas.Queries.Criterias
         /// <param name="targetType">目标类型</param>
         public static Expression CreateDateTimeExpression(object value, Type targetType)
         {
-            var parse = typeof(DateTime).GetMethod("Parse", new[] {typeof(string)});
+            var parse = typeof(DateTime).GetMethod("Parse", new[] { typeof(string) });
             if (parse == null)
                 return null;
             var parseExpression = Expression.Call(parse, Expression.Constant(value.SafeString()));

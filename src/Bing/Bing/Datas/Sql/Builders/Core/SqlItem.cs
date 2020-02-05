@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Bing.Datas.Sql.Builders.Extensions;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Extensions;
-using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -72,7 +71,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="raw">是否使用原始值</param>
         /// <param name="isSplit">是否用句点分割名称</param>
         /// <param name="isResolve">是否解析名称</param>
-        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true,bool isResolve = true)
+        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true, bool isResolve = true)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return;
@@ -109,7 +108,7 @@ namespace Bing.Datas.Sql.Builders.Core
                 name = Regex.Replace(name, pattern, ".");
             }
             var list = name.Split(' ').Where(t => t.IsEmpty() == false).ToList();
-            if (list.Count==0)
+            if (list.Count == 0)
                 return;
             if (list.Count == 2)
                 _alias = list[1].Trim();

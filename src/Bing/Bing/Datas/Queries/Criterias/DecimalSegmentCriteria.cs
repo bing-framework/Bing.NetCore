@@ -20,7 +20,7 @@ namespace Bing.Datas.Queries.Criterias
         public DecimalSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression
             , decimal? min
             , decimal? max
-            , Boundary boundary = Boundary.Both) 
+            , Boundary boundary = Boundary.Both)
             : base(propertyExpression, min, max, boundary)
         {
         }

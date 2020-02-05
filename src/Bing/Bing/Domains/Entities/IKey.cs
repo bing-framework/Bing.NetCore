@@ -9,6 +9,6 @@
         /// <summary>
         /// 标识
         /// </summary>
-        TKey Id { get;  }
+        TKey Id { get; }
     }
 }

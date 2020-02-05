@@ -1,5 +1,4 @@
-﻿
-namespace Bing.Applications.Dtos
+﻿namespace Bing.Applications.Dtos
 {
     /// <summary>
     /// 数据传输对象

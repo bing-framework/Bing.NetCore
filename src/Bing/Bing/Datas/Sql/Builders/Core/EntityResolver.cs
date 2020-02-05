@@ -5,8 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Bing.Datas.Sql.Matedatas;
-using Bing.Helpers;
 using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -110,7 +110,6 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="column">列名表达式</param>
         public string GetColumn<TEntity>(Expression<Func<TEntity, object>> column) => GetExpressionColumn<TEntity>(column);
 
-
         /// <summary>
         /// 获取表达式列名
         /// </summary>
@@ -123,14 +122,16 @@ namespace Bing.Datas.Sql.Builders.Core
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return GetExpressionColumn<TEntity>(((LambdaExpression) expression).Body);
+                    return GetExpressionColumn<TEntity>(((LambdaExpression)expression).Body);
+
                 case ExpressionType.Convert:
                 case ExpressionType.MemberAccess:
                     return GetSingleColumn<TEntity>(expression);
+
                 case ExpressionType.ListInit:
                     var isDictionary = typeof(Dictionary<object, string>).GetGenericTypeDefinition()
                         .IsAssignableFrom(expression.Type.GetGenericTypeDefinition());
-                    return isDictionary ? GetDictionaryColumns<TEntity>((ListInitExpression) expression) : null;
+                    return isDictionary ? GetDictionaryColumns<TEntity>((ListInitExpression)expression) : null;
             }
             return null;
         }
@@ -216,7 +217,7 @@ namespace Bing.Datas.Sql.Builders.Core
                 result += $"{item.Key} As {item.Value},";
             return result?.TrimEnd(',');
         }
-        
+
         /// <summary>
         /// 获取列名
         /// </summary>

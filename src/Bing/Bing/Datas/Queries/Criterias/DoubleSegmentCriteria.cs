@@ -20,7 +20,7 @@ namespace Bing.Datas.Queries.Criterias
         public DoubleSegmentCriteria(Expression<Func<TEntity, TProperty>> propertyExpression
             , double? min
             , double? max
-            , Boundary boundary = Boundary.Both) 
+            , Boundary boundary = Boundary.Both)
             : base(propertyExpression, min, max, boundary)
         {
         }

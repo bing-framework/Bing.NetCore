@@ -14,6 +14,6 @@ namespace Bing.Applications.Commands
         /// <typeparam name="TResponse">响应类型</typeparam>
         /// <param name="name">命令名称</param>
         /// <returns></returns>
-        ICommand<TRequest,TResponse> Create<TRequest,TResponse>(string name) where TRequest:IRequest where TResponse:IResponse;
+        ICommand<TRequest, TResponse> Create<TRequest, TResponse>(string name) where TRequest : IRequest where TResponse : IResponse;
     }
 }

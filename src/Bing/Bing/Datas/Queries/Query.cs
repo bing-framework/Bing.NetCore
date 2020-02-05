@@ -3,8 +3,8 @@ using System.Linq.Expressions;
 using Bing.Datas.Queries.Criterias;
 using Bing.Datas.Queries.Internal;
 using Bing.Domains.Repositories;
-using Bing.Helpers;
 using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Datas.Queries
 {

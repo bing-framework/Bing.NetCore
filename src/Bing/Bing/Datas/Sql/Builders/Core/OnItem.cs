@@ -1,6 +1,4 @@
-﻿using Bing.Utils;
-
-namespace Bing.Datas.Sql.Builders.Core
+﻿namespace Bing.Datas.Sql.Builders.Core
 {
     /// <summary>
     /// 连接条件项

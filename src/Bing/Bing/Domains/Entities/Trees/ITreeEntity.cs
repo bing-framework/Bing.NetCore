@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Bing.Validations.Abstractions;
 
 namespace Bing.Domains.Entities.Trees
 {

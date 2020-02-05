@@ -3,8 +3,6 @@ using System.Data;
 using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Datas.Sql

@@ -48,11 +48,14 @@ namespace Bing.Datas.Sql.Builders.Core
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return ResolveExpression(((LambdaExpression) expression).Body, type);
+                    return ResolveExpression(((LambdaExpression)expression).Body, type);
+
                 case ExpressionType.OrElse:
-                    return ResolveOrExpression((BinaryExpression) expression, type);
+                    return ResolveOrExpression((BinaryExpression)expression, type);
+
                 case ExpressionType.AndAlso:
-                    return ResolveAndExpression((BinaryExpression) expression, type);
+                    return ResolveAndExpression((BinaryExpression)expression, type);
+
                 default:
                     return _helper.CreateCondition(expression, type);
             }

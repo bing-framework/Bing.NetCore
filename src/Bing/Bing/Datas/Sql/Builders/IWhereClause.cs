@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Datas.Queries;
-using Bing.Datas.Sql.Queries;
-using Bing.Utils;
 
 namespace Bing.Datas.Sql.Builders
 {
     /// <summary>
     /// Where子句
     /// </summary>
-    public interface IWhereClause:ICondition
+    public interface IWhereClause : ICondition
     {
         /// <summary>
         /// 克隆
@@ -112,7 +110,7 @@ namespace Bing.Datas.Sql.Builders
         /// <param name="action">子查询操作</param>
         /// <param name="operator">运算符</param>
         void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action,
-            Operator @operator = Operator.Equal) where TEntity : class;       
+            Operator @operator = Operator.Equal) where TEntity : class;
 
         /// <summary>
         /// 设置查询条件
@@ -215,7 +213,6 @@ namespace Bing.Datas.Sql.Builders
         /// <param name="boundary">包含边界</param>
         void Between(string column, int? min, int? max, Boundary boundary);
 
-
         /// <summary>
         /// 添加范围查询条件
         /// </summary>
@@ -243,7 +240,6 @@ namespace Bing.Datas.Sql.Builders
         /// <param name="boundary">包含边界</param>
         void Between(string column, double? min, double? max, Boundary boundary);
 
-
         /// <summary>
         /// 添加范围查询条件
         /// </summary>
@@ -262,7 +258,6 @@ namespace Bing.Datas.Sql.Builders
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
         void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary);
-
 
         /// <summary>
         /// 设置Is Null条件
