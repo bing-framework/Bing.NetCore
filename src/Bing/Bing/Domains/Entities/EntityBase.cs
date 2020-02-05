@@ -66,7 +66,7 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 标识
         /// </summary>
-        [Key]
+        [Key, Required]
         public virtual TKey Id { get; protected set; }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 获取标识列表
         /// </summary>
-        public object[] GetKeys() => new object[] {Id};
+        public object[] GetKeys() => new object[] { Id };
 
         /// <summary>
         /// 初始化标识
