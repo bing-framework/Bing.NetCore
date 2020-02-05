@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Bing.Extensions;
 
 namespace Bing.Utils.Timing
 {
@@ -91,31 +92,7 @@ namespace Bing.Utils.Timing
         #endregion
 
         #region SetTime(设置时间)
-        /// <summary>
-        /// 设置时间，设置时分秒
-        /// </summary>
-        /// <param name="date">时间</param>
-        /// <param name="hours">小时</param>
-        /// <param name="minutes">分钟</param>
-        /// <param name="seconds">秒</param>
-        /// <returns>返回设置后的时间</returns>
-        public static DateTime SetTime(this DateTime date, int hours, int minutes, int seconds)
-        {
-            return date.SetTime(new TimeSpan(hours, minutes, seconds));
-        }
-        /// <summary>
-        /// 设置时间，设置时分秒毫秒
-        /// </summary>
-        /// <param name="date">时间</param>
-        /// <param name="hours">小时</param>
-        /// <param name="minutes">分钟</param>
-        /// <param name="seconds">秒</param>
-        /// <param name="milliseconds">毫秒</param>
-        /// <returns>返回设置后的时间</returns>
-        public static DateTime SetTime(this DateTime date, int hours, int minutes, int seconds, int milliseconds)
-        {
-            return date.SetTime(new TimeSpan(0, hours, minutes, seconds, milliseconds));
-        }
+
         /// <summary>
         /// 设置时间，设置时间间隔
         /// </summary>
@@ -178,56 +155,6 @@ namespace Bing.Utils.Timing
             return new DateTime(date.Year, date.Month, 1, 0, 0, 0, 0);
         }
 
-        #endregion
-
-        #region GetFirstDayOfMonth(获取指定日期的月份第一天)
-        /// <summary>
-        /// 获取指定日期的月份第一天
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <returns>月份第一天</returns>
-        public static DateTime GetFirstDayOfMonth(this DateTime date)
-        {
-            return new DateTime(date.Year, date.Month, 1);
-        }
-        /// <summary>
-        /// 获取指定日期的月份第一天，指定星期几
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="dayOfWeek">星期几</param>
-        /// <returns>月份第一天</returns>
-        public static DateTime GetFirstDayOfMonth(this DateTime date, DayOfWeek dayOfWeek)
-        {
-            var dt = date.GetFirstDayOfMonth();
-            while (dt.DayOfWeek != dayOfWeek)
-                dt = dt.AddDays(1);
-            return dt;
-        }
-        #endregion
-
-        #region GetLastDayOfMonth(获取指定日期的月份最后一天)
-        /// <summary>
-        /// 获取指定日期的月份最后一天
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <returns>最后一天</returns>
-        public static DateTime GetLastDayOfMonth(this DateTime date)
-        {
-            return new DateTime(date.Year, date.Month, GetCountDaysOfMonth(date));
-        }
-        /// <summary>
-        /// 获取指定日期的月份最后一天，指定星期几
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="dayOfWeek">星期几</param>
-        /// <returns>最后一天</returns>
-        public static DateTime GetLastDayOfMonth(this DateTime date, DayOfWeek dayOfWeek)
-        {
-            var dt = date.GetLastDayOfMonth();
-            while (dt.DayOfWeek != dayOfWeek)
-                dt = dt.AddDays(-1);
-            return dt;
-        }
         #endregion
 
         #region GetCountDaysOfMonth(获取月总天数)

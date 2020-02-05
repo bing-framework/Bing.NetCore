@@ -33,7 +33,7 @@ namespace Bing.Utils.Date.Chinese
         }
 
         /// <summary>
-        /// 获取生肖值
+        /// 获取生肖
         /// </summary>
         /// <param name="dt">时间</param>
         /// <param name="traditionalChineseCharacter">是否繁体中文</param>

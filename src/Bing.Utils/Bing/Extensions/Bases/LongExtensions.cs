@@ -213,7 +213,7 @@ namespace Bing.Extensions
         public static DateTime ToDateTime(this long unixTimeStamp)
         {
             var value = (unixTimeStamp + 8 * 60 * 60) * 10000000;
-            return DateTimeExtensions.Date1970.AddTicks(value);
+            return Bing.Utils.Timing.DateTimeExtensions.Date1970.AddTicks(value);
         }
 
         #endregion
