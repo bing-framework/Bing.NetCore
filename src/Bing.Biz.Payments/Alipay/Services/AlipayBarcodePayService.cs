@@ -8,7 +8,6 @@ using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Properties;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Extensions;
 
 namespace Bing.Biz.Payments.Alipay.Services
 {

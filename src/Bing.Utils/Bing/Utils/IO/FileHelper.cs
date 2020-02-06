@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bing.Extensions;
-using Bing.Extensions;
 using FileInfo = System.IO.FileInfo;
 
 namespace Bing.Utils.IO

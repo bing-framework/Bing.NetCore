@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Bing.Extensions;
-using Bing.Utils;
-using Bing.Extensions;
 
 namespace Bing.Helpers
 {

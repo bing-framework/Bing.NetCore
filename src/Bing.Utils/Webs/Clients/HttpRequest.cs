@@ -4,8 +4,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 
 namespace Bing.Utils.Webs.Clients
