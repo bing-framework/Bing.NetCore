@@ -7,7 +7,7 @@ namespace Bing.Exceptions
     /// 配置异常
     /// </summary>
     [Serializable]
-    public class ConfigException: Exception
+    public class ConfigException : Exception
     {
         /// <summary>
         /// 初始化一个<see cref="ConfigException"/>类型的实例
@@ -29,7 +29,7 @@ namespace Bing.Exceptions
         /// </summary>
         /// <param name="msgFormat">格式化消息</param>
         /// <param name="objects">格式化参数</param>
-        public ConfigException(string msgFormat,params object[] objects) : base(string.Format(msgFormat,objects))
+        public ConfigException(string msgFormat, params object[] objects) : base(string.Format(msgFormat, objects))
         {
         }
 
@@ -47,7 +47,7 @@ namespace Bing.Exceptions
         /// </summary>
         /// <param name="info">消息</param>
         /// <param name="context">错误来源</param>
-        public ConfigException(SerializationInfo info, StreamingContext context) : base(info,context)
+        public ConfigException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

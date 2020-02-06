@@ -14,7 +14,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services
     /// <summary>
     /// 微信支付通知服务
     /// </summary>
-    public class WechatpayNotifyService:IWechatpayNotifyService
+    public class WechatpayNotifyService : IWechatpayNotifyService
     {
         /// <summary>
         /// 配置提供器

@@ -9,7 +9,6 @@ using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Biz.Payments.Wechatpay.Services.Base;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Extensions;
 using Bing.Utils.Json;
 
 namespace Bing.Biz.Payments.Wechatpay.Services

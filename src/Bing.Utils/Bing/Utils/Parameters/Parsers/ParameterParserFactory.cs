@@ -17,10 +17,13 @@ namespace Bing.Utils.Parameters.Parsers
             {
                 case ParameterParserType.Url:
                     return new UrlParameterParser();
+
                 case ParameterParserType.Json:
                     return new JsonParameterParser();
+
                 case ParameterParserType.Jsonp:
                     return new JsonpParameterParser();
+
                 default:
                     throw new NotImplementedException();
             }

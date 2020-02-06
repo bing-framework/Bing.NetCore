@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Permissions.Identity.JwtBearer;
 using Bing.Extensions;
+using Bing.Permissions.Identity.JwtBearer;
 
 namespace Bing.Permissions.Authorization.Middlewares
 {

@@ -29,6 +29,5 @@ namespace Bing.Extensions
         public static byte Min(this byte value1, byte value2) => Math.Min(value1, value2);
 
         #endregion
-
     }
 }

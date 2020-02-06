@@ -97,7 +97,7 @@ namespace Bing.Helpers
         /// <param name="member">成员</param>
         public static string GetDisplayNameOrDescription(MemberInfo member)
         {
-            var result = GetDisplayName(member);            
+            var result = GetDisplayName(member);
             return string.IsNullOrWhiteSpace(result) ? GetDescription(member) : result;
         }
 
@@ -168,7 +168,7 @@ namespace Bing.Helpers
                 return;
             result.Add(type);
         }
-        
+
         /// <summary>
         /// 泛型匹配
         /// </summary>
@@ -179,7 +179,7 @@ namespace Bing.Helpers
             if (findType.IsGenericTypeDefinition == false)
                 return false;
             var definition = findType.GetGenericTypeDefinition();
-            foreach (var implementedInterface in type.FindInterfaces((filiter,criteria)=>true,null))
+            foreach (var implementedInterface in type.FindInterfaces((filiter, criteria) => true, null))
             {
                 if (implementedInterface.IsGenericType == false)
                     continue;
@@ -187,7 +187,7 @@ namespace Bing.Helpers
             }
             return false;
         }
-        
+
         #endregion
 
         #region GetInstancesByInterface(获取实现了接口的所有实例)
@@ -318,6 +318,7 @@ namespace Bing.Helpers
             {
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.Boolean";
+
                 case MemberTypes.Property:
                     return IsBool((PropertyInfo)member);
             }
@@ -346,6 +347,7 @@ namespace Bing.Helpers
             {
                 case MemberTypes.TypeInfo:
                     return ((TypeInfo)member).IsEnum;
+
                 case MemberTypes.Property:
                     return IsEnum((PropertyInfo)member);
             }
@@ -382,6 +384,7 @@ namespace Bing.Helpers
             {
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.DateTime";
+
                 case MemberTypes.Property:
                     return IsDate((PropertyInfo)member);
             }
@@ -418,6 +421,7 @@ namespace Bing.Helpers
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.Int32" || member.ToString() == "System.Int16" ||
                            member.ToString() == "System.Int64";
+
                 case MemberTypes.Property:
                     return IsInt((PropertyInfo)member);
             }
@@ -464,6 +468,7 @@ namespace Bing.Helpers
                 case MemberTypes.TypeInfo:
                     return member.ToString() == "System.Double" || member.ToString() == "System.Decimal" ||
                            member.ToString() == "System.Single";
+
                 case MemberTypes.Property:
                     return IsNumber((PropertyInfo)member);
             }
@@ -621,13 +626,13 @@ namespace Bing.Helpers
             Check.NotNull(type, nameof(type));
             if (!genericType.IsGenericType)
                 throw new ArgumentException("该功能只支持泛型类型的调用，非泛型类型可使用 IsAssignableFrom 方法。");
-            var allOthers = new List<Type>() {type};
+            var allOthers = new List<Type>() { type };
             if (genericType.IsInterface) allOthers.AddRange(type.GetInterfaces());
 
             foreach (var other in allOthers)
             {
                 var cur = other;
-                while (cur!=null)
+                while (cur != null)
                 {
                     if (cur.IsGenericType)
                         cur = cur.GetGenericTypeDefinition();

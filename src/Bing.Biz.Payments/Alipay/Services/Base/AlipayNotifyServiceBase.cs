@@ -209,6 +209,5 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         {
             return ValidationResultCollection.Success;
         }
-
     }
 }

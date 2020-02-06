@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bing.Auditing;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Logs;
 using Bing.Datas.Sql;
@@ -13,7 +14,6 @@ using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.Transactions;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
-using Bing.Auditing;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
@@ -236,6 +236,7 @@ namespace Bing.Datas.EntityFramework.Core
         #endregion
 
         #region Commit(提交)
+
         /// <summary>
         /// 提交，返回影响的行数
         /// </summary>
@@ -255,6 +256,7 @@ namespace Bing.Datas.EntityFramework.Core
         #endregion
 
         #region CommitAsync(异步提交)
+
         /// <summary>
         /// 异步提交，返回影响的行数
         /// </summary>
@@ -296,9 +298,11 @@ namespace Bing.Datas.EntityFramework.Core
                     case EntityState.Added:
                         InterceptAddedOperation(entry);
                         break;
+
                     case EntityState.Modified:
                         InterceptModifiedOperation(entry);
                         break;
+
                     case EntityState.Deleted:
                         InterceptDeletedOperation(entry);
                         break;
@@ -495,6 +499,5 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         #endregion
-
     }
 }

@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.Properties;
 using Bing.Extensions;
+using Bing.Properties;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Exceptions
 {
@@ -136,7 +136,7 @@ namespace Bing.Exceptions
             }
             result.Add(exception);
             AddException(result, exception.InnerException);
-        }        
+        }
 
         /// <summary>
         /// 获取友好提示

@@ -108,7 +108,7 @@ namespace Bing.Validations
             ResultCollection = new ValidationResultCollection(result);
             appendAction?.Invoke(ResultCollection);
             var tempList = ValidateStrategyList.Select(strategy => strategy.Validate(Instance)).ToList();
-            if(tempList.Any())
+            if (tempList.Any())
                 ResultCollection.AddRange(tempList);
             if (ResultCollection.IsValid)
                 return;

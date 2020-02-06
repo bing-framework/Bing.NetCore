@@ -5,7 +5,7 @@ namespace Bing.Logs.Serilog
     /// <summary>
     /// Serilog日志提供程序工厂
     /// </summary>
-    public class LogProviderFactory:ILogProviderFactory
+    public class LogProviderFactory : ILogProviderFactory
     {
         /// <summary>
         /// 创建日志提供程序

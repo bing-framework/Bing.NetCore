@@ -1,7 +1,5 @@
 ﻿using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Validations.Validators;
 
 // ReSharper disable once CheckNamespace
@@ -11,7 +9,7 @@ namespace System.ComponentModel.DataAnnotations
     /// Url地址验证
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class HttpUrlAddressAttribute: ValidationAttribute
+    public class HttpUrlAddressAttribute : ValidationAttribute
     {
         /// <summary>
         /// 错误消息

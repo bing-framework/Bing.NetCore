@@ -232,6 +232,7 @@ namespace Bing.Extensions
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
                     return true;
+
                 default:
                     return false;
             }
@@ -272,6 +273,7 @@ namespace Bing.Extensions
                     case TypeCode.Single:
                         result = true;
                         break;
+
                     default:
                         result = false;
                         break;

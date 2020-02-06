@@ -14,16 +14,19 @@ namespace Bing.Ui.Enums
         /// </summary>
         [Description("application/x-xls")]
         Xls,
+
         /// <summary>
         /// doc,docx
         /// </summary>
         [Description("application/msword")]
         Doc,
+
         /// <summary>
         /// pdf
         /// </summary>
         [Description("application/pdf")]
         Pdf,
+
         /// <summary>
         /// txt
         /// </summary>

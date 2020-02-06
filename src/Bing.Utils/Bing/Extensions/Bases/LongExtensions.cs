@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Utils.Timing;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions
@@ -21,6 +20,7 @@ namespace Bing.Extensions
             for (var i = 0; i < value; i++)
                 action();
         }
+
         /// <summary>
         /// 执行n次指定操作，基于底层long值
         /// </summary>
@@ -116,15 +116,18 @@ namespace Bing.Extensions
                 case 12:
                 case 13:
                     break;
+
                 default:
                     switch (i % 10)
                     {
                         case 1:
                             suffix = "st";
                             break;
+
                         case 2:
                             suffix = "nd";
                             break;
+
                         case 3:
                             suffix = "rd";
                             break;
@@ -145,7 +148,7 @@ namespace Bing.Extensions
         #endregion
 
         #region Days(获取日期间隔)
-        
+
         /// <summary>
         /// 获取日期间隔，根据数值获取时间间隔
         /// </summary>
@@ -165,7 +168,7 @@ namespace Bing.Extensions
         #endregion
 
         #region Minutes(获取分钟间隔)
-        
+
         /// <summary>
         /// 获取分钟间隔，根据数值获取时间间隔
         /// </summary>

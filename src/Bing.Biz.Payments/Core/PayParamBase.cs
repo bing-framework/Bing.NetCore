@@ -4,7 +4,6 @@ using Bing.Biz.Payments.Properties;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Mapping;
-using Bing.Extensions;
 using Bing.Validations;
 
 namespace Bing.Biz.Payments.Core

@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using Bing.Utils.Helpers;
-using Microsoft.Extensions.PlatformAbstractions;
-
-namespace Bing.Reflections
+﻿namespace Bing.Reflections
 {
     ///// <summary>
     ///// 应用程序类型查找器
@@ -135,7 +126,7 @@ namespace Bing.Reflections
     //    {
     //        assemblies = assemblies ?? GetAssemblies();
     //        return Reflection.FindTypes(findType, assemblies.ToArray());
-    //    }        
+    //    }
 
     //    #endregion
     //}

@@ -462,10 +462,13 @@ namespace Bing.Utils.Webs.Clients
             {
                 case "application/x-www-form-urlencoded":
                     return new FormUrlEncodedContent(_params.ToDictionary(t => t.Key, t => t.Value.SafeString()));
+
                 case "application/json":
                     return CreateJsonContent();
+
                 case "text/xml":
                     return CreateXmlContent();
+
                 case "multipart/form-data":
                     return CreateMultipartFormDataContent();
             }

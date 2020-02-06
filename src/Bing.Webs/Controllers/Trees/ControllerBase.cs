@@ -2,7 +2,6 @@
 using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Extensions;
-using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers.Trees
@@ -115,7 +114,7 @@ namespace Bing.Webs.Controllers.Trees
         /// <param name="ids">两个Id的标识列表，用逗号分隔，范例：1,2</param>
         /// <remarks>
         /// 调用范例:
-        /// POST   
+        /// POST
         /// /api/customer/SwapSort
         /// body: "'1,2'"
         /// </remarks>

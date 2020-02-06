@@ -22,7 +22,7 @@ namespace Bing.Utils.Drawing
         /// <summary>
         /// 生成种子
         /// </summary>
-        private const string Seed = "2,3,4,5,6,7,8,9," + 
+        private const string Seed = "2,3,4,5,6,7,8,9," +
                                     "A,B,C,D,E,F,G,H,J,K,M,N,P,Q,R,S,T,U,V,W,X,Y,Z," +
                                     "a,b,c,d,e,f,g,h,k,m,n,p,q,r,s,t,u,v,w,x,y,z";
 
@@ -128,8 +128,10 @@ namespace Bing.Utils.Drawing
             {
                 case CaptchaType.Number:
                     return GetRandomNumbers(length);
+
                 case CaptchaType.ChineseChar:
                     return GetRandomChinese(length);
+
                 default:
                     return GetRandomNumbersAndLetters(length);
             }
@@ -137,7 +139,7 @@ namespace Bing.Utils.Drawing
 
         /// <summary>
         /// 获取随机数字的字符串
-        /// </summary> 
+        /// </summary>
         /// <param name="length">长度</param>
         /// <returns></returns>
         private static string GetRandomNumbers(int length)
@@ -334,7 +336,7 @@ namespace Bing.Utils.Drawing
             {
                 return Color.Black;
             }
-            
+
             Random rnd = Random;
             return IsBgLight()
                 ? Color.FromArgb(rnd.Next(130, 200), rnd.Next(130, 200), rnd.Next(130, 200))
@@ -358,7 +360,7 @@ namespace Bing.Utils.Drawing
         /// <param name="g">绘制器</param>
         /// <param name="width">宽度</param>
         /// <param name="height">高度</param>
-        private void DrawDisorderPoint(Graphics g,int width,int height)
+        private void DrawDisorderPoint(Graphics g, int width, int height)
         {
             var pointPen = new Pen(Color.Black, 0);
             int x = 0;
@@ -453,7 +455,7 @@ namespace Bing.Utils.Drawing
         /// <param name="index">当前字符索引</param>
         /// <param name="height">图片高度</param>
         /// <returns></returns>
-        private Tuple<int, int> GetPosition(int index,int height)
+        private Tuple<int, int> GetPosition(int index, int height)
         {
             int x = FontWidth / 4 + FontWidth * index;
             int y = 3;

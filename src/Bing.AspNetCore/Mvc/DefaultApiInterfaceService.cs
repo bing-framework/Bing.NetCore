@@ -54,7 +54,6 @@ namespace Bing.AspNetCore.Mvc
                     return _controllerDescriptors;
                 }
 
-
                 _controllerDescriptors = new List<ControllerDescriptor>();
 
                 var controllerFeature = new ControllerFeature();
@@ -91,7 +90,7 @@ namespace Bing.AspNetCore.Mvc
                 var controllers = GetAllController();
                 foreach (var controller in controllers)
                 {
-                    foreach (var method in controller.TypeInfo.GetMethods(BindingFlags.Public|BindingFlags.Instance|BindingFlags.DeclaredOnly))
+                    foreach (var method in controller.TypeInfo.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                     {
                         if (!method.CustomAttributes.Any(m =>
                             m.AttributeType == typeof(HttpGetAttribute)

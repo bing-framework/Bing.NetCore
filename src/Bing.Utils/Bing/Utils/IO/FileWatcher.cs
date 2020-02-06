@@ -190,7 +190,7 @@ namespace Bing.Utils.IO
             fsw.NotifyFilter = (NotifyFilters)383;
             fsw.EnableRaisingEvents = true;
             return fsw;
-        }        
+        }
     }
 
     /// <summary>

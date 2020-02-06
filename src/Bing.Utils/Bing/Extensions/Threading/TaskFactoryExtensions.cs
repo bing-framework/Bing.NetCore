@@ -40,7 +40,7 @@ namespace Bing.Extensions
             {
                 // 清除取消令牌和计时器，并尝试转换为已完成状态
                 ctr1.Dispose();
-                ((Timer) self).Dispose();
+                ((Timer)self).Dispose();
                 tcs.TrySetResult(null);
             }, null, -1, -1);
 

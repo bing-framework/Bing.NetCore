@@ -7,7 +7,7 @@ namespace Bing.Net.Mail.Core
     /// <summary>
     /// 空电子邮件发送器
     /// </summary>
-    public class NullEmailSender:EmailSenderBase
+    public class NullEmailSender : EmailSenderBase
     {
         /// <summary>
         /// 初始化一个<see cref="NullEmailSender"/>类型的实例

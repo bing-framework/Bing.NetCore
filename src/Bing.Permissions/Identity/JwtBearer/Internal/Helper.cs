@@ -57,6 +57,7 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         /// 访问令牌
         /// </summary>
         AccessToken,
+
         /// <summary>
         /// 刷新令牌
         /// </summary>

@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.DingTalk
     /// <summary>
     /// 钉钉授权提供程序
     /// </summary>
-    public class DingTalkAuthorizationProvider: AuthorizationProviderBase<IDingTalkAuthorizationConfigProvider,DingTalkAuthorizationConfig>,IDingTalkAuthorizationProvider
+    public class DingTalkAuthorizationProvider : AuthorizationProviderBase<IDingTalkAuthorizationConfigProvider, DingTalkAuthorizationConfig>, IDingTalkAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

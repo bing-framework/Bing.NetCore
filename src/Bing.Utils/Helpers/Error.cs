@@ -1,7 +1,4 @@
-﻿using System;
-using Bing.Extensions;
-
-namespace Bing.Utils.Helpers
+﻿namespace Bing.Utils.Helpers
 {
     /// <summary>
     /// 错误操作

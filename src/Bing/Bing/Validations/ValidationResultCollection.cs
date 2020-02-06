@@ -42,7 +42,7 @@ namespace Bing.Validations
         public ValidationResultCollection(string result)
         {
             _results = new List<ValidationResult>();
-            if(string.IsNullOrWhiteSpace(result))
+            if (string.IsNullOrWhiteSpace(result))
                 return;
             _results.Add(new ValidationResult(result));
         }
@@ -253,7 +253,6 @@ namespace Bing.Validations
                 _resultsFlaggedByStrategy[name].AddRange(results);
             else
                 _resultsFlaggedByStrategy.Add(name, results);
-
         }
 
         /// <summary>

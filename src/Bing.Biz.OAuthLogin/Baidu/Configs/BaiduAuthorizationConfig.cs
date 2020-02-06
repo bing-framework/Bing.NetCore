@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Baidu.Configs
     /// <summary>
     /// 百度授权配置
     /// </summary>
-    public class BaiduAuthorizationConfig: AuthorizationConfigBase
+    public class BaiduAuthorizationConfig : AuthorizationConfigBase
     {
         /// <summary>
         /// 初始化一个<see cref="BaiduAuthorizationConfig"/>类型的实例

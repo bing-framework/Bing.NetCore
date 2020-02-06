@@ -24,6 +24,7 @@ namespace Bing.Permissions.Identity.Models
         [Required(ErrorMessage = "角色编码不能为空")]
         [StringLength(256, ErrorMessage = "角色编码输入过长，不能超过256位")]
         public string Code { get; set; }
+
         /// <summary>
         /// 角色名称
         /// </summary>
@@ -31,6 +32,7 @@ namespace Bing.Permissions.Identity.Models
         [Required(ErrorMessage = "角色名称不能为空")]
         [StringLength(256, ErrorMessage = "角色名称输入过长，不能超过256位")]
         public string Name { get; set; }
+
         /// <summary>
         /// 标准化角色名称
         /// </summary>
@@ -38,6 +40,7 @@ namespace Bing.Permissions.Identity.Models
         [Required(ErrorMessage = "标准化角色名称不能为空")]
         [StringLength(256, ErrorMessage = "标准化角色名称输入过长，不能超过256位")]
         public string NormalizedName { get; set; }
+
         /// <summary>
         /// 角色类型
         /// </summary>
@@ -45,63 +48,74 @@ namespace Bing.Permissions.Identity.Models
         [Required(ErrorMessage = "角色类型不能为空")]
         [StringLength(80, ErrorMessage = "角色类型输入过长，不能超过80位")]
         public string Type { get; set; }
+
         /// <summary>
         /// 是否管理员角色
         /// </summary>
         [Display(Name = "是否管理员角色")]
         [Required(ErrorMessage = "是否管理员角色不能为空")]
         public bool IsAdmin { get; set; }
+
         /// <summary>
         /// 是否默认角色
         /// </summary>
         [Display(Name = "是否默认角色")]
         [Required(ErrorMessage = "是否默认角色不能为空")]
         public bool IsDefault { get; set; }
+
         /// <summary>
         /// 是否系统角色
         /// </summary>
         [Display(Name = "是否系统角色")]
         [Required(ErrorMessage = "是否系统角色不能为空")]
         public bool IsSystem { get; set; }
+
         /// <summary>
         /// 备注
         /// </summary>
         [Display(Name = "备注")]
         [StringLength(500, ErrorMessage = "备注输入过长，不能超过500位")]
         public string Remark { get; set; }
+
         /// <summary>
         /// 拼音简码
         /// </summary>
         [Display(Name = "拼音简码")]
         [StringLength(200, ErrorMessage = "拼音简码输入过长，不能超过200位")]
         public string PinYin { get; set; }
+
         /// <summary>
         /// 签名
         /// </summary>
         [Display(Name = "签名")]
         [StringLength(256, ErrorMessage = "签名输入过长，不能超过256位")]
         public string Sign { get; set; }
+
         /// <summary>
         /// 是否删除
         /// </summary>
         [Display(Name = "是否删除")]
         [Required(ErrorMessage = "是否删除不能为空")]
         public bool IsDeleted { get; set; }
+
         /// <summary>
         /// 创建时间
         /// </summary>
         [Display(Name = "创建时间")]
         public DateTime? CreationTime { get; set; }
+
         /// <summary>
         /// 创建人标识
         /// </summary>
         [Display(Name = "创建人标识")]
         public Guid? CreatorId { get; set; }
+
         /// <summary>
         /// 最后修改时间
         /// </summary>
         [Display(Name = "最后修改时间")]
         public DateTime? LastModificationTime { get; set; }
+
         /// <summary>
         /// 最后修改人标识
         /// </summary>

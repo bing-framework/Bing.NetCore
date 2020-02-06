@@ -2,7 +2,6 @@
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Security.Encryptors;
-using Bing.Extensions;
 using Bing.Validations;
 
 namespace Bing.Permissions.Identity.Models

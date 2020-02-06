@@ -9,7 +9,7 @@ namespace Bing.Biz.OAuthLogin.Coding
     /// <summary>
     /// Coding.NET 授权提供程序
     /// </summary>
-    public class CodingAuthorizationProvider: AuthorizationProviderBase<ICodingAuthorizationConfigProvider,CodingAuthorizationConfig>,ICodingAuthorizationProvider
+    public class CodingAuthorizationProvider : AuthorizationProviderBase<ICodingAuthorizationConfigProvider, CodingAuthorizationConfig>, ICodingAuthorizationProvider
     {
         /// <summary>
         /// 跟踪日志名

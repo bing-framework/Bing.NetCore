@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.DingTalk.Configs
     /// <summary>
     /// 钉钉授权配置提供程序
     /// </summary>
-    public class DingTalkAuthorizationConfigProvider: AuthorizationConfigProviderBase<DingTalkAuthorizationConfig>,IDingTalkAuthorizationConfigProvider
+    public class DingTalkAuthorizationConfigProvider : AuthorizationConfigProviderBase<DingTalkAuthorizationConfig>, IDingTalkAuthorizationConfigProvider
     {
         /// <summary>
         /// 初始化一个<see cref="DingTalkAuthorizationConfigProvider"/>类型的实例

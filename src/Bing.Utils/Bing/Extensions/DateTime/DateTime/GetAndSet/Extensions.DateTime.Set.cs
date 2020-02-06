@@ -88,7 +88,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="dt">时间</param>
         /// <param name="year">年</param>
-        public static DateTime SetDate(this DateTime dt, int year)=> DateTimeFactory.Create(year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond, dt.Kind);
+        public static DateTime SetDate(this DateTime dt, int year) => DateTimeFactory.Create(year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond, dt.Kind);
 
         /// <summary>
         /// 设置日期

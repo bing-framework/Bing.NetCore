@@ -16,7 +16,7 @@ namespace Bing.Net.Mail.Abstractions
         /// 队列是否为空
         /// </summary>
         bool IsEmpty { get; }
-        
+
         /// <summary>
         /// 入队
         /// </summary>

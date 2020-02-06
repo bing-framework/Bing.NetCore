@@ -9,7 +9,7 @@ namespace Bing.Utils.Parameters.Parsers
     /// <summary>
     /// 参数解析器基类
     /// </summary>
-    public abstract class ParameterParserBase:IParameterParser
+    public abstract class ParameterParserBase : IParameterParser
     {
         /// <summary>
         /// 参数字典

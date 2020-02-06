@@ -42,8 +42,6 @@ namespace Bing
         /// <typeparam name="T">对象类型</typeparam>
         public static T DefaultValue<T>() => TypeDefault.Of<T>();
 
-
         #endregion
-
     }
 }

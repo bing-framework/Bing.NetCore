@@ -130,8 +130,8 @@ namespace Bing.Utils.Date
         public static DateTime FindNextDay(DateTime dt, DayOfWeek dayOfWeek)
         {
             var daysNeeded = (int)dayOfWeek - (int)dt.DayOfWeek;
-            return (int)dayOfWeek >= (int)dt.DayOfWeek 
-                ? dt.AddDays(daysNeeded) 
+            return (int)dayOfWeek >= (int)dt.DayOfWeek
+                ? dt.AddDays(daysNeeded)
                 : dt.AddDays(daysNeeded + 7);
         }
 
@@ -156,8 +156,8 @@ namespace Bing.Utils.Date
         public static DateTime FindDayBefore(DateTime dt, DayOfWeek dayOfWeek)
         {
             var daysSubtract = (int)dayOfWeek - (int)dt.DayOfWeek;
-            return (int)dayOfWeek < (int)dt.DayOfWeek 
-                ? dt.AddDays(daysSubtract) 
+            return (int)dayOfWeek < (int)dt.DayOfWeek
+                ? dt.AddDays(daysSubtract)
                 : dt.AddDays(daysSubtract - 7);
         }
 

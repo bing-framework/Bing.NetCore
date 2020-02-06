@@ -7,7 +7,7 @@ namespace Bing.Dependency
     /// <summary>
     /// 容器
     /// </summary>
-    public interface IContainer:IDisposable
+    public interface IContainer : IDisposable
     {
         /// <summary>
         /// 创建集合

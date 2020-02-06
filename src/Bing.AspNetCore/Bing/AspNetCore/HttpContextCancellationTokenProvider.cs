@@ -9,8 +9,8 @@ namespace Bing.AspNetCore
     /// <summary>
     /// 基于当前HttpContext的异步任务取消令牌提供程序
     /// </summary>
-    [Dependency(ServiceLifetime.Singleton,ReplaceExisting = true)]
-    public class HttpContextCancellationTokenProvider:ICancellationTokenProvider
+    [Dependency(ServiceLifetime.Singleton, ReplaceExisting = true)]
+    public class HttpContextCancellationTokenProvider : ICancellationTokenProvider
     {
         /// <summary>
         /// Http上下文访问器

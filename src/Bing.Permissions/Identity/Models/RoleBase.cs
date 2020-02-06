@@ -1,6 +1,4 @@
 ﻿using Bing.Extensions;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Str = Bing.Helpers.Str;
 
 namespace Bing.Permissions.Identity.Models

@@ -12,7 +12,7 @@ namespace Bing.Biz.Payments.Alipay.Services
     /// <summary>
     /// 支付宝二维码支付服务
     /// </summary>
-    public class AlipayQrCodePayService:AlipayServiceBase,IAlipayQrCodePayService
+    public class AlipayQrCodePayService : AlipayServiceBase, IAlipayQrCodePayService
     {
         /// <summary>
         /// 初始化一个<see cref="AlipayQrCodePayService"/>类型的实例
@@ -59,7 +59,7 @@ namespace Bing.Biz.Payments.Alipay.Services
         /// <returns></returns>
         protected override PayResult CreateResult(AlipayParameterBuilder builder, AlipayResult result)
         {
-            return new PayResult(result.Success,result.GetTradeNo(),result.Raw)
+            return new PayResult(result.Success, result.GetTradeNo(), result.Raw)
             {
                 Parameter = builder.ToString(),
                 Message = result.GetMessage(),

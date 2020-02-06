@@ -26,7 +26,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
-    public abstract class RepositoryBase<TEntity, TKey> :StoreBase<TEntity,TKey>,IRepository<TEntity, TKey> 
+    public abstract class RepositoryBase<TEntity, TKey> : StoreBase<TEntity, TKey>, IRepository<TEntity, TKey>
         where TEntity : class, IAggregateRoot<TEntity, TKey>
     {
         /// <summary>

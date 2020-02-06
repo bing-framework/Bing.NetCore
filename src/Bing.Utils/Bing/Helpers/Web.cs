@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Bing.Extensions;
-using Bing.Extensions;
 using Bing.Utils.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -455,7 +454,7 @@ namespace Bing.Helpers
         /// <param name="encode">编码字符串</param>
         private static string GetUpperEncode(string encode)
         {
-            var result=new StringBuilder();
+            var result = new StringBuilder();
             int index = int.MinValue;
             for (int i = 0; i < encode.Length; i++)
             {
@@ -530,7 +529,7 @@ namespace Bing.Helpers
             Response.Headers.Add("Content-Disposition", "attachment;filename=" + WebUtility.UrlEncode(Path.GetFileName(stream.Name)));
             Response.Headers.Add("Content-Length", size.ToString());
 
-            Task.Run(async () => { await Response.Body.WriteAsync(buffer, 0, (int) size); }).GetAwaiter().GetResult();
+            Task.Run(async () => { await Response.Body.WriteAsync(buffer, 0, (int)size); }).GetAwaiter().GetResult();
             Response.Body.Close();
         }
 

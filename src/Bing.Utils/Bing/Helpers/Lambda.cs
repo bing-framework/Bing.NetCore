@@ -51,11 +51,14 @@ namespace Bing.Helpers
             {
                 case ExpressionType.Lambda:
                     return GetMemberExpression(((LambdaExpression)expression).Body, right);
+
                 case ExpressionType.Convert:
                 case ExpressionType.Not:
                     return GetMemberExpression(((UnaryExpression)expression).Operand, right);
+
                 case ExpressionType.MemberAccess:
                     return (MemberExpression)expression;
+
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
                 case ExpressionType.GreaterThan:
@@ -65,6 +68,7 @@ namespace Bing.Helpers
                     return GetMemberExpression(right
                         ? ((BinaryExpression)expression).Right
                         : ((BinaryExpression)expression).Left);
+
                 case ExpressionType.Call:
                     return GetMethodCallExpressionName(expression);
             }
@@ -87,6 +91,7 @@ namespace Bing.Helpers
             }
             return left;
         }
+
         #endregion
 
         #region GetName(获取成员名称)
@@ -179,6 +184,7 @@ namespace Bing.Helpers
             {
                 case ExpressionType.MemberAccess:
                     return IsValueExpression(((MemberExpression)expression).Expression);
+
                 case ExpressionType.Constant:
                     return true;
             }
@@ -226,8 +232,10 @@ namespace Bing.Helpers
             {
                 case ExpressionType.Lambda:
                     return GetValue(((LambdaExpression)expression).Body);
+
                 case ExpressionType.Convert:
                     return GetValue(((UnaryExpression)expression).Operand);
+
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
                 case ExpressionType.GreaterThan:
@@ -238,12 +246,16 @@ namespace Bing.Helpers
                     if (hasParameter)
                         return GetValue(((BinaryExpression)expression).Right);
                     return GetValue(((BinaryExpression)expression).Left);
+
                 case ExpressionType.Call:
                     return GetMethodCallExpressionValue(expression);
+
                 case ExpressionType.MemberAccess:
                     return GetMemberValue((MemberExpression)expression);
+
                 case ExpressionType.Constant:
                     return GetConstantExpressionValue(expression);
+
                 case ExpressionType.Not:
                     if (expression.Type == typeof(bool))
                         return false;
@@ -264,8 +276,10 @@ namespace Bing.Helpers
             {
                 case ExpressionType.Convert:
                     return HasParameter(((UnaryExpression)expression).Operand);
+
                 case ExpressionType.MemberAccess:
                     return HasParameter(((MemberExpression)expression).Expression);
+
                 case ExpressionType.Parameter:
                     return true;
             }
@@ -343,20 +357,28 @@ namespace Bing.Helpers
             {
                 case ExpressionType.Lambda:
                     return GetOperator(((LambdaExpression)expression).Body);
+
                 case ExpressionType.Convert:
                     return GetOperator(((UnaryExpression)expression).Operand);
+
                 case ExpressionType.Equal:
                     return Operator.Equal;
+
                 case ExpressionType.NotEqual:
                     return Operator.NotEqual;
+
                 case ExpressionType.GreaterThan:
                     return Operator.Greater;
+
                 case ExpressionType.LessThan:
                     return Operator.Less;
+
                 case ExpressionType.GreaterThanOrEqual:
                     return Operator.GreaterEqual;
+
                 case ExpressionType.LessThanOrEqual:
                     return Operator.LessEqual;
+
                 case ExpressionType.Call:
                     return GetMethodCallExpressionOperator(expression);
             }
@@ -374,8 +396,10 @@ namespace Bing.Helpers
             {
                 case "contains":
                     return Operator.Contains;
+
                 case "endswith":
                     return Operator.Ends;
+
                 case "startswith":
                     return Operator.Starts;
             }
@@ -398,8 +422,10 @@ namespace Bing.Helpers
             {
                 case ExpressionType.Lambda:
                     return GetParameter(((LambdaExpression)expression).Body);
+
                 case ExpressionType.Convert:
                     return GetParameter(((UnaryExpression)expression).Operand);
+
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
                 case ExpressionType.GreaterThan:
@@ -407,10 +433,13 @@ namespace Bing.Helpers
                 case ExpressionType.LessThan:
                 case ExpressionType.LessThanOrEqual:
                     return GetParameter(((BinaryExpression)expression).Left);
+
                 case ExpressionType.MemberAccess:
                     return GetParameter(((MemberExpression)expression).Expression);
+
                 case ExpressionType.Call:
                     return GetParameter(((MethodCallExpression)expression).Object);
+
                 case ExpressionType.Parameter:
                     return (ParameterExpression)expression;
             }
@@ -458,14 +487,17 @@ namespace Bing.Helpers
                 case ExpressionType.Lambda:
                     AddPredicates(((LambdaExpression)expression).Body, result, group);
                     break;
+
                 case ExpressionType.OrElse:
                     AddPredicates(((BinaryExpression)expression).Left, result, group);
                     AddPredicates(((BinaryExpression)expression).Right, result, CreateGroup(result));
                     break;
+
                 case ExpressionType.AndAlso:
                     AddPredicates(((BinaryExpression)expression).Left, result, group);
                     AddPredicates(((BinaryExpression)expression).Right, result, group);
                     break;
+
                 default:
                     group.Add(expression);
                     break;

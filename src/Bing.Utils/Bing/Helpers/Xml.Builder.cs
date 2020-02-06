@@ -227,6 +227,5 @@ namespace Bing.Helpers
         public override string ToString() => Document.OuterXml;
 
         #endregion
-
     }
 }

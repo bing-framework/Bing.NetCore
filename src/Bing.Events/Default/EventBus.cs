@@ -12,7 +12,7 @@ namespace Bing.Events.Default
         /// <summary>
         /// 事件处理器服务
         /// </summary>
-        public IEventHandlerManager Manager { get; set; }        
+        public IEventHandlerManager Manager { get; set; }
 
         /// <summary>
         /// 初始化一个<see cref="EventBus"/>类型的实例
@@ -45,6 +45,6 @@ namespace Bing.Events.Default
                 }
                 await handler.HandleAsync(@event);
             }
-        }        
+        }
     }
 }

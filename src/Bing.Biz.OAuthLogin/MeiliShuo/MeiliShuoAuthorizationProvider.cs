@@ -7,9 +7,8 @@ namespace Bing.Biz.OAuthLogin.MeiliShuo
     /// <summary>
     /// 美丽说授权提供程序
     /// </summary>
-    public class MeiliShuoAuthorizationProvider: AuthorizationProviderBase<IMeiliShuoAuthorizationConfigProvider, MeiliShuoAuthorizationConfig>,IMeiliShuoAuthorizationProvider
+    public class MeiliShuoAuthorizationProvider : AuthorizationProviderBase<IMeiliShuoAuthorizationConfigProvider, MeiliShuoAuthorizationConfig>, IMeiliShuoAuthorizationProvider
     {
-        
         /// <summary>
         /// PC端授权地址
         /// </summary>

@@ -5,7 +5,6 @@ using Bing.Datas.Sql.Builders.Clauses;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Matedatas;
 
-
 namespace Bing.Datas.Dapper.MySql
 {
     /// <summary>

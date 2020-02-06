@@ -7,7 +7,6 @@ using Autofac;
 using Bing.Events.Handlers;
 using Bing.Helpers;
 using Bing.Reflections;
-using Bing.Utils.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dependency
@@ -41,7 +40,7 @@ namespace Bing.Dependency
         /// 所有程序集查找器
         /// </summary>
         private readonly IAllAssemblyFinder _allAssemblyFinder;
-        
+
         /// <summary>
         /// 程序集列表
         /// </summary>
@@ -161,7 +160,7 @@ namespace Bing.Dependency
                 _builder.RegisterType(handler)
                     .As(handler.FindInterfaces(
                         (filter, criteria) => filter.IsGenericType &&
-                                              ((Type) criteria).IsAssignableFrom(filter.GetGenericTypeDefinition()),
+                                              ((Type)criteria).IsAssignableFrom(filter.GetGenericTypeDefinition()),
                         handlerType)).InstancePerLifetimeScope();
             }
         }

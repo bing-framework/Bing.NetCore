@@ -12,11 +12,13 @@ namespace Bing.Webs.Commons
         /// </summary>
         [Description("成功")]
         Ok = 1,
+
         /// <summary>
         /// 失败
         /// </summary>
         [Description("失败")]
         Fail = 2,
+
         /// <summary>
         /// 尚未登录
         /// </summary>

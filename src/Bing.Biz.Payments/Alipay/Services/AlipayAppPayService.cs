@@ -11,7 +11,7 @@ namespace Bing.Biz.Payments.Alipay.Services
     /// <summary>
     /// 支付宝App支付服务
     /// </summary>
-    public class AlipayAppPayService:AlipayServiceBase,IAlipayAppPayService
+    public class AlipayAppPayService : AlipayServiceBase, IAlipayAppPayService
     {
         /// <summary>
         /// 初始化一个<see cref="AlipayAppPayService"/>类型的实例
@@ -42,7 +42,7 @@ namespace Bing.Biz.Payments.Alipay.Services
         {
             var result = builder.Result(true);
             WriteLog(config, builder, result);
-            return Task.FromResult(new PayResult() {Result = result});
+            return Task.FromResult(new PayResult() { Result = result });
         }
 
         /// <summary>

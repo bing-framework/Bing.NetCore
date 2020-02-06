@@ -5,7 +5,7 @@ namespace Bing.Net.Mail.Core
     /// <summary>
     /// 邮件队列服务
     /// </summary>
-    public class MailQueueService:IMailQueueService
+    public class MailQueueService : IMailQueueService
     {
         /// <summary>
         /// 邮件队列提供程序

@@ -7,7 +7,7 @@ namespace Bing.EasyCaching
     /// <summary>
     /// EasyCaching缓存管理 - 异步操作
     /// </summary>
-    public partial class CacheManager: ICache
+    public partial class CacheManager : ICache
     {
         /// <summary>
         /// 是否存在指定键的缓存

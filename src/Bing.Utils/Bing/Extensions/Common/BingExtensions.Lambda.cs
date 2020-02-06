@@ -281,20 +281,28 @@ namespace Bing.Extensions
             {
                 case Operator.Equal:
                     return left.Equal(value);
+
                 case Operator.NotEqual:
                     return left.NotEqual(value);
+
                 case Operator.Greater:
                     return left.Greater(value);
+
                 case Operator.GreaterEqual:
                     return left.GreaterEqual(value);
+
                 case Operator.Less:
                     return left.Less(value);
+
                 case Operator.LessEqual:
                     return left.LessEqual(value);
+
                 case Operator.Starts:
                     return left.StartsWith(value);
+
                 case Operator.Ends:
                     return left.EndsWith(value);
+
                 case Operator.Contains:
                     return left.Contains(value);
             }
@@ -313,14 +321,19 @@ namespace Bing.Extensions
             {
                 case Operator.Equal:
                     return left.Equal(value);
+
                 case Operator.NotEqual:
                     return left.NotEqual(value);
+
                 case Operator.Greater:
                     return left.Greater(value);
+
                 case Operator.GreaterEqual:
                     return left.GreaterEqual(value);
+
                 case Operator.Less:
                     return left.Less(value);
+
                 case Operator.LessEqual:
                     return left.LessEqual(value);
             }

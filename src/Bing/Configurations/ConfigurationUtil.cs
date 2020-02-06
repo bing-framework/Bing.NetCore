@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Bing.Extensions;
-using Bing.Extensions;
 using Microsoft.Extensions.Configuration;
 
 namespace Bing.Configurations
@@ -35,7 +34,6 @@ namespace Bing.Configurations
             builder = builder.AddEnvironmentVariables();
             if (options.EnvironmentName == "Development")
             {
-
             }
 
             return builder.Build();

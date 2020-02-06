@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Bing.Helpers;
 using Bing.Utils.Files;
-using Bing.Utils.Helpers;
 using FileInfo = System.IO.FileInfo;
 
 namespace Bing.Utils.IO

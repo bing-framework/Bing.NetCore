@@ -8,7 +8,7 @@ namespace Bing.Datas.Dapper.PgSql
     /// <summary>
     /// PgSql Sql生成器
     /// </summary>
-    public class PgSqlBuilder:SqlBuilderBase
+    public class PgSqlBuilder : SqlBuilderBase
     {
         /// <summary>
         /// 初始化一个<see cref="PgSqlBuilder"/>类型的实例
@@ -16,7 +16,7 @@ namespace Bing.Datas.Dapper.PgSql
         /// <param name="matedata">实体元数据解析器</param>
         /// <param name="tableDatabase">表数据库</param>
         /// <param name="parameterManager">参数管理器</param>
-        public PgSqlBuilder(IEntityMatedata matedata = null,ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(matedata,tableDatabase, parameterManager) { }
+        public PgSqlBuilder(IEntityMatedata matedata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(matedata, tableDatabase, parameterManager) { }
 
         /// <summary>
         /// 克隆

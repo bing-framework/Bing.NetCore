@@ -81,13 +81,13 @@ namespace Bing.Utils.IO
         /// <returns></returns>
         public static List<FileInfo> GetFilesFromQueue(string queueDir, int takeCount, string type = "")
         {
-            var items=new List<FileInfo>();
+            var items = new List<FileInfo>();
             if (!Directory.Exists(queueDir))
             {
                 return items;
             }
 
-            DirectoryInfo homeDir=new DirectoryInfo(queueDir);
+            DirectoryInfo homeDir = new DirectoryInfo(queueDir);
             DirectoryInfo[] dirs = homeDir.GetDirectories().OrderBy(p => Convert.ToInt32(p.Name)).ToArray();
             for (var i = 0; i < dirs.Length; i++)
             {
@@ -179,7 +179,6 @@ namespace Bing.Utils.IO
             {
                 using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    
                     using (var sr = new StreamReader(fs))
                     {
                         content = sr.ReadToEnd();
@@ -198,10 +197,8 @@ namespace Bing.Utils.IO
         /// <returns></returns>
         public static DirectoryInfo[] GetQueueDirs(string queueDir)
         {
-            DirectoryInfo homeDir=new DirectoryInfo(queueDir);
+            DirectoryInfo homeDir = new DirectoryInfo(queueDir);
             return homeDir.GetDirectories();
         }
-
-        
     }
 }

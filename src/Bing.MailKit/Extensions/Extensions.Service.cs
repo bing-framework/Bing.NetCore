@@ -16,14 +16,14 @@ namespace Bing.MailKit.Extensions
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="setupAcion">配置操作</param>
-        public static void AddMailKit(this IServiceCollection services,Action<EmailOptions> setupAcion)
+        public static void AddMailKit(this IServiceCollection services, Action<EmailOptions> setupAcion)
         {
             var options = new EmailOptions();
             setupAcion?.Invoke(options);
             services.TryAddSingleton<IEmailConfigProvider>(new DefaultEmailConfigProvider(options.EmailConfig));
             services.TryAddSingleton<IMailKitConfigProvider>(new DefaultMailKitConfigProvider(options.MailKitConfig));
             services.TryAddScoped<IMailKitSmtpBuilder, DefaultMailKitSmtpBuilder>();
-            services.TryAddScoped<IMailKitEmailSender,MailKitEmailSender>();
+            services.TryAddScoped<IMailKitEmailSender, MailKitEmailSender>();
         }
 
         /// <summary>

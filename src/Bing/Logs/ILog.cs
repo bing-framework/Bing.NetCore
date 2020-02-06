@@ -5,7 +5,7 @@ namespace Bing.Logs
 {
     /// <summary>
     /// 日志操作
-    /// </summary>    
+    /// </summary>
     public interface ILog
     {
         /// <summary>

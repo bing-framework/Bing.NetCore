@@ -5,7 +5,7 @@ namespace Bing.Net.Mail.Configs
     /// <summary>
     /// 电子邮件默认配置提供器
     /// </summary>
-    public class DefaultEmailConfigProvider:IEmailConfigProvider
+    public class DefaultEmailConfigProvider : IEmailConfigProvider
     {
         /// <summary>
         /// 配置

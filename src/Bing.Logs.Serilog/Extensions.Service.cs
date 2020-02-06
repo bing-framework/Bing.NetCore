@@ -30,9 +30,9 @@ namespace Bing.Logs.Serilog
             {
                 SerilogProvider.InitConfiguration();
             }
-            services.TryAddSingleton<ILogProviderFactory,Bing.Logs.Serilog.LogProviderFactory>();
+            services.TryAddSingleton<ILogProviderFactory, Bing.Logs.Serilog.LogProviderFactory>();
             services.TryAddSingleton<ILogFormat, ContentFormat>();
-            services.TryAddScoped<ILogContext,Bing.Logs.Core.LogContext>();
+            services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
             services.TryAddScoped<ILog, Log>();
         }
 

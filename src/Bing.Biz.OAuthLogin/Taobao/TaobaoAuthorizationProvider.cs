@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Taobao
     /// <summary>
     /// 淘宝授权提供程序
     /// </summary>
-    public class TaobaoAuthorizationProvider:AuthorizationProviderBase<ITaobaoAuthorizationConfigProvider,TaobaoAuthorizationConfig>,ITaobaoAuthorizationProvider
+    public class TaobaoAuthorizationProvider : AuthorizationProviderBase<ITaobaoAuthorizationConfigProvider, TaobaoAuthorizationConfig>, ITaobaoAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

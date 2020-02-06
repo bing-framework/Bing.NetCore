@@ -2,7 +2,6 @@
 using System.Linq;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
-using Bing.Extensions;
 
 namespace Bing.Logs.Extensions
 {

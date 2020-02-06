@@ -16,7 +16,7 @@ namespace Bing.Utils.Json.Converters
         /// <summary>
         /// 时间转换器
         /// </summary>
-        private static readonly IsoDateTimeConverter DtConverter=new IsoDateTimeConverter(){DateTimeFormat = "yyyy-MM-dd HH:mm:ss"};
+        private static readonly IsoDateTimeConverter DtConverter = new IsoDateTimeConverter() { DateTimeFormat = "yyyy-MM-dd HH:mm:ss" };
 
         /// <summary>
         /// 写入JSON对象

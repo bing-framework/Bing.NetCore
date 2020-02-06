@@ -133,7 +133,7 @@ namespace Bing.Extensions
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             unsafe
             {
-                byte* ptr = (byte*) data.Scan0;
+                byte* ptr = (byte*)data.Scan0;
                 int offset = data.Stride - width * 3;
                 for (int y = 0; y < height; y++)
                 {
@@ -358,7 +358,7 @@ namespace Bing.Extensions
             byte gray = binBytes[point.X, point.Y];
             stack.Push(point);
 
-            while (stack.Count>0)
+            while (stack.Count > 0)
             {
                 var p = stack.Pop();
                 if (p.X <= 0 || p.X >= width || p.Y <= 0 || p.Y >= height)

@@ -231,8 +231,6 @@ namespace Bing.Utils.Maths
                     return node;
             }
         }
-
-
     }
 
     /// <summary>
@@ -291,34 +289,42 @@ namespace Bing.Utils.Maths
         /// 未知
         /// </summary>
         Unknown,
+
         /// <summary>
         /// 括号"("
         /// </summary>
         OpenBracket,
+
         /// <summary>
         /// 括号")"
         /// </summary>
         CloseBracket,
+
         /// <summary>
         /// 加 +
         /// </summary>
         Add,
+
         /// <summary>
         /// 减 -
         /// </summary>
         Sub,
+
         /// <summary>
         /// 乘 *
         /// </summary>
         Mul,
+
         /// <summary>
         /// 除 /
         /// </summary>
         Div,
+
         /// <summary>
         /// 数值
         /// </summary>
         Number,
+
         /// <summary>
         /// 等于
         /// </summary>
@@ -328,6 +334,5 @@ namespace Bing.Utils.Maths
 
     public class MathEvaluatorException : Exception
     {
-
     }
 }

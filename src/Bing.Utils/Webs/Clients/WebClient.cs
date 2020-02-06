@@ -31,7 +31,7 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="url">请求地址</param>
         public IHttpRequest Delete(string url) => new HttpRequest(HttpMethod.Delete, url);
     }
-    
+
     /// <summary>
     /// Web客户端
     /// </summary>

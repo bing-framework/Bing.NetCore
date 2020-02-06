@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Github.Configs;
 using Bing.Helpers;
-using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 using Bing.Utils.Parameters.Parsers;
 
@@ -12,7 +11,7 @@ namespace Bing.Biz.OAuthLogin.Github
     /// <summary>
     /// Github授权提供程序
     /// </summary>
-    public class GithubAuthorizationProvider: AuthorizationProviderBase<IGithubAuthorizationConfigProvider,GithubAuthorizationConfig>,IGithubAuthorizationProvider
+    public class GithubAuthorizationProvider : AuthorizationProviderBase<IGithubAuthorizationConfigProvider, GithubAuthorizationConfig>, IGithubAuthorizationProvider
     {
         /// <summary>
         /// 跟踪日志名
@@ -109,7 +108,7 @@ namespace Bing.Biz.OAuthLogin.Github
         /// <param name="builder">授权参数生成器</param>
         /// <param name="appName">应用名称</param>
         /// <returns></returns>
-        private async Task<string> Request(AuthorizationParameterBuilder builder,string appName)
+        private async Task<string> Request(AuthorizationParameterBuilder builder, string appName)
         {
             return await Web.Client().Get(builder.ToString()).Header("User-Agent", appName).ResultAsync();
         }

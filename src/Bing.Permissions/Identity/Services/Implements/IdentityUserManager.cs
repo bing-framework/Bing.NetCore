@@ -35,7 +35,7 @@ namespace Bing.Permissions.Identity.Services.Implements
             , ILookupNormalizer keyNormalizer
             , IdentityErrorDescriber errors
             , IServiceProvider services
-            , ILogger<UserManager<TUser>> logger) 
+            , ILogger<UserManager<TUser>> logger)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
         }
@@ -69,7 +69,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         public virtual async Task<IdentityResult> UpdatePasswordAsync(TUser user, string newPassword)
         {
             ThrowIfDisposed();
-            if(user==null)
+            if (user == null)
                 throw new ArgumentNullException(nameof(user));
             var result = await UpdatePasswordHash(user, newPassword, true);
             if (!result.Succeeded)

@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Bing.Helpers;
-using Bing.Utils.Helpers;
 
 namespace Bing.Utils.IO
 {
@@ -45,6 +44,5 @@ namespace Bing.Utils.IO
         }
 
         #endregion
-
     }
 }

@@ -8,7 +8,7 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 访问令牌参数
     /// </summary>
-    public class AccessTokenParam: IValidation
+    public class AccessTokenParam : IValidation
     {
         /// <summary>
         /// 授权类型

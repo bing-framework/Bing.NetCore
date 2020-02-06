@@ -46,7 +46,7 @@ namespace Bing
         /// <param name="query">数据源</param>
         /// <param name="predicate">查询条件</param>
         /// <param name="condition">判断条件，该值为true时添加查询条件，否则忽略</param>
-        public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate, bool condition) 
+        public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate, bool condition)
             where TEntity : class
         {
             if (query == null)
@@ -64,7 +64,7 @@ namespace Bing
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="query">数据源</param>
         /// <param name="predicate">查询条件，如果参数为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-        public static IQueryable<TEntity> WhereIfNotEmpty<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate) 
+        public static IQueryable<TEntity> WhereIfNotEmpty<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate)
             where TEntity : class
         {
             if (query == null)
@@ -89,7 +89,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, int? min, int? max, Boundary boundary = Boundary.Both) 
+        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, int? min, int? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
             if (query == null)
@@ -107,7 +107,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max, Boundary boundary = Boundary.Both) 
+        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
             if (query == null)
@@ -125,7 +125,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min, decimal? max, Boundary boundary = Boundary.Both) 
+        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
             if (query == null)
@@ -143,7 +143,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min, DateTime? max, Boundary boundary = Boundary.Both) 
+        public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min, DateTime? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
             if (query == null)
@@ -195,7 +195,7 @@ namespace Bing
             return new PagerList<TEntity>(pager, query.Page(pager).ToList());
         }
 
-        #endregion        
+        #endregion
 
     }
 }

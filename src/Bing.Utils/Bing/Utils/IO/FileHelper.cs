@@ -80,7 +80,7 @@ namespace Bing.Utils.IO
         /// <param name="deleteCount">删除次数</param>
         /// <param name="randomData">随机数据填充文件，默认true</param>
         /// <param name="blanks">空白填充文件，默认false</param>
-        /// <returns>true:粉碎成功,false:粉碎失败</returns>        
+        /// <returns>true:粉碎成功,false:粉碎失败</returns>
         public static bool KillFile(string fileName, int deleteCount, bool randomData = true, bool blanks = false)
         {
             const int bufferLength = 1024000;
@@ -180,7 +180,6 @@ namespace Bing.Utils.IO
                 }
                 catch
                 {
-
                     ret = false;
                 }
             }
@@ -455,7 +454,7 @@ namespace Bing.Utils.IO
         /// <param name="delete">分割后是否删除源文件</param>
         /// <param name="encrypt">是否加密</param>
         /// <param name="sign">签名</param>
-        public static void Split(string file, string dirPath,string suffix = "bin", int size = 2048, bool delete = false, bool encrypt = false,
+        public static void Split(string file, string dirPath, string suffix = "bin", int size = 2048, bool delete = false, bool encrypt = false,
             int sign = 0)
         {
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
@@ -466,13 +465,13 @@ namespace Bing.Utils.IO
             var fileName = Path.GetFileNameWithoutExtension(file);
             var fileSize = GetFileSize(file);
             var total = GetSplitFileTotal(fileSize.GetSize(), size);
-            using (var rs=new FileStream(file, FileMode.Open,FileAccess.Read))
+            using (var rs = new FileStream(file, FileMode.Open, FileAccess.Read))
             {
                 var data = new byte[1024];
                 int len = 0, i = 1;
                 int readLen = 0;
                 FileStream ws = null;
-                while (readLen>0||(readLen=rs.Read(data,0,data.Length))>0)
+                while (readLen > 0 || (readLen = rs.Read(data, 0, data.Length)) > 0)
                 {
                     if (len == 0 || ws == null)
                     {
@@ -529,7 +528,7 @@ namespace Bing.Utils.IO
         /// <returns></returns>
         public static bool Compress(string file, string saveFile)
         {
-            if (string.IsNullOrWhiteSpace(file)|| string.IsNullOrWhiteSpace(saveFile))
+            if (string.IsNullOrWhiteSpace(file) || string.IsNullOrWhiteSpace(saveFile))
             {
                 return false;
             }
@@ -557,7 +556,6 @@ namespace Bing.Utils.IO
             {
                 return false;
             }
-            
         }
 
         #endregion
@@ -647,7 +645,7 @@ namespace Bing.Utils.IO
 
                 using (var fs = File.Create(saveFullPath))
                 {
-                    using (var zipStream=new GZipStream(fs,CompressionMode.Compress))
+                    using (var zipStream = new GZipStream(fs, CompressionMode.Compress))
                     {
                         ms.Position = 0;
                         ms.CopyTo(zipStream);
@@ -665,7 +663,7 @@ namespace Bing.Utils.IO
         /// </summary>
         /// <param name="zipPath">压缩文件路径</param>
         /// <param name="targetPath">解压目录</param>
-        public static void DecompressMulti(string zipPath,string targetPath)
+        public static void DecompressMulti(string zipPath, string targetPath)
         {
             if (string.IsNullOrWhiteSpace(zipPath) || string.IsNullOrWhiteSpace(targetPath))
             {
@@ -678,17 +676,17 @@ namespace Bing.Utils.IO
                 return;
             }
 
-            using (var fs=File.Open(zipPath,FileMode.Open))
+            using (var fs = File.Open(zipPath, FileMode.Open))
             {
-                using (var ms=new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    using (var zipStream=new GZipStream(fs,CompressionMode.Decompress))
+                    using (var zipStream = new GZipStream(fs, CompressionMode.Decompress))
                     {
                         zipStream.CopyTo(ms);
                     }
 
                     ms.Position = 0;
-                    while (ms.Position!=ms.Length)
+                    while (ms.Position != ms.Length)
                     {
                         ms.Read(fileSize, 0, fileSize.Length);
                         var fileNameLength = BitConverter.ToInt32(fileSize, 0);
@@ -700,7 +698,7 @@ namespace Bing.Utils.IO
                         var fileContentLength = BitConverter.ToInt32(fileSize, 0);
                         var fileContentBytes = new byte[fileContentLength];
                         ms.Read(fileContentBytes, 0, fileContentBytes.Length);
-                        using (var childFileStream=File.Create(fileFullName))
+                        using (var childFileStream = File.Create(fileFullName))
                         {
                             childFileStream.Write(fileContentBytes, 0, fileContentBytes.Length);
                         }
@@ -721,6 +719,7 @@ namespace Bing.Utils.IO
         /// 追加
         /// </summary>
         Append = 1,
+
         /// <summary>
         /// 覆盖
         /// </summary>

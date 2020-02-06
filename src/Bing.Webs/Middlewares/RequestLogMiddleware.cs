@@ -17,7 +17,7 @@ namespace Bing.Webs.Middlewares
         /// <summary>
         /// 方法
         /// </summary>
-        private readonly RequestDelegate _next;        
+        private readonly RequestDelegate _next;
 
         /// <summary>
         /// 初始化一个<see cref="RequestLogMiddleware"/>类型的实例
@@ -121,7 +121,7 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         /// <param name="response">Http响应</param>
         private async Task<string> FormatResponseAsync(HttpResponse response)
-        {            
+        {
             if (response.HasStarted)
             {
                 return string.Empty;

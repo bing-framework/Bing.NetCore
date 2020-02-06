@@ -1,7 +1,6 @@
 ﻿using Bing.Core.Modularity;
 using Bing.Exceptions;
 using Bing.Helpers;
-using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;

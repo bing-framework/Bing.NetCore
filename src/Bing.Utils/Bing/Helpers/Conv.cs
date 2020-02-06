@@ -334,11 +334,13 @@ namespace Bing.Helpers
                 case "no":
                 case "fail":
                     return false;
+
                 case "1":
                 case "是":
                 case "ok":
                 case "yes":
                     return true;
+
                 default:
                     return null;
             }

@@ -42,7 +42,7 @@ namespace Bing.Datas.EntityFramework.Extensions
             {
                 services.Configure<DataConfig>(configuration);
             }
-            
+
             services.TryAddScoped<TService>(t => t.GetService<TImplementation>());
             services.TryAddScoped<IUnitOfWork>(t => t.GetService<TImplementation>());
             return services;

@@ -9,7 +9,7 @@ namespace Bing.Datas.EntityFramework.Conventions
     /// <summary>
     /// 最大长度约定，用于ModelBuilder全局设置最大长度
     /// </summary>
-    public class HasMaxLengthAttributeConvention:PropertyAttributeConvention<HasMaxLengthAttribute>
+    public class HasMaxLengthAttributeConvention : PropertyAttributeConvention<HasMaxLengthAttribute>
     {
         /// <summary>
         /// 应用

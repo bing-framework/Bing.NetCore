@@ -10,12 +10,12 @@ namespace Bing.Utils.Date.Chinese
         /// <summary>
         /// 生肖 -简体
         /// </summary>
-        private static readonly string[] Animals = {"鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"};
+        private static readonly string[] Animals = { "鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪" };
 
         /// <summary>
         /// 生肖 - 繁体
         /// </summary>
-        private static readonly string[] Animalz = {"鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"};
+        private static readonly string[] Animalz = { "鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬" };
 
         /// <summary>
         /// 生肖开始年份。1900年为鼠年

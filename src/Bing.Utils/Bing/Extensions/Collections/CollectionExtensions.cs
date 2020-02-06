@@ -180,6 +180,7 @@ namespace Bing.Extensions
             collection.ReplaceItems(newItems, x => x);
         }
 
-        #endregion        
+        #endregion
+
     }
 }

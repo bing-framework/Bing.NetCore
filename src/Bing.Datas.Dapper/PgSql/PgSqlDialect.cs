@@ -5,7 +5,7 @@ namespace Bing.Datas.Dapper.PgSql
     /// <summary>
     /// PgSql方言
     /// </summary>
-    public class PgSqlDialect:DialectBase
+    public class PgSqlDialect : DialectBase
     {
         /// <summary>
         /// 起始转义标识符

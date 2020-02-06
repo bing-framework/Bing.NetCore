@@ -79,7 +79,9 @@ namespace Bing.Extensions
             return document.CreateNavigator();
         }
 
-        #endregion        
+        #endregion
+
+
 
         #region HexStringToBytes(16进制字符串转换成字节数组)
 

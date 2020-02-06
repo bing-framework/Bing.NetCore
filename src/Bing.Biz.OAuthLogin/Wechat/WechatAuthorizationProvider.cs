@@ -44,7 +44,7 @@ namespace Bing.Biz.OAuthLogin.Wechat
                 .ResponseType(param.ResponseType)
                 .Scope(param.Scope)
                 .State(param.State);
-        }        
+        }
 
         /// <summary>
         /// 处理授权地址

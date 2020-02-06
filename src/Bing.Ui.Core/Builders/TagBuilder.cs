@@ -44,7 +44,7 @@ namespace Bing.Ui.Builders
         /// <param name="renderMode">渲染模式</param>
         public TagBuilder(string tagName, TagRenderMode renderMode = TagRenderMode.Normal)
         {
-            _tagBuilder = new Microsoft.AspNetCore.Mvc.Rendering.TagBuilder(tagName) {TagRenderMode = renderMode};
+            _tagBuilder = new Microsoft.AspNetCore.Mvc.Rendering.TagBuilder(tagName) { TagRenderMode = renderMode };
             _classList = new List<string>();
         }
 

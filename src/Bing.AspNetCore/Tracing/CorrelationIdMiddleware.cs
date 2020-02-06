@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Bing.Dependency;
 using Bing.Tracing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;

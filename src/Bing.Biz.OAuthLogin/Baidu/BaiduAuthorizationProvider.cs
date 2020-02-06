@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Baidu
     /// <summary>
     /// 百度授权提供程序
     /// </summary>
-    public class BaiduAuthorizationProvider: AuthorizationProviderBase<IBaiduAuthorizationConfigProvider,BaiduAuthorizationConfig>,IBaiduAuthorizationProvider
+    public class BaiduAuthorizationProvider : AuthorizationProviderBase<IBaiduAuthorizationConfigProvider, BaiduAuthorizationConfig>, IBaiduAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

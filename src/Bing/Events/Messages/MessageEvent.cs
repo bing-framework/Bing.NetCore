@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Bing.Extensions;
-using Bing.Extensions;
 using Bing.Utils.Json;
 
 namespace Bing.Events.Messages

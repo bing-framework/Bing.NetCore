@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Gitee
     /// <summary>
     /// Gitee 授权用户信息结果
     /// </summary>
-    public class GiteeAuthorizationUserInfoResult: AuthorizationUserInfoResult
+    public class GiteeAuthorizationUserInfoResult : AuthorizationUserInfoResult
     {
         /// <summary>
         /// 头像地址

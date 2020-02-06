@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Bing.Biz.OAuthLogin.Core;
+﻿using Bing.Biz.OAuthLogin.Core;
 
 namespace Bing.Biz.OAuthLogin.QQ.Configs
 {
@@ -7,8 +6,8 @@ namespace Bing.Biz.OAuthLogin.QQ.Configs
     /// QQ 授权配置
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public class QQAuthorizationConfig: AuthorizationConfigBase
-    {        
+    public class QQAuthorizationConfig : AuthorizationConfigBase
+    {
         /// <summary>
         /// 初始化一个<see cref="QQAuthorizationConfig"/>类型的实例
         /// </summary>

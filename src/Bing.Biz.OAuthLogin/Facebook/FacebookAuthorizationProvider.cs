@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Facebook
     /// <summary>
     /// Facebook 授权提供程序
     /// </summary>
-    public class FacebookAuthorizationProvider: AuthorizationProviderBase<IFacebookAuthorizationConfigProvider,FacebookAuthorizationConfig>,IFacebookAuthorizationProvider
+    public class FacebookAuthorizationProvider : AuthorizationProviderBase<IFacebookAuthorizationConfigProvider, FacebookAuthorizationConfig>, IFacebookAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

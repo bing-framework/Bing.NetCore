@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Extensions;
 using Bing.Utils.IO;
 using Bing.Utils.Json;
 using Bing.Webs.Commons;
@@ -15,7 +14,7 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 跟踪日志过滤器
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class TraceLogAttribute : ActionFilterAttribute
     {
         /// <summary>

@@ -78,6 +78,7 @@ namespace Bing.Helpers
             var pattern = isRestrict ? @"^[1][3-8]\d{9}$" : @"^[1]\d{10}$";
             return value.IsMatch(pattern);
         }
+
         /// <summary>
         /// 是否手机号码
         /// </summary>
@@ -88,7 +89,7 @@ namespace Bing.Helpers
                 return false;
             value = value.Trim().Replace("^", "").Replace("$", "");
             /*
-             * 手机号码: 
+             * 手机号码:
              * 13[0-9], 14[5,7], 15[0, 1, 2, 3, 5, 6, 7, 8, 9], 17[6, 7, 8], 18[0-9], 170[0-9]
              * 移动号段: 134,135,136,137,138,139,150,151,152,157,158,159,182,183,184,187,188,147,178,1705
              * 联通号段: 130,131,132,155,156,185,186,145,176,1709
@@ -665,6 +666,7 @@ namespace Bing.Helpers
                 return false;
             return true;
         }
+
         #endregion
 
         #region IsPostalCode(是否中国邮政编码)
@@ -870,7 +872,7 @@ namespace Bing.Helpers
         /// <summary>
         /// 是否数字
         /// </summary>
-        /// <param name="input">输入值</param>        
+        /// <param name="input">输入值</param>
         public static bool IsNumber(string input)
         {
             if (input.IsEmpty())

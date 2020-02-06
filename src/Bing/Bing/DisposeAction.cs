@@ -1,6 +1,5 @@
 ﻿using System;
 using Bing.Helpers;
-using Bing.Utils.Helpers;
 
 namespace Bing
 {

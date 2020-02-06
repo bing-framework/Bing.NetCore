@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
@@ -8,15 +7,13 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Biz.Payments.Wechatpay.Services.Base
 {
     /// <summary>
     /// 微信支付服务
     /// </summary>
-    public abstract class WechatpayServiceBase:IPayService
+    public abstract class WechatpayServiceBase : IPayService
     {
         /// <summary>
         /// 配置提供器

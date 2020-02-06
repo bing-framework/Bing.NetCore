@@ -6,7 +6,7 @@ namespace Bing.Webs.Middlewares
     /// <summary>
     /// 允许CORS请求中间件
     /// </summary>
-    public class AllowCorsRequestMiddleware:IMiddleware
+    public class AllowCorsRequestMiddleware : IMiddleware
     {
         /// <summary>
         /// 方法

@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace Bing.Validations
+﻿namespace Bing.Validations
 {
     ///// <summary>
     ///// 验证结果集合
@@ -33,7 +29,6 @@ namespace Bing.Validations
     //    /// <summary>
     //    /// 成功验证结果集合
     //    /// </summary>
-        
 
     //    #endregion
 

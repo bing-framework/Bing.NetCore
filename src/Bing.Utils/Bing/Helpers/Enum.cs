@@ -260,6 +260,5 @@ namespace Bing.Helpers
         }
 
         #endregion
-
     }
 }

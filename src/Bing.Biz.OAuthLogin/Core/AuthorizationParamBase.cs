@@ -10,7 +10,7 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 授权参数基类
     /// </summary>
-    public class AuthorizationParamBase:IValidation
+    public class AuthorizationParamBase : IValidation
     {
         /// <summary>
         /// 授权类型
@@ -21,7 +21,7 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <summary>
         /// 重定向地址
         /// </summary>
-        public string RedirectUri { get; set; }        
+        public string RedirectUri { get; set; }
 
         /// <summary>
         /// 客户端的当前状态，可以指定任意值，认证服务器会原封不动地返回这个值

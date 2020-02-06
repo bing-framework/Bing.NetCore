@@ -17,7 +17,7 @@ namespace Bing.Serialization.Binary
         /// <returns></returns>
         public static byte[] Serialize(object obj)
         {
-            using (var memoryStream=new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
                 Serialize(obj, memoryStream);
                 return memoryStream.ToArray();
@@ -41,7 +41,7 @@ namespace Bing.Serialization.Binary
         /// <returns></returns>
         public static object Deserialize(byte[] bytes)
         {
-            using (var memoryStream=new MemoryStream(bytes))
+            using (var memoryStream = new MemoryStream(bytes))
             {
                 return Deserialize(memoryStream);
             }
@@ -64,7 +64,7 @@ namespace Bing.Serialization.Binary
         /// <returns></returns>
         public static object DeserializeExtended(byte[] bytes)
         {
-            using (var memoryStream=new MemoryStream(bytes))
+            using (var memoryStream = new MemoryStream(bytes))
             {
                 return DeserializeExtended(memoryStream);
             }
@@ -101,7 +101,7 @@ namespace Bing.Serialization.Binary
         /// <summary>
         /// 扩展序列化绑定器。允许序列化在运行时加载的程序集中定义的对象
         /// </summary>
-        private sealed class ExtendedSerializationBinder:SerializationBinder
+        private sealed class ExtendedSerializationBinder : SerializationBinder
         {
             /// <summary>
             /// 绑定类型

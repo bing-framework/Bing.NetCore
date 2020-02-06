@@ -90,6 +90,5 @@ namespace Bing.Extensions.Http
         }
 
         #endregion
-
     }
 }

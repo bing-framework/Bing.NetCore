@@ -115,6 +115,5 @@ namespace Bing.Helpers
         public static void UnZip(string zipFile, string targetDir) => ZipFile.ExtractToDirectory(zipFile, targetDir);
 
         #endregion
-
     }
 }

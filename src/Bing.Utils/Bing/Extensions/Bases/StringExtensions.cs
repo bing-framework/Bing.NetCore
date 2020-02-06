@@ -32,10 +32,13 @@ namespace Bing.Extensions
             {
                 case 1:
                     return value;
+
                 case 2:
                     return string.Concat(value, value);
+
                 case 3:
                     return string.Concat(value, value, value);
+
                 case 4:
                     return string.Concat(value, value, value, value);
             }
@@ -60,7 +63,7 @@ namespace Bing.Extensions
         {
             if (string.IsNullOrEmpty(value))
                 return string.Empty;
-            if(index>=value.Length)
+            if (index >= value.Length)
                 throw new IndexOutOfRangeException("参数索引值超出字符串的最大长度");
             var startIndex = Math.Max(0, index - left);
             var length = Math.Min(value.Length - startIndex, index - startIndex + right);
@@ -75,7 +78,7 @@ namespace Bing.Extensions
         /// 提取字符串中所有字母以及数字
         /// </summary>
         /// <param name="value">值</param>
-        public static string ExtractLettersNumbers(this string value) => value.Where(x=> !x.IsChinese() && char.IsLetterOrDigit(x))
+        public static string ExtractLettersNumbers(this string value) => value.Where(x => !x.IsChinese() && char.IsLetterOrDigit(x))
             .Aggregate(new StringBuilder(value.Length), (sb, c) => sb.Append(c))
             .ToString();
 
@@ -438,6 +441,7 @@ namespace Bing.Extensions
         #endregion
 
         #region WordCase(单词大小写)
+
         /// <summary>
         /// 首字母大写
         /// </summary>
@@ -706,18 +710,23 @@ namespace Bing.Extensions
                     case 32:
                         repl = " ";
                         break;
+
                     case 34:
                         repl = "\"";
                         break;
+
                     case 38:
                         repl = "&";
                         break;
+
                     case 60:
                         repl = "<";
                         break;
+
                     case 62:
                         repl = ">";
                         break;
+
                     default:
                         if (acode >= 32 && acode <= 127)
                         {
@@ -782,8 +791,8 @@ namespace Bing.Extensions
             var listStart = list.Take(old);
             var listEnd = list.Skip(old);
 
-            return string.Join(newValue, listStart) 
-                   + (listEnd.Any() ? oldValue : "") 
+            return string.Join(newValue, listStart)
+                   + (listEnd.Any() ? oldValue : "")
                    + string.Join(oldValue, listEnd);
         }
 

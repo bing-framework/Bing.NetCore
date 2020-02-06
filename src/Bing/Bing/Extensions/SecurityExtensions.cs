@@ -9,7 +9,7 @@ namespace Bing
     /// 安全扩展
     /// </summary>
     public static class SecurityExtensions
-    {        
+    {
         /// <summary>
         /// 获取身份标识
         /// </summary>

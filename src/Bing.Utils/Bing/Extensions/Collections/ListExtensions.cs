@@ -85,7 +85,7 @@ namespace Bing.Extensions
         {
             if (list == null || !list.Any())
                 return string.Empty;
-            var sb=new StringBuilder();
+            var sb = new StringBuilder();
             var listCount = list.Count;
             var listCountMinusOne = listCount - 1;
 
@@ -160,13 +160,13 @@ namespace Bing.Extensions
         /// <param name="step">递增值</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public static IList<T> Slice<T>(this IList<T> list, int? start, int? end,int? step)
+        public static IList<T> Slice<T>(this IList<T> list, int? start, int? end, int? step)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
             if (step == 0)
                 throw new ArgumentException($"{nameof(step)} 不能为0");
-            var result=new List<T>();
+            var result = new List<T>();
             if (list.Count == 0)
                 return result;
 
@@ -185,6 +185,7 @@ namespace Bing.Extensions
             return result;
         }
 
-        #endregion        
+        #endregion
+
     }
 }

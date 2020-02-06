@@ -10,7 +10,6 @@ using Bing.Domains.Repositories;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Helpers;
 using Dapper;
 
 namespace Bing.Datas.Dapper
@@ -187,7 +186,6 @@ namespace Bing.Datas.Dapper
         {
             return ToPagerList<TResult>(new Pager(page, pageSize), connection);
         }
-
 
         /// <summary>
         /// 获取分页列表

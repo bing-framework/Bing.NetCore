@@ -32,6 +32,7 @@ namespace Bing.Extensions
                 case 0x4947://gif
                 case 0x5089://png
                     return true;
+
                 default:
                     return false;
             }

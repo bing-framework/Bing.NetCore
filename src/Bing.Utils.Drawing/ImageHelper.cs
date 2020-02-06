@@ -35,12 +35,15 @@ namespace Bing.Utils.Drawing
             {
                 case ThumbnailMode.FixedBoth:
                     break;
+
                 case ThumbnailMode.FixedW:
                     toheight = oh * width / ow;
                     break;
+
                 case ThumbnailMode.FixedH:
                     towidth = ow * height / oh;
                     break;
+
                 case ThumbnailMode.Cut:
                     if (ow / (double)oh > towidth / (double)toheight)
                     {
@@ -253,7 +256,7 @@ namespace Bing.Utils.Drawing
                0x0005	PropertyTagGpsAltitudeRef
                0x0006	PropertyTagGpsAltitude
              */
-            var ids = new[] {0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006};
+            var ids = new[] { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006 };
             foreach (var id in ids)
             {
                 if (image.PropertyIdList.Contains(id))

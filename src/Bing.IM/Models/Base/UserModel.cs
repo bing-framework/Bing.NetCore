@@ -4,7 +4,7 @@
     /// 用户模型
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public class UserModel<TKey>:AvatarModelBase<TKey>
+    public class UserModel<TKey> : AvatarModelBase<TKey>
     {
         /// <summary>
         /// 用户名

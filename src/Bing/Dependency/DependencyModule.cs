@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Linq;
 using Bing.Core.Modularity;
 using Bing.Extensions;
-using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -63,7 +62,7 @@ namespace Bing.Dependency
         /// <param name="implementationType">要注册的服务实现类型</param>
         protected virtual void AddToServices(IServiceCollection services, Type implementationType)
         {
-            if(implementationType.IsAbstract||implementationType.IsInterface)
+            if (implementationType.IsAbstract || implementationType.IsInterface)
                 return;
             var lifetime = GetLifetimeOrNull(implementationType);
             if (lifetime == null)
@@ -139,7 +138,7 @@ namespace Bing.Dependency
         /// <param name="type">依赖注入实现类型</param>
         protected virtual Type[] GetImplementedInterfaces(Type type)
         {
-            var exceptInterfaces = new[] {typeof(IDisposable)};
+            var exceptInterfaces = new[] { typeof(IDisposable) };
             var interfaceTypes = type.GetInterfaces()
                 .Where(x => !exceptInterfaces.Contains(x) && !x.HasAttribute<IgnoreDependencyAttribute>()).ToArray();
             for (var index = 0; index < interfaceTypes.Length; index++)

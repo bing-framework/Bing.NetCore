@@ -3,8 +3,6 @@ using System.Linq;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Logs.Extensions
 {
@@ -20,7 +18,7 @@ namespace Bing.Logs.Extensions
         /// <param name="log">日志</param>
         public static void AppendTo(this Parameter parameter, ILog log)
         {
-            log.Params( parameter.Name, GetParameterValue(parameter), parameter.ParameterInfo.ParameterType.FullName);
+            log.Params(parameter.Name, GetParameterValue(parameter), parameter.ParameterInfo.ParameterType.FullName);
         }
 
         /// <summary>

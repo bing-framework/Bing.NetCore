@@ -135,7 +135,6 @@ namespace Bing.Applications
         where TUpdateRequest : IRequest, new()
         where TQueryParameter : IQueryParameter
     {
-
         /// <summary>
         /// 工作单元
         /// </summary>
@@ -151,7 +150,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         /// <param name="repository">仓储</param>
-        protected CrudServiceBase(IUnitOfWork unitOfWork, IRepository<TEntity, TKey> repository) : base(unitOfWork,repository)
+        protected CrudServiceBase(IUnitOfWork unitOfWork, IRepository<TEntity, TKey> repository) : base(unitOfWork, repository)
         {
             _unitOfWork = unitOfWork;
             _repository = repository;

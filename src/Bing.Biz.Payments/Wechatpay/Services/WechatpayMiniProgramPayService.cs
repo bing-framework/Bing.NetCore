@@ -9,15 +9,13 @@ using Bing.Biz.Payments.Wechatpay.Services.Base;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Biz.Payments.Wechatpay.Services
 {
     /// <summary>
     /// 微信小程序支付服务
     /// </summary>
-    public class WechatpayMiniProgramPayService:WechatpayServiceBase,IWechatpayMiniProgramPayService
+    public class WechatpayMiniProgramPayService : WechatpayServiceBase, IWechatpayMiniProgramPayService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayMiniProgramPayService"/>类型的实例

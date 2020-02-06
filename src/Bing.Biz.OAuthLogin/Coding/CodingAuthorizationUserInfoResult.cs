@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Coding
     /// <summary>
     /// Coding.NET 授权用户信息结果
     /// </summary>
-    public class CodingAuthorizationUserInfoResult:AuthorizationUserInfoResult
+    public class CodingAuthorizationUserInfoResult : AuthorizationUserInfoResult
     {
         /// <summary>
         /// 标签
@@ -73,7 +73,7 @@ namespace Bing.Biz.OAuthLogin.Coding
         /// </summary>
         [JsonProperty("website")]
         public string Website { get; set; }
-        
+
         /// <summary>
         /// 介绍
         /// </summary>

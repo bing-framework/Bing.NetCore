@@ -8,7 +8,7 @@ namespace Bing.Serialization
     /// <summary>
     /// 默认对象序列化器
     /// </summary>
-    public class DefaultObjectSerializer:IObjectSerializer,ITransientDependency
+    public class DefaultObjectSerializer : IObjectSerializer, ITransientDependency
     {
         /// <summary>
         /// 服务提供程序
@@ -95,7 +95,7 @@ namespace Bing.Serialization
         /// <returns></returns>
         protected virtual T AutoDeserialize<T>(byte[] bytes)
         {
-            return (T) BinarySerializationUtil.DeserializeExtended(bytes);
+            return (T)BinarySerializationUtil.DeserializeExtended(bytes);
         }
     }
 }

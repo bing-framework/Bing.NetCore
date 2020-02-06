@@ -6,7 +6,7 @@ namespace Bing.Dependency
     /// <summary>
     /// 作用域
     /// </summary>
-    internal class Scope:IScope
+    internal class Scope : IScope
     {
         /// <summary>
         /// Autofac 作用域

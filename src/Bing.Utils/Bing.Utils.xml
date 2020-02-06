@@ -5691,15 +5691,15 @@
             </summary>
         </member>
         <member name="T:Bing.Helpers.Internal.RsaHelper">
-            <summary>
-            RSA加解密 使用OpenSSL的公钥加密/私钥解密
+             <summary>
+             RSA加解密 使用OpenSSL的公钥加密/私钥解密
             
-            公私钥请使用openssl生成  ssh-keygen -t rsa 命令生成的公钥私钥是不行的
+             公私钥请使用openssl生成  ssh-keygen -t rsa 命令生成的公钥私钥是不行的
             
-            作者：李志强
-            时间：2017年10月30日15:50:14
-            QQ:501232752
-            </summary>
+             作者：李志强
+             时间：2017年10月30日15:50:14
+             QQ:501232752
+             </summary>
         </member>
         <member name="M:Bing.Helpers.Internal.RsaHelper.#ctor(Bing.Helpers.Internal.RSAType,System.Text.Encoding,System.String,System.String)">
             <summary>
@@ -7326,7 +7326,7 @@
             <summary>
             是否数字
             </summary>
-            <param name="input">输入值</param>        
+            <param name="input">输入值</param>
         </member>
         <member name="M:Bing.Helpers.Valid.IsTime(System.String)">
             <summary>
@@ -9319,7 +9319,7 @@
             <param name="deleteCount">删除次数</param>
             <param name="randomData">随机数据填充文件，默认true</param>
             <param name="blanks">空白填充文件，默认false</param>
-            <returns>true:粉碎成功,false:粉碎失败</returns>        
+            <returns>true:粉碎成功,false:粉碎失败</returns>
         </member>
         <member name="M:Bing.Utils.IO.FileHelper.SetAttribute(System.String,System.IO.FileAttributes,System.Boolean)">
             <summary>

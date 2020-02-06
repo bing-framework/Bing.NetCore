@@ -14,7 +14,7 @@ namespace Bing.Biz.Payments.Alipay.Services
     /// <summary>
     /// 支付宝条码支付服务
     /// </summary>
-    public class AlipayBarcodePayService:AlipayServiceBase,IAlipayBarcodePayService
+    public class AlipayBarcodePayService : AlipayServiceBase, IAlipayBarcodePayService
     {
         /// <summary>
         /// 初始化一个<see cref="AlipayBarcodePayService"/>类型的实例

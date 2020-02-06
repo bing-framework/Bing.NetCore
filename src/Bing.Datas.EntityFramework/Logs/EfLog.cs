@@ -8,8 +8,6 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -19,7 +17,7 @@ namespace Bing.Datas.EntityFramework.Logs
     /// <summary>
     /// EF日志记录器
     /// </summary>
-    public class EfLog:ILogger
+    public class EfLog : ILogger
     {
         /// <summary>
         /// EF跟踪日志名
@@ -66,7 +64,7 @@ namespace Bing.Datas.EntityFramework.Logs
             }
             catch
             {
-                return new DataConfig() {LogLevel = DataLogLevel.Sql};
+                return new DataConfig() { LogLevel = DataLogLevel.Sql };
             }
         }
 
@@ -160,7 +158,7 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <param name="log">日志操作</param>
         private void AddDictionary(IDictionary<string, string> dictionary, ILog log)
         {
-            AddElapsed(GetValue(dictionary,"elapsed"), log);
+            AddElapsed(GetValue(dictionary, "elapsed"), log);
             var sqlParams = GetValue(dictionary, "parameters");
             AddSql(GetValue(dictionary, "commandText"), log);
             AddSqlParams(sqlParams, log);
@@ -243,6 +241,6 @@ namespace Bing.Datas.EntityFramework.Logs
         public IDisposable BeginScope<TState>(TState state)
         {
             return null;
-        }                
+        }
     }
 }

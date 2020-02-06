@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace Bing.SqlBuilder.Conditions
 {
@@ -15,6 +12,7 @@ namespace Bing.SqlBuilder.Conditions
         /// </summary>
         [Description("And")]
         And,
+
         /// <summary>
         /// Or
         /// </summary>

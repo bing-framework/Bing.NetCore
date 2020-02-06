@@ -80,11 +80,13 @@ namespace Bing.MailKit.Extensions
                     message.Headers.RemoveAll(HeaderId.XPriority);
                     message.Headers.RemoveAll(HeaderId.Priority);
                     break;
+
                 case MailPriority.High:
                     message.Headers.Replace(HeaderId.Priority, "urgent");
                     message.Headers.Replace(HeaderId.Importance, "high");
                     message.Headers.Replace(HeaderId.XPriority, "2 (High)");
                     break;
+
                 case MailPriority.Low:
                     message.Headers.Replace(HeaderId.Priority, "non-urgent");
                     message.Headers.Replace(HeaderId.Importance, "low");
@@ -209,12 +211,15 @@ namespace Bing.MailKit.Extensions
                 case System.Net.Mime.TransferEncoding.QuotedPrintable:
                     part.ContentTransferEncoding = ContentEncoding.QuotedPrintable;
                     break;
+
                 case System.Net.Mime.TransferEncoding.Base64:
                     part.ContentTransferEncoding = ContentEncoding.Base64;
                     break;
+
                 case System.Net.Mime.TransferEncoding.SevenBit:
                     part.ContentTransferEncoding = ContentEncoding.SevenBit;
                     break;
+
                 case System.Net.Mime.TransferEncoding.EightBit:
                     part.ContentTransferEncoding = ContentEncoding.EightBit;
                     break;

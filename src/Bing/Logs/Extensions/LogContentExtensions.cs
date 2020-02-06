@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
-using Bing.Extensions;
 
 namespace Bing.Logs.Extensions
 {

@@ -1,7 +1,5 @@
 ﻿using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;
 
@@ -10,7 +8,7 @@ namespace Bing.Biz.Payments.Wechatpay.Signatures
     /// <summary>
     /// 微信支付Md5签名管理器
     /// </summary>
-    public class Md5SignManager:ISignManager
+    public class Md5SignManager : ISignManager
     {
         /// <summary>
         /// 签名密钥

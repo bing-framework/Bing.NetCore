@@ -21,7 +21,7 @@ namespace Bing.Datas.Attributes
         /// <summary>
         /// 初始化一个<see cref="DecimalPrecisionAttribute"/>类型的实例
         /// </summary>
-        public DecimalPrecisionAttribute():this(18,4)
+        public DecimalPrecisionAttribute() : this(18, 4)
         {
         }
 

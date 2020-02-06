@@ -5,7 +5,7 @@ namespace Bing.Biz.Payments.Wechatpay.Parameters.Requests
     /// <summary>
     /// 微信小程序支付参数
     /// </summary>
-    public class WechatpayMiniProgramPayRequest:PayParamBase
+    public class WechatpayMiniProgramPayRequest : PayParamBase
     {
         /// <summary>
         /// 用户标识

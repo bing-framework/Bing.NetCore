@@ -18,7 +18,7 @@ namespace Bing.Logs.NLog
         /// <param name="services">服务集合</param>
         /// <param name="name">服务名称</param>
         public static void AddNLog(this IServiceCollection services, string name = null)
-        {            
+        {
             services.TryAddScoped<ILogProviderFactory, Bing.Logs.NLog.LogProviderFactory>();
             services.TryAddSingleton<ILogFormat, ContentFormat>();
             services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();

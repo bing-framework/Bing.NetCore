@@ -3,7 +3,7 @@
     /// <summary>
     /// span生成器
     /// </summary>
-    public class SpanBuilder:TagBuilder
+    public class SpanBuilder : TagBuilder
     {
         /// <summary>
         /// 初始化一个<see cref="SpanBuilder"/>类型的实例

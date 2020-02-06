@@ -6,7 +6,7 @@ namespace Bing.Ui.Builders
     /// <summary>
     /// 空标签生成器
     /// </summary>
-    public class EmptyTagBuilder:TagBuilder
+    public class EmptyTagBuilder : TagBuilder
     {
         /// <summary>
         /// 初始化一个<see cref="EmptyTagBuilder"/>类型的实例
@@ -21,7 +21,7 @@ namespace Bing.Ui.Builders
         /// <param name="writer">流写入器</param>
         /// <param name="encoder">Html编码</param>
         public override void WriteTo(TextWriter writer, HtmlEncoder encoder)
-        {            
+        {
         }
 
         /// <summary>

@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using Bing.Security.Principals;
-using Bing.Utils.Helpers;
 
 namespace Bing.Helpers
 {

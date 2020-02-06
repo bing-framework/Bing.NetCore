@@ -4,14 +4,13 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Net.Mail.Configs;
 using Bing.Net.Mail.Core;
-using Bing.Extensions;
 
 namespace Bing.Net.Mail.Smtp
 {
     /// <summary>
     /// 基于SMTP的电子邮件发送器
     /// </summary>
-    public class SmtpEmailSender:EmailSenderBase,ISmtpEmailSender
+    public class SmtpEmailSender : EmailSenderBase, ISmtpEmailSender
     {
         /// <summary>
         /// 电子邮件配置提供器
@@ -61,7 +60,7 @@ namespace Bing.Net.Mail.Smtp
             var host = config.Host;
             var port = config.Port;
 
-            var smtpClient=new SmtpClient(host,port);
+            var smtpClient = new SmtpClient(host, port);
             try
             {
                 if (config.EnableSsl)

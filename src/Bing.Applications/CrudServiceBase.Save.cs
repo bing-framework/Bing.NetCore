@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bing.Domains.ChangeTracking;
-using Bing.Domains.Entities;
 using Bing.Extensions;
 using Bing.Logs.Extensions;
-using Bing.Extensions;
 
 namespace Bing.Applications
 {
@@ -81,7 +79,7 @@ namespace Bing.Applications
             CreateBefore(entity);
             await CreateBeforeAsync(entity);
             entity.Init();
-            await _repository.AddAsync(entity);            
+            await _repository.AddAsync(entity);
             CreateAfter(entity);
             await CreateAfterAsync(entity);
         }
@@ -283,6 +281,5 @@ namespace Bing.Applications
         protected virtual void SaveAfter() => WriteLog($"保存{EntityDescription}成功");
 
         #endregion
-
     }
 }

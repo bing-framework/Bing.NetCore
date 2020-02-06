@@ -8,6 +8,7 @@ namespace Bing.Logs.Internal
     public class LogContextInfo
     {
         #region 属性
+
         /// <summary>
         /// 跟踪号
         /// </summary>
@@ -37,6 +38,8 @@ namespace Bing.Logs.Internal
         /// 请求地址
         /// </summary>
         public string Url { get; set; }
-        #endregion       
+
+        #endregion
+
     }
 }

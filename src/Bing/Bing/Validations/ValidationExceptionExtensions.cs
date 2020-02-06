@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Utils;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations
@@ -55,6 +54,7 @@ namespace Bing.Validations
             {
                 case ValidationResultCollection fluentResult:
                     return ToException(fluentResult, appendAction);
+
                 case null:
                     throw new ArgumentNullException(nameof(result));
                 default:
@@ -74,6 +74,7 @@ namespace Bing.Validations
             {
                 case ValidationResultCollection fluentResult:
                     return ToException(fluentResult, appendAction);
+
                 case null:
                     throw new ArgumentNullException(nameof(result));
                 default:

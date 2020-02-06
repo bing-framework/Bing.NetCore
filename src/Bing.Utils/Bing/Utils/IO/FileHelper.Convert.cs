@@ -9,7 +9,7 @@ namespace Bing.Utils.IO
     /// </summary>
     public static partial class FileHelper
     {
-        #region ToString(转换成字符串)        
+        #region ToString(转换成字符串)
 
         /// <summary>
         /// 字节数组转换成字符串

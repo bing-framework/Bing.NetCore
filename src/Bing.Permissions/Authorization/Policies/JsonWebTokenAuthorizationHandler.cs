@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Permissions.Identity.JwtBearer;
 using Bing.Security;
-using Bing.Extensions;
 using Bing.Utils.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -61,7 +60,6 @@ namespace Bing.Permissions.Authorization.Policies
                 return;
             }
             await ResultHandleAsync(context, requirement);
-            
         }
 
         /// <summary>
@@ -80,7 +78,7 @@ namespace Bing.Permissions.Authorization.Policies
             var token = authorizationHeader.ToString().Split(' ').Last().Trim();
             if (!await _tokenStore.ExistsTokenAsync(token))
                 throw new UnauthorizedAccessException("未授权，无效参数");
-            if(!_tokenValidator.Validate(token, _options, requirement.ValidatePayload))
+            if (!_tokenValidator.Validate(token, _options, requirement.ValidatePayload))
                 throw new UnauthorizedAccessException("验证失败，请查看传递的参数是否正确或是否有权限访问该地址。");
             if (_options.SingleDeviceEnabled)
             {
@@ -157,7 +155,7 @@ namespace Bing.Permissions.Authorization.Policies
             }
 
             var isAuthenticated = httpContext.User.Identity.IsAuthenticated;
-            if(!isAuthenticated)
+            if (!isAuthenticated)
                 return;
             context.Succeed(requirement);
         }

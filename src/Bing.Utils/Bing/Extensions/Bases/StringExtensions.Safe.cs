@@ -299,6 +299,5 @@ namespace Bing.Extensions
         }
 
         #endregion
-
     }
 }

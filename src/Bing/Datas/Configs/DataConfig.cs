@@ -7,7 +7,7 @@ namespace Bing.Datas.Configs
     /// 数据配置
     /// </summary>
     public class DataConfig
-    {        
+    {
         /// <summary>
         /// 数据日志级别
         /// </summary>

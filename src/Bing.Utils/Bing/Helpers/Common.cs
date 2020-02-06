@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Bing.Utils.Helpers;
 
 namespace Bing.Helpers
 {
@@ -86,6 +85,5 @@ namespace Bing.Helpers
         }
 
         #endregion
-
     }
 }

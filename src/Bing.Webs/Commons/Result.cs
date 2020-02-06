@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bing.Extensions;
-using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Commons
@@ -37,7 +36,7 @@ namespace Bing.Webs.Commons
         /// <param name="code">状态码</param>
         /// <param name="message">消息</param>
         /// <param name="data">数据</param>
-        public Result(int code, string message, dynamic data = null):base(null)
+        public Result(int code, string message, dynamic data = null) : base(null)
         {
             Code = code;
             Message = message;

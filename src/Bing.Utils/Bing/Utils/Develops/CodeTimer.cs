@@ -204,7 +204,7 @@ namespace Bing.Utils.Develops
             if (!ShowProgress)
                 return;
             // 使用低优先级线程显示进度
-            _thread=new Thread(Progress)
+            _thread = new Thread(Progress)
             {
                 IsBackground = true,
                 Priority = ThreadPriority.BelowNormal
@@ -222,7 +222,6 @@ namespace Bing.Utils.Develops
             _thread.Abort();
             _thread.Join(3000);
         }
-
 
         /// <summary>
         /// 执行进程中
@@ -291,7 +290,7 @@ namespace Bing.Utils.Develops
         /// <param name="needTimeOne">是否需要预热</param>
         public static CodeTimer Time(int times, Action<int> action, bool needTimeOne = true)
         {
-            var timer = new CodeTimer() {Times = times, Action = action,};
+            var timer = new CodeTimer() { Times = times, Action = action, };
             if (needTimeOne)
                 timer.TimeOne();
             timer.Time();
@@ -309,7 +308,7 @@ namespace Bing.Utils.Develops
         {
             var n = Encoding.UTF8.GetByteCount(title);
             WriteLine($"{(n >= 16 ? "" : new string(' ', 16 - n))}{title}: ");
-            var timer=new CodeTimer()
+            var timer = new CodeTimer()
             {
                 Times = times,
                 Action = action,
@@ -318,7 +317,7 @@ namespace Bing.Utils.Develops
             var currentForeColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
             var left = Console.CursorLeft;
-            if(needTimeOne)
+            if (needTimeOne)
                 timer.TimeOne();
             timer.Time();
             // 等一会，让进度那边先输出
@@ -339,9 +338,9 @@ namespace Bing.Utils.Develops
             WriteLine(": ");
             var currentForeColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Write("执行时间",9);
+            Write("执行时间", 9);
             WriteLine(" ");
-            Write("CPU时间",9);
+            Write("CPU时间", 9);
             WriteLine(" ");
             Write("指令周期", 15);
             Write("GC(0/1/2)", 9);
@@ -392,7 +391,6 @@ namespace Bing.Utils.Develops
                 out var userTimer);
             return kernelTime + userTimer;
         }
-
     }
 
     /// <summary>

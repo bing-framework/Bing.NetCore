@@ -9,10 +9,12 @@
         /// 登录成功
         /// </summary>
         Succeeded,
+
         /// <summary>
         /// 失败
         /// </summary>
         Failed,
+
         /// <summary>
         /// 需要两阶段认证
         /// </summary>

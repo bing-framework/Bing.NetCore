@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
-using Bing.Utils.Helpers;
-using Microsoft.Extensions.DependencyInjection;
 using Autofac.Extensions.DependencyInjection;
 using Bing.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dependency
 {

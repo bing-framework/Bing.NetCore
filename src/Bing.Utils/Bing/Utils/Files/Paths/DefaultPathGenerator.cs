@@ -5,7 +5,7 @@ namespace Bing.Utils.Files.Paths
     /// <summary>
     /// 默认路径生成器
     /// </summary>
-    public class DefaultPathGenerator:PathGeneratorBase
+    public class DefaultPathGenerator : PathGeneratorBase
     {
         /// <summary>
         /// 基路径
@@ -17,7 +17,7 @@ namespace Bing.Utils.Files.Paths
         /// </summary>
         /// <param name="basePath">基路径</param>
         /// <param name="randomGenerator">随机数生成器</param>
-        public DefaultPathGenerator(IBasePath basePath,IRandomGenerator randomGenerator) : base(randomGenerator) => _basePath = basePath;
+        public DefaultPathGenerator(IBasePath basePath, IRandomGenerator randomGenerator) : base(randomGenerator) => _basePath = basePath;
 
         /// <summary>
         /// 创建完整路径

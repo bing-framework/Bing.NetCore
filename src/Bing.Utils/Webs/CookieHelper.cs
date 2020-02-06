@@ -1,5 +1,4 @@
 ﻿using Bing.Helpers;
-using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.Utils.Webs

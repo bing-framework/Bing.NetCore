@@ -130,6 +130,5 @@ namespace Bing.Extensions
         }
 
         #endregion
-
     }
 }

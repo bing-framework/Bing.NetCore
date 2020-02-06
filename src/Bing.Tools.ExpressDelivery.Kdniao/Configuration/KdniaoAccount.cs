@@ -3,7 +3,7 @@
     /// <summary>
     /// 快递鸟账户
     /// </summary>
-    public class KdniaoAccount:IAccountSettings
+    public class KdniaoAccount : IAccountSettings
     {
         /// <summary>
         /// 商户ID

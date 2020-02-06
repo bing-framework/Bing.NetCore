@@ -2,7 +2,6 @@
 using Bing.Dependency;
 using Bing.Extensions;
 using Bing.Tracing;
-using Bing.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

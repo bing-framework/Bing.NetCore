@@ -3,12 +3,12 @@
     /// <summary>
     /// 空用户会话
     /// </summary>
-    public class NullSession:ISession
+    public class NullSession : ISession
     {
         /// <summary>
         /// 用户编号
         /// </summary>
-        public string UserId =>string.Empty;
+        public string UserId => string.Empty;
 
         /// <summary>
         /// 用户名
@@ -23,6 +23,6 @@
         /// <summary>
         /// 空用户会话实例
         /// </summary>
-        public static readonly ISession Instance=new NullSession();
+        public static readonly ISession Instance = new NullSession();
     }
 }

@@ -10,7 +10,7 @@ namespace Bing.Logs.Aspects
     /// <summary>
     /// 错误日志
     /// </summary>
-    public class ErrorLogAttribute:InterceptorBase
+    public class ErrorLogAttribute : InterceptorBase
     {
         /// <summary>
         /// 执行

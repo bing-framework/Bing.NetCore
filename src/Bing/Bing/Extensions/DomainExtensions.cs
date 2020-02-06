@@ -66,7 +66,6 @@ namespace Bing
         public static KeyListCompareResult<long> Compare(this IEnumerable<long> newList, IEnumerable<long> oldList) =>
             CompareKey(newList, oldList);
 
-
         /// <summary>
         /// 比较键
         /// </summary>
@@ -75,7 +74,7 @@ namespace Bing
         /// <param name="oldList">旧实体标识集合</param>
         private static KeyListCompareResult<TKey> CompareKey<TKey>(IEnumerable<TKey> newList, IEnumerable<TKey> oldList)
         {
-            var comparator=new KeyListComparator<TKey>();
+            var comparator = new KeyListComparator<TKey>();
             return comparator.Compare(newList, oldList);
         }
     }

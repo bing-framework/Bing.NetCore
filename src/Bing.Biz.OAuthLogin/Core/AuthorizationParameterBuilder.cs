@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
-using Bing.Utils.Json;
 using Bing.Utils.Parameters;
 
 namespace Bing.Biz.OAuthLogin.Core
@@ -134,7 +133,7 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <param name="url">重定向地址</param>
         /// <param name="urlEncode">是否进行UrlEncode</param>
         /// <returns></returns>
-        public AuthorizationParameterBuilder RedirectUri(string url,bool urlEncode = true)
+        public AuthorizationParameterBuilder RedirectUri(string url, bool urlEncode = true)
         {
             _builder.Add(OAuthConst.RedirectUri, urlEncode ? HttpUtility.UrlEncode(url) : url);
             return this;

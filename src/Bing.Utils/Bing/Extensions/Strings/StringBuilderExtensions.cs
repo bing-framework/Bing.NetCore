@@ -27,7 +27,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="sb">StringBuilder</param>
         /// <param name="c">字符</param>
-        public static StringBuilder TrimStart(this StringBuilder sb,char c)
+        public static StringBuilder TrimStart(this StringBuilder sb, char c)
         {
             if (sb == null)
                 throw new ArgumentNullException(nameof(sb));
@@ -63,7 +63,7 @@ namespace Bing.Extensions
                 throw new ArgumentNullException(nameof(sb));
             if (string.IsNullOrEmpty(str) || sb.Length == 0 || str.Length > sb.Length)
                 return sb;
-            while (sb.SubString(0,str.Length).Equals(str))
+            while (sb.SubString(0, str.Length).Equals(str))
             {
                 sb.Remove(0, str.Length);
                 if (str.Length > sb.Length)
@@ -98,7 +98,7 @@ namespace Bing.Extensions
                 throw new ArgumentNullException(nameof(sb));
             if (sb.Length == 0)
                 return sb;
-            while (c.Equals(sb[sb.Length-1]))
+            while (c.Equals(sb[sb.Length - 1]))
                 sb.Remove(sb.Length - 1, 1);
             return sb;
         }
@@ -128,7 +128,7 @@ namespace Bing.Extensions
                 throw new ArgumentNullException(nameof(sb));
             if (string.IsNullOrEmpty(str) || sb.Length == 0 || str.Length > sb.Length)
                 return sb;
-            while (sb.SubString(sb.Length-str.Length, str.Length).Equals(str))
+            while (sb.SubString(sb.Length - str.Length, str.Length).Equals(str))
             {
                 sb.Remove(sb.Length - str.Length, str.Length);
                 if (sb.Length < str.Length)
@@ -171,7 +171,7 @@ namespace Bing.Extensions
                 throw new ArgumentNullException(nameof(sb));
             if (start + length > sb.Length)
                 throw new IndexOutOfRangeException("超出字符串索引长度");
-            char[] chars=new char[length];
+            char[] chars = new char[length];
             for (int i = 0; i < length; i++)
                 chars[i] = sb[start + i];
             return new string(chars);

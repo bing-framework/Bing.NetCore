@@ -8,7 +8,7 @@ namespace Bing.Biz.OAuthLogin.Core
     /// <summary>
     /// 授权配置基类
     /// </summary>
-    public abstract class AuthorizationConfigBase:IAuthorizationConfig
+    public abstract class AuthorizationConfigBase : IAuthorizationConfig
     {
         /// <summary>
         /// 应用标识

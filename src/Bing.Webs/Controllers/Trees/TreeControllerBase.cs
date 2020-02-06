@@ -5,7 +5,6 @@ using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers.Trees
@@ -39,7 +38,7 @@ namespace Bing.Webs.Controllers.Trees
     /// <typeparam name="TParentId">父标识类型</typeparam>
     public abstract class TreeControllerBase<TTreeResult, TDto, TQuery, TParentId> : ControllerBase<TDto, TQuery, TParentId>
         where TTreeResult : class, new()
-        where TDto : class, ITreeNode, new() 
+        where TDto : class, ITreeNode, new()
         where TQuery : class, ITreeQueryParameter<TParentId>, new()
     {
         /// <summary>
@@ -60,7 +59,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 查询
         /// </summary>
         /// <remarks>
-        /// 调用范例: 
+        /// 调用范例:
         /// GET
         /// /api/role?name=a
         /// </remarks>
@@ -80,9 +79,11 @@ namespace Bing.Webs.Controllers.Trees
                 case LoadOperation.FirstLoad:
                     result = await FirstLoad(query);
                     break;
+
                 case LoadOperation.LoadChild:
                     result = await LoadChildren(query);
                     break;
+
                 default:
                     result = await Search(query);
                     break;

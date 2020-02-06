@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Bing.Helpers;
 using Bing.Locks;
 using Bing.Properties;
-
-using Bing.Utils.Helpers;
 using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc.Filters;
 

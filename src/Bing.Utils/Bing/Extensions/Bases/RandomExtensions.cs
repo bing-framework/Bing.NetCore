@@ -89,14 +89,14 @@ namespace Bing.Extensions
         /// 获取下一个随机数。范围：[0.0,1.0]
         /// </summary>
         /// <param name="random">随机数</param>
-        public static float NextFloat(this Random random) => (float) random.NextDouble();
+        public static float NextFloat(this Random random) => (float)random.NextDouble();
 
         /// <summary>
         /// 获取下一个随机数。范围：[0.0,max]
         /// </summary>
         /// <param name="random">随机数</param>
         /// <param name="max">最大值</param>
-        public static float NextFloat(this Random random, float max) => (float) (random.NextDouble() * max);
+        public static float NextFloat(this Random random, float max) => (float)(random.NextDouble() * max);
 
         /// <summary>
         /// 获取下一个随机数。范围：[min,max]
@@ -105,7 +105,7 @@ namespace Bing.Extensions
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         public static float NextFloat(this Random random, float min, float max) =>
-            (float) (random.NextDouble() * (max - min) + min);
+            (float)(random.NextDouble() * (max - min) + min);
 
         #endregion
 
@@ -115,7 +115,7 @@ namespace Bing.Extensions
         /// 标准正态分布生成随机单精度浮点数
         /// </summary>
         /// <param name="random">随机数</param>
-        public static float NormalFloat(this Random random) => (float) random.NormalDouble();
+        public static float NormalFloat(this Random random) => (float)random.NormalDouble();
 
         /// <summary>
         /// 标准正态分布生成随机单精度浮点数
@@ -124,7 +124,7 @@ namespace Bing.Extensions
         /// <param name="mean">均值</param>
         /// <param name="deviation">偏差</param>
         public static float NormalFloat(this Random random, float mean, float deviation) =>
-            mean + (float) (deviation * random.NormalDouble());
+            mean + (float)(deviation * random.NormalDouble());
 
         #endregion
 

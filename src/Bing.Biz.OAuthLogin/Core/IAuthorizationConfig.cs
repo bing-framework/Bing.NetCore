@@ -1,6 +1,4 @@
-﻿using Bing.Validations;
-
-namespace Bing.Biz.OAuthLogin.Core
+﻿namespace Bing.Biz.OAuthLogin.Core
 {
     /// <summary>
     /// 授权配置

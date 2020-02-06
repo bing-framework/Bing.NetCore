@@ -1,17 +1,15 @@
 ﻿using System.Threading.Tasks;
 using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Weibo.Configs;
-using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 using Bing.Utils.Parameters.Parsers;
-using Bing.Utils.Webs.Clients;
 
 namespace Bing.Biz.OAuthLogin.Weibo
 {
     /// <summary>
     /// 微博授权提供程序
     /// </summary>
-    public class WeiboAuthorizationProvider:AuthorizationProviderBase<IWeiboAuthorizationConfigProvider,WeiboAuthorizationConfig>,IWeiboAuthorizationProvider
+    public class WeiboAuthorizationProvider : AuthorizationProviderBase<IWeiboAuthorizationConfigProvider, WeiboAuthorizationConfig>, IWeiboAuthorizationProvider
     {
         /// <summary>
         /// 跟踪日志名

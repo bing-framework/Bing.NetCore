@@ -31,10 +31,13 @@ namespace Bing.Utils.Files
             {
                 case FileSizeUnit.K:
                     return size * 1024;
+
                 case FileSizeUnit.M:
                     return size * 1024 * 1024;
+
                 case FileSizeUnit.G:
                     return size * 1024 * 1024 * 1024;
+
                 default:
                     return size;
             }
@@ -43,7 +46,7 @@ namespace Bing.Utils.Files
         /// <summary>
         /// 获取文件大小，单位：字节
         /// </summary>
-        public int GetSize() => (int) Size;
+        public int GetSize() => (int)Size;
 
         /// <summary>
         /// 获取文件大小，单位：K

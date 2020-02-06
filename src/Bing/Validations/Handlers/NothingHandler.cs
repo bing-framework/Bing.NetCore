@@ -12,7 +12,7 @@ namespace Bing.Validations.Handlers
         /// </summary>
         /// <param name="results">验证结果集合</param>
         public void Handle(ValidationResultCollection results)
-        {            
+        {
         }
     }
 }

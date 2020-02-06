@@ -27,7 +27,7 @@ namespace Bing.Utils.Webs
             {"FreeBSD","FreeBSD" },
         };
 
-        public static IDictionary<string,string> BrowserDict { get; set; }=new Dictionary<string, string>()
+        public static IDictionary<string, string> BrowserDict { get; set; } = new Dictionary<string, string>()
         {
             {"Maxthon","遨游浏览器" },
             {"MetaSr","搜狗高速浏览器" },

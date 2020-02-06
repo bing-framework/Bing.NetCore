@@ -5,7 +5,7 @@ namespace Bing.MailKit.Configs
     /// <summary>
     /// MailKit默认配置提供器
     /// </summary>
-    public class DefaultMailKitConfigProvider:IMailKitConfigProvider
+    public class DefaultMailKitConfigProvider : IMailKitConfigProvider
     {
         /// <summary>
         /// 配置

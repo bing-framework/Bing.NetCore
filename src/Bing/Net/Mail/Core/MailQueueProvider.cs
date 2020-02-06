@@ -6,12 +6,12 @@ namespace Bing.Net.Mail.Core
     /// <summary>
     /// 邮件队列提供程序
     /// </summary>
-    public class MailQueueProvider:IMailQueueProvider
+    public class MailQueueProvider : IMailQueueProvider
     {
         /// <summary>
         /// 线程安全的邮件队列
         /// </summary>
-        private static readonly ConcurrentQueue<EmailBox> MailQueue=new ConcurrentQueue<EmailBox>();
+        private static readonly ConcurrentQueue<EmailBox> MailQueue = new ConcurrentQueue<EmailBox>();
 
         /// <summary>
         /// 队列邮件数量

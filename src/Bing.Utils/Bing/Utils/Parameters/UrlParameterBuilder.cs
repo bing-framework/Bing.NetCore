@@ -211,6 +211,5 @@ namespace Bing.Utils.Parameters
         public bool Remove(string key) => ParameterBuilder.Remove(key);
 
         #endregion
-
     }
 }

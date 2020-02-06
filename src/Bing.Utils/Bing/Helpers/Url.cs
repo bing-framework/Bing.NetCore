@@ -105,6 +105,5 @@ namespace Bing.Helpers
         }
 
         #endregion
-
     }
 }

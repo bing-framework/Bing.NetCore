@@ -17083,7 +17083,7 @@
         <member name="T:Bing.Logs.ILog">
             <summary>
             日志操作
-            </summary>    
+            </summary>
         </member>
         <member name="P:Bing.Logs.ILog.IsDebugEnabled">
             <summary>
@@ -17292,7 +17292,7 @@
         </member>
         <member name="M:Bing.Net.Mail.Abstractions.IAttachment.GetName">
             <summary>
-            获取文件名称 
+            获取文件名称
             </summary>
             <returns></returns>
         </member>
@@ -17465,7 +17465,7 @@
         </member>
         <member name="M:Bing.Net.Mail.Attachments.MemoryStreamAttachment.GetName">
             <summary>
-            获取文件名称 
+            获取文件名称
             </summary>
             <returns></returns>
         </member>

@@ -7,7 +7,7 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 错误日志过滤器
     /// </summary>
-    public class ErrorLogAttribute:ExceptionFilterAttribute
+    public class ErrorLogAttribute : ExceptionFilterAttribute
     {
         /// <summary>
         /// 异常处理

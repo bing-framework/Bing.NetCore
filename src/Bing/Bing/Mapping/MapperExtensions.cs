@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Extensions;
 using Bing.Properties;
-using Bing.Extensions;
 
 namespace Bing.Mapping
 {

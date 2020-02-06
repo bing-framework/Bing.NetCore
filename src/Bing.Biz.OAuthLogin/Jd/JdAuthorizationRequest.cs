@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Jd
     /// <summary>
     /// 京东授权请求
     /// </summary>
-    public class JdAuthorizationRequest:AuthorizationParamBase
+    public class JdAuthorizationRequest : AuthorizationParamBase
     {
         /// <summary>
         /// 申请的权限范围。目前支持参数值：read

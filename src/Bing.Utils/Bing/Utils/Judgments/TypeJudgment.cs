@@ -36,8 +36,8 @@ namespace Bing.Utils.Judgments
         /// </summary>
         /// <param name="type">类型</param>
         public static bool IsNullableType(Type type) =>
-            type != null 
-            && type.GetTypeInfo().IsGenericType 
+            type != null
+            && type.GetTypeInfo().IsGenericType
             && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 
         /// <summary>

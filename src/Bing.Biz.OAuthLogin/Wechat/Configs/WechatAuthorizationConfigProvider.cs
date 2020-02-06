@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Wechat.Configs
     /// <summary>
     /// 微信授权配置提供程序
     /// </summary>
-    public class WechatAuthorizationConfigProvider:AuthorizationConfigProviderBase<WechatAuthorizationConfig>,IWechatAuthorizationConfigProvider
+    public class WechatAuthorizationConfigProvider : AuthorizationConfigProviderBase<WechatAuthorizationConfig>, IWechatAuthorizationConfigProvider
     {
         /// <summary>
         /// 初始化一个<see cref="WechatAuthorizationConfigProvider"/>类型的实例

@@ -447,6 +447,7 @@ namespace Bing.Helpers
                                 }
                             }
                             break;
+
                         case SnakeCaseState.Lower:
                         case SnakeCaseState.NewWord:
                             sb.Append('_');
@@ -530,8 +531,6 @@ namespace Bing.Helpers
         }
 
         #endregion
-
-
     }
 
     /// <summary>
@@ -543,10 +542,12 @@ namespace Bing.Helpers
         /// 蛇形策略
         /// </summary>
         Snake,
+
         /// <summary>
         /// 骆驼策略
         /// </summary>
         Camel,
+
         /// <summary>
         /// 不执行策略
         /// </summary>
@@ -562,14 +563,17 @@ namespace Bing.Helpers
         /// 开头
         /// </summary>
         Start,
+
         /// <summary>
         /// 小写
         /// </summary>
         Lower,
+
         /// <summary>
         /// 大写
         /// </summary>
         Upper,
+
         /// <summary>
         /// 单词
         /// </summary>

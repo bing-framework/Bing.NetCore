@@ -13,16 +13,19 @@ namespace Bing.Utils.Files
         /// </summary>
         [Description("B")]
         Byte,
+
         /// <summary>
         /// K字节
         /// </summary>
         [Description("KB")]
         K,
+
         /// <summary>
         /// M字节
         /// </summary>
         [Description("MB")]
         M,
+
         /// <summary>
         /// G字节
         /// </summary>

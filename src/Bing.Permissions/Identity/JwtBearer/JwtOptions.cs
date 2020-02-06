@@ -39,6 +39,5 @@
         /// 启用单设备登录
         /// </summary>
         public bool SingleDeviceEnabled { get; set; }
-
     }
 }

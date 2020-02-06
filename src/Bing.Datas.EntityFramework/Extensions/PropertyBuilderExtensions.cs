@@ -20,7 +20,7 @@ namespace Bing.Datas.EntityFramework.Extensions
         public static PropertyBuilder<TProperty> HasPrecision<TProperty>(
             this PropertyBuilder<TProperty> propertyBuilder, int precision = 18, int scale = 4)
         {
-            ((IInfrastructure<InternalPropertyBuilder>) propertyBuilder).Instance.HasPrecision(
+            ((IInfrastructure<InternalPropertyBuilder>)propertyBuilder).Instance.HasPrecision(
                 ConfigurationSource.Explicit, precision, scale);
             return propertyBuilder;
         }

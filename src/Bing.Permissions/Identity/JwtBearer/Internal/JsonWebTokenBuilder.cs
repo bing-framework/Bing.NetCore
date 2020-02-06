@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Utils.Timing;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -105,7 +103,10 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
             // 绑定用户设备令牌
             await _tokenStore.BindUserDeviceTokenAsync(userId, clientType, new DeviceTokenBindInfo()
             {
-                UserId = userId, DeviceId = clientId, DeviceType = clientType, Token = accessToken,
+                UserId = userId,
+                DeviceId = clientId,
+                DeviceType = clientType,
+                Token = accessToken,
             }, refreshExpires);
             // 存储payload
             await _tokenPayloadStore.SaveAsync(refreshToken, payload, refreshExpires);
@@ -119,8 +120,8 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         private string GetUserId(IDictionary<string, string> payload)
         {
             var userId = payload.GetOrDefault(IdentityModel.JwtClaimTypes.Subject, string.Empty);
-            if(userId.IsEmpty())
-                userId= payload.GetOrDefault(System.Security.Claims.ClaimTypes.NameIdentifier, string.Empty);
+            if (userId.IsEmpty())
+                userId = payload.GetOrDefault(System.Security.Claims.ClaimTypes.NameIdentifier, string.Empty);
             return userId;
         }
 
@@ -146,7 +147,7 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
                     await _tokenStore.RemoveRefreshTokenAsync(refreshToken);
                     await _tokenPayloadStore.RemoveAsync(refreshToken);
                 }
-                    
+
                 throw new Warning("刷新令牌不存在或已过期");
             }
 

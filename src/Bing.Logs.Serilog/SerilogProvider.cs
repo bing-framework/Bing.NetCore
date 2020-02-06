@@ -3,9 +3,9 @@ using System.IO;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
-using Bing.Extensions;
 using Serilog;
 using Serilog.Events;
+
 using Serilogs = Serilog;
 
 namespace Bing.Logs.Serilog
@@ -13,9 +13,8 @@ namespace Bing.Logs.Serilog
     /// <summary>
     /// Serilog 日志提供程序
     /// </summary>
-    public class SerilogProvider:ILogProvider
+    public class SerilogProvider : ILogProvider
     {
-
         #region 属性
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace Bing.Logs.Serilog
         /// 初始化Serilog配置
         /// </summary>
         /// <param name="configuration">配置</param>
-        internal static void InitConfiguration(LoggerConfiguration configuration=null)
+        internal static void InitConfiguration(LoggerConfiguration configuration = null)
         {
             if (configuration == null)
             {
@@ -104,13 +103,15 @@ namespace Bing.Logs.Serilog
                 .WriteTo.Logger(fileLogger => GetOutputConfiguration(fileLogger, LogEventLevel.Fatal, path, "Fatal"));
         }
 
-        private static LoggerConfiguration GetOutputConfiguration(LoggerConfiguration configuration,LogEventLevel level,string path,string name)
+        private static LoggerConfiguration GetOutputConfiguration(LoggerConfiguration configuration, LogEventLevel level, string path, string name)
         {
             return configuration.Filter.ByIncludingOnly(p => p.Level.Equals(level)).WriteTo.RollingFile(
                 Path.Combine($"{path}\\{name}\\{DateTime.Now:yyyy-MM-dd}", name + "-{Hour}.log"), level);
         }
 
-        #endregion        
+        #endregion
+
+
 
         /// <summary>
         /// 写日志
@@ -157,16 +158,22 @@ namespace Bing.Logs.Serilog
             {
                 case LogLevel.Trace:
                     return LogEventLevel.Verbose;
+
                 case LogLevel.Debug:
                     return LogEventLevel.Debug;
+
                 case LogLevel.Information:
                     return LogEventLevel.Information;
+
                 case LogLevel.Warning:
                     return LogEventLevel.Warning;
+
                 case LogLevel.Error:
                     return LogEventLevel.Error;
+
                 case LogLevel.Fatal:
                     return LogEventLevel.Fatal;
+
                 default:
                     return null;
             }

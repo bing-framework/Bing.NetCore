@@ -1,8 +1,6 @@
 ﻿using Bing.Datas.Sql.Builders.Core;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Datas.Dapper.Oracle
 {
@@ -55,6 +53,7 @@ namespace Bing.Datas.Dapper.Oracle
             {
                 case "boolean":
                     return Conv.ToBool(paramValue) ? 1 : 0;
+
                 case "int16":
                 case "int32":
                 case "int64":
@@ -62,6 +61,7 @@ namespace Bing.Datas.Dapper.Oracle
                 case "double":
                 case "decimal":
                     return paramValue.SafeString();
+
                 default:
                     return $"{paramValue}";
             }

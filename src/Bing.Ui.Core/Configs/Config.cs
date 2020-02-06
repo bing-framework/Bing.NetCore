@@ -2,8 +2,6 @@
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Ui.TagHelpers;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Str = Bing.Helpers.Str;
 

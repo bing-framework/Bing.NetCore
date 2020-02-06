@@ -95,7 +95,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao
                 {"DataType", "2"},
             };
 
-            var content = new FormUrlEncodedContent(bizParams);            
+            var content = new FormUrlEncodedContent(bizParams);
             return await _proxy.TrackAsync(content)
                 .Retry(_config.RetryTimes)
                 .Handle()
@@ -112,7 +112,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao
         /// <param name="content">内容</param>
         /// <param name="apiKey">ApiKey</param>
         /// <returns></returns>
-        private static string Sign(string content,string apiKey)
+        private static string Sign(string content, string apiKey)
         {
             return Base64(Md5($"{content}{apiKey}"));
         }
@@ -140,7 +140,7 @@ namespace Bing.Tools.ExpressDelivery.Kdniao
             try
             {
                 var hash = md5.ComputeHash(encoding.GetBytes(value));
-                result = BitConverter.ToString(hash);                
+                result = BitConverter.ToString(hash);
             }
             finally
             {

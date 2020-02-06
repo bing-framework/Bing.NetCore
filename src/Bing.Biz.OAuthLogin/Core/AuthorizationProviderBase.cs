@@ -4,8 +4,6 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Utils.Parameters.Parsers;
 
 namespace Bing.Biz.OAuthLogin.Core
@@ -237,7 +235,7 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <param name="success">请求成功条件</param>
         /// <returns></returns>
         protected virtual async Task<AuthorizationResult> RequestResult(TAuthorizationConfig config,
-            AuthorizationParameterBuilder builder, ParameterParserType type,Func<AuthorizationResult,bool> success)
+            AuthorizationParameterBuilder builder, ParameterParserType type, Func<AuthorizationResult, bool> success)
         {
             var result = new AuthorizationResult(await Request(builder), success, type);
             result.Parameter = builder.ToString();

@@ -43,6 +43,5 @@ namespace Bing.Extensions
         }
 
         #endregion
-
     }
 }

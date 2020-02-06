@@ -10,7 +10,6 @@ using Bing.Datas.Sql;
 using Bing.Datas.Sql.Configs;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Extensions;
-using Bing.Extensions;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -96,18 +95,23 @@ namespace Bing.Datas.Dapper
                 case DatabaseType.SqlServer:
                     services.AddTransient<ISqlBuilder, SqlServerBuilder>();
                     return;
+
                 case DatabaseType.MySql:
                     services.AddTransient<ISqlBuilder, MySqlBuilder>();
                     return;
+
                 case DatabaseType.PgSql:
                     services.AddTransient<ISqlBuilder, PgSqlBuilder>();
                     return;
+
                 case DatabaseType.Oracle:
                     services.AddTransient<ISqlBuilder, OracleBuilder>();
                     return;
+
                 case DatabaseType.Sqlite:
                     services.AddTransient<ISqlBuilder, SqliteBuilder>();
                     return;
+
                 default:
                     throw new NotImplementedException($"Sql生成器未实现 {config.DatabaseType.Description()} 数据库");
             }

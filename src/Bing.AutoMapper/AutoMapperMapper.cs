@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using Bing.Helpers;
-using Bing.Utils.Helpers;
 
 namespace Bing.AutoMapper
 {
@@ -87,7 +86,7 @@ namespace Bing.AutoMapper
         /// <param name="destinationType">目标类型</param>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        private static TDestination GetResult<TDestination>(Type sourceType,Type destinationType, object source, TDestination destination)
+        private static TDestination GetResult<TDestination>(Type sourceType, Type destinationType, object source, TDestination destination)
         {
             if (Exists(sourceType, destinationType))
                 return GetResult(source, destination);
@@ -95,7 +94,7 @@ namespace Bing.AutoMapper
             {
                 if (Exists(sourceType, destinationType))
                     return GetResult(source, destination);
-                Init(sourceType,destinationType);
+                Init(sourceType, destinationType);
             }
             return GetResult(source, destination);
         }
@@ -164,6 +163,5 @@ namespace Bing.AutoMapper
         }
 
         #endregion
-
     }
 }

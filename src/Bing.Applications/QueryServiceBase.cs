@@ -219,7 +219,5 @@ namespace Bing.Applications
         }
 
         #endregion
-
-
     }
 }

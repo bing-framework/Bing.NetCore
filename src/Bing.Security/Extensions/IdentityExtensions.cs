@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
-using Bing.Helpers;
 using Bing.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Security.Extensions
 {

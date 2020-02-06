@@ -13,7 +13,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services
     /// <summary>
     /// 微信App支付服务
     /// </summary>
-    public class WechatpayAppPayService:WechatpayServiceBase,IWechatpayAppPayService
+    public class WechatpayAppPayService : WechatpayServiceBase, IWechatpayAppPayService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayAppPayService"/>类型的实例

@@ -7,14 +7,13 @@ using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Services;
 using Bing.Extensions;
-using Bing.Extensions;
 
 namespace Bing.Biz.Payments.Factories
 {
     /// <summary>
     /// 支付工厂
     /// </summary>
-    public class PayFactory:IPayFactory
+    public class PayFactory : IPayFactory
     {
         /// <summary>
         /// 支付宝配置提供器
@@ -48,24 +47,34 @@ namespace Bing.Biz.Payments.Factories
             {
                 case PayWay.AlipayBarcodePay:
                     return new AlipayBarcodePayService(_alipayConfigProvider);
+
                 case PayWay.AlipayQrCodePay:
                     return new AlipayQrCodePayService(_alipayConfigProvider);
+
                 case PayWay.AlipayAppPay:
                     return new AlipayAppPayService(_alipayConfigProvider);
+
                 case PayWay.AlipayPagePay:
                     return new AlipayPagePayService(_alipayConfigProvider);
+
                 case PayWay.AlipayWapPay:
                     return new AlipayWapPayService(_alipayConfigProvider);
+
                 case PayWay.WechatpayAppPay:
                     return new WechatpayAppPayService(_wechatpayConfigProvider);
+
                 case PayWay.WechatpayMiniProgramPay:
                     return new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
+
                 case PayWay.WechatpayPagePay:
                     return new WechatpayPagePayService(_wechatpayConfigProvider);
+
                 case PayWay.WechatpayWapPay:
                     return new WechatpayWapPayService(_wechatpayConfigProvider);
+
                 case PayWay.WechatpayPublicPay:
                     return new WechatpayPublicPayService(_wechatpayConfigProvider);
+
                 case PayWay.WechatpayBarcodePay:
                     return new WechatpayBarcodePayService(_wechatpayConfigProvider);
             }

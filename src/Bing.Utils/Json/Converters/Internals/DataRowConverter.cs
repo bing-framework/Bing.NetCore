@@ -7,7 +7,7 @@ namespace Bing.Utils.Json.Converters.Internals
     /// <summary>
     /// DataRow 转换器
     /// </summary>
-    internal class DataRowConverter:JsonConverter
+    internal class DataRowConverter : JsonConverter
     {
         /// <summary>
         /// 写入JSON对象
@@ -22,7 +22,7 @@ namespace Bing.Utils.Json.Converters.Internals
             foreach (DataColumn column in row.Table.Columns)
             {
                 writer.WritePropertyName(column.ColumnName);
-                serializer.Serialize(writer,row[column]);
+                serializer.Serialize(writer, row[column]);
             }
             writer.WriteEndObject();
         }

@@ -190,6 +190,5 @@ namespace Bing.Datas.Sql.Builders.Core
         private string GetOn() => Condition == null ? null : $" On {Condition.GetCondition()}";
 
         #endregion
-
     }
 }

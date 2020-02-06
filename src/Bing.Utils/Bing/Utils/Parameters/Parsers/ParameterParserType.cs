@@ -9,10 +9,12 @@
         /// Url参数解析器
         /// </summary>
         Url,
+
         /// <summary>
         /// Json参数解析器
         /// </summary>
         Json,
+
         /// <summary>
         /// Jsonp参数解析器
         /// </summary>

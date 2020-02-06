@@ -14,8 +14,8 @@ namespace Bing.Datas.EntityFramework.Core
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TPo">持久化对象类型</typeparam>
-    public abstract class CompactRepositoryBase<TEntity, TPo> : CompactRepositoryBase<TEntity, TPo, Guid>,ICompactRepository<TEntity> 
-        where TEntity : class, IAggregateRoot<Guid> 
+    public abstract class CompactRepositoryBase<TEntity, TPo> : CompactRepositoryBase<TEntity, TPo, Guid>, ICompactRepository<TEntity>
+        where TEntity : class, IAggregateRoot<Guid>
         where TPo : class, IKey<Guid>
     {
         /// <summary>
@@ -34,7 +34,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// <typeparam name="TPo">持久化对象类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactRepository<TEntity, TKey>
-        where TEntity : class, IAggregateRoot<TKey> 
+        where TEntity : class, IAggregateRoot<TKey>
         where TPo : class, IKey<TKey>
     {
         /// <summary>
@@ -135,7 +135,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var pos = await _store.FindByIdsAsync(ids,cancellationToken);
+            var pos = await _store.FindByIdsAsync(ids, cancellationToken);
             return pos.Select(ToEntity).ToList();
         }
 

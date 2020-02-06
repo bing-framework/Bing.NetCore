@@ -42,8 +42,10 @@ namespace Bing.IM.Models
             {
                 case ChatType.Friend:
                     return "friend";
+
                 case ChatType.Group:
                     return "group";
+
                 case ChatType.CustomerService:
                     return "kefu";
             }

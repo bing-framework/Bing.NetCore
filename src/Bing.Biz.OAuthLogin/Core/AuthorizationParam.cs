@@ -3,7 +3,7 @@
     /// <summary>
     /// 授权参数
     /// </summary>
-    public class AuthorizationParam: AuthorizationParamBase
+    public class AuthorizationParam : AuthorizationParamBase
     {
         /// <summary>
         /// 申请的权限范围
