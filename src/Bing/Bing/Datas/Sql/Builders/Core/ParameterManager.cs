@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Bing.Utils;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
     /// <summary>
     /// 参数管理器
     /// </summary>
-    public class ParameterManager:IParameterManager
+    public class ParameterManager : IParameterManager
     {
         /// <summary>
         /// 参数集合
@@ -92,10 +91,13 @@ namespace Bing.Datas.Sql.Builders.Core
             {
                 case Operator.Contains:
                     return $"%{value}%";
+
                 case Operator.Starts:
                     return $"{value}%";
+
                 case Operator.Ends:
                     return $"%{value}";
+
                 default:
                     return value;
             }

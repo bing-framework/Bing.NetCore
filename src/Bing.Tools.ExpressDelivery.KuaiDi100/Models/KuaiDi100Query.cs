@@ -44,7 +44,7 @@ namespace Bing.Tools.ExpressDelivery.KuaiDi100.Models
             }
             if (string.IsNullOrWhiteSpace(Sheet))
             {
-                throw new InvalidArgumentException("快递单号为空",Constants.ServiceName,401);
+                throw new InvalidArgumentException("快递单号为空", Constants.ServiceName, 401);
             }
         }
     }

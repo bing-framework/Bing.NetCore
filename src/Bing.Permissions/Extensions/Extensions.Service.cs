@@ -46,7 +46,7 @@ namespace Bing.Permissions.Extensions
             services.Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o));
             var options = GetOptions(configuration);
             services.TryAddSingleton<IJsonWebTokenBuilder, JsonWebTokenBuilder>();
-            services.TryAddSingleton<IJsonWebTokenStore,JsonWebTokenStore>();
+            services.TryAddSingleton<IJsonWebTokenStore, JsonWebTokenStore>();
             services.TryAddSingleton<IJsonWebTokenValidator, JsonWebTokenValidator>();
             services.TryAddSingleton<IJsonWebTokenCustomerAuthorizeOption, JsonWebTokenCustomerAuthorizeOption>();
             services.TryAddSingleton<IJsonWebTokenAuthorizationRequirement, JsonWebTokenAuthorizationRequirement>();

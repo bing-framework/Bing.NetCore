@@ -7,15 +7,15 @@ using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Biz.Payments.Wechatpay.Services.Base;
 using Bing.Exceptions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Biz.Payments.Wechatpay.Services
 {
     /// <summary>
     /// 微信公众号支付服务
     /// </summary>
-    public class WechatpayPublicPayService:WechatpayServiceBase,IWechatpayPublicPayService
+    public class WechatpayPublicPayService : WechatpayServiceBase, IWechatpayPublicPayService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayPublicPayService"/>类型的实例

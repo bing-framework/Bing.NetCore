@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Datas.Sql

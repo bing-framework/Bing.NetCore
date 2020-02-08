@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Bing.Domains.Entities;
+using Bing.Helpers;
 
 namespace Bing.Domains.Values
 {
@@ -10,7 +11,7 @@ namespace Bing.Domains.Values
     /// 参考地址：https://docs.microsoft.com/zh-cn/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects
     /// </summary>
     /// <typeparam name="TValueObject">值对象类型</typeparam>
-    public abstract class ValueObjectBase<TValueObject> : DomainBase<TValueObject>, IEquatable<TValueObject> where TValueObject : ValueObjectBase<TValueObject>
+    public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObject>, IEquatable<TValueObject> where TValueObject : ValueObjectBase<TValueObject>
     {
         /// <summary>
         /// 相等性比较
@@ -60,6 +61,6 @@ namespace Bing.Domains.Values
         /// <summary>
         /// 克隆副本
         /// </summary>
-        public virtual TValueObject Clone() => Utils.Helpers.Conv.To<TValueObject>(MemberwiseClone());
+        public virtual TValueObject Clone() => Conv.To<TValueObject>(MemberwiseClone());
     }
 }

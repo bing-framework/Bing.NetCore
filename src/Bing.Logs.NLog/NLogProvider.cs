@@ -11,6 +11,7 @@ namespace Bing.Logs.NLog
     public class NLogProvider : ILogProvider
     {
         #region 属性
+
         /// <summary>
         /// NLog 日志操作
         /// </summary>
@@ -44,6 +45,7 @@ namespace Bing.Logs.NLog
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化一个<see cref="NLogProvider"/>类型的实例
         /// </summary>
@@ -54,6 +56,7 @@ namespace Bing.Logs.NLog
             _logger = GetLogger(logName);
             _format = format;
         }
+
         #endregion
 
         /// <summary>
@@ -106,16 +109,22 @@ namespace Bing.Logs.NLog
             {
                 case LogLevel.Trace:
                     return NLogs.LogLevel.Trace;
+
                 case LogLevel.Debug:
                     return NLogs.LogLevel.Debug;
+
                 case LogLevel.Information:
                     return NLogs.LogLevel.Info;
+
                 case LogLevel.Warning:
                     return NLogs.LogLevel.Warn;
+
                 case LogLevel.Error:
                     return NLogs.LogLevel.Error;
+
                 case LogLevel.Fatal:
                     return NLogs.LogLevel.Fatal;
+
                 default:
                     return NLogs.LogLevel.Off;
             }

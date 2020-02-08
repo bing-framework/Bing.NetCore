@@ -42,7 +42,7 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
             if (!await _cache.ExistsAsync(GetRefreshTokenKey(token)))
                 return;
             await _cache.RemoveAsync(GetRefreshTokenKey(token));
-            if(!await _cache.ExistsAsync(GetBindRefreshTokenKey(token)))
+            if (!await _cache.ExistsAsync(GetBindRefreshTokenKey(token)))
                 return;
             var accessToken = await _cache.GetAsync<JsonWebToken>(GetBindRefreshTokenKey(token));
             await _cache.RemoveAsync(GetBindRefreshTokenKey(token));
@@ -61,7 +61,7 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         /// <param name="token">访问令牌</param>
         public async Task RemoveTokenAsync(string token)
         {
-            if(!await _cache.ExistsAsync(GetTokenKey(token)))
+            if (!await _cache.ExistsAsync(GetTokenKey(token)))
                 return;
             await _cache.RemoveAsync(GetTokenKey(token));
         }

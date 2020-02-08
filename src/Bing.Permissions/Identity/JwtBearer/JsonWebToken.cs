@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 using Bing.Utils.Timing;
 
 namespace Bing.Permissions.Identity.JwtBearer

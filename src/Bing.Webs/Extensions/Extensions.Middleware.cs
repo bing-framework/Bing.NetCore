@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 using Bing.Webs.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

@@ -5,7 +5,6 @@ using Bing.AutoMapper;
 using Bing.Core;
 using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
-using Bing.Datas.EntityFramework.MySql;
 using Bing.Datas.EntityFramework.SqlServer;
 using Bing.Datas.Enums;
 using Bing.Extensions.Swashbuckle.Configs;

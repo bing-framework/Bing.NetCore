@@ -6,18 +6,18 @@ namespace Bing.Datas.EntityFramework.Logs
     /// <summary>
     /// 空日志记录器
     /// </summary>
-    public class NullLogger:ILogger
+    public class NullLogger : ILogger
     {
         /// <summary>
         /// 空日志记录器实例
         /// </summary>
-        public static readonly ILogger Instance=new NullLogger();
+        public static readonly ILogger Instance = new NullLogger();
 
         /// <summary>
         /// 日志记录
         /// </summary>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {            
+        {
         }
 
         /// <summary>

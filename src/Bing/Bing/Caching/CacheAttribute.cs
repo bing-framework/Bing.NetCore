@@ -152,7 +152,7 @@ namespace Bing.Caching
             if (cacheValue != null)
             {
                 context.ReturnValue = context.IsAsync()
-                    ? TaskResultMethod.MakeGenericMethod(returnType).Invoke(null, new object[] {cacheValue})
+                    ? TaskResultMethod.MakeGenericMethod(returnType).Invoke(null, new object[] { cacheValue })
                     : cacheValue;
                 return;
             }

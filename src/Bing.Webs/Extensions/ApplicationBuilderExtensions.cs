@@ -25,6 +25,5 @@ namespace Bing.Webs.Extensions
                 builder.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
-
     }
 }

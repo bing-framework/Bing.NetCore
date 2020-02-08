@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
+using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Extensions;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
+using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Logs.Core
 {
@@ -265,7 +266,7 @@ namespace Bing.Logs.Core
                 return;
             try
             {
-                content.Level = Utils.Helpers.Enum.GetName<LogLevel>(level);
+                content.Level = Enum.GetName<LogLevel>(level);
                 Init(content);
                 Provider.WriteLog(level, content);
             }

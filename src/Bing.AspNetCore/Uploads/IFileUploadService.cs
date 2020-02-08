@@ -40,6 +40,6 @@ namespace Bing.AspNetCore.Uploads
         /// <param name="formFile">表单文件</param>
         /// <param name="savePath">保存路径</param>
         /// <param name="cancellationToken">取消令牌</param>
-        Task<string> SaveWithMd5Async(IFormFile formFile, string savePath,CancellationToken cancellationToken = default(CancellationToken));
+        Task<string> SaveWithMd5Async(IFormFile formFile, string savePath, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

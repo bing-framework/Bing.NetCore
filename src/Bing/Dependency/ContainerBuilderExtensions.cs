@@ -6,8 +6,8 @@ using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.Autofac;
 using Autofac;
 using Autofac.Builder;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Dependency
 {
@@ -36,6 +36,7 @@ namespace Bing.Dependency
             }
             return builder.RegisterType<TImplementation>().Named<TService>(name).InstancePerDependency();
         }
+
         #endregion
 
         #region AddScoped(注册服务，生命周期为 InstancePerLifetimeScope - 每个请求一个实例)

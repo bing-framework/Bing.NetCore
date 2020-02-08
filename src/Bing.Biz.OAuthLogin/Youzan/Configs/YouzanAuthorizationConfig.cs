@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Youzan.Configs
     /// <summary>
     /// 有赞授权配置
     /// </summary>
-    public class YouzanAuthorizationConfig: AuthorizationConfigBase
+    public class YouzanAuthorizationConfig : AuthorizationConfigBase
     {
     }
 }

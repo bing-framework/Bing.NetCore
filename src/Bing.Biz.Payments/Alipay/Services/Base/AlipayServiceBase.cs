@@ -1,20 +1,19 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Parameters;
 using Bing.Biz.Payments.Alipay.Results;
 using Bing.Biz.Payments.Core;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Biz.Payments.Alipay.Services.Base
 {
     /// <summary>
     /// 支付宝支付服务基类
     /// </summary>
-    public abstract class AlipayServiceBase:IPayService
+    public abstract class AlipayServiceBase : IPayService
     {
         /// <summary>
         /// 配置提供器
@@ -167,7 +166,7 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
                 .Content(builder.ToString())
                 .Content()
                 .Content("原始响应:")
-                .Content(result.Raw)            
+                .Content(result.Raw)
                 .Trace();
         }
 

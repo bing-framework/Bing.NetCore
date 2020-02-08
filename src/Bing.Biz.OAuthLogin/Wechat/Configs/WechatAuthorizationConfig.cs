@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Wechat.Configs
     /// <summary>
     /// 微信授权配置
     /// </summary>
-    public class WechatAuthorizationConfig: AuthorizationConfigBase
+    public class WechatAuthorizationConfig : AuthorizationConfigBase
     {
         /// <summary>
         /// 刷新令牌地址

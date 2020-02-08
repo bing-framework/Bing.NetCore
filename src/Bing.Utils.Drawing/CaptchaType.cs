@@ -9,10 +9,12 @@
         /// 纯数值
         /// </summary>
         Number,
+
         /// <summary>
         /// 数值与字母组合
         /// </summary>
         NumberAndLetter,
+
         /// <summary>
         /// 汉字
         /// </summary>

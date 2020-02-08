@@ -3,6 +3,7 @@ using Bing.Applications;
 using Bing.Datas.Sql;
 using Bing.Domains.Repositories;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Mapping;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Models;
@@ -10,7 +11,7 @@ using Bing.Samples.Domain.Repositories;
 using Bing.Samples.Service.Abstractions.Systems;
 using Bing.Samples.Service.Dtos.Systems;
 using Bing.Samples.Service.Queries.Systems;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Samples.Service.Implements.Systems
 {

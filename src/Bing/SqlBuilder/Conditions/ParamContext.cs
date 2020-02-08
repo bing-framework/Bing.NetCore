@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.SqlBuilder.Conditions
+﻿namespace Bing.SqlBuilder.Conditions
 {
     /// <summary>
     /// 参数上下文

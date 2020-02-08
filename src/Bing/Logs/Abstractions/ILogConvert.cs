@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Bing.Utils;
 
 namespace Bing.Logs.Abstractions
 {

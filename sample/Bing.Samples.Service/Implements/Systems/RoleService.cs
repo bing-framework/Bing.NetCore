@@ -5,6 +5,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.Sql;
 using Bing.Domains.Repositories;
 using Bing.Events.Messages;
+using Bing.Extensions;
 using Bing.Mapping;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Events;
@@ -14,7 +15,7 @@ using Bing.Samples.Domain.Services.Abstractions;
 using Bing.Samples.Service.Abstractions.Systems;
 using Bing.Samples.Service.Dtos.Systems;
 using Bing.Samples.Service.Queries.Systems;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Samples.Service.Implements.Systems
 {

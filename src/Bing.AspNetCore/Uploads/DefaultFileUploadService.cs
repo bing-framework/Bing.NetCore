@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.AspNetCore.Uploads.Params;
 using Bing.Exceptions;
-using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Http;
 using FileInfo = Bing.Utils.Files.FileInfo;
 
@@ -109,7 +108,7 @@ namespace Bing.AspNetCore.Uploads
         /// <param name="cancellationToken">取消令牌</param>
         public async Task SaveAsync(IFormFile formFile, string savePath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var stream=new FileStream(savePath,FileMode.Create))
+            using (var stream = new FileStream(savePath, FileMode.Create))
             {
                 await formFile.CopyToAsync(stream, cancellationToken);
             }

@@ -1,11 +1,11 @@
-﻿using Bing.Logs.Abstractions;
-using Bing.Logs.Contents;
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 using Bing.Exceptions;
+using Bing.Extensions;
+using Bing.Logs.Abstractions;
+using Bing.Logs.Contents;
 using Bing.Logs.Properties;
-using Bing.Utils.Extensions;
 
 namespace Bing.Logs.Formats
 {

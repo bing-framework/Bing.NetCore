@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders;
-using Bing.Utils;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Datas.Sql
@@ -18,7 +17,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="condition">条件</param>
-        public static T And<T>(this T source, ICondition condition) 
+        public static T And<T>(this T source, ICondition condition)
             where T : IWhere
         {
             if (source == null)
@@ -34,7 +33,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="condition">条件</param>
-        public static T Or<T>(this T source, ICondition condition) 
+        public static T Or<T>(this T source, ICondition condition)
             where T : IWhere
         {
             if (source == null)
@@ -53,14 +52,13 @@ namespace Bing.Datas.Sql
         /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
         public static T OrIf<T>(this T source, ICondition predicate, bool condition) where T : IWhere => condition ? Or(source, predicate) : source;
 
-
         /// <summary>
         /// 设置查询条件
         /// </summary>
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="condition">条件</param>
-        public static T Where<T>(this T source, ICondition condition) 
+        public static T Where<T>(this T source, ICondition condition)
             where T : IWhere
         {
             if (source == null)
@@ -78,7 +76,7 @@ namespace Bing.Datas.Sql
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
         /// <param name="operator">运算符</param>
-        public static T Where<T>(this T source, string column, object value, Operator @operator = Operator.Equal) 
+        public static T Where<T>(this T source, string column, object value, Operator @operator = Operator.Equal)
             where T : IWhere
         {
             if (source == null)
@@ -96,7 +94,7 @@ namespace Bing.Datas.Sql
         /// <param name="column">列名</param>
         /// <param name="builder">子查询Sql生成器</param>
         /// <param name="operator">运算符</param>
-        public static T Where<T>(this T source, string column, ISqlBuilder builder, Operator @operator = Operator.Equal) 
+        public static T Where<T>(this T source, string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
             where T : IWhere
         {
             if (source == null)
@@ -114,7 +112,7 @@ namespace Bing.Datas.Sql
         /// <param name="column">列名</param>
         /// <param name="action">子查询操作</param>
         /// <param name="operator">运算符</param>
-        public static T Where<T>(this T source, string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) 
+        public static T Where<T>(this T source, string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
             where T : IWhere
         {
             if (source == null)
@@ -165,7 +163,7 @@ namespace Bing.Datas.Sql
         /// <param name="column">列名</param>
         /// <param name="value">值。如果值为空，则忽略该查询条件</param>
         /// <param name="operator">运算符</param>
-        public static T WhereIfNotEmpty<T>(this T source, string column, object value, Operator @operator = Operator.Equal) 
+        public static T WhereIfNotEmpty<T>(this T source, string column, object value, Operator @operator = Operator.Equal)
             where T : IWhere
         {
             if (source == null)
@@ -182,7 +180,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T Equal<T>(this T source, string column, object value) 
+        public static T Equal<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -197,7 +195,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T NotEqual<T>(this T source, string column, object value) 
+        public static T NotEqual<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -212,7 +210,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T Greater<T>(this T source, string column, object value) 
+        public static T Greater<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -227,7 +225,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T Less<T>(this T source, string column, object value) 
+        public static T Less<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -242,7 +240,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T GreaterEqual<T>(this T source, string column, object value) 
+        public static T GreaterEqual<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -257,7 +255,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T LessEqual<T>(this T source, string column, object value) 
+        public static T LessEqual<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -272,7 +270,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T Contains<T>(this T source, string column, object value) 
+        public static T Contains<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -287,7 +285,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T Starts<T>(this T source, string column, object value) 
+        public static T Starts<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -302,7 +300,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="value">值</param>
-        public static T Ends<T>(this T source, string column, object value) 
+        public static T Ends<T>(this T source, string column, object value)
             where T : IWhere
         {
             if (source == null)
@@ -316,7 +314,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
-        public static T IsNull<T>(this T source, string column) 
+        public static T IsNull<T>(this T source, string column)
             where T : IWhere
         {
             if (source == null)
@@ -332,7 +330,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
-        public static T IsNotNull<T>(this T source, string column) 
+        public static T IsNotNull<T>(this T source, string column)
             where T : IWhere
         {
             if (source == null)
@@ -348,7 +346,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
-        public static T IsEmpty<T>(this T source, string column) 
+        public static T IsEmpty<T>(this T source, string column)
             where T : IWhere
         {
             if (source == null)
@@ -364,7 +362,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
-        public static T IsNotEmpty<T>(this T source, string column) 
+        public static T IsNotEmpty<T>(this T source, string column)
             where T : IWhere
         {
             if (source == null)
@@ -381,7 +379,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="values">值集合</param>
-        public static T In<T>(this T source, string column, IEnumerable<object> values) 
+        public static T In<T>(this T source, string column, IEnumerable<object> values)
             where T : IWhere
         {
             if (source == null)
@@ -398,7 +396,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="builder">Sql生成器</param>
-        public static T In<T>(this T source, string column, ISqlBuilder builder) 
+        public static T In<T>(this T source, string column, ISqlBuilder builder)
             where T : IWhere
         {
             if (source == null)
@@ -415,7 +413,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="action">子查询操作</param>
-        public static T In<T>(this T source, string column, Action<ISqlBuilder> action) 
+        public static T In<T>(this T source, string column, Action<ISqlBuilder> action)
             where T : IWhere
         {
             if (source == null)
@@ -432,7 +430,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="values">值集合</param>
-        public static T NotIn<T>(this T source, string column, IEnumerable<object> values) 
+        public static T NotIn<T>(this T source, string column, IEnumerable<object> values)
             where T : IWhere
         {
             if (source == null)
@@ -449,7 +447,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="builder">Sql生成器</param>
-        public static T NotIn<T>(this T source, string column, ISqlBuilder builder) 
+        public static T NotIn<T>(this T source, string column, ISqlBuilder builder)
             where T : IWhere
         {
             if (source == null)
@@ -466,7 +464,7 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="column">列名</param>
         /// <param name="action">子查询操作</param>
-        public static T NotIn<T>(this T source, string column, Action<ISqlBuilder> action) 
+        public static T NotIn<T>(this T source, string column, Action<ISqlBuilder> action)
             where T : IWhere
         {
             if (source == null)
@@ -482,7 +480,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builder">Sql生成器</param>
-        public static T Exists<T>(this T source, ISqlBuilder builder) 
+        public static T Exists<T>(this T source, ISqlBuilder builder)
             where T : IWhere
         {
             if (source == null)
@@ -498,7 +496,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="action">子查询操作</param>
-        public static T Exists<T>(this T source, Action<ISqlBuilder> action) 
+        public static T Exists<T>(this T source, Action<ISqlBuilder> action)
             where T : IWhere
         {
             if (source == null)
@@ -514,7 +512,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="builder">Sql生成器</param>
-        public static T NotExists<T>(this T source, ISqlBuilder builder) 
+        public static T NotExists<T>(this T source, ISqlBuilder builder)
             where T : IWhere
         {
             if (source == null)
@@ -530,7 +528,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="action">子查询操作</param>
-        public static T NotExists<T>(this T source, Action<ISqlBuilder> action) 
+        public static T NotExists<T>(this T source, Action<ISqlBuilder> action)
             where T : IWhere
         {
             if (source == null)
@@ -549,7 +547,7 @@ namespace Bing.Datas.Sql
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static T Between<T>(this T source, string column, int? min, int? max, Boundary boundary = Boundary.Both) 
+        public static T Between<T>(this T source, string column, int? min, int? max, Boundary boundary = Boundary.Both)
             where T : IWhere
         {
             if (source == null)
@@ -568,7 +566,7 @@ namespace Bing.Datas.Sql
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static T Between<T>(this T source, string column, long? min, long? max, Boundary boundary = Boundary.Both) 
+        public static T Between<T>(this T source, string column, long? min, long? max, Boundary boundary = Boundary.Both)
             where T : IWhere
         {
             if (source == null)
@@ -587,7 +585,7 @@ namespace Bing.Datas.Sql
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static T Between<T>(this T source, string column, float? min, float? max, Boundary boundary = Boundary.Both) 
+        public static T Between<T>(this T source, string column, float? min, float? max, Boundary boundary = Boundary.Both)
             where T : IWhere
         {
             if (source == null)
@@ -606,7 +604,7 @@ namespace Bing.Datas.Sql
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static T Between<T>(this T source, string column, double? min, double? max, Boundary boundary = Boundary.Both) 
+        public static T Between<T>(this T source, string column, double? min, double? max, Boundary boundary = Boundary.Both)
             where T : IWhere
         {
             if (source == null)
@@ -625,7 +623,7 @@ namespace Bing.Datas.Sql
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        public static T Between<T>(this T source, string column, decimal? min, decimal? max, Boundary boundary = Boundary.Both) 
+        public static T Between<T>(this T source, string column, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
             where T : IWhere
         {
             if (source == null)
@@ -645,7 +643,7 @@ namespace Bing.Datas.Sql
         /// <param name="max">最大值</param>
         /// <param name="includeTime">是否包含时间</param>
         /// <param name="boundary">包含边界</param>
-        public static T Between<T>(this T source, string column, DateTime? min, DateTime? max, bool includeTime = true, Boundary? boundary = null) 
+        public static T Between<T>(this T source, string column, DateTime? min, DateTime? max, bool includeTime = true, Boundary? boundary = null)
             where T : IWhere
         {
             if (source == null)
@@ -661,7 +659,7 @@ namespace Bing.Datas.Sql
         /// <typeparam name="T">源类型</typeparam>
         /// <param name="source">源</param>
         /// <param name="sql">Sql语句。说明：原样添加到Sql中，不会进行任何处理</param>
-        public static T AppendWhere<T>(this T source, string sql) 
+        public static T AppendWhere<T>(this T source, string sql)
             where T : IWhere
         {
             if (source == null)
@@ -678,6 +676,6 @@ namespace Bing.Datas.Sql
         /// <param name="source">源</param>
         /// <param name="sql">Sql语句。说明：原样添加到Sql中，不会进行任何处理</param>
         /// <param name="condition">该值为true时添加Sql，否则忽略</param>
-        public static T AppendWhere<T>(this T source, string sql,bool condition) where T : IWhere => condition ? AppendWhere(source, sql) : source;
+        public static T AppendWhere<T>(this T source, string sql, bool condition) where T : IWhere => condition ? AppendWhere(source, sql) : source;
     }
 }

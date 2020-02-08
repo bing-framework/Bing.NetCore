@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.QQ
     /// <summary>
     /// QQ授权用户信息结果
     /// </summary>
-    public class QQAuthorizationUserInfoResult: AuthorizationUserInfoResult
+    public class QQAuthorizationUserInfoResult : AuthorizationUserInfoResult
     {
         /// <summary>
         /// 返回状态码

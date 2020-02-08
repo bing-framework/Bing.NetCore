@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Extensions;
 using Bing.Net.Mail.Abstractions;
 using Bing.Net.Mail.Configs;
-using Bing.Utils.Extensions;
 
 namespace Bing.Net.Mail.Core
 {

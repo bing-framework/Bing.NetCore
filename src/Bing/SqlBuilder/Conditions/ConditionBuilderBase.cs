@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.SqlBuilder.Conditions
 {
@@ -155,32 +155,39 @@ namespace Bing.SqlBuilder.Conditions
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}{2}", GetFieldName(fieldName),
                         GetOperator(@operator), GetFieldValue(fieldValue[0]));
                     break;
+
                 case SqlOperator.IsNull:
                 case SqlOperator.IsNotNull:
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}", GetFieldName(fieldName), GetOperator(@operator));
                     break;
+
                 case SqlOperator.Contains:
                 case SqlOperator.NotContains:
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}{2}", GetFieldName(fieldName),
                         GetOperator(@operator), GetFieldValue(string.Format("%{0}%", fieldValue[0])));
                     break;
+
                 case SqlOperator.In:
                 case SqlOperator.NotIn:
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}({2})", GetFieldName(fieldName),
                         GetOperator(@operator), GetArrayFieldValue(fieldValue));
                     break;
+
                 case SqlOperator.Starts:
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}{2}", GetFieldName(fieldName),
                         GetOperator(@operator), GetFieldValue(string.Format("{0}%", fieldValue[0])));
                     break;
+
                 case SqlOperator.Ends:
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}{2}", GetFieldName(fieldName),
                         GetOperator(@operator), GetFieldValue(string.Format("%{0}", fieldValue[0])));
                     break;
+
                 case SqlOperator.Between:
                     this.ConditionAppendBuilder.AppendFormat("{0}{1}{2} AND {3}", GetFieldName(fieldName),
                         GetOperator(@operator), GetFieldValue(fieldValue[0]), GetFieldValue(fieldValue[1]));
                     break;
+
                 default:
                     throw new SqlBuilderException("条件未定义!");
             }
@@ -244,6 +251,7 @@ namespace Bing.SqlBuilder.Conditions
             }
             return AppendRaw(RelationType.And, string.Format(sql, param));
         }
+
         #endregion
 
         #region Block(添加含有括号的条件)
@@ -402,9 +410,11 @@ namespace Bing.SqlBuilder.Conditions
                 case RelationType.And:
                     result = " AND ";
                     break;
+
                 case RelationType.Or:
                     result = " OR ";
                     break;
+
                 default:
                     throw new SqlBuilderException("关联类型未定义!");
             }
@@ -424,44 +434,57 @@ namespace Bing.SqlBuilder.Conditions
                 case SqlOperator.Equal:
                     result = " = ";
                     break;
+
                 case SqlOperator.NotEqual:
                     result = " <> ";
                     break;
+
                 case SqlOperator.GreaterThan:
                     result = " > ";
                     break;
+
                 case SqlOperator.GreaterEqual:
                     result = " >= ";
                     break;
+
                 case SqlOperator.LessThan:
                     result = " < ";
                     break;
+
                 case SqlOperator.LessEqual:
                     result = " <= ";
                     break;
+
                 case SqlOperator.Contains:
                 case SqlOperator.Starts:
                 case SqlOperator.Ends:
                     result = " LIKE ";
                     break;
+
                 case SqlOperator.NotContains:
                     result = " NOT LIKE ";
                     break;
+
                 case SqlOperator.IsNull:
                     result = " IS NULL ";
                     break;
+
                 case SqlOperator.IsNotNull:
                     result = " IS NOT NULL ";
                     break;
+
                 case SqlOperator.In:
                     result = " IN ";
                     break;
+
                 case SqlOperator.NotIn:
                     result = " NOT IN ";
                     break;
+
                 case SqlOperator.Between:
                     result = " BETWEEN ";
                     break;
+
                 default:
                     throw new SqlBuilderException("条件未定义!");
             }

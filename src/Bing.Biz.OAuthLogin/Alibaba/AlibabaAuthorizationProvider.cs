@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Alibaba
     /// <summary>
     /// 阿里巴巴授权提供程序
     /// </summary>
-    public class AlibabaAuthorizationProvider: AuthorizationProviderBase<IAlibabaAuthorizationConfigProvider,AlibabaAuthorizationConfig>,IAlibabaAuthorizationProvider
+    public class AlibabaAuthorizationProvider : AuthorizationProviderBase<IAlibabaAuthorizationConfigProvider, AlibabaAuthorizationConfig>, IAlibabaAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

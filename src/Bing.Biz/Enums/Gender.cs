@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Biz.Enums
 {
@@ -13,6 +13,7 @@ namespace Bing.Biz.Enums
         /// </summary>
         [Description("女士")]
         Female = 1,
+
         /// <summary>
         /// 男
         /// </summary>

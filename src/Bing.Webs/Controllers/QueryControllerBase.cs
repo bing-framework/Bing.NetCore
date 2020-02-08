@@ -6,8 +6,7 @@ using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
-using Bing.Utils;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers
@@ -18,7 +17,7 @@ namespace Bing.Webs.Controllers
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
     public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
-        where TQuery : IQueryParameter 
+        where TQuery : IQueryParameter
         where TDto : IResponse, new()
     {
         /// <summary>

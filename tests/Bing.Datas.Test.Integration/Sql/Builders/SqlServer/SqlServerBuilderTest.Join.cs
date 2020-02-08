@@ -4,6 +4,7 @@ using Bing.Datas.Test.Integration.Samples;
 using Bing.Utils;
 using Bing.Utils.Helpers;
 using Xunit;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
 {

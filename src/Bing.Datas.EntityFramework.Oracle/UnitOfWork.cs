@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
+using Bing.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -28,7 +29,7 @@ namespace Bing.Datas.EntityFramework.Oracle
         /// <param name="assembly">程序集</param>
         protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Bing.Utils.Helpers.Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Reflection.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

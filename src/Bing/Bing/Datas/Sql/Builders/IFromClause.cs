@@ -57,6 +57,6 @@ namespace Bing.Datas.Sql.Builders
         /// <summary>
         /// 输出Sql
         /// </summary>
-        string ToSql();        
+        string ToSql();
     }
 }

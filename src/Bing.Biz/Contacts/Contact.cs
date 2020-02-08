@@ -85,10 +85,10 @@ namespace Bing.Biz.Contacts
         {
             AddDescription("电话", Phone);
             AddDescription("手机", Mobile);
-            AddDescription("Email",Email);
-            AddDescription("QQ",QQ);
-            AddDescription("MSN",MSN);
-            AddDescription("微信",WeChat);
+            AddDescription("Email", Email);
+            AddDescription("QQ", QQ);
+            AddDescription("MSN", MSN);
+            AddDescription("微信", WeChat);
             AddDescription("微博", WeiBo);
         }
     }

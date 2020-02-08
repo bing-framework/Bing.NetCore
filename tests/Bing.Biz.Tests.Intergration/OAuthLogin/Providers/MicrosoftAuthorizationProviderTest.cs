@@ -2,6 +2,7 @@
 using Bing.AutoMapper;
 using Bing.Biz.OAuthLogin.Microsoft;
 using Bing.Biz.Tests.Intergration.OAuthLogin.Configs;
+using Bing.Helpers;
 using Bing.Mapping;
 using Bing.Utils.Helpers;
 using Xunit;

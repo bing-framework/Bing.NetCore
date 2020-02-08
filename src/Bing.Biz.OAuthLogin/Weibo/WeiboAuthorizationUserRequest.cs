@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Weibo
     /// <summary>
     /// 微博授权用户请求
     /// </summary>
-    public class WeiboAuthorizationUserRequest: AuthorizationUserParamBase
+    public class WeiboAuthorizationUserRequest : AuthorizationUserParamBase
     {
         /// <summary>
         /// 授权用户的UID

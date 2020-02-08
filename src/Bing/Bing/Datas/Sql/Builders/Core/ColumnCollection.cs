@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -79,7 +79,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="columnAlias">列别名</param>
         public void AddColumns(string columns, Type tableType, string columnAlias = null)
         {
-            if(columns.IsEmpty())
+            if (columns.IsEmpty())
                 return;
             var items = columns.Split(',').Select(column => CreateItem(column, tableType, columnAlias)).ToList();
             items.ForEach(item =>
@@ -143,7 +143,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="columnAlias">列别名</param>
         public void AddAggregationColumn(string column, string columnAlias)
         {
-            if(column.IsEmpty())
+            if (column.IsEmpty())
                 return;
             AddColumn(new ColumnItem(column, columnAlias: columnAlias, isAggregation: true));
         }
@@ -159,7 +159,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="tableAlias">表别名</param>
         public void RemoveColumns(string columns, string tableAlias = null)
         {
-            if(columns.IsEmpty())
+            if (columns.IsEmpty())
                 return;
             var items = columns.Split(',').Select(column => CreateItem(column, tableAlias)).ToList();
             items.ForEach(RemoveColumn);
@@ -183,7 +183,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="tableType">表实体类型</param>
         public void RemoveColumns(string columns, Type tableType)
         {
-            if(columns.IsEmpty())
+            if (columns.IsEmpty())
                 return;
             var items = columns.Split(',').Select(column => CreateItem(column, tableType)).ToList();
             items.ForEach(RemoveColumn);

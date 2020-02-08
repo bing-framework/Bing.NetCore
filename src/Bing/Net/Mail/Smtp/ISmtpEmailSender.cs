@@ -6,7 +6,7 @@ namespace Bing.Net.Mail.Smtp
     /// <summary>
     /// 基于SMTP的电子邮件发送器
     /// </summary>
-    public interface ISmtpEmailSender:IEmailSender
+    public interface ISmtpEmailSender : IEmailSender
     {
         /// <summary>
         /// 生成SMTP客户端

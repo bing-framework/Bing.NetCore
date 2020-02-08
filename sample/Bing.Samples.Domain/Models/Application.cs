@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Bing.Domains.Entities;
-using Bing.Domains.Entities.Auditing;
+using Bing.Auditing;
 
 namespace Bing.Samples.Domain.Models
 {
@@ -9,7 +9,7 @@ namespace Bing.Samples.Domain.Models
     /// 应用程序
     /// </summary>
     [Display(Name = "应用程序")]
-    public class Application : AggregateRoot<Application>, IDelete, IAudited
+    public class Application : AggregateRoot<Application>, IDelete, IAuditedObject
     {
         /// <summary>
         /// 初始化应用程序

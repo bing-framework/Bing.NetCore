@@ -6,7 +6,7 @@ namespace Bing.Security.Principals
     /// <summary>
     /// 未认证安全主体
     /// </summary>
-    public class UnauthenticatedPrincipal:ClaimsPrincipal
+    public class UnauthenticatedPrincipal : ClaimsPrincipal
     {
         /// <summary>
         /// 身份标识

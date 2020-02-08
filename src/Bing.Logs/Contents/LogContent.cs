@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Properties;
-using Bing.Utils;
 
 namespace Bing.Logs.Contents
 {
@@ -162,6 +161,7 @@ namespace Bing.Logs.Contents
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 初始化一个<see cref="LogContent"/>类型的实例
         /// </summary>
@@ -173,6 +173,7 @@ namespace Bing.Logs.Contents
             SqlParams = new StringBuilder();
             Tags = new List<string>();
         }
+
         #endregion
 
         /// <summary>

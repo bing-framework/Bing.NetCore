@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Weibo
     /// <summary>
     /// 微博授权用户信息结果
     /// </summary>
-    public class WeiboAuthorizationUserInfoResult: AuthorizationUserInfoResult
+    public class WeiboAuthorizationUserInfoResult : AuthorizationUserInfoResult
     {
         /// <summary>
         /// 用户UID

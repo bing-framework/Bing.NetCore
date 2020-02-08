@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Sqlite

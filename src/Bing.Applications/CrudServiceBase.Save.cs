@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Bing.Domains.Entities;
+using Bing.Domains.ChangeTracking;
+using Bing.Extensions;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
 
 namespace Bing.Applications
 {
@@ -79,7 +79,7 @@ namespace Bing.Applications
             CreateBefore(entity);
             await CreateBeforeAsync(entity);
             entity.Init();
-            await _repository.AddAsync(entity);            
+            await _repository.AddAsync(entity);
             CreateAfter(entity);
             await CreateAfterAsync(entity);
         }
@@ -154,7 +154,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        protected virtual void UpdateAfter(TEntity entity, ChangeValueCollection changeValues) => Log
+        protected virtual void UpdateAfter(TEntity entity, ChangedValueDescriptorCollection changeValues) => Log
             .BussinessId(entity.Id.SafeString())
             .Content(changeValues.SafeString());
 
@@ -200,7 +200,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
-        protected virtual Task UpdateAfterAsync(TEntity entity, ChangeValueCollection changeValues) => Task.CompletedTask;
+        protected virtual Task UpdateAfterAsync(TEntity entity, ChangedValueDescriptorCollection changeValues) => Task.CompletedTask;
 
         #endregion
 
@@ -281,6 +281,5 @@ namespace Bing.Applications
         protected virtual void SaveAfter() => WriteLog($"保存{EntityDescription}成功");
 
         #endregion
-
     }
 }

@@ -8,7 +8,7 @@ namespace Bing.Dependency
     /// <summary>
     /// 基于<see cref="ServiceLifetime.Scoped"/>生命周期的数据字典。可用于在Scoped环境中传递数据
     /// </summary>
-    [Dependency(ServiceLifetime.Scoped,AddSelf = true)]
+    [Dependency(ServiceLifetime.Scoped, AddSelf = true)]
     public class ScopedDictionary : ConcurrentDictionary<string, object>, IDisposable
     {
         /// <summary>

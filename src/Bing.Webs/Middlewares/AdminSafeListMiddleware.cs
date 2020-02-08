@@ -9,7 +9,7 @@ namespace Bing.Webs.Middlewares
     /// <summary>
     /// 安全管理列表中间件
     /// </summary>
-    public class AdminSafeListMiddleware:IMiddleware
+    public class AdminSafeListMiddleware : IMiddleware
     {
         /// <summary>
         /// 方法
@@ -61,7 +61,7 @@ namespace Bing.Webs.Middlewares
                 if (badIp)
                 {
                     log.Info($"来自远程IP地址的禁止请求：{rempteIp}");
-                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return;
                 }
             }

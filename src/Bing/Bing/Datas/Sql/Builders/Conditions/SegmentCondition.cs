@@ -1,5 +1,4 @@
 ﻿using Bing.Datas.Queries;
-using Bing.Utils;
 
 namespace Bing.Datas.Sql.Builders.Conditions
 {
@@ -22,6 +21,7 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// 最大值
         /// </summary>
         private readonly string _max;
+
         /// <summary>
         /// 包含边界
         /// </summary>
@@ -72,8 +72,10 @@ namespace Bing.Datas.Sql.Builders.Conditions
             {
                 case Boundary.Left:
                     return Operator.GreaterEqual;
+
                 case Boundary.Both:
                     return Operator.GreaterEqual;
+
                 default:
                     return Operator.Greater;
             }
@@ -98,8 +100,10 @@ namespace Bing.Datas.Sql.Builders.Conditions
             {
                 case Boundary.Right:
                     return Operator.LessEqual;
+
                 case Boundary.Both:
                     return Operator.LessEqual;
+
                 default:
                     return Operator.Less;
             }

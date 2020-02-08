@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bing.Domains.Services;
+using Bing.Extensions;
 using Bing.Permissions.Identity.Extensions;
 using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Options;
 using Bing.Permissions.Identity.Purposes;
 using Bing.Permissions.Identity.Repositories;
 using Bing.Permissions.Identity.Services.Abstractions;
-using Bing.Utils.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 

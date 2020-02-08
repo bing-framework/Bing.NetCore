@@ -1,5 +1,5 @@
-﻿using Bing.Helpers;
-using Bing.Utils.Extensions;
+﻿using Bing.Extensions;
+using Bing.Helpers;
 using IdentityModel;
 
 namespace Bing.Sessions

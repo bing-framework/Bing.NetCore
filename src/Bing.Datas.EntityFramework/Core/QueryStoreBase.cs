@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Datas.EntityFramework.Extensions;
+using Bing.Datas.Sql;
 using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
-using Bing.Utils.Extensions;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
-using Bing.Datas.Sql;
+using Bing.Extensions;
 using Bing.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core
 {
@@ -39,8 +39,8 @@ namespace Bing.Datas.EntityFramework.Core
     /// </summary>
     /// <typeparam name="TEntity">对象类型</typeparam>
     /// <typeparam name="TKey">对象标识类型</typeparam>
-    public abstract class QueryStoreBase<TEntity,TKey>:IQueryStore<TEntity,TKey>where TEntity:class,IKey<TKey>
-    {        
+    public abstract class QueryStoreBase<TEntity, TKey> : IQueryStore<TEntity, TKey> where TEntity : class, IKey<TKey>
+    {
         #region 属性
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="unitOfWork">工作单元</param>
         protected QueryStoreBase(IUnitOfWork unitOfWork)
         {
-            UnitOfWork = (UnitOfWorkBase) unitOfWork;
+            UnitOfWork = (UnitOfWorkBase)unitOfWork;
         }
 
         #endregion
@@ -160,7 +160,7 @@ namespace Bing.Datas.EntityFramework.Core
                 return null;
             }
 
-            return await Set.FindAsync(new[] {id}, cancellationToken);
+            return await Set.FindAsync(new[] { id }, cancellationToken);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIds(params TKey[] ids)
         {
-            return FindByIds((IEnumerable<TKey>) ids);
+            return FindByIds((IEnumerable<TKey>)ids);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIds(IEnumerable<TKey> ids)
         {
-            if(ids==null)
+            if (ids == null)
             {
                 return null;
             }
@@ -195,7 +195,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIds(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return FindByIds(idList);
         }
 
@@ -206,7 +206,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsAsync(params TKey[] ids)
         {
-            return await FindByIdsAsync((IEnumerable<TKey>) ids);
+            return await FindByIdsAsync((IEnumerable<TKey>)ids);
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsAsync(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return await FindByIdsAsync(idList);
         }
 
@@ -272,7 +272,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIdsNoTracking(params TKey[] ids)
         {
-            return FindByIdsNoTracking((IEnumerable<TKey>) ids);
+            return FindByIdsNoTracking((IEnumerable<TKey>)ids);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual List<TEntity> FindByIdsNoTracking(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return FindByIdsNoTracking(idList);
         }
 
@@ -308,7 +308,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(params TKey[] ids)
         {
-            return await FindByIdsNoTrackingAsync((IEnumerable<TKey>) ids);
+            return await FindByIdsNoTrackingAsync((IEnumerable<TKey>)ids);
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <returns></returns>
         public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids)
         {
-            var idList = Bing.Utils.Helpers.Conv.ToList<TKey>(ids);
+            var idList = Conv.ToList<TKey>(ids);
             return await FindByIdsNoTrackingAsync(idList);
         }
 
@@ -606,7 +606,5 @@ namespace Bing.Datas.EntityFramework.Core
         {
             return await FindAsNoTracking().Where(query).ToPagerListAsync(query.GetPager());
         }
-
-        
     }
 }

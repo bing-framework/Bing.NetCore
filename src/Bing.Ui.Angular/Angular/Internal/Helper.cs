@@ -3,14 +3,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Properties;
 using Bing.Ui.Angular.Forms.Configs;
 using Bing.Ui.Attributes;
 using Bing.Ui.Configs;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Bing.Validations.Validators;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Ui.Angular.Internal
 {
@@ -57,7 +60,7 @@ namespace Bing.Ui.Angular.Internal
         /// <param name="propertyName">属性名</param>
         private static void Init(IConfig config, Type modelType, MemberInfo member, string propertyName)
         {
-            config.SetAttribute(UiConst.Name, Bing.Utils.Helpers.Str.FirstLower(propertyName), false);
+            config.SetAttribute(UiConst.Name, Str.FirstLower(propertyName), false);
             var displayName = Reflection.GetDisplayNameOrDescription(member);
             config.SetAttribute(UiConst.Label, displayName, false);
             InitModel(config, modelType, member, propertyName);
@@ -107,7 +110,7 @@ namespace Bing.Ui.Angular.Internal
         /// <param name="propertyName">属性名</param>
         private static string GetModel(string modelName, string propertyName)
         {
-            modelName = Bing.Utils.Helpers.Str.FirstLower(modelName);
+            modelName = Str.FirstLower(modelName);
             propertyName = GetFirstLowerCasePropertyName(propertyName);
             if (string.IsNullOrWhiteSpace(modelName) || string.IsNullOrWhiteSpace(propertyName))
             {
@@ -128,7 +131,7 @@ namespace Bing.Ui.Angular.Internal
                 return propertyName;
             }
 
-            return propertyName.Split('.').Select(Bing.Utils.Helpers.Str.FirstLower).ToList().Join("", ".");
+            return propertyName.Split('.').Select(Str.FirstLower).ToList().Join("", ".");
         }
 
         /// <summary>

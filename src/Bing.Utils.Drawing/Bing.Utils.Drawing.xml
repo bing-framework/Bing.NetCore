@@ -100,7 +100,7 @@
         <member name="M:Bing.Utils.Drawing.CaptchaBuilder.GetRandomNumbers(System.Int32)">
             <summary>
             获取随机数字的字符串
-            </summary> 
+            </summary>
             <param name="length">长度</param>
             <returns></returns>
         </member>

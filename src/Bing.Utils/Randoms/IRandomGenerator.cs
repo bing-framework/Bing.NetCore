@@ -5,6 +5,9 @@
     /// </summary>
     public interface IRandomGenerator
     {
+        /// <summary>
+        /// 生成随机数
+        /// </summary>
         string Generate();
     }
 }

@@ -228,7 +228,7 @@
             </summary>
             <param name="context">TagHelper上下文</param>
         </member>
-        <member name="M:Bing.Ui.Angular.Forms.Configs.SelectConfig.AddItems(Bing.Utils.Item[])">
+        <member name="M:Bing.Ui.Angular.Forms.Configs.SelectConfig.AddItems(Bing.Item[])">
             <summary>
             添加项集合
             </summary>

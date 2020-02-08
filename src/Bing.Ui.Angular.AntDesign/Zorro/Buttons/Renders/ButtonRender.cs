@@ -1,11 +1,12 @@
-﻿using Bing.Ui.Angular;
+﻿using Bing.Extensions;
+using Bing.Ui.Angular;
 using Bing.Ui.Angular.Base;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;
 using Bing.Ui.Zorro.Buttons.Builders;
 using Bing.Ui.Zorro.Enums;
 using Bing.Ui.Zorro.Icons.Builders;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Ui.Zorro.Buttons.Renders
 {

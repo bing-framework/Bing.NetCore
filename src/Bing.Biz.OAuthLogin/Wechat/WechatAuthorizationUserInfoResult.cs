@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Wechat
     /// <summary>
     /// 微信授权用户信息结果
     /// </summary>
-    public class WechatAuthorizationUserInfoResult: AuthorizationUserInfoResult
+    public class WechatAuthorizationUserInfoResult : AuthorizationUserInfoResult
     {
         /// <summary>
         /// 用户OpenId。对当前开发者账号唯一

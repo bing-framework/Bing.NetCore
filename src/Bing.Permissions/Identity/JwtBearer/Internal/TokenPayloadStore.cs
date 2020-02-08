@@ -8,7 +8,7 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
     /// <summary>
     /// 令牌Payload存储器
     /// </summary>
-    internal sealed class TokenPayloadStore:ITokenPayloadStore
+    internal sealed class TokenPayloadStore : ITokenPayloadStore
     {
         /// <summary>
         /// 缓存

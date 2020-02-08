@@ -7,6 +7,7 @@ using Bing.Logs;
 using Bing.Utils;
 using Bing.Utils.Helpers;
 using Xunit;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
 {

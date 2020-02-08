@@ -263,7 +263,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="columnAlias">列别名</param>
         public void AppendSql(string sql, string columnAlias = null)
         {
-            if(string.IsNullOrWhiteSpace(sql))
+            if (string.IsNullOrWhiteSpace(sql))
                 return;
             sql = Helper.ResolveSql(sql, _dialect);
             _columns.AddRawColumn(sql, columnAlias);

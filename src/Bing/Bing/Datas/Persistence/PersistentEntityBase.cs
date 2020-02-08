@@ -7,13 +7,13 @@ namespace Bing.Datas.Persistence
     /// <summary>
     /// 持久化实体基类
     /// </summary>
-    public abstract class PersistentEntityBase: PersistentEntityBase<Guid> { }
+    public abstract class PersistentEntityBase : PersistentEntityBase<Guid> { }
 
     /// <summary>
     /// 持久化实体基类
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public abstract class PersistentEntityBase<TKey>:IKey<TKey>
+    public abstract class PersistentEntityBase<TKey> : IKey<TKey>
     {
         /// <summary>
         /// 标识

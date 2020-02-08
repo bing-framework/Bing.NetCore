@@ -4,16 +4,17 @@ using Bing.Biz.Payments.Properties;
 using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Results;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Validations;
+using Xml = Bing.Helpers.Xml;
 
 namespace Bing.Biz.Payments.Wechatpay.Services
 {
     /// <summary>
     /// 微信支付通知服务
     /// </summary>
-    public class WechatpayNotifyService:IWechatpayNotifyService
+    public class WechatpayNotifyService : IWechatpayNotifyService
     {
         /// <summary>
         /// 配置提供器

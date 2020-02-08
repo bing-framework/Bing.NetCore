@@ -2,8 +2,8 @@
 using System.Linq;
 using Bing.Biz.Payments.Properties;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Mapping;
-using Bing.Utils.Extensions;
 using Bing.Validations;
 
 namespace Bing.Biz.Payments.Core

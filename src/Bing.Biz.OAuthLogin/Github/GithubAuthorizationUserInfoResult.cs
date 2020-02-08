@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Github
     /// <summary>
     /// Github 授权用户信息结果
     /// </summary>
-    public class GithubAuthorizationUserInfoResult: AuthorizationUserInfoResult
+    public class GithubAuthorizationUserInfoResult : AuthorizationUserInfoResult
     {
         /// <summary>
         /// 登录账号

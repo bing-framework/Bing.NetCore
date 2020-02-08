@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Bing.Configurations
+﻿namespace Bing.Configurations
 {
     /// <summary>
     /// 配置构建器选项

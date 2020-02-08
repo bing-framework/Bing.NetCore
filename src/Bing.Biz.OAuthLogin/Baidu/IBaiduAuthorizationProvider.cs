@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Baidu
     /// <summary>
     /// 百度授权提供程序
     /// </summary>
-    public interface IBaiduAuthorizationProvider: IAuthorizationUrlProvider<BaiduAuthorizationRequest>
+    public interface IBaiduAuthorizationProvider : IAuthorizationUrlProvider<BaiduAuthorizationRequest>
     {
     }
 }

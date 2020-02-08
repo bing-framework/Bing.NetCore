@@ -2362,7 +2362,7 @@
             <param name="builder">参数生成器</param>
             <returns></returns>
         </member>
-        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.AddNode(Bing.Utils.Helpers.Xml,System.String,System.Object)">
+        <member name="M:Bing.Biz.Payments.Wechatpay.Parameters.WechatpayParameterBuilder.AddNode(Bing.Helpers.Xml,System.String,System.Object)">
             <summary>
             添加Xml节点
             </summary>

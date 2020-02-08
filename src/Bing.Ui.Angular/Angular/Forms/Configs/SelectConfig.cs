@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Bing.Ui.Configs;
 using Bing.Ui.TagHelpers;
 using Bing.Utils;
+using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Ui.Angular.Forms.Configs
 {
@@ -50,7 +51,7 @@ namespace Bing.Ui.Angular.Forms.Configs
         /// <param name="type">枚举类型</param>
         public void AddEnum(Type type)
         {
-            AddItems(Bing.Utils.Helpers.Enum.GetItems(type).ToArray());
+            AddItems(Enum.GetItems(type).ToArray());
         }
 
         /// <summary>

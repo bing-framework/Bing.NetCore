@@ -7,7 +7,7 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 验证实体过滤器
     /// </summary>
-    public class ValidationModelAttribute: IActionFilter
+    public class ValidationModelAttribute : IActionFilter
     {
         /// <summary>
         /// 允许空值
@@ -52,7 +52,7 @@ namespace Bing.Webs.Filters
                         Message = e.Value.Errors.First().ErrorMessage
                     }).ToList();
 
-                context.Result = new ValidationFailedResult(errors){ AllowMultipleResult = AllowMultipleResult };
+                context.Result = new ValidationFailedResult(errors) { AllowMultipleResult = AllowMultipleResult };
             }
         }
 

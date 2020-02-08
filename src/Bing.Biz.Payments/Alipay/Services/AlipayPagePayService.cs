@@ -5,7 +5,7 @@ using Bing.Biz.Payments.Alipay.Parameters;
 using Bing.Biz.Payments.Alipay.Parameters.Requests;
 using Bing.Biz.Payments.Alipay.Services.Base;
 using Bing.Biz.Payments.Core;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Biz.Payments.Alipay.Services
 {

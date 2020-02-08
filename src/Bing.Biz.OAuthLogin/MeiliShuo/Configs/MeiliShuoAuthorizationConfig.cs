@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.MeiliShuo.Configs
     /// <summary>
     /// 美丽说授权配置
     /// </summary>
-    public class MeiliShuoAuthorizationConfig: AuthorizationConfigBase
+    public class MeiliShuoAuthorizationConfig : AuthorizationConfigBase
     {
         /// <summary>
         /// 应用标识

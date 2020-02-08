@@ -2,7 +2,7 @@
 using System.Linq;
 using Bing.Biz.Payments.Wechatpay.Enums;
 using Bing.Exceptions;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 using Bing.Validations;
 
 namespace Bing.Biz.Payments.Wechatpay.Configs

@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Permissions.Identity.Extensions
 {

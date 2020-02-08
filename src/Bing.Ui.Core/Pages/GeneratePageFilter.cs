@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -58,7 +58,7 @@ namespace Bing.Ui.Pages
                 var relativePath = GetPath(context);
                 if (string.IsNullOrWhiteSpace(relativePath))
                     return;
-                var path = Bing.Utils.Helpers.Common.GetPhysicalPath(relativePath);
+                var path = Common.GetPhysicalPath(relativePath);
                 var directory = System.IO.Path.GetDirectoryName(path);
                 if (string.IsNullOrWhiteSpace(directory))
                     return;
@@ -131,7 +131,7 @@ namespace Bing.Ui.Pages
                 for (var i = 0; i < paths.Length; i++)
                 {
                     var path = paths[i];
-                    var name = Bing.Utils.Helpers.Str.SplitWordGroup(path);
+                    var name = Str.SplitWordGroup(path);
                     if (name == "pages" && i == 0)
                     {
                         result.Append("typings/app/");
@@ -144,7 +144,7 @@ namespace Bing.Ui.Pages
                     }
                     if (i == paths.Length - 1)
                     {
-                        name = Bing.Utils.Helpers.Str.SplitWordGroup(path.RemoveEnd(".cshtml"));
+                        name = Str.SplitWordGroup(path.RemoveEnd(".cshtml"));
                         result.Append($"{name}.component.html");
                         break;
                     }

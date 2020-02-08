@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bing.Auditing;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Logs;
 using Bing.Datas.Sql;
@@ -13,14 +14,12 @@ using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.Transactions;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
-using Bing.Domains.Entities.Auditing;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
 using Bing.Security.Extensions;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -75,7 +74,7 @@ namespace Bing.Datas.EntityFramework.Core
         static UnitOfWorkBase()
         {
             Maps = new ConcurrentDictionary<Type, IEnumerable<IMap>>();
-            LoggerFactory = new LoggerFactory(new[] {new EfLogProvider(),});
+            LoggerFactory = new LoggerFactory(new[] { new EfLogProvider(), });
         }
 
         #endregion
@@ -87,7 +86,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="options">配置</param>
         /// <param name="serviceProvider">服务提供器</param>
-        protected UnitOfWorkBase(DbContextOptions options,IServiceProvider serviceProvider):base(options)
+        protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) : base(options)
         {
             TraceId = Guid.NewGuid().ToString();
             Session = Bing.Sessions.Session.Instance;
@@ -237,6 +236,7 @@ namespace Bing.Datas.EntityFramework.Core
         #endregion
 
         #region Commit(提交)
+
         /// <summary>
         /// 提交，返回影响的行数
         /// </summary>
@@ -256,6 +256,7 @@ namespace Bing.Datas.EntityFramework.Core
         #endregion
 
         #region CommitAsync(异步提交)
+
         /// <summary>
         /// 异步提交，返回影响的行数
         /// </summary>
@@ -297,9 +298,11 @@ namespace Bing.Datas.EntityFramework.Core
                     case EntityState.Added:
                         InterceptAddedOperation(entry);
                         break;
+
                     case EntityState.Modified:
                         InterceptModifiedOperation(entry);
                         break;
+
                     case EntityState.Deleted:
                         InterceptDeletedOperation(entry);
                         break;
@@ -326,13 +329,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取用户标识
         /// </summary>
-        /// <returns></returns>
         protected virtual string GetUserId() => GetSession().UserId;
 
         /// <summary>
         /// 获取用户名称
         /// </summary>
-        /// <returns></returns>
         protected virtual string GetUserName()
         {
             var name = GetSession().GetFullName();
@@ -342,7 +343,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取用户会话
         /// </summary>
-        /// <returns></returns>
         protected virtual ISession GetSession() => Session;
 
         /// <summary>
@@ -499,6 +499,5 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         #endregion
-
     }
 }

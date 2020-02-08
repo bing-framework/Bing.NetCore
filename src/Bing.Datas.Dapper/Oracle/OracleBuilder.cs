@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Datas.Sql;
+﻿using Bing.Datas.Sql;
 using Bing.Datas.Sql.Builders;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Matedatas;
@@ -45,7 +44,7 @@ namespace Bing.Datas.Dapper.Oracle
         /// <summary>
         /// 创建From子句
         /// </summary>
-        protected override IFromClause CreateFromClause() => new OracleFromClause(this,GetDialect(),EntityResolver,AliasRegister,TableDatabase);
+        protected override IFromClause CreateFromClause() => new OracleFromClause(this, GetDialect(), EntityResolver, AliasRegister, TableDatabase);
 
         /// <summary>
         /// 创建Join子句

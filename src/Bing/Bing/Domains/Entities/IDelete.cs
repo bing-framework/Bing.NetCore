@@ -6,7 +6,7 @@
     public interface IDelete
     {
         /// <summary>
-        /// 是否删除
+        /// 是否已删除
         /// </summary>
         bool IsDeleted { get; set; }
     }

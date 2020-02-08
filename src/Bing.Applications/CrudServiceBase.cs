@@ -5,6 +5,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
+using Bing.Helpers;
 using Bing.Mapping;
 
 namespace Bing.Applications
@@ -134,7 +135,6 @@ namespace Bing.Applications
         where TUpdateRequest : IRequest, new()
         where TQueryParameter : IQueryParameter
     {
-
         /// <summary>
         /// 工作单元
         /// </summary>
@@ -150,7 +150,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         /// <param name="repository">仓储</param>
-        protected CrudServiceBase(IUnitOfWork unitOfWork, IRepository<TEntity, TKey> repository) : base(unitOfWork,repository)
+        protected CrudServiceBase(IUnitOfWork unitOfWork, IRepository<TEntity, TKey> repository) : base(unitOfWork, repository)
         {
             _unitOfWork = unitOfWork;
             _repository = repository;
@@ -166,12 +166,12 @@ namespace Bing.Applications
         /// 创建参数转换为实体
         /// </summary>
         /// <param name="request">创建参数</param>
-        protected virtual TEntity ToEntityFromCreateRequest(TCreateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Bing.Utils.Helpers.Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
+        protected virtual TEntity ToEntityFromCreateRequest(TCreateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
 
         /// <summary>
         /// 修改参数转换为实体
         /// </summary>
         /// <param name="request">修改参数</param>
-        protected virtual TEntity ToEntityFromUpdateRequest(TUpdateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Bing.Utils.Helpers.Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
+        protected virtual TEntity ToEntityFromUpdateRequest(TUpdateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
     }
 }

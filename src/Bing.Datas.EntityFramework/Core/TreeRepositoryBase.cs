@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core
@@ -14,7 +14,7 @@ namespace Bing.Datas.EntityFramework.Core
     /// 树型仓储
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
-    public abstract class TreeRepositoryBase<TEntity> : TreeRepositoryBase<TEntity, Guid, Guid?>,ITreeRepository<TEntity>
+    public abstract class TreeRepositoryBase<TEntity> : TreeRepositoryBase<TEntity, Guid, Guid?>, ITreeRepository<TEntity>
         where TEntity : class, ITreeEntity<TEntity, Guid, Guid?>
     {
         /// <summary>
@@ -43,8 +43,8 @@ namespace Bing.Datas.EntityFramework.Core
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
-    public abstract class TreeRepositoryBase<TEntity,TKey,TParentId>:RepositoryBase<TEntity,TKey>,ITreeRepository<TEntity,TKey,TParentId>
-        where TEntity:class ,ITreeEntity<TEntity,TKey,TParentId>
+    public abstract class TreeRepositoryBase<TEntity, TKey, TParentId> : RepositoryBase<TEntity, TKey>, ITreeRepository<TEntity, TKey, TParentId>
+        where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>
     {
         /// <summary>
         /// 初始化一个<see cref="TreeRepositoryBase{TEntity,TKey,TParentId}"/>类型的实例

@@ -11,7 +11,7 @@ namespace Bing.Net.Mail.Core
     /// <summary>
     /// 邮件队列管理器基类
     /// </summary>
-    public abstract class MailQueueManagerBase:IMailQueueManager
+    public abstract class MailQueueManagerBase : IMailQueueManager
     {
         /// <summary>
         /// 邮件队列提供程序
@@ -48,7 +48,7 @@ namespace Bing.Net.Mail.Core
         /// </summary>
         /// <param name="emailConfigProvider">电子邮件配置提供器</param>
         /// <param name="mailQueueProvider">邮件队列提供程序</param>
-        protected MailQueueManagerBase(IEmailConfigProvider emailConfigProvider,IMailQueueProvider mailQueueProvider)
+        protected MailQueueManagerBase(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider)
         {
             _emailConfigProvider = emailConfigProvider;
             _mailQueueProvider = mailQueueProvider;
@@ -65,12 +65,12 @@ namespace Bing.Net.Mail.Core
                 return;
             }
             IsRunning = true;
-            _thread=new Thread(StartSendMail)
+            _thread = new Thread(StartSendMail)
             {
                 Name = "EmailQueue",
                 IsBackground = true
             };
-            WriteLog("线程即将启动",LogLevel.Information);
+            WriteLog("线程即将启动", LogLevel.Information);
             _thread.Start();
             WriteLog($"线程已经启动，线程ID是: {_thread.ManagedThreadId}", LogLevel.Information);
         }
@@ -105,7 +105,7 @@ namespace Bing.Net.Mail.Core
 
                     if (_mailQueueProvider.IsEmpty)
                     {
-                        WriteLog("队列是空，开始睡眠",LogLevel.Trace);
+                        WriteLog("队列是空，开始睡眠", LogLevel.Trace);
                         var config = _emailConfigProvider.GetConfig();
                         Thread.Sleep(config.SleepInterval);
                         continue;
@@ -124,11 +124,11 @@ namespace Bing.Net.Mail.Core
             }
             catch (Exception e)
             {
-                WriteLog($"循环中出错，线程即将结束：{e.Message}",LogLevel.Error);
+                WriteLog($"循环中出错，线程即将结束：{e.Message}", LogLevel.Error);
                 IsRunning = false;
             }
 
-            WriteLog("邮件发送线程即将停止，人为跳出循环，没有异常发生",LogLevel.Information);
+            WriteLog("邮件发送线程即将停止，人为跳出循环，没有异常发生", LogLevel.Information);
             _tryStop = false;
             IsRunning = false;
         }

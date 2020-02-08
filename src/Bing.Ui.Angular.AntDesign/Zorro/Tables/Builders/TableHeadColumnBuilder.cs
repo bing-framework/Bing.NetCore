@@ -1,5 +1,7 @@
-﻿using Bing.Ui.Builders;
-using Bing.Utils.Extensions;
+﻿using Bing.Extensions;
+using Bing.Helpers;
+using Bing.Ui.Builders;
+using Bing.Extensions;
 
 namespace Bing.Ui.Zorro.Tables.Builders
 {
@@ -62,7 +64,7 @@ namespace Bing.Ui.Zorro.Tables.Builders
                 return;
             }
 
-            if (Bing.Utils.Helpers.Valid.IsNumber(width))
+            if (Valid.IsNumber(width))
             {
                 width += "px";
             }

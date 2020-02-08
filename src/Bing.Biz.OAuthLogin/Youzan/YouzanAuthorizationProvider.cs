@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Youzan
     /// <summary>
     /// 有赞授权提供程序
     /// </summary>
-    public class YouzanAuthorizationProvider: AuthorizationProviderBase<IYouzanAuthorizationConfigProvider,YouzanAuthorizationConfig>,IYouzanAuthorizationProvider
+    public class YouzanAuthorizationProvider : AuthorizationProviderBase<IYouzanAuthorizationConfigProvider, YouzanAuthorizationConfig>, IYouzanAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

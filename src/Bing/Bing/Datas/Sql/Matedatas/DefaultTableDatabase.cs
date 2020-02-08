@@ -3,7 +3,7 @@
     /// <summary>
     /// 表数据库
     /// </summary>
-    public class DefaultTableDatabase:ITableDatabase
+    public class DefaultTableDatabase : ITableDatabase
     {
         /// <summary>
         /// 获取数据库

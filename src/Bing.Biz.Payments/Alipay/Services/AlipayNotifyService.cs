@@ -2,7 +2,7 @@
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Enums;
 using Bing.Biz.Payments.Alipay.Services.Base;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Parameters;
 using Bing.Validations;
 
@@ -11,7 +11,7 @@ namespace Bing.Biz.Payments.Alipay.Services
     /// <summary>
     /// 支付宝回调通知服务
     /// </summary>
-    public class AlipayNotifyService:AlipayNotifyServiceBase,IAlipayNotifyService
+    public class AlipayNotifyService : AlipayNotifyServiceBase, IAlipayNotifyService
     {
         /// <summary>
         /// 交易状态
@@ -24,10 +24,13 @@ namespace Bing.Biz.Payments.Alipay.Services
                 {
                     case "WAIT_BUYER_PAY":
                         return TradeStatus.WaitPay;
+
                     case "TRADE_CLOSED":
                         return TradeStatus.Close;
+
                     case "TRADE_SUCCESS":
                         return TradeStatus.Success;
+
                     case "TRADE_FINISHED":
                         return TradeStatus.Finished;
                 }

@@ -3,7 +3,7 @@
     /// <summary>
     /// 跟踪日志
     /// </summary>
-    public class TraceLogAttribute:LogAttributeBase
+    public class TraceLogAttribute : LogAttributeBase
     {
         /// <summary>
         /// 写日志

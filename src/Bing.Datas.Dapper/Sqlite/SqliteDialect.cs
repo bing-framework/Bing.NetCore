@@ -5,7 +5,7 @@ namespace Bing.Datas.Dapper.Sqlite
     /// <summary>
     /// Sqlite方言
     /// </summary>
-    public class SqliteDialect:DialectBase
+    public class SqliteDialect : DialectBase
     {
         /// <summary>
         /// 起始转义标识符

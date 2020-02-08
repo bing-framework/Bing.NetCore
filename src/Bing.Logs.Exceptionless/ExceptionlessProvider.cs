@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Bing.Configurations;
+using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
-using Bing.Utils.Extensions;
 using Exceptionless;
 using el = global::Exceptionless;
 
@@ -119,16 +119,22 @@ namespace Bing.Logs.Exceptionless
             {
                 case LogLevel.Trace:
                     return el.Logging.LogLevel.Trace;
+
                 case LogLevel.Debug:
                     return el.Logging.LogLevel.Debug;
+
                 case LogLevel.Information:
                     return el.Logging.LogLevel.Info;
+
                 case LogLevel.Warning:
                     return el.Logging.LogLevel.Warn;
+
                 case LogLevel.Error:
                     return el.Logging.LogLevel.Error;
+
                 case LogLevel.Fatal:
                     return el.Logging.LogLevel.Fatal;
+
                 default:
                     return el.Logging.LogLevel.Off;
             }

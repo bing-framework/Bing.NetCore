@@ -8,7 +8,7 @@ namespace Bing.Biz.Payments.Alipay.Parameters
     /// <summary>
     /// 支付宝内容参数生成器
     /// </summary>
-    public class AlipayContentBuilder:ParameterBuilder
+    public class AlipayContentBuilder : ParameterBuilder
     {
         /// <summary>
         /// 初始化支付参数

@@ -12,16 +12,19 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         [Description("application/x-www-form-urlencoded")]
         FormUrlEncoded,
+
         /// <summary>
         /// JSON格式：application/json
         /// </summary>
         [Description("application/json")]
         Json,
+
         /// <summary>
         /// 表单文件上传：multipart/form-data
         /// </summary>
         [Description("multipart/form-data")]
         FormData,
+
         /// <summary>
         /// XML格式：text/xml
         /// </summary>

@@ -21,7 +21,7 @@ namespace Bing.Utils.Medias.Images
         /// <returns></returns>
         public static Bitmap BrightnessHandle(Bitmap bitmap, int width, int height, int val)
         {
-            Bitmap bm=new Bitmap(width,height);
+            Bitmap bm = new Bitmap(width, height);
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
@@ -55,7 +55,7 @@ namespace Bing.Utils.Medias.Images
                 for (var y = 0; y < height; y++)
                 {
                     Color pixel = bitmap.GetPixel(x, y);
-                    bitmap.SetPixel(x,y,Color.FromArgb(0,pixel.G,pixel.B));
+                    bitmap.SetPixel(x, y, Color.FromArgb(0, pixel.G, pixel.B));
                 }
             }
             return bitmap;
@@ -105,7 +105,7 @@ namespace Bing.Utils.Medias.Images
                     Color pixel = bitmap.GetPixel(x, y);
                     bitmap.SetPixel(x, z++, Color.FromArgb(pixel.R, pixel.G, pixel.B));
                 }
-            }            
+            }
             return bitmap;
         }
 
@@ -153,25 +153,25 @@ namespace Bing.Utils.Medias.Images
             Graphics g = Graphics.FromImage(destBitmap);
             g.FillRectangle(new SolidBrush(Color.White), 0, 0, destBitmap.Width, destBitmap.Height);
             g.Dispose();
-            double dBaseAxisLen = isTwist ? (double) destBitmap.Height : (double) destBitmap.Width;
+            double dBaseAxisLen = isTwist ? (double)destBitmap.Height : (double)destBitmap.Width;
             for (var i = 0; i < destBitmap.Width; i++)
             {
                 for (var j = 0; j < destBitmap.Height; j++)
                 {
                     double dx = 0;
                     dx = isTwist
-                        ? (2 * Math.PI * (double) j) / dBaseAxisLen
-                        : (2 * Math.PI * (double) i) / dBaseAxisLen;
+                        ? (2 * Math.PI * (double)j) / dBaseAxisLen
+                        : (2 * Math.PI * (double)i) / dBaseAxisLen;
                     dx += shapePhase;
                     double dy = Math.Sin(dx);
                     // 取当前点的颜色
                     int nOldX = 0, nOldY = 0;
-                    nOldX = isTwist ? i + (int) (dy * shapeMultValue) : i;
-                    nOldY = isTwist ? j : j + (int) (dy * shapeMultValue);
+                    nOldX = isTwist ? i + (int)(dy * shapeMultValue) : i;
+                    nOldY = isTwist ? j : j + (int)(dy * shapeMultValue);
                     Color color = bitmap.GetPixel(i, j);
                     if (nOldX >= 0 && nOldX <= destBitmap.Width && nOldY >= 0 && nOldY <= destBitmap.Height)
                     {
-                        destBitmap.SetPixel(nOldX,nOldY,color);
+                        destBitmap.SetPixel(nOldX, nOldY, color);
                     }
                 }
             }

@@ -129,18 +129,23 @@ namespace Bing.Logs.Log4Net
             {
                 case LogLevel.Trace:
                     return;
+
                 case LogLevel.Debug:
                     _log.Debug(message);
                     return;
+
                 case LogLevel.Information:
                     _log.Info(message);
                     return;
+
                 case LogLevel.Warning:
                     _log.Warn(message);
                     return;
+
                 case LogLevel.Error:
                     _log.Error(message);
                     return;
+
                 case LogLevel.Fatal:
                     _log.Fatal(message);
                     return;

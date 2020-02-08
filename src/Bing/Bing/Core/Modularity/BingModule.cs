@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Modularity

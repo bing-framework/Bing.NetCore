@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Datas.Sql.Builders.Core
 {

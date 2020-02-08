@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Ui.Angular;
 using Bing.Ui.Angular.Base;
 using Bing.Ui.Angular.Forms.Resolvers;
@@ -12,7 +14,7 @@ using Bing.Ui.Zorro.Buttons.Builders;
 using Bing.Ui.Zorro.Enums;
 using Bing.Ui.Zorro.Forms.Builders;
 using Bing.Ui.Zorro.Icons.Builders;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
@@ -288,7 +290,7 @@ namespace Bing.Ui.Zorro.Forms.Renders
         /// </summary>
         private List<string> GetAccepts<TEnum>() where TEnum : struct 
         {
-            var names = Bing.Utils.Helpers.Enum.GetNames<TEnum>();
+            var names = Enum.GetNames<TEnum>();
             return names.Select(FileTypeHelper.GetExtensions).ToList();
         }
 

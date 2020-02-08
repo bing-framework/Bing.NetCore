@@ -6,8 +6,8 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 无缓存过滤器
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Method)]
-    public sealed class NoCacheAttribute:ActionFilterAttribute
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public sealed class NoCacheAttribute : ActionFilterAttribute
     {
         /// <summary>
         /// 重写OnResultExecuting()方法，取消页面缓存

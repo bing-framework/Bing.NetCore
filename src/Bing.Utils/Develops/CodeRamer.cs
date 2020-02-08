@@ -48,7 +48,7 @@ namespace Bing.Utils.Develops
 
             Console.ForegroundColor = currentForeColor;
             long result = end - start;
-            WriteLine("\tRam:\t" + result + " B");            
+            WriteLine("\tRam:\t" + result + " B");
             WriteLine("\tRam:\t" + result + " B");
             WriteLine("\tRam:\t" + result / 1024 + " KB");
             WriteLine("\tRam:\t" + result / 1024 / 1024 + " MB");

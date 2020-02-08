@@ -46,11 +46,11 @@ namespace Bing.Utils.Configs
                 ? Directory.GetCurrentDirectory()
                 : Path.Combine(Directory.GetCurrentDirectory(), basePath);
 
-            var configuration=new ConfigurationBuilder().AddXmlFile(config =>
-            {
-                config.Path = configFileName;
-                config.FileProvider=new PhysicalFileProvider(basePath);
-            });
+            var configuration = new ConfigurationBuilder().AddXmlFile(config =>
+              {
+                  config.Path = configFileName;
+                  config.FileProvider = new PhysicalFileProvider(basePath);
+              });
 
             return configuration.Build();
         }

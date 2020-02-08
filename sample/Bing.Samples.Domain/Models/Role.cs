@@ -1,4 +1,5 @@
 ﻿using Bing.Utils.Helpers;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Samples.Domain.Models
 {

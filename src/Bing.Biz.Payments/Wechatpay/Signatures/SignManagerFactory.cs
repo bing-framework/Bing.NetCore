@@ -1,7 +1,7 @@
 ﻿using System;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Enums;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;
 
@@ -27,10 +27,10 @@ namespace Bing.Biz.Payments.Wechatpay.Signatures
 
             if (config.SignType == WechatpaySignType.HmacSha256)
             {
-                return new HmacSha256SignManager(new SignKey(config.PrivateKey),builder);
+                return new HmacSha256SignManager(new SignKey(config.PrivateKey), builder);
             }
 
-            throw new NotImplementedException($"未实现秦明算法:{config.SignType.Description()}");
+            throw new NotImplementedException($"未实现签名算法:{config.SignType.Description()}");
         }
     }
 }

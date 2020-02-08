@@ -34,9 +34,11 @@ namespace Bing.Utils.Threading.Locks
                 case ReaderWriteLockType.Read:
                     _rwLock.EnterReadLock();
                     break;
+
                 case ReaderWriteLockType.Write:
                     _rwLock.EnterWriteLock();
                     break;
+
                 case ReaderWriteLockType.UpgradeableRead:
                     _rwLock.EnterUpgradeableReadLock();
                     break;
@@ -53,9 +55,11 @@ namespace Bing.Utils.Threading.Locks
                 case ReaderWriteLockType.Read:
                     _rwLock.ExitReadLock();
                     break;
+
                 case ReaderWriteLockType.Write:
                     _rwLock.ExitWriteLock();
                     break;
+
                 case ReaderWriteLockType.UpgradeableRead:
                     _rwLock.ExitUpgradeableReadLock();
                     break;

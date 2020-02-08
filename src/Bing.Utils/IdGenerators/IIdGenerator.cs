@@ -9,7 +9,6 @@
         /// <summary>
         /// 创建 ID
         /// </summary>
-        /// <returns></returns>
         T Create();
     }
 }

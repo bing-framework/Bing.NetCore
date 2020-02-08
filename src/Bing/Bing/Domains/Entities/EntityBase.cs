@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
 using Bing.Sessions;
-using Bing.Utils.Extensions;
 using Bing.Validations;
 
 namespace Bing.Domains.Entities
@@ -11,16 +11,47 @@ namespace Bing.Domains.Entities
     /// <summary>
     /// 领域实体
     /// </summary>
+    [Serializable]
+    public abstract class EntityBase : IEntity
+    {
+        /// <summary>
+        /// 验证
+        /// </summary>
+        public abstract ValidationResultCollection Validate();
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        public abstract void Init();
+
+        /// <summary>
+        /// 获取标识列表
+        /// </summary>
+        public abstract object[] GetKeys();
+
+        /// <summary>
+        /// 输出字符串
+        /// </summary>
+        public override string ToString() => $"[Entity: {GetType().Name}] Keys = {GetKeys().Join(", ")}";
+    }
+
+    /// <summary>
+    /// 领域实体
+    /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
-    public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : IEntity
+    [Serializable]
+    public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : class, IEntity
     {
         /// <summary>
         /// 初始化一个<see cref="EntityBase{TEntity}"/>类型的实例
         /// </summary>
+        protected EntityBase() { }
+
+        /// <summary>
+        /// 初始化一个<see cref="EntityBase{TEntity}"/>类型的实例
+        /// </summary>
         /// <param name="id">标识</param>
-        protected EntityBase(Guid id) : base(id)
-        {
-        }
+        protected EntityBase(Guid id) : base(id) { }
     }
 
     /// <summary>
@@ -28,19 +59,25 @@ namespace Bing.Domains.Entities
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public abstract class EntityBase<TEntity, TKey> : DomainBase<TEntity>, IEntity<TEntity, TKey>
-        where TEntity : IEntity
+    [Serializable]
+    public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEntity<TEntity, TKey>
+        where TEntity : class, IEntity
     {
         /// <summary>
         /// 标识
         /// </summary>
-        [Key]
-        public TKey Id { get; protected set; }
+        [Key, Required]
+        public virtual TKey Id { get; protected set; }
 
         /// <summary>
         /// 用户会话
         /// </summary>
         protected virtual ISession Session => Ioc.Create<ISession>();
+
+        /// <summary>
+        /// 初始化一个<see cref="EntityBase{TEntity,TKey}"/>类型的实例
+        /// </summary>
+        protected EntityBase() { }
 
         /// <summary>
         /// 初始化一个<see cref="EntityBase{TEntity,TKey}"/>类型的实例
@@ -90,6 +127,11 @@ namespace Bing.Domains.Entities
         public virtual void Init() => InitId();
 
         /// <summary>
+        /// 获取标识列表
+        /// </summary>
+        public object[] GetKeys() => new object[] { Id };
+
+        /// <summary>
         /// 初始化标识
         /// </summary>
         protected virtual void InitId()
@@ -103,7 +145,7 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 创建标识
         /// </summary>
-        protected virtual TKey CreateId() => Utils.Helpers.Conv.To<TKey>(Guid.NewGuid());
+        protected virtual TKey CreateId() => Conv.To<TKey>(Guid.NewGuid());
 
         /// <summary>
         /// 验证

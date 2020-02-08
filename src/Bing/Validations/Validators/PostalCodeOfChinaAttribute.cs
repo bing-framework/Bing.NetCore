@@ -1,5 +1,5 @@
-﻿using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+﻿using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Validations.Validators;
 
 // ReSharper disable once CheckNamespace

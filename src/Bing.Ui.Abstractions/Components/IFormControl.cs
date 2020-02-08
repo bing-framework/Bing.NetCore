@@ -17,7 +17,7 @@ namespace Bing.Ui.Components
         IPrefix, ISuffix,
         IOnFocus, IOnBlur,
         IOnKeyup, IOnKeydown
-        
+
     {
     }
 }

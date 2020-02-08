@@ -3,8 +3,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Builders;
 using Bing.Datas.Test.Integration.Samples;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
+using Bing.Extensions;
 
 namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
 {

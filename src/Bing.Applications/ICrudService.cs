@@ -21,11 +21,11 @@ namespace Bing.Applications
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TRequest">请求参数类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
-    public interface ICrudService<TDto, TRequest, in TQueryParameter> : ICrudService<TDto, TRequest,TRequest,TRequest, TQueryParameter>
+    public interface ICrudService<TDto, TRequest, in TQueryParameter> : ICrudService<TDto, TRequest, TRequest, TRequest, TQueryParameter>
         where TDto : IResponse, new()
         where TRequest : IRequest, IKey, new()
         where TQueryParameter : IQueryParameter
-    {        
+    {
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ namespace Bing.Applications
     public interface ICrudService<TDto, TRequest, in TCreateRequest, in TUpdateRequest, in TQueryParameter> :
         IQueryService<TDto, TQueryParameter>,
         ICreate<TCreateRequest>, IUpdate<TUpdateRequest>, IDelete, ISave<TRequest>, IBatchSave<TDto, TRequest>,
-        ICreateAsync<TCreateRequest>, IUpdateAsync<TUpdateRequest>, IDeleteAsync, ISaveAsync<TRequest>,IBatchSaveAsync<TDto, TRequest>
+        ICreateAsync<TCreateRequest>, IUpdateAsync<TUpdateRequest>, IDeleteAsync, ISaveAsync<TRequest>, IBatchSaveAsync<TDto, TRequest>
         where TDto : IResponse, new()
         where TRequest : IRequest, IKey, new()
         where TCreateRequest : IRequest, new()

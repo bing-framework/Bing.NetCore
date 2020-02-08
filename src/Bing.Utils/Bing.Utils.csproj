@@ -5,12 +5,14 @@
     <Description>Bing.Utils是Bing应用框架的核心帮助类库。
 Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
     <PackageLicenseUrl />
+    <RootNamespace />
   </PropertyGroup>  
   <ItemGroup>
     <None Remove="Bing.Utils.csproj.DotSettings" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspectCore.Extensions.Reflection" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
@@ -39,10 +41,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Extensions\Configuration\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="IO/FileHelper.*.cs">
       <DependentUpon>FileHelper.cs</DependentUpon>
     </Compile>
@@ -55,7 +53,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Extensions/Bases/StringExtensions.*.cs">
+    <Compile Update="Bing/Extensions/Bases/StringExtensions.*.cs">
       <DependentUpon>StringExtensions.cs</DependentUpon>
     </Compile>
   </ItemGroup>

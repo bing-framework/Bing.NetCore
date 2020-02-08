@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Bing.Domains.Entities;
-using Bing.Domains.Entities.Auditing;
+using Bing.Auditing;
 using Bing.Domains.Entities.Trees;
 
 namespace Bing.Samples.Domain.Models
@@ -10,7 +10,7 @@ namespace Bing.Samples.Domain.Models
     /// 角色
     /// </summary>
     [Display(Name = "角色")]
-    public partial class Role : TreeEntityBase<Role, Guid, Guid?>, IDelete, IAudited
+    public partial class Role : TreeEntityBase<Role, Guid, Guid?>, IDelete, IAuditedObject
     {
         /// <summary>
         /// 初始化角色

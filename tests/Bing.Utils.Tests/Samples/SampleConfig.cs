@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Utils.Tests.Samples
+﻿namespace Bing.Utils.Tests.Samples
 {
     public class SampleConfig
     {

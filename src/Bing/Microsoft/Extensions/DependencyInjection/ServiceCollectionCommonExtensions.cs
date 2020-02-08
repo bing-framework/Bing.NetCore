@@ -120,9 +120,11 @@ namespace Microsoft.Extensions.DependencyInjection
                         case ServiceLifetime.Scoped:
                             services.AddScoped(interfaceType, instanceType);
                             break;
+
                         case ServiceLifetime.Singleton:
                             services.AddSingleton(interfaceType, instanceType);
                             break;
+
                         case ServiceLifetime.Transient:
                             services.AddTransient(interfaceType, instanceType);
                             break;

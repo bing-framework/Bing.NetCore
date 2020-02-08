@@ -85,4 +85,3 @@ namespace Bing.AspNetCore.Mvc.Models
         }
     }
 }
-

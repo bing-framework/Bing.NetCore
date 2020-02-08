@@ -5,7 +5,7 @@ using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Domains.Repositories;
 using Bing.Exceptions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers.Trees
@@ -56,7 +56,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 查询
         /// </summary>
         /// <remarks>
-        /// 调用范例: 
+        /// 调用范例:
         /// GET
         /// /api/role?name=a
         /// </remarks>
@@ -76,9 +76,11 @@ namespace Bing.Webs.Controllers.Trees
                 case LoadOperation.FirstLoad:
                     result = await FirstLoad(query);
                     break;
+
                 case LoadOperation.LoadChild:
                     result = await LoadChildren(query);
                     break;
+
                 default:
                     result = await Search(query);
                     break;

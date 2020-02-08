@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Taobao.Configs
     /// <summary>
     /// 淘宝授权配置
     /// </summary>
-    public class TaobaoAuthorizationConfig: AuthorizationConfigBase
+    public class TaobaoAuthorizationConfig : AuthorizationConfigBase
     {
         /// <summary>
         /// 应用标识

@@ -16,7 +16,7 @@ namespace Bing.Caching.Internal
         /// </summary>
         private static readonly ConcurrentDictionary<Type, Func<object, Dictionary<string, object>>> DictionaryCache =
             new ConcurrentDictionary<Type, Func<object, Dictionary<string, object>>>();
-        
+
         /// <summary>
         /// 将对象转换成字典
         /// </summary>
@@ -40,7 +40,7 @@ namespace Bing.Caching.Internal
         private static Func<object, Dictionary<string, object>> CreateDictionaryGenerator(Type type)
         {
             var dm = new DynamicMethod($"Dictionary{Guid.NewGuid()}", typeof(Dictionary<string, object>),
-                new[] {typeof(object)}, type, true);
+                new[] { typeof(object) }, type, true);
             ILGenerator il = dm.GetILGenerator();
             il.DeclareLocal(typeof(Dictionary<string, object>));
             il.Emit(OpCodes.Nop);

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Gitee.Configs;
-using Bing.Utils.Helpers;
 using Bing.Utils.Json;
 using Bing.Utils.Parameters.Parsers;
 
@@ -11,7 +9,7 @@ namespace Bing.Biz.OAuthLogin.Gitee
     /// <summary>
     /// Gitee 授权提供程序
     /// </summary>
-    public class GiteeAuthorizationProvider: AuthorizationProviderBase<IGiteeAuthorizationConfigProvider,GiteeAuthorizationConfig>,IGiteeAuthorizationProvider
+    public class GiteeAuthorizationProvider : AuthorizationProviderBase<IGiteeAuthorizationConfigProvider, GiteeAuthorizationConfig>, IGiteeAuthorizationProvider
     {
         /// <summary>
         /// 跟踪日志名

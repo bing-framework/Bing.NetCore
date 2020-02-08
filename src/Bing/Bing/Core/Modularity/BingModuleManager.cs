@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bing.Core.Builders;
-using Bing.Dependency;
 using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Logs;
 using Bing.Logs.Core;
-using Bing.Utils.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Modularity

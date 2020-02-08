@@ -5,6 +5,7 @@ using Bing.Applications;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
+
 namespace Bing.Tests.Samples
 {
     /// <summary>
@@ -38,6 +39,9 @@ namespace Bing.Tests.Samples
     /// </summary>
     public class QueryServiceSample : QueryServiceBase<EntitySample, DtoSample, QueryParameterSample>
     {
+        /// <summary>
+        /// 初始化一个<see cref="QueryServiceSample"/>类型的实例
+        /// </summary>
         public QueryServiceSample(IRepositorySample repository) : base(repository)
         {
         }
@@ -46,10 +50,7 @@ namespace Bing.Tests.Samples
         /// 创建查询对象
         /// </summary>
         /// <param name="parameter">查询参数</param>
-        protected override IQueryBase<EntitySample> CreateQuery(QueryParameterSample parameter)
-        {
-            return new Query<EntitySample>(parameter).WhereIfNotEmpty(t => t.Name == parameter.Name);
-        }
+        protected override IQueryBase<EntitySample> CreateQuery(QueryParameterSample parameter) => new Query<EntitySample>(parameter).WhereIfNotEmpty(t => t.Name == parameter.Name);
 
         /// <summary>
         /// 查询时是否跟踪对象

@@ -35,7 +35,7 @@ namespace Bing.Webs.Middlewares
             }
             catch (Exception ex)
             {
-                WriteLog(context,ex);
+                WriteLog(context, ex);
                 throw;
             }
         }
@@ -49,7 +49,7 @@ namespace Bing.Webs.Middlewares
         {
             if (context == null)
                 return;
-            var log = (ILog) context.RequestServices.GetService(typeof(ILog));
+            var log = (ILog)context.RequestServices.GetService(typeof(ILog));
             log.Caption("全局异常捕获 - 错误日志中间件")
                 .Content($"状态码：{context.Response.StatusCode}");
             ex.Log(log);

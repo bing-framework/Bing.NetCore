@@ -16,6 +16,7 @@ namespace Bing.Utils.Develops
         public static Action<string> WriteLine { get; set; } = Console.WriteLine;
 
         #region TestConcurrency(并发测试)
+
         /// <summary>
         /// 并发测试
         /// </summary>
@@ -48,6 +49,7 @@ namespace Bing.Utils.Develops
             threads.ForEach(t => t.Join());
             WriteLine(string.Format("执行完成,即将退出，耗时：{0}秒", stopwatch.Elapsed.TotalSeconds));
         }
+
         #endregion
     }
 }

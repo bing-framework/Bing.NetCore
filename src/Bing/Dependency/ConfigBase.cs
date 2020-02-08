@@ -3,7 +3,7 @@
     /// <summary>
     /// 依赖配置基类
     /// </summary>
-    public abstract class ConfigBase:Autofac.Module,IConfig
+    public abstract class ConfigBase : Autofac.Module, IConfig
     {
     }
 }

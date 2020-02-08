@@ -33,7 +33,7 @@ namespace Bing.Biz.OAuthLogin.QQ
         /// <param name="provider">QQ授权配置提供程序</param>
         public QQAuthorizationProvider(IQQAuthorizationConfigProvider provider) : base(provider)
         {
-        }           
+        }
 
         /// <summary>
         /// 生成授权地址

@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Properties;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Validations.Validators;
 
 // ReSharper disable once CheckNamespace
@@ -11,7 +11,7 @@ namespace System.ComponentModel.DataAnnotations
     /// 身份证验证
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class IdCardAttribute: ValidationAttribute
+    public class IdCardAttribute : ValidationAttribute
     {
         /// <summary>
         /// 格式化错误消息

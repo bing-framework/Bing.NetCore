@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Applications.Trees
 {
@@ -32,7 +32,7 @@ namespace Bing.Applications.Trees
         public static List<string> GetMissingParentIds<TEntity>(this IEnumerable<TEntity> entities)
             where TEntity : class, ITreeNode
         {
-            var result=new List<string>();
+            var result = new List<string>();
             if (entities == null)
                 return result;
             var list = entities.ToList();
@@ -40,7 +40,7 @@ namespace Bing.Applications.Trees
             {
                 if (entity == null)
                     return;
-                result.AddRange(entity.GetParentIdsFromPath().Select(t=>t.SafeString()));
+                result.AddRange(entity.GetParentIdsFromPath().Select(t => t.SafeString()));
             });
             var ids = list.Select(t => t?.Id.SafeString());
             return result.Except(ids).ToList();

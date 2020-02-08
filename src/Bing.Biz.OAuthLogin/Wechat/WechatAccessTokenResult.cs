@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Wechat
     /// <summary>
     /// 微信访问令牌结果
     /// </summary>
-    public class WechatAccessTokenResult:AccessTokenResult
+    public class WechatAccessTokenResult : AccessTokenResult
     {
         /// <summary>
         /// 授权用户唯一标识

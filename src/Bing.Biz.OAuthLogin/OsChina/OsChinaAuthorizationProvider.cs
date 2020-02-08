@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.OsChina
     /// <summary>
     /// 开源中国授权提供程序
     /// </summary>
-    public class OsChinaAuthorizationProvider: AuthorizationProviderBase<IOsChinaAuthorizationConfigProvider,OsChinaAuthorizationConfig>,IOsChinaAuthorizationProvider
+    public class OsChinaAuthorizationProvider : AuthorizationProviderBase<IOsChinaAuthorizationConfigProvider, OsChinaAuthorizationConfig>, IOsChinaAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

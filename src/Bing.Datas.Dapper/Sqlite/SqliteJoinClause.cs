@@ -26,7 +26,7 @@ namespace Bing.Datas.Dapper.Sqlite
             , IEntityResolver resolver
             , IEntityAliasRegister register
             , IParameterManager parameterManager
-            , ITableDatabase tableDatabase) 
+            , ITableDatabase tableDatabase)
             : base(sqlBuilder, dialect, resolver, register, parameterManager, tableDatabase)
         {
         }

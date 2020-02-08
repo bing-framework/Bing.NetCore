@@ -78,7 +78,7 @@ namespace Bing.Permissions.Authorization.Middlewares
             // 校验以及自定义校验
             result = _tokenValidator.Validate(authStr.ToString().Substring("Bearer ".Length).Trim(), _options,
                 _validatePayload);
-            if(!result)
+            if (!result)
                 throw new UnauthorizedAccessException("验证失败，请查看传递的参数是否正确或是否有权限访问该地址。");
             await _next(context);
         }

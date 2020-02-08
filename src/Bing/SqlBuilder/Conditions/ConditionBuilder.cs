@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.SqlBuilder.Conditions
+﻿namespace Bing.SqlBuilder.Conditions
 {
     /// <summary>
     /// 条件生成器
     /// </summary>
     public class ConditionBuilder : ConditionBuilderBase
     {
-
         #region 构造函数
 
         /// <summary>

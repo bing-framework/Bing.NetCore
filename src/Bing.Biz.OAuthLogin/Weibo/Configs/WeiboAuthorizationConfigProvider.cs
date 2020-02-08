@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Weibo.Configs
     /// <summary>
     /// 微博授权配置提供程序
     /// </summary>
-    public class WeiboAuthorizationConfigProvider:AuthorizationConfigProviderBase<WeiboAuthorizationConfig>,IWeiboAuthorizationConfigProvider
+    public class WeiboAuthorizationConfigProvider : AuthorizationConfigProviderBase<WeiboAuthorizationConfig>, IWeiboAuthorizationConfigProvider
     {
         /// <summary>
         /// 初始化一个<see cref="WeiboAuthorizationConfigProvider"/>类型的实例

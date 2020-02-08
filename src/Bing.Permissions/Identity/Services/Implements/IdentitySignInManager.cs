@@ -29,7 +29,7 @@ namespace Bing.Permissions.Identity.Services.Implements
             , IUserClaimsPrincipalFactory<TUser> claimsFactory
             , IOptions<IdentityOptions> optionsAccessor
             , ILogger<SignInManager<TUser>> logger
-            , IAuthenticationSchemeProvider schemes) 
+            , IAuthenticationSchemeProvider schemes)
             : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes)
         {
         }

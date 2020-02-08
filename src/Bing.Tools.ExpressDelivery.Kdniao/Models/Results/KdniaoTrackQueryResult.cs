@@ -80,6 +80,5 @@ namespace Bing.Tools.ExpressDelivery.Kdniao.Models.Results
             [JsonProperty("Remark")]
             public string Remark { get; set; }
         }
-
     }
 }

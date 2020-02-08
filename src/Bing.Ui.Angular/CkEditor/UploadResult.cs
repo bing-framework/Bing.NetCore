@@ -1,4 +1,7 @@
-﻿using Bing.Utils.Extensions;
+﻿using Bing.Extensions;
+using Bing.Helpers;
+using Bing.Extensions;
+using Bing.Utils.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Ui.CkEditor
@@ -15,7 +18,7 @@ namespace Bing.Ui.CkEditor
         /// <param name="message">消息</param>
         public UploadResult(string path, string message)
         {
-            var num = Bing.Utils.Helpers.Web.HttpContext.Request.Query["CKEditorFuncNum"].SafeString();
+            var num = Web.HttpContext.Request.Query["CKEditorFuncNum"].SafeString();
             Content = $"<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction({num}, '{path}', '{message}');</script>";
             ContentType = "text/html; charset=utf-8";
         }

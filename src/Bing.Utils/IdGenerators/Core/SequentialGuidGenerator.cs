@@ -28,19 +28,12 @@ namespace Bing.Utils.IdGenerators.Core
         /// <summary>
         /// 初始化一个<see cref="SequentialGuidGenerator"/>类型的实例
         /// </summary>
-        private SequentialGuidGenerator()
-        {
-            DatabaseType = SequentialGuidDatabaseType.SqlServer;
-        }
+        private SequentialGuidGenerator() => DatabaseType = SequentialGuidDatabaseType.SqlServer;
 
         /// <summary>
         /// 创建有序的 Guid
         /// </summary>
-        /// <returns></returns>
-        public Guid Create()
-        {
-            return Create(DatabaseType);
-        }
+        public Guid Create() => Create(DatabaseType);
 
         /// <summary>
         /// 创建有序的 Guid
@@ -53,12 +46,16 @@ namespace Bing.Utils.IdGenerators.Core
             {
                 case SequentialGuidDatabaseType.SqlServer:
                     return Create(SequentialGuidType.SequentialAtEnd);
+
                 case SequentialGuidDatabaseType.Oracle:
                     return Create(SequentialGuidType.SequentialAsBinary);
+
                 case SequentialGuidDatabaseType.MySql:
                     return Create(SequentialGuidType.SequentialAsString);
+
                 case SequentialGuidDatabaseType.PostgreSql:
                     return Create(SequentialGuidType.SequentialAsString);
+
                 default:
                     throw new InvalidOperationException();
             }
@@ -105,9 +102,7 @@ namespace Bing.Utils.IdGenerators.Core
             // Since we're converting from an Int64, we have to reverse on
             // little-endian systems.
             if (BitConverter.IsLittleEndian)
-            {
                 Array.Reverse(timestampBytes);
-            }
 
             byte[] guidBytes = new byte[16];
 
@@ -155,14 +150,17 @@ namespace Bing.Utils.IdGenerators.Core
         /// SqlServer
         /// </summary>
         SqlServer,
+
         /// <summary>
         /// Oracle
         /// </summary>
         Oracle,
+
         /// <summary>
         /// MySql
         /// </summary>
         MySql,
+
         /// <summary>
         /// PostgreSql
         /// </summary>
@@ -178,10 +176,12 @@ namespace Bing.Utils.IdGenerators.Core
         /// 生成的GUID 按照字符串顺序排列
         /// </summary>
         SequentialAsString,
+
         /// <summary>
         /// 生成的GUID 按照二进制的顺序排列
         /// </summary>
         SequentialAsBinary,
+
         /// <summary>
         /// 生成的GUID 像SQL Server, 按照末尾部分排列
         /// </summary>

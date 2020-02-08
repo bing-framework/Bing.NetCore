@@ -9,7 +9,7 @@ namespace Bing.Datas.Dapper.MySql
     /// <summary>
     /// MySql From子句
     /// </summary>
-    public class MySqlFromClause:FromClause
+    public class MySqlFromClause : FromClause
     {
         /// <summary>
         /// 初始化一个<see cref="MySqlFromClause"/>类型的实例

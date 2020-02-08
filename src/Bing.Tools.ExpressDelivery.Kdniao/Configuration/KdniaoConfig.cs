@@ -3,7 +3,7 @@
     /// <summary>
     /// 快递鸟配置
     /// </summary>
-    public class KdniaoConfig:IConfig
+    public class KdniaoConfig : IConfig
     {
         /// <summary>
         /// 快递鸟账户

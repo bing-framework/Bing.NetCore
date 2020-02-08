@@ -7,7 +7,7 @@ namespace Bing.Datas.EntityFramework.Conventions
     /// <summary>
     /// Bing 核心约束集合生成器
     /// </summary>
-    public class BingCoreConventionSetBuilder:CoreConventionSetBuilder
+    public class BingCoreConventionSetBuilder : CoreConventionSetBuilder
     {
         /// <summary>
         /// 初始化一个<see cref="BingCoreConventionSetBuilder"/>类型的实例

@@ -1,6 +1,6 @@
 ﻿using Bing.Datas.Sql.Builders;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Datas.Dapper.PgSql
 {
@@ -22,6 +22,7 @@ namespace Bing.Datas.Dapper.PgSql
             {
                 case "boolean":
                     return Conv.ToBool(value) ? "true" : "false";
+
                 case "int16":
                 case "int32":
                 case "int64":
@@ -29,6 +30,7 @@ namespace Bing.Datas.Dapper.PgSql
                 case "double":
                 case "decimal":
                     return value.SafeString();
+
                 default:
                     return $"'{value}'";
             }

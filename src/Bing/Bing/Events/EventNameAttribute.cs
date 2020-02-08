@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Events
 {

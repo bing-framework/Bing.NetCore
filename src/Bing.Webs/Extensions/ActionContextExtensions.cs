@@ -1,4 +1,4 @@
-﻿using Bing.Utils.Extensions;
+﻿using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Extensions
@@ -40,6 +40,6 @@ namespace Bing.Webs.Extensions
         /// </summary>
         /// <param name="context">操作上下文</param>
         /// <returns></returns>
-        public static string GetActionName(this ActionContext context)=> context.RouteData.Values["action"].ToString();
+        public static string GetActionName(this ActionContext context) => context.RouteData.Values["action"].ToString();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Bing.Ui.Angular.Forms.Configs;
+﻿using Bing.Extensions;
+using Bing.Ui.Angular.Forms.Configs;
 using Bing.Ui.Angular.Forms.Resolvers;
 using Bing.Ui.Builders;
 using Bing.Ui.Configs;
@@ -6,7 +7,7 @@ using Bing.Ui.Enums;
 using Bing.Ui.Zorro.Enums;
 using Bing.Ui.Zorro.Forms.Base;
 using Bing.Ui.Zorro.Forms.Builders;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Bing.Ui.Zorro.Forms.Renders

@@ -6,7 +6,7 @@ namespace Bing.AspNetCore.Logs
     /// <summary>
     /// 系统日志提供程序
     /// </summary>
-    internal class SysLoggerProvider: ILoggerProvider
+    internal class SysLoggerProvider : ILoggerProvider
     {
         /// <summary>
         /// 日志字典

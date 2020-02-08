@@ -33,7 +33,6 @@ namespace Bing.Webs.Controllers
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         protected virtual ILog GetLog()
         {
             try
@@ -51,7 +50,6 @@ namespace Bing.Webs.Controllers
         /// </summary>
         /// <param name="data">数据</param>
         /// <param name="message">消息</param>
-        /// <returns></returns>
         protected virtual IActionResult Success(dynamic data = null, string message = null)
         {
             if (message == null)
@@ -63,7 +61,6 @@ namespace Bing.Webs.Controllers
         /// 返回失败消息
         /// </summary>
         /// <param name="message">消息</param>
-        /// <returns></returns>
-        protected IActionResult Fail(string message) => new Result(StateCode.Fail,message);
+        protected IActionResult Fail(string message) => new Result(StateCode.Fail, message);
     }
 }

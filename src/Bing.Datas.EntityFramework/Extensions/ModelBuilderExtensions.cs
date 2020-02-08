@@ -20,7 +20,7 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <returns></returns>
         public static ModelBuilder SetSimpleUnderscoreTableNameConvention(this ModelBuilder modelBuilder)
         {
-            Regex underscoreRegex=new Regex(@"((?<=.)[A-Z][a-zA-Z]*)|((?<=[a-zA-Z])\d+)");
+            Regex underscoreRegex = new Regex(@"((?<=.)[A-Z][a-zA-Z]*)|((?<=[a-zA-Z])\d+)");
             foreach (IMutableEntityType entity in modelBuilder.Model.GetEntityTypes())
             {
                 entity.Relational().TableName = underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower();
@@ -35,7 +35,7 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <returns></returns>
         public static ModelBuilder SetOneToManyCascadeDeleteConvention(this ModelBuilder modelBuilder)
         {
-            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(x=>x.GetForeignKeys()))
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(x => x.GetForeignKeys()))
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
@@ -49,13 +49,13 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <returns></returns>
         public static ModelBuilder HasGlobalDeleteQueryFilter(this ModelBuilder modelBuilder)
         {
-            modelBuilder.Model.GetEntityTypes().Where(entityType=>typeof(IDelete).IsAssignableFrom(entityType.ClrType))
+            modelBuilder.Model.GetEntityTypes().Where(entityType => typeof(IDelete).IsAssignableFrom(entityType.ClrType))
                 .ToList().ForEach(x =>
                 {
                     modelBuilder.Entity(x.ClrType).Property<bool>("IsDeleted");
                     var parameter = Expression.Parameter(x.ClrType, "e");
                     var body = Expression.Equal(
-                        Expression.Call(typeof(EF), nameof(EF.Property), new[] {typeof(bool)}, parameter,
+                        Expression.Call(typeof(EF), nameof(EF.Property), new[] { typeof(bool) }, parameter,
                             Expression.Constant("IsDeleted")), Expression.Constant(false));
                     modelBuilder.Entity(x.ClrType).HasQueryFilter(Expression.Lambda(body, parameter));
                 });

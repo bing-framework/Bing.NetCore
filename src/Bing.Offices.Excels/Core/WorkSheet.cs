@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Bing.Extensions;
 using Bing.Offices.Excels.Abstractions;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Offices.Excels.Core
 {

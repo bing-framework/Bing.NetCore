@@ -6,7 +6,7 @@ namespace Bing.Utils.Webs.Clients.Parameters
     /// <summary>
     /// 文件参数
     /// </summary>
-    public interface IFileParameter:IDisposable
+    public interface IFileParameter : IDisposable
     {
         /// <summary>
         /// 获取文件流

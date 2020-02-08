@@ -10,14 +10,14 @@ namespace Bing.Datas.EntityFramework.Conventions
     /// <summary>
     /// Decimal精确度约定，用于ModelBuilder全局设置Decimal精确度属性
     /// </summary>
-    public class DecimalPrecisionAttributeConvention: PropertyAttributeConvention<DecimalPrecisionAttribute>
+    public class DecimalPrecisionAttributeConvention : PropertyAttributeConvention<DecimalPrecisionAttribute>
     {
         /// <summary>
         /// 应用
         /// </summary>
         public override InternalPropertyBuilder Apply(InternalPropertyBuilder propertyBuilder, DecimalPrecisionAttribute attribute,
             MemberInfo clrMember)
-        {            
+        {
             if (propertyBuilder.Metadata.ClrType == typeof(decimal))
             {
                 if (attribute.Precision < 1 || attribute.Precision > 38)

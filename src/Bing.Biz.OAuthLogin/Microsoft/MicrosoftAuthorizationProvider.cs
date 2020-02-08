@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Microsoft
     /// <summary>
     /// Microsoft 授权提供程序
     /// </summary>
-    public class MicrosoftAuthorizationProvider: AuthorizationProviderBase<IMicrosoftAuthorizationConfigProvider,MicrosoftAuthorizationConfig>,IMicrosoftAuthorizationProvider
+    public class MicrosoftAuthorizationProvider : AuthorizationProviderBase<IMicrosoftAuthorizationConfigProvider, MicrosoftAuthorizationConfig>, IMicrosoftAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

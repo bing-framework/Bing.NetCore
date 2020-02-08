@@ -7,7 +7,8 @@ using Bing.Datas.Dapper.SqlServer;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.Test.Integration.Sql.Builders.Samples;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
+using Bing.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 

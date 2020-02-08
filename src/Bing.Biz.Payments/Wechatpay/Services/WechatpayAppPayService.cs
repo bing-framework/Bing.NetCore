@@ -6,14 +6,14 @@ using Bing.Biz.Payments.Wechatpay.Parameters;
 using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Biz.Payments.Wechatpay.Services.Base;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Biz.Payments.Wechatpay.Services
 {
     /// <summary>
     /// 微信App支付服务
     /// </summary>
-    public class WechatpayAppPayService:WechatpayServiceBase,IWechatpayAppPayService
+    public class WechatpayAppPayService : WechatpayServiceBase, IWechatpayAppPayService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayAppPayService"/>类型的实例

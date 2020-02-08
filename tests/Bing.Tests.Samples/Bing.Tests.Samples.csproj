@@ -3,11 +3,27 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace />
+    <AssemblyName>Bing.Tests.Samples</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Bing\Tests\TestResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Bing\Tests\TestResource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

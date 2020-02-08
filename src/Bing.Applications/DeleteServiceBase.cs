@@ -7,9 +7,9 @@ using Bing.Datas.Queries;
 using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 
 namespace Bing.Applications
 {
@@ -34,7 +34,6 @@ namespace Bing.Applications
         }
     }
 
-
     /// <summary>
     /// 删除服务
     /// </summary>
@@ -43,7 +42,7 @@ namespace Bing.Applications
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
     /// <typeparam name="TKey">实体标识类型</typeparam>
     public abstract class DeleteServiceBase<TEntity, TDto, TQueryParameter, TKey>
-        : QueryServiceBase<TEntity, TDto, TQueryParameter, TKey>, IDeleteService<TDto, TQueryParameter> 
+        : QueryServiceBase<TEntity, TDto, TQueryParameter, TKey>, IDeleteService<TDto, TQueryParameter>
         where TEntity : class, IKey<TKey>, IVersion, new()
         where TDto : new()
         where TQueryParameter : IQueryParameter
@@ -68,7 +67,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         /// <param name="store">存储器</param>
-        protected DeleteServiceBase(IUnitOfWork unitOfWork,IStore<TEntity, TKey> store) : base(store)
+        protected DeleteServiceBase(IUnitOfWork unitOfWork, IStore<TEntity, TKey> store) : base(store)
         {
             _unitOfWork = unitOfWork;
             _store = store;
@@ -184,6 +183,5 @@ namespace Bing.Applications
             AddLog(entities);
             WriteLog($"删除{EntityDescription}成功");
         }
-
     }
 }

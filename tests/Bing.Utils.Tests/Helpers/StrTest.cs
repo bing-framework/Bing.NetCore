@@ -1,6 +1,8 @@
-﻿using Bing.Utils.Helpers;
+﻿using Bing.Tests;
+using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
+using Str = Bing.Helpers.Str;
 
 namespace Bing.Utils.Tests.Helpers
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Json;
 
 namespace Bing.Events
@@ -20,7 +20,7 @@ namespace Bing.Events
         /// </summary>
         public Event(string eventName = default)
         {
-            Id = Bing.Utils.Helpers.Id.Guid();
+            Id = Helpers.Id.Guid();
             Time = DateTime.Now;
             _eventName = eventName;
         }

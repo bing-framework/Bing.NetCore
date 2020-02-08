@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Bing.Extensions;
 using Bing.Mapping;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Ui.Data
 {

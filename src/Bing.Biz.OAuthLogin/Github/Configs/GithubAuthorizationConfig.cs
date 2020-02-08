@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Github.Configs
     /// <summary>
     /// Github授权配置
     /// </summary>
-    public class GithubAuthorizationConfig:AuthorizationConfigBase
+    public class GithubAuthorizationConfig : AuthorizationConfigBase
     {
         /// <summary>
         /// 应用名称

@@ -27,16 +27,16 @@ namespace Bing.Webs.Extensions
             var feature = httpContext.Features.Get<IRoutingFeature>();
             var routeData = feature.RouteData;
             var viewName = result.ViewName ?? routeData.Values["action"] as string;
-            var actionContext=new ActionContext(httpContext,routeData,new CompiledPageActionDescriptor());
+            var actionContext = new ActionContext(httpContext, routeData, new CompiledPageActionDescriptor());
             var options = httpContext.RequestServices.GetRequiredService<IOptions<MvcViewOptions>>();
             var htmlHelperOptions = options.Value.HtmlHelperOptions;
             var viewEngineResult = result.ViewEngine?.FindView(actionContext, viewName, true) ?? options.Value
                                        .ViewEngines.Select(x => x.FindView(actionContext, viewName, true))
                                        .FirstOrDefault(x => x != null);
             var view = viewEngineResult.View;
-            var builder=new StringBuilder();
+            var builder = new StringBuilder();
 
-            using (var output=new StringWriter(builder))
+            using (var output = new StringWriter(builder))
             {
                 var viewContext = new ViewContext(actionContext, view, result.ViewData, result.TempData, output,
                     htmlHelperOptions);

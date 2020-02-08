@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.MeiliShuo.Configs
     /// <summary>
     /// 美丽说授权配置提供程序
     /// </summary>
-    public class MeiliShuoAuthorizationConfigProvider: AuthorizationConfigProviderBase<MeiliShuoAuthorizationConfig>,IMeiliShuoAuthorizationConfigProvider
+    public class MeiliShuoAuthorizationConfigProvider : AuthorizationConfigProviderBase<MeiliShuoAuthorizationConfig>, IMeiliShuoAuthorizationConfigProvider
     {
         /// <summary>
         /// 初始化一个<see cref="MeiliShuoAuthorizationConfigProvider"/>类型的实例

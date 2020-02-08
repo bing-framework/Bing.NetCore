@@ -2,9 +2,10 @@
 using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Signatures;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Utils.Parameters;
+using Xml = Bing.Helpers.Xml;
 
 namespace Bing.Biz.Payments.Wechatpay.Parameters
 {
@@ -345,5 +346,4 @@ namespace Bing.Biz.Payments.Wechatpay.Parameters
             return ToXml();
         }
     }
-
 }

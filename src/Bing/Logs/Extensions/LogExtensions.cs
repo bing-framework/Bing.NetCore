@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Bing.Extensions;
 using Bing.Logs.Abstractions;
-using Bing.Utils.Extensions;
 
 namespace Bing.Logs.Extensions
 {

@@ -8,7 +8,7 @@ namespace Bing.Biz.Payments.Alipay.Services
     /// <summary>
     /// 支付宝返回服务
     /// </summary>
-    public class AlipayReturnService:AlipayNotifyServiceBase,IAlipayReturnService
+    public class AlipayReturnService : AlipayNotifyServiceBase, IAlipayReturnService
     {
         /// <summary>
         /// 初始化一个<see cref="AlipayReturnService"/>类型的实例

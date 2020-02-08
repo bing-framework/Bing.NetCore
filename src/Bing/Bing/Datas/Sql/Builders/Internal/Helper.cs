@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
-using Bing.Utils;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+using Bing.Extensions;
+using Bing.Helpers;
+using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Datas.Sql.Builders.Internal
 {
@@ -75,7 +75,7 @@ namespace Bing.Datas.Sql.Builders.Internal
                 return null;
             return GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
         }
-        
+
         /// <summary>
         /// 获取处理后的列名
         /// </summary>
@@ -85,7 +85,7 @@ namespace Bing.Datas.Sql.Builders.Internal
         {
             if (string.IsNullOrWhiteSpace(column))
                 return column;
-            return new SqlItem(column,_register.GetAlias(type)).ToSql(_dialect);
+            return new SqlItem(column, _register.GetAlias(type)).ToSql(_dialect);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Bing.Datas.Sql.Builders.Internal
                 return null;
             var type = result.GetType();
             if (type.IsEnum)
-                return Bing.Utils.Helpers.Enum.GetValue(type, result);
+                return Enum.GetValue(type, result);
             return result;
         }
 

@@ -65,7 +65,7 @@ namespace Bing.Ui.Components
             }
 
             IConfig config = OptionConfig;
-            configAction((TConfig) config);
+            configAction((TConfig)config);
         }
 
         /// <summary>

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects.Base;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 
 namespace Bing.Aspects
 {

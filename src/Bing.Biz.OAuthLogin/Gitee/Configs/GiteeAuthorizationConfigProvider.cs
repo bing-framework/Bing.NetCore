@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.Gitee.Configs
     /// <summary>
     /// Gitee 授权配置提供程序
     /// </summary>
-    public class GiteeAuthorizationConfigProvider: AuthorizationConfigProviderBase<GiteeAuthorizationConfig>,IGiteeAuthorizationConfigProvider
+    public class GiteeAuthorizationConfigProvider : AuthorizationConfigProviderBase<GiteeAuthorizationConfig>, IGiteeAuthorizationConfigProvider
     {
         /// <summary>
         /// 初始化一个<see cref="GiteeAuthorizationConfigProvider"/>类型的实例

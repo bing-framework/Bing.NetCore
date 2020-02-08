@@ -5,7 +5,7 @@ namespace Bing.Ui.Attributes
     /// <summary>
     /// 模型绑定
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
     public class ModelAttribute : Attribute
     {
         /// <summary>

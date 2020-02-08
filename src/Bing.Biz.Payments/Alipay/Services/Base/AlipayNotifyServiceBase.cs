@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Biz.Payments.Alipay.Configs;
+using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;
 using Bing.Validations;
@@ -210,6 +209,5 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         {
             return ValidationResultCollection.Success;
         }
-
     }
 }

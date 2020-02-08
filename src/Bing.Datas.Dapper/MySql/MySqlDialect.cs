@@ -5,7 +5,7 @@ namespace Bing.Datas.Dapper.MySql
     /// <summary>
     /// MySql方言
     /// </summary>
-    public class MySqlDialect:DialectBase
+    public class MySqlDialect : DialectBase
     {
         /// <summary>
         /// 起始转义标识符

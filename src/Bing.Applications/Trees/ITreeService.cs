@@ -10,7 +10,7 @@ namespace Bing.Applications.Trees
     /// </summary>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
-    public interface ITreeService<TDto, in TQueryParameter> : ITreeService<TDto, TQueryParameter,Guid?>        
+    public interface ITreeService<TDto, in TQueryParameter> : ITreeService<TDto, TQueryParameter, Guid?>
         where TDto : class, ITreeNode, new()
         where TQueryParameter : class, ITreeQueryParameter
     {

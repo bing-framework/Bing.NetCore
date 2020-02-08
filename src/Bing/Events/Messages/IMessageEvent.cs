@@ -13,7 +13,7 @@
         /// <summary>
         /// 事件数据
         /// </summary>
-        object Data { get; set; }        
+        object Data { get; set; }
 
         /// <summary>
         /// 回调名称

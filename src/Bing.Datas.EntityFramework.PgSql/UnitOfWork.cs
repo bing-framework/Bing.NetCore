@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -11,7 +11,7 @@ namespace Bing.Datas.EntityFramework.PgSql
     /// <summary>
     /// PgSql 工作单元
     /// </summary>
-    public abstract class UnitOfWork:UnitOfWorkBase
+    public abstract class UnitOfWork : UnitOfWorkBase
     {
         /// <summary>
         /// 初始化一个<see cref="UnitOfWork"/>类型的实例

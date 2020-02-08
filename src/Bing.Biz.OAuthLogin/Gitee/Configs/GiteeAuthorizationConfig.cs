@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Gitee.Configs
     /// <summary>
     /// Gitee 授权配置
     /// </summary>
-    public class GiteeAuthorizationConfig: AuthorizationConfigBase
+    public class GiteeAuthorizationConfig : AuthorizationConfigBase
     {
         /// <summary>
         /// 应用名称

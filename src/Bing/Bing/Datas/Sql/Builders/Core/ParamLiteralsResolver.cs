@@ -1,5 +1,5 @@
-﻿using Bing.Utils.Extensions;
-using Bing.Utils.Helpers;
+﻿using Bing.Extensions;
+using Bing.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -20,6 +20,7 @@ namespace Bing.Datas.Sql.Builders.Core
             {
                 case "boolean":
                     return Conv.ToBool(value) ? "1" : "0";
+
                 case "int16":
                 case "int32":
                 case "int64":
@@ -27,6 +28,7 @@ namespace Bing.Datas.Sql.Builders.Core
                 case "double":
                 case "decimal":
                     return value.SafeString();
+
                 default:
                     return $"'{value}'";
             }

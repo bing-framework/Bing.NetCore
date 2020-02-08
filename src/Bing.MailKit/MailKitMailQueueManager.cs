@@ -9,7 +9,7 @@ namespace Bing.MailKit
     /// <summary>
     /// Mailkit邮件队列管理器
     /// </summary>
-    public class MailKitMailQueueManager:MailQueueManagerBase,IMailQueueManager
+    public class MailKitMailQueueManager : MailQueueManagerBase, IMailQueueManager
     {
         /// <summary>
         /// MailKit电子邮件发送器
@@ -22,7 +22,7 @@ namespace Bing.MailKit
         /// <param name="emailConfigProvider">电子邮件配置提供器</param>
         /// <param name="mailQueueProvider">邮件队列提供程序</param>
         /// <param name="mailKitEmailSender">MailKit电子邮件发送器</param>
-        public MailKitMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider,IMailKitEmailSender mailKitEmailSender) : base(emailConfigProvider, mailQueueProvider)
+        public MailKitMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, IMailKitEmailSender mailKitEmailSender) : base(emailConfigProvider, mailQueueProvider)
         {
             _mailKitEmailSender = mailKitEmailSender;
         }

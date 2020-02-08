@@ -7,7 +7,7 @@ using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Trees;
-using Bing.Utils.Helpers;
+using Bing.Helpers;
 
 namespace Bing.Applications.Trees
 {
@@ -128,9 +128,9 @@ namespace Bing.Applications.Trees
                     return;
                 entity.Enabled = enabled;
                 await _store.UpdateAsync(entity);
-            }            
+            }
             _unitOfWork.Commit();
-            WriteLog(entities,enabled);
+            WriteLog(entities, enabled);
         }
 
         /// <summary>

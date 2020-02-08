@@ -30,7 +30,7 @@ namespace Bing.Webs.Middlewares
         /// </summary>
         /// <param name="next">方法</param>
         /// <param name="options">真实IP选项</param>
-        public RealIpMiddleware(RequestDelegate next,IOptions<RealIpOptions> options)
+        public RealIpMiddleware(RequestDelegate next, IOptions<RealIpOptions> options)
         {
             _next = next;
             _options = options.Value;

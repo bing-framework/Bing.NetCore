@@ -9,7 +9,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Json;
 using Bing.Utils.Webs.Clients.Internal;
 using Bing.Utils.Webs.Clients.Parameters;
@@ -462,10 +462,13 @@ namespace Bing.Utils.Webs.Clients
             {
                 case "application/x-www-form-urlencoded":
                     return new FormUrlEncodedContent(_params.ToDictionary(t => t.Key, t => t.Value.SafeString()));
+
                 case "application/json":
                     return CreateJsonContent();
+
                 case "text/xml":
                     return CreateXmlContent();
+
                 case "multipart/form-data":
                     return CreateMultipartFormDataContent();
             }

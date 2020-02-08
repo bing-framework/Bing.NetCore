@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Wechat
     /// <summary>
     /// 微信授权用户请求
     /// </summary>
-    public class WechatAuthorizationUserRequest: AuthorizationUserParamBase
+    public class WechatAuthorizationUserRequest : AuthorizationUserParamBase
     {
         /// <summary>
         /// 用户OpenId

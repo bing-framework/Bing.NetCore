@@ -19,7 +19,7 @@
         /// 运行
         /// </summary>
         void Run();
-        
+
         /// <summary>
         /// 停止
         /// </summary>

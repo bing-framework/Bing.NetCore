@@ -6,7 +6,7 @@ namespace Bing.Biz.Payments.Wechatpay.Configs
     /// <summary>
     /// 微信支付配置提供器
     /// </summary>
-    public class WechatpayConfigProvider:IWechatpayConfigProvider
+    public class WechatpayConfigProvider : IWechatpayConfigProvider
     {
         /// <summary>
         /// 配置

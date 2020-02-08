@@ -3,7 +3,7 @@
     /// <summary>
     /// 依赖配置
     /// </summary>
-    public interface IConfig:Autofac.Core.IModule
+    public interface IConfig : Autofac.Core.IModule
     {
     }
 }

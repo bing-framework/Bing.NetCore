@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Bing.Auditing;
 using Bing.Domains.Entities;
-using Bing.Domains.Entities.Auditing;
 
 namespace Bing.Permissions.Identity.Models
 {
@@ -11,7 +11,7 @@ namespace Bing.Permissions.Identity.Models
     /// <typeparam name="TApplication">应用程序类型</typeparam>
     /// <typeparam name="TKey">应用程序标识类型</typeparam>
     [Display(Name = "应用程序")]
-    public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoot<TApplication, TKey>, IDelete, IAudited
+    public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoot<TApplication, TKey>, IDelete, IAuditedObject
         where TApplication : ApplicationBase<TApplication, TKey>
     {
         #region 属性
@@ -23,6 +23,7 @@ namespace Bing.Permissions.Identity.Models
         [Required(ErrorMessage = "应用程序编码不能为空")]
         [StringLength(50, ErrorMessage = "应用程序编码输入过长，不能超过50位")]
         public string Code { get; set; }
+
         /// <summary>
         /// 应用程序名称
         /// </summary>
@@ -30,45 +31,53 @@ namespace Bing.Permissions.Identity.Models
         [Required(ErrorMessage = "应用程序名称不能为空")]
         [StringLength(200, ErrorMessage = "应用程序名称输入过长，不能超过200位")]
         public string Name { get; set; }
+
         /// <summary>
         /// 启用
         /// </summary>
         [Display(Name = "启用")]
         [Required(ErrorMessage = "启用不能为空")]
         public bool Enabled { get; set; }
+
         /// <summary>
         /// 启用注册
         /// </summary>
         [Display(Name = "启用注册")]
         [Required(ErrorMessage = "启用注册不能为空")]
         public bool RegisterEnabled { get; set; }
+
         /// <summary>
         /// 备注
         /// </summary>
         [Display(Name = "备注")]
         [StringLength(500)]
         public string Remark { get; set; }
+
         /// <summary>
         /// 是否删除
         /// </summary>
         [Display(Name = "是否删除")]
         [Required(ErrorMessage = "是否删除不能为空")]
         public bool IsDeleted { get; set; }
+
         /// <summary>
         /// 创建时间
         /// </summary>
         [Display(Name = "创建时间")]
         public DateTime? CreationTime { get; set; }
+
         /// <summary>
         /// 创建人标识
         /// </summary>
         [Display(Name = "创建人标识")]
         public Guid? CreatorId { get; set; }
+
         /// <summary>
         /// 最后修改时间
         /// </summary>
         [Display(Name = "最后修改时间")]
         public DateTime? LastModificationTime { get; set; }
+
         /// <summary>
         /// 最后修改人标识
         /// </summary>

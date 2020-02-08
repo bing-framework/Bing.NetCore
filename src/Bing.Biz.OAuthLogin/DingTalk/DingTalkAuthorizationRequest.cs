@@ -5,7 +5,7 @@ namespace Bing.Biz.OAuthLogin.DingTalk
     /// <summary>
     /// 钉钉授权请求
     /// </summary>
-    public class DingTalkAuthorizationRequest: AuthorizationParamBase
+    public class DingTalkAuthorizationRequest : AuthorizationParamBase
     {
         /// <summary>
         /// 申请的权限范围

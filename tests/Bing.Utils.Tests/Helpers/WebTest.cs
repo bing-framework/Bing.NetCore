@@ -3,9 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Bing.Helpers;
+using Bing.Tests;
 using Bing.Utils.Develops;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Helpers;
+using Bing.Utils.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,7 +26,7 @@ namespace Bing.Utils.Tests.Helpers
         /// <summary>
         /// 测试客户端上传文件
         /// </summary>
-        [Fact]
+        [Fact(Skip = "未设置上传地址")]
         public async Task Test_Client_UploadFile()
         {
             var result = await Web.Client()
@@ -52,6 +55,7 @@ namespace Bing.Utils.Tests.Helpers
         private async Task WriteFile(string url)
         {
             var path = @"D:\Test\File\";
+            DirectoryHelper.CreateIfNotExists(path);
             var result = await Web.Client()
                 .Get(url)
                 .ResultAsync();

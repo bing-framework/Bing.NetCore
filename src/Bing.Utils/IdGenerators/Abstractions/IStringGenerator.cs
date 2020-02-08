@@ -3,7 +3,7 @@
     /// <summary>
     /// String ID 生成器
     /// </summary>
-    public interface IStringGenerator:IIdGenerator<string>
+    public interface IStringGenerator : IIdGenerator<string>
     {
     }
 }

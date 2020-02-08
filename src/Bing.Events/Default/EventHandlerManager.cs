@@ -7,7 +7,7 @@ namespace Bing.Events.Default
     /// <summary>
     /// 事件处理器服务
     /// </summary>
-    public class EventHandlerManager: IEventHandlerManager
+    public class EventHandlerManager : IEventHandlerManager
     {
         /// <summary>
         /// 获取事件处理器列表

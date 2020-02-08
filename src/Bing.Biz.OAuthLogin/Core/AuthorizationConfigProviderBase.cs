@@ -6,7 +6,7 @@ namespace Bing.Biz.OAuthLogin.Core
     /// 授权配置提供程序基类
     /// </summary>
     /// <typeparam name="TAuthorizationConfig">授权配置类型</typeparam>
-    public abstract class AuthorizationConfigProviderBase<TAuthorizationConfig>:IAuthorizationConfigProvider<TAuthorizationConfig> where TAuthorizationConfig:IAuthorizationConfig
+    public abstract class AuthorizationConfigProviderBase<TAuthorizationConfig> : IAuthorizationConfigProvider<TAuthorizationConfig> where TAuthorizationConfig : IAuthorizationConfig
     {
         /// <summary>
         /// 配置

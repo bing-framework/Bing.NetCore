@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Bing.Helpers;
 using Bing.Ui.Helpers;
 
 namespace Bing.Ui.Enums
@@ -13,16 +14,19 @@ namespace Bing.Ui.Enums
         /// </summary>
         [Description("application/x-xls")]
         Xls,
+
         /// <summary>
         /// doc,docx
         /// </summary>
         [Description("application/msword")]
         Doc,
+
         /// <summary>
         /// pdf
         /// </summary>
         [Description("application/pdf")]
         Pdf,
+
         /// <summary>
         /// txt
         /// </summary>
@@ -40,7 +44,7 @@ namespace Bing.Ui.Enums
         /// </summary>
         public static string GetExtensions(this DocumentType fileType)
         {
-            var name = Bing.Utils.Helpers.Enum.GetName<DocumentType>(fileType);
+            var name = Enum.GetName<DocumentType>(fileType);
             return FileTypeHelper.GetExtensions(name);
         }
     }

@@ -8,6 +8,7 @@ using Bing.Datas.Queries;
 using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
+using Bing.Helpers;
 using Bing.Mapping;
 using Microsoft.EntityFrameworkCore;
 
@@ -93,7 +94,7 @@ namespace Bing.Applications
         /// <param name="id">实体编号</param>
         public virtual TDto GetById(object id)
         {
-            var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
+            var key = Conv.To<TKey>(id);
             return ToDto(_store.Find(key));
         }
 
@@ -103,7 +104,7 @@ namespace Bing.Applications
         /// <param name="id">实体编号</param>
         public virtual async Task<TDto> GetByIdAsync(object id)
         {
-            var key = Bing.Utils.Helpers.Conv.To<TKey>(id);
+            var key = Conv.To<TKey>(id);
             return ToDto(await _store.FindAsync(key));
         }
 
@@ -218,7 +219,5 @@ namespace Bing.Applications
         }
 
         #endregion
-
-
     }
 }

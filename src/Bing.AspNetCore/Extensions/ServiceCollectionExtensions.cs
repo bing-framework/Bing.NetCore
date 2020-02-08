@@ -1,5 +1,4 @@
-﻿using Bing.Dependency;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore

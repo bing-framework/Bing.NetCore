@@ -8,7 +8,7 @@ namespace Bing.Applications.Commands
     /// </summary>
     /// <typeparam name="TRequest">请求类型</typeparam>
     /// <typeparam name="TResponse">响应类型</typeparam>
-    public interface ICommand<in TRequest,TResponse> where TRequest:IRequest where TResponse:IResponse
+    public interface ICommand<in TRequest, TResponse> where TRequest : IRequest where TResponse : IResponse
     {
         /// <summary>
         /// 执行

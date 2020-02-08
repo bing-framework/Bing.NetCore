@@ -5,7 +5,7 @@ namespace Bing.Locks
     /// <summary>
     /// 空业务锁
     /// </summary>
-    public class NullLock:ILock
+    public class NullLock : ILock
     {
         /// <summary>
         /// 空业务锁

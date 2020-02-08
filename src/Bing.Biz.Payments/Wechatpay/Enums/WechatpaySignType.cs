@@ -12,6 +12,7 @@ namespace Bing.Biz.Payments.Wechatpay.Enums
         /// </summary>
         [Description("MD5")]
         Md5,
+
         /// <summary>
         /// HMAC-SHA256
         /// </summary>

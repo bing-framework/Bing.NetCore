@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Bing.Biz.Payments.Alipay.Configs;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace Bing.Biz.Payments.Alipay.Results
@@ -69,7 +69,7 @@ namespace Bing.Biz.Payments.Alipay.Results
             {
                 return;
             }
-            _result.Add(item.Name,item.Value.SafeString());
+            _result.Add(item.Name, item.Value.SafeString());
         }
 
         /// <summary>

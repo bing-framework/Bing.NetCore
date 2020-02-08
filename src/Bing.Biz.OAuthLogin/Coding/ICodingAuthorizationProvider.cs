@@ -5,9 +5,9 @@ namespace Bing.Biz.OAuthLogin.Coding
     /// <summary>
     /// Coding.NET 授权提供程序
     /// </summary>
-    public interface ICodingAuthorizationProvider: IAuthorizationUrlProvider<CodingAuthorizationRequest>
+    public interface ICodingAuthorizationProvider : IAuthorizationUrlProvider<CodingAuthorizationRequest>
         , IAccessTokenProvider
-        , IGetUserInfoProvider<CodingAuthorizationUserInfoResult,CodingAuthorizationUserRequest>
+        , IGetUserInfoProvider<CodingAuthorizationUserInfoResult, CodingAuthorizationUserRequest>
     {
     }
 }

@@ -5,7 +5,7 @@ namespace Bing.Configurations
     /// <summary>
     /// 默认配置访问器
     /// </summary>
-    public class DefaultConfigurationAccessor:IConfigurationAccessor
+    public class DefaultConfigurationAccessor : IConfigurationAccessor
     {
         /// <summary>
         /// 空

@@ -6,7 +6,7 @@ namespace Bing.Events.Messages
     /// 消息事件总线
     /// </summary>
     public interface IMessageEventBus
-    {        
+    {
         /// <summary>
         /// 发布事件
         /// </summary>

@@ -1,4 +1,4 @@
-﻿using Bing.Utils.Extensions;
+﻿using Bing.Extensions;
 
 namespace Bing.Caching
 {

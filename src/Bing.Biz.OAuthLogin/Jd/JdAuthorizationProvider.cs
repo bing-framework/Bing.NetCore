@@ -7,7 +7,7 @@ namespace Bing.Biz.OAuthLogin.Jd
     /// <summary>
     /// 京东授权提供程序
     /// </summary>
-    public class JdAuthorizationProvider:AuthorizationProviderBase<IJdAuthorizationConfigProvider,JdAuthorizationConfig>,IJdAuthorizationProvider
+    public class JdAuthorizationProvider : AuthorizationProviderBase<IJdAuthorizationConfigProvider, JdAuthorizationConfig>, IJdAuthorizationProvider
     {
         /// <summary>
         /// PC端授权地址

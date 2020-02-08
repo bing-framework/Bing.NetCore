@@ -114,7 +114,7 @@ namespace Bing.Utils.IdGenerators.Ids
         /// <summary>
         /// 对象锁
         /// </summary>
-        private readonly object _lock=new object();
+        private readonly object _lock = new object();
 
         /// <summary>
         /// 获取下一个ID
@@ -162,7 +162,7 @@ namespace Bing.Utils.IdGenerators.Ids
         protected virtual long TilNextMillis(long lastTimestamp)
         {
             var timestamp = TimeGen();
-            while (timestamp<=lastTimestamp)
+            while (timestamp <= lastTimestamp)
             {
                 timestamp = TimeGen();
             }

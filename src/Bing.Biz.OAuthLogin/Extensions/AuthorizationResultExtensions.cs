@@ -1,7 +1,7 @@
 ﻿using Bing.Biz.OAuthLogin.Core;
 using Bing.Biz.OAuthLogin.Wechat;
 using Bing.Biz.OAuthLogin.Weibo;
-using Bing.Utils.Extensions;
+using Bing.Extensions;
 using Bing.Utils.Json;
 
 namespace Bing.Biz.OAuthLogin.Extensions
