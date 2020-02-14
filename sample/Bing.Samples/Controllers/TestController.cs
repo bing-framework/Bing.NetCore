@@ -46,5 +46,18 @@ namespace Bing.Samples.Controllers
             await TestService.WriteLogAsync(content);
             return Success();
         }
+
+        [HttpGet("testEnum")]
+        public async Task<IActionResult> TestEnumAsync([FromQuery]TestEnum e)
+        {
+            return Success();
+        }
+    }
+
+    public enum TestEnum
+    {
+        One,
+        Two,
+        Three
     }
 }

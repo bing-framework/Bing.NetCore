@@ -9,27 +9,6 @@ namespace Bing.Extensions
     /// </summary>
     public static partial class ArrayExtensions
     {
-        #region WithInIndex(判断索引是否在数组中)
-
-        /// <summary>
-        /// 判断索引是否在数组中
-        /// </summary>
-        /// <param name="source">数组</param>
-        /// <param name="index">索引</param>
-        public static bool WithInIndex(this Array source, int index) => source != null && index >= 0 && index < source.Length;
-
-        /// <summary>
-        /// 判断索引是否在数组中
-        /// </summary>
-        /// <param name="source">数组</param>
-        /// <param name="index">索引</param>
-        /// <param name="dimension">数组维度</param>
-        public static bool WithInIndex(this Array source, int index, int dimension) =>
-            source != null && index >= source.GetLowerBound(dimension) &&
-            index <= source.GetUpperBound(dimension);
-
-        #endregion
-
         #region CombineArray(合并数组)
 
         /// <summary>
@@ -55,75 +34,6 @@ namespace Bing.Extensions
                     arrayToCombine.Length);
             }
             return combineWith;
-        }
-
-        #endregion
-
-        #region ClearAll(清空数组内容)
-
-        /// <summary>
-        /// 清空数组内容
-        /// </summary>
-        /// <param name="source">源数组</param>
-        public static Array ClearAll(this Array source)
-        {
-            if (source != null)
-                Array.Clear(source, 0, source.Length);
-            return source;
-        }
-
-        /// <summary>
-        /// 清空数组内容
-        /// </summary>
-        /// <typeparam name="T">数组类型</typeparam>
-        /// <param name="source">源数组</param>
-        public static T[] ClearAll<T>(this T[] source)
-        {
-            if (source != null)
-            {
-                for (var i = source.GetLowerBound(0); i <= source.GetUpperBound(0); ++i)
-                    source[i] = default(T);
-            }
-            return source;
-        }
-
-        #endregion
-
-        #region ClearAt(清除数组中指定索引的内容)
-
-        /// <summary>
-        /// 清除数组中指定索引的内容
-        /// </summary>
-        /// <param name="array">数组</param>
-        /// <param name="index">索引</param>
-        public static Array ClearAt(this Array array, int index)
-        {
-            if (array != null)
-            {
-                var arrayIndex = index.GetArrayIndex();
-                if (arrayIndex.IsIndexInArray(array))
-                    Array.Clear(array, arrayIndex, 1);
-            }
-
-            return array;
-        }
-
-        /// <summary>
-        /// 清除数组中指定索引的内容
-        /// </summary>
-        /// <typeparam name="T">数组类型</typeparam>
-        /// <param name="array">数组</param>
-        /// <param name="index">索引</param>
-        public static T[] ClearAt<T>(this T[] array, int index)
-        {
-            if (array != null)
-            {
-                var arrayIndex = index.GetArrayIndex();
-                if (arrayIndex.IsIndexInArray(array))
-                    array[arrayIndex] = default;
-            }
-
-            return array;
         }
 
         #endregion

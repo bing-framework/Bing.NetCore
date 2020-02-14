@@ -10,7 +10,7 @@ namespace Bing.Extensions
     /// <summary>
     /// 对象(<see cref="object"/>) 扩展
     /// </summary>
-    public static class ObjectExtensions
+    public static partial class ObjectExtensions
     {
         #region DeepClone(对象深拷贝)
 

@@ -113,6 +113,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
     - Nop是一个开源商城，封装了大量实用的基础代码。
   - [Util](https://github.com/dotnetcore/util)
     - 使用 .net core 可使用该框架。
+  - [Cosmos](https://github.com/cosmos-loops)
 
 ## 框架开发流程
 

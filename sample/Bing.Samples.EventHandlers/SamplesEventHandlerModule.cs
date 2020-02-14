@@ -24,7 +24,7 @@ namespace Bing.Samples.EventHandlers
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            //services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
+            services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
             return services;
         }
 

@@ -7,7 +7,7 @@ namespace Bing.Extensions
     /// <summary>
     /// <see cref="StringBuilder"/> 扩展
     /// </summary>
-    public static class StringBuilderExtensions
+    public static partial class StringBuilderExtensions
     {
         #region TrimStart(去除StringBuilder开头指定值)
 

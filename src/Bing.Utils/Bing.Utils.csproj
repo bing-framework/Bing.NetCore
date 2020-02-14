@@ -58,4 +58,10 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Bing\Extensions\StringBuilder\ToCharArray\" />
+    <Folder Include="Bing\Extensions\StringBuilder\Append\" />
+    <Folder Include="Bing\Extensions\StringBuilder\Trim\" />
+  </ItemGroup>
+
 </Project>

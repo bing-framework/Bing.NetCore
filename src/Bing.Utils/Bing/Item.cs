@@ -6,6 +6,7 @@ namespace Bing
     /// <summary>
     /// 列表项
     /// </summary>
+    [Serializable]
     public class Item : IComparable<Item>
     {
         /// <summary>

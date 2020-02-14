@@ -10,39 +10,6 @@ namespace Bing.Extensions
     /// </summary>
     public static class CharExtensions
     {
-        #region In(判断当前字符是否在目标字符数组中)
-
-        /// <summary>
-        /// 判断当前字符是否在目标字符数组中
-        /// </summary>
-        /// <param name="this">字符</param>
-        /// <param name="values">字符数组</param>
-        public static bool In(this char @this, params char[] values) => Array.IndexOf(values, @this) != -1;
-
-        #endregion
-
-        #region NotIn(判断当前字符是否不在目标字符数组中)
-
-        /// <summary>
-        /// 判断当前字符是否不在目标字符数组中
-        /// </summary>
-        /// <param name="this">字符</param>
-        /// <param name="values">字符数组</param>
-        public static bool NotIn(this char @this, params char[] values) => Array.IndexOf(values, @this) == -1;
-
-        #endregion
-
-        #region Repeat(重复拼接字符)
-
-        /// <summary>
-        /// 重复拼接字符
-        /// </summary>
-        /// <param name="this">字符</param>
-        /// <param name="repeatCount">重复数</param>
-        public static string Repeat(this char @this, int repeatCount) => new string(@this, repeatCount);
-
-        #endregion
-
         #region GetAscii(获取ASCII编码)
 
         /// <summary>

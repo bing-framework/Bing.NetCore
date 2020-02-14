@@ -133,50 +133,10 @@
             <param name="value">值</param>
             <param name="action">执行方法</param>
         </member>
-        <member name="T:Bing.Extensions.ByteExtensions">
-            <summary>
-            字节值(<see cref="T:System.Byte"/>) 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.Extensions.ByteExtensions.Max(System.Byte,System.Byte)">
-            <summary>
-            获取两个数中最大值
-            </summary>
-            <param name="value1">值1</param>
-            <param name="value2">值2</param>
-        </member>
-        <member name="M:Bing.Extensions.ByteExtensions.Min(System.Byte,System.Byte)">
-            <summary>
-            获取两个数中最小值
-            </summary>
-            <param name="value1">值1</param>
-            <param name="value2">值2</param>
-        </member>
         <member name="T:Bing.Extensions.CharExtensions">
             <summary>
             字符(<see cref="T:System.Char"/>) 扩展
             </summary>
-        </member>
-        <member name="M:Bing.Extensions.CharExtensions.In(System.Char,System.Char[])">
-            <summary>
-            判断当前字符是否在目标字符数组中
-            </summary>
-            <param name="this">字符</param>
-            <param name="values">字符数组</param>
-        </member>
-        <member name="M:Bing.Extensions.CharExtensions.NotIn(System.Char,System.Char[])">
-            <summary>
-            判断当前字符是否不在目标字符数组中
-            </summary>
-            <param name="this">字符</param>
-            <param name="values">字符数组</param>
-        </member>
-        <member name="M:Bing.Extensions.CharExtensions.Repeat(System.Char,System.Int32)">
-            <summary>
-            重复拼接字符
-            </summary>
-            <param name="this">字符</param>
-            <param name="repeatCount">重复数</param>
         </member>
         <member name="M:Bing.Extensions.CharExtensions.GetAsciiCode(System.Char)">
             <summary>
@@ -609,6 +569,15 @@
             <summary>
             对象(<see cref="T:System.Object"/>) 扩展
             </summary>
+            <summary>
+            对象(<see cref="T:System.Object"/>) 扩展
+            </summary>
+            <summary>
+            对象(<see cref="T:System.Object"/>) 扩展
+            </summary>
+            <summary>
+            对象(<see cref="T:System.Object"/>) 扩展
+            </summary>
         </member>
         <member name="M:Bing.Extensions.ObjectExtensions.DeepClone``1(``0)">
             <summary>
@@ -700,6 +669,83 @@
             <typeparam name="TResult">结果类型</typeparam>
             <param name="source">锁定对象</param>
             <param name="func">执行函数</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.As``1(System.Object)">
+            <summary>
+            转换为指定对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="this">object</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.AsOrDefault``1(System.Object)">
+            <summary>
+            转换为指定对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="this">当前对象</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.AsOrDefault``1(System.Object,``0)">
+            <summary>
+            转换为指定对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="this">object</param>
+            <param name="defaultValue">默认值</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.AsOrDefault``1(System.Object,System.Func{``0})">
+            <summary>
+            转换为指定对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="this">当前对象</param>
+            <param name="defaultValueFactory">默认值工厂</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.AsOrDefault``1(System.Object,System.Func{System.Object,``0})">
+            <summary>
+            转换为指定对象
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="this">object</param>
+            <param name="defaultValueFactory">默认值工厂</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.ExpressionCopy``1(``0)">
+            <summary>
+            表达式复制
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="source">数据源</param>
+        </member>
+        <member name="T:Bing.Extensions.ObjectExtensions.Copier`1">
+            <summary>
+            复制器
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+        </member>
+        <member name="F:Bing.Extensions.ObjectExtensions.Copier`1._parameterExpression">
+            <summary>
+            参数表达式
+            </summary>
+        </member>
+        <member name="F:Bing.Extensions.ObjectExtensions.Copier`1._check">
+            <summary>
+            检查字典
+            </summary>
+        </member>
+        <member name="F:Bing.Extensions.ObjectExtensions.Copier`1._func">
+            <summary>
+            函数
+            </summary>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.Copier`1.Copy(`0)">
+            <summary>
+            复制
+            </summary>
+            <param name="source">数据源</param>
+        </member>
+        <member name="M:Bing.Extensions.ObjectExtensions.Copier`1.GetAllPropertiesOrFields">
+            <summary>
+            获取所有属性或字段
+            </summary>
         </member>
         <member name="T:Bing.Extensions.RandomExtensions">
             <summary>
@@ -1597,21 +1643,6 @@
             数组(<see cref="T:System.Array"/>) 扩展
             </summary>
         </member>
-        <member name="M:Bing.Extensions.ArrayExtensions.WithInIndex(System.Array,System.Int32)">
-            <summary>
-            判断索引是否在数组中
-            </summary>
-            <param name="source">数组</param>
-            <param name="index">索引</param>
-        </member>
-        <member name="M:Bing.Extensions.ArrayExtensions.WithInIndex(System.Array,System.Int32,System.Int32)">
-            <summary>
-            判断索引是否在数组中
-            </summary>
-            <param name="source">数组</param>
-            <param name="index">索引</param>
-            <param name="dimension">数组维度</param>
-        </member>
         <member name="M:Bing.Extensions.ArrayExtensions.CombineArray``1(``0[],``0[])">
             <summary>
             合并数组，合并两个数组到一个新的数组
@@ -1626,34 +1657,6 @@
             		Array combinedArray = arrayOne.CombineArray&lt;int&gt;(arrayTwo);
             	</code>
             </example>
-        </member>
-        <member name="M:Bing.Extensions.ArrayExtensions.ClearAll(System.Array)">
-            <summary>
-            清空数组内容
-            </summary>
-            <param name="source">源数组</param>
-        </member>
-        <member name="M:Bing.Extensions.ArrayExtensions.ClearAll``1(``0[])">
-            <summary>
-            清空数组内容
-            </summary>
-            <typeparam name="T">数组类型</typeparam>
-            <param name="source">源数组</param>
-        </member>
-        <member name="M:Bing.Extensions.ArrayExtensions.ClearAt(System.Array,System.Int32)">
-            <summary>
-            清除数组中指定索引的内容
-            </summary>
-            <param name="array">数组</param>
-            <param name="index">索引</param>
-        </member>
-        <member name="M:Bing.Extensions.ArrayExtensions.ClearAt``1(``0[],System.Int32)">
-            <summary>
-            清除数组中指定索引的内容
-            </summary>
-            <typeparam name="T">数组类型</typeparam>
-            <param name="array">数组</param>
-            <param name="index">索引</param>
         </member>
         <member name="M:Bing.Extensions.ArrayExtensions.BlockCopy``1(``0[],System.Int32,System.Int32)">
             <summary>
@@ -4022,6 +4025,18 @@
             </summary>
             <param name="property">属性</param>
         </member>
+        <member name="T:Bing.Extensions.RegexExtensions">
+            <summary>
+            正则表达式(<see cref="T:System.Text.RegularExpressions.Regex"/>) 扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Extensions.RegexExtensions.GetGroupValue(System.Text.RegularExpressions.Match,System.String)">
+            <summary>
+            获取分组值
+            </summary>
+            <param name="match">Match</param>
+            <param name="group">分组</param>
+        </member>
         <member name="T:Bing.Extensions.ClaimsExtensions">
             <summary>
             声明(<see cref="T:System.Security.Claims.Claim"/>) 扩展
@@ -4072,8 +4087,17 @@
         </member>
         <member name="T:Bing.Extensions.StringBuilderExtensions">
             <summary>
+            字符串拼接器(<see cref="T:System.Text.StringBuilder" />) 扩展
+            </summary>
+            <summary>
             <see cref="T:System.Text.StringBuilder"/> 扩展
             </summary>
+        </member>
+        <member name="M:Bing.Extensions.StringBuilderExtensions.Reverse(System.Text.StringBuilder)">
+            <summary>
+            反转字符串
+            </summary>
+            <param name="builder">StringBuilder</param>
         </member>
         <member name="M:Bing.Extensions.StringBuilderExtensions.TrimStart(System.Text.StringBuilder)">
             <summary>
@@ -4193,6 +4217,601 @@
             <param name="condition">拼接条件</param>
             <param name="value">内容</param>
             <param name="parameters">参数</param>
+        </member>
+        <member name="T:Bing.Extensions.BaseTypeExtensions">
+            <summary>
+            基础类型扩展
+            </summary>
+            <summary>
+            基础类型扩展
+            </summary>
+            <summary>
+            基础类型扩展
+            </summary>
+            <summary>
+            基础类型扩展
+            </summary>
+            <summary>
+            基础类型扩展
+            </summary>
+            <summary>
+            基础类型扩展
+            </summary>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Copy(System.Array,System.Array,System.Int32)">
+            <summary>
+            复制。将一个 Array 的一部分元素复制到另一个 Array 中，并根据需要执行类型转换和装箱。
+            </summary>
+            <param name="sourceArray">源数组</param>
+            <param name="destinationArray">目标数组</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Copy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)">
+            <summary>
+            复制。将一个 Array 的一部分元素复制到另一个 Array 中，并根据需要执行类型转换和装箱。
+            </summary>
+            <param name="sourceArray">源数组</param>
+            <param name="sourceIndex">源数组索引</param>
+            <param name="destinationArray">目标数组</param>
+            <param name="destinationIndex">目标数组索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Copy(System.Array,System.Array,System.Int64)">
+            <summary>
+            复制。将一个 Array 的一部分元素复制到另一个 Array 中，并根据需要执行类型转换和装箱。
+            </summary>
+            <param name="sourceArray">源数组</param>
+            <param name="destinationArray">目标数组</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Copy(System.Array,System.Int64,System.Array,System.Int64,System.Int64)">
+            <summary>
+            复制。将一个 Array 的一部分元素复制到另一个 Array 中，并根据需要执行类型转换和装箱。
+            </summary>
+            <param name="sourceArray">源数组</param>
+            <param name="sourceIndex">源数组索引</param>
+            <param name="destinationArray">目标数组</param>
+            <param name="destinationIndex">目标数组索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ConstrainedCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)">
+            <summary>
+            复制。复制 Array 中的一系列元素（从指定的源索引开始），并将它们粘贴到另一 Array 中（从指定的目标索引开始）。 保证在复制未成功完成的情况下撤消所有更改。
+            </summary>
+            <param name="sourceArray">源数组</param>
+            <param name="sourceIndex">源数组索引</param>
+            <param name="destinationArray">目标数组</param>
+            <param name="destinationIndex">目标数组索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Clear(System.Array,System.Int32,System.Int32)">
+            <summary>
+            清空
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ClearAll(System.Array)">
+            <summary>
+            清空所有数据
+            </summary>
+            <param name="array">数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IndexOf(System.Array,System.Object)">
+            <summary>
+            获取指定值的索引
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IndexOf(System.Array,System.Object,System.Int32)">
+            <summary>
+            获取指定值的索引
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+            <param name="startIndex">起始索引</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IndexOf(System.Array,System.Object,System.Int32,System.Int32)">
+            <summary>
+            获取指定值的索引
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+            <param name="startIndex">起始索引</param>
+            <param name="count">计数</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.LastIndexOf(System.Array,System.Object)">
+            <summary>
+            获取指定值的最后索引
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.LastIndexOf(System.Array,System.Object,System.Int32)">
+            <summary>
+            获取指定值的最后索引
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+            <param name="startIndex">起始索引</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.LastIndexOf(System.Array,System.Object,System.Int32,System.Int32)">
+            <summary>
+            获取指定值的最后索引
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+            <param name="startIndex">起始索引</param>
+            <param name="count">计数</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.WithInIndex(System.Array,System.Int32)">
+            <summary>
+            是否在数组索引范围内
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.WithInIndex(System.Array,System.Int32,System.Int32)">
+            <summary>
+            是否在数组索引范围内
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="dimension">数组维度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Reverse(System.Array)">
+            <summary>
+            反转
+            </summary>
+            <param name="array">数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Reverse(System.Array,System.Int32,System.Int32)">
+            <summary>
+            反转
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Array)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="items">其它项数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Int32,System.Int32)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Array,System.Int32,System.Int32)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="items">其它项数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Collections.IComparer)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="comparer">比较器</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Array,System.Collections.IComparer)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="items">其它项数组</param>
+            <param name="comparer">比较器</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Int32,System.Int32,System.Collections.IComparer)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+            <param name="comparer">比较器</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Sort(System.Array,System.Array,System.Int32,System.Int32,System.Collections.IComparer)">
+            <summary>
+            排序
+            </summary>
+            <param name="array">数组</param>
+            <param name="items">其它项数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+            <param name="comparer">比较器</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.BinarySearch(System.Array,System.Object)">
+            <summary>
+            二进制查询
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.BinarySearch(System.Array,System.Int32,System.Int32,System.Object)">
+            <summary>
+            二进制查询
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.BinarySearch(System.Array,System.Object,System.Collections.IComparer)">
+            <summary>
+            二进制查询
+            </summary>
+            <param name="array">数组</param>
+            <param name="value">值</param>
+            <param name="comparer">比较器</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.BinarySearch(System.Array,System.Int32,System.Int32,System.Object,System.Collections.IComparer)">
+            <summary>
+            二进制查询
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+            <param name="length">长度</param>
+            <param name="value">值</param>
+            <param name="comparer">比较器</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.FindAll``1(``0[],System.Predicate{``0})">
+            <summary>
+            查找所有
+            </summary>
+            <typeparam name="T">对象类型</typeparam>
+            <param name="me">数组</param>
+            <param name="condition">条件</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.BlockCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)">
+            <summary>
+            块复制
+            </summary>
+            <param name="src">源数组</param>
+            <param name="srcOffset">源数组偏移量</param>
+            <param name="dst">目标数组</param>
+            <param name="dstOffset">目标数组偏移量</param>
+            <param name="count">数量</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ByteLength(System.Array)">
+            <summary>
+            获取字节长度
+            </summary>
+            <param name="array">数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.GetByte(System.Array,System.Int32)">
+            <summary>
+            获取指定索引的字节
+            </summary>
+            <param name="array">数组</param>
+            <param name="index">索引</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.SetByte(System.Array,System.Int32,System.Byte)">
+            <summary>
+            设置字节
+            </summary>
+            <param name="array">数值</param>
+            <param name="index">索引</param>
+            <param name="value">字节</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Max(System.Byte,System.Byte)">
+            <summary>
+            获取最大值
+            </summary>
+            <param name="val1">值1</param>
+            <param name="val2">值2</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Min(System.Byte,System.Byte)">
+            <summary>
+            获取最小值
+            </summary>
+            <param name="val1">值1</param>
+            <param name="val2">值2</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Resize(System.Byte[],System.Int32)">
+            <summary>
+            重置数组大小
+            </summary>
+            <param name="this">byte[]</param>
+            <param name="newSize">新数组的大小</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToBase64CharArray(System.Byte[],System.Int32,System.Int32,System.Char[],System.Int32)">
+            <summary>
+            转换为Base64字符数组
+            </summary>
+            <param name="inArray">byte[]</param>
+            <param name="offsetIn">输入偏移量</param>
+            <param name="length">长度</param>
+            <param name="outArray">输出字符数组</param>
+            <param name="offsetOut">输出偏移量</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToBase64CharArray(System.Byte[],System.Int32,System.Int32,System.Char[],System.Int32,System.Base64FormattingOptions)">
+            <summary>
+            转换为Base64字符数组
+            </summary>
+            <param name="inArray">byte[]</param>
+            <param name="offsetIn">输入偏移量</param>
+            <param name="length">长度</param>
+            <param name="outArray">输出字符数组</param>
+            <param name="offsetOut">输出偏移量</param>
+            <param name="options">Base64格式化配置</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToBase64String(System.Byte[],System.Base64FormattingOptions)">
+            <summary>
+            转换为Base64字符串
+            </summary>
+            <param name="inArray">byte[]</param>
+            <param name="options">Base64格式化配置</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToBase64String(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            转换为Base64字符串
+            </summary>
+            <param name="inArray">byte[]</param>
+            <param name="offset">偏移量</param>
+            <param name="length">长度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToBase64String(System.Byte[],System.Int32,System.Int32,System.Base64FormattingOptions)">
+            <summary>
+            转换为Base64字符串
+            </summary>
+            <param name="inArray">byte[]</param>
+            <param name="offset">偏移量</param>
+            <param name="length">长度</param>
+            <param name="options">Base64格式化配置</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToMemoryStream(System.Byte[])">
+            <summary>
+            转换为内存流
+            </summary>
+            <param name="this">byte[]</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.GetNumericValue(System.Char)">
+            <summary>
+            获取数值
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.GetUnicodeCategory(System.Char)">
+            <summary>
+            获取Unicode类别
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToLower(System.Char)">
+            <summary>
+            转换为小写字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToLower(System.Char,System.Globalization.CultureInfo)">
+            <summary>
+            转换为小写字符
+            </summary>
+            <param name="c">字符</param>
+            <param name="culture">区域信息</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToLowerInvariant(System.Char)">
+            <summary>
+            转换为小写字符。使用固定区域性的大小写规则
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToUpper(System.Char)">
+            <summary>
+            转换为大写字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToUpper(System.Char,System.Globalization.CultureInfo)">
+            <summary>
+            转换为大写字符
+            </summary>
+            <param name="c">字符</param>
+            <param name="culture">区域信息</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToUpperInvariant(System.Char)">
+            <summary>
+            转换为小写字符。使用固定区域性的大小写规则
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ConvertToUtf32(System.Char,System.Char)">
+            <summary>
+            将 UTF-16 编码的代理项对的值转换为 Unicode 码位。
+            </summary>
+            <param name="highSurrogate">高代理项代码单位（即代码单位从 U+D800 到 U+DBFF）。</param>
+            <param name="lowSurrogate">低代理项代码单位（即代码单位从 U+DC00 到 U+DFFF）。</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsSurrogate(System.Char)">
+            <summary>
+            是否具有代理项代码单位
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsSurrogatePair(System.Char,System.Char)">
+            <summary>
+            是否形成一个代理项对
+            </summary>
+            <param name="highSurrogate">要作为代理项对的高代理项进行计算的字符。</param>
+            <param name="lowSurrogate">要作为代理项对的低代理项进行计算的字符。</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsHighSurrogate(System.Char)">
+            <summary>
+            是否高代理项
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsLowSurrogate(System.Char)">
+            <summary>
+            是否低代理项
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.Repeat(System.Char,System.Int32)">
+            <summary>
+            重复拼接字符
+            </summary>
+            <param name="this">字符</param>
+            <param name="repeatCount">重复次数</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.In(System.Char,System.Char[])">
+            <summary>
+            判断当前字符是否在目标字符数组中
+            </summary>
+            <param name="this">字符</param>
+            <param name="values">字符数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.NotIn(System.Char,System.Char[])">
+            <summary>
+            判断当前字符是否不在目标字符数组中
+            </summary>
+            <param name="this">字符</param>
+            <param name="values">字符数组</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsWhiteSpace(System.Char)">
+            <summary>
+            判断当前字符是否空格字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsControl(System.Char)">
+            <summary>
+            判断当前字符是否控制字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsDigit(System.Char)">
+            <summary>
+            判断当前字符是否十进制数字字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsLetter(System.Char)">
+            <summary>
+            判断当前字符是否英文字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsLetterOrDigit(System.Char)">
+            <summary>
+            判断当前字符是否英文或十进制数字字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsLower(System.Char)">
+            <summary>
+            判断当前字符是否小写英文字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsNumber(System.Char)">
+            <summary>
+            判断当前字符是否数字字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsPunctuation(System.Char)">
+            <summary>
+            判断当前字符是否标点符号
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsSeparator(System.Char)">
+            <summary>
+            判断当前字符是否分隔符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.IsSymbol(System.Char)">
+            <summary>
+            判断当前字符是否符号字符
+            </summary>
+            <param name="c">字符</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.SetDateTime(System.DateTime,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            设置时间
+            </summary>
+            <param name="date">DateTime</param>
+            <param name="hours">时</param>
+            <param name="minutes">分</param>
+            <param name="seconds">秒</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.SetDateTime(System.DateTime,System.TimeSpan)">
+            <summary>
+            设置时间
+            </summary>
+            <param name="date">DateTime</param>
+            <param name="time">时间跨度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.SetDateTime(System.DateTimeOffset,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            设置时间
+            </summary>
+            <param name="date">DateTimeOffset</param>
+            <param name="hours">时</param>
+            <param name="minutes">分</param>
+            <param name="seconds">秒</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.SetDateTime(System.DateTimeOffset,System.TimeSpan)">
+            <summary>
+            设置时间
+            </summary>
+            <param name="date">DateTimeOffset</param>
+            <param name="time">时间跨度</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.SetDateTime(System.DateTimeOffset,System.TimeSpan,System.TimeZoneInfo)">
+            <summary>
+            设置时间
+            </summary>
+            <param name="date">DateTimeOffset</param>
+            <param name="time">时间跨度</param>
+            <param name="localTimeZone">时区</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToDateTimeOffset(System.DateTime)">
+            <summary>
+            将时间转换为时间点
+            </summary>
+            <param name="localDateTime">DateTime</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToDateTimeOffset(System.DateTime,System.TimeZoneInfo)">
+            <summary>
+            将时间转换为时间点
+            </summary>
+            <param name="localDateTime">DateTime</param>
+            <param name="localTimeZone">时区</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToLocalDateTime(System.DateTimeOffset)">
+            <summary>
+            将时间点转换为时间
+            </summary>
+            <param name="dateTimeUtc">DateTimeOffset</param>
+        </member>
+        <member name="M:Bing.Extensions.BaseTypeExtensions.ToLocalDateTime(System.DateTimeOffset,System.TimeZoneInfo)">
+            <summary>
+            将时间点转换为时间
+            </summary>
+            <param name="dateTimeUtc">DateTimeOffset</param>
+            <param name="localTimeZone">时区</param>
         </member>
         <member name="T:Bing.Extensions.TaskExtensions">
             <summary>

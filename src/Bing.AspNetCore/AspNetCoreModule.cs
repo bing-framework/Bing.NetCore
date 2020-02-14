@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using Bing.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore
@@ -38,7 +37,6 @@ namespace Bing.AspNetCore
             services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.Session>();
             // 注册编码
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            services.EnableAop();
             return services;
         }
 

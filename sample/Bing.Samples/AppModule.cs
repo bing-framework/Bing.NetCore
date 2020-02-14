@@ -7,6 +7,7 @@ using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.SqlServer;
 using Bing.Datas.Enums;
+using Bing.Events.Cap;
 using Bing.Extensions.Swashbuckle.Configs;
 using Bing.Extensions.Swashbuckle.Core;
 using Bing.Extensions.Swashbuckle.Extensions;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Savorboard.CAP.InMemoryMessageQueue;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Bing.Samples
@@ -59,9 +61,6 @@ namespace Bing.Samples
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
 
-
-            services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
-
             // 注册工作单元
             services.AddSqlServerUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(
                 services.GetConfiguration().GetConnectionString("DefaultConnection"));
@@ -80,6 +79,26 @@ namespace Bing.Samples
 
             // 注册AutoMapper
             services.AddAutoMapper();
+
+            services.AddCapEventBus(o =>
+            {
+                o.UseEntityFramework<Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>();
+                o.UseDashboard();
+                // 设置处理成功的数据在数据库中保存的时间（秒），为保证系统性能，数据会定期清理
+                o.SucceedMessageExpiredAfter = 24 * 3600;
+                // 设置失败重试次数
+                o.FailedRetryCount = 5;
+                o.Version = "bing_test";
+                // 启用内存队列
+                o.UseInMemoryMessageQueue();
+                // 启用RabbitMQ
+                //o.UseRabbitMQ(x =>
+                //{
+                //    x.HostName = "";
+                //    x.UserName = "admin";
+                //    x.Password = "";
+                //});
+            });
             return services;
         }
 

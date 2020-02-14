@@ -43,7 +43,7 @@ namespace Bing.Samples.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             app.UseMiniProfiler();
-            Enabled = true;
+            Enabled = false;
         }
     }
 }

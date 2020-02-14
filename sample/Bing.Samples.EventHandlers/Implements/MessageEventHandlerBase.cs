@@ -1,9 +1,11 @@
-﻿namespace Bing.Samples.EventHandlers.Implements
+﻿using Bing.Samples.EventHandlers.Abstractions;
+
+namespace Bing.Samples.EventHandlers.Implements
 {
     /// <summary>
     /// 消息事件处理器基类
     /// </summary>
-    public abstract class MessageEventHandlerBase : DotNetCore.CAP.ICapSubscribe
+    public abstract class MessageEventHandlerBase : IMessageEventHandler, DotNetCore.CAP.ICapSubscribe
     {
         /// <summary>
         /// 日志
