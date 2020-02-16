@@ -300,8 +300,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 判断是否存在
         /// </summary>
-        /// <param name="ids">标识列表</param>
-        public bool Exists(params Guid[] ids)
+        /// <param name="id">标识</param>
+        public bool Exists(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -310,7 +310,25 @@ namespace Bing.Tests.Samples
         /// 判断是否存在
         /// </summary>
         /// <param name="ids">标识列表</param>
-        public async Task<bool> ExistsAsync(params Guid[] ids)
+        public bool Exists(Guid[] ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 判断是否存在
+        /// </summary>
+        /// <param name="id">标识</param>
+        public Task<bool> ExistsAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 判断是否存在
+        /// </summary>
+        /// <param name="ids">标识列表</param>
+        public async Task<bool> ExistsAsync(Guid[] ids)
         {
             throw new NotImplementedException();
         }

@@ -8,20 +8,6 @@ using Xunit;
 namespace Bing.Tests.Helpers
 {
     /// <summary>
-    /// Ioc配置
-    /// </summary>
-    public class TestIocConfig : ConfigBase
-    {
-        /// <summary>
-        /// 加载配置
-        /// </summary>
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.AddScoped<ISample, Sample>();
-        }
-    }
-
-    /// <summary>
     /// Ioc测试
     /// </summary>
     public class IocTest
@@ -31,7 +17,6 @@ namespace Bing.Tests.Helpers
         /// </summary>
         public IocTest()
         {
-            Ioc.Register(new TestIocConfig());
         }
 
         /// <summary>

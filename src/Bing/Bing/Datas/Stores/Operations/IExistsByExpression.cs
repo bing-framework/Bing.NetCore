@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Bing.Aspects;
 using Bing.Domains.Entities;
 
 namespace Bing.Datas.Stores.Operations
@@ -15,6 +16,6 @@ namespace Bing.Datas.Stores.Operations
         /// 判断是否存在
         /// </summary>
         /// <param name="predicate">查询条件</param>
-        bool Exists(Expression<Func<TEntity, bool>> predicate);
+        bool Exists([NotNull]Expression<Func<TEntity, bool>> predicate);
     }
 }

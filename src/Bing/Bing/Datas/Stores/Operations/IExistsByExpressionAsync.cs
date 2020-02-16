@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Bing.Aspects;
 using Bing.Domains.Entities;
 
 namespace Bing.Datas.Stores.Operations
@@ -16,6 +17,6 @@ namespace Bing.Datas.Stores.Operations
         /// 判断是否存在
         /// </summary>
         /// <param name="predicate">查询条件</param>
-        Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<bool> ExistsAsync([NotNull]Expression<Func<TEntity, bool>> predicate);
     }
 }

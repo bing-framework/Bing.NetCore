@@ -32,27 +32,16 @@ namespace Bing.Datas.Dapper.SqlServer
         /// <summary>
         /// 创建Sql生成器
         /// </summary>
-        /// <returns></returns>
-        public override ISqlBuilder New()
-        {
-            return new SqlServerBuilder(EntityMatedata, TableDatabase, ParameterManager);
-        }
+        public override ISqlBuilder New() => new SqlServerBuilder(EntityMatedata, TableDatabase, ParameterManager);
 
         /// <summary>
         /// 创建分页Sql
         /// </summary>
-        protected override string CreateLimitSql()
-        {
-            return $"Offset {GetOffsetParam()} Rows Fetch Next {GetLimitParam()} Rows Only";
-        }
+        protected override string CreateLimitSql() => $"Offset {GetOffsetParam()} Rows Fetch Next {GetLimitParam()} Rows Only";
 
         /// <summary>
         /// 获取Sql方言
         /// </summary>
-        /// <returns></returns>
-        protected override IDialect GetDialect()
-        {
-            return new SqlServerDialect();
-        }
+        protected override IDialect GetDialect() => new SqlServerDialect();
     }
 }

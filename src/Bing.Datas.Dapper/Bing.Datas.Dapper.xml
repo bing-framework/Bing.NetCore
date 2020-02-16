@@ -1108,7 +1108,6 @@
             <summary>
             创建Sql生成器
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.Dapper.SqlServer.SqlServerBuilder.CreateLimitSql">
             <summary>
@@ -1119,7 +1118,6 @@
             <summary>
             获取Sql方言
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.Dapper.SqlServer.SqlServerDialect">
             <summary>

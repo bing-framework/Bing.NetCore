@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using Bing.Aspects;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 
@@ -33,6 +34,6 @@ namespace Bing.Datas.Stores.Operations
         /// 查找
         /// </summary>
         /// <param name="predicate">查询条件</param>
-        IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
+        IQueryable<TEntity> Find([NotNull]Expression<Func<TEntity, bool>> predicate);
     }
 }

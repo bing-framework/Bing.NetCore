@@ -8810,6 +8810,730 @@
             <param name="type">实例类型</param>
             <param name="args">参数</param>
         </member>
+        <member name="T:Bing.Utils.Conversions.IConversionImpl`2">
+            <summary>
+            转换实现
+            </summary>
+            <typeparam name="TFrom">来源类型</typeparam>
+            <typeparam name="TTo">目标类型</typeparam>
+        </member>
+        <member name="M:Bing.Utils.Conversions.IConversionImpl`2.TryTo(`0,`1@)">
+            <summary>
+            尝试转换
+            </summary>
+            <param name="from">源对象</param>
+            <param name="to">目标对象</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.IConversionTry`2">
+            <summary>
+            尝试转换
+            </summary>
+            <typeparam name="TFrom">来源类型</typeparam>
+            <typeparam name="TTo">目标类型</typeparam>
+        </member>
+        <member name="M:Bing.Utils.Conversions.IConversionTry`2.Is(`0,`1@)">
+            <summary>
+            是否转换成功
+            </summary>
+            <param name="from">源对象</param>
+            <param name="to">目标对象</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.EncodingHelper">
+            <summary>
+            编码操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.EncodingHelper.Fixed(System.Text.Encoding)">
+            <summary>
+            补全。如果编码为空，则默认返回<see cref="P:System.Text.Encoding.UTF8"/>
+            </summary>
+            <param name="encoding">编码</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.Helper">
+            <summary>
+            内部操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.Helper.IsXXX``2(``0,System.Func{``0,System.Boolean},System.Func{``0,System.Action{``1},System.Boolean},System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{``0,``1}},System.Action{``1})">
+            <summary>
+            是否某对象
+            </summary>
+            <typeparam name="TFrom">源类型</typeparam>
+            <typeparam name="TTo">目标类型</typeparam>
+            <param name="from">源对象</param>
+            <param name="fromTry">源尝试</param>
+            <param name="firstTry">首次尝试</param>
+            <param name="tries">尝试方法</param>
+            <param name="act">转换操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.Helper.ToXXX``2(``0,System.Func{``0,System.Action{``1},System.Boolean},System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{``0,``1}})">
+            <summary>
+            转换为某对象
+            </summary>
+            <typeparam name="TFrom">源类型</typeparam>
+            <typeparam name="TTo">目标类型</typeparam>
+            <param name="from">源对象</param>
+            <param name="firstImpl">首次实现操作</param>
+            <param name="impls">实现操作</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringBooleanHelper">
+            <summary>
+            字符串转bool 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringBooleanHelper.Is(System.String,System.Action{System.Boolean})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringBooleanHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Boolean}},System.Action{System.Boolean})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringBooleanHelper.To(System.String,System.Boolean)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringBooleanHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Boolean}})">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringByteHelper">
+            <summary>
+            字符串转byte 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringByteHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.Byte})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringByteHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Byte}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.Byte})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringByteHelper.To(System.String,System.Byte,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringByteHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Byte}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringCharHelper">
+            <summary>
+            字符串转char 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringCharHelper.Is(System.String,System.Action{System.Char})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringCharHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Char}},System.Action{System.Char})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringCharHelper.To(System.String,System.Char)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringCharHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Char}})">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringIpAddressHelper">
+            <summary>
+            字符串转IP地址 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringIpAddressHelper.Is(System.String,System.Action{System.Net.IPAddress})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringIpAddressHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Net.IPAddress}},System.Action{System.Net.IPAddress})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringIpAddressHelper.To(System.String,System.Net.IPAddress)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringIpAddressHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Net.IPAddress}})">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringLongHelper">
+            <summary>
+            字符串转long 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringLongHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.Int64})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringLongHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Int64}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.Int64})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringLongHelper.To(System.String,System.Int64,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringLongHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Int64}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringSByteHelper">
+            <summary>
+            字符串转sbyte 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringSByteHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.SByte})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringSByteHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.SByte}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.SByte})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringSByteHelper.To(System.String,System.SByte,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringSByteHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.SByte}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringShortHelper">
+            <summary>
+            字符串转short 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringShortHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.Int16})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringShortHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Int16}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.Int16})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringShortHelper.To(System.String,System.Int16,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringShortHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Int16}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringTimeSpanExactHelper">
+            <summary>
+            字符串精确转时间跨度 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanExactHelper.Is(System.String,System.String,System.IFormatProvider,System.Action{System.TimeSpan})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="format">格式化字符串</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanExactHelper.Is(System.String,System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.TimeSpan}},System.IFormatProvider,System.Action{System.TimeSpan})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="format">格式化字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanExactHelper.To(System.String,System.String,System.TimeSpan,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="format">格式化字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanExactHelper.To(System.String,System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.TimeSpan}},System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="format">格式化字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringTimeSpanHelper">
+            <summary>
+            字符串转时间跨度 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanHelper.Is(System.String,System.IFormatProvider,System.Action{System.TimeSpan})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.TimeSpan}},System.IFormatProvider,System.Action{System.TimeSpan})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanHelper.To(System.String,System.TimeSpan,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringTimeSpanHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.TimeSpan}},System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringUIntHelper">
+            <summary>
+            字符串转uint 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUIntHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.UInt32})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUIntHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.UInt32}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.UInt32})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUIntHelper.To(System.String,System.UInt32,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUIntHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.UInt32}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringULongHelper">
+            <summary>
+            字符串转ulong 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringULongHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.UInt64})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringULongHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.UInt64}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.UInt64})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringULongHelper.To(System.String,System.UInt64,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringULongHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.UInt64}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringUShortHelper">
+            <summary>
+            字符串转ushort 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUShortHelper.Is(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.UInt16})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUShortHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.UInt16}},System.Globalization.NumberStyles,System.IFormatProvider,System.Action{System.UInt16})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUShortHelper.To(System.String,System.UInt16,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringUShortHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.UInt16}},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+            <param name="style">数值格式</param>
+            <param name="formatProvider">格式化提供程序</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Internals.StringVersionHelper">
+            <summary>
+            字符串转版本 操作辅助类
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringVersionHelper.Is(System.String,System.Action{System.Version})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringVersionHelper.Is(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionTry{System.String,System.Version}},System.Action{System.Version})">
+            <summary>
+            是否
+            </summary>
+            <param name="str">字符串</param>
+            <param name="tries">尝试转换集合</param>
+            <param name="setupAction">操作</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringVersionHelper.To(System.String,System.Version)">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="defaultVal">默认值</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Internals.StringVersionHelper.To(System.String,System.Collections.Generic.IEnumerable{Bing.Utils.Conversions.IConversionImpl{System.String,System.Version}})">
+            <summary>
+            转换
+            </summary>
+            <param name="str">字符串</param>
+            <param name="impls">实现集合</param>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Scale.BinaryConversion">
+            <summary>
+            二进制转换操作
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BinaryConversion.ToDecimalism(System.String)">
+            <summary>
+            转换为十进制
+            </summary>
+            <param name="bin">二进制</param>
+            <example>in: 101110; out: 46</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BinaryConversion.ToHexadecimal(System.String)">
+            <summary>
+            转换为十六机制
+            </summary>
+            <param name="bin">二进制</param>
+            <example>in: 101110; out: 2E</example>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Scale.BytesConversion">
+            <summary>
+            字节转换操作
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToAscii(System.Byte[])">
+            <summary>
+            转换为ASCII字符串
+            </summary>
+            <param name="bytes">字节数组</param>
+            <example>in: new byte[] {65, 66, 67}; out: ABC</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToBinary(System.Byte)">
+            <summary>
+            转换为二进制字符串
+            </summary>
+            <param name="byte">byte</param>
+            <example>in: (byte)128; out: 10000000</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToDecimalism(System.Byte,System.Byte)">
+            <summary>
+            转换为十进制
+            </summary>
+            <param name="h">高地址字节</param>
+            <param name="l">低地址字节</param>
+            <example>in: (byte)65, (byte)66; out: 16706</example>
+            <example>in: (byte)66, (byte)65; out: 16961</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToDecimalism(System.Byte,System.Byte,System.Boolean)">
+            <summary>
+            转换为十进制
+            </summary>
+            <param name="h">高地址字节</param>
+            <param name="l">低地址字节</param>
+            <param name="isRadix">是否基数</param>
+            <example>in: (byte)255, (byte)66; out: 65346</example>
+            <example>in: (byte)66, (byte)255; out: -190</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToHexadecimal(System.Byte)">
+            <summary>
+            转换为十六进制字符串
+            </summary>
+            <param name="byte">byte</param>
+            <example>in: (byte)128; out: 80</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToHexadecimal(System.Byte[])">
+            <summary>
+            转换为十六进制字符串
+            </summary>
+            <param name="bytes">字节数组</param>
+            <example>in: new byte[] {65, 66, 67}; out: 414243</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.BytesConversion.ToHexadecimal(System.Byte,System.Byte)">
+            <summary>
+            转换为十六进制字符串
+            </summary>
+            <param name="h">高地址字节</param>
+            <param name="l">低地址字节</param>
+            <example>in: (byte)65, (byte)66; out: 4142</example>
+            <example>in: (byte)66, (byte)65; out: 4241</example>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Scale.DecimalismConversion">
+            <summary>
+            十进制转换操作
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.DecimalismConversion.ToBinary(System.Int32)">
+            <summary>
+            转换为二进制字符串
+            </summary>
+            <param name="dec">十进制</param>
+            <example>in: 46; out: 101110</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.DecimalismConversion.ToHexadecimal(System.Int32)">
+            <summary>
+            转换为十六进制字符串
+            </summary>
+            <param name="dec">十进制</param>
+            <example>in: 46; out: 2E</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.DecimalismConversion.ToHexadecimal(System.Int32,System.Int32)">
+            <summary>
+            转换为十六进制字符串
+            </summary>
+            <param name="dec">十进制</param>
+            <param name="formatLength">格式化长度</param>
+            <example>in: 46, 4; out: 002E</example>
+        </member>
+        <member name="T:Bing.Utils.Conversions.Scale.HexadecimalConversion">
+            <summary>
+            十六进制转换操作
+            </summary>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.HexadecimalConversion.ToDecimalism(System.String)">
+            <summary>
+            转换为十进制
+            </summary>
+            <param name="hex">十六进制字符串</param>
+            <example>in: 2E; out: 46</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.HexadecimalConversion.ToBinary(System.String)">
+            <summary>
+            转换为二进制字符串
+            </summary>
+            <param name="hex">十六进制字符串</param>
+            <example>in: 2E; out: 101110</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.HexadecimalConversion.ToBytes(System.String)">
+            <summary>
+            转换为字节数组
+            </summary>
+            <param name="hex">十六进制字符串</param>
+            <example>in: 2E3D; out: result[0] is 46, result[1] is 61</example>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.HexadecimalConversion.ToString(System.String,System.Text.Encoding)">
+            <summary>
+            转换为字符串
+            </summary>
+            <param name="hex">十六进制字符串</param>
+            <param name="encoding">编码方式</param>
+        </member>
+        <member name="M:Bing.Utils.Conversions.Scale.HexadecimalConversion.FromString(System.String,System.Text.Encoding)">
+            <summary>
+            将普通字符串转换为十六进制字符串
+            </summary>
+            <param name="str">普通字符串</param>
+            <param name="encoding">编码方式</param>
+            <example>in: A; out: 1000001</example>
+        </member>
         <member name="T:Bing.Utils.Date.Chinese.ChineseAnimalHelper">
             <summary>
             中国生肖操作辅助类

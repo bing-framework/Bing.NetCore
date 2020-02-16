@@ -10704,6 +10704,12 @@
             <typeparam name="TEntity">对象类型</typeparam>
             <typeparam name="TKey">对象标识类型</typeparam>
         </member>
+        <member name="M:Bing.Datas.Stores.Operations.IExists`2.Exists(`1)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="id">标识</param>
+        </member>
         <member name="M:Bing.Datas.Stores.Operations.IExists`2.Exists(`1[])">
             <summary>
             判断是否存在
@@ -10716,6 +10722,12 @@
             </summary>
             <typeparam name="TEntity">对象类型</typeparam>
             <typeparam name="TKey">对象标识类型</typeparam>
+        </member>
+        <member name="M:Bing.Datas.Stores.Operations.IExistsAsync`2.ExistsAsync(`1)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="id">标识</param>
         </member>
         <member name="M:Bing.Datas.Stores.Operations.IExistsAsync`2.ExistsAsync(`1[])">
             <summary>
@@ -11200,6 +11212,44 @@
             提交
             </summary>
             <param name="transaction">事务</param>
+        </member>
+        <member name="T:Bing.Datas.Transactions.ITransactionWrapper">
+            <summary>
+            事务包装器
+            </summary>
+        </member>
+        <member name="P:Bing.Datas.Transactions.ITransactionWrapper.CurrentTransaction">
+            <summary>
+            当前事务。如果没有事务，将返回null
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Transactions.ITransactionWrapper.Begin">
+            <summary>
+            开始事务
+            </summary>
+        </member>
+        <member name="M:Bing.Datas.Transactions.ITransactionWrapper.Begin(System.Data.IsolationLevel)">
+            <summary>
+            开始事务
+            </summary>
+            <param name="level">事务隔离级别</param>
+        </member>
+        <member name="M:Bing.Datas.Transactions.ITransactionWrapper.Commit(System.Boolean)">
+            <summary>
+            提交
+            </summary>
+            <param name="clearTransaction">提交后清空事务</param>
+        </member>
+        <member name="M:Bing.Datas.Transactions.ITransactionWrapper.Rollback(System.Boolean)">
+            <summary>
+            回滚
+            </summary>
+            <param name="clearTransaction">回滚后清空事务</param>
+        </member>
+        <member name="P:Bing.Datas.Transactions.ITransactionWrapper.IsNull">
+            <summary>
+            是否为空
+            </summary>
         </member>
         <member name="T:Bing.Datas.Transactions.TransactionActionManager">
             <summary>
@@ -11810,155 +11860,6 @@
             释放资源
             </summary>
         </member>
-        <member name="T:Bing.Dependency.Bootstrapper">
-            <summary>
-            依赖引导器
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._services">
-            <summary>
-            服务集合
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._configs">
-            <summary>
-            依赖配置
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._builder">
-            <summary>
-            容器生成器
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._finder">
-            <summary>
-            类型查找器
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._allAssemblyFinder">
-            <summary>
-            所有程序集查找器
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._assemblies">
-            <summary>
-            程序集列表
-            </summary>
-        </member>
-        <member name="F:Bing.Dependency.Bootstrapper._aopConfigAction">
-            <summary>
-            Aop配置操作
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Bing.Dependency.IConfig[],System.Action{AspectCore.Configuration.IAspectConfiguration},Bing.Reflections.ITypeFinder)">
-            <summary>
-            初始化一个<see cref="T:Bing.Dependency.Bootstrapper"/>类型的实例
-            </summary>
-            <param name="services">服务集合</param>
-            <param name="configs">依赖配置</param>
-            <param name="aopConfigAction">Aop配置操作</param>
-            <param name="finder">类型查找器</param>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.Run(Microsoft.Extensions.DependencyInjection.IServiceCollection,Bing.Dependency.IConfig[],System.Action{AspectCore.Configuration.IAspectConfiguration},Bing.Reflections.ITypeFinder)">
-            <summary>
-            启动引导
-            </summary>
-            <param name="services">服务集合</param>
-            <param name="configs">依赖配置</param>
-            <param name="aopConfigAction">Aop配置操作</param>
-            <param name="finder">类型查找器</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.Run(Microsoft.Extensions.DependencyInjection.IServiceCollection,Bing.Dependency.IConfig[])">
-            <summary>
-            启动引导
-            </summary>
-            <param name="services">服务集合</param>
-            <param name="configs">依赖配置</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.Bootstrap">
-            <summary>
-            引导
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistServices(Autofac.ContainerBuilder)">
-            <summary>
-            注册服务集合
-            </summary>
-            <param name="builder">容器生成器</param>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistInfrastracture">
-            <summary>
-            注册基础设施
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.EnableAop">
-            <summary>
-            启用Aop
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistFinder">
-            <summary>
-            注册类型查找器
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistEventHandlers">
-            <summary>
-            注册事件处理器
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistEventHandlers(System.Type)">
-            <summary>
-            注册事件处理器
-            </summary>
-            <param name="handlerType">处理器类型</param>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistDependency">
-            <summary>
-            查找并注册依赖
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistSingletonDependency">
-            <summary>
-            注册单例依赖
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistScopeDependency">
-            <summary>
-            注册作用域依赖
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.RegistTransientDependency">
-            <summary>
-            注册瞬态依赖
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.ResolveDependencyRegistrar">
-            <summary>
-            解析依赖注册器
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.GetTypes``1">
-            <summary>
-            获取类型集合
-            </summary>
-            <typeparam name="T">类型</typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.Bootstrapper.GetTypes(System.Type)">
-            <summary>
-            获取类型集合
-            </summary>
-            <param name="type">类型</param>
-            <returns></returns>
-        </member>
-        <member name="T:Bing.Dependency.ConfigBase">
-            <summary>
-            依赖配置基类
-            </summary>
-        </member>
         <member name="T:Bing.Dependency.Container">
             <summary>
             默认容器。Autofac对象容器
@@ -12059,72 +11960,6 @@
             <summary>
             释放容器
             </summary>
-        </member>
-        <member name="T:Bing.Dependency.ContainerBuilderExtensions">
-            <summary>
-            Autofac 容器生成器 扩展
-            </summary>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.AddTransient``2(Autofac.ContainerBuilder,System.String)">
-            <summary>
-            注册服务，生命周期为 InstancePerDependency(每次创建一个新实例)
-            </summary>
-            <typeparam name="TService">接口类型</typeparam>
-            <typeparam name="TImplementation">实现类型</typeparam>
-            <param name="builder">容器生成器</param>
-            <param name="name">服务名称</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.AddScoped``2(Autofac.ContainerBuilder,System.String)">
-            <summary>
-            注册服务，生命周期为 InstancePerLifetimeScope(每个请求一个实例)
-            </summary>
-            <typeparam name="TService">接口类型</typeparam>
-            <typeparam name="TImplementation">实现类型</typeparam>
-            <param name="builder">容器生成器</param>
-            <param name="name">服务名称</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.AddScoped``1(Autofac.ContainerBuilder)">
-            <summary>
-            注册服务，生命周期为 InstancePerLifetimeScope(每个请求一个实例)
-            </summary>
-            <typeparam name="TImplementation">实现类型</typeparam>
-            <param name="builder">容器生成器</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.AddSingleton``2(Autofac.ContainerBuilder,System.String)">
-            <summary>
-            注册服务，生命周期为 SingleInstance(单例)
-            </summary>
-            <typeparam name="TService">接口类型</typeparam>
-            <typeparam name="TImplementation">实现类型</typeparam>
-            <param name="builder">容器生成器</param>
-            <param name="name">服务名称</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.AddSingleton``1(Autofac.ContainerBuilder,``0,System.String)">
-            <summary>
-            注册服务，生命周期为 SingleInstance(单例)
-            </summary>
-            <typeparam name="TService">接口类型</typeparam>
-            <param name="builder">容器生成器</param>
-            <param name="instance">服务实例</param>
-            <param name="name">服务名称</param>
-            <returns></returns>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.EnableAop(Autofac.ContainerBuilder,System.Action{AspectCore.Configuration.IAspectConfiguration})">
-            <summary>
-            启用Aop
-            </summary>
-            <param name="builder">容器生成器</param>
-            <param name="configAction">Aop配置</param>
-        </member>
-        <member name="M:Bing.Dependency.ContainerBuilderExtensions.EnableAspectScoped(Autofac.ContainerBuilder)">
-            <summary>
-            启用Aop作用域
-            </summary>
-            <param name="builder">容器生成器</param>
         </member>
         <member name="T:Bing.Dependency.DependencyModule">
             <summary>
@@ -16034,12 +15869,6 @@
             默认容器
             </summary>
         </member>
-        <member name="M:Bing.Helpers.Ioc.CreateContainer(Bing.Dependency.IConfig[])">
-            <summary>
-            创建容器
-            </summary>
-            <param name="configs">依赖配置</param>
-        </member>
         <member name="M:Bing.Helpers.Ioc.CreateList``1(System.String)">
             <summary>
             创建集合
@@ -16081,19 +15910,6 @@
             <summary>
             作用域开始
             </summary>
-        </member>
-        <member name="M:Bing.Helpers.Ioc.Register(Bing.Dependency.IConfig[])">
-            <summary>
-            注册依赖
-            </summary>
-            <param name="configs">依赖配置</param>
-        </member>
-        <member name="M:Bing.Helpers.Ioc.Register(Microsoft.Extensions.DependencyInjection.IServiceCollection,Bing.Dependency.IConfig[])">
-            <summary>
-            注册依赖
-            </summary>
-            <param name="services">服务集合</param>
-            <param name="configs">依赖配置</param>
         </member>
         <member name="M:Bing.Helpers.Ioc.Dispose">
             <summary>

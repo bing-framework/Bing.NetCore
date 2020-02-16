@@ -78,21 +78,18 @@
             将持久化对象转成实体
             </summary>
             <param name="po">持久化对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.ToPo(`0)">
             <summary>
             将实体转换成持久化对象
             </summary>
             <param name="entity">实体</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.Find(System.Object)">
             <summary>
             查找实体
             </summary>
             <param name="id">标识</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindAsync(System.Object,System.Threading.CancellationToken)">
             <summary>
@@ -100,35 +97,30 @@
             </summary>
             <param name="id">标识</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindByIds(`2[])">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindByIds(System.Collections.Generic.IEnumerable{`2})">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindByIds(System.String)">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindByIdsAsync(`2[])">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindByIdsAsync(System.Collections.Generic.IEnumerable{`2},System.Threading.CancellationToken)">
             <summary>
@@ -136,28 +128,36 @@
             </summary>
             <param name="ids">标识列表</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.FindByIdsAsync(System.String)">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.Exists(`2)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="id">标识</param>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.Exists(`2[])">
             <summary>
             判断是否存在
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.ExistsAsync(`2)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="id">标识</param>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.ExistsAsync(`2[])">
             <summary>
             判断是否存在
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.Add(`0)">
             <summary>
@@ -177,7 +177,6 @@
             </summary>
             <param name="entity">实体</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.AddAsync(System.Collections.Generic.IEnumerable{`0},System.Threading.CancellationToken)">
             <summary>
@@ -185,7 +184,6 @@
             </summary>
             <param name="entities">实体集合</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.Update(`0)">
             <summary>
@@ -204,14 +202,12 @@
             修改实体
             </summary>
             <param name="entity">实体</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.UpdateAsync(System.Collections.Generic.IEnumerable{`0})">
             <summary>
             修改实体集合
             </summary>
             <param name="entities">实体集合</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.Remove(System.Object)">
             <summary>
@@ -251,7 +247,6 @@
             </summary>
             <param name="entity">实体</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.RemoveAsync(System.Collections.Generic.IEnumerable{`2},System.Threading.CancellationToken)">
             <summary>
@@ -259,7 +254,6 @@
             </summary>
             <param name="ids">标识集合</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.CompactRepositoryBase`3.RemoveAsync(System.Collections.Generic.IEnumerable{`0},System.Threading.CancellationToken)">
             <summary>
@@ -363,7 +357,6 @@
             <summary>
             创建Sql查询对象
             </summary>
-            <returns></returns>
         </member>
         <member name="P:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Connection">
             <summary>
@@ -380,34 +373,29 @@
             <summary>
             获取未跟踪查询对象
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Find">
             <summary>
             获取查询对象
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Find(Bing.Domains.Repositories.ICriteria{`0})">
             <summary>
             查找
             </summary>
             <param name="criteria">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Find(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Find(System.Object)">
             <summary>
             查找实体
             </summary>
             <param name="id">标识</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindAsync(System.Object,System.Threading.CancellationToken)">
             <summary>
@@ -415,35 +403,30 @@
             </summary>
             <param name="id">标识</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIds(`1[])">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIds(System.Collections.Generic.IEnumerable{`1})">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIds(System.String)">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsAsync(`1[])">
             <summary>
             查找实体列表
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsAsync(System.Collections.Generic.IEnumerable{`1},System.Threading.CancellationToken)">
             <summary>
@@ -457,14 +440,12 @@
             查找实体列表
             </summary>
             <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdNoTracking(`1)">
             <summary>
             查找未跟踪单个实体
             </summary>
             <param name="id">标识</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdNoTrackingAsync(`1,System.Threading.CancellationToken)">
             <summary>
@@ -472,35 +453,30 @@
             </summary>
             <param name="id">标识</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsNoTracking(`1[])">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsNoTracking(System.Collections.Generic.IEnumerable{`1})">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsNoTracking(System.String)">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsNoTrackingAsync(`1[])">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsNoTrackingAsync(System.Collections.Generic.IEnumerable{`1},System.Threading.CancellationToken)">
             <summary>
@@ -508,21 +484,18 @@
             </summary>
             <param name="ids">标识列表</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindByIdsNoTrackingAsync(System.String)">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Single(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找单个实体
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.SingleAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}},System.Threading.CancellationToken)">
             <summary>
@@ -530,84 +503,84 @@
             </summary>
             <param name="predicate">查询条件</param>
             <param name="cancellationToken">取消令牌</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindAll(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找实体列表
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindAllAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找实体列表
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindAllNoTracking(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.FindAllNoTrackingAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找实体列表，不跟踪
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Exists(`1)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="id">标识</param>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Exists(`1[])">
             <summary>
             判断是否存在
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.ExistsAsync(`1)">
+            <summary>
+            判断是否存在
+            </summary>
+            <param name="id">标识</param>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.ExistsAsync(`1[])">
             <summary>
             判断是否存在
             </summary>
             <param name="ids">标识列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Exists(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             判断是否存在
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.ExistsAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             判断是否存在
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Count(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找数量
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.CountAsync(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
             <summary>
             查找数量
             </summary>
             <param name="predicate">查询条件</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Query(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             查询
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.Query(System.Linq.IQueryable{`0},Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
@@ -615,56 +588,48 @@
             </summary>
             <param name="queryable">数据源</param>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.QueryAsNoTracking(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             查询 - 返回未跟踪的实体
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.PagerQuery(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             分页查询
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.PagerQueryAsNoTracking(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             分页查询 - 返回未跟踪的实体
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.QueryAsync(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             查询
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.QueryAsNoTrackingAsync(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             查询 - 返回未跟踪的实体
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.PagerQueryAsync(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             分页查询
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Datas.EntityFramework.Core.QueryStoreBase`2.PagerQueryAsNoTrackingAsync(Bing.Domains.Repositories.IQueryBase{`0})">
             <summary>
             分页查询 - 返回未跟踪的实体
             </summary>
             <param name="query">查询对象</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Datas.EntityFramework.Core.RepositoryBase`1">
             <summary>
