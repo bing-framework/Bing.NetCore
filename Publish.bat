@@ -67,7 +67,7 @@ set /p key=input key:
 set source=https://api.nuget.org/v3/index.json
 
 for /R "nuget_pub" %%s in (*.nupkg) do (
-    call nuget push %%s %key% -Source %source%
+    call dotnet nuget push %%s -k %key% -s %source%
     echo.
 )
 
