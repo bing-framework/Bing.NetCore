@@ -240,7 +240,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 提交，返回影响的行数
         /// </summary>
-        /// <returns></returns>
         public int Commit()
         {
             try
@@ -260,7 +259,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 异步提交，返回影响的行数
         /// </summary>
-        /// <returns></returns>
         public async Task<int> CommitAsync()
         {
             try
