@@ -36,7 +36,6 @@
             获取方法名
             </summary>
             <param name="context">Aspect上下文</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Aspects.LogAttributeBase">
             <summary>
@@ -98,7 +97,6 @@
             是否启用
             </summary>
             <param name="log">日志操作</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Contents.ICaption">
             <summary>
@@ -170,7 +168,7 @@
             请求地址
             </summary>
         </member>
-        <member name="P:Bing.Logs.Contents.LogContent.BussinessId">
+        <member name="P:Bing.Logs.Contents.LogContent.BusinessId">
             <summary>
             业务编号
             </summary>
@@ -255,6 +253,11 @@
             标签列表
             </summary>
         </member>
+        <member name="P:Bing.Logs.Contents.LogContent.ExtraProperties">
+            <summary>
+            扩展属性
+            </summary>
+        </member>
         <member name="P:Bing.Logs.Contents.LogContent.Order">
             <summary>
             排序
@@ -287,7 +290,6 @@
             获取参数值
             </summary>
             <param name="parameter">参数</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Extensions.ExceptionExtensions">
             <summary>
@@ -306,13 +308,12 @@
             日志扩展
             </summary>
         </member>
-        <member name="M:Bing.Logs.Extensions.LogExtensions.BussinessId(Bing.Logs.ILog,System.String)">
+        <member name="M:Bing.Logs.Extensions.LogExtensions.BusinessId(Bing.Logs.ILog,System.String)">
             <summary>
             设置业务编号
             </summary>
             <param name="log">日志操作</param>
-            <param name="bussinessId">业务编号</param>
-            <returns></returns>
+            <param name="businessId">业务编号</param>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Module(Bing.Logs.ILog,System.String)">
             <summary>
@@ -320,7 +321,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="module">业务编号</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Class(Bing.Logs.ILog,System.String)">
             <summary>
@@ -328,7 +328,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="class">类名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Method(Bing.Logs.ILog,System.String)">
             <summary>
@@ -336,7 +335,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="method">方法</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Params(Bing.Logs.ILog,System.String)">
             <summary>
@@ -344,7 +342,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="value">参数值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Params(Bing.Logs.ILog,System.String,System.String,System.String)">
             <summary>
@@ -354,7 +351,6 @@
             <param name="name">参数名</param>
             <param name="value">参数值</param>
             <param name="type">参数类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Params(Bing.Logs.ILog,System.Collections.Generic.IDictionary{System.String,System.Object})">
             <summary>
@@ -362,7 +358,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="dictionary">字典</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Caption(Bing.Logs.ILog,System.String)">
             <summary>
@@ -370,7 +365,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="caption">标题</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Sql(Bing.Logs.ILog,System.String)">
             <summary>
@@ -378,7 +372,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.SqlParams(Bing.Logs.ILog,System.String)">
             <summary>
@@ -386,7 +379,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="value">值</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.SqlParams(Bing.Logs.ILog,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
             <summary>
@@ -394,7 +386,6 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="list">键值对列表</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.GetParamLiterals(System.Object)">
             <summary>
@@ -409,7 +400,6 @@
             <param name="log">日志操作</param>
             <param name="exception">异常</param>
             <param name="errorCode">错误码</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Extensions.LogExtensions.Exception(Bing.Logs.ILog,Bing.Exceptions.Warning)">
             <summary>
@@ -417,7 +407,14 @@
             </summary>
             <param name="log">日志操作</param>
             <param name="exception">异常</param>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Logs.Extensions.LogExtensions.AddExtraProperty(Bing.Logs.ILog,System.String,System.Object)">
+            <summary>
+            添加扩展属性
+            </summary>
+            <param name="log">日志内容</param>
+            <param name="name">名称</param>
+            <param name="value">值</param>
         </member>
         <member name="T:Bing.Logs.Formats.ContentFormat">
             <summary>
@@ -429,7 +426,6 @@
             格式化
             </summary>
             <param name="logContent">日志内容</param>
-            <returns></returns>
         </member>
         <member name="F:Bing.Logs.Formats.ContentFormat.Instance">
             <summary>
@@ -441,7 +437,6 @@
             格式化
             </summary>
             <param name="content">日志内容</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Formats.ContentFormat.AppendLine(System.Text.StringBuilder,Bing.Logs.Contents.LogContent,System.Action{System.Text.StringBuilder,Bing.Logs.Contents.LogContent},System.Int32@)">
             <summary>
@@ -499,7 +494,7 @@
             </summary>
             <param name="result">拼接器</param>
             <param name="content">日志内容</param>
-            <param name="line"></param>
+            <param name="line">行号</param>
         </member>
         <member name="M:Bing.Logs.Formats.ContentFormat.Line5(System.Text.StringBuilder,Bing.Logs.Contents.LogContent,System.Int32@)">
             <summary>
@@ -578,18 +573,24 @@
             获取异常类型列表
             </summary>
             <param name="exception">异常</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Formats.ContentFormat.GetErrorCode(System.String)">
             <summary>
             获取错误码
             </summary>
             <param name="errorCode">错误码</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Formats.ContentFormat.Line14(System.Text.StringBuilder,Bing.Logs.Contents.LogContent,System.Int32@)">
             <summary>
             第14行
+            </summary>
+            <param name="result">拼接器</param>
+            <param name="content">日志内容</param>
+            <param name="line">行号</param>
+        </member>
+        <member name="M:Bing.Logs.Formats.ContentFormat.Line15(System.Text.StringBuilder,Bing.Logs.Contents.LogContent,System.Int32@)">
+            <summary>
+            第15行
             </summary>
             <param name="result">拼接器</param>
             <param name="content">日志内容</param>
@@ -622,7 +623,6 @@
             获取格式化器
             </summary>
             <param name="formatType">格式化器类型</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Formats.FormatProvider.Format(System.String,System.Object,System.IFormatProvider)">
             <summary>
@@ -631,7 +631,6 @@
             <param name="format">包含格式规范的格式字符串。</param>
             <param name="arg">要设置格式的对象。</param>
             <param name="formatProvider">一个对象，它提供有关当前实例的格式信息。</param>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Log">
             <summary>
@@ -790,6 +789,11 @@
         <member name="P:Bing.Logs.Properties.LogResource.Exception">
             <summary>
               查找类似 异常 的本地化字符串。
+            </summary>
+        </member>
+        <member name="P:Bing.Logs.Properties.LogResource.ExtraProperties">
+            <summary>
+              查找类似 扩展属性 的本地化字符串。
             </summary>
         </member>
         <member name="P:Bing.Logs.Properties.LogResource.Host">

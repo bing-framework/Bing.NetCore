@@ -83,5 +83,10 @@ namespace Bing.Logs.Abstractions
         /// 标签列表
         /// </summary>
         List<string> Tags { get; set; }
+
+        /// <summary>
+        /// 扩展属性
+        /// </summary>
+        IDictionary<string, object> ExtraProperties { get; set; }
     }
 }

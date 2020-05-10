@@ -144,6 +144,9 @@
   <data name="Exception" xml:space="preserve">
     <value>异常</value>
   </data>
+  <data name="ExtraProperties" xml:space="preserve">
+    <value>扩展属性</value>
+  </data>
   <data name="Host" xml:space="preserve">
     <value>主机</value>
   </data>

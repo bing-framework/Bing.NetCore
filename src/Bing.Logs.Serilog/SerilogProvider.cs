@@ -5,7 +5,6 @@ using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
 using Serilog;
 using Serilog.Events;
-
 using Serilogs = Serilog;
 
 namespace Bing.Logs.Serilog
@@ -73,21 +72,13 @@ namespace Bing.Logs.Serilog
         /// <param name="configuration">配置</param>
         internal static void InitConfiguration(LoggerConfiguration configuration = null)
         {
-            if (configuration == null)
-            {
-                Configuration = GetDefaultConfiguration();
-            }
-            else
-            {
-                Configuration = configuration;
-            }
+            Configuration = configuration ?? GetDefaultConfiguration();
             _logger = Configuration.CreateLogger();
         }
 
         /// <summary>
         /// 获取默认配置
         /// </summary>
-        /// <returns></returns>
         private static LoggerConfiguration GetDefaultConfiguration()
         {
             var path = $"{AppContext.BaseDirectory}\\logs";
@@ -103,15 +94,18 @@ namespace Bing.Logs.Serilog
                 .WriteTo.Logger(fileLogger => GetOutputConfiguration(fileLogger, LogEventLevel.Fatal, path, "Fatal"));
         }
 
-        private static LoggerConfiguration GetOutputConfiguration(LoggerConfiguration configuration, LogEventLevel level, string path, string name)
-        {
-            return configuration.Filter.ByIncludingOnly(p => p.Level.Equals(level)).WriteTo.RollingFile(
+        /// <summary>
+        /// 获取输出配置
+        /// </summary>
+        /// <param name="configuration">日志配置</param>
+        /// <param name="level">日志级别</param>
+        /// <param name="path">路径</param>
+        /// <param name="name">名称</param>
+        private static LoggerConfiguration GetOutputConfiguration(LoggerConfiguration configuration, LogEventLevel level, string path, string name) =>
+            configuration.Filter.ByIncludingOnly(p => p.Level.Equals(level)).WriteTo.RollingFile(
                 Path.Combine($"{path}\\{name}\\{DateTime.Now:yyyy-MM-dd}", name + "-{Hour}.log"), level);
-        }
 
         #endregion
-
-
 
         /// <summary>
         /// 写日志
@@ -123,57 +117,38 @@ namespace Bing.Logs.Serilog
             var provider = GetFormatProvider();
             var logEventLevel = ConvertTo(level);
             if (logEventLevel == null)
-            {
                 return;
-            }
             if (provider == null)
-            {
                 throw new NullReferenceException("日志格式化提供程序不可为空");
-            }
             var message = provider.Format("", content, null);
             _logger.Write(logEventLevel.SafeValue(), message);
         }
 
         /// <summary>
-        /// 获取格式化提供chengx
+        /// 获取格式化提供程序
         /// </summary>
-        /// <returns></returns>
-        private FormatProvider GetFormatProvider()
-        {
-            if (_format == null)
-            {
-                return null;
-            }
-            return new FormatProvider(_format);
-        }
+        private FormatProvider GetFormatProvider() => _format == null ? null : new FormatProvider(_format);
 
         /// <summary>
         /// 转换日志级别
         /// </summary>
         /// <param name="level">日志级别</param>
-        /// <returns></returns>
         private Serilogs.Events.LogEventLevel? ConvertTo(LogLevel level)
         {
             switch (level)
             {
                 case LogLevel.Trace:
                     return LogEventLevel.Verbose;
-
                 case LogLevel.Debug:
                     return LogEventLevel.Debug;
-
                 case LogLevel.Information:
                     return LogEventLevel.Information;
-
                 case LogLevel.Warning:
                     return LogEventLevel.Warning;
-
                 case LogLevel.Error:
                     return LogEventLevel.Error;
-
                 case LogLevel.Fatal:
                     return LogEventLevel.Fatal;
-
                 default:
                     return null;
             }

@@ -70,10 +70,8 @@ namespace Bing.Logs.Log4Net
         /// <param name="configFileName">log4net配置文件</param>
         internal static void InitRepository(string configFileName)
         {
-            if (Repository == null)
-            {
+            if (Repository == null) 
                 Repository = log4net.LogManager.CreateRepository("Log4netRepository");
-            }
             //log4net.Config.XmlConfigurator.Configure(Log4NetProvider.Repository, new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configFileName)));
             log4net.Config.XmlConfigurator.Configure(Log4NetProvider.Repository, new FileInfo(configFileName));
         }
@@ -82,11 +80,7 @@ namespace Bing.Logs.Log4Net
         /// 获取Log4Net日志操作
         /// </summary>
         /// <param name="logName">日志名</param>
-        /// <returns></returns>
-        public static log4net.ILog GetLogger(string logName)
-        {
-            return log4net.LogManager.GetLogger(Repository.Name, logName);
-        }
+        public static log4net.ILog GetLogger(string logName) => log4net.LogManager.GetLogger(Repository.Name, logName);
 
         /// <summary>
         /// 写日志
@@ -108,15 +102,7 @@ namespace Bing.Logs.Log4Net
         /// <summary>
         /// 获取格式化提供程序
         /// </summary>
-        /// <returns></returns>
-        private FormatProvider GetFormatProvider()
-        {
-            if (_format == null)
-            {
-                return null;
-            }
-            return new FormatProvider(_format);
-        }
+        private FormatProvider GetFormatProvider() => _format == null ? null : new FormatProvider(_format);
 
         /// <summary>
         /// 写日志
@@ -129,23 +115,18 @@ namespace Bing.Logs.Log4Net
             {
                 case LogLevel.Trace:
                     return;
-
                 case LogLevel.Debug:
                     _log.Debug(message);
                     return;
-
                 case LogLevel.Information:
                     _log.Info(message);
                     return;
-
                 case LogLevel.Warning:
                     _log.Warn(message);
                     return;
-
                 case LogLevel.Error:
                     _log.Error(message);
                     return;
-
                 case LogLevel.Fatal:
                     _log.Fatal(message);
                     return;

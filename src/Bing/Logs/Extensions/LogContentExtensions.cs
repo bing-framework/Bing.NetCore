@@ -40,5 +40,13 @@ namespace Bing.Logs.Extensions
         /// <param name="content">日志内容</param>
         /// <param name="value">值</param>
         public static void Content(this ILogContent content, string value) => content.AppendLine(content.Content, value);
+
+        /// <summary>
+        /// 添加扩展属性
+        /// </summary>
+        /// <param name="content">日志内容</param>
+        /// <param name="name">名称</param>
+        /// <param name="value">值</param>
+        public static void AddExtraProperty(this ILogContent content, string name, object value) => content.ExtraProperties[name] = value;
     }
 }

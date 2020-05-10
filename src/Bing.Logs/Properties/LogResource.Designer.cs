@@ -142,6 +142,15 @@ namespace Bing.Logs.Properties {
         }
         
         /// <summary>
+        ///   查找类似 扩展属性 的本地化字符串。
+        /// </summary>
+        public static string ExtraProperties {
+            get {
+                return ResourceManager.GetString("ExtraProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 主机 的本地化字符串。
         /// </summary>
         public static string Host {

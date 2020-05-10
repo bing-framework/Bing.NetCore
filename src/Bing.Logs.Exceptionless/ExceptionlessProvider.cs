@@ -3,6 +3,7 @@ using Bing.Configurations;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
+using Bing.Logs.Exceptionless.Internal;
 using Exceptionless;
 using el = global::Exceptionless;
 
@@ -19,11 +20,6 @@ namespace Bing.Logs.Exceptionless
         /// 客户端
         /// </summary>
         private readonly el.ExceptionlessClient _client;
-
-        /// <summary>
-        /// 行号
-        /// </summary>
-        private int _line;
 
         /// <summary>
         /// 日志名称
@@ -66,20 +62,18 @@ namespace Bing.Logs.Exceptionless
         /// <param name="content">日志内容</param>
         public void WriteLog(LogLevel level, ILogContent content)
         {
-            InitLine();
             var builder = CreateBuilder(level, content);
+            // 致命错误
+            if (level == LogLevel.Fatal)
+                builder.MarkAsCritical();
             SetUser(content);
             SetSource(builder, content);
             SetReferenceId(builder, content);
             AddProperties(builder, content as ILogConvert);
+            AddExtraProperties(builder, content);
             AddTags(builder, content);
             builder.Submit();
         }
-
-        /// <summary>
-        /// 初始化行号
-        /// </summary>
-        private void InitLine() => _line = 1;
 
         /// <summary>
         /// 创建事件生成器
@@ -90,7 +84,7 @@ namespace Bing.Logs.Exceptionless
         {
             if (content.Exception != null && (level == LogLevel.Error || level == LogLevel.Fatal))
                 return _client.CreateException(content.Exception);
-            var builder = _client.CreateLog(GetMessage(content), ConvertTo(level));
+            var builder = _client.CreateLog(GetMessage(content), LogLevelSwitcher.Switch(level));
             if (content.Exception != null && level == LogLevel.Warning)
                 builder.SetException(content.Exception);
             return builder;
@@ -107,37 +101,6 @@ namespace Bing.Logs.Exceptionless
             if (content.Content.Length > 0)
                 return content.Content.ToString();
             return content.LogId;
-        }
-
-        /// <summary>
-        /// 转换日志等级
-        /// </summary>
-        /// <param name="level">平台日志等级</param>
-        private el.Logging.LogLevel ConvertTo(LogLevel level)
-        {
-            switch (level)
-            {
-                case LogLevel.Trace:
-                    return el.Logging.LogLevel.Trace;
-
-                case LogLevel.Debug:
-                    return el.Logging.LogLevel.Debug;
-
-                case LogLevel.Information:
-                    return el.Logging.LogLevel.Info;
-
-                case LogLevel.Warning:
-                    return el.Logging.LogLevel.Warn;
-
-                case LogLevel.Error:
-                    return el.Logging.LogLevel.Error;
-
-                case LogLevel.Fatal:
-                    return el.Logging.LogLevel.Fatal;
-
-                default:
-                    return el.Logging.LogLevel.Off;
-            }
         }
 
         /// <summary>
@@ -183,7 +146,24 @@ namespace Bing.Logs.Exceptionless
             {
                 if (string.IsNullOrWhiteSpace(parameter.Value.SafeString()))
                     continue;
-                builder.SetProperty($"{GetLine()}. {parameter.Text}", parameter.Value);
+                builder.SetProperty(parameter.Text, parameter.Value);
+            }
+        }
+
+        /// <summary>
+        /// 添加扩展属性集合
+        /// </summary>
+        /// <param name="builder">事件生成器</param>
+        /// <param name="content">日志转换器</param>
+        private void AddExtraProperties(EventBuilder builder, ILogContent content)
+        {
+            if (content == null)
+                return;
+            foreach (var parameter in content.ExtraProperties)
+            {
+                if (string.IsNullOrWhiteSpace(parameter.Value.SafeString()))
+                    continue;
+                builder.SetProperty(parameter.Key, parameter.Value);
             }
         }
 
@@ -198,10 +178,5 @@ namespace Bing.Logs.Exceptionless
             if (content.Tags.Any())
                 builder.AddTags(content.Tags.ToArray());
         }
-
-        /// <summary>
-        /// 获取行号
-        /// </summary>
-        private string GetLine() => _line++.ToString().PadLeft(2, '0');
     }
 }

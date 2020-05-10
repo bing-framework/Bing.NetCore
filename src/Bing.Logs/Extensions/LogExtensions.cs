@@ -19,18 +19,14 @@ namespace Bing.Logs.Extensions
         /// 设置业务编号
         /// </summary>
         /// <param name="log">日志操作</param>
-        /// <param name="bussinessId">业务编号</param>
-        /// <returns></returns>
-        public static ILog BussinessId(this ILog log, string bussinessId)
+        /// <param name="businessId">业务编号</param>
+        public static ILog BusinessId(this ILog log, string businessId)
         {
             return log.Set<LogContent>(content =>
             {
-                if (string.IsNullOrWhiteSpace(content.BussinessId) == false)
-                {
-                    content.BussinessId += ",";
-                }
-
-                content.BussinessId += bussinessId;
+                if (string.IsNullOrWhiteSpace(content.BusinessId) == false) 
+                    content.BusinessId += ",";
+                content.BusinessId += businessId;
             });
         }
 
@@ -39,44 +35,28 @@ namespace Bing.Logs.Extensions
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="module">业务编号</param>
-        /// <returns></returns>
-        public static ILog Module(this ILog log, string module)
-        {
-            return log.Set<LogContent>(content => content.Module = module);
-        }
+        public static ILog Module(this ILog log, string module) => log.Set<LogContent>(content => content.Module = module);
 
         /// <summary>
         /// 设置类名
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="class">类名</param>
-        /// <returns></returns>
-        public static ILog Class(this ILog log, string @class)
-        {
-            return log.Set<LogContent>(content => content.Class = @class);
-        }
+        public static ILog Class(this ILog log, string @class) => log.Set<LogContent>(content => content.Class = @class);
 
         /// <summary>
         /// 设置方法
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="method">方法</param>
-        /// <returns></returns>
-        public static ILog Method(this ILog log, string method)
-        {
-            return log.Set<LogContent>(content => content.Method = method);
-        }
+        public static ILog Method(this ILog log, string method) => log.Set<LogContent>(content => content.Method = method);
 
         /// <summary>
         /// 设置参数
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="value">参数值</param>
-        /// <returns></returns>
-        public static ILog Params(this ILog log, string value)
-        {
-            return log.Set<LogContent>(content => content.AppendLine(content.Params, value));
-        }
+        public static ILog Params(this ILog log, string value) => log.Set<LogContent>(content => content.AppendLine(content.Params, value));
 
         /// <summary>
         /// 设置参数
@@ -85,7 +65,6 @@ namespace Bing.Logs.Extensions
         /// <param name="name">参数名</param>
         /// <param name="value">参数值</param>
         /// <param name="type">参数类型</param>
-        /// <returns></returns>
         public static ILog Params(this ILog log, string name, string value, string type = null)
         {
             return log.Set<LogContent>(content =>
@@ -106,17 +85,12 @@ namespace Bing.Logs.Extensions
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="dictionary">字典</param>
-        /// <returns></returns>
         public static ILog Params(this ILog log, IDictionary<string, object> dictionary)
         {
             if (dictionary == null || dictionary.Count == 0)
-            {
                 return log;
-            }
-            foreach (var item in dictionary)
-            {
+            foreach (var item in dictionary) 
                 Params(log, item.Key, item.Value.SafeString());
-            }
             return log;
         }
 
@@ -125,57 +99,37 @@ namespace Bing.Logs.Extensions
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="caption">标题</param>
-        /// <returns></returns>
-        public static ILog Caption(this ILog log, string caption)
-        {
-            return log.Set<LogContent>(content => content.Caption = caption);
-        }
+        public static ILog Caption(this ILog log, string caption) => log.Set<LogContent>(content => content.Caption = caption);
 
         /// <summary>
         /// 设置Sql语句
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static ILog Sql(this ILog log, string value)
-        {
-            return log.Set<LogContent>(content => content.Sql.AppendLine(value));
-        }
+        public static ILog Sql(this ILog log, string value) => log.Set<LogContent>(content => content.Sql.AppendLine(value));
 
         /// <summary>
         /// 设置Sql参数
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
-        public static ILog SqlParams(this ILog log, string value)
-        {
-            return log.Set<LogContent>(content => content.AppendLine(content.SqlParams, value));
-        }
+        public static ILog SqlParams(this ILog log, string value) => log.Set<LogContent>(content => content.AppendLine(content.SqlParams, value));
 
         /// <summary>
         /// 设置Sql参数
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="list">键值对列表</param>
-        /// <returns></returns>
         public static ILog SqlParams(this ILog log, IEnumerable<KeyValuePair<string, object>> list)
         {
             if (list == null)
-            {
                 return log;
-            }
             var dictionary = list.ToList();
             if (dictionary.Count == 0)
-            {
                 return log;
-            }
             var result = new StringBuilder();
             foreach (var item in dictionary)
-            {
                 result.AppendLine($"    {item.Key} : {GetParamLiterals(item.Value)} : {item.Value?.GetType()},");
-            }
-
             return SqlParams(log, result.ToString().RemoveEnd($",{Common.Line}"));
         }
 
@@ -191,7 +145,6 @@ namespace Bing.Logs.Extensions
             {
                 case "boolean":
                     return Conv.ToBool(value) ? "1" : "0";
-
                 case "int16":
                 case "int32":
                 case "int64":
@@ -199,7 +152,6 @@ namespace Bing.Logs.Extensions
                 case "double":
                 case "decimal":
                     return value.SafeString();
-
                 default:
                     return $"'{value}'";
             }
@@ -211,14 +163,10 @@ namespace Bing.Logs.Extensions
         /// <param name="log">日志操作</param>
         /// <param name="exception">异常</param>
         /// <param name="errorCode">错误码</param>
-        /// <returns></returns>
         public static ILog Exception(this ILog log, Exception exception, string errorCode = "")
         {
             if (exception == null)
-            {
                 return log;
-            }
-
             return log.Set<LogContent>(content =>
             {
                 content.Exception = exception;
@@ -231,15 +179,19 @@ namespace Bing.Logs.Extensions
         /// </summary>
         /// <param name="log">日志操作</param>
         /// <param name="exception">异常</param>
-        /// <returns></returns>
         public static ILog Exception(this ILog log, Warning exception)
         {
             if (exception == null)
-            {
                 return log;
-            }
-
             return Exception(log, exception, exception.Code);
         }
+
+        /// <summary>
+        /// 添加扩展属性
+        /// </summary>
+        /// <param name="log">日志内容</param>
+        /// <param name="name">名称</param>
+        /// <param name="value">值</param>
+        public static ILog AddExtraProperty(this ILog log, string name, object value) => log.Set<LogContent>(content => content.AddExtraProperty(name, value));
     }
 }

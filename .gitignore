@@ -264,3 +264,4 @@ __pycache__/
 *.DotSettings
 /bus
 /output/netstandard2.0
+Bing*.xml

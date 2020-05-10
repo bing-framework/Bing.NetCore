@@ -82,7 +82,6 @@
             获取NLog日志操作
             </summary>
             <param name="logName">日志名称</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.NLog.NLogProvider.WriteLog(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
             <summary>
@@ -95,14 +94,12 @@
             <summary>
             获取格式化提供程序
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.NLog.NLogProvider.ConvertTo(Bing.Logs.LogLevel)">
             <summary>
             转换日志等级
             </summary>
             <param name="level">平台日志等级</param>
-            <returns></returns>
         </member>
     </members>
 </doc>

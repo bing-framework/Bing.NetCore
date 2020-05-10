@@ -115,7 +115,7 @@ namespace Bing.Applications
         /// <param name="entity">实体</param>
         protected void AddLog(TEntity entity)
         {
-            Log.BussinessId(entity.Id.SafeString());
+            Log.BusinessId(entity.Id.SafeString());
             Log.Content(entity.ToString());
         }
 
@@ -125,7 +125,7 @@ namespace Bing.Applications
         /// <param name="entities">实体集合</param>
         protected void AddLog(IList<TEntity> entities)
         {
-            Log.BussinessId(entities.Select(t => t.Id).Join());
+            Log.BusinessId(entities.Select(t => t.Id).Join());
             foreach (var entity in entities)
                 Log.Content(entity.ToString());
         }

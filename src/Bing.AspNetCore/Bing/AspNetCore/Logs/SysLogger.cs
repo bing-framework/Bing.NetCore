@@ -58,23 +58,18 @@ namespace Bing.AspNetCore.Logs
                 case LogLevel.Trace:
                     log.Trace();
                     break;
-
                 case LogLevel.Debug:
                     log.Debug();
                     break;
-
                 case LogLevel.Information:
                     log.Info();
                     break;
-
                 case LogLevel.Warning:
                     log.Warn();
                     break;
-
                 case LogLevel.Error:
                     log.Error();
                     break;
-
                 case LogLevel.Critical:
                     log.Fatal();
                     break;

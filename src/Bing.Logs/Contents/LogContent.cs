@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using Bing.Logs.Abstractions;
@@ -71,7 +72,7 @@ namespace Bing.Logs.Contents
         /// <summary>
         /// 业务编号
         /// </summary>
-        public string BussinessId { get; set; }
+        public string BusinessId { get; set; }
 
         /// <summary>
         /// 租户
@@ -154,6 +155,11 @@ namespace Bing.Logs.Contents
         public List<string> Tags { get; set; }
 
         /// <summary>
+        /// 扩展属性
+        /// </summary>
+        public IDictionary<string, object> ExtraProperties { get; set; }
+
+        /// <summary>
         /// 排序
         /// </summary>
         public int Order { get; set; }
@@ -172,6 +178,7 @@ namespace Bing.Logs.Contents
             Sql = new StringBuilder();
             SqlParams = new StringBuilder();
             Tags = new List<string>();
+            ExtraProperties = new ConcurrentDictionary<string, object>();
         }
 
         #endregion
@@ -181,7 +188,7 @@ namespace Bing.Logs.Contents
         /// </summary>
         public List<Item> To()
         {
-            return new List<Item>()
+            return new List<Item>
             {
                 {new Item(LogResource.LogId, LogId, 0)},
                 {new Item(LogResource.LogName, LogName, 1)},
@@ -193,7 +200,7 @@ namespace Bing.Logs.Contents
                 {new Item(LogResource.UserId, UserId, 7)},
                 {new Item(LogResource.Operator, Operator, 8)},
                 {new Item(LogResource.Role, Role, 9)},
-                {new Item(LogResource.BusinessId, BussinessId, 10)},
+                {new Item(LogResource.BusinessId, BusinessId, 10)},
                 {new Item(LogResource.Tenant, Tenant, 11)},
                 {new Item(LogResource.Application, Application, 12)},
                 {new Item(LogResource.Module, Module, 13)},

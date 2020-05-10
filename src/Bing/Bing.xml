@@ -16188,6 +16188,11 @@
             标签列表
             </summary>
         </member>
+        <member name="P:Bing.Logs.Abstractions.ILogContent.ExtraProperties">
+            <summary>
+            扩展属性
+            </summary>
+        </member>
         <member name="T:Bing.Logs.Abstractions.ILogContext">
             <summary>
             日志上下文
@@ -16848,6 +16853,14 @@
             设置内容并换行
             </summary>
             <param name="content">日志内容</param>
+            <param name="value">值</param>
+        </member>
+        <member name="M:Bing.Logs.Extensions.LogContentExtensions.AddExtraProperty(Bing.Logs.Abstractions.ILogContent,System.String,System.Object)">
+            <summary>
+            添加扩展属性
+            </summary>
+            <param name="content">日志内容</param>
+            <param name="name">名称</param>
             <param name="value">值</param>
         </member>
         <member name="T:Bing.Logs.Extensions.LogExtensions">

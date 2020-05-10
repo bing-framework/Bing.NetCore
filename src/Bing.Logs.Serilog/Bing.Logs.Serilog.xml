@@ -93,7 +93,15 @@
             <summary>
             获取默认配置
             </summary>
-            <returns></returns>
+        </member>
+        <member name="M:Bing.Logs.Serilog.SerilogProvider.GetOutputConfiguration(Serilog.LoggerConfiguration,Serilog.Events.LogEventLevel,System.String,System.String)">
+            <summary>
+            获取输出配置
+            </summary>
+            <param name="configuration">日志配置</param>
+            <param name="level">日志级别</param>
+            <param name="path">路径</param>
+            <param name="name">名称</param>
         </member>
         <member name="M:Bing.Logs.Serilog.SerilogProvider.WriteLog(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
             <summary>
@@ -104,16 +112,14 @@
         </member>
         <member name="M:Bing.Logs.Serilog.SerilogProvider.GetFormatProvider">
             <summary>
-            获取格式化提供chengx
+            获取格式化提供程序
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Serilog.SerilogProvider.ConvertTo(Bing.Logs.LogLevel)">
             <summary>
             转换日志级别
             </summary>
             <param name="level">日志级别</param>
-            <returns></returns>
         </member>
     </members>
 </doc>

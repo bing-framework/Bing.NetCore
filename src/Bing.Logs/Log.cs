@@ -1,4 +1,5 @@
-﻿using Bing.Helpers;
+﻿using Bing.Dependency;
+using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;
@@ -59,7 +60,7 @@ namespace Bing.Logs
         /// <summary>
         /// 获取日志内容
         /// </summary>
-        protected override LogContent GetContent() => new LogContent() { Class = _class };
+        protected override LogContent GetContent() => new LogContent { Class = _class };
 
         /// <summary>
         /// 初始化
@@ -121,7 +122,7 @@ namespace Bing.Logs
         {
             try
             {
-                return Ioc.Create<ILogProviderFactory>() ?? NullLogProviderFactory.Instance;
+                return ServiceLocator.Instance.GetService<ILogProviderFactory>() ?? NullLogProviderFactory.Instance;
             }
             catch
             {
@@ -136,7 +137,7 @@ namespace Bing.Logs
         {
             try
             {
-                return Ioc.Create<ILogFormat>() ?? ContentFormat.Instance;
+                return ServiceLocator.Instance.GetService<ILogFormat>() ?? ContentFormat.Instance;
             }
             catch
             {
@@ -151,7 +152,7 @@ namespace Bing.Logs
         {
             try
             {
-                return Ioc.Create<ILogContext>() ?? NullLogContext.Instance;
+                return ServiceLocator.Instance.GetService<ILogContext>() ?? NullLogContext.Instance;
             }
             catch
             {
@@ -166,7 +167,7 @@ namespace Bing.Logs
         {
             try
             {
-                return Ioc.Create<ISession>() ?? Bing.Sessions.Session.Null;
+                return ServiceLocator.Instance.GetService<ISession>() ?? Bing.Sessions.Session.Null;
             }
             catch
             {

@@ -155,7 +155,7 @@ namespace Bing.Applications
         /// <param name="entity">实体</param>
         /// <param name="changeValues">变更值集合</param>
         protected virtual void UpdateAfter(TEntity entity, ChangedValueDescriptorCollection changeValues) => Log
-            .BussinessId(entity.Id.SafeString())
+            .BusinessId(entity.Id.SafeString())
             .Content(changeValues.SafeString());
 
         /// <summary>

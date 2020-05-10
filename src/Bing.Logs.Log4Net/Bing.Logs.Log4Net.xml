@@ -83,7 +83,6 @@
             获取Log4Net日志操作
             </summary>
             <param name="logName">日志名</param>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Log4Net.Log4NetProvider.WriteLog(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
             <summary>
@@ -96,7 +95,6 @@
             <summary>
             获取格式化提供程序
             </summary>
-            <returns></returns>
         </member>
         <member name="M:Bing.Logs.Log4Net.Log4NetProvider.WriteLog(Bing.Logs.LogLevel,System.Object)">
             <summary>

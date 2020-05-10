@@ -63,11 +63,7 @@ namespace Bing.Logs.NLog
         /// 获取NLog日志操作
         /// </summary>
         /// <param name="logName">日志名称</param>
-        /// <returns></returns>
-        public static NLogs.ILogger GetLogger(string logName)
-        {
-            return NLogs.LogManager.GetLogger(logName);
-        }
+        public static NLogs.ILogger GetLogger(string logName) => NLogs.LogManager.GetLogger(logName);
 
         /// <summary>
         /// 写日志
@@ -88,43 +84,28 @@ namespace Bing.Logs.NLog
         /// <summary>
         /// 获取格式化提供程序
         /// </summary>
-        /// <returns></returns>
-        private IFormatProvider GetFormatProvider()
-        {
-            if (_format == null)
-            {
-                return null;
-            }
-            return new FormatProvider(_format);
-        }
+        private IFormatProvider GetFormatProvider() => _format == null ? null : new FormatProvider(_format);
 
         /// <summary>
         /// 转换日志等级
         /// </summary>
         /// <param name="level">平台日志等级</param>
-        /// <returns></returns>
         private NLogs.LogLevel ConvertTo(LogLevel level)
         {
             switch (level)
             {
                 case LogLevel.Trace:
                     return NLogs.LogLevel.Trace;
-
                 case LogLevel.Debug:
                     return NLogs.LogLevel.Debug;
-
                 case LogLevel.Information:
                     return NLogs.LogLevel.Info;
-
                 case LogLevel.Warning:
                     return NLogs.LogLevel.Warn;
-
                 case LogLevel.Error:
                     return NLogs.LogLevel.Error;
-
                 case LogLevel.Fatal:
                     return NLogs.LogLevel.Fatal;
-
                 default:
                     return NLogs.LogLevel.Off;
             }

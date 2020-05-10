@@ -14,11 +14,6 @@
             客户端
             </summary>
         </member>
-        <member name="F:Bing.Logs.Exceptionless.ExceptionlessProvider._line">
-            <summary>
-            行号
-            </summary>
-        </member>
         <member name="P:Bing.Logs.Exceptionless.ExceptionlessProvider.LogName">
             <summary>
             日志名称
@@ -52,11 +47,6 @@
             <param name="level">平台日志等级</param>
             <param name="content">日志内容</param>
         </member>
-        <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.InitLine">
-            <summary>
-            初始化行号
-            </summary>
-        </member>
         <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.CreateBuilder(Bing.Logs.LogLevel,Bing.Logs.Abstractions.ILogContent)">
             <summary>
             创建事件生成器
@@ -69,12 +59,6 @@
             获取日志消息
             </summary>
             <param name="content">日志内容</param>
-        </member>
-        <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.ConvertTo(Bing.Logs.LogLevel)">
-            <summary>
-            转换日志等级
-            </summary>
-            <param name="level">平台日志等级</param>
         </member>
         <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.SetUser(Bing.Logs.Abstractions.ILogContent)">
             <summary>
@@ -103,17 +87,19 @@
             <param name="builder">事件生成器</param>
             <param name="content">日志转换器</param>
         </member>
+        <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.AddExtraProperties(Exceptionless.EventBuilder,Bing.Logs.Abstractions.ILogContent)">
+            <summary>
+            添加扩展属性集合
+            </summary>
+            <param name="builder">事件生成器</param>
+            <param name="content">日志转换器</param>
+        </member>
         <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.AddTags(Exceptionless.EventBuilder,Bing.Logs.Abstractions.ILogContent)">
             <summary>
             添加标签
             </summary>
             <param name="builder">事件生成器</param>
             <param name="content">日志内容</param>
-        </member>
-        <member name="M:Bing.Logs.Exceptionless.ExceptionlessProvider.GetLine">
-            <summary>
-            获取行号
-            </summary>
         </member>
         <member name="T:Bing.Logs.Exceptionless.Extensions">
             <summary>
@@ -136,6 +122,17 @@
             <param name="configAction">配置操作</param>
             <param name="name">名称</param>
         </member>
+        <member name="T:Bing.Logs.Exceptionless.Internal.LogLevelSwitcher">
+            <summary>
+            日志级别切换器
+            </summary>
+        </member>
+        <member name="M:Bing.Logs.Exceptionless.Internal.LogLevelSwitcher.Switch(Bing.Logs.LogLevel)">
+            <summary>
+            转换日志等级
+            </summary>
+            <param name="level">平台日志等级</param>
+        </member>
         <member name="T:Bing.Logs.Exceptionless.LogContext">
             <summary>
             Exceptionless日志上下文
@@ -145,7 +142,6 @@
             <summary>
             创建日志上下文信息
             </summary>
-            <returns></returns>
         </member>
         <member name="T:Bing.Logs.Exceptionless.LogProviderFactory">
             <summary>

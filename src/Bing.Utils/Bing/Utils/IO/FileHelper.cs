@@ -237,10 +237,7 @@ namespace Bing.Utils.IO
         /// 读取文件到字符串
         /// </summary>
         /// <param name="filePath">文件的绝对路径</param>
-        public static string Read(string filePath)
-        {
-            return Read(filePath, Encoding.UTF8);
-        }
+        public static string Read(string filePath) => Read(filePath, Encoding.UTF8);
 
         /// <summary>
         /// 读取文件到字符串
@@ -253,8 +250,8 @@ namespace Bing.Utils.IO
                 encoding = Encoding.UTF8;
             if (!File.Exists(filePath))
                 return string.Empty;
-            using (var reader = new StreamReader(filePath, encoding))
-                return reader.ReadToEnd();
+            using var reader = new StreamReader(filePath, encoding);
+            return reader.ReadToEnd();
         }
 
         #endregion

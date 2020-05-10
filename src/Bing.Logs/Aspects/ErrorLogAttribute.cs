@@ -26,10 +26,8 @@ namespace Bing.Logs.Aspects
             catch (Exception ex)
             {
                 log.Class(context.ServiceMethod.DeclaringType.FullName).Method(methodName).Exception(ex);
-                foreach (var parameter in context.GetParameters())
-                {
+                foreach (var parameter in context.GetParameters()) 
                     parameter.AppendTo(log);
-                }
                 log.Error();
                 throw;
             }
@@ -39,10 +37,6 @@ namespace Bing.Logs.Aspects
         /// 获取方法名
         /// </summary>
         /// <param name="context">Aspect上下文</param>
-        /// <returns></returns>
-        private string GetMethodName(AspectContext context)
-        {
-            return $"{context.ServiceMethod.DeclaringType.FullName}.{context.ServiceMethod.Name}";
-        }
+        private string GetMethodName(AspectContext context) => $"{context.ServiceMethod.DeclaringType.FullName}.{context.ServiceMethod.Name}";
     }
 }
