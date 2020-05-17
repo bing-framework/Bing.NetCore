@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Bing.Utils.Drawing
+namespace Bing.Drawing
 {
     /// <summary>
     /// 验证码生成器

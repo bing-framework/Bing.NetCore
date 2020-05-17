@@ -1,4 +1,4 @@
-﻿namespace Bing.Utils.Medias.Images
+﻿namespace Bing.Drawing
 {
     /// <summary>
     /// 图片位置模式

@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Reflection;
 
-namespace Bing.Utils.Drawing
+namespace Bing.Drawing
 {
     /// <summary>
     /// 图片操作辅助类 - 信息

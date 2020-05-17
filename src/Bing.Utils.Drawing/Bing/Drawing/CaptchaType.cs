@@ -1,4 +1,4 @@
-﻿namespace Bing.Utils.Drawing
+﻿namespace Bing.Drawing
 {
     /// <summary>
     /// 验证码类型

@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Bing.Utils.Drawing
+namespace Bing.Drawing
 {
     /// <summary>
     /// 图片操作辅助类 - 加载

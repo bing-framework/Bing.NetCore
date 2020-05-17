@@ -1,4 +1,4 @@
-﻿namespace Bing.Utils.Medias.Images
+﻿namespace Bing.Drawing
 {
     /// <summary>
     /// 缩略图模式

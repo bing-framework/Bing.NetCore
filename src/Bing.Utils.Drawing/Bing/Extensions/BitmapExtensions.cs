@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 
-// ReSharper disable once CheckNamespace
 namespace Bing.Extensions
 {
     /// <summary>
@@ -18,19 +17,18 @@ namespace Bing.Extensions
         /// 将图像转换为 Color[,]颜色值二维数组
         /// </summary>
         /// <param name="bitmap">图像</param>
-        /// <returns></returns>
         public static Color[,] ToPixelArray2D(this Bitmap bitmap)
         {
             int width = bitmap.Width, height = bitmap.Height;
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
             unsafe
             {
-                byte* ptr = (byte*)data.Scan0;
-                Color[,] pixels = new Color[width, height];
-                int offset = data.Stride - width * 3;
-                for (int y = 0; y < height; y++)
+                var ptr = (byte*)data.Scan0;
+                var pixels = new Color[width, height];
+                var offset = data.Stride - width * 3;
+                for (var y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         pixels[x, y] = Color.FromArgb(ptr[2], ptr[1], ptr[0]);
                     }
@@ -50,19 +48,18 @@ namespace Bing.Extensions
         /// 将图像转换为 byte[,]灰度值二维数组，后续所有操作都以二维数组作为中间变量
         /// </summary>
         /// <param name="bitmap">图像</param>
-        /// <returns></returns>
         public static byte[,] ToGrayArray2D(this Bitmap bitmap)
         {
             int width = bitmap.Width, height = bitmap.Height;
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
             unsafe
             {
-                byte* ptr = (byte*)data.Scan0;
-                byte[,] grayBytes = new byte[width, height];
-                int offset = data.Stride - width * 3;
-                for (int y = 0; y < height; y++)
+                var ptr = (byte*)data.Scan0;
+                var grayBytes = new byte[width, height];
+                var offset = data.Stride - width * 3;
+                for (var y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         grayBytes[x, y] = GetGrayValue(ptr[2], ptr[1], ptr[0]);
                         ptr += 3;
@@ -81,24 +78,19 @@ namespace Bing.Extensions
         /// <param name="red">红</param>
         /// <param name="green">绿</param>
         /// <param name="blue">蓝</param>
-        /// <returns></returns>
-        private static byte GetGrayValue(byte red, byte green, byte blue)
-        {
-            return (byte)((red * 19595 + green * 38469 + blue * 7472) >> 16);
-        }
+        private static byte GetGrayValue(byte red, byte green, byte blue) => (byte)((red * 19595 + green * 38469 + blue * 7472) >> 16);
 
         /// <summary>
         /// 将颜色二维数组转换为 byte[,]灰度值二维数组
         /// </summary>
         /// <param name="pixels">颜色二维数组</param>
-        /// <returns></returns>
         public static byte[,] ToGrayArray2D(this Color[,] pixels)
         {
             int width = pixels.GetLength(0), height = pixels.GetLength(1);
-            byte[,] grayBytes = new byte[width, height];
-            for (int y = 0; y < height; y++)
+            var grayBytes = new byte[width, height];
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     grayBytes[x, y] = GetGrayValue(pixels[x, y]);
                 }
@@ -111,11 +103,7 @@ namespace Bing.Extensions
         /// 获取灰度值
         /// </summary>
         /// <param name="pixel">颜色</param>
-        /// <returns></returns>
-        private static byte GetGrayValue(Color pixel)
-        {
-            return GetGrayValue(pixel.R, pixel.G, pixel.B);
-        }
+        private static byte GetGrayValue(Color pixel) => GetGrayValue(pixel.R, pixel.G, pixel.B);
 
         #endregion
 
@@ -129,17 +117,17 @@ namespace Bing.Extensions
         public static Bitmap ToBitmap(this Color[,] pixels)
         {
             int width = pixels.GetLength(0), height = pixels.GetLength(1);
-            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             unsafe
             {
-                byte* ptr = (byte*)data.Scan0;
-                int offset = data.Stride - width * 3;
-                for (int y = 0; y < height; y++)
+                var ptr = (byte*)data.Scan0;
+                var offset = data.Stride - width * 3;
+                for (var y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (var x = 0; x < width; x++)
                     {
-                        Color pixel = pixels[x, y];
+                        var pixel = pixels[x, y];
                         ptr[2] = pixel.R;
                         ptr[1] = pixel.G;
                         ptr[0] = pixel.B;
@@ -158,19 +146,18 @@ namespace Bing.Extensions
         /// 将灰度值二维数组转换为图像
         /// </summary>
         /// <param name="grayBytes">灰度值二维数组</param>
-        /// <returns></returns>
         public static Bitmap ToBitmap(this byte[,] grayBytes)
         {
             int width = grayBytes.GetLength(0), height = grayBytes.GetLength(1);
-            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             unsafe
             {
-                byte* ptr = (byte*)data.Scan0;
-                int offset = data.Stride - width * 3;
-                for (int y = 0; y < height; y++)
+                var ptr = (byte*)data.Scan0;
+                var offset = data.Stride - width * 3;
+                for (var y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         ptr[2] = ptr[1] = ptr[0] = grayBytes[x, y];
                         ptr += 3;
@@ -193,13 +180,12 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="grayBytes">灰度值二维数组</param>
         /// <param name="gray">灰度值</param>
-        /// <returns></returns>
         public static byte[,] Binaryzation(this byte[,] grayBytes, byte gray)
         {
             int width = grayBytes.GetLength(0), height = grayBytes.GetLength(1);
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     grayBytes[x, y] = (byte)(grayBytes[x, y] > gray ? 255 : 0);
                 }
@@ -217,13 +203,12 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="grayBytes">灰度值二维数组</param>
         /// <param name="gray">灰度值</param>
-        /// <returns></returns>
         public static byte[,] DeepFore(this byte[,] grayBytes, byte gray = 200)
         {
             int width = grayBytes.GetLength(0), height = grayBytes.GetLength(1);
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     if (grayBytes[x, y] < gray)
                     {
@@ -245,15 +230,14 @@ namespace Bing.Extensions
         /// <param name="binBytes">二进制数组</param>
         /// <param name="gray">灰度值</param>
         /// <param name="maxNearPoints">噪点阀值</param>
-        /// <returns></returns>
         public static byte[,] ClearNoiseRound(this byte[,] binBytes, byte gray, int maxNearPoints)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
-                    byte value = binBytes[x, y];
+                    var value = binBytes[x, y];
                     // 背景，边框
                     if (value > gray || (x == 0 || y == 0 || x == width - 1 || y == height - 1))
                     {
@@ -261,7 +245,7 @@ namespace Bing.Extensions
                         continue;
                     }
 
-                    int count = 0;
+                    var count = 0;
                     if (binBytes[x - 1, y - 1] < gray) count++;
                     if (binBytes[x, y - 1] < gray) count++;
                     if (binBytes[x + 1, y - 1] < gray) count++;
@@ -291,17 +275,16 @@ namespace Bing.Extensions
         /// <param name="binBytes">二进制数组</param>
         /// <param name="gray">灰度值</param>
         /// <param name="minAreaPoints">噪点阀值</param>
-        /// <returns></returns>
         public static byte[,] ClearNoiseArea(this byte[,] binBytes, byte gray, int minAreaPoints)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            byte[,] newBinBytes = binBytes.Copy();
+            var newBinBytes = binBytes.Copy();
             // 遍历所有点，是黑点0，把与黑点连通的所有点灰度都改为1，下一个连通区域改为2，直到所有连通区域都标记完毕
-            Dictionary<byte, Point[]> areaPointDict = new Dictionary<byte, Point[]>();
+            var areaPointDict = new Dictionary<byte, Point[]>();
             byte setGray = 1;
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     if (IsBlack(newBinBytes[x, y]))
                     {
@@ -317,8 +300,7 @@ namespace Bing.Extensions
                 }
             }
             // 筛选出区域点数小于阈值的区域，将原图相应点设置为白色
-            List<Point[]> pointsList =
-                areaPointDict.Where(m => m.Value.Length < minAreaPoints).Select(m => m.Value).ToList();
+            var pointsList = areaPointDict.Where(m => m.Value.Length < minAreaPoints).Select(m => m.Value).ToList();
             foreach (var points in pointsList)
             {
                 foreach (var point in points)
@@ -334,10 +316,18 @@ namespace Bing.Extensions
         /// 是否黑色
         /// </summary>
         /// <param name="value">颜色值</param>
-        /// <returns></returns>
-        private static bool IsBlack(byte value)
+        private static bool IsBlack(byte value) => value == 0;
+
+        /// <summary>
+        /// 复制一份二维数组的副本
+        /// </summary>
+        /// <param name="bytes">二维数组</param>
+        internal static byte[,] Copy(this byte[,] bytes)
         {
-            return value == 0;
+            int width = bytes.GetLength(0), height = bytes.GetLength(1);
+            var newBytes = new byte[width, height];
+            Array.Copy(bytes, newBytes, bytes.Length);
+            return newBytes;
         }
 
         #endregion
@@ -350,12 +340,11 @@ namespace Bing.Extensions
         /// <param name="binBytes">二进制数组</param>
         /// <param name="point">点坐标</param>
         /// <param name="replacementGray">填充灰度值</param>
-        /// <returns></returns>
         public static byte[,] FloodFill(this byte[,] binBytes, Point point, byte replacementGray)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            Stack<Point> stack = new Stack<Point>();
-            byte gray = binBytes[point.X, point.Y];
+            var stack = new Stack<Point>();
+            var gray = binBytes[point.X, point.Y];
             stack.Push(point);
 
             while (stack.Count > 0)
@@ -387,13 +376,12 @@ namespace Bing.Extensions
         /// <param name="point">点坐标</param>
         /// <param name="replacementGray">填充灰度值</param>
         /// <param name="points">已填充灰度值的点坐标数组</param>
-        /// <returns></returns>
         public static byte[,] FloodFill(this byte[,] binBytes, Point point, byte replacementGray, out Point[] points)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            List<Point> pointList = new List<Point>();
-            Stack<Point> stack = new Stack<Point>();
-            byte gray = binBytes[point.X, point.Y];
+            var pointList = new List<Point>();
+            var stack = new Stack<Point>();
+            var gray = binBytes[point.X, point.Y];
             stack.Push(point);
 
             while (stack.Count > 0)
@@ -429,13 +417,12 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="grayBytes">灰度值二维数组</param>
         /// <param name="border">边框宽度</param>
-        /// <returns></returns>
         public static byte[,] ClearBorder(this byte[,] grayBytes, int border)
         {
             int width = grayBytes.GetLength(0), height = grayBytes.GetLength(1);
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     if (x < border || y < border || x > width - 1 - border || y > height - 1 - border)
                     {
@@ -457,14 +444,13 @@ namespace Bing.Extensions
         /// <param name="grayBytes">灰度值二维数组</param>
         /// <param name="border">边框宽度</param>
         /// <param name="gray">灰度值</param>
-        /// <returns></returns>
         public static byte[,] AddBorder(this byte[,] grayBytes, int border, byte gray = 255)
         {
             int width = grayBytes.GetLength(0) + border * 2, height = grayBytes.GetLength(1) + border * 2;
-            byte[,] newBytes = new byte[width, height];
-            for (int y = 0; y < height; y++)
+            var newBytes = new byte[width, height];
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     if (x < border || y < border || x > width - 1 - border || y > height - 1 - border)
                     {
@@ -488,7 +474,6 @@ namespace Bing.Extensions
         /// <param name="bigBytes">大图二维数组</param>
         /// <param name="x1">边框横坐标</param>
         /// <param name="y1">边框纵坐标</param>
-        /// <returns></returns>
         public static byte[,] DrawTo(this byte[,] smallBytes, byte[,] bigBytes, int x1, int y1)
         {
             int smallWidth = smallBytes.GetLength(0),
@@ -506,9 +491,9 @@ namespace Bing.Extensions
                 throw new ArgumentException("大图矩阵高度无法装下小矩阵高度");
             }
 
-            for (int y = 0; y < smallHeight; y++)
+            for (var y = 0; y < smallHeight; y++)
             {
-                for (int x = 0; x < smallWidth; x++)
+                for (var x = 0; x < smallWidth; x++)
                 {
                     bigBytes[x1 + x, y1 + y] = smallBytes[x, y];
                 }
@@ -527,11 +512,11 @@ namespace Bing.Extensions
         public static byte[,] ClearGray(this byte[,] grayBytes, byte minGray, byte maxGray)
         {
             int width = grayBytes.GetLength(0), height = grayBytes.GetLength(1);
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
-                    byte value = grayBytes[x, y];
+                    var value = grayBytes[x, y];
                     if (minGray <= value && value <= maxGray)
                     {
                         grayBytes[x, y] = 255;
@@ -553,15 +538,13 @@ namespace Bing.Extensions
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
             // 有效矩形的左上/右下角坐标，左上坐标从右下开始拉，右下坐标从左上开始拉，所以初始值为
             int x1 = width, y1 = height, x2 = 0, y2 = 0;
-            for (int y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
-                    byte value = binBytes[x, y];
+                    var value = binBytes[x, y];
                     if (value >= gray)
-                    {
                         continue;
-                    }
                     if (x1 > x) x1 = x;
                     if (y1 > y) y1 = y;
                     if (x2 < x) x2 = x;
@@ -592,10 +575,10 @@ namespace Bing.Extensions
             {
                 throw new ArgumentException("要截取的高度超出界限");
             }
-            byte[,] newBytes = new byte[width, height];
-            for (int y = 0; y < height; y++)
+            var newBytes = new byte[width, height];
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     newBytes[x, y] = sourceBytes[x1 + x, y1 + y];
                 }
@@ -613,10 +596,10 @@ namespace Bing.Extensions
         public static int[] ShadowY(this byte[,] binBytes)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            int[] nums = new int[width];
-            for (int x = 0; x < width; x++)
+            var nums = new int[width];
+            for (var x = 0; x < width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (var y = 0; y < height; y++)
                 {
                     if (IsBlack(binBytes[x, y]))
                     {
@@ -637,10 +620,10 @@ namespace Bing.Extensions
         public static int[] ShadowX(this byte[,] binBytes)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            int[] nums = new int[height];
-            for (int y = 0; y < height; y++)
+            var nums = new int[height];
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (var x = 0; x < width; x++)
                 {
                     if (IsBlack(binBytes[x, y]))
                     {
@@ -661,17 +644,16 @@ namespace Bing.Extensions
         /// <param name="binBytes">二维二值化数组</param>
         /// <param name="minFontWidth">最小字符宽度，0则自动</param>
         /// <param name="minLines">最小有效投影行数</param>
-        /// <returns></returns>
         public static List<byte[,]> SplitShadowY(this byte[,] binBytes, byte minFontWidth = 0, byte minLines = 0)
         {
-            int height = binBytes.GetLength(1);
-            int[] shadow = binBytes.ShadowY();
-            List<Tuple<int, int>> validXs = new List<Tuple<int, int>>();
-            int x1 = 0;
-            bool inFont = false;
-            for (int x = 0; x < shadow.Length; x++)
+            var height = binBytes.GetLength(1);
+            var shadow = binBytes.ShadowY();
+            var validXs = new List<Tuple<int, int>>();
+            var x1 = 0;
+            var inFont = false;
+            for (var x = 0; x < shadow.Length; x++)
             {
-                int value = shadow[x];
+                var value = shadow[x];
                 if (!inFont)
                 {
                     if (value > minLines)
@@ -693,7 +675,7 @@ namespace Bing.Extensions
                 }
             }
 
-            List<byte[,]> splits = validXs.Select(valid => binBytes.Clone(valid.Item1, 0, valid.Item2 - valid.Item1 + 1, height).ToValid()).ToList();
+            var splits = validXs.Select(valid => binBytes.Clone(valid.Item1, 0, valid.Item2 - valid.Item1 + 1, height).ToValid()).ToList();
             return splits;
         }
 
@@ -707,17 +689,13 @@ namespace Bing.Extensions
         public static string ToCodeString(this byte[,] binBytes, byte gray, bool breakLine = false)
         {
             int width = binBytes.GetLength(0), height = binBytes.GetLength(1);
-            string code = string.Empty;
-            for (int y = 0; y < height; y++)
+            var code = string.Empty;
+            for (var y = 0; y < height; y++)
             {
-                for (int x = 0; x < width; x++)
-                {
+                for (var x = 0; x < width; x++) 
                     code += binBytes[x, y] < gray ? 1 : 0;
-                }
-                if (breakLine)
-                {
+                if (breakLine) 
                     code += "\r\n";
-                }
             }
             return code;
         }
@@ -726,7 +704,7 @@ namespace Bing.Extensions
 
         private static byte GetAverageColor(byte[,] source, int x, int y, int w, int h)
         {
-            int result = source[x, y]
+            var result = source[x, y]
                          + (x == 0 ? 255 : source[x - 1, y])
                          + (x == 0 || y == 0 ? 255 : source[x - 1, y - 1])
                          + (x == 0 || y == h - 1 ? 255 : source[x - 1, y + 1])
