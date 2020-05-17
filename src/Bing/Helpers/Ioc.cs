@@ -11,20 +11,11 @@ namespace Bing.Helpers
     public static class Ioc
     {
         /// <summary>
-        /// 默认容器
-        /// </summary>
-        internal static Container DefaultContainer { get; } = new Container();
-
-        /// <summary>
         /// 创建集合
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="name">服务名称</param>
-        public static List<T> CreateList<T>(string name = null)
-        {
-            //return DefaultContainer.CreateList<T>(name);
-            return ServiceLocator.Instance.GetServices<T>().ToList();
-        }
+        public static List<T> CreateList<T>(string name = null) => ServiceLocator.Instance.GetServices<T>().ToList();
 
         /// <summary>
         /// 创建集合
@@ -32,32 +23,21 @@ namespace Bing.Helpers
         /// <typeparam name="TResult">对象类型</typeparam>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
-        public static List<TResult> CreateList<TResult>(Type type, string name = null)
-        {
-            return ((IEnumerable<TResult>)DefaultContainer.CreateList(type, name)).ToList();
-        }
+        public static List<TResult> CreateList<TResult>(Type type, string name = null) => ((IEnumerable<TResult>)ServiceLocator.Instance.GetServices(type)).ToList();
 
         /// <summary>
         /// 创建实例
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="name">服务名称</param>
-        public static T Create<T>(string name = null)
-        {
-            //return DefaultContainer.Create<T>(name);
-            return ServiceLocator.Instance.GetService<T>();
-        }
+        public static T Create<T>(string name = null) => ServiceLocator.Instance.GetService<T>();
 
         /// <summary>
         /// 创建实例
         /// </summary>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
-        public static object Create(Type type, string name = null)
-        {
-            //return DefaultContainer.Create(type, name);
-            return ServiceLocator.Instance.GetService(type);
-        }
+        public static object Create(Type type, string name = null) => ServiceLocator.Instance.GetService(type);
 
         /// <summary>
         /// 创建实例
@@ -65,17 +45,14 @@ namespace Bing.Helpers
         /// <typeparam name="TResult">对象类型</typeparam>
         /// <param name="type">对象类型</param>
         /// <param name="name">服务名称</param>
-        public static TResult Create<TResult>(Type type, string name = null)
-        {
-            return (TResult)DefaultContainer.Create(type, name);
-        }
+        public static TResult Create<TResult>(Type type, string name = null) => (TResult)ServiceLocator.Instance.GetService(type);
 
         /// <summary>
         /// 作用域开始
         /// </summary>
         public static IScope BeginScope()
         {
-            return DefaultContainer.BeginScope();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -83,7 +60,7 @@ namespace Bing.Helpers
         /// </summary>
         public static void Dispose()
         {
-            DefaultContainer?.Dispose();
+            throw new NotImplementedException();
         }
     }
 }
