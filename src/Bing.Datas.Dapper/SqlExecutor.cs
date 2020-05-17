@@ -34,7 +34,7 @@ namespace Bing.Datas.Dapper
         {
             TransactionActionManager.Register(async transaction =>
             {
-                Connection.Execute(sql, param, transaction);
+                await Connection.ExecuteAsync(sql, param, transaction);
             });
             return 1;
         }
