@@ -22,7 +22,7 @@
     <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Update="Microsoft.Net.Compilers" Version="3.3.1" />
-    <PackageReference Include="AspectCore.Extensions.AspectScope" Version="2.0.0" />
+    <PackageReference Include="AspectCore.Extensions.AspectScope" Version="2.1.0" />
   </ItemGroup>
 
 </Project>
