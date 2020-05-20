@@ -48,14 +48,6 @@ namespace Bing.Helpers
         public static TResult Create<TResult>(Type type, string name = null) => (TResult)ServiceLocator.Instance.GetService(type);
 
         /// <summary>
-        /// 作用域开始
-        /// </summary>
-        public static IScope BeginScope()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// 释放容器
         /// </summary>
         public static void Dispose()

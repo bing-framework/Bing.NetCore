@@ -17,8 +17,9 @@ namespace Bing
         {
             if (exception == null)
                 return null;
-            if (exception is Autofac.Core.DependencyResolutionException dependencyResolutionException)
-                return GetRawException(dependencyResolutionException.InnerException);
+            // 移除 Autofac
+            //if (exception is Autofac.Core.DependencyResolutionException dependencyResolutionException)
+            //    return GetRawException(dependencyResolutionException.InnerException);
             if (exception is AspectCore.DynamicProxy.AspectInvocationException aspectInvocationException)
                 return GetRawException(aspectInvocationException.InnerException);
             return exception;

@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using Autofac;
-using Bing.Dependency;
 using Bing.Helpers;
 using Bing.Tests.Samples;
 using Xunit;
@@ -37,19 +35,6 @@ namespace Bing.Tests.Helpers
         {
             var sample = Ioc.Create<ISample>(typeof(ISample));
             Assert.NotNull(sample);
-        }
-
-        /// <summary>
-        /// 测试作用域
-        /// </summary>
-        [Fact]
-        public void TestScope()
-        {
-            using (var scope = Ioc.BeginScope())
-            {
-                var sample = scope.Create<ISample>();
-                Assert.NotNull(sample);
-            }
         }
 
         /// <summary>
