@@ -39,10 +39,7 @@ namespace Bing.Datas.EntityFramework.Logs
             var config = GetConfig();
             var log = GetLog();
             if (IsEnabled(eventId, config) == false)
-            {
                 return;
-            }
-
             log.Caption($"执行EF操作：")
                 .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
                 .Content($"事件ID：{eventId.Id}")
@@ -54,7 +51,6 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
         private DataConfig GetConfig()
         {
             try
@@ -64,14 +60,13 @@ namespace Bing.Datas.EntityFramework.Logs
             }
             catch
             {
-                return new DataConfig() { LogLevel = DataLogLevel.Sql };
+                return new DataConfig { LogLevel = DataLogLevel.Sql };
             }
         }
 
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         protected virtual ILog GetLog()
         {
             try
@@ -87,7 +82,6 @@ namespace Bing.Datas.EntityFramework.Logs
         /// <summary>
         /// 获取工作单元
         /// </summary>
-        /// <returns></returns>
         protected virtual UnitOfWorkBase GetUnitOfWork()
         {
             try
@@ -106,24 +100,14 @@ namespace Bing.Datas.EntityFramework.Logs
         /// </summary>
         /// <param name="eventId">事件ID</param>
         /// <param name="config">数据配置</param>
-        /// <returns></returns>
         private bool IsEnabled(EventId eventId, DataConfig config)
         {
             if (config.LogLevel == DataLogLevel.Off)
-            {
                 return false;
-            }
-
             if (config.LogLevel == DataLogLevel.All)
-            {
                 return true;
-            }
-
             if (eventId.Name == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted")
-            {
                 return true;
-            }
-
             return false;
         }
 
@@ -132,22 +116,13 @@ namespace Bing.Datas.EntityFramework.Logs
         /// </summary>
         private void AddContent<TState>(TState state, DataConfig config, ILog log)
         {
-            if (config.LogLevel == DataLogLevel.All)
-            {
+            if (config.LogLevel == DataLogLevel.All) 
                 log.Content("事件内容：").Content(state.SafeString());
-            }
-
             if (!(state is IEnumerable list))
-            {
                 return;
-            }
-
             var dictionary = new Dictionary<string, string>();
-            foreach (KeyValuePair<string, object> item in list)
-            {
+            foreach (KeyValuePair<string, object> item in list) 
                 dictionary.Add(item.Key, item.Value.SafeString());
-            }
-
             AddDictionary(dictionary, log);
         }
 
@@ -169,14 +144,10 @@ namespace Bing.Datas.EntityFramework.Logs
         /// </summary>
         /// <param name="dictionary">参数字典</param>
         /// <param name="key">参数名</param>
-        /// <returns></returns>
         private string GetValue(IDictionary<string, string> dictionary, string key)
         {
             if (dictionary.ContainsKey(key))
-            {
                 return dictionary[key];
-            }
-
             return string.Empty;
         }
 
@@ -188,10 +159,7 @@ namespace Bing.Datas.EntityFramework.Logs
         private void AddElapsed(string value, ILog log)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return;
-            }
-
             log.Content($"执行时间：{value} 毫秒");
         }
 
@@ -203,10 +171,7 @@ namespace Bing.Datas.EntityFramework.Logs
         private void AddSql(string sql, ILog log)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             log.Sql($"{sql}{Common.Line}");
         }
 
@@ -218,10 +183,7 @@ namespace Bing.Datas.EntityFramework.Logs
         private void AddSqlParams(string value, ILog log)
         {
             if (string.IsNullOrWhiteSpace(value))
-            {
                 return;
-            }
-
             log.SqlParams(value);
         }
 
@@ -229,18 +191,11 @@ namespace Bing.Datas.EntityFramework.Logs
         /// 是否启用
         /// </summary>
         /// <param name="logLevel">日志级别</param>
-        /// <returns></returns>
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
+        public bool IsEnabled(LogLevel logLevel) => true;
 
         /// <summary>
         /// 起始范围
         /// </summary>
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return null;
-        }
+        public IDisposable BeginScope<TState>(TState state) => null;
     }
 }

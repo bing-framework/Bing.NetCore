@@ -17,9 +17,7 @@ namespace Bing.EasyCaching
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="configAction">配置操作</param>
-        /// <returns></returns>
-        public static IServiceCollection AddCaching(this IServiceCollection services,
-            Action<EasyCachingOptions> configAction)
+        public static IServiceCollection AddCaching(this IServiceCollection services, Action<EasyCachingOptions> configAction)
         {
             services.TryAddScoped<ICache, CacheManager>();
             services.AddEasyCaching(configAction);

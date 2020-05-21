@@ -24,18 +24,11 @@ namespace Bing.Datas.EntityFramework.Logs
         /// 是否启用
         /// </summary>
         /// <param name="logLevel">日志级别</param>
-        /// <returns></returns>
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return false;
-        }
+        public bool IsEnabled(LogLevel logLevel) => false;
 
         /// <summary>
         /// 起始范围
         /// </summary>
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return null;
-        }
+        public IDisposable BeginScope<TState>(TState state) => null;
     }
 }

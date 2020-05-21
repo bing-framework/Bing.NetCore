@@ -187,6 +187,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Quartz", "src\Bing.Qua
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas", "src\Bing.Datas\Bing.Datas.csproj", "{0D315460-8341-446F-A1A3-819600AA69FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.CSRedis", "src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj", "{98E58A27-5CFE-4E14-8651-D20A6F99B051}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -389,6 +391,10 @@ Global
 		{0D315460-8341-446F-A1A3-819600AA69FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D315460-8341-446F-A1A3-819600AA69FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D315460-8341-446F-A1A3-819600AA69FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98E58A27-5CFE-4E14-8651-D20A6F99B051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98E58A27-5CFE-4E14-8651-D20A6F99B051}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98E58A27-5CFE-4E14-8651-D20A6F99B051}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98E58A27-5CFE-4E14-8651-D20A6F99B051}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -470,6 +476,7 @@ Global
 		{7FBEB621-9962-4357-8D8E-6B7EA833D06F} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 		{DA1FE566-B80A-4B6C-B33B-7AC645131611} = {7FBEB621-9962-4357-8D8E-6B7EA833D06F}
 		{0D315460-8341-446F-A1A3-819600AA69FF} = {919230E8-CEFA-48BC-958A-42601DB44C4A}
+		{98E58A27-5CFE-4E14-8651-D20A6F99B051} = {6C2A39D9-1D73-4321-B386-468D9BC3D65D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

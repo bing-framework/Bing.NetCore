@@ -141,10 +141,7 @@ namespace Bing.AutoMapper
         /// </summary>
         /// <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
         /// <param name="source">源集合</param>
-        public List<TDestination> MapToList<TDestination>(IEnumerable source)
-        {
-            return MapTo<List<TDestination>>(source);
-        }
+        public List<TDestination> MapToList<TDestination>(IEnumerable source) => MapTo<List<TDestination>>(source);
 
         #endregion
 
