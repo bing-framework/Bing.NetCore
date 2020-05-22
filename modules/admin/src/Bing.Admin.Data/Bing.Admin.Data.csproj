@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj" />
+    <ProjectReference Include="..\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj" />
+    <ProjectReference Include="..\Bing.Admin.Systems.Domain\Bing.Admin.Systems.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

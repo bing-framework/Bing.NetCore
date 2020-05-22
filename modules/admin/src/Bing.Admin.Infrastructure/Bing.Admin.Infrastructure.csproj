@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bing.Webs\Bing.Webs.csproj" />
+  </ItemGroup>
+
+</Project>
