@@ -8,6 +8,7 @@
     <ProjectReference Include="..\..\..\..\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bing.Permissions\Bing.Permissions.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Webs\Bing.Webs.csproj" />
   </ItemGroup>
 
