@@ -6,7 +6,6 @@ using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
 using Bing.Datas.Seed;
 using Bing.Datas.UnitOfWorks;
-using Bing.Domains.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Data.Seed
