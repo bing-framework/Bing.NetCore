@@ -443,9 +443,7 @@ namespace Bing.Helpers
         public static string UrlEncode(string url, Encoding encoding, bool isUpper = false)
         {
             var result = HttpUtility.UrlEncode(url, encoding);
-            if (isUpper == false)
-                return result;
-            return GetUpperEncode(result);
+            return isUpper == false ? result : GetUpperEncode(result);
         }
 
         /// <summary>
@@ -455,10 +453,10 @@ namespace Bing.Helpers
         private static string GetUpperEncode(string encode)
         {
             var result = new StringBuilder();
-            int index = int.MinValue;
-            for (int i = 0; i < encode.Length; i++)
+            var index = int.MinValue;
+            for (var i = 0; i < encode.Length; i++)
             {
-                string character = encode[i].ToString();
+                var character = encode[i].ToString();
                 if (character == "%")
                     index = i;
                 if (i - index == 1 || i - index == 2)
@@ -607,6 +605,49 @@ namespace Bing.Helpers
             Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
             Response.Headers.Add("Content-Length", bytes.Length.ToString());
             await Response.Body.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        #endregion
+
+        #region GetCookie(获取Cookie值)
+
+        /// <summary>
+        /// 读取Cookie值
+        /// </summary>
+        /// <param name="name">名称</param>
+        public static string GetCookie(string name)
+        {
+            if (HttpContext.Request.Cookies != null && HttpContext.Request.Cookies[name] != null)
+                return HttpContext.Request.Cookies[name];
+            return string.Empty;
+        }
+
+        #endregion
+
+        #region ClearCookie(清空Cookie)
+
+        /// <summary>
+        /// 清空Cookie
+        /// </summary>
+        public static void ClearCookie()
+        {
+            foreach (var cookie in HttpContext.Request.Cookies.Keys) 
+                HttpContext.Response.Cookies.Delete(cookie);
+        }
+
+        #endregion
+
+        #region SetCookie(设置Cookie值)
+
+        /// <summary>
+        /// 设置Cookie值。未设置过期时间，则写的是浏览器进程Cookie，一旦浏览器（是浏览器，非标签页）关闭，则Cookie自动失效
+        /// </summary>
+        /// <param name="name">名称</param>
+        /// <param name="value">值</param>
+        public static void SetCookie(string name, string value)
+        {
+            var cookieOptions = new CookieOptions {HttpOnly = true};
+            HttpContext.Response.Cookies.Append(name, value, cookieOptions);
         }
 
         #endregion

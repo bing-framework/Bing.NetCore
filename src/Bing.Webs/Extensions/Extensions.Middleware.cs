@@ -17,6 +17,7 @@ namespace Bing.Webs.Extensions
         /// 注册错误日志中间件
         /// </summary>
         /// <param name="builder">应用程序生成器</param>
+        [Obsolete("改为 UseBingExceptionHandling")]
         public static IApplicationBuilder UseErrorLog(this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<ErrorLogMiddleware>();

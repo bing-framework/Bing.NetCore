@@ -4,7 +4,7 @@ using Bing.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bing.AspNetCore
+namespace Bing.AspNetCore.Threading
 {
     /// <summary>
     /// 基于当前HttpContext的异步任务取消令牌提供程序

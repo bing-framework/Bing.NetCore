@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Bing.Helpers;
 
 namespace Bing.AutoMapper
@@ -153,11 +154,7 @@ namespace Bing.AutoMapper
         /// <typeparam name="TOutputDto">输出Dto类型</typeparam>
         /// <param name="source">源类型</param>
         /// <param name="membersToExpand">成员展开</param>
-        public IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source, params Expression<Func<TOutputDto, object>>[] membersToExpand)
-        {
-            //return source.ProjectTo(membersToExpand);
-            throw new NotImplementedException();
-        }
+        public IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source, params Expression<Func<TOutputDto, object>>[] membersToExpand) => source.ProjectTo(_config, membersToExpand);
 
         #endregion
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Bing.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dependency
 {

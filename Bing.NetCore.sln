@@ -193,27 +193,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-modules", "04-modules", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-admin", "01-admin", "{A4D1BA63-0112-44EB-BF3E-A15A2EC2FCDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Infrastructure", "modules\admin\src\Bing.Admin.Infrastructure\Bing.Admin.Infrastructure.csproj", "{D7D5F1C2-11DE-431F-AE7C-D316376588FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Infrastructure", "modules\admin\src\Bing.Admin.Infrastructure\Bing.Admin.Infrastructure.csproj", "{D7D5F1C2-11DE-431F-AE7C-D316376588FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Data", "modules\admin\src\Bing.Admin.Data\Bing.Admin.Data.csproj", "{EE799C3D-1CC4-437C-AFDF-B46981437D9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Data", "modules\admin\src\Bing.Admin.Data\Bing.Admin.Data.csproj", "{EE799C3D-1CC4-437C-AFDF-B46981437D9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Systems.Domain", "modules\admin\src\Bing.Admin.Systems.Domain\Bing.Admin.Systems.Domain.csproj", "{38A36B8A-E951-414A-9198-9A8BB499F28E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Systems.Domain", "modules\admin\src\Bing.Admin.Systems.Domain\Bing.Admin.Systems.Domain.csproj", "{38A36B8A-E951-414A-9198-9A8BB499F28E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-Infrastructure", "04-Infrastructure", "{34B591F3-9EBA-43E5-97A8-F106FDD3E104}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-Domain", "03-Domain", "{BA235841-C503-4D1D-BBEB-2770A5018E6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Commons.Domain", "modules\admin\src\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj", "{1FFBD424-3A56-4560-8D29-1F549CECC0BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Commons.Domain", "modules\admin\src\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj", "{1FFBD424-3A56-4560-8D29-1F549CECC0BC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Service", "02-Service", "{B9E5A2E9-52B6-43FA-9D18-95D4778093B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Service", "modules\admin\src\Bing.Admin.Service\Bing.Admin.Service.csproj", "{C8AFE620-1A2E-40AB-8AB8-74C2D77B9F23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Service", "modules\admin\src\Bing.Admin.Service\Bing.Admin.Service.csproj", "{C8AFE620-1A2E-40AB-8AB8-74C2D77B9F23}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Presentation", "01-Presentation", "{2D20E018-A523-4279-B172-893C16C9A5C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin", "modules\admin\src\Bing.Admin\Bing.Admin.csproj", "{4C0C7747-CCCD-46CF-8DC1-0695CB6DAF3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin", "modules\admin\src\Bing.Admin\Bing.Admin.csproj", "{4C0C7747-CCCD-46CF-8DC1-0695CB6DAF3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.EventHandlers", "modules\admin\src\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj", "{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.EventHandlers", "modules\admin\src\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj", "{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Domain.Shared", "modules\admin\src\Bing.Admin.Domain.Shared\Bing.Admin.Domain.Shared.csproj", "{5D23FE61-79E3-4295-9675-95342B3C9BF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -449,6 +451,10 @@ Global
 		{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D23FE61-79E3-4295-9675-95342B3C9BF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D23FE61-79E3-4295-9675-95342B3C9BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D23FE61-79E3-4295-9675-95342B3C9BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D23FE61-79E3-4295-9675-95342B3C9BF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -543,6 +549,7 @@ Global
 		{2D20E018-A523-4279-B172-893C16C9A5C8} = {A4D1BA63-0112-44EB-BF3E-A15A2EC2FCDB}
 		{4C0C7747-CCCD-46CF-8DC1-0695CB6DAF3B} = {2D20E018-A523-4279-B172-893C16C9A5C8}
 		{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F} = {B9E5A2E9-52B6-43FA-9D18-95D4778093B4}
+		{5D23FE61-79E3-4295-9675-95342B3C9BF4} = {BA235841-C503-4D1D-BBEB-2770A5018E6C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

@@ -4,8 +4,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.2\Bing.Admin.Infrastructure.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Permissions\Bing.Permissions.csproj" />

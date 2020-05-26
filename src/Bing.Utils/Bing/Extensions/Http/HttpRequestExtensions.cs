@@ -110,9 +110,14 @@ namespace Bing.Extensions
         public static bool IsAjaxRequest(this HttpRequest request)
         {
             request.CheckNotNull(nameof(request));
-            bool? flag = request.Headers?["X-Requested-With"].ToString()
+            var isHxr = request.Headers?["X-Requested-With"].ToString()
                 ?.Equals("XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
-            return flag.HasValue && flag.Value;
+            if (isHxr.HasValue && isHxr.Value)
+                return true;
+            if (!string.IsNullOrEmpty(request.ContentType))
+                return request.ContentType.ToLower().Equals("application/x-www-form-urlencoded") ||
+                       request.ContentType.ToLower().Equals("application/json");
+            return false;
         }
 
         #endregion

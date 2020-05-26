@@ -73,7 +73,11 @@ namespace Bing.Helpers
         /// <param name="value">要判断的值</param>
         /// <param name="paramName">参数名</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void NotNull<T>(T value, string paramName) => Require<ArgumentNullException>(value != null, string.Format(R.ParameterCheck_NotNull, paramName));
+        public static T NotNull<T>(T value, string paramName)
+        {
+            Require<ArgumentNullException>(value != null, string.Format(R.ParameterCheck_NotNull, paramName));
+            return value;
+        }
 
         /// <summary>
         /// 检查字符串不能为空引用或空字符串，否则抛出<see cref="ArgumentNullException"/>异常或<see cref="ArgumentException"/>异常
