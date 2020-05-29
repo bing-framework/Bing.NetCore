@@ -37,24 +37,32 @@ namespace Bing.AspNetCore
         /// 获取指定服务类型的实例
         /// </summary>
         /// <typeparam name="T">服务类型</typeparam>
-        public T GetService<T>() => _httpContextAccessor.HttpContext.RequestServices.GetService<T>();
+        public T GetService<T>() => ResolveEnabled 
+            ? _httpContextAccessor.HttpContext.RequestServices.GetService<T>() 
+            : default;
 
         /// <summary>
         /// 获取指定服务类型的实例
         /// </summary>
         /// <param name="serviceType">服务类型</param>
-        public object GetService(Type serviceType) => _httpContextAccessor.HttpContext.RequestServices.GetService(serviceType);
+        public object GetService(Type serviceType) => ResolveEnabled
+            ? _httpContextAccessor.HttpContext.RequestServices.GetService(serviceType)
+            : null;
 
         /// <summary>
         /// 获取指定服务类型的所有实例
         /// </summary>
         /// <typeparam name="T">服务类型</typeparam>
-        public IEnumerable<T> GetServices<T>() => _httpContextAccessor.HttpContext.RequestServices.GetServices<T>();
+        public IEnumerable<T> GetServices<T>() => ResolveEnabled
+            ? _httpContextAccessor.HttpContext.RequestServices.GetServices<T>()
+            : new List<T>();
 
         /// <summary>
         /// 获取指定服务类型的所有实例
         /// </summary>
         /// <param name="serviceType">服务类型</param>
-        public IEnumerable<object> GetServices(Type serviceType) => _httpContextAccessor.HttpContext.RequestServices.GetServices(serviceType);
+        public IEnumerable<object> GetServices(Type serviceType) => ResolveEnabled
+            ? _httpContextAccessor.HttpContext.RequestServices.GetServices(serviceType)
+            : new List<object>();
     }
 }

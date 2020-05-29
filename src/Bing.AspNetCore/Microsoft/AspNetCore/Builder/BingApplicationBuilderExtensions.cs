@@ -6,7 +6,7 @@ namespace Microsoft.AspNetCore.Builder
     /// <summary>
     /// 应用程序构建器(<see cref="IApplicationBuilder"/>) 扩展
     /// </summary>
-    public static class BingApplicationBuilderExtensions
+    public static partial class BingApplicationBuilderExtensions
     {
         /// <summary>
         /// 异常处理中间件标识
