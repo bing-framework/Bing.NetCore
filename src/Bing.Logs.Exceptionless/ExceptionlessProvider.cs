@@ -64,14 +64,16 @@ namespace Bing.Logs.Exceptionless
         {
             var builder = CreateBuilder(level, content);
             // 致命错误
-            if (level == LogLevel.Fatal)
+            if (level == LogLevel.Fatal || level == LogLevel.Error)
                 builder.MarkAsCritical();
             SetUser(content);
             SetSource(builder, content);
             SetReferenceId(builder, content);
+            SetException(builder, content);
             AddProperties(builder, content as ILogConvert);
             AddExtraProperties(builder, content);
             AddTags(builder, content);
+            
             builder.Submit();
         }
 
@@ -132,6 +134,32 @@ namespace Bing.Logs.Exceptionless
         /// <param name="builder">事件生成器</param>
         /// <param name="content">日志内容</param>
         private void SetReferenceId(EventBuilder builder, ILogContent content) => builder.SetReferenceId($"{content.LogId}");
+
+        /// <summary>
+        /// 设置异常
+        /// </summary>
+        /// <param name="builder">事件生成器</param>
+        /// <param name="content">日志内容</param>
+        private void SetException(EventBuilder builder, ILogContent content)
+        {
+            if (content.Exception == null)
+                return;
+            if (content is ICaption caption && !string.IsNullOrWhiteSpace(caption.Caption))
+                builder.SetMessage($"{builder.Target.Message} {content.Exception.Message}【{caption.Caption}】");
+            SetExceptionData(builder, content);
+        }
+
+        /// <summary>
+        /// 设置异常数据
+        /// </summary>
+        /// <param name="builder">事件生成器</param>
+        /// <param name="content">日志内容</param>
+        private void SetExceptionData(EventBuilder builder, ILogContent content)
+        {
+            if (content?.Exception?.Data != null && content.Exception.Data.Count == 0)
+                return;
+            builder.SetProperty("异常数据", content?.Exception?.Data);
+        }
 
         /// <summary>
         /// 添加属性集合

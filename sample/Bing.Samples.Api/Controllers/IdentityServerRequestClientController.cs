@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Utils.Helpers;
+﻿using System.Threading.Tasks;
+using Bing.Helpers;
 using Bing.Webs.Controllers;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Mvc;

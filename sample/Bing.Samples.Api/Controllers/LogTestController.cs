@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Bing.Exceptions;
 using Bing.Logs;
 using Bing.Logs.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Webs.Controllers;
 using Exceptionless;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +14,7 @@ namespace Bing.Samples.Api.Controllers
     /// 日志测试控制器
     /// </summary>
     [Route("api/[controller]/[action]")]
-    public class LogTestController:ApiControllerBase
+    public class LogTestController : ApiControllerBase
     {
         /// <summary>
         /// 日志
@@ -78,7 +75,11 @@ namespace Bing.Samples.Api.Controllers
             }
             catch (Exception e)
             {
-                Log.Caption("全局异常捕获").Content(e.Message);
+                e.Data["test"] = "隔壁老王666";
+                e.Data["test1"] = new {T1 = 444, T2 = "gebi "};
+                Log.Caption("全局异常捕获")
+                    .Content(e.Message)
+                    .Exception(e);
                 e.Log(Log);
             }
         }
@@ -102,8 +103,8 @@ namespace Bing.Samples.Api.Controllers
         public async Task ExceptionlessMoreInfo()
         {
             ExceptionlessClient _client = ExceptionlessClient.Default;
-            _client.CreateLog("测试日志1",LogLevel.Info).Submit();
-            _client.CreateLog("测试日志2",LogLevel.Trace).Submit();
+            _client.CreateLog("测试日志1", LogLevel.Info).Submit();
+            _client.CreateLog("测试日志2", LogLevel.Trace).Submit();
         }
 
         [HttpGet("testGuid")]

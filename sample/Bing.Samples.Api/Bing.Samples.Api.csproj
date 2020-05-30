@@ -9,17 +9,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="wwwroot\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Swagger\index.html" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.1.0" />
+    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.1" />
     <PackageReference Include="EasyCaching.CSRedis" Version="0.6.1" />
     <PackageReference Include="EasyCaching.Redis" Version="0.6.1" />
     <PackageReference Include="EasyCaching.Serialization.Json" Version="0.6.1" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.2.0" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.7.0" />
     <PackageReference Include="IdentityServer4.AspNetIdentity" Version="2.5.3" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     <PackageReference Include="Microsoft.Net.Compilers" Version="3.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -36,10 +43,6 @@
     <ProjectReference Include="..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\src\Bing.Logs.Serilog\Bing.Logs.Serilog.csproj" />
     <ProjectReference Include="..\..\src\Bing.Webs\Bing.Webs.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>

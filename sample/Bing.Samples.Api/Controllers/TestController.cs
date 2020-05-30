@@ -2,8 +2,7 @@
 using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Bing.AspNetCore.Uploads.Params;
-using Bing.Utils.Helpers;
-using Bing.Webs.Controllers;
+using Bing.Helpers;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +12,7 @@ namespace Bing.Samples.Api.Controllers
     /// <summary>
     /// 测试控制器
     /// </summary>
-    public class TestController : ApiControllerBase
+    public class TestController : Bing.AspNetCore.Mvc.ApiControllerBase
     {
         /// <summary>
         /// 文件上传服务
