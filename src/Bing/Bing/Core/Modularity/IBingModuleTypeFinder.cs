@@ -1,4 +1,4 @@
-﻿using Bing.Reflections;
+﻿using Bing.Reflection;
 
 namespace Bing.Core.Modularity
 {

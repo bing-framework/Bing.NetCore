@@ -28,7 +28,7 @@ namespace Bing.Datas.EntityFramework.PgSql
         /// <param name="assembly">程序集</param>
         protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

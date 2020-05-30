@@ -28,7 +28,7 @@ namespace Bing.Datas.EntityFramework.Sqlite
         /// <returns></returns>
         protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
         }
     }
 }

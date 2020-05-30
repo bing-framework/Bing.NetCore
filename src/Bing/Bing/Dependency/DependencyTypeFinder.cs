@@ -5,7 +5,7 @@ using System.Reflection;
 using Bing.Extensions;
 using Bing.Finders;
 using Bing.Helpers;
-using Bing.Reflections;
+using Bing.Reflection;
 
 namespace Bing.Dependency
 {
@@ -57,7 +57,7 @@ namespace Bing.Dependency
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
             assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();
-            return Reflection.FindTypes(findType, assemblies.ToArray());
+            return Helpers.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }
 }

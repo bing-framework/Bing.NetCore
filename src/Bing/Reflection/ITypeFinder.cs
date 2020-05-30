@@ -4,7 +4,7 @@ using System.Reflection;
 using Bing.Dependency;
 using Bing.Finders;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 定义类型查找器

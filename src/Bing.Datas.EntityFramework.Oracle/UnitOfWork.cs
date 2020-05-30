@@ -29,7 +29,7 @@ namespace Bing.Datas.EntityFramework.Oracle
         /// <param name="assembly">程序集</param>
         protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using Bing.Reflections;
+﻿using Bing.Reflection;
 using Bing.Extensions;
 using Xunit;
 using Xunit.Abstractions;

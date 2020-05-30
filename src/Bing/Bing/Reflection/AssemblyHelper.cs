@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 程序集操作辅助类

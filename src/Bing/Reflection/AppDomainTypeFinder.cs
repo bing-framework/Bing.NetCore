@@ -1,4 +1,4 @@
-﻿namespace Bing.Reflections
+﻿namespace Bing.Reflection
 {
     ///// <summary>
     ///// 应用程序类型查找器

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Bing.Finders;
 using Microsoft.Extensions.PlatformAbstractions;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 应用程序目录程序集查找器

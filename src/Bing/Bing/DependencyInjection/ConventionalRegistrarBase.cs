@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Bing.Reflections;
+using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.DependencyInjection

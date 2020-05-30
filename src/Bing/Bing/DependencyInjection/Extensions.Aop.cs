@@ -26,7 +26,7 @@ namespace Bing.DependencyInjection
             {
                 config.EnableParameterAspect();
                 config.NonAspectPredicates.Add(t =>
-                    Reflection.GetTopBaseType(t.DeclaringType).SafeString() ==
+                    Reflections.GetTopBaseType(t.DeclaringType).SafeString() ==
                     "Microsoft.EntityFrameworkCore.DbContext");
                 configAction?.Invoke(config);
             });

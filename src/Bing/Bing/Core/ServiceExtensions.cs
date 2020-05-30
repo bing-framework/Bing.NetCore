@@ -3,7 +3,7 @@ using Bing.Core.Builders;
 using Bing.Core.Modularity;
 using Bing.Core.Options;
 using Bing.Helpers;
-using Bing.Reflections;
+using Bing.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

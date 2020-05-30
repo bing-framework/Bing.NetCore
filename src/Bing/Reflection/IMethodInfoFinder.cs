@@ -2,7 +2,7 @@
 using System.Reflection;
 using Bing.Dependency;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 方法信息查找器

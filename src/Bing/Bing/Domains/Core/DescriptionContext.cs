@@ -56,9 +56,9 @@ namespace Bing.Domains.Core
         public void Add<T, TProperty>(Expression<Func<T, TProperty>> expression)
         {
             var member = Lambda.GetMember(expression);
-            var description = Reflection.GetDisplayNameOrDescription(member);
+            var description = Helpers.Reflections.GetDisplayNameOrDescription(member);
             var value = member.GetPropertyValue(this);
-            if (Reflection.IsBool(member))
+            if (Helpers.Reflections.IsBool(member))
                 value = Conv.ToBool(value).Description();
             Add(description, value);
         }

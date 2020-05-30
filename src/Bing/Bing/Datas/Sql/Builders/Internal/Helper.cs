@@ -154,7 +154,7 @@ namespace Bing.Datas.Sql.Builders.Internal
         {
             if (@operator == Operator.In)
                 return true;
-            if (@operator == Operator.Contains && value != null && Reflection.IsCollection(value.GetType()))
+            if (@operator == Operator.Contains && value != null && Helpers.Reflections.IsCollection(value.GetType()))
                 return true;
             return false;
         }

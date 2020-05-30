@@ -4,8 +4,9 @@ using System.Linq;
 using System.Reflection;
 using Bing.Finders;
 using Bing.Helpers;
+using Bing.Reflection;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 类型查找器
@@ -57,7 +58,7 @@ namespace Bing.Reflections
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
             assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();
-            return Reflection.FindTypes(findType, assemblies.ToArray());
+            return Helpers.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }
 }

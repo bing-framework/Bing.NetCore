@@ -6,7 +6,7 @@ using Bing.Extensions;
 using Bing.Finders;
 using Bing.Helpers;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 指定基类的实现类型查找器基类
@@ -55,7 +55,7 @@ namespace Bing.Reflections
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
             assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();
-            return Reflection.FindTypes(findType, assemblies.ToArray());
+            return Helpers.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }
 }

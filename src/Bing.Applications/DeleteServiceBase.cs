@@ -71,7 +71,7 @@ namespace Bing.Applications
         {
             _unitOfWork = unitOfWork;
             _store = store;
-            EntityDescription = Reflection.GetDisplayNameOrDescription<TEntity>();
+            EntityDescription = Helpers.Reflections.GetDisplayNameOrDescription<TEntity>();
         }
 
         #region WriteLog(写日志)

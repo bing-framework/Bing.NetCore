@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions
@@ -224,10 +225,8 @@ namespace Bing.Extensions
         /// <param name="stream">流</param>
         public static byte[] ReadAllBytes(this Stream stream)
         {
-            using (var memoryStream = stream.CopyToMemory())
-            {
-                return memoryStream.ToArray();
-            }
+            using var memoryStream = stream.CopyToMemory();
+            return memoryStream.ToArray();
         }
 
         #endregion
@@ -275,6 +274,32 @@ namespace Bing.Extensions
                     md5Builder.Append(b.ToString("x2"));
                 return md5Builder.ToString();
             }
+        }
+
+        #endregion
+
+        #region GetAllBytes(获取所有字节数组)
+
+        /// <summary>
+        /// 获取所有字节数组
+        /// </summary>
+        /// <param name="stream">流</param>
+        public static byte[] GetAllBytes(this Stream stream)
+        {
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            return ms.ToArray();
+        }
+
+        /// <summary>
+        /// 获取所有自己数组
+        /// </summary>
+        /// <param name="stream">流</param>
+        public static async Task<byte[]> GetAllBytesAsync(this Stream stream)
+        {
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            return ms.ToArray();
         }
 
         #endregion

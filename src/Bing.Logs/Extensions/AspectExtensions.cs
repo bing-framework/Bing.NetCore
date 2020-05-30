@@ -24,7 +24,7 @@ namespace Bing.Logs.Extensions
         /// <param name="parameter">参数</param>
         private static string GetParameterValue(Parameter parameter)
         {
-            if (Reflection.IsGenericCollection(parameter.RawType) == false)
+            if (Helpers.Reflections.IsGenericCollection(parameter.RawType) == false)
                 return parameter.Value.SafeString();
             if (!(parameter.Value is IEnumerable<object> list))
                 return parameter.Value.SafeString();

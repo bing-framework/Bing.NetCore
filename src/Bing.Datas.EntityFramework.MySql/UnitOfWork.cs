@@ -29,7 +29,7 @@ namespace Bing.Datas.EntityFramework.MySql
         /// <returns></returns>
         protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Reflection.GetInstancesByInterface<IMap>(assembly);
+            return Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
         }
 
         /// <summary>

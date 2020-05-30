@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Bing.Reflections;
+using Bing.Reflection;
 
 namespace Bing.Core.Modularity
 {

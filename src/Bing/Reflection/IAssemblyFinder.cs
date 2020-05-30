@@ -2,7 +2,7 @@
 using Bing.Dependency;
 using Bing.Finders;
 
-namespace Bing.Reflections
+namespace Bing.Reflection
 {
     /// <summary>
     /// 定义程序集查找器

@@ -142,14 +142,14 @@ namespace Bing.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可,范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
-        public static string GetDescription<TEnum>(object member) => Reflection.GetDescription<TEnum>(GetName<TEnum>(member));
+        public static string GetDescription<TEnum>(object member) => Reflections.GetDescription<TEnum>(GetName<TEnum>(member));
 
         /// <summary>
         /// 获取描述，使用<see cref="DescriptionAttribute"/>特性设置描述
         /// </summary>
         /// <param name="type">枚举类型</param>
         /// <param name="member">成员名、值、实例均可,范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
-        public static string GetDescription(Type type, object member) => Reflection.GetDescription(type, GetName(type, member));
+        public static string GetDescription(Type type, object member) => Reflections.GetDescription(type, GetName(type, member));
 
         #endregion
 
@@ -197,7 +197,7 @@ namespace Bing.Helpers
             if (!field.FieldType.IsEnum)
                 return;
             var value = GetValue(type, field.Name);
-            var description = Reflection.GetDescription(field);
+            var description = Reflections.GetDescription(field);
             result.Add(new Item(description, value, value));
         }
 
@@ -230,7 +230,7 @@ namespace Bing.Helpers
             if (!field.FieldType.GetTypeInfo().IsEnum)
                 return;
             var value = GetValue<TEnum>(field.Name);
-            var description = Reflection.GetDescription(field);
+            var description = Reflections.GetDescription(field);
             result.Add(value, description);
         }
 
@@ -251,7 +251,7 @@ namespace Bing.Helpers
             foreach (var field in fields.Where(x => x.Name != EnumValueField))
             {
                 var value = GetValue<TEnum>(field.Name);
-                var description = Reflection.GetDescription(field);
+                var description = Reflections.GetDescription(field);
                 collection.Add(new Tuple<int, string, string>(value, field.Name,
                     string.IsNullOrWhiteSpace(description) ? field.Name : description));
             }

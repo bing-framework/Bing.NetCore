@@ -12,7 +12,7 @@ namespace Bing.Helpers
     /// <summary>
     /// 反射 操作
     /// </summary>
-    public static class Reflection
+    public static class Reflections
     {
         #region GetDescription(获取类型描述)
 

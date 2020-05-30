@@ -83,7 +83,7 @@ namespace Bing.Helpers
         {
             var methodCallExpression = (MethodCallExpression)expression;
             var left = (MemberExpression)methodCallExpression.Object;
-            if (Reflection.IsGenericCollection(left?.Type))
+            if (Reflections.IsGenericCollection(left?.Type))
             {
                 var argumentExpression = methodCallExpression.Arguments.FirstOrDefault();
                 if (argumentExpression != null && argumentExpression.NodeType == ExpressionType.MemberAccess)
