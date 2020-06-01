@@ -129,6 +129,7 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 可空int值
         /// </summary>
+        [Description("TestNullableIntValue")]
         public int? NullableIntValue { get; set; }
         /// <summary>
         /// short值

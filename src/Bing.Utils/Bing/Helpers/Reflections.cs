@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,95 +12,6 @@ namespace Bing.Helpers
     /// </summary>
     public static partial class Reflections
     {
-        #region GetDescription(获取类型描述)
-
-        /// <summary>
-        /// 获取类型描述，使用<see cref="DescriptionAttribute"/>设置描述
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        public static string GetDescription<T>() => GetDescription(Common.GetType<T>());
-
-        /// <summary>
-        /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="memberName">成员名称</param>
-        public static string GetDescription<T>(string memberName) => GetDescription(Common.GetType<T>(), memberName);
-
-        /// <summary>
-        /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述
-        /// </summary>
-        /// <param name="type">类型</param>
-        /// <param name="memberName">成员名称</param>
-        public static string GetDescription(Type type, string memberName)
-        {
-            if (type == null)
-                return string.Empty;
-            return memberName.IsEmpty()
-                ? string.Empty
-                : GetDescription(type.GetTypeInfo().GetMember(memberName).FirstOrDefault());
-        }
-
-        /// <summary>
-        /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述
-        /// </summary>
-        /// <param name="member">成员</param>
-        public static string GetDescription(MemberInfo member)
-        {
-            if (member == null)
-                return string.Empty;
-            return member.GetCustomAttribute<DescriptionAttribute>() is DescriptionAttribute attribute
-                ? attribute.Description
-                : member.Name;
-        }
-
-        #endregion
-
-        #region GetDisplayName(获取类型显示名称)
-
-        /// <summary>
-        /// 获取类型显示名称，使用<see cref="DisplayNameAttribute"/>设置显示名称
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        public static string GetDisplayName<T>() => GetDisplayName(Common.GetType<T>());
-
-        /// <summary>
-        /// 获取类型成员显示名称，，使用<see cref="DisplayNameAttribute"/>或<see cref="DisplayAttribute"/>设置显示名称
-        /// </summary>
-        /// <param name="member">成员</param>
-        private static string GetDisplayName(MemberInfo member)
-        {
-            if (member == null)
-                return string.Empty;
-            if (member.GetCustomAttribute<DisplayAttribute>() is DisplayAttribute displayAttribute)
-                return displayAttribute.Name; ;
-            if (member.GetCustomAttribute<DisplayNameAttribute>() is DisplayNameAttribute displayNameAttribute)
-                return displayNameAttribute.DisplayName;
-            return string.Empty;
-        }
-
-        #endregion
-
-        #region GetDisplayNameOrDescription(获取显示名称或类型描述)
-
-        /// <summary>
-        /// 获取类型显示名称或描述，使用<see cref="DescriptionAttribute"/>设置描述，使用<see cref="DisplayNameAttribute"/>设置显示名称
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        public static string GetDisplayNameOrDescription<T>() => GetDisplayNameOrDescription(Common.GetType<T>());
-
-        /// <summary>
-        /// 获取类型显示名称或成员描述，使用<see cref="DescriptionAttribute"/>设置描述，使用<see cref="DisplayNameAttribute"/>或<see cref="DisplayAttribute"/>设置显示名称
-        /// </summary>
-        /// <param name="member">成员</param>
-        public static string GetDisplayNameOrDescription(MemberInfo member)
-        {
-            var result = GetDisplayName(member);
-            return string.IsNullOrWhiteSpace(result) ? GetDescription(member) : result;
-        }
-
-        #endregion
-
         #region FindTypes(查找类型列表)
 
         /// <summary>
