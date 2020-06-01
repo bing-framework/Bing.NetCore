@@ -41,9 +41,6 @@ namespace Bing.Datas.Configs
         /// <summary>
         /// 初始化一个<see cref="DataConfig"/>类型的实例
         /// </summary>
-        public DataConfig()
-        {
-            SqlOptions = new SqlOptions();
-        }
+        public DataConfig() => SqlOptions = new SqlOptions();
     }
 }

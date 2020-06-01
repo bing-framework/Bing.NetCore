@@ -12,7 +12,7 @@ namespace Bing.Helpers
     /// <summary>
     /// 反射 操作
     /// </summary>
-    public static class Reflections
+    public static partial class Reflections
     {
         #region GetDescription(获取类型描述)
 
@@ -268,28 +268,6 @@ namespace Bing.Helpers
         /// 获取当前程序集名称
         /// </summary>
         public static string GetCurrentAssemblyName() => Assembly.GetCallingAssembly().GetName().Name;
-
-        #endregion
-
-        #region GetAttribute(获取特性信息)
-
-        /// <summary>
-        /// 获取特性信息
-        /// </summary>
-        /// <typeparam name="TAttribute">泛型特性</typeparam>
-        /// <param name="memberInfo">元数据</param>
-        public static TAttribute GetAttribute<TAttribute>(MemberInfo memberInfo) where TAttribute : Attribute => (TAttribute)memberInfo.GetCustomAttributes(typeof(TAttribute), false).FirstOrDefault();
-
-        #endregion
-
-        #region GetAttributes(获取特性信息数据)
-
-        /// <summary>
-        /// 获取特性信息数组
-        /// </summary>
-        /// <typeparam name="TAttribute">泛型特性</typeparam>
-        /// <param name="memberInfo">元数据</param>
-        public static TAttribute[] GetAttributes<TAttribute>(MemberInfo memberInfo) where TAttribute : Attribute => Array.ConvertAll(memberInfo.GetCustomAttributes(typeof(TAttribute), false), x => (TAttribute)x);
 
         #endregion
 
