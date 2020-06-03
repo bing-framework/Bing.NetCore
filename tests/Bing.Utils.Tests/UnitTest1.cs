@@ -543,6 +543,12 @@ Where `a`.`IsDeny`=1 And `b`.`ApplicationId`='79c3c002-1474-4b3f-bf83-b17aa173a2
             Assert.Equal(default, item);
         }
 
+        [Fact]
+        public void Test_Regex()
+        {
+            var result= Regex.IsMatch("AutoMapper", "^AutoMapper", RegexOptions.IgnoreCase | RegexOptions.Compiled) == false;
+            Output.WriteLine(result.ToString());
+        }
     }
 
     public class BingLogModel

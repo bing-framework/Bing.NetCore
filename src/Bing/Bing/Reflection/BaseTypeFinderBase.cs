@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Bing.Extensions;
 using Bing.Finders;
-using Bing.Helpers;
 
 namespace Bing.Reflection
 {
@@ -23,10 +22,7 @@ namespace Bing.Reflection
         /// 初始化一个<see cref="BaseTypeFinderBase{TBaseType}"/>类型的实例
         /// </summary>
         /// <param name="allAssemblyFinder">所有程序集查找器</param>
-        protected BaseTypeFinderBase(IAllAssemblyFinder allAssemblyFinder)
-        {
-            _allAssemblyFinder = allAssemblyFinder;
-        }
+        protected BaseTypeFinderBase(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;
 
         /// <summary>
         /// 重写已实现所有项的查找
@@ -45,6 +41,7 @@ namespace Bing.Reflection
         /// </summary>
         /// <typeparam name="T">查找类型</typeparam>
         /// <param name="assemblies">在指定的程序集列表中查找</param>
+        [Obsolete]
         public virtual List<Type> Find<T>(List<Assembly> assemblies = null) => Find(typeof(T), assemblies);
 
         /// <summary>
@@ -52,6 +49,7 @@ namespace Bing.Reflection
         /// </summary>
         /// <param name="findType">查找类型</param>
         /// <param name="assemblies">在指定的程序集列表中查找</param>
+        [Obsolete]
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
             assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();

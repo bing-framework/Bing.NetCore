@@ -33,7 +33,7 @@ namespace Bing.Core
             // 初始化所有程序集查找器
             services.TryAddSingleton<IAllAssemblyFinder>(new AppDomainAllAssemblyFinder());
 
-            var builder = services.GetSingletonInstanceOrNull<IBingBuilder>() ?? new BingBuilder();
+            var builder = services.GetSingletonInstanceOrNull<IBingBuilder>() ?? new BingBuilder(services);
             builderAction?.Invoke(builder);
             services.TryAddSingleton<IBingBuilder>(builder);
 
@@ -42,12 +42,6 @@ namespace Bing.Core
             manager.LoadModules(services);
             return services;
         }
-
-        /// <summary>
-        /// 获取<see cref="IConfiguration"/>配置信息
-        /// </summary>
-        /// <param name="services">服务集合</param>
-        public static IConfiguration GetConfiguration(this IServiceCollection services) => services.GetSingletonInstanceOrNull<IConfiguration>();
 
         /// <summary>
         /// 获取Bing框架配置选项信息

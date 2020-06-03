@@ -45,5 +45,11 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app">应用程序构建器</param>
         public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder app) => app.UseMiddleware<BingCorrelationIdMiddleware>();
+
+        //public static IApplicationBuilder UseBing(this IApplicationBuilder app)
+        //{
+        //    var provider = app.ApplicationServices;
+        //    return app;
+        //}
     }
 }

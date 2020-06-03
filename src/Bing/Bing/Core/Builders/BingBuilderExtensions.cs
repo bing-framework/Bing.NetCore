@@ -1,4 +1,5 @@
 ﻿using Bing.Core.Modularity;
+using Bing.DependencyInjection;
 
 namespace Bing.Core.Builders
 {
@@ -11,6 +12,8 @@ namespace Bing.Core.Builders
         /// 添加核心模块
         /// </summary>
         /// <param name="builder">Bing构建器</param>
-        public static IBingBuilder AddCoreModule(this IBingBuilder builder) => builder.AddModule<BingCoreModule>();
+        internal static IBingBuilder AddCoreModule(this IBingBuilder builder) =>
+            builder.AddModule<BingCoreModule>()
+                .AddModule<DependencyModule>();
     }
 }

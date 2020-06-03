@@ -217,7 +217,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.EventHandlers", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Domain.Shared", "modules\admin\src\Bing.Admin.Domain.Shared\Bing.Admin.Domain.Shared.csproj", "{5D23FE61-79E3-4295-9675-95342B3C9BF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.HangFire", "src\Bing.HangFire\Bing.HangFire.csproj", "{5B4AC6C6-6953-432B-9319-F866ED15FDE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.HangFire", "src\Bing.HangFire\Bing.HangFire.csproj", "{5B4AC6C6-6953-432B-9319-F866ED15FDE6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Modules", "02-Modules", "{33BD1217-5797-44C1-99A3-5E8DCA2AEE77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -557,6 +559,7 @@ Global
 		{8AAAF1EF-36F2-45B0-95D9-EB767FF4305F} = {B9E5A2E9-52B6-43FA-9D18-95D4778093B4}
 		{5D23FE61-79E3-4295-9675-95342B3C9BF4} = {BA235841-C503-4D1D-BBEB-2770A5018E6C}
 		{5B4AC6C6-6953-432B-9319-F866ED15FDE6} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
+		{33BD1217-5797-44C1-99A3-5E8DCA2AEE77} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}

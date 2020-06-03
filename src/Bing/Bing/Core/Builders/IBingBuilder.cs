@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Bing.Core.Modularity;
 using Bing.Core.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Builders
 {
@@ -10,6 +11,16 @@ namespace Bing.Core.Builders
     /// </summary>
     public interface IBingBuilder
     {
+        /// <summary>
+        /// 服务集合
+        /// </summary>
+        IServiceCollection Services { get; }
+
+        /// <summary>
+        /// 加载的模块集合
+        /// </summary>
+        IEnumerable<BingModule> Modules { get; }
+
         /// <summary>
         /// 加载的模块集合
         /// </summary>
@@ -30,12 +41,6 @@ namespace Bing.Core.Builders
         /// </summary>
         /// <typeparam name="TModule">要添加的模块类型</typeparam>
         IBingBuilder AddModule<TModule>() where TModule : BingModule;
-
-        /// <summary>
-        /// 排除指定模块
-        /// </summary>
-        /// <typeparam name="TModule">要排除的模块类型</typeparam>
-        IBingBuilder ExceptModule<TModule>() where TModule : BingModule;
 
         /// <summary>
         /// 添加Bing选项配置

@@ -25,7 +25,7 @@ namespace Bing.Core.Modularity
             // 排除被继承的Module实类
             var types = base.FindAllItems();
             var baseModuleTypes = types.Select(x => x.BaseType)
-                .Where(x => x != null && x.IsClass && !x.IsAbstract && !x.IsInterface)
+                .Where(x => x != null && x.IsClass && !x.IsAbstract)
                 .ToArray();
             return types.Except(baseModuleTypes).ToArray();
         }

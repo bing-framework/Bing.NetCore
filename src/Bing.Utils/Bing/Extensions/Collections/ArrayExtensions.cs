@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions
@@ -87,6 +88,23 @@ namespace Bing.Extensions
         {
             for (var i = 0; i < source.Length; i += length)
                 yield return source.BlockCopy(i, length, padToLength);
+        }
+
+        #endregion
+
+        #region RandomGet(随机获取)
+
+        /// <summary>
+        /// 随机获取数组中的一个
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="array">数组</param>
+        public static T RandomGet<T>(this T[] array)
+        {
+            if (array == null || !array.Any())
+                return default;
+            var r = new Random();
+            return array[r.Next(array.Length)];
         }
 
         #endregion

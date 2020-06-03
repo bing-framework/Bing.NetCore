@@ -21,7 +21,7 @@ namespace Bing.Utils.Judgments
         public static bool IsNullOrEmpty(Guid? guid) => guid is null || IsNullOrEmpty(guid.Value);
 
         /// <summary>
-        /// Guid 架构正则
+        /// Guid 正则表达式
         /// </summary>
         private static readonly Regex GuidSchema = new Regex("^[A-Fa-f0-9]{32}$|" +
                                                              "^({|\\()?[A-Fa-f0-9]{8}-([A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}(}|\\))?$|" +
