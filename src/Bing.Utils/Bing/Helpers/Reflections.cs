@@ -171,8 +171,6 @@ namespace Bing.Helpers
 
         #endregion
 
-        
-
         #region GetPropertyInfo(获取属性信息)
 
         /// <summary>

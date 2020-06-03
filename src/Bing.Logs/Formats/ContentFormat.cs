@@ -361,7 +361,7 @@ namespace Bing.Logs.Formats
         /// <param name="line">行号</param>
         protected void Line15(StringBuilder result, LogContent content, ref int line)
         {
-            if (content.ExtraProperties.Any())
+            if (!content.ExtraProperties.Any())
                 return;
             AppendLine(result, content, (r, c) =>
             {

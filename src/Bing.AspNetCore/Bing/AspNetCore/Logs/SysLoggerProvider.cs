@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.AspNetCore.Logs
@@ -28,6 +29,10 @@ namespace Bing.AspNetCore.Logs
         /// 创建日志实现类
         /// </summary>
         /// <param name="name">名称</param>
-        private SysLogger CreateLoggerImplementation(string name) => new SysLogger(name);
+        private SysLogger CreateLoggerImplementation(string name)
+        {
+            Debug.WriteLine($"创建【{name}】系统日志记录器");
+            return new SysLogger(name);
+        }
     }
 }

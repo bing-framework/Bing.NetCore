@@ -1,16 +1,14 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using Bing.Admin.Data;
 using Bing.Admin.Data.Seed;
 using Bing.Admin.Service.Extensions;
 using Bing.AspNetCore;
-using Bing.AutoMapper;
-using Bing.Core;
 using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.PgSql;
 using Bing.Datas.Enums;
 using Bing.Datas.Seed;
-using Bing.Logs.NLog;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
@@ -23,6 +21,7 @@ namespace Bing.Admin.Modules
     /// <summary>
     /// 应用程序模块
     /// </summary>
+    [Description("应用程序模块")]
     [DependsOnModule(typeof(AspNetCoreModule))]
     public class AppModule : AspNetCoreBingModule
     {
@@ -63,12 +62,6 @@ namespace Bing.Admin.Modules
             });
             // 注册SqlExecutor
             services.AddSqlExecutor();
-
-            // 注册日志
-            services.AddNLog();
-
-            // 注册AutoMapper
-            services.AddAutoMapper();
 
             // 添加权限服务
             services.AddPermission(o =>

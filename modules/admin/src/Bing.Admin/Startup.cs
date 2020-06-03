@@ -1,11 +1,11 @@
 ﻿using System;
 using AspectCore.Extensions.DependencyInjection;
-using Bing.AspNetCore;
-using Bing.Core;
+using Bing.Admin.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Admin
 {
@@ -33,15 +33,22 @@ namespace Bing.Admin
         /// </summary>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddBing<AspNetCoreBingModuleManager>();
+            //services.AddBing<AspNetCoreBingModuleManager>();
+            services.AddBing()
+                .AddModule<LogModule>()
+                .AddModule<MapperModule>()
+                .AddModule<AppModule>()
+                //.AddModule<PgSqlAdminUnitOfWorkMigrationModule>()
+                .AddModule<SwaggerModule>();
             return services.BuildServiceContextProvider();
         }
 
         /// <summary>
         /// 配置请求管道
         /// </summary>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddSysLogProvider();
             app.UseBing();
         }
     }

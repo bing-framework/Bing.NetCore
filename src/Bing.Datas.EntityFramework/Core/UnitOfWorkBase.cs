@@ -383,26 +383,22 @@ namespace Bing.Datas.EntityFramework.Core
         private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager,
             CancellationToken cancellationToken)
         {
-            using (var connection = Database.GetDbConnection())
+            using var connection = Database.GetDbConnection();
+            if (connection.State == ConnectionState.Closed)
+                await connection.OpenAsync(cancellationToken);
+            using var transaction = connection.BeginTransaction();
+            try
             {
-                if (connection.State == ConnectionState.Closed)
-                    await connection.OpenAsync(cancellationToken);
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        await transactionActionManager.CommitAsync(transaction);
-                        Database.UseTransaction(transaction);
-                        var result = await base.SaveChangesAsync(cancellationToken);
-                        transaction.Commit();
-                        return result;
-                    }
-                    catch (Exception e)
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
-                }
+                await transactionActionManager.CommitAsync(transaction);
+                Database.UseTransaction(transaction);
+                var result = await base.SaveChangesAsync(cancellationToken);
+                transaction.Commit();
+                return result;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
         }
 

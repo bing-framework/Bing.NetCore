@@ -1,5 +1,10 @@
-﻿using Bing.AspNetCore.ExceptionHandling;
+﻿using System.Diagnostics;
+using Bing.AspNetCore;
+using Bing.AspNetCore.ExceptionHandling;
 using Bing.AspNetCore.Tracing;
+using Bing.Helpers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -12,6 +17,11 @@ namespace Microsoft.AspNetCore.Builder
         /// 异常处理中间件标识
         /// </summary>
         private const string ExceptionHandlingMiddlewareMarker = "_BingExceptionHandlingMiddleware_Added";
+
+        /// <summary>
+        /// 框架初始化
+        /// </summary>
+        private const string FrameworkLog = "BingFrameworkLog";
 
         /// <summary>
         /// 添加MVC并支持Area路由
@@ -46,10 +56,30 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app">应用程序构建器</param>
         public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder app) => app.UseMiddleware<BingCorrelationIdMiddleware>();
 
-        //public static IApplicationBuilder UseBing(this IApplicationBuilder app)
-        //{
-        //    var provider = app.ApplicationServices;
-        //    return app;
-        //}
+        /// <summary>
+        /// Bing框架初始化，适用于AspNetCore环境
+        /// </summary>
+        /// <param name="app">应用程序构建器</param>
+        public static IApplicationBuilder UseBing(this IApplicationBuilder app)
+        {
+            var provider = app.ApplicationServices;
+            var logger = provider.GetLogger(FrameworkLog);
+            logger.LogInformation("Bing框架初始化开始");
+            var watch = Stopwatch.StartNew();
+            var modules = provider.GetAllModules();
+            foreach (var module in modules)
+            {
+                var moduleName = Reflections.GetDescription(module.GetType());
+                logger.LogInformation($"正在初始化模块 “{moduleName}”");
+                 if (module is AspNetCoreBingModule netCoreModule)
+                    netCoreModule.UseModule(app);
+                else
+                    module.UseModule(provider);
+                logger.LogInformation($"模块 “{moduleName}” 初始化完成");
+            }
+            watch.Stop();
+            logger.LogInformation($"Bing框架初始化完成，耗时：{watch.Elapsed}");
+            return app;
+        }
     }
 }
