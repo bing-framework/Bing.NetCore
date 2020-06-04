@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +7,7 @@ using Bing.Utils;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
+using Bing.Biz.Enums;
 using Bing.Domains;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Tenants;
@@ -76,7 +77,7 @@ namespace Bing.Admin.Commons.Domain.Models
         /// 性别
         ///</summary>
         [Display(Name = "性别")]
-        public int? Gender { get; set; }
+        public Gender? Gender { get; set; }
     
         /// <summary>
         /// 出生日期

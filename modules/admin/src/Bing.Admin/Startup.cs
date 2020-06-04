@@ -38,7 +38,7 @@ namespace Bing.Admin
                 .AddModule<LogModule>()
                 .AddModule<MapperModule>()
                 .AddModule<AppModule>()
-                //.AddModule<PgSqlAdminUnitOfWorkMigrationModule>()
+                .AddModule<PgSqlAdminUnitOfWorkMigrationModule>()
                 .AddModule<SwaggerModule>();
             return services.BuildServiceContextProvider();
         }

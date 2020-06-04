@@ -272,5 +272,20 @@ namespace Bing.Admin.Data.Repositories.Systems
         public void RemoveUserRoles(IEnumerable<UserRole> userRoles) => UnitOfWork.Set<UserRole>().RemoveRange(userRoles);
 
         #endregion
+
+        #region GetByCodeAsync(根据编码获取角色)
+
+        /// <summary>
+        /// 根据编码获取角色
+        /// </summary>
+        /// <param name="code">角色编码</param>
+        public async Task<Role> GetByCodeAsync(string code)
+        {
+            return await UnitOfWork.Set<Role>()
+                .Where(t => t.Code == code)
+                .FirstOrDefaultAsync();
+        }
+
+        #endregion
     }
 }

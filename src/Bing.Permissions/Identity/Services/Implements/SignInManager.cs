@@ -29,8 +29,8 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// </summary>
         /// <param name="identitySignInManager">Identity登录管理</param>
         /// <param name="userManager">用户管理</param>
-        public SignInManager(IdentitySignInManager<TUser, TKey> identitySignInManager,
-            IUserManager<TUser, TKey> userManager)
+        public SignInManager(IdentitySignInManager<TUser, TKey> identitySignInManager
+            , IUserManager<TUser, TKey> userManager)
         {
             IdentitySignInManager = identitySignInManager;
             UserManager = userManager;

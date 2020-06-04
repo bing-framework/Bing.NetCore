@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Bing.Admin.Domain.Shared;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
@@ -40,8 +41,8 @@ namespace Bing.Admin.Data.Seed
         protected override Role[] SeedData()
         {
             var list = new List<Role>();
-            list.Add(AddRole("SuperAdmin", "超级管理员", "SystemRole", true, true, false));
-            list.Add(AddRole("SystemAdmin", "普通管理员", "SystemRole", true, true, true));
+            list.Add(AddRole(RoleCode.SuperAdmin, "超级管理员", RoleTypeCode.SystemRole, true, true, false));
+            list.Add(AddRole(RoleCode.Admin, "普通管理员", RoleTypeCode.SystemRole, true, true, true));
             return list.ToArray();
         }
 
@@ -98,7 +99,7 @@ namespace Bing.Admin.Data.Seed
             {
                 if (repository.Exists(ExistingExpression(entity)))
                     continue;
-                manager.CreateAsync(entity).Wait();
+                manager.CreateAsync(entity).GetAwaiter().GetResult();
             }
             unitOfWork.Commit();
         }

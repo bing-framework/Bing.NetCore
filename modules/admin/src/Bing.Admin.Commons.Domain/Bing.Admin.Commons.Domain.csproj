@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bing.Admin.Domain.Shared\Bing.Admin.Domain.Shared.csproj" />
     <ProjectReference Include="..\Bing.Admin.Infrastructure\Bing.Admin.Infrastructure.csproj" />
   </ItemGroup>
 

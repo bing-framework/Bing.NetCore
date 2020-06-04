@@ -4,4 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Admin.Infrastructure\Bing.Admin.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

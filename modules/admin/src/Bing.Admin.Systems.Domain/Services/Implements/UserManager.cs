@@ -1,10 +1,11 @@
 ﻿using System;
-using Bing.Domains.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
 using Bing.Permissions.Identity.Options;
-using Bing.Permissions.Identity.Services.Implements;
 using Microsoft.Extensions.Options;
 
 namespace Bing.Admin.Systems.Domain.Services.Implements
@@ -17,14 +18,48 @@ namespace Bing.Admin.Systems.Domain.Services.Implements
         /// <summary>
         /// 初始化一个<see cref="UserManager" />类型的实例
         /// </summary>
-        /// <param name="userManager">Identity用户管理</param>
-        /// <param name="options">权限配置</param>
-        /// <param name="userRepository">用户仓储</param>
         public UserManager(IdentityUserManager userManager
             , IOptions<PermissionOptions> options
-            , IUserRepository userRepository)
+            , IUserRepository userRepository
+            , IUserInfoRepository userInfoRepository)
             : base(userManager, options, userRepository)
         {
+            UserRepository = userRepository;
+            UserInfoRepository = userInfoRepository;
+        }
+
+        /// <summary>
+        /// 用户仓储
+        /// </summary>
+        protected IUserRepository UserRepository { get; }
+
+        /// <summary>
+        /// 用户信息仓储
+        /// </summary>
+        protected IUserInfoRepository UserInfoRepository { get; }
+
+        /// <summary>
+        /// 启用
+        /// </summary>
+        /// <param name="ids">标识列表</param>
+        public async Task EnableAsync(List<Guid> ids)
+        {
+            var entities = await UserRepository.FindByIdsAsync(ids);
+            foreach (var entity in entities) 
+                entity.Enabled = true;
+            await UserRepository.UpdateAsync(entities);
+        }
+
+        /// <summary>
+        /// 禁用
+        /// </summary>
+        /// <param name="ids">标识列表</param>
+        public async Task DisableAsync(List<Guid> ids)
+        {
+            var entities = await UserRepository.FindByIdsAsync(ids);
+            foreach (var entity in entities) 
+                entity.Enabled = false;
+            await UserRepository.UpdateAsync(entities);
         }
     }
 }

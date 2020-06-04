@@ -73,6 +73,7 @@ namespace Bing.Admin.Modules
             // 种子数据初始化
             services.AddSingleton<ISeedDataInitializer, ApplicationSeedDataInitializer>();
             services.AddSingleton<ISeedDataInitializer, RoleSeedDataInitializer>();
+            services.AddSingleton<ISeedDataInitializer, AdministratorSeedDataInitializer>();
 
             return services;
         }
