@@ -1,4 +1,5 @@
-﻿using Bing.Dependency;
+﻿using System.Threading.Tasks;
+using Bing.Dependency;
 
 namespace Bing.Datas.Seed
 {
@@ -16,6 +17,6 @@ namespace Bing.Datas.Seed
         /// <summary>
         /// 初始化种子数据
         /// </summary>
-        void Initialize();
+        Task InitializeAsync();
     }
 }

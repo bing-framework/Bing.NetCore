@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Bing.Admin.Domain.Shared;
 using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Repositories;
@@ -35,10 +36,10 @@ namespace Bing.Admin.Data.Seed
         /// <summary>
         /// 初始化种子数据
         /// </summary>
-        public void Initialize()
+        public async Task InitializeAsync()
         {
             var parameters = SeedData();
-            SyncToDatabase(parameters);
+            await SyncToDatabaseAsync(parameters);
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace Bing.Admin.Data.Seed
         /// 将种子数据初始化到数据库
         /// </summary>
         /// <param name="parameters">参数集合</param>
-        protected void SyncToDatabase(UserParameter[] parameters)
+        protected async Task SyncToDatabaseAsync(UserParameter[] parameters)
         {
             if (parameters == null || parameters.Length == 0)
                 return;
@@ -75,12 +76,12 @@ namespace Bing.Admin.Data.Seed
             var roleManager = scopeProvider.GetService<IRoleManager>();
             foreach (var parameter in parameters)
             {
-                if (repository.Exists(x => x.UserName == parameter.UserName))
+                if (await repository.ExistsAsync(x => x.UserName == parameter.UserName))
                     continue;
-                var user = manager.CreateAsync(parameter).GetAwaiter().GetResult();
-                roleManager.AddUserToRoleAsync(user.Id, RoleCode.SuperAdmin);
+                var user = await manager.CreateAsync(parameter);
+                await roleManager.AddUserToRoleAsync(user.Id, RoleCode.SuperAdmin);
             }
-            unitOfWork.CommitAsync().GetAwaiter().GetResult();
+            await unitOfWork.CommitAsync();
         }
     }
 }

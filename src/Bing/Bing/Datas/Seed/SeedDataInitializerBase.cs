@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
@@ -35,10 +36,10 @@ namespace Bing.Datas.Seed
         /// <summary>
         /// 初始化种子数据
         /// </summary>
-        public void Initialize()
+        public async Task InitializeAsync()
         {
             var entities = SeedData();
-            SyncToDatabase(entities);
+            await SyncToDatabaseAsync(entities);
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace Bing.Datas.Seed
         /// 将种子数据初始化到数据库
         /// </summary>
         /// <param name="entities">实体集合</param>
-        protected virtual void SyncToDatabase(TEntity[] entities)
+        protected virtual async Task SyncToDatabaseAsync(TEntity[] entities)
         {
             if (entities == null || entities.Length == 0)
                 return;
@@ -66,11 +67,11 @@ namespace Bing.Datas.Seed
             var repository = scopeProvider.GetService<IRepository<TEntity, TKey>>();
             foreach (var entity in entities)
             {
-                if (repository.Exists(ExistingExpression(entity)))
+                if (await repository.ExistsAsync(ExistingExpression(entity)))
                     continue;
-                repository.Add(entity);
+                await repository.AddAsync(entity);
             }
-            unitOfWork.Commit();
+            await unitOfWork.CommitAsync();
         }
     }
 }

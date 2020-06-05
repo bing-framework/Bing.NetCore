@@ -27,7 +27,7 @@ namespace Bing.Datas.EntityFramework
         {
             var seedDataInitializers = provider.GetServices<ISeedDataInitializer>().OrderBy(m => m.Order);
             foreach (var initializer in seedDataInitializers)
-                initializer.Initialize();
+                initializer.InitializeAsync().GetAwaiter().GetResult();
             Enabled = true;
         }
 

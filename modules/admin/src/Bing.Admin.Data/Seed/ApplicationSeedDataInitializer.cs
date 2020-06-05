@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Bing.Admin.Data.Stores.Abstractions.Systems;
 using Bing.Admin.Domain.Shared;
 using Bing.Admin.Domain.Shared.Enums;
@@ -60,7 +61,7 @@ namespace Bing.Admin.Data.Seed
         /// 将种子数据初始化到数据库
         /// </summary>
         /// <param name="entities">实体集合</param>
-        protected override void SyncToDatabase(Application[] entities)
+        protected override async Task SyncToDatabaseAsync(Application[] entities)
         {
             if (entities == null || entities.Length == 0)
                 return;
@@ -71,11 +72,11 @@ namespace Bing.Admin.Data.Seed
             var repository = scopeProvider.GetService<IApplicationRepository>();
             foreach (var entity in entities)
             {
-                if (store.Exists(x => x.Code == entity.Code))
+                if (await store.ExistsAsync(x => x.Code == entity.Code))
                     continue;
-                repository.Add(entity);
+                await repository.AddAsync(entity);
             }
-            unitOfWork.Commit();
+            await unitOfWork.CommitAsync();
         }
     }
 }

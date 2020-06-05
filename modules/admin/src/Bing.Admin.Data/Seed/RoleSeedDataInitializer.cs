@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Bing.Admin.Domain.Shared;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
@@ -86,7 +87,7 @@ namespace Bing.Admin.Data.Seed
         /// 将种子数据初始化到数据库
         /// </summary>
         /// <param name="entities">实体集合</param>
-        protected override void SyncToDatabase(Role[] entities)
+        protected override async Task SyncToDatabaseAsync(Role[] entities)
         {
             if (entities == null || entities.Length == 0)
                 return;
@@ -97,11 +98,11 @@ namespace Bing.Admin.Data.Seed
             var manager = scopeProvider.GetService<IRoleManager>();
             foreach (var entity in entities)
             {
-                if (repository.Exists(ExistingExpression(entity)))
+                if (await repository.ExistsAsync(ExistingExpression(entity)))
                     continue;
-                manager.CreateAsync(entity).GetAwaiter().GetResult();
+                await manager.CreateAsync(entity);
             }
-            unitOfWork.Commit();
+            await unitOfWork.CommitAsync();
         }
     }
 }
