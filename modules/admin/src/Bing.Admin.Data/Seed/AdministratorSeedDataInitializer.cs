@@ -25,7 +25,7 @@ namespace Bing.Admin.Data.Seed
         /// <summary>
         /// 种子数据初始化顺序
         /// </summary>
-        public virtual int Order => 0;
+        public virtual int Order => 2;
 
         /// <summary>
         /// 初始化一个<see cref="AdministratorSeedDataInitializer"/>类型的实例

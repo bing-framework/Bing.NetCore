@@ -11,6 +11,12 @@ namespace Bing.Admin.Systems.Domain.Repositories
     public interface IRoleRepository : Bing.Permissions.Identity.Repositories.IRoleRepository<Role, Guid, Guid?>
     {
         /// <summary>
+        /// 获取用户的角色列表
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        Task<List<Role>> GetRolesAsync(Guid userId);
+
+        /// <summary>
         /// 通过编码获取角色
         /// </summary>
         /// <param name="code">编码</param>

@@ -1,19 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Text;
-using Bing.Admin.Data;
-using Bing.Admin.Data.Seed;
-using Bing.Admin.Service.Extensions;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
-using Bing.Datas.Dapper;
-using Bing.Datas.EntityFramework.PgSql;
-using Bing.Datas.Enums;
-using Bing.Datas.Seed;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -49,31 +41,6 @@ namespace Bing.Admin.Modules
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
-
-            // 注册工作单元
-            services.AddPgSqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.PgSql.AdminUnitOfWork>(
-                services.GetConfiguration().GetConnectionString("DefaultConnection"));
-
-            // 注册SqlQuery
-            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.PgSql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.PgSql.AdminUnitOfWork>(options =>
-            {
-                options.DatabaseType = DatabaseType.PgSql;
-                options.IsClearAfterExecution = true;
-            });
-            // 注册SqlExecutor
-            services.AddSqlExecutor();
-
-            // 添加权限服务
-            services.AddPermission(o =>
-            {
-                o.Store.StoreOriginalPassword = true;
-                o.Password.MinLength = 6;
-            });
-
-            // 种子数据初始化
-            services.AddSingleton<ISeedDataInitializer, ApplicationSeedDataInitializer>();
-            services.AddSingleton<ISeedDataInitializer, RoleSeedDataInitializer>();
-            services.AddSingleton<ISeedDataInitializer, AdministratorSeedDataInitializer>();
 
             return services;
         }

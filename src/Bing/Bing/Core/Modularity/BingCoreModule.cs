@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using Bing.Helpers;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Modularity
@@ -19,5 +22,16 @@ namespace Bing.Core.Modularity
         /// </summary>
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services) => services;
+
+        /// <summary>
+        /// 应用模块服务
+        /// </summary>
+        /// <param name="provider">服务提供程序</param>
+        public override void UseModule(IServiceProvider provider)
+        {
+            var environment = provider.GetService<IHostingEnvironment>();
+            Web.Environment = environment;
+            base.UseModule(provider);
+        }
     }
 }

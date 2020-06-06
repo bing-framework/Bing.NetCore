@@ -1,16 +1,19 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Bing.Admin.Data;
 using Bing.Admin.Domain.Shared;
 using Bing.Admin.Domain.Shared.Results;
+using Bing.Admin.Infrastructure;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Service.Requests.Systems;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
+using Bing.Admin.Systems.Domain.Services.Abstractions;
 using Bing.Applications;
 using Bing.Exceptions;
 using Bing.Extensions;
+using Bing.Permissions.Identity.JwtBearer;
 using Bing.Permissions.Identity.Results;
-using IdentityModel;
 
 namespace Bing.Admin.Service.Implements
 {
@@ -23,18 +26,29 @@ namespace Bing.Admin.Service.Implements
         /// 初始化一个<see cref="SecurityService"/>类型的实例
         /// </summary>
         public SecurityService(IAdminUnitOfWork unitOfWork
+            , IJsonWebTokenBuilder tokenBuilder
             , IUserRepository userRepository
-            , IApplicationRepository applicationRepository)
+            , IApplicationRepository applicationRepository
+            , IRoleRepository roleRepository
+            , ISignInManager signInManager)
         {
             UnitOfWork = unitOfWork;
+            TokenBuilder = tokenBuilder;
             UserRepository = userRepository;
             ApplicationRepository = applicationRepository;
+            RoleRepository = roleRepository;
+            SignInManager = signInManager;
         }
 
         /// <summary>
         /// 工作单元
         /// </summary>
         protected IAdminUnitOfWork UnitOfWork { get; }
+
+        /// <summary>
+        /// Jwt令牌构建器
+        /// </summary>
+        protected IJsonWebTokenBuilder TokenBuilder { get; }
 
         /// <summary>
         /// 用户仓储
@@ -45,14 +59,30 @@ namespace Bing.Admin.Service.Implements
         /// 应用程序仓储
         /// </summary>
         protected IApplicationRepository ApplicationRepository { get; }
+        
+        /// <summary>
+        /// 角色仓储
+        /// </summary>
+        protected IRoleRepository RoleRepository { get; }
 
+        /// <summary>
+        /// 登录管理器
+        /// </summary>
+        protected ISignInManager SignInManager { get; }
+
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="request">请求</param>
         public async Task<SignInWithTokenResult> SignInAsync(AdminLoginRequest request)
         {
             var user = await GetUserAsync(request.UserName);
             if (user == null)
                 return new SignInWithTokenResult {Message = "用户名不存在", State = SignInState.Failed};
             await AddClaimsToUserAsync(user, ApplicationCode.Admin);
-            return null;
+            var result = await SignInManager.SignInAsync(user, request.Password);
+            await UnitOfWork.CommitAsync();
+            return await GetLoginResultAsync(user, result, ApplicationCode.Admin);
         }
 
         /// <summary>
@@ -70,7 +100,7 @@ namespace Bing.Admin.Service.Implements
         {
             user.AddUserClaims();
             await AddApplicationClaims(user, applicationCode);
-            //await AddRoleClaimsAsync(user, applicationCode);
+            await AddRoleClaimsAsync(user, applicationCode);
         }
 
         /// <summary>
@@ -87,6 +117,58 @@ namespace Bing.Admin.Service.Implements
             user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationCode, applicationCode);
             user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationName, application.Name);
             user.AddClaim(JwtClaimTypes.ClientId, application.Id.SafeString());
+        }
+
+        /// <summary>
+        /// 添加角色声明
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="applicationCode">应用程序编码</param>
+        private async Task AddRoleClaimsAsync(User user, string applicationCode)
+        {
+            var roles = await RoleRepository.GetRolesAsync(user.Id);
+            if (!roles.Any())
+                throw new Warning($"用户：{user.UserName} 未设置任何权限，不能访问系统，请联系管理员");
+            user.AddClaim(Bing.Security.Claims.ClaimTypes.RoleIds, roles.Select(x => x.Id).Join());
+            user.AddClaim(JwtClaimTypes.RoleCode, roles.Select(x => x.Code).Join());
+            user.AddClaim(Bing.Security.Claims.ClaimTypes.RoleName, roles.Select(x => x.Name).Join());
+        }
+
+        /// <summary>
+        /// 获取登录结果
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="signInResult">登录结果</param>
+        /// <param name="applicationCode">应用程序编码</param>
+        private async Task<SignInWithTokenResult> GetLoginResultAsync(User user, SignInResult signInResult, string applicationCode)
+        {
+            if (signInResult.State == SignInState.Failed)
+                return new SignInWithTokenResult { UserId = signInResult.UserId, State = signInResult.State, Message = signInResult.Message };
+            //await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage()
+            //{
+            //    UserId = user.Id,
+            //    Name = user.Nickname,
+            //    Ip = Web.IP,
+            //    UserAgent = Web.Browser
+            //}));
+            var result = await TokenBuilder.CreateAsync(user.GetClaims().ToDictionary(x => x.Type, x => x.Value));
+            return new SignInWithTokenResult
+            {
+                UserId = signInResult.UserId,
+                State = signInResult.State,
+                Message = signInResult.Message,
+                Token = result
+            };
+        }
+
+        /// <summary>
+        /// 刷新令牌
+        /// </summary>
+        /// <param name="refreshToken">刷新令牌</param>
+        public async Task<JsonWebToken> RefreshTokenAsync(string refreshToken)
+        {
+            var result = await TokenBuilder.RefreshAsync(refreshToken);
+            return result;
         }
     }
 }

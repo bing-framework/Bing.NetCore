@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using Bing.Admin.Data.Seed;
 using Bing.Admin.Data.UnitOfWorks.PgSql;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Datas.EntityFramework;
+using Bing.Datas.Seed;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -26,5 +28,18 @@ namespace Bing.Admin.Modules
         /// </summary>
         /// <param name="scopedProvider">服务提供者</param>
         protected override AdminUnitOfWork CreateDbContext(IServiceProvider scopedProvider) => scopedProvider.GetService<AdminUnitOfWork>();
+
+        /// <summary>
+        /// 添加服务。将模块服务添加到依赖注入服务容器中
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        public override IServiceCollection AddServices(IServiceCollection services)
+        {
+            // 种子数据初始化
+            services.AddSingleton<ISeedDataInitializer, ApplicationSeedDataInitializer>();
+            services.AddSingleton<ISeedDataInitializer, RoleSeedDataInitializer>();
+            services.AddSingleton<ISeedDataInitializer, AdministratorSeedDataInitializer>();
+            return services;
+        }
     }
 }
