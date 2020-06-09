@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
 using Bing.Datas.Dapper;

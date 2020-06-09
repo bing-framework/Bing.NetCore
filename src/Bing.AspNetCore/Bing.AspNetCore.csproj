@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Bing\AspNetCore\Mvc\Filters\" />
+  </ItemGroup>
+
 </Project>

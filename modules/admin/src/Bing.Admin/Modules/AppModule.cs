@@ -32,7 +32,7 @@ namespace Bing.Admin.Modules
             services
                 .AddMvc(options =>
                 {
-                    options.Filters.Add<ResultHandlerAttribute>();
+                    //options.Filters.Add<ResultHandlerAttribute>();
                     options.Filters.Add<ExceptionHandlerAttribute>();
                 })
                 .AddJsonOptions(options =>
@@ -54,6 +54,7 @@ namespace Bing.Admin.Modules
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseErrorLog();
             app.UseStaticHttpContext();
+            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");

@@ -2,6 +2,7 @@
 using Bing.Admin.Service.Extensions;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
+using Bing.Permissions.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -30,12 +31,15 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
+            var configuration = services.GetConfiguration();
             // 添加权限服务
             services.AddPermission(o =>
             {
                 o.Store.StoreOriginalPassword = true;
                 o.Password.MinLength = 6;
             });
+            // 添加Jwt认证
+            services.AddJwt(configuration);
             return services;
         }
     }
