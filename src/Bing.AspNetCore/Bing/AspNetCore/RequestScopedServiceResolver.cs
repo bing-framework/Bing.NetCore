@@ -28,6 +28,11 @@ namespace Bing.AspNetCore
         public IServiceProvider ScopedProvider => _httpContextAccessor.HttpContext.RequestServices;
 
         /// <summary>
+        /// 是否空请求服务
+        /// </summary>
+        protected bool EmptyRequestService => _httpContextAccessor.HttpContext.RequestServices == null;
+
+        /// <summary>
         /// 初始化一个<see cref="RequestScopedServiceResolver"/>类型的实例
         /// </summary>
         /// <param name="httpContextAccessor">Http上下文访问器</param>
@@ -37,8 +42,8 @@ namespace Bing.AspNetCore
         /// 获取指定服务类型的实例
         /// </summary>
         /// <typeparam name="T">服务类型</typeparam>
-        public T GetService<T>() => ResolveEnabled 
-            ? _httpContextAccessor.HttpContext.RequestServices.GetService<T>() 
+        public T GetService<T>() => ResolveEnabled
+            ? EmptyRequestService ? default : ScopedProvider.GetService<T>()
             : default;
 
         /// <summary>
@@ -46,7 +51,7 @@ namespace Bing.AspNetCore
         /// </summary>
         /// <param name="serviceType">服务类型</param>
         public object GetService(Type serviceType) => ResolveEnabled
-            ? _httpContextAccessor.HttpContext.RequestServices.GetService(serviceType)
+            ? EmptyRequestService ? null : ScopedProvider.GetService(serviceType)
             : null;
 
         /// <summary>
@@ -54,7 +59,7 @@ namespace Bing.AspNetCore
         /// </summary>
         /// <typeparam name="T">服务类型</typeparam>
         public IEnumerable<T> GetServices<T>() => ResolveEnabled
-            ? _httpContextAccessor.HttpContext.RequestServices.GetServices<T>()
+            ? EmptyRequestService ? new List<T>() : ScopedProvider.GetServices<T>()
             : new List<T>();
 
         /// <summary>
@@ -62,7 +67,7 @@ namespace Bing.AspNetCore
         /// </summary>
         /// <param name="serviceType">服务类型</param>
         public IEnumerable<object> GetServices(Type serviceType) => ResolveEnabled
-            ? _httpContextAccessor.HttpContext.RequestServices.GetServices(serviceType)
+            ? EmptyRequestService ? new List<object>() : ScopedProvider.GetServices(serviceType)
             : new List<object>();
     }
 }

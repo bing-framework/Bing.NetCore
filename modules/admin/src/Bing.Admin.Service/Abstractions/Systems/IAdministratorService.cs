@@ -1,3 +1,7 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Bing.Admin.Service.Requests.Systems;
 using Bing.Applications;
 
 namespace Bing.Admin.Service.Abstractions.Systems
@@ -7,5 +11,28 @@ namespace Bing.Admin.Service.Abstractions.Systems
     /// </summary>
     public interface IAdministratorService : IService
     {
+        /// <summary>
+        /// 创建
+        /// </summary>
+        /// <param name="request">请求</param>
+        Task<Guid> CreateAsync(AdministratorCreateRequest request);
+
+        /// <summary>
+        /// 更新
+        /// </summary>
+        /// <param name="request">请求</param>
+        Task UpdateAsync(AdministratorUpdateRequest request);
+
+        /// <summary>
+        /// 启用
+        /// </summary>
+        /// <param name="ids">用户标识列表</param>
+        Task EnableAsync(List<Guid> ids);
+
+        /// <summary>
+        /// 禁用
+        /// </summary>
+        /// <param name="ids">用户标识列表</param>
+        Task DisableAsync(List<Guid> ids);
     }
 }

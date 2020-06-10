@@ -6,6 +6,8 @@ using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -34,6 +36,8 @@ namespace Bing.Admin.Modules
                 {
                     //options.Filters.Add<ResultHandlerAttribute>();
                     options.Filters.Add<ExceptionHandlerAttribute>();
+                    // 全局添加授权
+                    options.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
                 .AddJsonOptions(options =>
                 {
@@ -62,5 +66,16 @@ namespace Bing.Admin.Modules
             });
             Enabled = true;
         }
+    }
+
+    /// <summary>
+    /// 授权控制器模型转换器
+    /// </summary>
+    internal class AuthorizeControllerModelConvention : IControllerModelConvention
+    {
+        /// <summary>
+        /// 实现Apply
+        /// </summary>
+        public void Apply(ControllerModel controller) => controller.Filters.Add(new AuthorizeFilter("jwt"));
     }
 }

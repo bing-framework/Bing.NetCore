@@ -12,8 +12,4 @@
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Responses\" />
-  </ItemGroup>
-
 </Project>
