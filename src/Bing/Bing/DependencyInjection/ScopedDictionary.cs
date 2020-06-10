@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Security.Claims;
+using Bing.Dependency;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 基于<see cref="ServiceLifetime.Scoped"/>生命周期的数据字典。可用于在Scoped环境中传递数据

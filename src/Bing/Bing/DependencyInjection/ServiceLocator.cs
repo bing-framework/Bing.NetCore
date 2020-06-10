@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bing.Dependency;
 using Bing.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 应用程序服务定位器。可随时正常解析<see cref="ServiceLifetime.Singleton"/>与<see cref="ServiceLifetime.Transient"/>生命周期类型的服务

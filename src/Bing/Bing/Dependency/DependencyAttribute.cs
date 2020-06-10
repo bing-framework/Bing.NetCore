@@ -34,9 +34,6 @@ namespace Bing.Dependency
         /// 初始化一个<see cref="DependencyAttribute"/>类型的实例
         /// </summary>
         /// <param name="lifetime">生命周期类型</param>
-        public DependencyAttribute(ServiceLifetime lifetime)
-        {
-            Lifetime = lifetime;
-        }
+        public DependencyAttribute(ServiceLifetime lifetime) => Lifetime = lifetime;
     }
 }

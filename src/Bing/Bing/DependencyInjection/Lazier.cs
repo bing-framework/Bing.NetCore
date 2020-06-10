@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// Lazy延迟加载解析器

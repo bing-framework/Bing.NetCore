@@ -1,7 +1,7 @@
-﻿using Bing.DependencyInjection;
+﻿using Bing.Dependency;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 默认<see cref="IServiceScope"/>工厂，行为和<see cref="IServiceScopeFactory"/>一样

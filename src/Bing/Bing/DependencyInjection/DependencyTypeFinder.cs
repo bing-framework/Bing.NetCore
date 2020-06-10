@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Bing.Dependency;
 using Bing.Extensions;
 using Bing.Finders;
-using Bing.Helpers;
 using Bing.Reflection;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 依赖注入类型查找器
@@ -23,10 +23,7 @@ namespace Bing.Dependency
         /// 初始化一个<see cref="DependencyTypeFinder"/>类型的实例
         /// </summary>
         /// <param name="allAssemblyFinder">所有程序集查找器</param>
-        public DependencyTypeFinder(IAllAssemblyFinder allAssemblyFinder)
-        {
-            _allAssemblyFinder = allAssemblyFinder;
-        }
+        public DependencyTypeFinder(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;
 
         /// <summary>
         /// 重写已实现所有项的查找

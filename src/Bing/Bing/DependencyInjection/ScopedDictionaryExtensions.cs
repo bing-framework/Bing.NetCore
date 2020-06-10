@@ -1,4 +1,4 @@
-﻿namespace Bing.Dependency
+﻿namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 作用域字典(<see cref="ScopedDictionary"/>) 扩展
@@ -13,7 +13,7 @@
         /// <param name="key">键名</param>
         public static T GetValue<T>(this ScopedDictionary dictionary, string key) where T : class
         {
-            if (dictionary.TryGetValue(key, out object obj))
+            if (dictionary.TryGetValue(key, out var obj))
                 return obj as T;
             return default;
         }

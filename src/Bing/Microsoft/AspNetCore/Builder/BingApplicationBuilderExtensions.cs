@@ -1,4 +1,4 @@
-﻿using Bing.Dependency;
+﻿using Bing.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Builder
 {
