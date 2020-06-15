@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Biz\Bing.Biz.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Permissions\Bing.Permissions.csproj" />
     <ProjectReference Include="..\..\..\..\src\Bing.Webs\Bing.Webs.csproj" />
