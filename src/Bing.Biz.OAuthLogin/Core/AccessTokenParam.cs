@@ -31,14 +31,11 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public virtual ValidationResultCollection Validate()
         {
             var result = DataAnnotationValidation.Validate(this);
             if (result.IsValid)
-            {
                 return ValidationResultCollection.Success;
-            }
             throw new Warning(result.First().ErrorMessage);
         }
     }

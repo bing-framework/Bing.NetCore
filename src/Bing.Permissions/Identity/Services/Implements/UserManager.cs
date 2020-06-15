@@ -252,6 +252,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <param name="newPassword">新密码</param>
         public virtual async Task ResetPasswordByEmailAsync(TUser user, string token, string newPassword)
         {
+            user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
             var result = await Manager.ResetPasswordAsync(user, TokenOptions.DefaultEmailProvider, token, newPassword);
             result.ThrowIfError();
         }
@@ -280,6 +281,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <param name="newPassword">新密码</param>
         public virtual async Task ResetPasswordByPhoneAsync(TUser user, string token, string newPassword)
         {
+            user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
             var result = await Manager.ResetPasswordAsync(user, TokenOptions.DefaultPhoneProvider, token, newPassword);
             result.ThrowIfError();
         }
@@ -296,6 +298,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <param name="newPassword">新密码</param>
         public virtual async Task ChangePasswordAsync(TUser user, string currentPassword, string newPassword)
         {
+            user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
             var result = await Manager.ChangePasswordAsync(user, currentPassword, newPassword);
             result.ThrowIfError();
         }
@@ -307,6 +310,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <param name="newPassword">新密码</param>
         public virtual async Task ChangePasswordAsync(TUser user, string newPassword)
         {
+            user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
             var result = await Manager.UpdatePasswordAsync(user, newPassword);
             result.ThrowIfError();
         }

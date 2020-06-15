@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Bing.Admin.Infrastructure.Encryptor;
 using Bing.Extensions;
+using Bing.Security.Encryptors;
 
 namespace Bing.Admin.Systems.Domain.Models
 {
@@ -57,5 +59,10 @@ namespace Bing.Admin.Systems.Domain.Models
             AddClaim(Bing.Security.Claims.ClaimTypes.Mobile, PhoneNumber);
             AddClaim(Bing.Security.Claims.ClaimTypes.Email, Email);
         }
+
+        /// <summary>
+        /// 获取加密器
+        /// </summary>
+        protected override IEncryptor GetEncryptor() => AesEncryptor.Instance;
     }
 }

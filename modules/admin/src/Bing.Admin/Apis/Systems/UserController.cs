@@ -1,5 +1,8 @@
-﻿using Bing.Webs.Controllers;
+﻿using System.Threading.Tasks;
+using Bing.Webs.Controllers;
 using Bing.Admin.Service.Abstractions.Systems;
+using Bing.Admin.Service.Requests.Systems;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis.Systems
 {
@@ -27,6 +30,28 @@ namespace Bing.Admin.Apis.Systems
         {
             UserService = service;
             QueryUserService = queryService;
+        }
+
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="request">请求</param>
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePasswordAsync([FromBody] UpdatePasswordRequest request)
+        {
+            await UserService.ChangePasswordAsync(null, request.OldPassword, request.NewPassword);
+            return Success();
+        }
+
+        /// <summary>
+        /// 重置密码
+        /// </summary>
+        /// <param name="request">请求</param>
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
+        {
+            await UserService.ResetPasswordAsync(request);
+            return Success();
         }
     }
 }

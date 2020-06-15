@@ -37,34 +37,26 @@ namespace Bing.Biz.Payments.Core
         /// <summary>
         /// 初始化
         /// </summary>
-        public virtual void Init()
-        {
-            InitSubject();
-        }
+        public virtual void Init() => InitSubject();
 
         /// <summary>
         /// 初始化订单标题
         /// </summary>
         private void InitSubject()
         {
-            if (Subject.IsEmpty())
-            {
+            if (Subject.IsEmpty()) 
                 Subject = OrderId;
-            }
         }
 
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public virtual ValidationResultCollection Validate()
         {
             ValidateMoney();
             var result = DataAnnotationValidation.Validate(this);
             if (result.IsValid)
-            {
                 return ValidationResultCollection.Success;
-            }
             throw new Warning(result.First().ErrorMessage);
         }
 
@@ -74,18 +66,12 @@ namespace Bing.Biz.Payments.Core
         private void ValidateMoney()
         {
             if (Money <= 0)
-            {
                 throw new Warning(PayResource.InvalidMoney);
-            }
         }
 
         /// <summary>
         /// 转换为支付参数
         /// </summary>
-        /// <returns></returns>
-        public virtual PayParam ToParam()
-        {
-            return this.MapTo<PayParam>();
-        }
+        public virtual PayParam ToParam() => this.MapTo<PayParam>();
     }
 }

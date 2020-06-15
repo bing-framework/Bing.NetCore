@@ -26,6 +26,7 @@ namespace Bing.Admin.Service.Extensions
         {
             var permissionOptions = new PermissionOptions();
             setupAction?.Invoke(permissionOptions);
+            services.Configure(setupAction);
             services.AddScoped<IdentityUserManager>();
             services.AddScoped<IdentitySignInManager>();
             services.AddIdentity<User, Role>(options => options.Load(permissionOptions))
