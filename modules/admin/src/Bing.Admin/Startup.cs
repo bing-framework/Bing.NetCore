@@ -41,6 +41,7 @@ namespace Bing.Admin
                 .AddModule<AuthenticationModule>()
                 .AddModule<EntityFrameworkCoreModule>()
                 .AddModule<CacheModule>()
+                .AddModule<CapModule>()
                 //.AddModule<PgSqlAdminUnitOfWorkMigrationModule>()
                 .AddModule<SwaggerModule>();
             return services.BuildServiceContextProvider();

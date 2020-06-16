@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Threading.Tasks;
+using Bing.Admin.Systems.Domain.Events;
 
 namespace Bing.Admin.EventHandlers.Abstractions.Systems
 {
@@ -9,6 +8,10 @@ namespace Bing.Admin.EventHandlers.Abstractions.Systems
     /// </summary>
     public interface IUserLoginLogMessageEventHandler
     {
-
+        /// <summary>
+        /// 用户登录
+        /// </summary>
+        /// <param name="message">消息</param>
+        Task UserLoginAsync(UserLoginMessage message);
     }
 }

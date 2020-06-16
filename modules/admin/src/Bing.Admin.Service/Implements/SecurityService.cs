@@ -6,12 +6,15 @@ using Bing.Admin.Domain.Shared.Results;
 using Bing.Admin.Infrastructure;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Service.Requests.Systems;
+using Bing.Admin.Systems.Domain.Events;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
 using Bing.Applications;
+using Bing.Events.Messages;
 using Bing.Exceptions;
 using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Permissions.Identity.JwtBearer;
 using Bing.Permissions.Identity.Results;
 
@@ -27,6 +30,7 @@ namespace Bing.Admin.Service.Implements
         /// </summary>
         public SecurityService(IAdminUnitOfWork unitOfWork
             , IJsonWebTokenBuilder tokenBuilder
+            , IMessageEventBus messageEventBus
             , IUserRepository userRepository
             , IApplicationRepository applicationRepository
             , IRoleRepository roleRepository
@@ -34,6 +38,7 @@ namespace Bing.Admin.Service.Implements
         {
             UnitOfWork = unitOfWork;
             TokenBuilder = tokenBuilder;
+            MessageEventBus = messageEventBus;
             UserRepository = userRepository;
             ApplicationRepository = applicationRepository;
             RoleRepository = roleRepository;
@@ -49,6 +54,11 @@ namespace Bing.Admin.Service.Implements
         /// Jwt令牌构建器
         /// </summary>
         protected IJsonWebTokenBuilder TokenBuilder { get; }
+
+        /// <summary>
+        /// 消息事件总线
+        /// </summary>
+        protected IMessageEventBus MessageEventBus { get; }
 
         /// <summary>
         /// 用户仓储
@@ -144,13 +154,13 @@ namespace Bing.Admin.Service.Implements
         {
             if (signInResult.State == SignInState.Failed)
                 return new SignInWithTokenResult { UserId = signInResult.UserId, State = signInResult.State, Message = signInResult.Message };
-            //await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage()
-            //{
-            //    UserId = user.Id,
-            //    Name = user.Nickname,
-            //    Ip = Web.IP,
-            //    UserAgent = Web.Browser
-            //}));
+            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage()
+            {
+                UserId = user.Id,
+                Name = user.Nickname,
+                Ip = Web.IP,
+                UserAgent = Web.Browser
+            }));
             var result = await TokenBuilder.CreateAsync(user.GetClaims().ToDictionary(x => x.Type, x => x.Value));
             return new SignInWithTokenResult
             {

@@ -1,3 +1,5 @@
+﻿using System.Threading.Tasks;
+using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Domains.Services;
 
 namespace Bing.Admin.Systems.Domain.Services.Abstractions
@@ -7,5 +9,10 @@ namespace Bing.Admin.Systems.Domain.Services.Abstractions
     /// </summary>
     public interface IUserLoginLogManager : IDomainService
     {
+        /// <summary>
+        /// 创建
+        /// </summary>
+        /// <param name="parameter">参数</param>
+        Task CreateAsync(UserLoginLogParameter parameter);
     }
 }
