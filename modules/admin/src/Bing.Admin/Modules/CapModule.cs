@@ -2,9 +2,11 @@
 using Bing.Admin.Data.UnitOfWorks.PgSql;
 using Bing.Admin.EventHandlers.Abstractions.Systems;
 using Bing.Admin.EventHandlers.Implements.Systems;
+using Bing.Admin.Infrastructure.Cap;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Events.Cap;
+using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -33,6 +35,7 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
+            services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
             LoadEvent(services);
             // 添加事件总线服务
             services.AddCapEventBus(o =>
