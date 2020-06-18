@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Bing.Extensions;
 
 namespace Bing.Helpers
@@ -199,32 +200,41 @@ namespace Bing.Helpers
 
         /// <summary>
         /// 转换为32位浮点型，并按指定小数位舍入
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        public static float ToFloat(object input, int? digits = null) => ToFloat(input, default, digits);
+        /// <param name="mode">可选择模式</param>
+        public static float ToFloat(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToFloat(input, default, digits, mode);
 
         /// <summary>
         /// 转换为32位浮点型，并按指定小数位舍入
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="defaultValue">默认值</param>
         /// <param name="digits">小数位数</param>
-        public static float ToFloat(object input, float defaultValue, int? digits = null) => ToFloatOrNull(input, digits) ?? defaultValue;
+        /// <param name="mode">可选择模式</param>
+        public static float ToFloat(object input, float defaultValue, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToFloatOrNull(input, digits, mode) ?? defaultValue;
 
         /// <summary>
         /// 转换为32位可空浮点型，并按指定小数位舍入
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        public static float? ToFloatOrNull(object input, int? digits = null)
+        /// <param name="mode">可选择模式</param>
+        public static float? ToFloatOrNull(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero)
         {
             var success = float.TryParse(input.SafeString(), out var result);
             if (!success)
                 return null;
             if (digits == null)
                 return result;
-            return (float)Math.Round(result, digits.Value);
+            return (float)Math.Round(result, digits.Value, mode);
         }
 
         #endregion
@@ -233,30 +243,39 @@ namespace Bing.Helpers
 
         /// <summary>
         /// 转换为64位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        public static double ToDouble(object input, int? digits = null) => ToDouble(input, default, digits);
+        /// <param name="mode">可选择模式</param>
+        public static double ToDouble(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToDouble(input, default, digits, mode);
 
         /// <summary>
         /// 转换为64位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="defaultValue">默认值</param>
         /// <param name="digits">小数位数</param>
-        public static double ToDouble(object input, double defaultValue, int? digits = null) => ToDoubleOrNull(input, digits) ?? defaultValue;
+        /// <param name="mode">可选择模式</param>
+        public static double ToDouble(object input, double defaultValue, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToDoubleOrNull(input, digits, mode) ?? defaultValue;
 
         /// <summary>
         /// 转换为64位可空浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        public static double? ToDoubleOrNull(object input, int? digits = null)
+        /// <param name="mode">可选择模式</param>
+        public static double? ToDoubleOrNull(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero)
         {
             var success = double.TryParse(input.SafeString(), out var result);
             if (!success)
                 return null;
-            return digits == null ? result : Math.Round(result, digits.Value);
+            return digits == null ? result : Math.Round(result, digits.Value, mode);
         }
 
         #endregion
@@ -265,30 +284,39 @@ namespace Bing.Helpers
 
         /// <summary>
         /// 转换为128位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        public static decimal ToDecimal(object input, int? digits = null) => ToDecimal(input, default(decimal), digits);
+        /// <param name="mode">可选择模式</param>
+        public static decimal ToDecimal(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToDecimal(input, default, digits, mode);
 
         /// <summary>
         /// 转换为128位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="defaultValue">默认值</param>
         /// <param name="digits">小数位数</param>
-        public static decimal ToDecimal(object input, decimal defaultValue, int? digits = null) => ToDecimalOrNull(input, digits) ?? defaultValue;
+        /// <param name="mode">可选择模式</param>
+        public static decimal ToDecimal(object input, decimal defaultValue, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToDecimalOrNull(input, digits, mode) ?? defaultValue;
 
         /// <summary>
         /// 转换为128位可空浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
+        /// <para>采用Banker's rounding（银行家算法），即：四舍六入五取偶。事实上这也是IEEE的规范。</para>
+        /// <para>备注：<see cref="MidpointRounding.AwayFromZero"/>可以用来实现传统意义上的"四舍五入"。</para>
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        public static decimal? ToDecimalOrNull(object input, int? digits = null)
+        /// <param name="mode">可选择模式</param>
+        public static decimal? ToDecimalOrNull(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero)
         {
             var success = decimal.TryParse(input.SafeString(), out var result);
             if (!success)
                 return null;
-            return digits == null ? result : Math.Round(result, digits.Value);
+            return digits == null ? result : Math.Round(result, digits.Value, mode);
         }
 
         #endregion
@@ -476,6 +504,31 @@ namespace Bing.Helpers
             {
                 return default;
             }
+        }
+
+        #endregion
+
+        #region ToAmountInWords(转换为大写金额)
+
+        /// <summary>
+        /// 转换为大写金额
+        /// </summary>
+        /// <param name="input">输入值</param>
+        public static string ToAmountInWords(object input)
+        {
+            string tempValue;
+            if (input is string valueStr)
+                tempValue = valueStr;
+            else
+                tempValue = input.ToString();
+            if (!decimal.TryParse(tempValue, out var decValue))
+                return tempValue;
+            tempValue = decValue.ToString("#L#E#D#C#K#E#D#C#J#E#D#C#I#E#D#C#H#E#D#C#G#E#D#C#F#E#D#C#.0B0A");
+            var temp = Regex.Replace(tempValue,
+                @"((?<=-|^)[^1-9]*)|((?'z'0)[0A-E]*((?=[1-9])|(?'-z'(?=[F-L\.]|$))))|((?'b'[F-L])(?'z'0)[0A-L]*((?=[1-9])|(?'-z'(?=[\.]|$))))",
+                "${b}${z}");
+            var result = Regex.Replace(temp, ".", m => "负元空零壹贰叁肆伍陆柒捌玖空空空空空空空分角拾佰仟万亿兆京垓秭穰"[m.Value[0] - '-'].ToString());
+            return result;
         }
 
         #endregion
