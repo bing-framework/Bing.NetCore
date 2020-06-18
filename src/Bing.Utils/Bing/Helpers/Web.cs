@@ -9,11 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Bing.Extensions;
-using Bing.Utils.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Internal;
+using FileHelper = Bing.IO.FileHelper;
 
 namespace Bing.Helpers
 {

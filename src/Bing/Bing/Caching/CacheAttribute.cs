@@ -9,7 +9,7 @@ using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using Bing.Aspects.Base;
 using Bing.Exceptions;
-using Bing.Utils.Threading.Asyncs;
+using Bing.Threading.Asyncs;
 
 namespace Bing.Caching
 {

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Extensions;
 
-namespace Bing.Utils.Threading.Asyncs
+namespace Bing.Threading.Asyncs
 {
     /// <summary>
     /// 异步信号量
@@ -37,7 +37,6 @@ namespace Bing.Utils.Threading.Asyncs
         /// <summary>
         /// 等待同步
         /// </summary>
-        /// <returns></returns>
         public Task WaitAsync()
         {
             lock (_waiters)
@@ -63,13 +62,9 @@ namespace Bing.Utils.Threading.Asyncs
             lock (_waiters)
             {
                 if (_waiters.Count > 0)
-                {
                     toRelease = _waiters.Dequeue();
-                }
                 else
-                {
                     ++_currentCount;
-                }
             }
 
             toRelease?.SetResult(true);

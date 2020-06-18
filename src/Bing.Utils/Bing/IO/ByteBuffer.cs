@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 字节缓冲区

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Bing.Utils.Threading.Asyncs
+namespace Bing.Threading.Asyncs
 {
     /// <summary>
     /// 异步锁

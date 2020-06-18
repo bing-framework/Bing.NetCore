@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 文件监控器

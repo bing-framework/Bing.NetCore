@@ -5,14 +5,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.IO;
 using Bing.Tests;
-using Bing.Extensions;
-using Bing.Utils.Helpers;
 using Bing.Utils.IdGenerators.Core;
-using Bing.Utils.IO;
 using Bing.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
+using FileHelper = Bing.IO.FileHelper;
 
 namespace Bing.Utils.Tests
 {

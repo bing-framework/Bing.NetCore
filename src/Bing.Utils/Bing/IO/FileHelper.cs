@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using FileInfo = System.IO.FileInfo;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 文件操作辅助类
@@ -303,7 +303,7 @@ namespace Bing.Utils.IO
         /// <param name="content">数据</param>
         public static void Write(string filePath, string content)
         {
-            Write(filePath, ToBytes(content.SafeString()));
+            Write(filePath, FileHelper.ToBytes(content.SafeString()));
         }
 
         /// <summary>

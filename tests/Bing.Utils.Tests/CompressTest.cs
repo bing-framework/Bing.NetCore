@@ -3,9 +3,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Bing.Utils.IO;
 using ComponentAce.Compression.Libs.zlib;
 using Xunit;
+using FileHelper = Bing.IO.FileHelper;
 
 namespace Bing.Utils.Tests
 {

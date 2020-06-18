@@ -2,8 +2,9 @@
 using System.IO;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Utils;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 目录操作辅助类

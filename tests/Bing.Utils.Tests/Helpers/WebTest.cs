@@ -7,8 +7,8 @@ using Bing.Helpers;
 using Bing.Tests;
 using Bing.Utils.Develops;
 using Bing.Extensions;
+using Bing.IO;
 using Bing.Utils.Helpers;
-using Bing.Utils.IO;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,6 +1,6 @@
 ﻿using System.IO;
+using Bing.IO;
 using Bing.Tests;
-using Bing.Utils.IO;
 using Xunit;
 using Xunit.Abstractions;
 

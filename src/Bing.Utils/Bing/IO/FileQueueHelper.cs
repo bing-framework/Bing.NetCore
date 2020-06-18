@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Bing.Utils.Json;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 文件队列工具
@@ -20,20 +20,13 @@ namespace Bing.Utils.IO
         public static void AddFileToEnqueue(string queueDir, string fileName, string fileContent)
         {
             var saveDir = GetSaveDir(queueDir);
-            if (!Directory.Exists(saveDir))
-            {
+            if (!Directory.Exists(saveDir)) 
                 Directory.CreateDirectory(saveDir);
-            }
-
             var savePath = Path.Combine(saveDir, fileName);
-            string tempFilePath = $"{savePath}.bak";
-            using (var fs = new FileStream(tempFilePath, FileMode.Create, FileAccess.ReadWrite))
-            {
-                using (var sw = new StreamWriter(fs))
-                {
-                    sw.Write(fs);
-                }
-            }
+            var tempFilePath = $"{savePath}.bak";
+            using var fs = new FileStream(tempFilePath, FileMode.Create, FileAccess.ReadWrite);
+            using var sw = new StreamWriter(fs);
+            sw.Write(fs);
 
             File.Copy(tempFilePath, savePath, true);
             File.Delete(tempFilePath);
@@ -43,14 +36,10 @@ namespace Bing.Utils.IO
         /// 获取保存目录
         /// </summary>
         /// <param name="queuePath">队列路径</param>
-        /// <returns></returns>
         private static string GetSaveDir(string queuePath)
         {
-            if (!Directory.Exists(queuePath))
-            {
+            if (!Directory.Exists(queuePath)) 
                 Directory.CreateDirectory(queuePath);
-            }
-
             return Path.Combine(queuePath, DateTime.Now.ToString("yyyyMMddHHmm"));
         }
 
@@ -58,19 +47,13 @@ namespace Bing.Utils.IO
         /// 从队列中移除文件
         /// </summary>
         /// <param name="filePath">文件路径</param>
-        public static void RemoveFileFromQueue(string filePath)
-        {
-            File.Delete(filePath);
-        }
+        public static void RemoveFileFromQueue(string filePath) => File.Delete(filePath);
 
         /// <summary>
         /// 从队列中移除文件
         /// </summary>
         /// <param name="fileInfo">文件信息</param>
-        public static void RemoveFileFromQueue(FileInfo fileInfo)
-        {
-            File.Delete(fileInfo.FullName);
-        }
+        public static void RemoveFileFromQueue(FileInfo fileInfo) => File.Delete(fileInfo.FullName);
 
         /// <summary>
         /// 获取文件
@@ -78,7 +61,6 @@ namespace Bing.Utils.IO
         /// <param name="queueDir">队列目录</param>
         /// <param name="takeCount">获取文件数量</param>
         /// <param name="type">类型</param>
-        /// <returns></returns>
         public static List<FileInfo> GetFilesFromQueue(string queueDir, int takeCount, string type = "")
         {
             var items = new List<FileInfo>();
@@ -87,11 +69,11 @@ namespace Bing.Utils.IO
                 return items;
             }
 
-            DirectoryInfo homeDir = new DirectoryInfo(queueDir);
-            DirectoryInfo[] dirs = homeDir.GetDirectories().OrderBy(p => Convert.ToInt32(p.Name)).ToArray();
+            var homeDir = new DirectoryInfo(queueDir);
+            var dirs = homeDir.GetDirectories().OrderBy(p => Convert.ToInt32(p.Name)).ToArray();
             for (var i = 0; i < dirs.Length; i++)
             {
-                DirectoryInfo dir = dirs[i];
+                var dir = dirs[i];
                 var fileInfos = !string.IsNullOrWhiteSpace(type) ? dir.GetFiles(type) : dir.GetFiles();
                 if (fileInfos.Length == 0)
                 {
@@ -139,28 +121,20 @@ namespace Bing.Utils.IO
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="filePath">文件路径</param>
-        /// <returns></returns>
         public static T ReadObjectFromQueue<T>(string filePath)
         {
-            T t = default(T);
+            var t = default(T);
             var fi = new FileInfo(filePath);
             if (fi.Exists)
             {
-                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    string content;
-                    using (var sr = new StreamReader(fs))
-                    {
-                        content = sr.ReadToEnd();
-                    }
+                using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                string content;
+                using (var sr = new StreamReader(fs)) 
+                    content = sr.ReadToEnd();
 
-                    if (!string.IsNullOrWhiteSpace(content))
-                    {
-                        t = JsonHelper.ToObject<T>(content);
-                    }
-
-                    fs.Close();
-                }
+                if (!string.IsNullOrWhiteSpace(content)) 
+                    t = JsonHelper.ToObject<T>(content);
+                fs.Close();
             }
 
             return t;
@@ -170,21 +144,18 @@ namespace Bing.Utils.IO
         /// 读取文件内容
         /// </summary>
         /// <param name="filePath">文件路径</param>
-        /// <returns></returns>
         public static string ReadStringFromQueue(string filePath)
         {
-            string content = string.Empty;
+            var content = string.Empty;
             var fi = new FileInfo(filePath);
             if (fi.Exists)
             {
-                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using (var sr = new StreamReader(fs))
                 {
-                    using (var sr = new StreamReader(fs))
-                    {
-                        content = sr.ReadToEnd();
-                    }
-                    fs.Close();
+                    content = sr.ReadToEnd();
                 }
+                fs.Close();
             }
 
             return content;
@@ -194,10 +165,9 @@ namespace Bing.Utils.IO
         /// 获取队列文件夹
         /// </summary>
         /// <param name="queueDir">队列目录</param>
-        /// <returns></returns>
         public static DirectoryInfo[] GetQueueDirs(string queueDir)
         {
-            DirectoryInfo homeDir = new DirectoryInfo(queueDir);
+            var homeDir = new DirectoryInfo(queueDir);
             return homeDir.GetDirectories();
         }
     }

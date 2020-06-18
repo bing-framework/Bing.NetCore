@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Bing.Utils.Threading.Locks
+namespace Bing.Threading.Locks
 {
     /// <summary>
     /// 读写锁释放器
@@ -55,11 +55,9 @@ namespace Bing.Utils.Threading.Locks
                 case ReaderWriteLockType.Read:
                     _rwLock.ExitReadLock();
                     break;
-
                 case ReaderWriteLockType.Write:
                     _rwLock.ExitWriteLock();
                     break;
-
                 case ReaderWriteLockType.UpgradeableRead:
                     _rwLock.ExitUpgradeableReadLock();
                     break;

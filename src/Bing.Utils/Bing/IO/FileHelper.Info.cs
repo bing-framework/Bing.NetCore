@@ -7,7 +7,7 @@ using Bing.Helpers;
 using Bing.Utils.Files;
 using FileInfo = System.IO.FileInfo;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 文件操作辅助类 - 信息

@@ -1,4 +1,4 @@
-﻿namespace Bing.Utils.Threading.Locks
+﻿namespace Bing.Threading.Locks
 {
     /// <summary>
     /// 读写锁类型

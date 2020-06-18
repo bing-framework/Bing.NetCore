@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Helpers;
 
-namespace Bing.Utils.IO
+namespace Bing.IO
 {
     /// <summary>
     /// 文件操作帮助类 - 加载
@@ -18,10 +18,8 @@ namespace Bing.Utils.IO
         public static async Task<string> ReadAllTextAsync(string filePath)
         {
             Check.NotNull(filePath, nameof(filePath));
-            using (var reader = File.OpenText(filePath))
-            {
-                return await reader.ReadToEndAsync();
-            }
+            using var reader = File.OpenText(filePath);
+            return await reader.ReadToEndAsync();
         }
 
         #endregion
@@ -35,12 +33,10 @@ namespace Bing.Utils.IO
         public static async Task<byte[]> ReadAllBytesAsync(string filePath)
         {
             Check.NotNull(filePath, nameof(filePath));
-            using (var stream = File.Open(filePath, FileMode.Open))
-            {
-                var result = new byte[stream.Length];
-                await stream.ReadAsync(result, 0, (int)stream.Length);
-                return result;
-            }
+            using var stream = File.Open(filePath, FileMode.Open);
+            var result = new byte[stream.Length];
+            await stream.ReadAsync(result, 0, (int)stream.Length);
+            return result;
         }
 
         #endregion
