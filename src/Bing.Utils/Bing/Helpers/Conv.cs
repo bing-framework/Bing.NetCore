@@ -205,8 +205,7 @@ namespace Bing.Helpers
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        /// <param name="mode">可选择模式</param>
-        public static float ToFloat(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToFloat(input, default, digits, mode);
+        public static float ToFloat(object input, int? digits = null) => ToFloat(input, default, digits, MidpointRounding.AwayFromZero);
 
         /// <summary>
         /// 转换为32位浮点型，并按指定小数位舍入
@@ -248,8 +247,7 @@ namespace Bing.Helpers
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        /// <param name="mode">可选择模式</param>
-        public static double ToDouble(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToDouble(input, default, digits, mode);
+        public static double ToDouble(object input, int? digits = null) => ToDouble(input, default, digits, MidpointRounding.AwayFromZero);
 
         /// <summary>
         /// 转换为64位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
@@ -289,8 +287,7 @@ namespace Bing.Helpers
         /// </summary>
         /// <param name="input">输入值</param>
         /// <param name="digits">小数位数</param>
-        /// <param name="mode">可选择模式</param>
-        public static decimal ToDecimal(object input, int? digits = null, MidpointRounding mode = MidpointRounding.AwayFromZero) => ToDecimal(input, default, digits, mode);
+        public static decimal ToDecimal(object input, int? digits = null) => ToDecimal(input, default, digits, MidpointRounding.AwayFromZero);
 
         /// <summary>
         /// 转换为128位浮点型，并按指定小数位舍入，温馨提示：4舍6入5成双
