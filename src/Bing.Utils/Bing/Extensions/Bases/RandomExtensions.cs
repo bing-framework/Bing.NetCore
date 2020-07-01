@@ -83,32 +83,6 @@ namespace Bing.Extensions
 
         #endregion
 
-        #region NextFloat(获取下一个随机数)
-
-        /// <summary>
-        /// 获取下一个随机数。范围：[0.0,1.0]
-        /// </summary>
-        /// <param name="random">随机数</param>
-        public static float NextFloat(this Random random) => (float)random.NextDouble();
-
-        /// <summary>
-        /// 获取下一个随机数。范围：[0.0,max]
-        /// </summary>
-        /// <param name="random">随机数</param>
-        /// <param name="max">最大值</param>
-        public static float NextFloat(this Random random, float max) => (float)(random.NextDouble() * max);
-
-        /// <summary>
-        /// 获取下一个随机数。范围：[min,max]
-        /// </summary>
-        /// <param name="random">随机数</param>
-        /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
-        public static float NextFloat(this Random random, float min, float max) =>
-            (float)(random.NextDouble() * (max - min) + min);
-
-        #endregion
-
         #region NormalFloat(标准正态分布生成随机单精度浮点数)
 
         /// <summary>
@@ -138,21 +112,6 @@ namespace Bing.Extensions
 
         #endregion
 
-        #region NextBool(获取下一个随机数)
-
-        /// <summary>
-        /// 获取下一个随机数。范围：[true,false]
-        /// </summary>
-        /// <param name="random">随机数</param>
-        public static bool NextBool(this Random random) => random.NextDouble() < 0.5;
-
-        /// <summary>
-        /// 获取下一个随机数。范围：[true,false]
-        /// </summary>
-        /// <param name="random">随机数</param>
-        /// <param name="probability">true的概率。范围：[0.0,1.0]</param>
-        public static bool NextBool(this Random random, double probability) => random.NextDouble() < probability;
-
-        #endregion
+        
     }
 }

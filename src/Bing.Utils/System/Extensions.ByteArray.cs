@@ -1,8 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
-// ReSharper disable once CheckNamespace
-namespace Bing.Extensions
+namespace System
 {
     public static partial class BaseTypeExtensions
     {

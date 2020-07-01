@@ -81,8 +81,6 @@ namespace Bing.Extensions
 
         #endregion
 
-
-
         #region HexStringToBytes(16进制字符串转换成字节数组)
 
         /// <summary>

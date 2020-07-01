@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 
-// ReSharper disable once CheckNamespace
-namespace Bing.Extensions
+namespace System
 {
     /// <summary>
     /// 基础类型扩展

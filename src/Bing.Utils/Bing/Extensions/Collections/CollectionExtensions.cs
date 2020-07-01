@@ -11,64 +11,6 @@ namespace Bing.Extensions
     /// </summary>
     public static class CollectionExtensions
     {
-        #region AddIfNotContains(添加项。如果未包含，则添加)
-
-        /// <summary>
-        /// 添加项。如果未包含，则添加
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="source">集合</param>
-        /// <param name="item">项</param>
-        public static bool AddIfNotContains<T>(this ICollection<T> source, T item)
-        {
-            Check.NotNull(source, nameof(source));
-            if (source.Contains(item))
-                return false;
-            source.Add(item);
-            return true;
-        }
-
-        /// <summary>
-        /// 添加项集合。如果未包含，则添加
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="source">集合</param>
-        /// <param name="items">项集合</param>
-        public static IEnumerable<T> AddIfNotContains<T>(this ICollection<T> source, IEnumerable<T> items)
-        {
-            Check.NotNull(source, nameof(source));
-
-            var addedItems = new List<T>();
-            foreach (var item in items)
-            {
-                if (source.Contains(item))
-                    continue;
-                source.Add(item);
-                addedItems.Add(item);
-            }
-            return addedItems;
-        }
-
-        /// <summary>
-        /// 添加项。如果未包含
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="source">集合</param>
-        /// <param name="predicate">条件</param>
-        /// <param name="itemFactory">获取项函数</param>
-        public static bool AddIfNotContains<T>(this ICollection<T> source, Func<T, bool> predicate, Func<T> itemFactory)
-        {
-            Check.NotNull(source, nameof(source));
-            Check.NotNull(predicate, nameof(predicate));
-            Check.NotNull(itemFactory, nameof(itemFactory));
-
-            if (source.Any(predicate))
-                return false;
-            source.Add(itemFactory());
-            return true;
-        }
-
-        #endregion
 
         #region RemoveAll(移除项)
 
