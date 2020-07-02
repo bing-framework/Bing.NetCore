@@ -60,23 +60,52 @@ namespace Bing
 
         #endregion
 
-        #region NextUInt16(随机返回一个无符号八位整数)
+        #region NextUInt16(随机返回一个无符号16位整型)
 
         /// <summary>
-        /// 随机返回一个无符号八位整数
+        /// 随机返回一个无符号16位整型
         /// </summary>
         /// <param name="random">随机数</param>
         public static ushort NextUInt16(this Random random) => BitConverter.ToUInt16(random.NextBytes(2), 0);
 
         #endregion
 
-        #region NextInt16(随机返回一个有符号十六位整数)
+        #region NextInt16(随机返回一个有符号16位整型)
 
         /// <summary>
         /// 随机返回一个有符号十六位整数
         /// </summary>
         /// <param name="random">随机数</param>
         public static short NextInt16(this Random random) => BitConverter.ToInt16(random.NextBytes(2), 0);
+
+        #endregion
+
+        #region NextLong(随机返回一个有符号64位整型)
+
+        /// <summary>
+        /// 随机返回一个有符号64位整型。范围：[0,long.MaxValue]
+        /// </summary>
+        /// <param name="random">范围</param>
+        public static long NextLong(this Random random) => random.NextLong(0, long.MaxValue);
+
+        /// <summary>
+        /// 随机返回一个有符号64位整型。范围：[0,max]
+        /// </summary>
+        /// <param name="random">随机数</param>
+        /// <param name="max">最大值</param>
+        public static long NextLong(this Random random, long max) => random.NextLong(0, max);
+
+        /// <summary>
+        /// 随机返回一个有符号64位整型。范围：[min,max]
+        /// </summary>
+        /// <param name="random">随机数</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        public static long NextLong(this Random random, long min, long max)
+        {
+            var longRand = BitConverter.ToInt64(random.NextBytes(8),0);
+            return Math.Abs(longRand % (max - min)) + min;
+        }
 
         #endregion
 
@@ -103,6 +132,26 @@ namespace Bing
         /// <param name="max">最大值</param>
         public static float NextFloat(this Random random, float min, float max) =>
             (float)(random.NextDouble() * (max - min) + min);
+
+        #endregion
+
+        #region NextDouble(随机返回一个双精度浮点数)
+
+        /// <summary>
+        /// 随机返回一个双精度浮点数。范围：[0.0,max]
+        /// </summary>
+        /// <param name="random">随机数</param>
+        /// <param name="max">最大值</param>
+        public static double NextDouble(this Random random, double max) => random.NextDouble() * max;
+
+        /// <summary>
+        /// 随机返回一个双精度浮点数。范围：[min,max]
+        /// </summary>
+        /// <param name="random">随机数</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        public static double NextDouble(this Random random, double min, double max) =>
+            random.NextDouble() * (max - min) + min;
 
         #endregion
 
@@ -135,6 +184,49 @@ namespace Bing
         /// <param name="random">随机数</param>
         /// <param name="values">结果集合</param>
         public static T OneOf<T>(this Random random, params T[] values) => values[random.Next(values.Length)];
+
+        #endregion
+
+        #region NormalFloat(标准正态分布生成随机单精度浮点数)
+
+        /// <summary>
+        /// 标准正态分布生成随机单精度浮点数
+        /// </summary>
+        /// <param name="random">随机数</param>
+        public static float NormalFloat(this Random random) => (float)random.NormalDouble();
+
+        /// <summary>
+        /// 标准正态分布生成随机单精度浮点数
+        /// </summary>
+        /// <param name="random">随机数</param>
+        /// <param name="mean">均值</param>
+        /// <param name="deviation">偏差</param>
+        public static float NormalFloat(this Random random, float mean, float deviation) =>
+            mean + (float)(deviation * random.NormalDouble());
+
+        #endregion
+
+        #region NormalDouble(标准正态分布生成随机双精度浮点数)
+
+        /// <summary>
+        /// 标准正态分布生成随机双精度浮点数
+        /// </summary>
+        /// <param name="random">随机数</param>
+        public static double NormalDouble(this Random random)
+        {
+            var u1 = random.NextDouble();
+            var u2 = random.NextDouble();
+            return Math.Sqrt(-2 * Math.Log(u1)) * Math.Cos(2 * Math.PI * u2);
+        }
+
+        /// <summary>
+        /// 标准正态分布生成随机双精度浮点数
+        /// </summary>
+        /// <param name="random">随机数</param>
+        /// <param name="mean">均值</param>
+        /// <param name="deviation">偏差</param>
+        public static double NormalDouble(this Random random, double mean, double deviation) =>
+            mean + deviation * random.NormalDouble();
 
         #endregion
     }

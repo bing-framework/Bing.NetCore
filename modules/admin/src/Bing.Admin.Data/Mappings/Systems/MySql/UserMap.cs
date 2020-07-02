@@ -2,29 +2,29 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Bing.Admin.Systems.Domain.Models;
 
-namespace Bing.Admin.Data.Mappings.Systems.PgSql
+namespace Bing.Admin.Data.Mappings.Systems.MySql
 {
     /// <summary>
-    /// 权限 映射配置
+    /// 用户 映射配置
     /// </summary>
-    public class PermissionMap : Bing.Datas.EntityFramework.PgSql.AggregateRootMap<Permission>
+    public class UserMap : Bing.Datas.EntityFramework.MySql.AggregateRootMap<User>
     {
         /// <summary>
         /// 映射表
         /// </summary>
-        protected override void MapTable( EntityTypeBuilder<Permission> builder ) 
+        protected override void MapTable( EntityTypeBuilder<User> builder ) 
         {
-            builder.ToTable( "Permission", "Systems" );
+            builder.ToTable( "Systems.User" );
         }
                 
         /// <summary>
         /// 映射属性
         /// </summary>
-        protected override void MapProperties( EntityTypeBuilder<Permission> builder ) 
+        protected override void MapProperties( EntityTypeBuilder<User> builder ) 
         {
-            // 权限标识
+            // 用户标识
             builder.Property(t => t.Id)
-                .HasColumnName("PermissionId");
+                .HasColumnName("UserId");
             builder.HasQueryFilter( t => t.IsDeleted == false );
         }
     }

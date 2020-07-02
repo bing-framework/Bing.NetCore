@@ -1,30 +1,30 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Bing.Admin.Commons.Domain.Models;
+using Bing.Admin.Systems.Domain.Models;
 
-namespace Bing.Admin.Data.Mappings.Commons.PgSql
+namespace Bing.Admin.Data.Mappings.Systems.MySql
 {
     /// <summary>
-    /// 字典 映射配置
+    /// 资源 映射配置
     /// </summary>
-    public class DictionaryMap : Bing.Datas.EntityFramework.PgSql.AggregateRootMap<Dictionary>
+    public class ResourceMap : Bing.Datas.EntityFramework.MySql.AggregateRootMap<Resource>
     {
         /// <summary>
         /// 映射表
         /// </summary>
-        protected override void MapTable( EntityTypeBuilder<Dictionary> builder ) 
+        protected override void MapTable( EntityTypeBuilder<Resource> builder ) 
         {
-            builder.ToTable( "Dictionary", "Commons" );
+            builder.ToTable( "Systems.Resource" );
         }
                 
         /// <summary>
         /// 映射属性
         /// </summary>
-        protected override void MapProperties( EntityTypeBuilder<Dictionary> builder ) 
+        protected override void MapProperties( EntityTypeBuilder<Resource> builder ) 
         {
-            // 字典编号
+            // 资源标识
             builder.Property(t => t.Id)
-                .HasColumnName("DictionaryId");
+                .HasColumnName("ResourceId");
             builder.HasQueryFilter( t => t.IsDeleted == false );
             builder.Property( t => t.Path ).HasColumnName( "Path" );
             builder.Property( t => t.Level ).HasColumnName( "Level" );

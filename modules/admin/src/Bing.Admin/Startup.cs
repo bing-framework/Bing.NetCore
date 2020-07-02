@@ -42,7 +42,7 @@ namespace Bing.Admin
                 .AddModule<EntityFrameworkCoreModule>()
                 .AddModule<CacheModule>()
                 .AddModule<CapModule>()
-                //.AddModule<PgSqlAdminUnitOfWorkMigrationModule>()
+                .AddModule<MySqlAdminUnitOfWorkMigrationModule>()
                 .AddModule<SwaggerModule>();
             return services.BuildServiceContextProvider();
         }

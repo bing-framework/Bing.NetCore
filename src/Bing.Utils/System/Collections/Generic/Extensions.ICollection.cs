@@ -79,19 +79,19 @@ namespace System.Collections.Generic
 
         #region RemoveAll(移除所有项)
 
-        /// <summary>
-        /// 移除所有项。从集合中删除所有满足给定条件的项
-        /// </summary>
-        /// <typeparam name="T">泛型类型</typeparam>
-        /// <param name="source">源</param>
-        /// <param name="predicate">条件</param>
-        public static IList<T> RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
-        {
-            var items = source.Where(predicate).ToList();
-            foreach (var item in items)
-                source.Remove(item);
-            return items;
-        }
+        ///// <summary>
+        ///// 移除所有项。从集合中删除所有满足给定条件的项
+        ///// </summary>
+        ///// <typeparam name="T">泛型类型</typeparam>
+        ///// <param name="source">源</param>
+        ///// <param name="predicate">条件</param>
+        //public static IList<T> RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
+        //{
+        //    var items = source.Where(predicate).ToList();
+        //    foreach (var item in items)
+        //        source.Remove(item);
+        //    return items;
+        //}
 
         #endregion
     }

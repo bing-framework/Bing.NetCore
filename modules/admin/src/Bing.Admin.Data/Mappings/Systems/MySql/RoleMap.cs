@@ -2,19 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Bing.Admin.Systems.Domain.Models;
 
-namespace Bing.Admin.Data.Mappings.Systems.PgSql
+namespace Bing.Admin.Data.Mappings.Systems.MySql
 {
     /// <summary>
     /// 角色 映射配置
     /// </summary>
-    public class RoleMap : Bing.Datas.EntityFramework.PgSql.AggregateRootMap<Role>
+    public class RoleMap : Bing.Datas.EntityFramework.MySql.AggregateRootMap<Role>
     {
         /// <summary>
         /// 映射表
         /// </summary>
         protected override void MapTable( EntityTypeBuilder<Role> builder ) 
         {
-            builder.ToTable( "Role", "Systems" );
+            builder.ToTable( "Systems.Role" );
         }
                 
         /// <summary>

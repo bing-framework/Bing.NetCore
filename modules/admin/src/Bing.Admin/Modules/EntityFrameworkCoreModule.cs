@@ -2,7 +2,7 @@
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
-using Bing.Datas.EntityFramework.PgSql;
+using Bing.Datas.EntityFramework.MySql;
 using Bing.Datas.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,11 +35,11 @@ namespace Bing.Admin.Modules
             var configuration = services.GetConfiguration();
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
             // 注册工作单元
-            services.AddPgSqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.PgSql.AdminUnitOfWork>(connectionStr);
+            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(connectionStr);
             // 注册SqlQuery
-            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.PgSql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.PgSql.AdminUnitOfWork>(options =>
+            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
                 {
-                    options.DatabaseType = DatabaseType.PgSql;
+                    options.DatabaseType = DatabaseType.MySql;
                     options.IsClearAfterExecution = true;
                 });
             // 注册SqlExecutor

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using Bing.Admin.Data.Seed;
-using Bing.Admin.Data.UnitOfWorks.PgSql;
+using Bing.Admin.Data.UnitOfWorks.MySql;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Datas.EntityFramework;
@@ -11,11 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Admin.Modules
 {
     /// <summary>
-    /// PgSql-AdminUnitOfWork迁移模块
+    /// MySql-AdminUnitOfWork迁移模块
     /// </summary>
     [DependsOnModule(typeof(AspNetCoreModule))]
-    [Description("PgSql-AdminUnitOfWork迁移模块")]
-    public class PgSqlAdminUnitOfWorkMigrationModule : MigrationModuleBase<AdminUnitOfWork>
+    [Description("MySql-AdminUnitOfWork迁移模块")]
+    public class MySqlAdminUnitOfWorkMigrationModule : MigrationModuleBase<AdminUnitOfWork>
     {
         /// <summary>
         /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，

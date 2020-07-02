@@ -1,28 +1,28 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Bing.Admin.Systems.Domain.Models;
+using Bing.Admin.Commons.Domain.Models;
 
-namespace Bing.Admin.Data.Mappings.Systems.PgSql
+namespace Bing.Admin.Data.Mappings.Commons.MySql
 {
     /// <summary>
-    /// 用户 映射配置
+    /// 用户信息 映射配置
     /// </summary>
-    public class UserMap : Bing.Datas.EntityFramework.PgSql.AggregateRootMap<User>
+    public class UserInfoMap : Bing.Datas.EntityFramework.MySql.AggregateRootMap<UserInfo>
     {
         /// <summary>
         /// 映射表
         /// </summary>
-        protected override void MapTable( EntityTypeBuilder<User> builder ) 
+        protected override void MapTable( EntityTypeBuilder<UserInfo> builder ) 
         {
-            builder.ToTable( "User", "Systems" );
+            builder.ToTable( "Commons.UserInfo" );
         }
                 
         /// <summary>
         /// 映射属性
         /// </summary>
-        protected override void MapProperties( EntityTypeBuilder<User> builder ) 
+        protected override void MapProperties( EntityTypeBuilder<UserInfo> builder ) 
         {
-            // 用户标识
+            // 用户编号
             builder.Property(t => t.Id)
                 .HasColumnName("UserId");
             builder.HasQueryFilter( t => t.IsDeleted == false );

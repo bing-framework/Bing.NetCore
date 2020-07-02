@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.PostgreSql" Version="2.6.0" />
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="2.6.0" />
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="2.6.0" />
   </ItemGroup>
 

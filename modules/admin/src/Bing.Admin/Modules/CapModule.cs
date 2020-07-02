@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using Bing.Admin.Data.UnitOfWorks.PgSql;
+using Bing.Admin.Data.UnitOfWorks.MySql;
 using Bing.Admin.EventHandlers.Abstractions.Systems;
 using Bing.Admin.EventHandlers.Implements.Systems;
 using Bing.Admin.Infrastructure.Cap;

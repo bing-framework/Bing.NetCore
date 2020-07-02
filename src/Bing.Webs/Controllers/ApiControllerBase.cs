@@ -23,7 +23,7 @@ namespace Bing.Webs.Controllers
         /// <summary>
         /// 日志
         /// </summary>
-        public ILog Log => _log ?? (_log = GetLog());
+        public ILog Log => _log ??= GetLog();
 
         /// <summary>
         /// 会话

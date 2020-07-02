@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.UnitOfWorks;
@@ -44,6 +45,7 @@ namespace Bing.Datas.EntityFramework.Logs
                 .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
                 .Content($"事件ID：{eventId.Id}")
                 .Content($"事件名称：{eventId.Name}");
+            Debug.WriteLine(state);
             AddContent(state, config, log);
             log.Exception(exception).Trace();
         }
