@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace Bing.Utils.Judgments
+namespace Bing.Judgments
 {
     /// <summary>
     /// Guid判断
