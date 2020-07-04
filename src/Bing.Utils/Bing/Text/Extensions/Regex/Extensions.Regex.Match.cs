@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 
 // ReSharper disable once CheckNamespace
-namespace Bing.Extensions
+namespace Bing.Text
 {
     /// <summary>
     /// 正则表达式(<see cref="Regex"/>) 扩展
@@ -14,6 +14,8 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="match">Match</param>
         /// <param name="group">分组</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         public static string GetGroupValue(this Match match, string group)
         {
             if (match == null)

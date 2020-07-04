@@ -1,9 +1,13 @@
-﻿namespace System.IO
+﻿using System.IO;
+using Bing.Collections;
+
+// ReSharper disable once CheckNamespace
+namespace Bing.IO
 {
     /// <summary>
     /// 流(<see cref="Stream"/>) 扩展
     /// </summary>
-    public static class StreamExtensions
+    public static partial class StreamExtensions
     {
         /// <summary>
         /// 读取流当中所有字节数组

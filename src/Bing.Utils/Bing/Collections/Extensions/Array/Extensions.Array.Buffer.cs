@@ -26,7 +26,7 @@ namespace Bing.Collections
         public static int ByteLength(this Array array) => Buffer.ByteLength(array);
 
         /// <summary>
-        /// 获取字节
+        /// 获取指定索引的字节
         /// </summary>
         /// <param name="array">数组</param>
         /// <param name="index">索引</param>
