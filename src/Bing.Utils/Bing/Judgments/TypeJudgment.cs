@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace Bing.Utils.Judgments
+namespace Bing.Judgments
 {
     /// <summary>
     /// 类型判断
@@ -68,6 +68,12 @@ namespace Bing.Utils.Judgments
         #endregion
 
         #region IsNullableType(是否可空类型)
+
+        /// <summary>
+        /// 是否可空类型
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        public static bool IsNullableType<T>() => IsNullableType(typeof(T));
 
         /// <summary>
         /// 是否可空类型

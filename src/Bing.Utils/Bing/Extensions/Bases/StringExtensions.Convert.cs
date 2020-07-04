@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -17,20 +16,6 @@ namespace Bing.Extensions
     /// </summary>
     public static partial class StringExtensions
     {
-        #region ToBytes(转换成Byte[])
-
-        /// <summary>
-        /// 将字符串转为byte[]数组，默认编码为<see cref="Encoding.UTF8"/>
-        /// </summary>
-        /// <param name="value">字符串</param>
-        /// <param name="encoding">编码格式</param>
-        public static byte[] ToBytes(this string value, Encoding encoding = null)
-        {
-            encoding = encoding ?? Encoding.UTF8;
-            return encoding.GetBytes(value);
-        }
-
-        #endregion
 
         #region ToXDocument(转换成XDocument)
 
