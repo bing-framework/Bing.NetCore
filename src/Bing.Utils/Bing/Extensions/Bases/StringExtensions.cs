@@ -283,26 +283,6 @@ namespace Bing.Extensions
 
         #endregion
 
-        #region Truncate(截断字符串)
-
-        /// <summary>
-        /// 截断字符串，是否添加圆点
-        /// </summary>
-        /// <param name="value">字符串</param>
-        /// <param name="length">截断长度</param>
-        /// <param name="userElipse">是否使用圆点</param>
-        public static string Truncate(this string value, int length, bool userElipse = false)
-        {
-            int e = userElipse ? 3 : 0;
-            if (length - e <= 0)
-                throw new InvalidOperationException($"Length must be greater than {e}.");
-            if (value.IsEmpty() || value.Length <= length)
-                return value;
-            return value.Substring(0, length - e) + new string('.', e);
-        }
-
-        #endregion
-
         #region PadBoth(指定字符串长度)
 
         /// <summary>
