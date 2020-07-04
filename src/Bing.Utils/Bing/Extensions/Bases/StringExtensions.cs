@@ -15,40 +15,6 @@ namespace Bing.Extensions
     /// </summary>
     public static partial class StringExtensions
     {
-        #region Repeat(重复指定字符串)
-
-        /// <summary>
-        /// 重复指定字符串，根据指定重复次数
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="repeatCount">重复次数</param>
-        public static string Repeat(this string value, int repeatCount)
-        {
-            if (string.IsNullOrEmpty(value) || repeatCount == 0)
-                return string.Empty;
-            if (value.Length == 1)
-                return new string(value[0], repeatCount);
-            switch (repeatCount)
-            {
-                case 1:
-                    return value;
-
-                case 2:
-                    return string.Concat(value, value);
-
-                case 3:
-                    return string.Concat(value, value, value);
-
-                case 4:
-                    return string.Concat(value, value, value, value);
-            }
-            var sb = new StringBuilder(value.Length * repeatCount);
-            while (repeatCount-- > 0)
-                sb.Append(value);
-            return sb.ToString();
-        }
-
-        #endregion
 
         #region ExtractAround(提取指定范围字符串)
 
@@ -815,44 +781,5 @@ namespace Bing.Extensions
 
         #endregion
 
-        #region Left(获取从字符串开头指定长度的子字符串)
-
-        /// <summary>
-        /// 获取从字符串开头指定长度的子字符串
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="length">指定字符串长度</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static string Left(this string value, int length)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (length >= value.Length)
-                throw new ArgumentOutOfRangeException(nameof(length), length, $"{nameof(length)} 不能大于给定字符串的长度");
-            return value.Substring(0, length);
-        }
-
-        #endregion
-
-        #region Right(获取从字符串末尾指定长度的子字符串)
-
-        /// <summary>
-        /// 获取从字符串末尾指定长度的子字符串
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="length">指定字符串长度</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static string Right(this string value, int length)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (length >= value.Length)
-                throw new ArgumentOutOfRangeException(nameof(length), length, $"{nameof(length)} 不能大于给定字符串的长度");
-            return value.Substring(value.Length - length, length);
-        }
-
-        #endregion
     }
 }

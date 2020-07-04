@@ -1,4 +1,4 @@
-﻿using Bing.Extensions;
+﻿using Bing.Collections;
 
 namespace System.Data
 {

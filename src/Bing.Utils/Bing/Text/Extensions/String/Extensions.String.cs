@@ -66,5 +66,40 @@ namespace Bing.Text
             }
             return res.ToString().ReplaceRecursive("__", "_").Trim('_');
         }
+
+        /// <summary>
+        /// 避免为空
+        /// </summary>
+        /// <param name="text">字符串</param>
+        public static string AvoidNull(this string text) => text ?? string.Empty;
+
+        /// <summary>
+        /// 重复指定字符串，根据指定重复次数
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="repeatCount">重复次数</param>
+        public static string Repeat(this string value, int repeatCount)
+        {
+            if (string.IsNullOrEmpty(value) || repeatCount == 0)
+                return string.Empty;
+            if (value.Length == 1)
+                return new string(value[0], repeatCount);
+            switch (repeatCount)
+            {
+                case 1:
+                    return value;
+                case 2:
+                    return string.Concat(value, value);
+                case 3:
+                    return string.Concat(value, value, value);
+                case 4:
+                    return string.Concat(value, value, value, value);
+            }
+            var sb = new StringBuilder(value.Length * repeatCount);
+            while (repeatCount-- > 0)
+                sb.Append(value);
+            return sb.ToString();
+        }
+
     }
 }
