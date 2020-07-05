@@ -62,7 +62,7 @@ namespace Bing.Events
         {
             var result = new StringBuilder();
             result.AppendLine($"事件标识: {Id}");
-            result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
+            result.AppendLine($"事件时间: {Time:yyyy-MM-dd HH:mm:ss.fff}");
             result.AppendLine($"事件数据: {(this).ToJson()}");
             return result.ToString();
         }

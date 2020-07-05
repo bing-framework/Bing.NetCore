@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Bing.Utils.Json;
 
 namespace Bing.Events.Messages
@@ -37,7 +36,7 @@ namespace Bing.Events.Messages
         {
             var result = new StringBuilder();
             result.AppendLine($"事件标识: {Id}");
-            result.AppendLine($"事件时间: {Time.ToMillisecondString()}");
+            result.AppendLine($"事件时间: {Time:yyyy-MM-dd HH:mm:ss.fff}");
             if (string.IsNullOrWhiteSpace(Name) == false)
                 result.AppendLine($"消息名称: {Name}");
             if (string.IsNullOrWhiteSpace(Callback) == false)

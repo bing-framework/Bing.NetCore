@@ -243,7 +243,7 @@ namespace Bing.Logs.Core
             content.LogName = Provider.LogName;
             content.TraceId = Context.TraceId;
             content.LogId = Context.LogId;
-            content.OperationTime = DateTime.Now.ToMillisecondString();
+            content.OperationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             content.Duration = Context.Stopwatch.Elapsed.Description();
             content.Ip = Context.Ip;
             content.Host = Context.Host;
