@@ -77,6 +77,6 @@ namespace Bing
         /// </summary>
         /// <param name="type">实例类型</param>
         /// <param name="args">参数</param>
-        private static object CreateInstanceCore(Type type, object[] args) => type.GetConstructor(Of(args))?.GetReflector().Invoke(args);
+        private static object CreateInstanceCore(Type type, object[] args) => type.GetConstructor(Reflection.Types.Of(args))?.GetReflector().Invoke(args);
     }
 }
