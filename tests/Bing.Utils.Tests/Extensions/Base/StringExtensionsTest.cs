@@ -1,5 +1,6 @@
 ﻿using System;
 using Bing.Extensions;
+using Bing.Text;
 using Xunit;
 
 // ReSharper disable once CheckNamespace

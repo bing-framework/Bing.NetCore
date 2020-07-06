@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Date;
 using Bing.Extensions;
 using Bing.Helpers;
 using Xunit;
