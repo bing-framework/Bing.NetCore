@@ -3,7 +3,7 @@
 namespace Bing.Judgments
 {
     /// <summary>
-    /// 正则表达式判断
+    /// 正则表达式(<see cref="Regex"/>) 判断
     /// </summary>
     public static class RegexJudgment
     {

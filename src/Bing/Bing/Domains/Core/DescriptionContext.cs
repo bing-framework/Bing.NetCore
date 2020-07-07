@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Text;
+using Bing.Expressions;
 using Bing.Extensions;
 using Bing.Helpers;
 
@@ -55,7 +56,7 @@ namespace Bing.Domains.Core
         /// <param name="expression">属性表达式，范例：t => t.Name</param>
         public void Add<T, TProperty>(Expression<Func<T, TProperty>> expression)
         {
-            var member = Lambda.GetMember(expression);
+            var member = Lambdas.GetMember(expression);
             var description = Helpers.Reflections.GetDisplayNameOrDescription(member);
             var value = member.GetPropertyValue(this);
             if (Helpers.Reflections.IsBool(member))

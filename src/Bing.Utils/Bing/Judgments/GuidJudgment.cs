@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Bing.Judgments
 {
     /// <summary>
-    /// Guid判断
+    /// <see cref="Guid"/> 判断
     /// </summary>
     public static class GuidJudgment
     {

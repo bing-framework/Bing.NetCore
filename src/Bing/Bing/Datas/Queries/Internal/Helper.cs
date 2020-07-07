@@ -3,8 +3,8 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Bing.Domains.Repositories;
+using Bing.Expressions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Properties;
 
 namespace Bing.Datas.Queries.Internal
@@ -20,23 +20,16 @@ namespace Bing.Datas.Queries.Internal
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="predicate">查询条件,如果参数值为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。
         /// 注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-        /// <returns></returns>
         public static Expression<Func<TEntity, bool>> GetWhereIfNotEmptyExpression<TEntity>(
             Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
             if (predicate == null)
-            {
                 return null;
-            }
-            if (Lambda.GetConditionCount(predicate) > 1)
-            {
+            if (Lambdas.GetConditionCount(predicate) > 1)
                 throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, predicate));
-            }
             var value = predicate.Value();
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return null;
-            }
             return predicate;
         }
 
@@ -49,15 +42,9 @@ namespace Bing.Datas.Queries.Internal
         public static void InitOrder<TEntity>(IQueryable<TEntity> source, IPager pager)
         {
             if (string.IsNullOrWhiteSpace(pager.Order) == false)
-            {
                 return;
-            }
-
             if (source.Expression.SafeString().Contains(".OrderBy("))
-            {
                 return;
-            }
-
             pager.Order = "Id";
         }
 
@@ -67,14 +54,10 @@ namespace Bing.Datas.Queries.Internal
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="source">查询对象</param>
         /// <param name="pager">分页</param>
-        /// <returns></returns>
         public static IOrderedQueryable<TEntity> GetOrderedQueryable<TEntity>(IQueryable<TEntity> source, IPager pager)
         {
             if (string.IsNullOrWhiteSpace(pager.Order))
-            {
                 return source as IOrderedQueryable<TEntity>;
-            }
-
             return source.OrderBy(pager.Order);
         }
     }

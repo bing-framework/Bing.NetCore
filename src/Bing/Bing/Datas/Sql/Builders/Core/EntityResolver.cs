@@ -5,8 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Bing.Datas.Sql.Matedatas;
+using Bing.Expressions;
 using Bing.Extensions;
-using Bing.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Core
 {
@@ -82,7 +82,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
         public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias)
         {
-            var names = Lambda.GetLastNames(columns);
+            var names = Lambdas.GetLastNames(columns);
             return _matedata == null ? names.Join() : GetColumns<TEntity>(names, propertyAsAlias);
         }
 
@@ -143,7 +143,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="expression">列名表达式</param>
         private string GetSingleColumn<TEntity>(Expression expression)
         {
-            var name = Lambda.GetLastName(expression);
+            var name = Lambdas.GetLastName(expression);
             if (_matedata == null)
                 return name;
             return _matedata.GetColumn(typeof(TEntity), name);
@@ -190,7 +190,7 @@ namespace Bing.Datas.Sql.Builders.Core
             var list = arguments.ToList();
             if (list.Count < 2)
                 return null;
-            return new KeyValuePair<object, string>(Lambda.GetName(list[0]), Lambda.GetValue(list[1]).SafeString());
+            return new KeyValuePair<object, string>(Lambdas.GetName(list[0]), Lambdas.GetValue(list[1]).SafeString());
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="right">是否取右侧操作数</param>
         public string GetColumn(Expression expression, Type entity, bool right = false)
         {
-            var column = Lambda.GetLastName(expression, right);
+            var column = Lambdas.GetLastName(expression, right);
             return _matedata == null
                 ? column
                 : _matedata.GetColumn(entity, column);
@@ -239,7 +239,7 @@ namespace Bing.Datas.Sql.Builders.Core
         /// <param name="right">是否取右侧操作数</param>
         public Type GetType(Expression expression, bool right = false)
         {
-            var memberExpression = Lambda.GetMemberExpression(expression, right);
+            var memberExpression = Lambdas.GetMemberExpression(expression, right);
             return memberExpression?.Expression?.Type;
         }
     }

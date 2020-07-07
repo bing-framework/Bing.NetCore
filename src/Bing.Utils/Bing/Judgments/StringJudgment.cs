@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace Bing.Judgments
 {
     /// <summary>
-    /// 字符串判断
+    /// 字符串(<see cref="string"/>) 判断
     /// </summary>
     public static class StringJudgment
     {

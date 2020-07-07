@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Bing.Domains.Entities;
+using Bing.Expressions;
 using Bing.Extensions;
 using Bing.Helpers;
 
@@ -77,10 +78,10 @@ namespace Bing.Domains.ChangeTracking
         /// <param name="newValue">新值。范例：newEntity.Name</param>
         public void Add<TObject, TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) where TObject : IDomainObject
         {
-            var member = Lambda.GetMemberExpression(expression);
-            var name = Lambda.GetMemberName(member);
+            var member = Lambdas.GetMemberExpression(expression);
+            var name = Lambdas.GetMemberName(member);
             var desc = Helpers.Reflections.GetDisplayNameOrDescription(member.Member);
-            var value = Lambda.GetValue(expression);
+            var value = Lambdas.GetValue(expression);
             Add(name, desc, Conv.To<TValue>(value), newValue);
         }
 

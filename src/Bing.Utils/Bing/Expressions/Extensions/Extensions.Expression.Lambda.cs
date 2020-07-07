@@ -2,16 +2,14 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Bing.Helpers;
-using Bing.Utils.Expressions;
 
 // ReSharper disable once CheckNamespace
-namespace Bing.Extensions
+namespace Bing.Expressions
 {
     /// <summary>
     /// 系统扩展 - Lambda表达式扩展
     /// </summary>
-    public static partial class BingExtensions
+    public static partial class LambdaExtensions
     {
         #region Property(属性表达式)
 
@@ -122,7 +120,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="expression">表达式</param>
-        public static object Value<T>(this Expression<Func<T, bool>> expression) => Lambda.GetValue(expression);
+        public static object Value<T>(this Expression<Func<T, bool>> expression) => Lambdas.GetValue(expression);
 
         #endregion
 
@@ -140,7 +138,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        public static Expression Equal(this Expression left, object value) => left.Equal(Lambda.Constant(value, left));
+        public static Expression Equal(this Expression left, object value) => left.Equal(Lambdas.Constant(value, left));
 
         #endregion
 
@@ -158,7 +156,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        public static Expression NotEqual(this Expression left, object value) => left.NotEqual(Lambda.Constant(value, left));
+        public static Expression NotEqual(this Expression left, object value) => left.NotEqual(Lambdas.Constant(value, left));
 
         #endregion
 
@@ -176,7 +174,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        public static Expression Greater(this Expression left, object value) => left.Greater(Lambda.Constant(value, left));
+        public static Expression Greater(this Expression left, object value) => left.Greater(Lambdas.Constant(value, left));
 
         #endregion
 
@@ -194,7 +192,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        public static Expression GreaterEqual(this Expression left, object value) => left.GreaterEqual(Lambda.Constant(value, left));
+        public static Expression GreaterEqual(this Expression left, object value) => left.GreaterEqual(Lambdas.Constant(value, left));
 
         #endregion
 
@@ -212,7 +210,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        public static Expression Less(this Expression left, object value) => left.Less(Lambda.Constant(value, left));
+        public static Expression Less(this Expression left, object value) => left.Less(Lambdas.Constant(value, left));
 
         #endregion
 
@@ -230,7 +228,7 @@ namespace Bing.Extensions
         /// </summary>
         /// <param name="left">左操作数</param>
         /// <param name="value">值</param>
-        public static Expression LessEqual(this Expression left, object value) => left.LessEqual(Lambda.Constant(value, left));
+        public static Expression LessEqual(this Expression left, object value) => left.LessEqual(Lambdas.Constant(value, left));
 
         #endregion
 
@@ -277,36 +275,19 @@ namespace Bing.Extensions
         /// <param name="value">值</param>
         public static Expression Operation(this Expression left, Operator @operator, object value)
         {
-            switch (@operator)
+            return @operator switch
             {
-                case Operator.Equal:
-                    return left.Equal(value);
-
-                case Operator.NotEqual:
-                    return left.NotEqual(value);
-
-                case Operator.Greater:
-                    return left.Greater(value);
-
-                case Operator.GreaterEqual:
-                    return left.GreaterEqual(value);
-
-                case Operator.Less:
-                    return left.Less(value);
-
-                case Operator.LessEqual:
-                    return left.LessEqual(value);
-
-                case Operator.Starts:
-                    return left.StartsWith(value);
-
-                case Operator.Ends:
-                    return left.EndsWith(value);
-
-                case Operator.Contains:
-                    return left.Contains(value);
-            }
-            throw new NotImplementedException();
+                Operator.Equal => left.Equal(value),
+                Operator.NotEqual => left.NotEqual(value),
+                Operator.Greater => left.Greater(value),
+                Operator.GreaterEqual => left.GreaterEqual(value),
+                Operator.Less => left.Less(value),
+                Operator.LessEqual => left.LessEqual(value),
+                Operator.Starts => left.StartsWith(value),
+                Operator.Ends => left.EndsWith(value),
+                Operator.Contains => left.Contains(value),
+                _ => throw new NotImplementedException()
+            };
         }
 
         /// <summary>
@@ -317,27 +298,16 @@ namespace Bing.Extensions
         /// <param name="value">值</param>
         public static Expression Operation(this Expression left, Operator @operator, Expression value)
         {
-            switch (@operator)
+            return @operator switch
             {
-                case Operator.Equal:
-                    return left.Equal(value);
-
-                case Operator.NotEqual:
-                    return left.NotEqual(value);
-
-                case Operator.Greater:
-                    return left.Greater(value);
-
-                case Operator.GreaterEqual:
-                    return left.GreaterEqual(value);
-
-                case Operator.Less:
-                    return left.Less(value);
-
-                case Operator.LessEqual:
-                    return left.LessEqual(value);
-            }
-            throw new NotImplementedException();
+                Operator.Equal => left.Equal(value),
+                Operator.NotEqual => left.NotEqual(value),
+                Operator.Greater => left.Greater(value),
+                Operator.GreaterEqual => left.GreaterEqual(value),
+                Operator.Less => left.Less(value),
+                Operator.LessEqual => left.LessEqual(value),
+                _ => throw new NotImplementedException()
+            };
         }
 
         #endregion
@@ -432,8 +402,7 @@ namespace Bing.Extensions
         /// <typeparam name="TDelegate">委托类型</typeparam>
         /// <param name="body">表达式</param>
         /// <param name="parameters">参数列表</param>
-        public static Expression<TDelegate> ToLambda<TDelegate>(this Expression body,
-            params ParameterExpression[] parameters)
+        public static Expression<TDelegate> ToLambda<TDelegate>(this Expression body, params ParameterExpression[] parameters)
         {
             if (body == null)
                 return null;

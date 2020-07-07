@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Bing.Extensions;
 using Bing.Helpers;
 
-namespace Bing.Utils.Expressions
+namespace Bing.Expressions
 {
     /// <summary>
     /// 谓词表达式生成器
@@ -38,9 +38,8 @@ namespace Bing.Utils.Expressions
         /// <param name="propertyExpression">属性表达式</param>
         /// <param name="operator">运算符</param>
         /// <param name="value">值</param>
-        public void Append<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, Operator @operator,
-            object value) =>
-            _result = _result.And(_parameter.Property(Lambda.GetMember(propertyExpression))
+        public void Append<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, Operator @operator, object value) =>
+            _result = _result.And(_parameter.Property(Lambdas.GetMember(propertyExpression))
                 .Operation(@operator, value));
 
         /// <summary>
@@ -52,7 +51,7 @@ namespace Bing.Utils.Expressions
         /// <param name="value">值</param>
         public void Append<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, Operator @operator,
             Expression value) =>
-            _result = _result.And(_parameter.Property(Lambda.GetMember(propertyExpression))
+            _result = _result.And(_parameter.Property(Lambdas.GetMember(propertyExpression))
                 .Operation(@operator, value));
 
         /// <summary>

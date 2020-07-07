@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Datas.Sql.Builders;
 using Bing.Datas.Test.Integration.Samples;
-using Bing.Helpers;
+using Bing.Expressions;
 using Bing.Extensions;
 
 namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
@@ -39,14 +39,14 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="columns">列名表达式</param>
         /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
-        public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias) => Lambda.GetLastNames(columns).Select(column => $"t_{column}").Join();
+        public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias) => Lambdas.GetLastNames(columns).Select(column => $"t_{column}").Join();
 
         /// <summary>
         /// 获取列名
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="column">列名表达式</param>
-        public string GetColumn<TEntity>(Expression<Func<TEntity, object>> column) => $"t_{Lambda.GetLastName(column)}";
+        public string GetColumn<TEntity>(Expression<Func<TEntity, object>> column) => $"t_{Lambdas.GetLastName(column)}";
 
         /// <summary>
         /// 获取列名
@@ -54,7 +54,7 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
         /// <param name="expression">表达式</param>
         /// <param name="entity">实体类型</param>
         /// <param name="right">是否右侧操作</param>
-        public string GetColumn(Expression expression, Type entity, bool right) => $"t_{Lambda.GetLastName(expression, right)}";
+        public string GetColumn(Expression expression, Type entity, bool right) => $"t_{Lambdas.GetLastName(expression, right)}";
 
         /// <summary>
         /// 获取类型

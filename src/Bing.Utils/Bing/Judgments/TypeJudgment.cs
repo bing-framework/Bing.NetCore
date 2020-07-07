@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Bing.Judgments
 {
     /// <summary>
-    /// 类型判断
+    /// 类型(<see cref="Type"/>) 判断
     /// </summary>
     public static class TypeJudgment
     {
@@ -41,6 +41,12 @@ namespace Bing.Judgments
         #endregion
 
         #region IsNumericType(是否数值类型)
+
+        /// <summary>
+        /// 是否数值类型
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        public static bool IsNumericType<T>() => IsNumericType(typeof(T));
 
         /// <summary>
         /// 是否数值类型

@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.Reflection;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations

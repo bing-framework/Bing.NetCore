@@ -5,8 +5,8 @@ using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Internal;
+using Bing.Expressions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Properties;
 
 namespace Bing.Datas.Sql.Builders.Clauses
@@ -121,9 +121,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
             {
                 if (condition == null)
                     continue;
-                if (Lambda.GetConditionCount(condition) > 1)
+                if (Lambdas.GetConditionCount(condition) > 1)
                     throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, condition));
-                if (string.IsNullOrWhiteSpace(Lambda.GetValue(condition).SafeString()))
+                if (string.IsNullOrWhiteSpace(Lambdas.GetValue(condition).SafeString()))
                     continue;
                 var predicate = _expressionResolver.Resolve(condition);
                 if (predicate == null)
@@ -254,9 +254,9 @@ namespace Bing.Datas.Sql.Builders.Clauses
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
-            if (Lambda.GetConditionCount(expression) > 1)
+            if (Lambdas.GetConditionCount(expression) > 1)
                 throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, expression));
-            if (string.IsNullOrWhiteSpace(Lambda.GetValue(expression).SafeString()))
+            if (string.IsNullOrWhiteSpace(Lambdas.GetValue(expression).SafeString()))
                 return;
             Where(expression);
         }
@@ -702,7 +702,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         {
             if (min == null)
                 return null;
-            DateTime? result = min;
+            var result = min;
             if (min > max)
                 result = min;
             if (includeTime)
@@ -721,7 +721,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         {
             if (max == null)
                 return null;
-            DateTime? result = max;
+            var result = max;
             if (min > max)
                 result = min;
             if (includeTime)

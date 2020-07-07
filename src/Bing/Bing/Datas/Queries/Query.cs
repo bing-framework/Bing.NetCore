@@ -3,8 +3,7 @@ using System.Linq.Expressions;
 using Bing.Datas.Queries.Criterias;
 using Bing.Datas.Queries.Internal;
 using Bing.Domains.Repositories;
-using Bing.Extensions;
-using Bing.Helpers;
+using Bing.Expressions;
 
 namespace Bing.Datas.Queries
 {
@@ -166,7 +165,7 @@ namespace Bing.Datas.Queries
         /// <typeparam name="TProperty">属性类型</typeparam>
         /// <param name="propertyExpression">属性表达式</param>
         /// <param name="desc">是否降序</param>
-        public IQuery<TEntity, TKey> OrderBy<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, bool desc = false) => OrderBy(Lambda.GetName(propertyExpression), desc);
+        public IQuery<TEntity, TKey> OrderBy<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, bool desc = false) => OrderBy(Lambdas.GetName(propertyExpression), desc);
 
         /// <summary>
         /// 添加排序

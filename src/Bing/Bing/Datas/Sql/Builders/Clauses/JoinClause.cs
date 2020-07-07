@@ -8,8 +8,8 @@ using Bing.Datas.Sql.Builders.Core;
 using Bing.Datas.Sql.Builders.Extensions;
 using Bing.Datas.Sql.Builders.Internal;
 using Bing.Datas.Sql.Matedatas;
+using Bing.Expressions;
 using Bing.Extensions;
-using Bing.Helpers;
 
 namespace Bing.Datas.Sql.Builders.Clauses
 {
@@ -413,7 +413,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
-            var expressions = Lambda.GetGroupPredicates(expression);
+            var expressions = Lambdas.GetGroupPredicates(expression);
             var items = expressions.Select(GetOnItems).ToList();
             _params.LastOrDefault()?.On(items, _dialect);
         }
@@ -424,7 +424,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         /// <param name="group">条件组</param>
         private List<OnItem> GetOnItems(List<Expression> group) =>
             @group.Select(expression => new OnItem(
-                GetColumn(expression, false), GetColumn(expression, true), Lambda.GetOperator(expression).SafeValue()
+                GetColumn(expression, false), GetColumn(expression, true), Lambdas.GetOperator(expression).SafeValue()
             )).ToList();
 
         /// <summary>
@@ -439,7 +439,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
             if (string.IsNullOrWhiteSpace(column))
             {
                 var name = _parameterManager.GenerateName();
-                _parameterManager.Add(name, Lambda.GetValue(expression));
+                _parameterManager.Add(name, Lambdas.GetValue(expression));
                 return new SqlItem(name, raw: true);
             }
 

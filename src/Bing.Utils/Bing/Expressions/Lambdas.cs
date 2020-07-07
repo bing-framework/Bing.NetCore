@@ -4,13 +4,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Bing.Extensions;
+using Bing.Helpers;
 
-namespace Bing.Helpers
+namespace Bing.Expressions
 {
     /// <summary>
     /// Lambda表达式操作
     /// </summary>
-    public static partial class Lambda
+    public static partial class Lambdas
     {
         #region GetType(获取类型)
 
@@ -114,7 +115,7 @@ namespace Bing.Helpers
         {
             if (memberExpression == null)
                 return string.Empty;
-            string result = memberExpression.ToString();
+            var result = memberExpression.ToString();
             return result.Substring(result.IndexOf(".", StringComparison.Ordinal) + 1);
         }
 

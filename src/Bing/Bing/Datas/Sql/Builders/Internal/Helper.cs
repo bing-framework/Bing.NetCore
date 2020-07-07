@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 using Bing.Datas.Queries;
 using Bing.Datas.Sql.Builders.Conditions;
 using Bing.Datas.Sql.Builders.Core;
+using Bing.Expressions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Datas.Sql.Builders.Internal
@@ -107,7 +107,7 @@ namespace Bing.Datas.Sql.Builders.Internal
         {
             if (expression == null)
                 return null;
-            var result = Lambda.GetValue(expression);
+            var result = Lambdas.GetValue(expression);
             if (result == null)
                 return null;
             var type = result.GetType();
@@ -121,7 +121,7 @@ namespace Bing.Datas.Sql.Builders.Internal
         /// </summary>
         /// <param name="expression">列名</param>
         /// <param name="type">实体类型</param>
-        public ICondition CreateCondition(Expression expression, Type type) => CreateCondition(GetColumn(expression, type), GetValue(expression), Lambda.GetOperator(expression).SafeValue());
+        public ICondition CreateCondition(Expression expression, Type type) => CreateCondition(GetColumn(expression, type), GetValue(expression), Lambdas.GetOperator(expression).SafeValue());
 
         /// <summary>
         /// 创建查询条件并添加参数

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Bing.Domains.Repositories;
+using Bing.Expressions;
 using Bing.Helpers;
-using Bing.Utils.Expressions;
 
 namespace Bing.Datas.Queries.Criterias
 {
@@ -61,7 +61,7 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取属性类型
         /// </summary>
-        protected Type GetPropertyType() => Lambda.GetType(_propertyExpression);
+        protected Type GetPropertyType() => Lambdas.GetType(_propertyExpression);
 
         /// <summary>
         /// 获取查询条件
@@ -132,7 +132,7 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取最小值表达式
         /// </summary>
-        protected virtual Expression GetMinValueExpression() => Lambda.Constant(_min, _propertyExpression);
+        protected virtual Expression GetMinValueExpression() => Lambdas.Constant(_min, _propertyExpression);
 
         /// <summary>
         /// 创建右操作数，即 t => t.Property &lt;= Max
@@ -171,6 +171,6 @@ namespace Bing.Datas.Queries.Criterias
         /// <summary>
         /// 获取最大值表达式
         /// </summary>
-        protected virtual Expression GetMaxValueExpression() => Lambda.Constant(_max, _propertyExpression);
+        protected virtual Expression GetMaxValueExpression() => Lambdas.Constant(_max, _propertyExpression);
     }
 }

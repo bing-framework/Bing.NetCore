@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Bing.Utils.Expressions
+namespace Bing.Expressions
 {
     /// <summary>
     /// 参数重绑定操作
@@ -24,8 +24,7 @@ namespace Bing.Utils.Expressions
         /// </summary>
         /// <param name="map">参数字典</param>
         /// <param name="exp">表达式</param>
-        public static Expression ReplaceParameters(Dictionary<ParameterExpression, ParameterExpression> map,
-            Expression exp) =>
+        public static Expression ReplaceParameters(Dictionary<ParameterExpression, ParameterExpression> map, Expression exp) =>
             new ParameterRebinder(map).Visit(exp);
 
         /// <summary>
