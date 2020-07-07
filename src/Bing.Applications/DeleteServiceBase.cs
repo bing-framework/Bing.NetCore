@@ -8,7 +8,6 @@ using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Logs.Extensions;
 
 namespace Bing.Applications
@@ -71,7 +70,7 @@ namespace Bing.Applications
         {
             _unitOfWork = unitOfWork;
             _store = store;
-            EntityDescription = Helpers.Reflections.GetDisplayNameOrDescription<TEntity>();
+            EntityDescription = Reflection.Reflections.GetDisplayNameOrDescription<TEntity>();
         }
 
         #region WriteLog(写日志)

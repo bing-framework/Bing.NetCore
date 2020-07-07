@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Bing.Helpers;
 
 namespace Bing.AutoMapper
 {
@@ -77,7 +76,7 @@ namespace Bing.AutoMapper
         /// 获取类型
         /// </summary>
         /// <param name="type">类型</param>
-        private static Type GetType(Type type) => Helpers.Reflections.GetElementType(type);
+        private static Type GetType(Type type) => Reflection.Reflections.GetElementType(type);
 
         /// <summary>
         /// 获取映射结果

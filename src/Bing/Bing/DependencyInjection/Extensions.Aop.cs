@@ -5,7 +5,7 @@ using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
 using Bing.Extensions;
-using Bing.Helpers;
+using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.DependencyInjection

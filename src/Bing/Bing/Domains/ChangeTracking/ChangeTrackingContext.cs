@@ -80,7 +80,7 @@ namespace Bing.Domains.ChangeTracking
         {
             var member = Lambdas.GetMemberExpression(expression);
             var name = Lambdas.GetMemberName(member);
-            var desc = Helpers.Reflections.GetDisplayNameOrDescription(member.Member);
+            var desc = Reflection.Reflections.GetDisplayNameOrDescription(member.Member);
             var value = Lambdas.GetValue(expression);
             Add(name, desc, Conv.To<TValue>(value), newValue);
         }

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Bing.Helpers;
+using Bing.Reflection;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Extensions

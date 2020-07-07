@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Bing.Extensions;
+using Bing.Helpers;
 
-namespace Bing.Helpers
+namespace Bing.Reflection
 {
     /// <summary>
     /// 反射 操作

@@ -1,4 +1,4 @@
-﻿using Bing.Helpers;
+﻿using Bing.Reflection;
 using Bing.Tests;
 using Bing.Tests.Samples;
 using Xunit;

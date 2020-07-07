@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using AspectCore.Extensions.Reflection;
 
-namespace Bing.Helpers
+namespace Bing.Reflection
 {
     /// <summary>
     /// 反射 操作

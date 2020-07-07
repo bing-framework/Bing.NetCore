@@ -54,7 +54,7 @@ namespace Bing.DependencyInjection
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
             assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();
-            return Helpers.Reflections.FindTypes(findType, assemblies.ToArray());
+            return Reflection.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }
 }

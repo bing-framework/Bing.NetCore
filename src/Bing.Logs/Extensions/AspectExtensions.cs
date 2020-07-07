@@ -2,7 +2,6 @@
 using System.Linq;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Extensions;
-using Bing.Helpers;
 
 namespace Bing.Logs.Extensions
 {
@@ -24,7 +23,7 @@ namespace Bing.Logs.Extensions
         /// <param name="parameter">参数</param>
         private static string GetParameterValue(Parameter parameter)
         {
-            if (Helpers.Reflections.IsGenericCollection(parameter.RawType) == false)
+            if (Reflection.Reflections.IsGenericCollection(parameter.RawType) == false)
                 return parameter.Value.SafeString();
             if (!(parameter.Value is IEnumerable<object> list))
                 return parameter.Value.SafeString();

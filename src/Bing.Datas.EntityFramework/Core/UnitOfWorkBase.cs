@@ -223,7 +223,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly) => Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
+        protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 
         /// <summary>
         /// 获取定义映射配置的程序集列表

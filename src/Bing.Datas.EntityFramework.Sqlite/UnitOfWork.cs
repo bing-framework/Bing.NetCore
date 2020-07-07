@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Sqlite
@@ -28,7 +27,7 @@ namespace Bing.Datas.EntityFramework.Sqlite
         /// <returns></returns>
         protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly)
         {
-            return Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
+            return Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
         }
     }
 }

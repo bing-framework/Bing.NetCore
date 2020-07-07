@@ -2,8 +2,9 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Bing.Helpers;
 
-namespace Bing.Helpers
+namespace Bing.Reflection
 {
     /// <summary>
     /// 反射 操作

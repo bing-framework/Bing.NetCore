@@ -52,7 +52,7 @@ namespace Bing.Datas.Queries.Trees
         /// </summary>
         public virtual bool IsSearch()
         {
-            var items = Helpers.Reflections.GetPublicProperties(this);
+            var items = Reflection.Reflections.GetPublicProperties(this);
             return items.Any(t => IsSearchProperty(t.Text, t.Value));
         }
 

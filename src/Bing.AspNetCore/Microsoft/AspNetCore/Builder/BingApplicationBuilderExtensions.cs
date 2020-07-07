@@ -2,7 +2,7 @@
 using Bing.AspNetCore;
 using Bing.AspNetCore.ExceptionHandling;
 using Bing.AspNetCore.Tracing;
-using Bing.Helpers;
+using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

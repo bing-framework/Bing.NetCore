@@ -27,7 +27,7 @@ namespace Bing.Validations.Aspects
         /// <param name="parameter">参数</param>
         private void Validate(Parameter parameter)
         {
-            if (Helpers.Reflections.IsGenericCollection(parameter.RawType))
+            if (Reflection.Reflections.IsGenericCollection(parameter.RawType))
             {
                 ValidateCollection(parameter);
                 return;

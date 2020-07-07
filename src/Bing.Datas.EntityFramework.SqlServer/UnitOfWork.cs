@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.SqlServer
@@ -25,6 +24,6 @@ namespace Bing.Datas.EntityFramework.SqlServer
         /// 获取映射实例列表
         /// </summary>
         /// <param name="assembly">程序集</param>
-        protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly) => Helpers.Reflections.GetInstancesByInterface<IMap>(assembly);
+        protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
     }
 }
