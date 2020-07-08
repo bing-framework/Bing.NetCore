@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
+using Bing.Datas.Configs;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
 using Bing.Datas.Enums;
@@ -41,6 +42,7 @@ namespace Bing.Admin.Modules
                 {
                     options.DatabaseType = DatabaseType.MySql;
                     options.IsClearAfterExecution = true;
+                    //options.LogLevel = DataLogLevel.Off;
                 });
             // 注册SqlExecutor
             services.AddSqlExecutor();

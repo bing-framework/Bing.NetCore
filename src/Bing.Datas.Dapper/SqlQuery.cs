@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Datas.Configs;
 using Bing.Datas.Sql;
 using Bing.Datas.Sql.Configs;
 using Bing.Datas.Sql.Queries;
@@ -54,62 +55,50 @@ namespace Bing.Datas.Dapper
         /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
-        public override object ToScalar(IDbConnection connection = null)
-        {
-            return Query((con, sql, sqlParams) => con.ExecuteScalar(sql, sqlParams), connection);
-        }
+        public override object ToScalar(IDbConnection connection = null) => 
+            Query((con, sql, sqlParams) => con.ExecuteScalar(sql, sqlParams), connection);
 
         /// <summary>
         /// 获取单值
         /// </summary>
         /// <param name="connection">数据库连接</param>
-        public override async Task<object> ToScalarAsync(IDbConnection connection = null)
-        {
-            return await QueryAsync(async (con, sql, sqlParams) => await con.ExecuteScalarAsync(sql, sqlParams),
+        public override async Task<object> ToScalarAsync(IDbConnection connection = null) =>
+            await QueryAsync(async (con, sql, sqlParams) => await con.ExecuteScalarAsync(sql, sqlParams),
                 connection);
-        }
 
         /// <summary>
         /// 获取单个实体
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        public override TResult To<TResult>(IDbConnection connection = null)
-        {
-            return Query((con, sql, sqlParams) => con.QueryFirstOrDefault<TResult>(sql, sqlParams), connection);
-        }
+        public override TResult To<TResult>(IDbConnection connection = null) => 
+            Query((con, sql, sqlParams) => con.QueryFirstOrDefault<TResult>(sql, sqlParams), connection);
 
         /// <summary>
         /// 获取单个实体
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        public override async Task<TResult> ToAsync<TResult>(IDbConnection connection = null)
-        {
-            return await QueryAsync(
+        public override async Task<TResult> ToAsync<TResult>(IDbConnection connection = null) =>
+            await QueryAsync(
                 async (con, sql, sqlParams) => await con.QueryFirstOrDefaultAsync<TResult>(sql, sqlParams), connection);
-        }
 
         /// <summary>
         /// 获取列表
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        public override List<TResult> ToList<TResult>(IDbConnection connection = null)
-        {
-            return Query((con, sql, sqlParams) => con.Query<TResult>(sql, sqlParams).ToList(), connection);
-        }
+        public override List<TResult> ToList<TResult>(IDbConnection connection = null) => 
+            Query((con, sql, sqlParams) => con.Query<TResult>(sql, sqlParams).ToList(), connection);
 
         /// <summary>
         /// 获取列表
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
-        public override async Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null)
-        {
-            return await QueryAsync(
+        public override async Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null) =>
+            await QueryAsync(
                 async (con, sql, sqlParams) => (await con.QueryAsync<TResult>(sql, sqlParams)).ToList(), connection);
-        }
 
         /// <summary>
         /// 获取列表
@@ -117,10 +106,8 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="sql">Sql语句</param>
         /// <param name="connection">数据库连接</param>
-        public override async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null)
-        {
-            return (await GetConnection(connection).QueryAsync<TResult>(sql, Params)).ToList();
-        }
+        public override async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null) => 
+            (await GetConnection(connection).QueryAsync<TResult>(sql, Params)).ToList();
 
         /// <summary>
         /// 获取分页列表
@@ -128,10 +115,8 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
-        public override PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null)
-        {
-            return PagerQuery(() => ToList<TResult>(connection), parameter, connection);
-        }
+        public override PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null) => 
+            PagerQuery(() => ToList<TResult>(connection), parameter, connection);
 
         /// <summary>
         /// 分页查询
@@ -143,10 +128,8 @@ namespace Bing.Datas.Dapper
         public override PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter, IDbConnection connection = null)
         {
             parameter = GetPage(parameter);
-            if (parameter.TotalCount == 0)
-            {
+            if (parameter.TotalCount == 0) 
                 parameter.TotalCount = GetCount(connection);
-            }
             SetPager(parameter);
             return new PagerList<TResult>(parameter, func());
         }
@@ -181,10 +164,8 @@ namespace Bing.Datas.Dapper
         /// <param name="page">页数</param>
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
-        public override PagerList<TResult> ToPagerList<TResult>(int page, int pageSize, IDbConnection connection = null)
-        {
-            return ToPagerList<TResult>(new Pager(page, pageSize), connection);
-        }
+        public override PagerList<TResult> ToPagerList<TResult>(int page, int pageSize, IDbConnection connection = null) => 
+            ToPagerList<TResult>(new Pager(page, pageSize), connection);
 
         /// <summary>
         /// 获取分页列表
@@ -192,10 +173,8 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="parameter">分页参数</param>
         /// <param name="connection">数据库连接</param>
-        public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null)
-        {
-            return await PagerQueryAsync(async () => await ToListAsync<TResult>(connection), parameter, connection);
-        }
+        public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null) => 
+            await PagerQueryAsync(async () => await ToListAsync<TResult>(connection), parameter, connection);
 
         /// <summary>
         /// 分页查询
@@ -207,10 +186,8 @@ namespace Bing.Datas.Dapper
         public override async Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter, IDbConnection connection = null)
         {
             parameter = GetPage(parameter);
-            if (parameter.TotalCount == 0)
-            {
+            if (parameter.TotalCount == 0) 
                 parameter.TotalCount = await GetCountAsync(connection);
-            }
             SetPager(parameter);
             return new PagerList<TResult>(parameter, await func());
         }
@@ -235,10 +212,8 @@ namespace Bing.Datas.Dapper
         /// <param name="page">页数</param>
         /// <param name="pageSize">每页显示行数</param>
         /// <param name="connection">数据库连接</param>
-        public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null)
-        {
-            return await ToPagerListAsync<TResult>(new Pager(page, pageSize), connection);
-        }
+        public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null) => 
+            await ToPagerListAsync<TResult>(new Pager(page, pageSize), connection);
 
         /// <summary>
         /// 获取分页列表
@@ -263,7 +238,7 @@ namespace Bing.Datas.Dapper
         protected override void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
         {
             var log = GetLog();
-            if (log.IsTraceEnabled == false)
+            if (IsEnabled(log) == false)
                 return;
             log.Class(GetType().FullName)
                 .Caption("SqlQuery查询调试:")
@@ -278,7 +253,6 @@ namespace Bing.Datas.Dapper
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         private ILog GetLog()
         {
             try
@@ -289,6 +263,19 @@ namespace Bing.Datas.Dapper
             {
                 return Log.Null;
             }
+        }
+
+        /// <summary>
+        /// 是否启用日志
+        /// </summary>
+        /// <param name="log">日志操作</param>
+        private bool IsEnabled(ILog log)
+        {
+            if (SqlOptions.LogLevel == DataLogLevel.Off)
+                return false;
+            if (log.IsTraceEnabled == false)
+                return false;
+            return true;
         }
     }
 }

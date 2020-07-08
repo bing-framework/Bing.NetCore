@@ -1,4 +1,5 @@
-﻿using Bing.Datas.Enums;
+﻿using Bing.Datas.Configs;
+using Bing.Datas.Enums;
 
 namespace Bing.Datas.Sql.Configs
 {
@@ -16,5 +17,10 @@ namespace Bing.Datas.Sql.Configs
         /// 是否在执行之后清空Sql和参数，默认为 true
         /// </summary>
         public bool IsClearAfterExecution { get; set; } = true;
+
+        /// <summary>
+        /// 数据日志级别
+        /// </summary>
+        public DataLogLevel LogLevel { get; set; } = DataLogLevel.Sql;
     }
 }
