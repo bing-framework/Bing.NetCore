@@ -48,6 +48,7 @@ dotnet pack src/Bing.Webs -c Release -o nuget_pub
 
 ::Caching
 dotnet pack src/Bing.EasyCaching -c Release -o nuget_pub
+dotnet pack src/Bing.Caching.CSRedis -c Release -o nuget_pub
 
 ::Biz
 dotnet pack src/Bing.Biz -c Release -o nuget_pub
