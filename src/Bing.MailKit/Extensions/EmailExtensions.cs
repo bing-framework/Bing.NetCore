@@ -25,13 +25,9 @@ namespace Bing.MailKit.Extensions
             {
                 var values = mail.Headers.GetValues(key);
                 if (values == null)
-                {
                     continue;
-                }
-                foreach (var value in values)
-                {
+                foreach (var value in values) 
                     headers.Add(new Header(key, value));
-                }
             }
 
             var message = new MimeMessage(headers.ToArray());
@@ -182,7 +178,6 @@ namespace Bing.MailKit.Extensions
         /// 获取MimePart
         /// </summary>
         /// <param name="item">附件基类</param>
-        /// <returns></returns>
         private static MimePart GetMimePart(AttachmentBase item)
         {
             var mimeType = item.ContentType.ToString();
@@ -262,29 +257,19 @@ namespace Bing.MailKit.Extensions
         /// 转换成邮箱地址
         /// </summary>
         /// <param name="address">邮箱地址</param>
-        /// <returns></returns>
-        private static MailboxAddress ToMailboxAddress(this MailAddress address)
-        {
-            return address == null ? null : new MailboxAddress(address.DisplayName, address.Address);
-        }
+        private static MailboxAddress ToMailboxAddress(this MailAddress address) => address == null ? null : new MailboxAddress(address.DisplayName, address.Address);
 
         /// <summary>
         /// 转换成Internet地址列表
         /// </summary>
         /// <param name="addresses">邮箱地址集合</param>
-        /// <returns></returns>
         private static InternetAddressList ToInternetAddressList(this MailAddressCollection addresses)
         {
             if (addresses == null)
-            {
                 return null;
-            }
             var list = new InternetAddressList();
-            foreach (var address in addresses)
-            {
+            foreach (var address in addresses) 
                 list.Add(address.ToMailboxAddress());
-            }
-
             return list;
         }
     }

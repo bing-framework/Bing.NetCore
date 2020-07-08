@@ -11,13 +11,11 @@ namespace Bing.Net.Mail.Abstractions
         /// <summary>
         /// 获取文件流
         /// </summary>
-        /// <returns></returns>
         Stream GetFileStream();
 
         /// <summary>
         /// 获取文件名称
         /// </summary>
-        /// <returns></returns>
         string GetName();
     }
 }

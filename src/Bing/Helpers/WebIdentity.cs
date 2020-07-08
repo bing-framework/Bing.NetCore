@@ -16,14 +16,9 @@ namespace Bing.Helpers
             get
             {
                 if (Web.HttpContext == null)
-                {
                     return UnauthenticatedPrincipal.Instance;
-                }
-
                 if (Web.HttpContext.User is ClaimsPrincipal principal)
-                {
                     return principal;
-                }
                 return UnauthenticatedPrincipal.Instance;
             }
         }
@@ -36,10 +31,7 @@ namespace Bing.Helpers
             get
             {
                 if (User.Identity is ClaimsIdentity identity)
-                {
                     return identity;
-                }
-
                 return UnauthenticatedIdentity.Instance;
             }
         }

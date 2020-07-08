@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.AspNetCore.ExceptionHandling
@@ -20,10 +19,7 @@ namespace Bing.AspNetCore.ExceptionHandling
         /// 初始化一个<see cref="BingExceptionHandlingMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        public BingExceptionHandlingMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        public BingExceptionHandlingMiddleware(RequestDelegate next) => _next = next;
 
         /// <summary>
         /// 执行中间件拦截逻辑

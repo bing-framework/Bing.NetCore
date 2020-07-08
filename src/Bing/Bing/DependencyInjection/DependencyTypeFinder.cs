@@ -53,7 +53,7 @@ namespace Bing.DependencyInjection
         /// <param name="assemblies">在指定的程序集列表中查找</param>
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
-            assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();
+            assemblies ??= _allAssemblyFinder.FindAll(true).ToList();
             return Reflection.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }

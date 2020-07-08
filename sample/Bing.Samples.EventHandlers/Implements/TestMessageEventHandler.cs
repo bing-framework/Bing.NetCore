@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Bing.Events;
-using Bing.Logs.Extensions;
+using Bing.Logs;
 using Bing.Samples.Data;
 using Bing.Samples.Domain.Events;
 using Bing.Samples.Domain.Models;

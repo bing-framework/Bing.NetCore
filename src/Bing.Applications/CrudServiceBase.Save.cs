@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Domains.ChangeTracking;
 using Bing.Extensions;
-using Bing.Logs.Extensions;
+using Bing.Logs;
 
 namespace Bing.Applications
 {
@@ -17,6 +17,7 @@ namespace Bing.Applications
         /// 创建
         /// </summary>
         /// <param name="request">创建参数</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual string Create(TCreateRequest request)
         {
             if (request == null)
@@ -58,7 +59,7 @@ namespace Bing.Applications
         /// 创建
         /// </summary>
         /// <param name="request">创建参数</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task<string> CreateAsync(TCreateRequest request)
         {
             if (request == null)
@@ -104,6 +105,7 @@ namespace Bing.Applications
         /// 修改
         /// </summary>
         /// <param name="request">修改参数</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Update(TUpdateRequest request)
         {
             if (request == null)
@@ -118,6 +120,7 @@ namespace Bing.Applications
         /// 修改实体
         /// </summary>
         /// <param name="entity">实体</param>
+        /// <exception cref="ArgumentNullException"></exception>
         protected void Update(TEntity entity)
         {
             var oldEntity = FindOldEntity(entity.Id);
@@ -162,6 +165,7 @@ namespace Bing.Applications
         /// 修改
         /// </summary>
         /// <param name="request">修改参数</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task UpdateAsync(TUpdateRequest request)
         {
             if (request == null)
@@ -176,6 +180,7 @@ namespace Bing.Applications
         /// 修改实体
         /// </summary>
         /// <param name="entity">实体</param>
+        /// <exception cref="ArgumentNullException"></exception>
         protected async Task UpdateAsync(TEntity entity)
         {
             var oldEntity = await FindOldEntityAsync(entity.Id);
@@ -210,6 +215,7 @@ namespace Bing.Applications
         /// 保存
         /// </summary>
         /// <param name="request">请求参数</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Save(TRequest request)
         {
             if (request == null)
@@ -233,6 +239,7 @@ namespace Bing.Applications
         /// 保存
         /// </summary>
         /// <param name="request">请求参数</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task SaveAsync(TRequest request)
         {
             if (request == null)
@@ -265,10 +272,7 @@ namespace Bing.Applications
         /// </summary>
         /// <param name="request">请求参数</param>
         /// <param name="entity">实体</param>
-        protected virtual bool IsNew(TRequest request, TEntity entity)
-        {
-            return string.IsNullOrWhiteSpace(request.Id) || entity.Id.Equals(default(TKey));
-        }
+        protected virtual bool IsNew(TRequest request, TEntity entity) => string.IsNullOrWhiteSpace(request.Id) || entity.Id.Equals(default(TKey));
 
         /// <summary>
         /// 提交后操作 - 该方法由工作单元拦截器调用

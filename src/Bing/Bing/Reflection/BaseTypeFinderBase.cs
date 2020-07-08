@@ -52,7 +52,7 @@ namespace Bing.Reflection
         [Obsolete]
         public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
         {
-            assemblies = assemblies ?? _allAssemblyFinder.FindAll(true).ToList();
+            assemblies ??= _allAssemblyFinder.FindAll(true).ToList();
             return Reflection.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }

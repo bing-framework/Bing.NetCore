@@ -28,21 +28,15 @@ namespace Bing.Events.Default
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
         /// <param name="event">事件</param>
-        /// <returns></returns>
         public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : IEvent
         {
             var handlers = Manager.GetHandlers<TEvent>();
             if (handlers == null)
-            {
                 return;
-            }
-
             foreach (var handler in handlers)
             {
                 if (handler == null)
-                {
                     continue;
-                }
                 await handler.HandleAsync(@event);
             }
         }

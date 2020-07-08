@@ -10,13 +10,11 @@ namespace Bing.Net.Mail.Configs
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
         EmailConfig GetConfig();
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
         Task<EmailConfig> GetConfigAsync();
     }
 }

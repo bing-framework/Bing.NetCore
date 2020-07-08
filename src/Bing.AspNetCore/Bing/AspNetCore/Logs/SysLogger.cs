@@ -1,6 +1,5 @@
 ﻿using System;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.Extensions.Logging;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 

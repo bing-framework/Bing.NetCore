@@ -58,12 +58,10 @@ namespace Bing.Caching.CSRedis
         /// <param name="type">类型</param>
         internal object Deserialize(byte[] bytes, Type type)
         {
-            using (var ms = new MemoryStream(bytes))
-            using (var sr = new StreamReader(ms, Encoding.UTF8))
-            using (var jtr = new JsonTextReader(sr))
-            {
-                return _serializer.Deserialize(jtr, type);
-            }
+            using var ms = new MemoryStream(bytes);
+            using var sr = new StreamReader(ms, Encoding.UTF8);
+            using var jtr = new JsonTextReader(sr);
+            return _serializer.Deserialize(jtr, type);
         }
 
         /// <summary>

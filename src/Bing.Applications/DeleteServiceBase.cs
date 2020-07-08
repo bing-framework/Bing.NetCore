@@ -8,7 +8,7 @@ using Bing.Datas.Stores;
 using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Extensions;
-using Bing.Logs.Extensions;
+using Bing.Logs;
 
 namespace Bing.Applications
 {

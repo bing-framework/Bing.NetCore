@@ -55,7 +55,6 @@ namespace Bing.Validations
             {
                 case ValidationResultCollection fluentResult:
                     return ToException(fluentResult, appendAction);
-
                 case null:
                     throw new ArgumentNullException(nameof(result));
                 default:

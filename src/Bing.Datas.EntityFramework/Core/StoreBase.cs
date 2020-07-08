@@ -45,6 +45,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 添加实体
         /// </summary>
         /// <param name="entity">实体</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Add(TEntity entity)
         {
             if (entity == null)
@@ -56,6 +57,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 添加实体集合
         /// </summary>
         /// <param name="entities">实体集合</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Add(IEnumerable<TEntity> entities)
         {
             if (entities == null)
@@ -68,6 +70,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="cancellationToken">取消令牌</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             if (entity == null)
@@ -80,6 +83,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="entities">实体集合</param>
         /// <param name="cancellationToken">取消令牌</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
         {
             if (entities == null)
@@ -91,6 +95,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 修改实体
         /// </summary>
         /// <param name="entity">实体</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Update(TEntity entity)
         {
             if (entity == null)
@@ -114,6 +119,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 修改实体集合
         /// </summary>
         /// <param name="entities">实体集合</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual void Update(IEnumerable<TEntity> entities)
         {
             if (entities == null)
@@ -126,7 +132,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// 修改实体
         /// </summary>
         /// <param name="entity">实体</param>
-        /// <returns></returns>
         public virtual Task UpdateAsync(TEntity entity)
         {
             Update(entity);
@@ -137,7 +142,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 修改实体集合
         /// </summary>
         /// <param name="entities">实体集合</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task UpdateAsync(IEnumerable<TEntity> entities)
         {
             if (entities == null)

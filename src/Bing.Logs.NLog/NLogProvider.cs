@@ -1,6 +1,7 @@
 ﻿using System;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
+using Bing.Logs.NLog.Internal;
 using NLogs = NLog;
 
 namespace Bing.Logs.NLog
@@ -75,40 +76,15 @@ namespace Bing.Logs.NLog
             var provider = GetFormatProvider();
             if (provider == null)
             {
-                _logger.Log(ConvertTo(level), content);
+                _logger.Log(LogLevelSwitcher.Switch(level), content);
                 return;
             }
-            _logger.Log(ConvertTo(level), provider, content);
+            _logger.Log(LogLevelSwitcher.Switch(level), provider, content);
         }
 
         /// <summary>
         /// 获取格式化提供程序
         /// </summary>
         private IFormatProvider GetFormatProvider() => _format == null ? null : new FormatProvider(_format);
-
-        /// <summary>
-        /// 转换日志等级
-        /// </summary>
-        /// <param name="level">平台日志等级</param>
-        private NLogs.LogLevel ConvertTo(LogLevel level)
-        {
-            switch (level)
-            {
-                case LogLevel.Trace:
-                    return NLogs.LogLevel.Trace;
-                case LogLevel.Debug:
-                    return NLogs.LogLevel.Debug;
-                case LogLevel.Information:
-                    return NLogs.LogLevel.Info;
-                case LogLevel.Warning:
-                    return NLogs.LogLevel.Warn;
-                case LogLevel.Error:
-                    return NLogs.LogLevel.Error;
-                case LogLevel.Fatal:
-                    return NLogs.LogLevel.Fatal;
-                default:
-                    return NLogs.LogLevel.Off;
-            }
-        }
     }
 }

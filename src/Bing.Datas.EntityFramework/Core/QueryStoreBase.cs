@@ -61,7 +61,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// Sql查询对象
         /// </summary>
-        protected virtual ISqlQuery Sql => _sqlQuery ?? (_sqlQuery = CreateSqlQuery());
+        protected virtual ISqlQuery Sql => _sqlQuery ??= CreateSqlQuery();
 
         /// <summary>
         /// 创建Sql查询对象
@@ -395,7 +395,7 @@ namespace Bing.Datas.EntityFramework.Core
         public virtual int Count(Expression<Func<TEntity, bool>> predicate = null)
         {
             if (predicate == null)
-                return Queryable.Count(Set);
+                return Set.Count();
             return Set.Count(predicate);
         }
 
@@ -427,7 +427,7 @@ namespace Bing.Datas.EntityFramework.Core
             var order = query.GetOrder();
             if (string.IsNullOrWhiteSpace(order))
                 return queryable;
-            return DynamicQueryableExtensions.OrderBy(queryable, order);
+            return queryable.OrderBy(order);
         }
 
         /// <summary>

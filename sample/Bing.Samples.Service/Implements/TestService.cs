@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using Bing.Applications;
 using Bing.Events.Messages;
+using Bing.Logs;
 using Bing.Logs.Aspects;
-using Bing.Logs.Extensions;
 using Bing.Samples.Domain.Events;
 using Bing.Samples.Service.Abstractions;
 

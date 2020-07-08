@@ -24,10 +24,7 @@ namespace Bing.Net.Mail.Core
         /// 初始化一个<see cref="EmailSenderBase"/>类型的实例
         /// </summary>
         /// <param name="provider">电子邮件配置提供器</param>
-        protected EmailSenderBase(IEmailConfigProvider provider)
-        {
-            ConfigProvider = provider ?? throw new ArgumentNullException(nameof(provider));
-        }
+        protected EmailSenderBase(IEmailConfigProvider provider) => ConfigProvider = provider ?? throw new ArgumentNullException(nameof(provider));
 
         /// <summary>
         /// 发送邮件
@@ -36,16 +33,7 @@ namespace Bing.Net.Mail.Core
         /// <param name="subject">邮件主题</param>
         /// <param name="body">正文</param>
         /// <param name="isBodyHtml">是否html内容</param>
-        public virtual void Send(string to, string subject, string body, bool isBodyHtml = true)
-        {
-            Send(new MailMessage()
-            {
-                To = { to },
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = isBodyHtml
-            });
-        }
+        public virtual void Send(string to, string subject, string body, bool isBodyHtml = true) => Send(new MailMessage {To = {to}, Subject = subject, Body = body, IsBodyHtml = isBodyHtml});
 
         /// <summary>
         /// 发送邮件
@@ -54,16 +42,7 @@ namespace Bing.Net.Mail.Core
         /// <param name="subject">邮件主题</param>
         /// <param name="body">正文</param>
         /// <param name="isBodyHtml">是否html内容</param>
-        public virtual async Task SendAsync(string to, string subject, string body, bool isBodyHtml = true)
-        {
-            await SendAsync(new MailMessage()
-            {
-                To = { to },
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = isBodyHtml
-            });
-        }
+        public virtual async Task SendAsync(string to, string subject, string body, bool isBodyHtml = true) => await SendAsync(new MailMessage {To = {to}, Subject = subject, Body = body, IsBodyHtml = isBodyHtml});
 
         /// <summary>
         /// 发送邮件
@@ -73,10 +52,7 @@ namespace Bing.Net.Mail.Core
         /// <param name="subject">邮件主题</param>
         /// <param name="body">正文</param>
         /// <param name="isBodyHtml">是否html内容</param>
-        public virtual void Send(string @from, string to, string subject, string body, bool isBodyHtml = true)
-        {
-            Send(new MailMessage(from, to, subject, body) { IsBodyHtml = isBodyHtml });
-        }
+        public virtual void Send(string @from, string to, string subject, string body, bool isBodyHtml = true) => Send(new MailMessage(@from, to, subject, body) { IsBodyHtml = isBodyHtml });
 
         /// <summary>
         /// 发送邮件
@@ -86,10 +62,7 @@ namespace Bing.Net.Mail.Core
         /// <param name="subject">邮件主题</param>
         /// <param name="body">正文</param>
         /// <param name="isBodyHtml">是否html内容</param>
-        public virtual async Task SendAsync(string @from, string to, string subject, string body, bool isBodyHtml = true)
-        {
-            await SendAsync(new MailMessage(from, to, subject, body) { IsBodyHtml = isBodyHtml });
-        }
+        public virtual async Task SendAsync(string @from, string to, string subject, string body, bool isBodyHtml = true) => await SendAsync(new MailMessage(@from, to, subject, body) { IsBodyHtml = isBodyHtml });
 
         /// <summary>
         /// 发送邮件
@@ -115,7 +88,6 @@ namespace Bing.Net.Mail.Core
         /// 发送邮件
         /// </summary>
         /// <param name="box">邮件</param>
-        /// <returns></returns>
         public virtual async Task SendAsync(EmailBox box)
         {
             var mail = new MailMessage();
@@ -179,7 +151,7 @@ namespace Bing.Net.Mail.Core
                 return;
             foreach (var item in attachments)
             {
-                Attachment attachment = new Attachment(item.GetFileStream(), item.GetName());
+                var attachment = new Attachment(item.GetFileStream(), item.GetName());
                 attachmentCollection.Add(attachment);
             }
         }
@@ -212,8 +184,8 @@ namespace Bing.Net.Mail.Core
         {
             if (mailAddress.IsEmpty())
                 return;
-            char[] separator = new char[2] { ',', ';' };
-            string[] addressArray = mailAddress.Split(separator);
+            var separator = new char[2] { ',', ';' };
+            var addressArray = mailAddress.Split(separator);
             PaserMailAddress(addressArray.ToList(), mailAddressCollection);
         }
 

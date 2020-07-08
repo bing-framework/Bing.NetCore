@@ -1,5 +1,4 @@
 ﻿using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.Webs.Filters

@@ -36,6 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="services">服务集合</param>
+        /// <exception cref="InvalidOperationException"></exception>
         public static T GetSingletonInstance<T>(this IServiceCollection services)
         {
             var instance = services.GetSingletonInstanceOrNull<T>();

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 
@@ -15,16 +15,15 @@ namespace Bing.Datas.EntityFramework.Conventions
         /// <param name="dependencies">依赖</param>
         public BingCoreConventionSetBuilder(CoreConventionSetBuilderDependencies dependencies) : base(dependencies)
         {
-            Console.WriteLine("BingRelationModeCustomizer ctor");
+            Debug.WriteLine("BingRelationModeCustomizer ctor");
         }
 
         /// <summary>
         /// 创建约束集合
         /// </summary>
-        /// <returns></returns>
         public override ConventionSet CreateConventionSet()
         {
-            Console.WriteLine("BingCoreConventionSetBuilder.CreateConventionSet");
+            Debug.WriteLine("BingCoreConventionSetBuilder.CreateConventionSet");
 
             var conventionSet = base.CreateConventionSet();
             conventionSet.PropertyAddedConventions.Add(new DecimalPrecisionAttributeConvention());

@@ -11,7 +11,6 @@ namespace Bing.Exceptions.Prompts
         /// 获取异常提示
         /// </summary>
         /// <param name="exception">异常</param>
-        /// <returns></returns>
         string GetPrompt(Exception exception);
     }
 }

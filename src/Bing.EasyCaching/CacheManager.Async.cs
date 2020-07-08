@@ -33,10 +33,7 @@ namespace Bing.EasyCaching
         /// </summary>
         /// <param name="key">缓存键</param>
         /// <param name="type">缓存数据类型</param>
-        public async Task<object> GetAsync(string key, Type type)
-        {
-            return await _provider.GetAsync(key, type);
-        }
+        public async Task<object> GetAsync(string key, Type type) => await _provider.GetAsync(key, type);
 
         /// <summary>
         /// 从缓存中获取数据

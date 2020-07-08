@@ -3,7 +3,8 @@ using System.Linq;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Extensions;
 
-namespace Bing.Logs.Extensions
+// ReSharper disable once CheckNamespace
+namespace Bing.Logs
 {
     /// <summary>
     /// Aop扩展

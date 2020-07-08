@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Logs.Extensions;
+using Bing.Logs;
 
 namespace Bing.Applications
 {
@@ -20,9 +20,9 @@ namespace Bing.Applications
         {
             if (addList == null && updateList == null && deleteList == null)
                 return new List<TDto>();
-            addList = addList ?? new List<TRequest>();
-            updateList = updateList ?? new List<TRequest>();
-            deleteList = deleteList ?? new List<TRequest>();
+            addList ??= new List<TRequest>();
+            updateList ??= new List<TRequest>();
+            deleteList ??= new List<TRequest>();
             FilterList(addList, updateList, deleteList);
             var addEntities = ToEntities(addList);
             var updateEntities = ToEntities(updateList);
@@ -45,12 +45,10 @@ namespace Bing.Applications
         public virtual async Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
         {
             if (addList == null && updateList == null && deleteList == null)
-            {
                 return new List<TDto>();
-            }
-            addList = addList ?? new List<TRequest>();
-            updateList = updateList ?? new List<TRequest>();
-            deleteList = deleteList ?? new List<TRequest>();
+            addList ??= new List<TRequest>();
+            updateList ??= new List<TRequest>();
+            deleteList ??= new List<TRequest>();
             FilterList(addList, updateList, deleteList);
             var addEntities = ToEntities(addList);
             var updateEntities = ToEntities(updateList);

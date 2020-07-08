@@ -16,27 +16,16 @@ namespace Bing.MailKit.Configs
         /// 初始化一个<see cref="DefaultMailKitConfigProvider"/>类型的实例
         /// </summary>
         /// <param name="config">MailKit 配置</param>
-        public DefaultMailKitConfigProvider(MailKitConfig config)
-        {
-            _config = config;
-        }
+        public DefaultMailKitConfigProvider(MailKitConfig config) => _config = config;
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
-        public MailKitConfig GetConfig()
-        {
-            return _config;
-        }
+        public MailKitConfig GetConfig() => _config;
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
-        public Task<MailKitConfig> GetConfigAsync()
-        {
-            return Task.FromResult(_config);
-        }
+        public Task<MailKitConfig> GetConfigAsync() => Task.FromResult(_config);
     }
 }

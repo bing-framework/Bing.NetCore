@@ -64,26 +64,18 @@ namespace Bing.Exceptions
         /// <summary>
         /// 获取错误消息
         /// </summary>
-        /// <returns></returns>
-        public string GetMessage()
-        {
-            return GetMessage(this);
-        }
+        public string GetMessage() => GetMessage(this);
 
         /// <summary>
         /// 获取错误消息
         /// </summary>
         /// <param name="ex">异常</param>
-        /// <returns></returns>
         public static string GetMessage(Exception ex)
         {
             var result = new StringBuilder();
             var list = GetExceptions(ex);
-            foreach (var exception in list)
-            {
+            foreach (var exception in list) 
                 AppendMessage(result, exception);
-            }
-
             return result.ToString().RemoveEnd(Environment.NewLine);
         }
 
@@ -95,27 +87,19 @@ namespace Bing.Exceptions
         private static void AppendMessage(StringBuilder result, Exception exception)
         {
             if (exception == null)
-            {
                 return;
-            }
-
             result.AppendLine(exception.Message);
         }
 
         /// <summary>
         /// 获取异常列表
         /// </summary>
-        /// <returns></returns>
-        public IList<Exception> GetExceptions()
-        {
-            return GetExceptions(this);
-        }
+        public IList<Exception> GetExceptions() => GetExceptions(this);
 
         /// <summary>
         /// 获取异常列表
         /// </summary>
         /// <param name="ex">异常</param>
-        /// <returns></returns>
         public static IList<Exception> GetExceptions(Exception ex)
         {
             var result = new List<Exception>();
@@ -131,9 +115,7 @@ namespace Bing.Exceptions
         private static void AddException(List<Exception> result, Exception exception)
         {
             if (exception == null)
-            {
                 return;
-            }
             result.Add(exception);
             AddException(result, exception.InnerException);
         }
@@ -142,14 +124,10 @@ namespace Bing.Exceptions
         /// 获取友好提示
         /// </summary>
         /// <param name="level">日志级别</param>
-        /// <returns></returns>
         public string GetPrompt(LogLevel level)
         {
             if (level == LogLevel.Error)
-            {
                 return R.SystemError;
-            }
-
             return Message;
         }
     }

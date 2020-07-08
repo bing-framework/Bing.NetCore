@@ -8,7 +8,6 @@ using Bing.Datas.UnitOfWorks;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;

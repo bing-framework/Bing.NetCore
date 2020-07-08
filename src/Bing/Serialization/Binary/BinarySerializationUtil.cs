@@ -14,14 +14,11 @@ namespace Bing.Serialization.Binary
         /// 序列化
         /// </summary>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
         public static byte[] Serialize(object obj)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                Serialize(obj, memoryStream);
-                return memoryStream.ToArray();
-            }
+            using var memoryStream = new MemoryStream();
+            Serialize(obj, memoryStream);
+            return memoryStream.ToArray();
         }
 
         /// <summary>
@@ -29,67 +26,49 @@ namespace Bing.Serialization.Binary
         /// </summary>
         /// <param name="obj">对象</param>
         /// <param name="stream">流</param>
-        public static void Serialize(object obj, Stream stream)
-        {
-            CreateBinaryFormatter().Serialize(stream, obj);
-        }
+        public static void Serialize(object obj, Stream stream) => CreateBinaryFormatter().Serialize(stream, obj);
 
         /// <summary>
         /// 反序列化
         /// </summary>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
         public static object Deserialize(byte[] bytes)
         {
-            using (var memoryStream = new MemoryStream(bytes))
-            {
-                return Deserialize(memoryStream);
-            }
+            using var memoryStream = new MemoryStream(bytes);
+            return Deserialize(memoryStream);
         }
 
         /// <summary>
         /// 反序列化
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static object Deserialize(Stream stream)
-        {
-            return CreateBinaryFormatter().Deserialize(stream);
-        }
+        public static object Deserialize(Stream stream) => CreateBinaryFormatter().Deserialize(stream);
 
         /// <summary>
         /// 反序列化。允许反序列化运行时加载的程序集定义的对象
         /// </summary>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
         public static object DeserializeExtended(byte[] bytes)
         {
-            using (var memoryStream = new MemoryStream(bytes))
-            {
-                return DeserializeExtended(memoryStream);
-            }
+            using var memoryStream = new MemoryStream(bytes);
+            return DeserializeExtended(memoryStream);
         }
 
         /// <summary>
         /// 反序列化。允许反序列化运行时加载的程序集定义的对象
         /// </summary>
         /// <param name="stream">流</param>
-        /// <returns></returns>
-        public static object DeserializeExtended(Stream stream)
-        {
-            return CreateBinaryFormatter(true).Deserialize(stream);
-        }
+        public static object DeserializeExtended(Stream stream) => CreateBinaryFormatter(true).Deserialize(stream);
 
         /// <summary>
         /// 创建二进制格式化程序
         /// </summary>
         /// <param name="extended">是否允许序列化运行时对象</param>
-        /// <returns></returns>
         private static BinaryFormatter CreateBinaryFormatter(bool extended = false)
         {
             if (extended)
             {
-                return new BinaryFormatter()
+                return new BinaryFormatter
                 {
                     // TODO: AssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple,
                     Binder = new ExtendedSerializationBinder()
@@ -108,16 +87,13 @@ namespace Bing.Serialization.Binary
             /// </summary>
             /// <param name="assemblyName">程序集名称</param>
             /// <param name="typeName">类型名称</param>
-            /// <returns></returns>
             public override Type BindToType(string assemblyName, string typeName)
             {
                 var toAssemblyName = assemblyName.Split(',')[0];
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
                     if (assembly.FullName.Split(',')[0] == toAssemblyName)
-                    {
                         return assembly.GetType(typeName);
-                    }
                 }
                 return Type.GetType($"{typeName}, {assemblyName}");
             }

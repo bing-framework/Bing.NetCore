@@ -39,10 +39,7 @@ namespace Bing.Events.Cap
         {
             await SimpleEventBus.PublishAsync(@event);
             if (!(@event is IMessageEvent messageEvent))
-            {
                 return;
-            }
-
             await MessageEventBus.PublishAsync(messageEvent);
         }
     }

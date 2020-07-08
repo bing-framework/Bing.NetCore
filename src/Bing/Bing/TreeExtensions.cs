@@ -47,23 +47,17 @@ namespace Bing
         /// <typeparam name="TKey">标识类型</typeparam>
         /// <typeparam name="TParentId">父标识类型</typeparam>
         /// <param name="entities">实体列表</param>
-        /// <returns></returns>
         public static List<string> GetMissingParentIds<TEntity, TKey, TParentId>(this IEnumerable<TEntity> entities)
             where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>
         {
             var result = new List<string>();
             if (entities == null)
-            {
                 return result;
-            }
-
             var list = entities.ToList();
             list.ForEach(entity =>
             {
                 if (entity == null)
-                {
                     return;
-                }
                 result.AddRange(entity.GetParentIdsFromPath().Select(t => t.SafeString()));
             });
 

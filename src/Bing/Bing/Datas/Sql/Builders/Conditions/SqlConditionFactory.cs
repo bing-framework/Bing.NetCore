@@ -22,30 +22,22 @@ namespace Bing.Datas.Sql.Builders.Conditions
                     if (right == null)
                         return new IsNullCondition(left);
                     return new EqualCondition(left, right);
-
                 case Operator.NotEqual:
                     if (right == null)
                         return new IsNotNullCondition(left);
                     return new NotEqualCondition(left, right);
-
                 case Operator.Greater:
                     return new GreaterCondition(left, right);
-
                 case Operator.GreaterEqual:
                     return new GreaterEqualCondition(left, right);
-
                 case Operator.Less:
                     return new LessCondition(left, right);
-
                 case Operator.LessEqual:
                     return new LessEqualCondition(left, right);
-
                 case Operator.Contains:
                     return new LikeCondition(left, right);
-
                 case Operator.Starts:
                     return new LikeCondition(left, right);
-
                 case Operator.Ends:
                     return new LikeCondition(left, right);
             }

@@ -68,7 +68,7 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 上下文
         /// </summary>
-        public IContext Context => _context ?? (_context = ContextFactory.Create());
+        public IContext Context => _context ??= ContextFactory.Create();
 
         #endregion
 
@@ -101,7 +101,7 @@ namespace Bing.Logs.Core
         /// 创建日志上下文信息
         /// </summary>
         protected virtual LogContextInfo CreateInfo() =>
-            new LogContextInfo()
+            new LogContextInfo
             {
                 TraceId = GetTraceId(),
                 Stopwatch = GetStopwatch(),

@@ -27,7 +27,6 @@ namespace Bing.Net.Mail.Abstractions
         /// 尝试出队，获取电子邮件
         /// </summary>
         /// <param name="box">电子邮件</param>
-        /// <returns></returns>
         bool TryDequeue(out EmailBox box);
     }
 }

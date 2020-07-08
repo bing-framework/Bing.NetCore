@@ -19,32 +19,24 @@ namespace Bing.Serialization
         /// 初始化一个<see cref="DefaultObjectSerializer"/>类型的实例
         /// </summary>
         /// <param name="serviceProvider">服务提供程序</param>
-        public DefaultObjectSerializer(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
+        public DefaultObjectSerializer(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
         /// <summary>
         /// 序列化
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
         public virtual byte[] Serialize<T>(T obj)
         {
             if (obj == null)
-            {
                 return null;
-            }
 
             // 检查是否已注册特定的序列化程序
             using (var scope = _serviceProvider.CreateScope())
             {
                 var specificSerializer = scope.ServiceProvider.GetService<IObjectSerializer<T>>();
                 if (specificSerializer != null)
-                {
                     return specificSerializer.Serialize(obj);
-                }
             }
 
             return AutoSerialize(obj);
@@ -55,13 +47,10 @@ namespace Bing.Serialization
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
         public virtual T Deserialize<T>(byte[] bytes)
         {
             if (bytes == null)
-            {
-                return default(T);
-            }
+                return default;
 
             // 检查是否已注册特定的序列化程序
             using (var scope = _serviceProvider.CreateScope())
@@ -81,21 +70,13 @@ namespace Bing.Serialization
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="obj">对象</param>
-        /// <returns></returns>
-        protected virtual byte[] AutoSerialize<T>(T obj)
-        {
-            return BinarySerializationUtil.Serialize(obj);
-        }
+        protected virtual byte[] AutoSerialize<T>(T obj) => BinarySerializationUtil.Serialize(obj);
 
         /// <summary>
         /// 自动反序列化
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="bytes">字节数组</param>
-        /// <returns></returns>
-        protected virtual T AutoDeserialize<T>(byte[] bytes)
-        {
-            return (T)BinarySerializationUtil.DeserializeExtended(bytes);
-        }
+        protected virtual T AutoDeserialize<T>(byte[] bytes) => (T)BinarySerializationUtil.DeserializeExtended(bytes);
     }
 }

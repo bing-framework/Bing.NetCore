@@ -27,19 +27,12 @@ namespace Bing.Net.Mail.Core
         /// 入队
         /// </summary>
         /// <param name="box">电子邮件</param>
-        public void Enqueue(EmailBox box)
-        {
-            MailQueue.Enqueue(box);
-        }
+        public void Enqueue(EmailBox box) => MailQueue.Enqueue(box);
 
         /// <summary>
         /// 尝试出队，获取电子邮件
         /// </summary>
         /// <param name="box">电子邮件</param>
-        /// <returns></returns>
-        public bool TryDequeue(out EmailBox box)
-        {
-            return MailQueue.TryDequeue(out box);
-        }
+        public bool TryDequeue(out EmailBox box) => MailQueue.TryDequeue(out box);
     }
 }

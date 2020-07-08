@@ -225,7 +225,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="id">标识</param>
         /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
         public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default) => await _store.RemoveAsync(id, cancellationToken);
 
         /// <summary>

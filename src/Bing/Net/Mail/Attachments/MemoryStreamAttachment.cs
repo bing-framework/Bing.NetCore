@@ -37,13 +37,11 @@ namespace Bing.Net.Mail.Attachments
         /// <summary>
         /// 获取文件流
         /// </summary>
-        /// <returns></returns>
         public Stream GetFileStream() => _stream;
 
         /// <summary>
         /// 获取文件名称
         /// </summary>
-        /// <returns></returns>
         public string GetName() => _fileName;
     }
 }

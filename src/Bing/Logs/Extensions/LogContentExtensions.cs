@@ -2,12 +2,13 @@
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 
-namespace Bing.Logs.Extensions
+// ReSharper disable once CheckNamespace
+namespace Bing.Logs
 {
     /// <summary>
     /// 日志内容 扩展
     /// </summary>
-    public static class LogContentExtensions
+    public static partial class LogContentExtensions
     {
         /// <summary>
         /// 追加内容

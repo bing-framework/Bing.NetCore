@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.Webs.Middlewares

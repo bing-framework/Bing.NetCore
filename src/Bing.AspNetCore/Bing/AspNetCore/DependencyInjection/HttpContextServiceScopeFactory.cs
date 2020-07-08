@@ -27,8 +27,8 @@ namespace Bing.AspNetCore.DependencyInjection
         /// </summary>
         /// <param name="serviceScopeFactory">服务作用域工厂</param>
         /// <param name="httpContextAccessor">Http上下文访问器</param>
-        public HttpContextServiceScopeFactory(IServiceScopeFactory serviceScopeFactory,
-            IHttpContextAccessor httpContextAccessor)
+        public HttpContextServiceScopeFactory(IServiceScopeFactory serviceScopeFactory
+            , IHttpContextAccessor httpContextAccessor)
         {
             ServiceScopeFactory = serviceScopeFactory;
             HttpContextAccessor = httpContextAccessor;
@@ -60,10 +60,7 @@ namespace Bing.AspNetCore.DependencyInjection
             /// 初始化一个<see cref="NonDisposedHttpContextServiceScope"/>类型的实例
             /// </summary>
             /// <param name="serviceProvider">服务提供程序</param>
-            public NonDisposedHttpContextServiceScope(IServiceProvider serviceProvider)
-            {
-                ServiceProvider = serviceProvider;
-            }
+            public NonDisposedHttpContextServiceScope(IServiceProvider serviceProvider) => ServiceProvider = serviceProvider;
 
             /// <summary>
             /// 释放资源。因为是HttpContext的，啥也不做，避免在using使用时被释放

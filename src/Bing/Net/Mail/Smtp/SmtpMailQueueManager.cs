@@ -22,28 +22,19 @@ namespace Bing.Net.Mail.Smtp
         /// <param name="emailConfigProvider">电子邮件配置提供器</param>
         /// <param name="mailQueueProvider">邮件队列提供程序</param>
         /// <param name="smtpEmailSender">SMTP电子邮件发送器</param>
-        public SmtpMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, ISmtpEmailSender smtpEmailSender) : base(emailConfigProvider, mailQueueProvider)
-        {
-            _smtpEmailSender = smtpEmailSender;
-        }
+        public SmtpMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, ISmtpEmailSender smtpEmailSender) : base(emailConfigProvider, mailQueueProvider) => _smtpEmailSender = smtpEmailSender;
 
         /// <summary>
         /// 发送邮件
         /// </summary>
         /// <param name="box">电子邮件</param>
-        protected override void SendMail(EmailBox box)
-        {
-            _smtpEmailSender.Send(box);
-        }
+        protected override void SendMail(EmailBox box) => _smtpEmailSender.Send(box);
 
         /// <summary>
         /// 写入日志
         /// </summary>
         /// <param name="log">日志</param>
         /// <param name="level">日志等级</param>
-        protected override void WriteLog(string log, LogLevel level)
-        {
-            Console.WriteLine(log);
-        }
+        protected override void WriteLog(string log, LogLevel level) => Console.WriteLine(log);
     }
 }

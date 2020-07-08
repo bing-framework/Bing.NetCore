@@ -13,7 +13,6 @@ namespace Bing.Events.Default
         /// 注册默认事件总线服务
         /// </summary>
         /// <param name="services">服务集合</param>
-        /// <returns></returns>
         public static IServiceCollection AddDefaultEventBus(this IServiceCollection services)
         {
             services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();

@@ -3,6 +3,7 @@ using System.IO;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
+using Bing.Logs.Serilog.Internal;
 using Serilog;
 using Serilog.Events;
 using Serilogs = Serilog;
@@ -112,10 +113,11 @@ namespace Bing.Logs.Serilog
         /// </summary>
         /// <param name="level">日志等级</param>
         /// <param name="content">日志内容</param>
+        /// <exception cref="NullReferenceException"></exception>
         public void WriteLog(LogLevel level, ILogContent content)
         {
             var provider = GetFormatProvider();
-            var logEventLevel = ConvertTo(level);
+            var logEventLevel = LogLevelSwitcher.Switch(level);
             if (logEventLevel == null)
                 return;
             if (provider == null)
@@ -128,30 +130,5 @@ namespace Bing.Logs.Serilog
         /// 获取格式化提供程序
         /// </summary>
         private FormatProvider GetFormatProvider() => _format == null ? null : new FormatProvider(_format);
-
-        /// <summary>
-        /// 转换日志级别
-        /// </summary>
-        /// <param name="level">日志级别</param>
-        private Serilogs.Events.LogEventLevel? ConvertTo(LogLevel level)
-        {
-            switch (level)
-            {
-                case LogLevel.Trace:
-                    return LogEventLevel.Verbose;
-                case LogLevel.Debug:
-                    return LogEventLevel.Debug;
-                case LogLevel.Information:
-                    return LogEventLevel.Information;
-                case LogLevel.Warning:
-                    return LogEventLevel.Warning;
-                case LogLevel.Error:
-                    return LogEventLevel.Error;
-                case LogLevel.Fatal:
-                    return LogEventLevel.Fatal;
-                default:
-                    return null;
-            }
-        }
     }
 }

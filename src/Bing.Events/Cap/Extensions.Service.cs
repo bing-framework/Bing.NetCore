@@ -18,7 +18,6 @@ namespace Bing.Events.Cap
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="action">配置操作</param>
-        /// <returns></returns>
         public static IServiceCollection AddCapEventBus(this IServiceCollection services, Action<CapOptions> action)
         {
             services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();

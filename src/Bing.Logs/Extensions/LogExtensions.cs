@@ -8,7 +8,8 @@ using Bing.Helpers;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
 
-namespace Bing.Logs.Extensions
+// ReSharper disable once CheckNamespace
+namespace Bing.Logs
 {
     /// <summary>
     /// 日志扩展

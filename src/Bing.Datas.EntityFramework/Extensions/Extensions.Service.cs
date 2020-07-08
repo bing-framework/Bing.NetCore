@@ -23,7 +23,6 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <param name="configAction">配置操作</param>
         /// <param name="dataConfigAction">数据配置操作</param>
         /// <param name="configuration">配置</param>
-        /// <returns></returns>
         public static IServiceCollection AddUnitOfWork<TService, TImplementation>(this IServiceCollection services,
             Action<DbContextOptionsBuilder> configAction, Action<DataConfig> dataConfigAction = null,
             IConfiguration configuration = null)
@@ -38,11 +37,8 @@ namespace Bing.Datas.EntityFramework.Extensions
                 dataConfigAction.Invoke(dataConfig);
             }
 
-            if (configuration != null)
-            {
+            if (configuration != null) 
                 services.Configure<DataConfig>(configuration);
-            }
-
             services.TryAddScoped<TService>(t => t.GetService<TImplementation>());
             services.TryAddScoped<IUnitOfWork>(t => t.GetService<TImplementation>());
             return services;

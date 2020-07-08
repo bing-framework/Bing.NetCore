@@ -108,10 +108,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null)
         {
             if (column == null)
-            {
                 return;
-            }
-
             _group.Add(new SqlItem(_resolver.GetColumn(column), _register.GetAlias(typeof(TEntity))));
             _having = having;
         }
@@ -123,10 +120,7 @@ namespace Bing.Datas.Sql.Builders.Clauses
         public void AppendSql(string sql)
         {
             if (string.IsNullOrWhiteSpace(sql))
-            {
                 return;
-            }
-
             sql = Helper.ResolveSql(sql, _dialect);
             _group.Add(new SqlItem(sql, raw: true));
         }

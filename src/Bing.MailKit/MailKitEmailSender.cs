@@ -33,12 +33,10 @@ namespace Bing.MailKit
         /// <param name="mail">邮件</param>
         protected override void SendEmail(MailMessage mail)
         {
-            using (var client = BuildSmtpClient())
-            {
-                var message = mail.ToMimeMessage();
-                client.Send(message);
-                client.Disconnect(true);
-            }
+            using var client = BuildSmtpClient();
+            var message = mail.ToMimeMessage();
+            client.Send(message);
+            client.Disconnect(true);
         }
 
         /// <summary>
@@ -47,12 +45,10 @@ namespace Bing.MailKit
         /// <param name="mail">邮件</param>
         protected override async Task SendEmailAsync(MailMessage mail)
         {
-            using (var client = BuildSmtpClient())
-            {
-                var message = mail.ToMimeMessage();
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
-            }
+            using var client = BuildSmtpClient();
+            var message = mail.ToMimeMessage();
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
         }
 
         /// <summary>

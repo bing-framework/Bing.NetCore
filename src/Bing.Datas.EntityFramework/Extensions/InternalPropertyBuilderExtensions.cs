@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Bing.Datas.EntityFramework.Extensions
@@ -15,7 +16,6 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <param name="configurationSource">配置源</param>
         /// <param name="precision">精度</param>
         /// <param name="scale">保留小数位</param>
-        /// <returns></returns>
         public static InternalPropertyBuilder HasPrecision(this InternalPropertyBuilder propertyBuilder,
             ConfigurationSource configurationSource, int precision, int scale)
         {
@@ -29,13 +29,12 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <param name="propertyBuilder">内部属性生成器</param>
         /// <param name="configurationSource">配置源</param>
         /// <param name="hasMaxLength">是否最大长度</param>
-        /// <returns></returns>
         public static InternalPropertyBuilder HasMaxLength(this InternalPropertyBuilder propertyBuilder,
             ConfigurationSource configurationSource, bool? hasMaxLength)
         {
             if (hasMaxLength.HasValue && hasMaxLength.Value == true)
             {
-                Console.WriteLine($"HasMaxLength(true) remove MaxLength Annotaion.entity:{propertyBuilder.Metadata.DeclaringType.Name};property:{propertyBuilder.Metadata.Name};{configurationSource}");
+                Debug.WriteLine($"HasMaxLength(true) remove MaxLength Annotaion.entity:{propertyBuilder.Metadata.DeclaringType.Name};property:{propertyBuilder.Metadata.Name};{configurationSource}");
                 propertyBuilder.HasAnnotation(CoreAnnotationNames.MaxLengthAnnotation, null, configurationSource);
             }
 

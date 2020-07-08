@@ -23,10 +23,7 @@ namespace Bing.Applications.Dtos
         /// 初始化一个<see cref="NullableIdDto{TId}"/>类型的实例
         /// </summary>
         /// <param name="id">标识</param>
-        public NullableIdDto(TId? id)
-        {
-            Id = id;
-        }
+        public NullableIdDto(TId? id) => Id = id;
     }
 
     /// <summary>

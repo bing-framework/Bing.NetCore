@@ -29,10 +29,6 @@ namespace Bing.Net.Mail.Core
         /// 发送邮件
         /// </summary>
         /// <param name="mail">邮件</param>
-        /// <returns></returns>
-        protected override Task SendEmailAsync(MailMessage mail)
-        {
-            return Task.FromResult(0);
-        }
+        protected override Task SendEmailAsync(MailMessage mail) => Task.FromResult(0);
     }
 }

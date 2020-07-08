@@ -2,7 +2,6 @@
 using System.Threading;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
-using Bing.Logs.Extensions;
 using Bing.Sessions;
 using Enum = Bing.Helpers.Enum;
 
@@ -24,7 +23,7 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 日志内容
         /// </summary>
-        private TContent LogContent => _content ?? (_content = GetContent());
+        private TContent LogContent => _content ??= GetContent();
 
         /// <summary>
         /// 日志提供程序
@@ -93,7 +92,6 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 获取日志内容
         /// </summary>
-        /// <returns></returns>
         protected abstract TContent GetContent();
 
         /// <summary>

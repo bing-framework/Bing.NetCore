@@ -77,10 +77,7 @@ namespace Bing.Logs
         /// <summary>
         /// 获取日志操作实例
         /// </summary>
-        public static ILog GetLog()
-        {
-            return GetLog(string.Empty);
-        }
+        public static ILog GetLog() => GetLog(string.Empty);
 
         /// <summary>
         /// 获取日志操作实例

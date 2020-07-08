@@ -16,18 +16,12 @@ namespace Bing.Net.Mail.Core
         /// 初始化一个<see cref="MailQueueService"/>类型的实例
         /// </summary>
         /// <param name="provider">邮件队列提供程序</param>
-        public MailQueueService(IMailQueueProvider provider)
-        {
-            _provider = provider;
-        }
+        public MailQueueService(IMailQueueProvider provider) => _provider = provider;
 
         /// <summary>
         /// 入队
         /// </summary>
         /// <param name="box">电子邮件</param>
-        public void Enqueue(EmailBox box)
-        {
-            _provider.Enqueue(box);
-        }
+        public void Enqueue(EmailBox box) => _provider.Enqueue(box);
     }
 }

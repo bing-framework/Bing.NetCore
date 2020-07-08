@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;

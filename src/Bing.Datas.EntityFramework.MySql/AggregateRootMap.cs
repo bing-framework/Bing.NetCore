@@ -14,9 +14,6 @@ namespace Bing.Datas.EntityFramework.MySql
         /// 映射乐观离线锁
         /// </summary>
         /// <param name="builder">实体类型生成器</param>
-        protected override void MapVersion(EntityTypeBuilder<TEntity> builder)
-        {
-            builder.Property(t => t.Version).IsConcurrencyToken();
-        }
+        protected override void MapVersion(EntityTypeBuilder<TEntity> builder) => builder.Property(t => t.Version).IsConcurrencyToken();
     }
 }

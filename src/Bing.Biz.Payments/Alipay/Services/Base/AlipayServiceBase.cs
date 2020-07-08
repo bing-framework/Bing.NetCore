@@ -6,7 +6,6 @@ using Bing.Biz.Payments.Core;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 
 namespace Bing.Biz.Payments.Alipay.Services.Base
 {

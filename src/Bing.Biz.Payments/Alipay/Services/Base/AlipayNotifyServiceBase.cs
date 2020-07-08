@@ -5,7 +5,6 @@ using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;
 using Bing.Validations;

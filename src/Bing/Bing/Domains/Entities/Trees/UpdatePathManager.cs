@@ -26,10 +26,7 @@ namespace Bing.Domains.Entities.Trees
         /// 初始化一个<see cref="UpdatePathManager{TEntity,TKey,TParentId}"/>类型的实例
         /// </summary>
         /// <param name="repository">仓储</param>
-        public UpdatePathManager(ITreeCompactRepository<TEntity, TKey, TParentId> repository)
-        {
-            _repository = repository;
-        }
+        public UpdatePathManager(ITreeCompactRepository<TEntity, TKey, TParentId> repository) => _repository = repository;
 
         /// <summary>
         /// 更新实体级所有下级节点路径

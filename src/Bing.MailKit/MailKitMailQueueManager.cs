@@ -22,19 +22,13 @@ namespace Bing.MailKit
         /// <param name="emailConfigProvider">电子邮件配置提供器</param>
         /// <param name="mailQueueProvider">邮件队列提供程序</param>
         /// <param name="mailKitEmailSender">MailKit电子邮件发送器</param>
-        public MailKitMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, IMailKitEmailSender mailKitEmailSender) : base(emailConfigProvider, mailQueueProvider)
-        {
-            _mailKitEmailSender = mailKitEmailSender;
-        }
+        public MailKitMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, IMailKitEmailSender mailKitEmailSender) : base(emailConfigProvider, mailQueueProvider) => _mailKitEmailSender = mailKitEmailSender;
 
         /// <summary>
         /// 发送邮件
         /// </summary>
         /// <param name="box">电子邮件</param>
-        protected override void SendMail(EmailBox box)
-        {
-            _mailKitEmailSender.Send(box);
-        }
+        protected override void SendMail(EmailBox box) => _mailKitEmailSender.Send(box);
 
         /// <summary>
         /// 写入日志

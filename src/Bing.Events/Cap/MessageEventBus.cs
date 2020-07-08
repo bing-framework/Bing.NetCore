@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bing.Datas.Transactions;
 using Bing.Events.Messages;
 using Bing.Logs;
-using Bing.Logs.Extensions;
+using Bing.Utils.Json;
 using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,10 +40,7 @@ namespace Bing.Events.Cap
         /// </summary>
         /// <typeparam name="TEvent">事件类型</typeparam>
         /// <param name="event">事件</param>
-        public Task PublishAsync<TEvent>(TEvent @event) where TEvent : IMessageEvent
-        {
-            return PublishAsync(@event.Name, @event.Data, @event.Callback, @event.Send);
-        }
+        public Task PublishAsync<TEvent>(TEvent @event) where TEvent : IMessageEvent => PublishAsync(@event.Name, @event.Data, @event.Callback, @event.Send);
 
         /// <summary>
         /// 发布事件
@@ -82,31 +79,33 @@ namespace Bing.Events.Cap
         /// <param name="name">消息名称</param>
         /// <param name="data">事件数据</param>
         /// <param name="callback">回调名称</param>
-        /// <returns></returns>
         private async Task InternalPublishAsync(string name, object data, string callback)
         {
             await Publisher.PublishAsync(name, data, callback);
-            WriteLog(name);
+            WriteLog(name, data, callback);
         }
 
         /// <summary>
         /// 写日志
         /// </summary>
         /// <param name="name">消息名称</param>
-        private void WriteLog(string name)
+        /// <param name="data">事件数据</param>
+        /// <param name="callback">回调名称</param>
+        private void WriteLog(string name, object data,string callback)
         {
             var log = GetLog();
             if (log.IsDebugEnabled == false)
                 return;
-            log.Caption("Cap已发送事件")
-                .Content($"消息名称:{name}")
+            log.Tag(name)
+                .Caption("Cap已发送事件")
+                .Content($"消息名称: {name}")
+                .AddExtraProperty("event_data", data.ToJson())
                 .Debug();
         }
 
         /// <summary>
         /// 获取日志
         /// </summary>
-        /// <returns></returns>
         private ILog GetLog()
         {
             try

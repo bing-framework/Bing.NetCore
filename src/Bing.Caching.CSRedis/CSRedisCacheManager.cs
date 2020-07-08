@@ -21,10 +21,7 @@ namespace Bing.Caching.CSRedis
         /// <summary>
         /// 初始化一个<see cref="CSRedisCacheManager"/>类型的实例
         /// </summary>
-        public CSRedisCacheManager()
-        {
-            _serializer = JsonSerializer.Create();
-        }
+        public CSRedisCacheManager() => _serializer = JsonSerializer.Create();
 
         /// <summary>
         /// 是否存在指定键的缓存
@@ -144,7 +141,7 @@ namespace Bing.Caching.CSRedis
         /// <param name="expiration">过期时间间隔</param>
         private TimeSpan GetExpiration(TimeSpan? expiration)
         {
-            expiration = expiration ?? TimeSpan.FromHours(12);
+            expiration ??= TimeSpan.FromHours(12);
             return expiration.SafeValue();
         }
     }

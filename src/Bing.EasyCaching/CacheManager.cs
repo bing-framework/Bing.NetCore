@@ -92,7 +92,7 @@ namespace Bing.EasyCaching
         /// <param name="expiration">过期时间间隔</param>
         private TimeSpan GetExpiration(TimeSpan? expiration)
         {
-            expiration = expiration ?? TimeSpan.FromHours(12);
+            expiration ??= TimeSpan.FromHours(12);
             return expiration.SafeValue();
         }
     }

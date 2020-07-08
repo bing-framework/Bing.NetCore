@@ -6,7 +6,6 @@ using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 
 namespace Bing.Biz.Payments.Wechatpay.Services.Base
 {

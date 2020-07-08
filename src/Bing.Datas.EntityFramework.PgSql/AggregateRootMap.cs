@@ -13,9 +13,6 @@ namespace Bing.Datas.EntityFramework.PgSql
         /// <summary>
         /// 映射乐观离线锁
         /// </summary>
-        protected override void MapVersion(EntityTypeBuilder<TEntity> builder)
-        {
-            builder.Property(t => t.Version).IsConcurrencyToken();
-        }
+        protected override void MapVersion(EntityTypeBuilder<TEntity> builder) => builder.Property(t => t.Version).IsConcurrencyToken();
     }
 }

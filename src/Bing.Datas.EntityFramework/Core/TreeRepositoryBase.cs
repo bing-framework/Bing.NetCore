@@ -29,7 +29,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// 生成排序号
         /// </summary>
         /// <param name="parentId">父标识</param>
-        /// <returns></returns>
         public override async Task<int> GenerateSortIdAsync(Guid? parentId)
         {
             var maxSortId = await Find(x => x.ParentId == parentId).MaxAsync(x => x.SortId);
@@ -58,14 +57,12 @@ namespace Bing.Datas.EntityFramework.Core
         /// 生成排序号
         /// </summary>
         /// <param name="parentId">父标识</param>
-        /// <returns></returns>
         public abstract Task<int> GenerateSortIdAsync(TParentId parentId);
 
         /// <summary>
         /// 获取全部下级实体
         /// </summary>
         /// <param name="parent">父实体</param>
-        /// <returns></returns>
         public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
         {
             var list = await FindAllAsync(t => t.Path.StartsWith(parent.Path));

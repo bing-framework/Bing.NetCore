@@ -132,7 +132,6 @@ namespace Bing.Validations
         /// <summary>
         /// 获取验证结果集合
         /// </summary>
-        /// <returns></returns>
         public ValidationResultCollection GetValidationResultCollection() => ResultCollection;
     }
 }

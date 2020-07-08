@@ -31,16 +31,12 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化一个<see cref="TreeCompactRepositoryBase{TEntity,TPo}"/>类型的实例
         /// </summary>
         /// <param name="store">存储器</param>
-        protected TreeCompactRepositoryBase(IStore<TPo, Guid> store) : base(store)
-        {
-            _store = store;
-        }
+        protected TreeCompactRepositoryBase(IStore<TPo, Guid> store) : base(store) => _store = store;
 
         /// <summary>
         /// 生成排序号
         /// </summary>
         /// <param name="parentId">父标识</param>
-        /// <returns></returns>
         public override async Task<int> GenerateSortIdAsync(Guid? parentId)
         {
             var maxSortId = await _store.Find(t => t.ParentId == parentId).MaxAsync(t => t.SortId);
@@ -68,23 +64,18 @@ namespace Bing.Datas.EntityFramework.Core
         /// 初始化一个<see cref="TreeCompactRepositoryBase{TEntity,TPo,TKey,TParentId}"/>类型的实例
         /// </summary>
         /// <param name="store">存储器</param>
-        protected TreeCompactRepositoryBase(IStore<TPo, TKey> store) : base(store)
-        {
-            _store = store;
-        }
+        protected TreeCompactRepositoryBase(IStore<TPo, TKey> store) : base(store) => _store = store;
 
         /// <summary>
         /// 生成排序号
         /// </summary>
         /// <param name="parentId">父标识</param>
-        /// <returns></returns>
         public abstract Task<int> GenerateSortIdAsync(TParentId parentId);
 
         /// <summary>
         /// 获取全部下级实体
         /// </summary>
         /// <param name="parent">父实体</param>
-        /// <returns></returns>
         public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
         {
             var list = await _store.FindAllAsync(t => t.Path.StartsWith(parent.Path));
@@ -96,10 +87,6 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         /// <param name="id">标识</param>
         /// <param name="cancellationToken">取消令牌</param>
-        /// <returns></returns>
-        public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return ToEntity(await _store.FindByIdNoTrackingAsync(id, cancellationToken));
-        }
+        public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default) => ToEntity(await _store.FindByIdNoTrackingAsync(id, cancellationToken));
     }
 }

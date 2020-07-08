@@ -114,10 +114,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <summary>
         /// 创建安全戳
         /// </summary>
-        protected virtual string CreateSecurityStamp()
-        {
-            return "56df9984-bc05-460a-a4ce-9dec3922a5e9";
-        }
+        protected virtual string CreateSecurityStamp() => "56df9984-bc05-460a-a4ce-9dec3922a5e9";
 
         /// <summary>
         /// 生成令牌

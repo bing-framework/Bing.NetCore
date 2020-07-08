@@ -3,7 +3,6 @@ using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects.Base;
 using Bing.Extensions;
-using Bing.Logs.Extensions;
 
 namespace Bing.Logs.Aspects
 {

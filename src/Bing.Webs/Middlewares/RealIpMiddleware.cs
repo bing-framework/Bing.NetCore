@@ -2,7 +2,6 @@
 using System.Net;
 using System.Threading.Tasks;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;

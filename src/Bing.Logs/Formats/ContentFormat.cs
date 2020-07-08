@@ -110,9 +110,7 @@ namespace Bing.Logs.Formats
                 r.AppendFormat("{0}: {1}    ", LogResource.LogId, c.LogId);
                 r.AppendFormat("{0}: {1}    ", LogResource.OperationTime, c.OperationTime);
                 if (string.IsNullOrWhiteSpace(c.Duration))
-                {
                     return;
-                }
                 r.AppendFormat("{0}: {1}    ", LogResource.Duration, c.Duration);
             }, ref line);
         }
@@ -377,7 +375,7 @@ namespace Bing.Logs.Formats
         /// <param name="result">拼接器</param>
         protected void Finish(StringBuilder result)
         {
-            for (int i = 0; i < 125; i++) 
+            for (var i = 0; i < 125; i++) 
                 result.Append("-");
             result.AppendLine();
         }

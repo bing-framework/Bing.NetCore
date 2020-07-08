@@ -1,7 +1,8 @@
 ﻿using System;
 using Bing.Exceptions;
 
-namespace Bing.Logs.Extensions
+// ReSharper disable once CheckNamespace
+namespace Bing.Logs
 {
     /// <summary>
     /// 异常扩展

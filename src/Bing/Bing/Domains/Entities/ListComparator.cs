@@ -16,7 +16,7 @@ namespace Bing.Domains.Entities
         /// </summary>
         /// <param name="newList">新实体集合</param>
         /// <param name="oldList">旧实体集合</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public ListCompareResult<TEntity, TKey> Compare(IEnumerable<TEntity> newList, IEnumerable<TEntity> oldList)
         {
             if (newList == null)

@@ -72,7 +72,7 @@ namespace Bing.Domains.Entities
         /// <summary>
         /// 验证并添加到验证结果集合
         /// </summary>
-        /// <param name="results"></param>
+        /// <param name="results">验证结果集合</param>
         protected virtual void Validate(ValidationResultCollection results) { }
 
         #endregion

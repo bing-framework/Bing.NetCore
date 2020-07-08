@@ -9,7 +9,6 @@ using Bing.Datas.Sql.Queries;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Dapper;
 
 namespace Bing.Datas.Dapper

@@ -25,10 +25,7 @@ namespace Bing.Net.Mail.Attachments
         public PhysicalFileAttachment(string absolutePath)
         {
             if (!File.Exists(absolutePath))
-            {
                 throw new FileNotFoundException($"文件未找到：{absolutePath}");
-            }
-
             AbsolutePath = absolutePath;
         }
 
@@ -40,13 +37,11 @@ namespace Bing.Net.Mail.Attachments
         /// <summary>
         /// 获取文件流
         /// </summary>
-        /// <returns></returns>
-        public Stream GetFileStream() => _stream ?? (_stream = new FileStream(AbsolutePath, FileMode.Open));
+        public Stream GetFileStream() => _stream ??= new FileStream(AbsolutePath, FileMode.Open);
 
         /// <summary>
         /// 获取文件名
         /// </summary>
-        /// <returns></returns>
         public string GetName() => Path.GetFileName(AbsolutePath);
     }
 }

@@ -29,8 +29,8 @@ namespace Bing.AspNetCore.Tracing
         /// </summary>
         /// <param name="httpContextAccessor">Http上下文访问器</param>
         /// <param name="options">跟踪关联ID选项</param>
-        public AspNetCoreCorrelationIdProvider(IHttpContextAccessor httpContextAccessor,
-            IOptions<CorrelationIdOptions> options)
+        public AspNetCoreCorrelationIdProvider(IHttpContextAccessor httpContextAccessor
+            , IOptions<CorrelationIdOptions> options)
         {
             HttpContextAccessor = httpContextAccessor;
             Options = options.Value;

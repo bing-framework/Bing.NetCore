@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Extensions;
 using Bing.Utils.Parameters.Parsers;
 
 namespace Bing.Biz.OAuthLogin.Core

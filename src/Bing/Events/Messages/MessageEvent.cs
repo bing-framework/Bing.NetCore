@@ -31,7 +31,6 @@ namespace Bing.Events.Messages
         /// <summary>
         /// 输出日志
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             var result = new StringBuilder();

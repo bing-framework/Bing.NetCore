@@ -16,27 +16,16 @@ namespace Bing.Net.Mail.Configs
         /// 初始化一个<see cref="DefaultEmailConfigProvider"/>类型的实例
         /// </summary>
         /// <param name="config">电子邮件配置</param>
-        public DefaultEmailConfigProvider(EmailConfig config)
-        {
-            _config = config;
-        }
+        public DefaultEmailConfigProvider(EmailConfig config) => _config = config;
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
-        public EmailConfig GetConfig()
-        {
-            return _config;
-        }
+        public EmailConfig GetConfig() => _config;
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        /// <returns></returns>
-        public Task<EmailConfig> GetConfigAsync()
-        {
-            return Task.FromResult(_config);
-        }
+        public Task<EmailConfig> GetConfigAsync() => Task.FromResult(_config);
     }
 }

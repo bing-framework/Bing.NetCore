@@ -87,12 +87,13 @@ namespace Bing.Logs.Log4Net
         /// </summary>
         /// <param name="level">日志等级</param>
         /// <param name="content">日志内容</param>
+        /// <exception cref="NullReferenceException"></exception>
         public void WriteLog(LogLevel level, ILogContent content)
         {
             var provider = GetFormatProvider();
             if (provider != null)
             {
-                string message = provider.Format("", content, null);
+                var message = provider.Format("", content, null);
                 WriteLog(level, message);
                 return;
             }

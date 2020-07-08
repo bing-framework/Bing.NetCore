@@ -20,18 +20,12 @@ namespace Bing.Configurations
         /// <summary>
         /// 静态构造函数
         /// </summary>
-        static DefaultConfigurationAccessor()
-        {
-            Empty = new DefaultConfigurationAccessor(new ConfigurationBuilder().Build());
-        }
+        static DefaultConfigurationAccessor() => Empty = new DefaultConfigurationAccessor(new ConfigurationBuilder().Build());
 
         /// <summary>
-        /// 初始化一耳光<see cref="DefaultConfigurationAccessor"/>类型的实例
+        /// 初始化一个<see cref="DefaultConfigurationAccessor"/>类型的实例
         /// </summary>
         /// <param name="configuration">配置</param>
-        public DefaultConfigurationAccessor(IConfigurationRoot configuration)
-        {
-            Configuration = configuration;
-        }
+        public DefaultConfigurationAccessor(IConfigurationRoot configuration) => Configuration = configuration;
     }
 }

@@ -68,17 +68,12 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// </summary>
         private Operator CreateLeftOperator()
         {
-            switch (_boundary)
+            return _boundary switch
             {
-                case Boundary.Left:
-                    return Operator.GreaterEqual;
-
-                case Boundary.Both:
-                    return Operator.GreaterEqual;
-
-                default:
-                    return Operator.Greater;
-            }
+                Boundary.Left => Operator.GreaterEqual,
+                Boundary.Both => Operator.GreaterEqual,
+                _ => Operator.Greater
+            };
         }
 
         /// <summary>
@@ -96,17 +91,12 @@ namespace Bing.Datas.Sql.Builders.Conditions
         /// </summary>
         private Operator CreateRightOperator()
         {
-            switch (_boundary)
+            return _boundary switch
             {
-                case Boundary.Right:
-                    return Operator.LessEqual;
-
-                case Boundary.Both:
-                    return Operator.LessEqual;
-
-                default:
-                    return Operator.Less;
-            }
+                Boundary.Right => Operator.LessEqual,
+                Boundary.Both => Operator.LessEqual,
+                _ => Operator.Less
+            };
         }
     }
 }

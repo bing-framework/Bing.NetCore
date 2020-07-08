@@ -22,6 +22,7 @@ namespace Bing
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="query">数据源</param>
         /// <param name="criteria">查询条件对象</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> Where<TEntity>(this IQueryable<TEntity> query, ICriteria<TEntity> criteria)
             where TEntity : class
         {
@@ -46,6 +47,7 @@ namespace Bing
         /// <param name="query">数据源</param>
         /// <param name="predicate">查询条件</param>
         /// <param name="condition">判断条件，该值为true时添加查询条件，否则忽略</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate, bool condition)
             where TEntity : class
         {
@@ -64,6 +66,7 @@ namespace Bing
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="query">数据源</param>
         /// <param name="predicate">查询条件，如果参数为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> WhereIfNotEmpty<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate)
             where TEntity : class
         {
@@ -89,6 +92,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, int? min, int? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
@@ -107,6 +111,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
@@ -125,6 +130,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
@@ -143,6 +149,7 @@ namespace Bing
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min, DateTime? max, Boundary boundary = Boundary.Both)
             where TEntity : class
         {
@@ -161,6 +168,8 @@ namespace Bing
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="query">数据源</param>
         /// <param name="pager">分页对象</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public static IQueryable<TEntity> Page<TEntity>(this IQueryable<TEntity> query, IPager pager)
         {
             if (query == null)
@@ -172,7 +181,7 @@ namespace Bing
                 pager.TotalCount = query.Count();
             var orderedQueryable = Helper.GetOrderedQueryable(query, pager);
             if (orderedQueryable == null)
-                throw new ArgumentException("必须设置排序字段");
+                throw new ArgumentException("必须设置排序字段", nameof(orderedQueryable));
             return orderedQueryable.Skip(pager.GetSkipCount()).Take(pager.PageSize);
         }
 
@@ -186,6 +195,7 @@ namespace Bing
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="query">数据源</param>
         /// <param name="pager">分页对象</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static PagerList<TEntity> ToPagerList<TEntity>(this IQueryable<TEntity> query, IPager pager)
         {
             if (query == null)

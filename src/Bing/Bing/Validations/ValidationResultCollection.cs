@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using Bing.Extensions;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations
@@ -39,6 +38,10 @@ namespace Bing.Validations
             UpdateResultFlaggedByStrategy(NoName, new List<ValidationResult>());
         }
 
+        /// <summary>
+        /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+        /// </summary>
+        /// <param name="result">结果</param>
         public ValidationResultCollection(string result)
         {
             _results = new List<ValidationResult>();
