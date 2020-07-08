@@ -23,11 +23,8 @@ namespace Bing.Drawing
                 using (var ms = new MemoryStream())
                 {
                     var format = newBitmap.RawFormat;
-                    if (ImageFormat.MemoryBmp.Equals(format))
-                    {
+                    if (ImageFormat.MemoryBmp.Equals(format)) 
                         format = ImageFormat.Bmp;
-                    }
-
                     newBitmap.Save(ms, format);
                     return ms.ToArray();
                 }
@@ -61,10 +58,9 @@ namespace Bing.Drawing
         /// 将图片转换为内存流，需要释放资源
         /// </summary>
         /// <param name="image">图片</param>
-        /// <returns></returns>
         public static Stream ToStream(Image image)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
             image.Save(ms, image.RawFormat);
             return ms;
         }
@@ -73,10 +69,9 @@ namespace Bing.Drawing
         /// 将图像转换为内存流，需要释放资源
         /// </summary>
         /// <param name="bitmap">图像</param>
-        /// <returns></returns>
         public static Stream ToStream(Bitmap bitmap)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
             bitmap.Save(ms, bitmap.RawFormat);
             return ms;
         }
@@ -90,11 +85,7 @@ namespace Bing.Drawing
         /// </summary>
         /// <param name="image">图片</param>
         /// <param name="appendPrefix">是否追加前缀</param>
-        /// <returns></returns>
-        public static string ToBase64String(Image image, bool appendPrefix = false)
-        {
-            return ToBase64String(image, image.RawFormat, appendPrefix);
-        }
+        public static string ToBase64String(Image image, bool appendPrefix = false) => ToBase64String(image, image.RawFormat, appendPrefix);
 
         /// <summary>
         /// 将图片转换为Base64字符串
@@ -102,18 +93,14 @@ namespace Bing.Drawing
         /// <param name="image">图片</param>
         /// <param name="imageFormat">图片格式</param>
         /// <param name="appendPrefix">是否追加前缀</param>
-        /// <returns></returns>
         public static string ToBase64String(Image image, ImageFormat imageFormat, bool appendPrefix = false)
         {
             using (var ms = new MemoryStream())
             {
                 image.Save(ms, imageFormat);
                 var result = Convert.ToBase64String(ms.ToArray());
-                if (appendPrefix)
-                {
+                if (appendPrefix) 
                     result = $"data:image/{imageFormat.ToString().ToLower()};base64,{result}";
-                }
-
                 return result;
             }
         }
@@ -123,11 +110,7 @@ namespace Bing.Drawing
         /// </summary>
         /// <param name="bitmap">图像</param>
         /// <param name="appendPrefix">是否追加前缀</param>
-        /// <returns></returns>
-        public static string ToBase64String(Bitmap bitmap, bool appendPrefix = false)
-        {
-            return ToBase64String(bitmap, bitmap.RawFormat, appendPrefix);
-        }
+        public static string ToBase64String(Bitmap bitmap, bool appendPrefix = false) => ToBase64String(bitmap, bitmap.RawFormat, appendPrefix);
 
         /// <summary>
         /// 将图像转换为Base64字符串
@@ -135,20 +118,14 @@ namespace Bing.Drawing
         /// <param name="bitmap">图像</param>
         /// <param name="imageFormat">图片格式</param>
         /// <param name="appendPrefix">是否追加前缀</param>
-        /// <returns></returns>
         public static string ToBase64String(Bitmap bitmap, ImageFormat imageFormat, bool appendPrefix = false)
         {
-            using (var ms = new MemoryStream())
-            {
-                bitmap.Save(ms, imageFormat);
-                var result = Convert.ToBase64String(ms.ToArray());
-                if (appendPrefix)
-                {
-                    result = $"data:image/{imageFormat.ToString().ToLower()};base64,{result}";
-                }
-
-                return result;
-            }
+            using var ms = new MemoryStream();
+            bitmap.Save(ms, imageFormat);
+            var result = Convert.ToBase64String(ms.ToArray());
+            if (appendPrefix) 
+                result = $"data:image/{imageFormat.ToString().ToLower()};base64,{result}";
+            return result;
         }
 
         #endregion

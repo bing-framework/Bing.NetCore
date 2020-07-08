@@ -38,10 +38,8 @@ namespace Bing.Drawing
         /// <param name="bytes">字节数组</param>
         public static Image FromBytes(byte[] bytes)
         {
-            using (var ms = new MemoryStream(bytes))
-            {
-                return Image.FromStream(ms);
-            }
+            using var ms = new MemoryStream(bytes);
+            return Image.FromStream(ms);
         }
 
         #endregion
@@ -54,11 +52,9 @@ namespace Bing.Drawing
         /// <param name="base64String">Base64字符串</param>
         public static Image FromBase64String(string base64String)
         {
-            byte[] bytes = Convert.FromBase64String(GetBase64String(base64String));
-            using (var ms = new MemoryStream(bytes))
-            {
-                return Image.FromStream(ms);
-            }
+            var bytes = Convert.FromBase64String(GetBase64String(base64String));
+            using var ms = new MemoryStream(bytes);
+            return Image.FromStream(ms);
         }
 
         /// <summary>
@@ -68,7 +64,7 @@ namespace Bing.Drawing
         /// <param name="base64String">带前缀的Base64图片字符串</param>
         private static string GetBase64String(string base64String)
         {
-            string parttern = "^(data:image/.*?;base64,).*?$";
+            var parttern = "^(data:image/.*?;base64,).*?$";
             var match = Regex.Match(base64String, parttern);
             return base64String.Replace(match.Groups[1].ToString(), "");
         }

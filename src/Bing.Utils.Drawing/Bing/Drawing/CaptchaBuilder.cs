@@ -116,14 +116,10 @@ namespace Bing.Drawing
         /// </summary>
         /// <param name="length">长度</param>
         /// <param name="captchaType">验证码类型</param>
-        /// <returns></returns>
         public string GetCode(int length, CaptchaType captchaType = CaptchaType.NumberAndLetter)
         {
             if (length <= 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(length));
-            }
-
             switch (captchaType)
             {
                 case CaptchaType.Number:
@@ -229,13 +225,10 @@ namespace Bing.Drawing
         /// 创建指定字符串的验证码图片
         /// </summary>
         /// <param name="code">验证码</param>
-        /// <returns></returns>
         public Bitmap CreateImage(string code)
         {
             if (string.IsNullOrWhiteSpace(code))
-            {
                 throw new ArgumentNullException(nameof(code));
-            }
 
             var width = FontWidth * code.Length + FontWidth;
             var height = FontSize + FontSize / 2;
@@ -264,10 +257,7 @@ namespace Bing.Drawing
         private void DrawBorder(Graphics g, int width, int height)
         {
             if (!HasBorder)
-            {
                 return;
-            }
-
             g.DrawRectangle(new Pen(Color.Silver), 0, 0, width - 1, height - 1);
         }
 
@@ -276,7 +266,6 @@ namespace Bing.Drawing
         /// </summary>
         /// <param name="imageWidth">图片宽度</param>
         /// <param name="captchCodeCount">验证码长度</param>
-        /// <returns></returns>
         private int GetFontSize(int imageWidth, int captchCodeCount)
         {
             var averageSize = imageWidth / captchCodeCount;
@@ -286,7 +275,6 @@ namespace Bing.Drawing
         /// <summary>
         /// 获取随机深色
         /// </summary>
-        /// <returns></returns>
         private Color GetRandomDeepColor()
         {
             int r = 160, g = 100, b = 160;
@@ -296,7 +284,6 @@ namespace Bing.Drawing
         /// <summary>
         /// 获取随机浅色
         /// </summary>
-        /// <returns></returns>
         private Color GetRandomLightColor()
         {
             int low = 180, high = 255;
@@ -329,15 +316,11 @@ namespace Bing.Drawing
         /// <summary>
         /// 获取干扰颜色
         /// </summary>
-        /// <returns></returns>
         private Color GetDisorderColor()
         {
             if (!RandomColor)
-            {
                 return Color.Black;
-            }
-
-            Random rnd = Random;
+            var rnd = Random;
             return IsBgLight()
                 ? Color.FromArgb(rnd.Next(130, 200), rnd.Next(130, 200), rnd.Next(130, 200))
                 : Color.FromArgb(rnd.Next(70, 150), rnd.Next(70, 150), rnd.Next(70, 150));
@@ -346,11 +329,10 @@ namespace Bing.Drawing
         /// <summary>
         /// 是否背景高亮
         /// </summary>
-        /// <returns></returns>
         private bool IsBgLight()
         {
-            int flag = 255 / 2;
-            bool isBgLight = (Background.R + Background.G + Background.B) / 3 > flag;
+            var flag = 255 / 2;
+            var isBgLight = (Background.R + Background.G + Background.B) / 3 > flag;
             return isBgLight;
         }
 
@@ -363,8 +345,8 @@ namespace Bing.Drawing
         private void DrawDisorderPoint(Graphics g, int width, int height)
         {
             var pointPen = new Pen(Color.Black, 0);
-            int x = 0;
-            int y = 0;
+            var x = 0;
+            var y = 0;
             for (var i = 0; i < (int)(width * height * RandomPointPercent / 100); i++)
             {
                 x = Random.Next(0, width);
@@ -382,7 +364,7 @@ namespace Bing.Drawing
         /// <param name="height">高度</param>
         private void DrawText(Graphics g, string code, int height)
         {
-            for (int i = 0; i < code.Length; i++)
+            for (var i = 0; i < code.Length; i++)
             {
                 var position = GetPosition(i, height);
                 var point = new PointF(position.Item1, position.Item2);
@@ -397,15 +379,12 @@ namespace Bing.Drawing
         /// <summary>
         /// 获取文本颜色
         /// </summary>
-        /// <returns></returns>
         private Color GetTextColor()
         {
             if (!RandomColor)
-            {
                 return Color.FromArgb(255 - Background.R, 255 - Background.G, 255 - Background.B);
-            }
 
-            Random rnd = Random;
+            var rnd = Random;
             int r, g, b;
             if (!IsBgLight())
             {
@@ -439,7 +418,6 @@ namespace Bing.Drawing
         /// 获取文本字体
         /// </summary>
         /// <param name="code">验证码</param>
-        /// <returns></returns>
         private Font GetFont(string code)
         {
             var fontName = Regex.IsMatch(code, @"[\u4e00-\u9fa5]+", RegexOptions.IgnoreCase)
@@ -454,11 +432,10 @@ namespace Bing.Drawing
         /// </summary>
         /// <param name="index">当前字符索引</param>
         /// <param name="height">图片高度</param>
-        /// <returns></returns>
         private Tuple<int, int> GetPosition(int index, int height)
         {
-            int x = FontWidth / 4 + FontWidth * index;
-            int y = 3;
+            var x = FontWidth / 4 + FontWidth * index;
+            var y = 3;
             if (RandomPosition)
             {
                 x = Random.Next(FontWidth / 4) + FontWidth * index;
@@ -476,7 +453,7 @@ namespace Bing.Drawing
             if (RandomItalic)
             {
                 g.TranslateTransform(0, 0);
-                Matrix transform = g.Transform;
+                var transform = g.Transform;
                 transform.Shear(Convert.ToSingle(Random.Next(2, 9) / 10d - 0.5), 0.001f);
                 g.Transform = transform;
             }
@@ -488,21 +465,15 @@ namespace Bing.Drawing
         /// <param name="length">长度</param>
         /// <param name="code">验证码</param>
         /// <param name="captchaType">验证码类型</param>
-        /// <returns></returns>
         public Bitmap CreateImage(int length, out string code,
             CaptchaType captchaType = CaptchaType.NumberAndLetter)
         {
             if (length <= 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(length));
-            }
             length = length < 1 ? 1 : length;
             code = GetCode(length, captchaType);
-            if (code.Length > length)
-            {
+            if (code.Length > length) 
                 code = code.Substring(0, length);
-            }
-
             return CreateImage(code);
         }
 
