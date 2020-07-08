@@ -43,15 +43,9 @@ namespace Bing.Webs.Controllers.Trees
         public List<TNode> GetResult()
         {
             if (_data == null)
-            {
                 return _result;
-            }
-
-            foreach (var root in _data.Where(IsRoot).OrderBy(t => t.SortId))
-            {
+            foreach (var root in _data.Where(IsRoot).OrderBy(t => t.SortId)) 
                 AddNode(root);
-            }
-
             return _result;
         }
 
@@ -62,10 +56,7 @@ namespace Bing.Webs.Controllers.Trees
         protected virtual bool IsRoot(TNode dto)
         {
             if (_data.Any(t => t.ParentId.IsEmpty()))
-            {
                 return dto.ParentId.IsEmpty();
-            }
-
             return dto.Level == _data.Min(t => t.Level);
         }
 
@@ -76,16 +67,11 @@ namespace Bing.Webs.Controllers.Trees
         private void AddNode(TNode node)
         {
             if (node == null)
-            {
                 return;
-            }
             Init(node);
             _result.Add(node);
             var children = GetChildren(node);
-            foreach (var child in children)
-            {
-                AddNode(child);
-            }
+            foreach (var child in children) AddNode(child);
         }
 
         /// <summary>
@@ -109,11 +95,8 @@ namespace Bing.Webs.Controllers.Trees
                 node.Expanded = false;
                 return;
             }
-
-            if (node.Level == 1)
-            {
+            if (node.Level == 1) 
                 node.Expanded = true;
-            }
         }
 
         /// <summary>
@@ -124,14 +107,9 @@ namespace Bing.Webs.Controllers.Trees
         {
             node.Leaf = false;
             if (_async)
-            {
                 return;
-            }
-
-            if (IsLeaf(node))
-            {
+            if (IsLeaf(node)) 
                 node.Leaf = true;
-            }
         }
 
         /// <summary>
@@ -141,10 +119,7 @@ namespace Bing.Webs.Controllers.Trees
         protected virtual bool IsLeaf(TNode node)
         {
             if (node.Id.IsEmpty())
-            {
                 return true;
-            }
-
             return _data.All(t => t.ParentId != node.Id);
         }
 
@@ -152,9 +127,6 @@ namespace Bing.Webs.Controllers.Trees
         /// 获取节点直接下级
         /// </summary>
         /// <param name="node">节点</param>
-        private List<TNode> GetChildren(TNode node)
-        {
-            return _data.Where(t => t.ParentId == node.Id).OrderBy(t => t.SortId).ToList();
-        }
+        private List<TNode> GetChildren(TNode node) => _data.Where(t => t.ParentId == node.Id).OrderBy(t => t.SortId).ToList();
     }
 }

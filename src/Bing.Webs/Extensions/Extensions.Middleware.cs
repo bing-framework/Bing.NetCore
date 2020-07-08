@@ -18,19 +18,13 @@ namespace Bing.Webs.Extensions
         /// </summary>
         /// <param name="builder">应用程序生成器</param>
         [Obsolete("改为 UseBingExceptionHandling")]
-        public static IApplicationBuilder UseErrorLog(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<ErrorLogMiddleware>();
-        }
+        public static IApplicationBuilder UseErrorLog(this IApplicationBuilder builder) => builder.UseMiddleware<ErrorLogMiddleware>();
 
         /// <summary>
         /// 注册请求日志中间件
         /// </summary>
         /// <param name="builder">应用程序生成器</param>
-        public static IApplicationBuilder UseRequestLog(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<RequestLogMiddleware>();
-        }
+        public static IApplicationBuilder UseRequestLog(this IApplicationBuilder builder) => builder.UseMiddleware<RequestLogMiddleware>();
 
         /// <summary>
         /// 启用静态请求上下文
@@ -47,10 +41,7 @@ namespace Bing.Webs.Extensions
         /// 注册真实IP中间件
         /// </summary>
         /// <param name="builder">应用程序生成器</param>
-        public static IApplicationBuilder UseRealIp(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<RealIpMiddleware>();
-        }
+        public static IApplicationBuilder UseRealIp(this IApplicationBuilder builder) => builder.UseMiddleware<RealIpMiddleware>();
 
         /// <summary>
         /// 注册真实IP
@@ -60,15 +51,9 @@ namespace Bing.Webs.Extensions
         public static IWebHostBuilder UseRealIp(this IWebHostBuilder hostBuilder, string headerKey = "X-Forwarded-For")
         {
             if (hostBuilder == null)
-            {
                 throw new ArgumentNullException(nameof(hostBuilder));
-            }
-
             if (hostBuilder.GetSetting(nameof(UseRealIp)) != null)
-            {
                 return hostBuilder;
-            }
-
             hostBuilder.UseSetting(nameof(UseRealIp), true.ToString());
 
             hostBuilder.ConfigureServices(services =>

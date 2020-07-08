@@ -132,9 +132,6 @@ namespace Bing.Webs.Controllers
         /// 将Dto转换为列表项
         /// </summary>
         /// <param name="dto">数据传输对象</param>
-        protected virtual Item ToItem(TDto dto)
-        {
-            throw new NotImplementedException("ToItem方法未实现，请重写控制器 ToItem 方法");
-        }
+        protected virtual Item ToItem(TDto dto) => throw new NotImplementedException("ToItem方法未实现，请重写控制器 ToItem 方法");
     }
 }

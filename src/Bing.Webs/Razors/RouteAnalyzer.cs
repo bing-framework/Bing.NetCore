@@ -29,15 +29,14 @@ namespace Bing.Webs.Razors
         /// <summary>
         /// 获取所有路由信息
         /// </summary>
-        /// <returns></returns>
         public IEnumerable<RouteInformation> GetAllRouteInformations()
         {
-            List<RouteInformation> list = new List<RouteInformation>();
+            var list = new List<RouteInformation>();
 
             var actionDescriptors = this._actionDescriptorCollectionProvider.ActionDescriptors.Items;
             foreach (var actionDescriptor in actionDescriptors)
             {
-                RouteInformation info = new RouteInformation();
+                var info = new RouteInformation();
 
                 if (actionDescriptor.RouteValues.ContainsKey("area"))
                 {

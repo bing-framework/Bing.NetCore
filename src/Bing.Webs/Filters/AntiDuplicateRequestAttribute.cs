@@ -34,18 +34,13 @@ namespace Bing.Webs.Filters
         /// </summary>
         /// <param name="context">操作执行上下文</param>
         /// <param name="next">操作执行下一步委托</param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             if (context == null)
-            {
                 throw new ArgumentNullException(nameof(context));
-            }
-
             if (next == null)
-            {
                 throw new ArgumentNullException(nameof(next));
-            }
 
             var @lock = CreateLock();
             var key = GetKey(context);
@@ -80,52 +75,37 @@ namespace Bing.Webs.Filters
         /// <summary>
         /// 创建业务锁
         /// </summary>
-        /// <returns></returns>
-        private ILock CreateLock()
-        {
-            return Ioc.Create<ILock>() ?? NullLock.Instance;
-        }
+        private ILock CreateLock() => Ioc.Create<ILock>() ?? NullLock.Instance;
 
         /// <summary>
         /// 获取锁定标识
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        /// <returns></returns>
         protected virtual string GetKey(ActionExecutingContext context)
         {
             var userId = string.Empty;
-            if (Type == LockType.User)
-            {
+            if (Type == LockType.User) 
                 userId = $"{Bing.Sessions.Session.Instance.UserId}_";
-            }
-
             return string.IsNullOrWhiteSpace(Key) ? $"{userId}{Web.Request.Path}" : $"{userId}{Key}";
         }
 
         /// <summary>
         /// 获取到期时间间隔
         /// </summary>
-        /// <returns></returns>
         private TimeSpan? GetExpiration()
         {
             if (Interval == 0)
-            {
                 return null;
-            }
             return TimeSpan.FromSeconds(Interval);
         }
 
         /// <summary>
         /// 获取失败消息
         /// </summary>
-        /// <returns></returns>
         protected virtual string GetFailMessage()
         {
             if (Type == LockType.User)
-            {
                 return R.UserDuplicateRequest;
-            }
-
             return R.GlobalDuplicateRequest;
         }
     }

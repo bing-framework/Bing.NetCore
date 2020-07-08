@@ -30,7 +30,6 @@ namespace Bing.Webs.Filters
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
         private ILog GetLog()
         {
             try

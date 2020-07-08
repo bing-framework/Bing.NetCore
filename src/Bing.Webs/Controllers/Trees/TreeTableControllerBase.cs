@@ -47,10 +47,7 @@ namespace Bing.Webs.Controllers.Trees
         /// 初始化一个<see cref="TreeTableControllerBase{TDto,TQuery,TParentId}"/>类型的实例
         /// </summary>
         /// <param name="service">树型服务</param>
-        protected TreeTableControllerBase(ITreeService<TDto, TQuery, TParentId> service) : base(service)
-        {
-            _service = service;
-        }
+        protected TreeTableControllerBase(ITreeService<TDto, TQuery, TParentId> service) : base(service) => _service = service;
 
         /// <summary>
         /// 查询
@@ -65,9 +62,7 @@ namespace Bing.Webs.Controllers.Trees
         public virtual async Task<IActionResult> QueryAsync([FromQuery]TQuery query)
         {
             if (query == null)
-            {
                 throw new ArgumentNullException(nameof(query));
-            }
             QueryBefore(query);
             InitParam(query);
             PagerList<TDto> result;
@@ -101,18 +96,12 @@ namespace Bing.Webs.Controllers.Trees
         /// <param name="query">查询参数</param>
         protected virtual void InitParam(TQuery query)
         {
-            if (query.Order.IsEmpty())
-            {
+            if (query.Order.IsEmpty()) 
                 query.Order = "SortId";
-            }
-
             query.Path = null;
             if (GetOperation(query) == LoadOperation.LoadChild)
-            {
                 return;
-            }
-
-            query.ParentId = default(TParentId);
+            query.ParentId = default;
         }
 
         /// <summary>
@@ -123,10 +112,7 @@ namespace Bing.Webs.Controllers.Trees
         {
             var operation = Request.Query["operation"].SafeString().ToLower();
             if (operation == "loadchild")
-            {
                 return LoadOperation.LoadChild;
-            }
-
             return query.IsSearch() ? LoadOperation.Search : LoadOperation.FirstLoad;
         }
 
@@ -137,10 +123,7 @@ namespace Bing.Webs.Controllers.Trees
         protected virtual async Task<PagerList<TDto>> FirstLoad(TQuery query)
         {
             if (GetLoadMode() == LoadMode.Sync)
-            {
                 return await SyncFirstLoad(query);
-            }
-
             return await AsyncFirstLoad(query);
         }
 
@@ -179,10 +162,7 @@ namespace Bing.Webs.Controllers.Trees
         /// </summary>
         /// <param name="data">数据列表</param>
         /// <param name="async">是否异步</param>
-        protected virtual PagerList<TDto> ToResult(List<TDto> data, bool async = false)
-        {
-            return new PagerList<TDto>(GetTreeTableResult(data, async).GetResult());
-        }
+        protected virtual PagerList<TDto> ToResult(List<TDto> data, bool async = false) => new PagerList<TDto>(GetTreeTableResult(data, async).GetResult());
 
         /// <summary>
         /// 异步首次加载
@@ -210,15 +190,9 @@ namespace Bing.Webs.Controllers.Trees
         protected virtual async Task<PagerList<TDto>> LoadChildren(TQuery query)
         {
             if (query.ParentId == null)
-            {
                 throw new Warning("父节点标识为空，加载节点失败");
-            }
-
             if (GetLoadMode() == LoadMode.Async)
-            {
                 return await AsyncLoadChildren(query);
-            }
-
             return await SyncLoadChildren(query);
         }
 
@@ -283,10 +257,7 @@ namespace Bing.Webs.Controllers.Trees
             data.AddRange(list);
             ProcessData(data, query);
             if (GetLoadMode() == LoadMode.Async)
-            {
                 return ToResult(data, true);
-            }
-
             return ToResult(data);
         }
     }

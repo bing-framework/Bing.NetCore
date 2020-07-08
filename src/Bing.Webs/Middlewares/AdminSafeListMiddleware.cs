@@ -36,17 +36,16 @@ namespace Bing.Webs.Middlewares
         /// 执行中间件拦截逻辑
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
             if (context.Request.Method != "GET")
             {
-                var rempteIp = context.Connection.RemoteIpAddress;
+                var remoteIp = context.Connection.RemoteIpAddress;
                 var log = Log.GetLog(this);
-                log.Debug($"来自远程IP地址的请求：{rempteIp}");
+                log.Debug($"来自远程IP地址的请求：{remoteIp}");
 
-                string[] ips = _whitelist.Split(';');
-                var bytes = rempteIp.GetAddressBytes();
+                var ips = _whitelist.Split(';');
+                var bytes = remoteIp.GetAddressBytes();
                 var badIp = true;
                 foreach (var ip in ips)
                 {
@@ -60,7 +59,7 @@ namespace Bing.Webs.Middlewares
 
                 if (badIp)
                 {
-                    log.Info($"来自远程IP地址的禁止请求：{rempteIp}");
+                    log.Info($"来自远程IP地址的禁止请求：{remoteIp}");
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return;
                 }

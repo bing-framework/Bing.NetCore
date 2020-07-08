@@ -104,18 +104,12 @@ namespace Bing.Webs.Controllers.Trees
         /// <param name="query">查询参数</param>
         protected virtual void InitParam(TQuery query)
         {
-            if (query.Order.IsEmpty())
-            {
+            if (query.Order.IsEmpty()) 
                 query.Order = "SortId";
-            }
-
             query.Path = null;
             if (GetOperation(query) == LoadOperation.LoadChild)
-            {
                 return;
-            }
-
-            query.ParentId = default(TParentId);
+            query.ParentId = default;
         }
 
         /// <summary>
@@ -126,10 +120,7 @@ namespace Bing.Webs.Controllers.Trees
         {
             var operation = Request.Query["operation"].SafeString().ToLower();
             if (operation == "loadchild")
-            {
                 return LoadOperation.LoadChild;
-            }
-
             return query.IsSearch() ? LoadOperation.Search : LoadOperation.FirstLoad;
         }
 
@@ -140,10 +131,7 @@ namespace Bing.Webs.Controllers.Trees
         protected virtual async Task<TTreeResult> FirstLoad(TQuery query)
         {
             if (GetLoadMode() == LoadMode.Sync)
-            {
                 return await SyncFirstLoad(query);
-            }
-
             return await AsyncFirstLoad(query);
         }
 
@@ -202,15 +190,9 @@ namespace Bing.Webs.Controllers.Trees
         protected virtual async Task<TTreeResult> LoadChildren(TQuery query)
         {
             if (query.ParentId == null)
-            {
                 throw new Warning("父节点标识为空，加载节点失败");
-            }
-
             if (GetLoadMode() == LoadMode.Async)
-            {
                 return await AsyncLoadChildren(query);
-            }
-
             return await SyncLoadChildren(query);
         }
 
@@ -275,10 +257,7 @@ namespace Bing.Webs.Controllers.Trees
             data.AddRange(list);
             ProcessData(data, query);
             if (GetLoadMode() == LoadMode.Async)
-            {
                 return ToResult(data, true);
-            }
-
             return ToResult(data);
         }
     }

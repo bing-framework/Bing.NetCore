@@ -32,7 +32,6 @@ namespace Bing.Webs.Middlewares
         /// 执行方法
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
             if (!ExecuteInterception(context))
@@ -58,14 +57,10 @@ namespace Bing.Webs.Middlewares
         /// 是否执行拦截
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
         protected virtual bool ExecuteInterception(HttpContext context)
         {
             if (context.Request.Path.Value.Contains("swagger"))
-            {
                 return false;
-            }
-
             return true;
         }
 
@@ -77,16 +72,12 @@ namespace Bing.Webs.Middlewares
         private async Task WriteLogAsync(HttpContext context, Stopwatch stopwatch)
         {
             if (context == null)
-            {
                 return;
-            }
-
             if (IgnoreOctetStream(context.Response))
             {
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 return;
             }
-
             var log = Log.GetLog(this).Caption("请求日志中间件");
             log.Content(new Dictionary<string, string>()
             {
@@ -123,10 +114,7 @@ namespace Bing.Webs.Middlewares
         private async Task<string> FormatResponseAsync(HttpResponse response)
         {
             if (response.HasStarted)
-            {
                 return string.Empty;
-            }
-
             response.Body.Seek(0, SeekOrigin.Begin);
             var text = await new StreamReader(response.Body).ReadToEndAsync();
             response.Body.Seek(0, SeekOrigin.Begin);
@@ -137,7 +125,6 @@ namespace Bing.Webs.Middlewares
         /// 忽略二进制流
         /// </summary>
         /// <param name="response">Http响应</param>
-        /// <returns></returns>
         private bool IgnoreOctetStream(HttpResponse response) => response.ContentType == "application/octet-stream";
     }
 }

@@ -10,7 +10,6 @@ namespace Bing.Webs.Controllers.Trees
         /// <summary>
         /// 获取树型表格结果
         /// </summary>
-        /// <returns></returns>
         List<TNode> GetResult();
     }
 }

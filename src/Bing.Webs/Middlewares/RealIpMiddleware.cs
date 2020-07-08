@@ -40,7 +40,6 @@ namespace Bing.Webs.Middlewares
         /// 执行方法
         /// </summary>
         /// <param name="context">Http上下文</param>
-        /// <returns></returns>
         public async Task Invoke(HttpContext context)
         {
             var headers = context.Request.Headers;

@@ -28,24 +28,18 @@ namespace Bing.Webs.Razors
         /// 初始化一个<see cref="DefaultRazorHtmlGenerator"/>类型的实例
         /// </summary>
         /// <param name="routeAnalyzer">路由分析器</param>
-        public DefaultRazorHtmlGenerator(IRouteAnalyzer routeAnalyzer)
-        {
-            _routeAnalyzer = routeAnalyzer;
-        }
+        public DefaultRazorHtmlGenerator(IRouteAnalyzer routeAnalyzer) => _routeAnalyzer = routeAnalyzer;
 
         /// <summary>
         /// 生成Html文件
         /// </summary>
-        /// <returns></returns>
         public async Task Generate()
         {
             foreach (var routeInformation in _routeAnalyzer.GetAllRouteInformations())
             {
                 // 跳过API的处理
                 if (routeInformation.Path.StartsWith("/api"))
-                {
                     continue;
-                }
                 await WriteViewToFileAsync(routeInformation);
             }
         }
@@ -54,7 +48,6 @@ namespace Bing.Webs.Razors
         /// 渲染视图为字符串
         /// </summary>
         /// <param name="info">路由信息</param>
-        /// <returns></returns>
         public async Task<string> RenderToStringAsync(RouteInformation info)
         {
             var razorViewEngine = Ioc.Create<IRazorViewEngine>();
@@ -64,10 +57,7 @@ namespace Bing.Webs.Razors
             var actionContext = new ActionContext(httpContext, GetRouteData(info), new ActionDescriptor());
             var viewResult = GetView(razorViewEngine, actionContext, info);
             if (!viewResult.Success)
-            {
                 throw new InvalidOperationException($"找不到视图模板 {info.ActionName}");
-            }
-
             using (var stringWriter = new StringWriter())
             {
                 var viewDictionary = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary());
@@ -81,7 +71,6 @@ namespace Bing.Webs.Razors
         /// 将视图写入文件
         /// </summary>
         /// <param name="info">路由信息</param>
-        /// <returns></returns>
         public async Task WriteViewToFileAsync(RouteInformation info)
         {
             try
@@ -107,7 +96,6 @@ namespace Bing.Webs.Razors
         /// 获取路径
         /// </summary>
         /// <param name="info">路由信息</param>
-        /// <returns></returns>
         protected virtual string GetPath(RouteInformation info)
         {
             var area = info.AreaName.SafeString();
@@ -123,7 +111,6 @@ namespace Bing.Webs.Razors
         /// <param name="razorViewEngine">Razor视图引擎</param>
         /// <param name="actionContext">操作上下文</param>
         /// <param name="info">路由信息</param>
-        /// <returns></returns>
         protected virtual ViewEngineResult GetView(IRazorViewEngine razorViewEngine, ActionContext actionContext, RouteInformation info)
         {
             return razorViewEngine.FindView(actionContext, info.ViewName.IsEmpty() ? info.ActionName : info.ViewName,
@@ -134,22 +121,15 @@ namespace Bing.Webs.Razors
         /// 获取路由数据
         /// </summary>
         /// <param name="info">路由信息</param>
-        /// <returns></returns>
         protected virtual RouteData GetRouteData(RouteInformation info)
         {
             var routeData = new RouteData();
-            if (!info.AreaName.IsEmpty())
-            {
+            if (!info.AreaName.IsEmpty()) 
                 routeData.Values.Add("area", info.AreaName);
-            }
-            if (!info.ControllerName.IsEmpty())
-            {
+            if (!info.ControllerName.IsEmpty()) 
                 routeData.Values.Add("controller", info.ControllerName);
-            }
-            if (!info.ActionName.IsEmpty())
-            {
+            if (!info.ActionName.IsEmpty()) 
                 routeData.Values.Add("action", info.ActionName);
-            }
             return routeData;
         }
     }

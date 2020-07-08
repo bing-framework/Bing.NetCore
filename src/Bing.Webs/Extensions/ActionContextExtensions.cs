@@ -19,12 +19,9 @@ namespace Bing.Webs.Extensions
             if (context.RouteData.Values.TryGetValue("area", out object value))
             {
                 area = value.SafeString();
-                if (area.IsEmpty())
-                {
+                if (area.IsEmpty()) 
                     area = null;
-                }
             }
-
             return area;
         }
 
@@ -32,14 +29,12 @@ namespace Bing.Webs.Extensions
         /// 获取Controller名称
         /// </summary>
         /// <param name="context">操作上下文</param>
-        /// <returns></returns>
         public static string GetControllerName(this ActionContext context) => context.RouteData.Values["controller"].ToString();
 
         /// <summary>
         /// 获取Action名称
         /// </summary>
         /// <param name="context">操作上下文</param>
-        /// <returns></returns>
         public static string GetActionName(this ActionContext context) => context.RouteData.Values["action"].ToString();
     }
 }

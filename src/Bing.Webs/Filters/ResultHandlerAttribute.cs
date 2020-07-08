@@ -29,9 +29,7 @@ namespace Bing.Webs.Filters
                 var ignore = controllerActionDescriptor.MethodInfo
                     .GetCustomAttributes<IgnoreResultHandlerAttribute>().Any();
                 if (ignore)
-                {
                     return;
-                }
             }
 
             if (context.Result is ValidationFailedResult validationFailedResult)
@@ -44,9 +42,7 @@ namespace Bing.Webs.Filters
             }
 
             if (context.Result is Result result)
-            {
                 return;
-            }
 
             if (context.Result is BadRequestObjectResult badRequestObjectResult)
             {

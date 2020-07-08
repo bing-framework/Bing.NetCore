@@ -81,7 +81,6 @@ namespace Bing.Webs.Controllers
         /// /api/customer
         /// </remarks>
         /// <param name="request">创建参数</param>
-        /// <returns></returns>
         [HttpPost]
         public virtual async Task<IActionResult> CreateAsync([FromBody] TCreateRequest request)
         {
@@ -109,7 +108,6 @@ namespace Bing.Webs.Controllers
         /// </remarks>
         /// <param name="id">标识</param>
         /// <param name="request">修改参数</param>
-        /// <returns></returns>
         [HttpPut("{id?}")]
         public virtual async Task<IActionResult> UpdateAsync(string id, [FromBody] TUpdateRequest request)
         {
@@ -141,7 +139,6 @@ namespace Bing.Webs.Controllers
         /// /api/customers/1
         /// </remarks>
         /// <param name="id">标识</param>
-        /// <returns></returns>
         [HttpDelete("{id}")]
         public virtual async Task<IActionResult> DeleteAsync(string id)
         {
@@ -159,7 +156,6 @@ namespace Bing.Webs.Controllers
         /// body："'1,2,3'"
         /// </remarks>
         /// <param name="ids">标识列表，多个Id用逗号分隔，范例：1,2,3</param>
-        /// <returns></returns>
         [HttpPost("delete")]
         public virtual async Task<IActionResult> BatchDeleteAsync([FromBody] string ids)
         {

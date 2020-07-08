@@ -12,7 +12,6 @@ namespace Bing.Webs.Extensions
         /// 注册Razor静态Html生成器
         /// </summary>
         /// <param name="services"></param>
-        /// <returns></returns>
         public static IServiceCollection AddRazorHtml(this IServiceCollection services)
         {
             services.AddScoped<IRouteAnalyzer, RouteAnalyzer>();

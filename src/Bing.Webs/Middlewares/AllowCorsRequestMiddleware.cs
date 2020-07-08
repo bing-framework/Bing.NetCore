@@ -17,10 +17,7 @@ namespace Bing.Webs.Middlewares
         /// 初始化一个<see cref="AllowCorsRequestMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        public AllowCorsRequestMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        public AllowCorsRequestMiddleware(RequestDelegate next) => _next = next;
 
         /// <summary>
         /// 执行中间件拦截逻辑

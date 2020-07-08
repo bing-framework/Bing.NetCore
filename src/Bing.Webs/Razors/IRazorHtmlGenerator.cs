@@ -10,7 +10,6 @@ namespace Bing.Webs.Razors
         /// <summary>
         /// 生成Html文件
         /// </summary>
-        /// <returns></returns>
         Task Generate();
     }
 }

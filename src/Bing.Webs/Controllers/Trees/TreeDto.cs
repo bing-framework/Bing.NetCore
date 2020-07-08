@@ -17,10 +17,7 @@ namespace Bing.Webs.Controllers.Trees
         /// <summary>
         /// 初始化一个<see cref="TreeDto{TNode}"/>类型的实例
         /// </summary>
-        public TreeDto()
-        {
-            Children = new List<TNode>();
-        }
+        public TreeDto() => Children = new List<TNode>();
     }
 
     /// <summary>

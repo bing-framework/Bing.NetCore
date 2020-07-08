@@ -12,16 +12,12 @@ namespace Bing.Webs.Extensions
         /// </summary>
         /// <param name="app">应用构建器</param>
         /// <param name="area">是否支持区域路由</param>
-        /// <returns></returns>
         public static IApplicationBuilder UseMvcWithAreaRoute(this IApplicationBuilder app, bool area = true)
         {
             return app.UseMvc(builder =>
             {
-                if (area)
-                {
+                if (area) 
                     builder.MapRoute("area", "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-                }
-
                 builder.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
