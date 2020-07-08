@@ -49,7 +49,7 @@ namespace Bing.Reflection
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="memberName">成员名称</param>
-        public static string GetDescription<T>(string memberName) => GetDescription(Common.GetType<T>(), memberName);
+        public static string GetDescription<T>(string memberName) => GetDescription(Types.Of<T>(), memberName);
 
         /// <summary>
         /// 获取类型成员描述，使用<see cref="DescriptionAttribute"/>设置描述

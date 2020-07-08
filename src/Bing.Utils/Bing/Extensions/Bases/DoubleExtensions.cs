@@ -91,16 +91,6 @@ namespace Bing.Extensions
 
         #endregion
 
-        #region IsNaN(是否NaN)
-
-        /// <summary>
-        /// 判断是否0/0的接口，不是一个数字
-        /// </summary>
-        /// <param name="value">值</param>
-        public static bool IsNaN(this double value) => double.IsNaN(value);
-
-        #endregion
-
         #region FixValue(修复当被除数为0时的异常)
 
         /// <summary>

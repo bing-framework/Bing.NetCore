@@ -7,7 +7,6 @@ namespace Bing.Reflection
     /// </summary>
     public static partial class Reflections
     {
-
         #region GetCurrentAssemblyName(获取当前程序集名称)
 
         /// <summary>
