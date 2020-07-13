@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj" />
-    <ProjectReference Include="..\..\..\..\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
     <ProjectReference Include="..\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj" />
     <ProjectReference Include="..\Bing.Admin.Systems.Domain\Bing.Admin.Systems.Domain.csproj" />
   </ItemGroup>

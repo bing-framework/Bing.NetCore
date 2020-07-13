@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-sample", "03-sample", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-Utils", "00-Utils", "{2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils", "src\Bing.Utils\Bing.Utils.csproj", "{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils", "utils\src\Bing.Utils\Bing.Utils.csproj", "{937E7C90-19F2-4FB4-A671-8CDFEA70C79F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{77209C11-A719-45C3-9C49-27FA702503A1}"
 EndProject
@@ -123,7 +123,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz.Tests.Intergration
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.GraphQL", "sample\Bing.Samples.GraphQL\Bing.Samples.GraphQL.csproj", "{C3A7D208-C0D8-48AC-BB23-9138EF850768}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Drawing", "src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj", "{3F28BFCB-B1C7-4A7C-BA58-8BEA9998F0A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Drawing", "utils\src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj", "{3F28BFCB-B1C7-4A7C-BA58-8BEA9998F0A4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_SolutionItems", "{268C9D9A-9655-4A48-8A5F-27815D05D224}"
 	ProjectSection(SolutionItems) = preProject
@@ -220,6 +220,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.HangFire", "src\Bing.HangFire\Bing.HangFire.csproj", "{5B4AC6C6-6953-432B-9319-F866ED15FDE6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Modules", "02-Modules", "{33BD1217-5797-44C1-99A3-5E8DCA2AEE77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Utils.DateTime", "utils\src\Bing.Utils.DateTime\Bing.Utils.DateTime.csproj", "{30214E49-C76F-4032-8722-1586A5C71884}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -463,6 +465,10 @@ Global
 		{5B4AC6C6-6953-432B-9319-F866ED15FDE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B4AC6C6-6953-432B-9319-F866ED15FDE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B4AC6C6-6953-432B-9319-F866ED15FDE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30214E49-C76F-4032-8722-1586A5C71884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30214E49-C76F-4032-8722-1586A5C71884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30214E49-C76F-4032-8722-1586A5C71884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30214E49-C76F-4032-8722-1586A5C71884}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -560,6 +566,7 @@ Global
 		{5D23FE61-79E3-4295-9675-95342B3C9BF4} = {BA235841-C503-4D1D-BBEB-2770A5018E6C}
 		{5B4AC6C6-6953-432B-9319-F866ED15FDE6} = {FF7DDF01-C939-468A-A1D8-F85624E17856}
 		{33BD1217-5797-44C1-99A3-5E8DCA2AEE77} = {4A869F5F-6D49-458C-84C7-C202182BF4A6}
+		{30214E49-C76F-4032-8722-1586A5C71884} = {2B1B5674-9464-4DE8-BCB4-2A4A9BC6C40C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82408448-62DC-44A6-B7C1-6FCEBCC12C93}
