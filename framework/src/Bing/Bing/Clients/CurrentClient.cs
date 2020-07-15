@@ -1,5 +1,5 @@
 ﻿using System.Security.Principal;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 using Bing.Security.Claims;
 
 namespace Bing.Clients

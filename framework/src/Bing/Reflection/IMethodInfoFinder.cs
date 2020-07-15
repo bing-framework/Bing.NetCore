@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 
 namespace Bing.Reflection
 {

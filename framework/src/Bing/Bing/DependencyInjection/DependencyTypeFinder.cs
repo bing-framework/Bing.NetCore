@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Bing.Dependency;
 using Bing.Extensions;
 using Bing.Finders;
 using Bing.Reflection;

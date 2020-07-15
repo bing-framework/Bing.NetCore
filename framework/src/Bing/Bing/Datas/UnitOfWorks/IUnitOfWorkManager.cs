@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 
 namespace Bing.Datas.UnitOfWorks
 {

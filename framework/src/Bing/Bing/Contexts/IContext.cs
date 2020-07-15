@@ -1,4 +1,4 @@
-﻿using Bing.Dependency;
+﻿using Bing.DependencyInjection;
 
 namespace Bing.Contexts
 {

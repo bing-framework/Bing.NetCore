@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 标注了此特性的类，将忽略依赖注入自动映射

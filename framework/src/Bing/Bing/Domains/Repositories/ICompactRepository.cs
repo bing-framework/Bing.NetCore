@@ -1,6 +1,6 @@
 ﻿using System;
 using Bing.Datas.Stores.Operations;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 using Bing.Domains.Entities;
 
 namespace Bing.Domains.Repositories

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Security.Claims;
-using Bing.Dependency;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.DependencyInjection

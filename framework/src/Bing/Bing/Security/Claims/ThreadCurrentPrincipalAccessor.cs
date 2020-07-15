@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 
 namespace Bing.Security.Claims
 {

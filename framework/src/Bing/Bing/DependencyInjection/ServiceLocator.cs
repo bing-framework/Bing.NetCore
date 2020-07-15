@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Dependency;
 using Bing.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 

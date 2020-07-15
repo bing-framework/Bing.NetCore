@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Biz\Bing.Biz.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Permissions\Bing.Permissions.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Webs\Bing.Webs.csproj" />

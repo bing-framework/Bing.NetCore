@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Threading

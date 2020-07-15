@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Tracing;
 using Microsoft.AspNetCore.Http;

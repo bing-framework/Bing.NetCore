@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bing.Dependency
+namespace Bing.DependencyInjection
 {
     /// <summary>
     /// 标记允许多重注入，即一个接口可以注入多个实例

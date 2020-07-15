@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 
 namespace Bing.Datas.Transactions
 {

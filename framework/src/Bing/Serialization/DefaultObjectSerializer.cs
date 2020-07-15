@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 using Bing.Serialization.Binary;
 using Microsoft.Extensions.DependencyInjection;
 

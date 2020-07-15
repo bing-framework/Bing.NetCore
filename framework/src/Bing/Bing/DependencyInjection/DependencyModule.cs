@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using Bing.Core.Modularity;
-using Bing.Dependency;
 using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

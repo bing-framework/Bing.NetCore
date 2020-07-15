@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace Bing.Auditing

@@ -1,6 +1,6 @@
 ﻿using Bing.Applications.Operations;
 using Bing.Datas.Queries;
-using Bing.Dependency;
+using Bing.DependencyInjection;
 
 namespace Bing.Applications
 {
