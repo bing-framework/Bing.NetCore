@@ -5,11 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
     <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Mapster\Bing.Mapster.csproj" />
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
-    <ProjectReference Include="..\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
   </ItemGroup>
 
   <ItemGroup>
