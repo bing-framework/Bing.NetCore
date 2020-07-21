@@ -48,5 +48,10 @@ namespace Bing.Datas.UnitOfWorks
             if (_unitOfWorks.Contains(unitOfWork) == false)
                 _unitOfWorks.Add(unitOfWork);
         }
+
+        /// <summary>
+        /// 获取工作单元集合
+        /// </summary>
+        public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks() => _unitOfWorks.AsReadOnly();
     }
 }

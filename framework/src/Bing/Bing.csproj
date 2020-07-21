@@ -62,7 +62,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Bing\Dependency\" />
     <Folder Include="Bing\Events\Local\" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Bing.DependencyInjection;
 
 namespace Bing.Datas.UnitOfWorks
@@ -23,5 +24,10 @@ namespace Bing.Datas.UnitOfWorks
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         void Register(IUnitOfWork unitOfWork);
+
+        /// <summary>
+        /// 获取工作单元集合
+        /// </summary>
+        IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks();
     }
 }
