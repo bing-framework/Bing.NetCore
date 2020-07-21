@@ -2,7 +2,6 @@
 using Bing.Datas.Sql;
 using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.Test.Integration.Samples;
-using Bing.Utils.Helpers;
 using Xunit;
 using Str = Bing.Helpers.Str;
 
@@ -35,7 +34,7 @@ namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
         /// <summary>
         /// 求总行数
         /// </summary>
-        [Fact]
+        [Fact(DisplayName = "求总行数")]
         public void Test_Count_1()
         {
             //结果

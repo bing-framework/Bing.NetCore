@@ -35,9 +35,6 @@ namespace Bing.Datas.Dapper.Oracle
         /// <param name="schema">架构名</param>
         /// <param name="alias">别名</param>
         /// <param name="type">类型</param>
-        protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null)
-        {
-            return new JoinItem(joinType, table, schema, alias, false, false, type);
-        }
+        protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) => new JoinItem(joinType, table, schema, alias, false, false, type);
     }
 }

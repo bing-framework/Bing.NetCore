@@ -113,10 +113,21 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-admin", "01-admin", "{BDBABE46-FAAE-459D-BC78-B5BA6503EBBA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{5C7976B4-C243-41B9-8303-8E8FAE099D31}"
+	ProjectSection(SolutionItems) = preProject
+		framework\tests\Directory.Build.props = framework\tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AutoMapper.Tests", "framework\tests\Bing.AutoMapper.Tests\Bing.AutoMapper.Tests.csproj", "{741EE94D-5F03-426E-9D34-CBDA41671742}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Tests.Samples", "tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj", "{A66F9341-005F-4FAC-BF93-D676329A34B4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Tests", "framework\tests\Bing.Tests\Bing.Tests.csproj", "{58BE2219-6694-4630-85E6-7953A608A2D6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Test.Integration", "framework\tests\Bing.Datas.Test.Integration\Bing.Datas.Test.Integration.csproj", "{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-demo", "03-demo", "{2DABEEC3-E915-44D7-A4B4-50972CAF45FB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.SqlBuilder.Console", "framework\demo\Bing.Datas.SqlBuilder.Console\Bing.Datas.SqlBuilder.Console.csproj", "{77817263-DB2A-4500-86A5-1ADBE3318A73}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -284,6 +295,18 @@ Global
 		{A66F9341-005F-4FAC-BF93-D676329A34B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A66F9341-005F-4FAC-BF93-D676329A34B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A66F9341-005F-4FAC-BF93-D676329A34B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58BE2219-6694-4630-85E6-7953A608A2D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58BE2219-6694-4630-85E6-7953A608A2D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58BE2219-6694-4630-85E6-7953A608A2D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58BE2219-6694-4630-85E6-7953A608A2D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -334,6 +357,10 @@ Global
 		{5C7976B4-C243-41B9-8303-8E8FAE099D31} = {A3E29077-2385-4F4F-B2BB-01975E24979C}
 		{741EE94D-5F03-426E-9D34-CBDA41671742} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{A66F9341-005F-4FAC-BF93-D676329A34B4} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
+		{58BE2219-6694-4630-85E6-7953A608A2D6} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
+		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
+		{2DABEEC3-E915-44D7-A4B4-50972CAF45FB} = {A3E29077-2385-4F4F-B2BB-01975E24979C}
+		{77817263-DB2A-4500-86A5-1ADBE3318A73} = {2DABEEC3-E915-44D7-A4B4-50972CAF45FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

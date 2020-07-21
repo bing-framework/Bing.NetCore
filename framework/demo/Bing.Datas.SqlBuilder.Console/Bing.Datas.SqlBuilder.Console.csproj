@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RootNamespace>Bing.Datas.SqlBuilder</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj" />
+    <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
+  </ItemGroup>
+
+</Project>
