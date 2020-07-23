@@ -121,7 +121,6 @@ namespace Bing.Applications
         /// 添加列表
         /// </summary>
         /// <param name="list">新增列表</param>
-        /// <returns></returns>
         private async Task AddListAsync(List<TEntity> list)
         {
             if (list.Count == 0)

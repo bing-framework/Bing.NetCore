@@ -129,11 +129,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-demo", "03-demo", "{2DAB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.SqlBuilder.Console", "framework\demo\Bing.Datas.SqlBuilder.Console\Bing.Datas.SqlBuilder.Console.csproj", "{77817263-DB2A-4500-86A5-1ADBE3318A73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ddd.Domain", "framework\src\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj", "{25107D91-1E7D-422C-8B03-B1C94EE3A1B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Domain", "framework\src\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj", "{25107D91-1E7D-422C-8B03-B1C94EE3A1B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ddd.Application", "framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj", "{CAC738F2-8F95-4940-90D2-76DABF403581}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Application", "framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj", "{CAC738F2-8F95-4940-90D2-76DABF403581}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ddd.Application.Contracts", "framework\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj", "{577D3EA3-5342-4E0D-AE51-39CBEE217089}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Application.Contracts", "framework\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj", "{577D3EA3-5342-4E0D-AE51-39CBEE217089}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Validation.Abstractions", "framework\src\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj", "{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -325,6 +327,10 @@ Global
 		{577D3EA3-5342-4E0D-AE51-39CBEE217089}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{577D3EA3-5342-4E0D-AE51-39CBEE217089}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{577D3EA3-5342-4E0D-AE51-39CBEE217089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -382,6 +388,7 @@ Global
 		{25107D91-1E7D-422C-8B03-B1C94EE3A1B5} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{CAC738F2-8F95-4940-90D2-76DABF403581} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{577D3EA3-5342-4E0D-AE51-39CBEE217089} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
+		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

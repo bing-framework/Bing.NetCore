@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Text;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Mvc.Filters;
+using Bing.Auditing;
 using Bing.Core.Modularity;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
@@ -36,6 +38,7 @@ namespace Bing.Admin.Modules
                 {
                     //options.Filters.Add<ResultHandlerAttribute>();
                     options.Filters.Add<ExceptionHandlerAttribute>();
+                    options.Filters.Add<AuditOperationAttribute>();
                     // 全局添加授权
                     options.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
@@ -45,7 +48,7 @@ namespace Bing.Admin.Modules
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
-
+            services.AddAudit();
             return services;
         }
 

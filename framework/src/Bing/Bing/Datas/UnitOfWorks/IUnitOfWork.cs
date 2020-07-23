@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Aspects;
+using Bing.Auditing;
 
 namespace Bing.Datas.UnitOfWorks
 {
@@ -19,5 +21,10 @@ namespace Bing.Datas.UnitOfWorks
         /// 提交，返回影响的行数
         /// </summary>
         Task<int> CommitAsync();
+
+        /// <summary>
+        /// 获取审计实体集合
+        /// </summary>
+        IEnumerable<AuditEntityEntry> GetAuditEntities();
     }
 }
