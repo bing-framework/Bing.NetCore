@@ -187,6 +187,41 @@ namespace Bing
 
         #endregion
 
+        #region PageBy(分页)
+
+        /// <summary>
+        /// 分页
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="query">数据源</param>
+        /// <param name="skipCount">跳行的行数</param>
+        /// <param name="maxResultCount">每页显示行数</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IQueryable<T> PageBy<T>(this IQueryable<T> query, int skipCount, int maxResultCount)
+        {
+            if (query == null)
+                throw new ArgumentNullException(nameof(query));
+            return query.Skip(skipCount).Take(maxResultCount);
+        }
+
+        /// <summary>
+        /// 分页
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <typeparam name="TQueryable">数据源类型</typeparam>
+        /// <param name="query">数据源</param>
+        /// <param name="skipCount">跳过的行数</param>
+        /// <param name="maxResultCount">每页显示行数</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static TQueryable PageBy<T,TQueryable>(this TQueryable query,int skipCount,int maxResultCount) where TQueryable : IQueryable<T>
+        {
+            if (query == null)
+                throw new ArgumentNullException(nameof(query));
+            return (TQueryable)query.Skip(skipCount).Take(maxResultCount);
+        }
+
+        #endregion
+
         #region ToPagerList(转换为分页列表)
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace Bing.Admin.Modules
                 o.UseRabbitMQ(x =>
                 {
                     x.UserName = "admin";
-                    x.Password = "";
+                    x.Password = "bing2019.00";
                     x.HostName = "10.186.132.60";
                 });
             });

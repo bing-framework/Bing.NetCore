@@ -9,6 +9,7 @@ using Bing.Datas.Stores;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
+using Bing.Linq;
 using Bing.Mapping;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,6 +56,16 @@ namespace Bing.Applications
         /// 查询时是否跟踪对象
         /// </summary>
         protected virtual bool IsTracking => false;
+
+        /// <summary>
+        /// 异步查询执行器
+        /// </summary>
+        protected IAsyncQueryableExecuter AsyncExecuter => LazyGetRequiredService(ref _asynceExecuter);
+
+        /// <summary>
+        /// 异步查询执行器
+        /// </summary>
+        private IAsyncQueryableExecuter _asynceExecuter;
 
         /// <summary>
         /// 初始化一个<see cref="QueryServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
@@ -151,6 +162,7 @@ namespace Bing.Applications
         {
             if (parameter == null)
                 return new List<TDto>();
+            //return (await AsyncExecuter.ToListAsync(ExecuteQuery(parameter))).Select(ToDto).ToList();
             return (await ExecuteQuery(parameter).ToListAsync()).Select(ToDto).ToList();
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Bing.Applications.Dtos;
 using Bing.Biz.Enums;
 using Bing.Extensions;
