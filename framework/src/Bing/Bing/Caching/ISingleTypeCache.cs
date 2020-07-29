@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Bing.Core.Data;
-using Bing.Release;
 
 namespace Bing.Caching
 {
@@ -9,7 +8,7 @@ namespace Bing.Caching
     /// </summary>
     /// <typeparam name="TKey">键类型</typeparam>
     /// <typeparam name="TValue">值类型</typeparam>
-    public interface ISingleTypeCache<TKey, TValue> : IGetable<TKey, TValue>, IClearable, IReader<IDictionary<TKey, TValue>>
+    public interface ISingleTypeCache<TKey, TValue> : IGetable<TKey, TValue>, IReader<IDictionary<TKey, TValue>>
     {
         /// <summary>
         /// 缓存键数量

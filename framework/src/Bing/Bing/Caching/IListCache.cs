@@ -1,5 +1,4 @@
 ﻿using Bing.Core.Data;
-using Bing.Release;
 
 namespace Bing.Caching
 {
@@ -7,7 +6,7 @@ namespace Bing.Caching
     /// 列表缓存
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
-    public interface IListCache<T> : IReaderAll<T>, IClearable
+    public interface IListCache<T> : IReaderAll<T>
     {
         /// <summary>
         /// 缓存键数量
