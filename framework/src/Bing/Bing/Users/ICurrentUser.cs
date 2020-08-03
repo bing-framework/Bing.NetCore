@@ -28,9 +28,19 @@ namespace Bing.Users
         string PhoneNumber { get; }
 
         /// <summary>
+        /// 是否已验证手机号码
+        /// </summary>
+        bool PhoneNumberVerified { get; }
+
+        /// <summary>
         /// 电子邮箱
         /// </summary>
         string Email { get; }
+
+        /// <summary>
+        /// 是否已验证邮箱
+        /// </summary>
+        bool EmailVerified { get; }
 
         /// <summary>
         /// 租户标识
@@ -60,7 +70,7 @@ namespace Bing.Users
         Claim[] GetAllClaims();
 
         /// <summary>
-        /// 是否包含改角色
+        /// 是否包含指定角色
         /// </summary>
         /// <param name="roleName">角色名</param>
         bool IsInRole(string roleName);

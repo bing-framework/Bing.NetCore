@@ -4,6 +4,7 @@ using Bing.AspNetCore;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Auditing;
 using Bing.Core.Modularity;
+using Bing.Security.Claims;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +33,8 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
+            BingClaimTypes.UserId = IdentityModel.JwtClaimTypes.Subject;
+            BingClaimTypes.UserName = IdentityModel.JwtClaimTypes.Name;
             // 注册Mvc
             services
                 .AddMvc(options =>

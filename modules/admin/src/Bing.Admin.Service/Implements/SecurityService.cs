@@ -17,6 +17,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Permissions.Identity.JwtBearer;
 using Bing.Permissions.Identity.Results;
+using Bing.Security.Claims;
 
 namespace Bing.Admin.Service.Implements
 {
@@ -123,9 +124,13 @@ namespace Bing.Admin.Service.Implements
             var application = await ApplicationRepository.GetByCodeAsync(applicationCode);
             if (application == null)
                 throw new Warning("无效应用程序");
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationId, application.Id.SafeString());
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationCode, applicationCode);
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationName, application.Name);
+            //user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationId, application.Id.SafeString());
+            //user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationCode, applicationCode);
+            //user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationName, application.Name);
+            //user.AddClaim(JwtClaimTypes.ClientId, application.Id.SafeString());
+            user.AddClaim(BingClaimTypes.ApplicationId, application.Id.SafeString());
+            user.AddClaim(BingClaimTypes.ApplicationCode, applicationCode);
+            user.AddClaim(BingClaimTypes.ApplicationName, application.Name);
             user.AddClaim(JwtClaimTypes.ClientId, application.Id.SafeString());
         }
 

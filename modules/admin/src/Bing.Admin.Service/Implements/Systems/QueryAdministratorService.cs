@@ -13,6 +13,7 @@ using Bing.Admin.Systems.Domain.Models;
 using Bing.Domains.Repositories;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Users;
 
 namespace Bing.Admin.Service.Implements.Systems
 {
@@ -30,16 +31,24 @@ namespace Bing.Admin.Service.Implements.Systems
         /// 管理员仓储
         /// </summary>
         protected IAdministratorRepository AdministratorRepository { get; set; }
+
+        /// <summary>
+        /// 当前用户
+        /// </summary>
+        protected ICurrentUser CurrentUser { get; set; }
     
         /// <summary>
         /// 初始化一个<see cref="QueryAdministratorService"/>类型的实例
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="administratorRepository">管理员仓储</param>
-        public QueryAdministratorService( ISqlQuery sqlQuery, IAdministratorRepository administratorRepository )
+        public QueryAdministratorService( ISqlQuery sqlQuery
+            , IAdministratorRepository administratorRepository
+            , ICurrentUser currentUser)
         {
             SqlQuery = sqlQuery;
             AdministratorRepository = administratorRepository;
+            CurrentUser = currentUser;
         }
 
         /// <summary>
