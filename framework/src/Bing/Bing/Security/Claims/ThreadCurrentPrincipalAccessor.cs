@@ -18,7 +18,7 @@ namespace Bing.Security.Claims
         /// <summary>
         /// 安全主体
         /// </summary>
-        public ClaimsPrincipal Principal => _currentPrincipal.Value ?? GetClaimsPrincipal();
+        public virtual ClaimsPrincipal Principal => _currentPrincipal.Value ?? GetClaimsPrincipal();
 
         /// <summary>
         /// 变更

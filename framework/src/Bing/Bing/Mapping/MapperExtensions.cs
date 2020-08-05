@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -43,6 +44,8 @@ namespace Bing.Mapping
         public static TDestination MapTo<TSource, TDestination>(this TSource source, TDestination destination)
         {
             CheckMapper();
+            source.CheckNull(nameof(source));
+            destination.CheckNull(nameof(destination));
             return _mapper.MapTo(source, destination);
         }
 
@@ -63,6 +66,7 @@ namespace Bing.Mapping
         public static TDestination MapTo<TDestination>(this object source) where TDestination : new()
         {
             CheckMapper();
+            source.CheckNull(nameof(source));
             return _mapper.MapTo<TDestination>(source);
         }
 
@@ -75,9 +79,10 @@ namespace Bing.Mapping
         /// </summary>
         /// <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
         /// <param name="source">源集合</param>
-        public static List<TDestination> MapToList<TDestination>(this System.Collections.IEnumerable source)
+        public static List<TDestination> MapToList<TDestination>(this IEnumerable source)
         {
             CheckMapper();
+            source.CheckNull(nameof(source));
             return _mapper.MapToList<TDestination>(source);
         }
 

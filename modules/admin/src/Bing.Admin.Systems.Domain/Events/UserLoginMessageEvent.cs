@@ -1,5 +1,6 @@
 ﻿using System;
 using Bing.Admin.Infrastructure;
+using Bing.Events;
 using Bing.Events.Messages;
 
 namespace Bing.Admin.Systems.Domain.Events
@@ -23,7 +24,7 @@ namespace Bing.Admin.Systems.Domain.Events
     /// <summary>
     /// 用户登录消息
     /// </summary>
-    public class UserLoginMessage
+    public class UserLoginMessage:IEventSession
     {
         /// <summary>
         /// IP地址
@@ -44,5 +45,10 @@ namespace Bing.Admin.Systems.Domain.Events
         /// 姓名
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 会话标识
+        /// </summary>
+        public string SessionId { get; set; }
     }
 }

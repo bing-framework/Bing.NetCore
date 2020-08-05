@@ -2,7 +2,6 @@
 using Bing.Helpers;
 using Bing.Mapping;
 using Bing.Tests.Samples;
-using Bing.Utils.Helpers;
 using Xunit;
 
 namespace Bing.AutoMapper.Tests
