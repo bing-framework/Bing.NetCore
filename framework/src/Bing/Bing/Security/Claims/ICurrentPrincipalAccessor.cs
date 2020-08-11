@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Security.Claims;
+using Bing.Aspects;
 
 namespace Bing.Security.Claims
 {
     /// <summary>
     /// 当前安全主体访问器
     /// </summary>
+    [Ignore]
     public interface ICurrentPrincipalAccessor
     {
         /// <summary>

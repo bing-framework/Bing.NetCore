@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Text;
+using AspectCore.Configuration;
 using Bing.AspNetCore;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Auditing;
 using Bing.Core.Modularity;
+using Bing.DependencyInjection;
 using Bing.Security.Claims;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
@@ -51,6 +53,12 @@ namespace Bing.Admin.Modules
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
+            services.EnableAop(o =>
+            {
+                o.ThrowAspectException = false;
+                o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
+                o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
+            });
             services.AddAudit();
             return services;
         }

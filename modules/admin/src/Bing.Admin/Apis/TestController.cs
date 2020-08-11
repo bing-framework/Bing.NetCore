@@ -1,6 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Bing.Admin.Service.Abstractions;
 using Bing.AspNetCore.Mvc;
+using Bing.DependencyInjection;
+using DotNetCore.CAP;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis
@@ -15,13 +18,16 @@ namespace Bing.Admin.Apis
         /// </summary>
         public ITestService TestService { get; }
 
+        public IProcessingServer ProcessingServer { get; }
+
         /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
         /// </summary>
         /// <param name="testService">测试服务</param>
-        public TestController(ITestService testService)
+        public TestController(ITestService testService, IProcessingServer processingServer)
         {
             TestService = testService;
+            ProcessingServer = processingServer;
         }
 
         /// <summary>
@@ -31,6 +37,16 @@ namespace Bing.Admin.Apis
         public async Task<IActionResult> TestBatchInsertAsync([FromBody]long qty)
         {
             await TestService.BatchInsertFileAsync(qty);
+            return Success();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("testDisposed")]
+        public async Task<IActionResult> TestDisposed()
+        {
+            //var temp = ServiceLocator.Instance.GetService<IProcessingServer>();
+            //temp.Dispose();
+            ProcessingServer.Dispose();
             return Success();
         }
     }

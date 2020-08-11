@@ -159,7 +159,7 @@ namespace Bing.Admin.Service.Implements
         {
             if (signInResult.State == SignInState.Failed)
                 return new SignInWithTokenResult { UserId = signInResult.UserId, State = signInResult.State, Message = signInResult.Message };
-            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage()
+            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
             {
                 UserId = user.Id,
                 Name = user.Nickname,
