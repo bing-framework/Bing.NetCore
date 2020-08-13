@@ -1,4 +1,5 @@
-﻿using Bing.AspNetCore.Mvc;
+﻿using System.Reflection;
+using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -48,6 +49,11 @@ namespace Bing.AspNetCore
             where TApiInterfaceService : class, IApiInterfaceService
         {
             services.TryAddSingleton<IApiInterfaceService, TApiInterfaceService>();
+        }
+
+        public static void AddConfigType(this IServiceCollection services, Assembly assembly)
+        {
+
         }
     }
 }

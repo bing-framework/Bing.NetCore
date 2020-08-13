@@ -22,16 +22,6 @@ namespace Bing.Core.Builders
         IEnumerable<BingModule> Modules { get; }
 
         /// <summary>
-        /// 加载的模块集合
-        /// </summary>
-        IEnumerable<Type> AddModules { get; }
-
-        /// <summary>
-        /// 排除的模块集合
-        /// </summary>
-        IEnumerable<Type> ExceptModules { get; }
-
-        /// <summary>
         /// Bing 选项配置委托
         /// </summary>
         Action<BingOptions> OptionsAction { get; }
@@ -41,6 +31,12 @@ namespace Bing.Core.Builders
         /// </summary>
         /// <typeparam name="TModule">要添加的模块类型</typeparam>
         IBingBuilder AddModule<TModule>() where TModule : BingModule;
+
+        /// <summary>
+        /// 添加加载的所有模块，并可排除指定的模块类型
+        /// </summary>
+        /// <param name="exceptModuleTypes">要排除的模块类型</param>
+        IBingBuilder AddModules(params Type[] exceptModuleTypes);
 
         /// <summary>
         /// 添加Bing选项配置

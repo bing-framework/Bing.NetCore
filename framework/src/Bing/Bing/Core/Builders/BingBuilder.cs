@@ -38,10 +38,8 @@ namespace Bing.Core.Builders
         public BingBuilder(IServiceCollection services)
         {
             Services = services;
-            _modules = new List<BingModule>();
             _source = GetAllModules(services);
-            AddModules = new List<Type>();
-            ExceptModules = new List<Type>();
+            _modules = new List<BingModule>();
         }
 
         /// <summary>
@@ -52,7 +50,11 @@ namespace Bing.Core.Builders
         {
             var moduleTypeFinder = services.GetOrAddTypeFinder<IBingModuleTypeFinder>(assemblyFiner => new BingModuleTypeFinder(assemblyFiner));
             var moduleTypes = moduleTypeFinder.FindAll();
-            return moduleTypes.Select(m => (BingModule)Activator.CreateInstance(m)).ToList();
+            return moduleTypes.Select(m => (BingModule)Activator.CreateInstance(m))
+                .OrderBy(m => m.Level)
+                .ThenBy(m => m.Order)
+                .ThenBy(m => m.GetType().FullName)
+                .ToList();
         }
 
         #endregion
@@ -70,16 +72,6 @@ namespace Bing.Core.Builders
         public IEnumerable<BingModule> Modules => _modules;
 
         /// <summary>
-        /// 加载的模块集合
-        /// </summary>
-        public IEnumerable<Type> AddModules { get; private set; }
-
-        /// <summary>
-        /// 排除的模块集合
-        /// </summary>
-        public IEnumerable<Type> ExceptModules { get; private set; }
-
-        /// <summary>
         /// Bing 选项配置委托
         /// </summary>
         public Action<BingOptions> OptionsAction { get; private set; }
@@ -92,14 +84,21 @@ namespace Bing.Core.Builders
         /// 添加指定模块。执行此功能后将仅加载指定的模块
         /// </summary>
         /// <typeparam name="TModule">要添加的模块类型</typeparam>
-        public IBingBuilder AddModule<TModule>() where TModule : BingModule
+        public IBingBuilder AddModule<TModule>() where TModule : BingModule => AddModule(typeof(TModule));
+
+        /// <summary>
+        /// 添加模块
+        /// </summary>
+        /// <param name="type">类型</param>
+        private IBingBuilder AddModule(Type type)
         {
-            var type = typeof(TModule);
+            if (!type.IsBaseOn(typeof(BingModule)))
+                throw new Warning($"要加载的模块类型“{type}”不派生于基类 {nameof(BingModule)}");
             if (_modules.Any(m => m.GetType() == type))
                 return this;
+
             var tmpModules = new BingModule[_modules.Count];
             _modules.CopyTo(tmpModules);
-
             var module = _source.FirstOrDefault(x => x.GetType() == type);
             if (module == null)
                 throw new Warning($"类型为“{type.FullName}”的模块实例无法找到");
@@ -117,13 +116,11 @@ namespace Bing.Core.Builders
 
             // 按先层级后顺序的规则进行排序
             _modules = _modules.OrderBy(m => m.Level).ThenBy(m => m.Order).ToList();
+
             tmpModules = _modules.Except(tmpModules).ToArray();
-            foreach (var tmpModule in tmpModules) 
+            foreach (var tmpModule in tmpModules)
                 AddModule(Services, tmpModule);
 
-            //var list = AddModules.ToList();
-            //list.AddIfNotContains(typeof(TModule));
-            //AddModules = list;
             return this;
         }
 
@@ -140,21 +137,40 @@ namespace Bing.Core.Builders
             {
                 // 移除多重继承的模块
                 var descriptors = services.Where(m =>
-                    m.Lifetime == ServiceLifetime.Singleton && m.ServiceType == serviceType &&
-                    m.ImplementationInstance?.GetType() == type.BaseType).ToArray();
-                foreach (var descriptor in descriptors) 
+                        m.Lifetime == ServiceLifetime.Singleton
+                        && m.ServiceType == serviceType
+                        && m.ImplementationInstance?.GetType() == type.BaseType)
+                    .ToArray();
+                foreach (var descriptor in descriptors)
                     services.Remove(descriptor);
             }
 
             if (!services.Any(m =>
-                m.Lifetime == ServiceLifetime.Singleton && m.ServiceType == serviceType &&
-                m.ImplementationInstance?.GetType() == type))
+                m.Lifetime == ServiceLifetime.Singleton
+                && m.ServiceType == serviceType
+                && m.ImplementationInstance?.GetType() == type))
             {
                 services.AddSingleton(typeof(BingModule), module);
                 module.AddServices(services);
             }
             return services;
         }
+
+        /// <summary>
+        /// 添加加载的所有模块，并可排除指定的模块类型
+        /// </summary>
+        /// <param name="exceptModuleTypes">要排除的模块类型</param>
+        public IBingBuilder AddModules(params Type[] exceptModuleTypes)
+        {
+            var source = _source.ToArray();
+            var exceptModules = source.Where(x => exceptModuleTypes.Contains(x.GetType())).ToArray();
+            source = source.Except(exceptModules).ToArray();
+            foreach (var module in source) 
+                AddModule(module.GetType());
+            return this;
+        }
+
+        
 
         #endregion AddModule(添加模块)
 
