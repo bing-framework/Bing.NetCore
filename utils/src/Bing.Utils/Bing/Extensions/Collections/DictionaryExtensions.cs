@@ -16,89 +16,6 @@ namespace Bing.Extensions
     /// </summary>
     public static class DictionaryExtensions
     {
-        #region GetOrDefault(获取指定Key对应的Value，若未找到则返回默认值)
-
-        /// <summary>
-        /// 获取指定Key对应的Value，若未找到则返回默认值
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="dictionary">字典</param>
-        /// <param name="key">键</param>
-        /// <param name="defaultValue">默认值</param>
-        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
-            TValue defaultValue = default) =>
-            dictionary.TryGetValue(key, out var obj) ? obj : defaultValue;
-
-        #endregion
-
-        #region AddRange(批量添加键值对到字典)
-
-        /// <summary>
-        /// 批量添加键值对到字典中
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="dict">字典</param>
-        /// <param name="values">键值对集合</param>
-        /// <param name="replaceExisted">是否替换已存在的键值对</param>
-        public static IDictionary<TKey, TValue> AddRange<TKey, TValue>(this IDictionary<TKey, TValue> dict,
-            IEnumerable<KeyValuePair<TKey, TValue>> values, bool replaceExisted)
-        {
-            foreach (var item in values)
-            {
-                if (dict.ContainsKey(item.Key) && replaceExisted)
-                {
-                    dict[item.Key] = item.Value;
-                    continue;
-                }
-                if (!dict.ContainsKey(item.Key))
-                    dict.Add(item.Key, item.Value);
-            }
-            return dict;
-        }
-
-        #endregion
-
-        #region GetOrAdd(获取指定键的值，不存在则按指定委托添加值)
-
-        /// <summary>
-        /// 获取指定键的值，不存在则按指定委托添加值
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="dict">字典</param>
-        /// <param name="key">键</param>
-        /// <param name="setValue">添加值的委托</param>
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key,
-            Func<TKey, TValue> setValue)
-        {
-            if (!dict.TryGetValue(key, out var value))
-            {
-                value = setValue(key);
-                dict.Add(key, value);
-            }
-            return value;
-        }
-
-        /// <summary>
-        /// 获取指定键的值，不存在则按指定委托添加值
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="dictionary">字典</param>
-        /// <param name="key">键</param>
-        /// <param name="addFunc">添加值的委托</param>
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
-            Func<TValue> addFunc)
-        {
-            if (dictionary.TryGetValue(key, out var value))
-                return value;
-            return dictionary[key] = addFunc();
-        }
-
-        #endregion
-
         #region Sort(字段排序)
 
         /// <summary>
@@ -161,24 +78,6 @@ namespace Bing.Extensions
                 sb.Append($"{item.Key.ToString()}={item.Value.ToString()}&");
             sb.TrimEnd("&");
             return sb.ToString();
-        }
-
-        #endregion
-
-        #region GetKey(根据Value反向查找Key)
-
-        /// <summary>
-        /// 根据Value反向查找Key
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="dictionary">字典</param>
-        /// <param name="value">值</param>
-        public static TKey GetKey<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TValue value)
-        {
-            foreach (var item in dictionary.Where(x => x.Value.Equals(value)))
-                return item.Key;
-            return default;
         }
 
         #endregion
@@ -316,61 +215,5 @@ namespace Bing.Extensions
 
         #endregion
 
-        #region AddOrUpdate(添加或更新)
-
-        /// <summary>
-        /// 添加或更新
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="this">字典</param>
-        /// <param name="key">键</param>
-        /// <param name="value">值</param>
-        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key, TValue value)
-        {
-            if (!@this.ContainsKey(key))
-                @this.Add(new KeyValuePair<TKey, TValue>(key, value));
-            else
-                @this[key] = value;
-            return @this[key];
-        }
-
-        /// <summary>
-        /// 添加或更新
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="this">字典</param>
-        /// <param name="key">键</param>
-        /// <param name="addValue">添加值</param>
-        /// <param name="updateValueFactory">更新值函数</param>
-        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
-        {
-            if (!@this.ContainsKey(key))
-                @this.Add(new KeyValuePair<TKey, TValue>(key, addValue));
-            else
-                @this[key] = updateValueFactory(key, @this[key]);
-            return @this[key];
-        }
-
-        /// <summary>
-        /// 添加或更新
-        /// </summary>
-        /// <typeparam name="TKey">键类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="this">字典</param>
-        /// <param name="key">键</param>
-        /// <param name="addValueFactory">添加值函数</param>
-        /// <param name="updateValueFactory">更新值函数</param>
-        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key, Func<TKey, TValue> addValueFactory, Func<TKey, TValue, TValue> updateValueFactory)
-        {
-            if (!@this.ContainsKey(key))
-                @this.Add(new KeyValuePair<TKey, TValue>(key, addValueFactory(key)));
-            else
-                @this[key] = updateValueFactory(key, @this[key]);
-            return @this[key];
-        }
-
-        #endregion
     }
 }

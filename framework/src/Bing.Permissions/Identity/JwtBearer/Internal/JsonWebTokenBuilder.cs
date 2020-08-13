@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Collections;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;

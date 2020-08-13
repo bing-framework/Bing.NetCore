@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.Collections;
 using Bing.Extensions;
 
 namespace Bing.SqlBuilder.Conditions
@@ -261,29 +262,20 @@ namespace Bing.SqlBuilder.Conditions
         /// </summary>
         /// <param name="relationType">关联运算符</param>
         /// <param name="condition">条件生成器</param>
-        /// <returns></returns>
         public virtual IConditionBuilder Block(RelationType relationType, IConditionBuilder condition)
         {
             if (condition == null)
-            {
                 return this;
-            }
             var conditionBuilder = condition as ConditionBuilder;
             if (conditionBuilder == null || conditionBuilder.ConditionAppendBuilder.ToString().Trim().Length < 6)
-            {
                 return this;
-            }
             if (!ConditionAppendBuilder.ToString().Trim()
                 .EndsWith("WHERE", StringComparison.InvariantCultureIgnoreCase))
-            {
                 this.ConditionAppendBuilder.Append(GetRelation(relationType));
-            }
             this.ConditionAppendBuilder.AppendFormat(" ({0}) ",
                 conditionBuilder.ConditionAppendBuilder.ToString().Remove(0, 6));
             if (conditionBuilder.ParamDictionary.Count > 0)
-            {
                 this.ParamDictionary.AddRange(conditionBuilder.ParamDictionary, true);
-            }
             this.Length++;
             return this;
         }
