@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using Bing.Admin.Data.UnitOfWorks.MySql;
+using Bing.Admin.EventHandlers.Abstractions;
 using Bing.Admin.EventHandlers.Abstractions.Systems;
+using Bing.Admin.EventHandlers.Implements;
 using Bing.Admin.EventHandlers.Implements.Systems;
 using Bing.Admin.Infrastructure.Cap;
 using Bing.AspNetCore;
@@ -64,6 +66,7 @@ namespace Bing.Admin.Modules
         protected void LoadEvent(IServiceCollection services)
         {
             services.AddTransient<IUserLoginLogMessageEventHandler, UserLoginLogMessageEventHandler>();
+            services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
         }
     }
 }

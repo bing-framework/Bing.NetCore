@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bing.Aspects;
 using Bing.Auditing;
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Logs;
@@ -63,6 +64,12 @@ namespace Bing.Datas.EntityFramework.Core
         /// 用户会话
         /// </summary>
         public ISession Session { get; set; }
+
+        /// <summary>
+        /// 服务提供程序
+        /// </summary>
+        [Autowired]
+        public IServiceProvider ServiceProvider { get; set; }
 
         #endregion
 

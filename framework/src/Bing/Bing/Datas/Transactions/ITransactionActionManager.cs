@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
+using Bing.Aspects;
 using Bing.DependencyInjection;
 
 namespace Bing.Datas.Transactions
@@ -8,6 +9,7 @@ namespace Bing.Datas.Transactions
     /// <summary>
     /// 事务操作管理器
     /// </summary>
+    [Ignore]
     public interface ITransactionActionManager : IScopedDependency
     {
         /// <summary>

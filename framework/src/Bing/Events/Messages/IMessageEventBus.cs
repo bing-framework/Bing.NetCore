@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
+using Bing.Aspects;
 
 namespace Bing.Events.Messages
 {
     /// <summary>
     /// 消息事件总线
     /// </summary>
+    [Ignore]
     public interface IMessageEventBus
     {
         /// <summary>
