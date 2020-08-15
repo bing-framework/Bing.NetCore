@@ -44,6 +44,11 @@ namespace Bing.Logs.Core
         public string Url => string.Empty;
 
         /// <summary>
+        /// 初始化日志标识
+        /// </summary>
+        public void InitLogId() { }
+
+        /// <summary>
         /// 空日志上下文实例
         /// </summary>
         public static ILogContext Instance { get; } = new NullLogContext();

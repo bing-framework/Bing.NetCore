@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using Bing.Collections;
 using Bing.Contexts;
+using Bing.DependencyInjection;
 using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
@@ -31,9 +33,14 @@ namespace Bing.Logs.Core
         private IContext _context;
 
         /// <summary>
+        /// 作用域字典
+        /// </summary>
+        private readonly ScopedDictionary _scopedDictionary;
+
+        /// <summary>
         /// 日志标识
         /// </summary>
-        public string LogId => $"{GetInfo().TraceId}-{++_orderId}";
+        public string LogId => $"{GetInfo().TraceId}-{_orderId}";
 
         /// <summary>
         /// 跟踪号
@@ -77,10 +84,24 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 初始化一个<see cref="LogContext"/>类型的实例
         /// </summary>
-        public LogContext() => _orderId = 0;
+        /// <param name="scopedDictionary">作用域字典</param>
+        public LogContext(ScopedDictionary scopedDictionary)
+        {
+            _orderId = 0;
+            _scopedDictionary = scopedDictionary;
+        }
 
         #endregion
 
+        /// <summary>
+        /// 初始化日志标识
+        /// </summary>
+        public void InitLogId()
+        {
+            var key = "Bing.Logs.LogContext_orderId";
+            _scopedDictionary.AddOrUpdate(key, ++_orderId);
+
+        }
         /// <summary>
         /// 获取日志上下文信息
         /// </summary>
@@ -89,11 +110,16 @@ namespace Bing.Logs.Core
             if (_info != null)
                 return _info;
             var key = "Bing.Logs.LogContext";
-            _info = Context.Get<LogContextInfo>(key);
+            _info = Context is NullContext
+                ? _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null
+                : Context.Get<LogContextInfo>(key);
             if (_info != null)
                 return _info;
             _info = CreateInfo();
-            Context.Add(key, _info);
+            if (Context is NullContext)
+                _scopedDictionary.AddOrUpdate(key, _info);
+            else
+                Context.Add(key, _info);
             return _info;
         }
 

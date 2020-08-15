@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Bing.Aspects;
 using Bing.Auditing;
 
 namespace Bing.Datas.UnitOfWorks
@@ -8,6 +9,7 @@ namespace Bing.Datas.UnitOfWorks
     /// <summary>
     /// 工作单元
     /// </summary>
+    [Ignore]
     public interface IUnitOfWork : IDisposable
     {
         /// <summary>

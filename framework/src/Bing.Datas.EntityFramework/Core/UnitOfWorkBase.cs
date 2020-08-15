@@ -201,7 +201,8 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="modelBuilder">映射生成器</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            foreach (var mapper in GetMaps())
+            var mappers = GetMaps();
+            foreach (var mapper in mappers)
                 mapper.Map(modelBuilder);
         }
 

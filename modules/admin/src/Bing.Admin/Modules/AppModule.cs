@@ -43,7 +43,7 @@ namespace Bing.Admin.Modules
                 {
                     //options.Filters.Add<ResultHandlerAttribute>();
                     options.Filters.Add<ExceptionHandlerAttribute>();
-                    options.Filters.Add<AuditOperationAttribute>();
+                    //options.Filters.Add<AuditOperationAttribute>();
                     // 全局添加授权
                     options.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
@@ -59,7 +59,7 @@ namespace Bing.Admin.Modules
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
             });
-            services.AddAudit();
+            //services.AddAudit();
             return services;
         }
 

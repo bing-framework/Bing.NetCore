@@ -65,7 +65,9 @@ namespace Bing.Logs.Core
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
         /// <param name="session">用户会话</param>
-        protected LogBase(ILogProvider provider, ILogContext context, Bing.Sessions.ISession session)
+        protected LogBase(ILogProvider provider
+            , ILogContext context
+            , Bing.Sessions.ISession session)
         {
             Provider = provider;
             Context = context;
@@ -79,7 +81,10 @@ namespace Bing.Logs.Core
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
         /// <param name="session">用户会话</param>
-        protected LogBase(string name, ILogProvider provider, ILogContext context, Bing.Sessions.ISession session)
+        protected LogBase(string name
+            , ILogProvider provider
+            , ILogContext context
+            , Bing.Sessions.ISession session)
         {
             Provider = provider;
             Context = context;
@@ -238,6 +243,9 @@ namespace Bing.Logs.Core
         /// <param name="content">日志内容</param>
         protected virtual void Init(TContent content)
         {
+            Context.InitLogId();
+            System.Diagnostics.Debug.WriteLine("【执行方法】初始化日志");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}] LogName: {Provider.LogName}, TraceId: {Context.TraceId}, LogId: {Context.LogId}, Ip: {Context.Ip}, Host: {Context.Host}");
             content.LogName = Provider.LogName;
             content.TraceId = Context.TraceId;
             content.LogId = Context.LogId;
