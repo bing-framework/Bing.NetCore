@@ -591,5 +591,7 @@ namespace Bing.Linq
         Task<T[]> ToArrayAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default);
 
         #endregion
+
+
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Bing.Domains.Repositories;
 
 namespace Bing.Linq
 {

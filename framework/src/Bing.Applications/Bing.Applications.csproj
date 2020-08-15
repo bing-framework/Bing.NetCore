@@ -5,9 +5,8 @@
     <Description>Bing.Applications是Bing应用框架的应用层基类库。
 Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Bing.Datas.EntityFramework.Extensions;
 using Bing.Datas.Queries;
 using Bing.Datas.Stores;
 using Bing.Domains.Entities;
@@ -11,7 +10,6 @@ using Bing.Domains.Repositories;
 using Bing.Helpers;
 using Bing.Linq;
 using Bing.Mapping;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Applications
 {
@@ -60,12 +58,12 @@ namespace Bing.Applications
         /// <summary>
         /// 异步查询执行器
         /// </summary>
-        protected IAsyncQueryableExecuter AsyncExecuter => LazyGetRequiredService(ref _asynceExecuter);
+        protected IAsyncQueryableExecuter AsyncExecuter => LazyGetRequiredService(ref _asyncExecuter);
 
         /// <summary>
         /// 异步查询执行器
         /// </summary>
-        private IAsyncQueryableExecuter _asynceExecuter;
+        private IAsyncQueryableExecuter _asyncExecuter;
 
         /// <summary>
         /// 初始化一个<see cref="QueryServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
@@ -162,8 +160,7 @@ namespace Bing.Applications
         {
             if (parameter == null)
                 return new List<TDto>();
-            //return (await AsyncExecuter.ToListAsync(ExecuteQuery(parameter))).Select(ToDto).ToList();
-            return (await ExecuteQuery(parameter).ToListAsync()).Select(ToDto).ToList();
+            return (await AsyncExecuter.ToListAsync(ExecuteQuery(parameter))).Select(ToDto).ToList();
         }
 
         /// <summary>
@@ -227,7 +224,17 @@ namespace Bing.Applications
             var query = CreateQuery(parameter);
             var queryable = Filter(query);
             queryable = Filter(queryable, parameter);
-            return (await queryable.ToPagerListAsync(query.GetPager())).Convert(ToDto);
+            var pager = query.GetPager();
+            Bing.Datas.Queries.Internal.Helper.InitOrder(queryable, pager);
+            if (pager.TotalCount <= 0)
+                pager.TotalCount = await AsyncExecuter.CountAsync(queryable);
+            var orderedQueryable = Bing.Datas.Queries.Internal.Helper.GetOrderedQueryable(queryable, pager);
+            if (orderedQueryable == null)
+                throw new ArgumentException("必须设置排序字段");
+            queryable = orderedQueryable.Skip(pager.GetSkipCount()).Take(pager.PageSize);
+            var pagerList = new PagerList<TEntity>(pager, await AsyncExecuter.ToListAsync(queryable));
+            return pagerList.Convert(ToDto);
+            //return (await queryable.ToPagerListAsync(query.GetPager())).Convert(ToDto);
         }
 
         #endregion
