@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Bing.Datas.UnitOfWorks;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Extensions

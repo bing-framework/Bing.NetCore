@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities.Trees;
 using Bing.Domains.Repositories;
 using Bing.Extensions;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core

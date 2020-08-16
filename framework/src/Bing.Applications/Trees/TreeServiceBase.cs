@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bing.Datas.Queries.Trees;
 using Bing.Datas.Stores;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Entities.Trees;
 using Bing.Helpers;
+using Bing.Uow;
 
 namespace Bing.Applications.Trees
 {

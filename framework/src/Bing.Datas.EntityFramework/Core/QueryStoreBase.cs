@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Datas.Sql;
 using Bing.Datas.Stores;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Bing.Aspects;
 using Bing.Auditing;
 
-namespace Bing.Datas.UnitOfWorks
+namespace Bing.Uow
 {
     /// <summary>
     /// 工作单元

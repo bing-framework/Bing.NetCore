@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
 using Bing.Datas.Stores;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Extensions;
 using Bing.Logs;
+using Bing.Uow;
 
 namespace Bing.Applications
 {

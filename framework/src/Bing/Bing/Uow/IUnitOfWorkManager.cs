@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bing.DependencyInjection;
 
-namespace Bing.Datas.UnitOfWorks
+namespace Bing.Uow
 {
     /// <summary>
     /// 工作单元管理器

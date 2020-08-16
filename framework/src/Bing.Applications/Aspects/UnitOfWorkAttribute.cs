@@ -2,7 +2,7 @@
 using AspectCore.DynamicProxy;
 using AspectCore.Extensions.AspectScope;
 using Bing.Aspects.Base;
-using Bing.Datas.UnitOfWorks;
+using Bing.Uow;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Applications.Aspects

@@ -2,11 +2,11 @@
 using Bing.Applications.Aspects;
 using Bing.Applications.Dtos;
 using Bing.Datas.Queries;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
 using Bing.Helpers;
 using Bing.Mapping;
+using Bing.Uow;
 
 namespace Bing.Applications
 {

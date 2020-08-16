@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Bing.Datas.UnitOfWorks
+namespace Bing.Uow
 {
     /// <summary>
     /// 工作单元管理器

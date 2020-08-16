@@ -7,7 +7,7 @@ using Bing.Admin.Domain.Shared.Enums;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Datas.Seed;
-using Bing.Datas.UnitOfWorks;
+using Bing.Uow;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Data.Seed

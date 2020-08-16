@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using Bing.Auditing;
-using Bing.Datas.UnitOfWorks;
 using Bing.Security.Extensions;
+using Bing.Uow;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Datas.Stores;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core

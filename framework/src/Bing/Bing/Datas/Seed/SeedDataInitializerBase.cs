@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
+using Bing.Uow;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Datas.Seed

@@ -1,6 +1,6 @@
 ﻿using System;
-using Bing.Datas.UnitOfWorks;
 using Bing.Tests.XUnitHelpers;
+using Bing.Uow;
 using NSubstitute;
 using Xunit;
 

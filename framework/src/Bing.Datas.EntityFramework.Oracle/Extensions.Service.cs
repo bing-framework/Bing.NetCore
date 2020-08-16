@@ -2,7 +2,7 @@
 using Bing.Datas.Configs;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.EntityFramework.Extensions;
-using Bing.Datas.UnitOfWorks;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

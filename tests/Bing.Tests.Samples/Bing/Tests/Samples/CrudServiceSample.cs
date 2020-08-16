@@ -3,11 +3,10 @@ using System.Threading.Tasks;
 using Bing.Applications;
 using Bing.Auditing;
 using Bing.Datas.Queries;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Repositories;
 using Bing.Extensions;
 using Bing.Mapping;
-using Bing.Extensions;
+using Bing.Uow;
 
 namespace Bing.Tests.Samples
 {

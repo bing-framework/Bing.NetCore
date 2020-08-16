@@ -1,7 +1,7 @@
 ﻿using System;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
 using Bing.Domains.Repositories;
+using Bing.Uow;
 
 namespace Bing.Datas.EntityFramework.Core
 {

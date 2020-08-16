@@ -1,7 +1,7 @@
 ﻿using System;
 using Bing.Datas.Stores;
-using Bing.Datas.UnitOfWorks;
 using Bing.Domains.Entities;
+using Bing.Uow;
 
 namespace Bing.Domains.Repositories
 {

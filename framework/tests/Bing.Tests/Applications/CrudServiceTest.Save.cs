@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.AutoMapper;
-using Bing.Datas.UnitOfWorks;
 using Bing.Mapping;
 using Bing.Tests.Samples;
 using NSubstitute;
 using Xunit;
 using Bing.Extensions;
+using Bing.Uow;
 
 namespace Bing.Tests.Applications
 {
