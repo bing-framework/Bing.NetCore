@@ -1,7 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="..\..\..\build\common.props"></Import>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace />
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+  </ItemGroup>
 
 </Project>
