@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bing.Utils.Webs.Clients
+namespace Bing.Http.Clients
 {
     /// <summary>
     /// Http请求

@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Net;
 using Bing.Collections;
-using Bing.Contexts;
 using Bing.DependencyInjection;
 using Bing.Helpers;
 using Bing.Logs.Abstractions;
@@ -26,11 +25,6 @@ namespace Bing.Logs.Core
         /// 序号
         /// </summary>
         private int _orderId;
-
-        /// <summary>
-        /// 上下文
-        /// </summary>
-        private IContext _context;
 
         /// <summary>
         /// 作用域字典
@@ -72,11 +66,6 @@ namespace Bing.Logs.Core
         /// </summary>
         public string Url => GetInfo().Url;
 
-        /// <summary>
-        /// 上下文
-        /// </summary>
-        public IContext Context => _context ??= ContextFactory.Create();
-
         #endregion
 
         #region 构造函数
@@ -110,16 +99,11 @@ namespace Bing.Logs.Core
             if (_info != null)
                 return _info;
             var key = "Bing.Logs.LogContext";
-            _info = Context is NullContext
-                ? _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null
-                : Context.Get<LogContextInfo>(key);
+            _info = _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null;
             if (_info != null)
                 return _info;
             _info = CreateInfo();
-            if (Context is NullContext)
-                _scopedDictionary.AddOrUpdate(key, _info);
-            else
-                Context.Add(key, _info);
+            _scopedDictionary.AddOrUpdate(key, _info);
             return _info;
         }
 
@@ -142,7 +126,7 @@ namespace Bing.Logs.Core
         /// </summary>
         protected string GetTraceId()
         {
-            var traceId = Context.TraceId;
+            var traceId = Web.HttpContext?.TraceIdentifier;
             return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : traceId;
         }
 

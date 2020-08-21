@@ -9,18 +9,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Bing.Extensions;
-using Microsoft.AspNetCore.Hosting;
+using Bing.Http.Clients;
+using Bing.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Internal;
-using FileHelper = Bing.IO.FileHelper;
+using Microsoft.AspNetCore.Hosting;
+using HttpRequest = Microsoft.AspNetCore.Http.HttpRequest;
+using WebClient = Bing.Http.Clients.WebClient;
 
 namespace Bing.Helpers
 {
     /// <summary>
     /// Web操作
     /// </summary>
-    public static partial class Web
+    public static class Web
     {
         #region 属性
 
@@ -345,13 +348,13 @@ namespace Bing.Helpers
         /// <summary>
         /// Web客户端，用于发送Http请求
         /// </summary>
-        public static Bing.Utils.Webs.Clients.WebClient Client() => new Bing.Utils.Webs.Clients.WebClient();
+        public static WebClient Client() => new WebClient();
 
         /// <summary>
         /// Web客户端，用于发送Http请求
         /// </summary>
         /// <typeparam name="TResult">返回结果类型</typeparam>
-        public static Bing.Utils.Webs.Clients.WebClient<TResult> Client<TResult>() where TResult : class => new Bing.Utils.Webs.Clients.WebClient<TResult>();
+        public static WebClient<TResult> Client<TResult>() where TResult : class => new WebClient<TResult>();
 
         #endregion
 
@@ -563,8 +566,15 @@ namespace Bing.Helpers
         /// <param name="encoding">字符编码</param>
         public static async Task DownloadFileAsync(string filePath, string fileName, Encoding encoding)
         {
-            var bytes = FileHelper.ReadToBytes(filePath);
-            await DownloadAsync(bytes, fileName, encoding);
+            if(!File.Exists(filePath))
+                return;
+            var fileInfo = new FileInfo(filePath);
+            int fileSize = (int)fileInfo.Length;
+            using (var reader = new BinaryReader(fileInfo.Open(FileMode.Open)))
+            {
+                var bytes = reader.ReadBytes(fileSize);
+                await DownloadAsync(bytes, fileName, encoding);
+            }
         }
 
         /// <summary>
@@ -631,7 +641,7 @@ namespace Bing.Helpers
         /// </summary>
         public static void ClearCookie()
         {
-            foreach (var cookie in HttpContext.Request.Cookies.Keys) 
+            foreach (var cookie in HttpContext.Request.Cookies.Keys)
                 HttpContext.Response.Cookies.Delete(cookie);
         }
 
@@ -646,7 +656,7 @@ namespace Bing.Helpers
         /// <param name="value">值</param>
         public static void SetCookie(string name, string value)
         {
-            var cookieOptions = new CookieOptions {HttpOnly = true};
+            var cookieOptions = new CookieOptions { HttpOnly = true };
             HttpContext.Response.Cookies.Append(name, value, cookieOptions);
         }
 

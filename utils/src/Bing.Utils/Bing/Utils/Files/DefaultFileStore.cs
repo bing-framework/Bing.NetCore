@@ -27,17 +27,18 @@ namespace Bing.Utils.Files
         /// </summary>
         public async Task<string> SaveAsync()
         {
-            var fileControl = Web.GetFile();
-            var path = _pathGenerator.Generate(fileControl.FileName);
-            var physicalPath = Common.GetWebRootPath(path);
-            var directory = Path.GetDirectoryName(physicalPath);
-            if (string.IsNullOrEmpty(directory))
-                throw new ArgumentException("上传失败");
-            if (Directory.Exists(directory) == false)
-                Directory.CreateDirectory(directory);
-            using (var stream = new FileStream(physicalPath, FileMode.Create))
-                await fileControl.CopyToAsync(stream);
-            return path;
+            //var fileControl = Web.GetFile();
+            //var path = _pathGenerator.Generate(fileControl.FileName);
+            //var physicalPath = Common.GetWebRootPath(path);
+            //var directory = Path.GetDirectoryName(physicalPath);
+            //if (string.IsNullOrEmpty(directory))
+            //    throw new ArgumentException("上传失败");
+            //if (Directory.Exists(directory) == false)
+            //    Directory.CreateDirectory(directory);
+            //using (var stream = new FileStream(physicalPath, FileMode.Create))
+            //    await fileControl.CopyToAsync(stream);
+            //return path;
+            return string.Empty;
         }
     }
 }

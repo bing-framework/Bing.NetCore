@@ -85,44 +85,6 @@ namespace Bing.Utils.Parameters
 
         #endregion
 
-        #region LoadForm(从Request加载表单参数)
-
-        /// <summary>
-        /// 从Request加载表单参数
-        /// </summary>
-        public void LoadForm()
-        {
-            var form = Web.Request?.Form;
-            if (form == null)
-                return;
-            foreach (var key in form.Keys)
-            {
-                if (form.ContainsKey(key))
-                    Add(key, form[key]);
-            }
-        }
-
-        #endregion
-
-        #region LoadQuery(从Request加载查询参数)
-
-        /// <summary>
-        /// 从Request加载查询参数
-        /// </summary>
-        public void LoadQuery()
-        {
-            var query = Web.Request?.Query;
-            if (query == null)
-                return;
-            foreach (var key in query.Keys)
-            {
-                if (query.ContainsKey(key))
-                    Add(key, query[key]);
-            }
-        }
-
-        #endregion
-
         #region Add(添加参数)
 
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿using Bing.Utils.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Bing.Extensions.Http
+namespace Bing.Http.Extensions
 {
     /// <summary>
     /// 会话(<see cref="ISession"/>) 扩展

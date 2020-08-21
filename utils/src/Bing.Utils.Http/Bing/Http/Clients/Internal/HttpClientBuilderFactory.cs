@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 
-namespace Bing.Utils.Webs.Clients.Internal
+namespace Bing.Http.Clients.Internal
 {
     /// <summary>
     /// HttpClient 生成工厂

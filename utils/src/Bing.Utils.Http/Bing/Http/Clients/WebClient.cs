@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Bing.Utils.Webs.Clients
+namespace Bing.Http.Clients
 {
     /// <summary>
     /// Web客户端

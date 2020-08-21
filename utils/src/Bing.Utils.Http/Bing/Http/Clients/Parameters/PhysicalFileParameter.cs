@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Bing.Utils.Webs.Clients.Parameters
+namespace Bing.Http.Clients.Parameters
 {
     /// <summary>
     /// 物理文件参数

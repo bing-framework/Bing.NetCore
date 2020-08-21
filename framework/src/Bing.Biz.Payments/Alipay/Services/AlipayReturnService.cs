@@ -1,6 +1,7 @@
 ﻿using Bing.Biz.Payments.Alipay.Abstractions;
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Services.Base;
+using Bing.Parameters;
 using Bing.Utils.Parameters;
 
 namespace Bing.Biz.Payments.Alipay.Services
@@ -22,18 +23,11 @@ namespace Bing.Biz.Payments.Alipay.Services
         /// 加载参数
         /// </summary>
         /// <param name="builder">参数生成器</param>
-        protected override void Load(UrlParameterBuilder builder)
-        {
-            builder.LoadQuery();
-        }
+        protected override void Load(UrlParameterBuilder builder) => builder.LoadQuery();
 
         /// <summary>
         /// 获取日志标题
         /// </summary>
-        /// <returns></returns>
-        protected override string GetCaption()
-        {
-            return "支付宝返回";
-        }
+        protected override string GetCaption() => "支付宝返回";
     }
 }

@@ -77,7 +77,7 @@ namespace Bing.Webs.Razors
                 var html = await RenderToStringAsync(info);
                 if (string.IsNullOrWhiteSpace(html))
                     return;
-                var path = Common.GetPhysicalPath(string.IsNullOrWhiteSpace(info.FilePath) ? GetPath(info) : info.FilePath);
+                var path = PathHelper.GetPhysicalPath(string.IsNullOrWhiteSpace(info.FilePath) ? GetPath(info) : info.FilePath);
                 var directory = System.IO.Path.GetDirectoryName(path);
                 if (string.IsNullOrWhiteSpace(directory))
                     return;

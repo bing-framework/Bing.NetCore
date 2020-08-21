@@ -6,7 +6,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Utils.Json;
 
-namespace Bing.Utils.Webs.Clients
+namespace Bing.Http.Clients
 {
     /// <summary>
     /// Http请求

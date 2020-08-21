@@ -118,7 +118,7 @@ namespace Bing.Utils.Parameters
         private object GetEncodeValue(object value, bool isUrlEncode, string encoding)
         {
             if (isUrlEncode)
-                return Web.UrlEncode(value.SafeString(), encoding);
+                return Url.UrlEncode(value.SafeString(), encoding);
             return value;
         }
 

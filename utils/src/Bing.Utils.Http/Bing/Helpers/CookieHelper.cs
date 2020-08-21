@@ -1,7 +1,6 @@
-﻿using Bing.Helpers;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
-namespace Bing.Utils.Webs
+namespace Bing.Helpers
 {
     /// <summary>
     /// Cookie 操作辅助类

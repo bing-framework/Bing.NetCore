@@ -2,10 +2,11 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Http;
 
 // ReSharper disable once CheckNamespace
-namespace Bing.Extensions
+namespace Bing.Http
 {
     /// <summary>
     /// Http请求(<see cref="HttpRequest"/>) 扩展

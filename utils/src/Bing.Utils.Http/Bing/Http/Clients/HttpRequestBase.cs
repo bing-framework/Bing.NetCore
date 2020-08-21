@@ -10,11 +10,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Bing.Extensions;
+using Bing.Http.Clients.Internal;
+using Bing.Http.Clients.Parameters;
 using Bing.Utils.Json;
-using Bing.Utils.Webs.Clients.Internal;
-using Bing.Utils.Webs.Clients.Parameters;
 
-namespace Bing.Utils.Webs.Clients
+namespace Bing.Http.Clients
 {
     /// <summary>
     /// Http请求基类

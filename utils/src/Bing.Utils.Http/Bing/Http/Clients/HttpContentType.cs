@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Bing.Utils.Webs.Clients
+namespace Bing.Http.Clients
 {
     /// <summary>
     /// Http 内容类型

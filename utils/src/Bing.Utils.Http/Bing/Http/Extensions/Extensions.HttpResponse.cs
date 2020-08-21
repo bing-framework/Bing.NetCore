@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using Bing.Utils.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Bing.Extensions.Http
+// ReSharper disable once CheckNamespace
+namespace Bing.Http
 {
     /// <summary>
     /// Http响应(<see cref="HttpResponse"/>) 扩展
