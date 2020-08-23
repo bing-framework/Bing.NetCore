@@ -10,6 +10,7 @@ namespace Bing.Exceptions
     /// <summary>
     /// 应用程序异常
     /// </summary>
+    [Serializable]
     public class Warning : Exception
     {
         #region 属性

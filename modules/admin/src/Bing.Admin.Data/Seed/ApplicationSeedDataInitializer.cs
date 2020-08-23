@@ -15,7 +15,7 @@ namespace Bing.Admin.Data.Seed
     /// <summary>
     /// 应用程序种子数据初始化
     /// </summary>
-    public class ApplicationSeedDataInitializer : SeedDataInitializerBase<Application, Guid>
+    public class ApplicationSeedDataInitializer : SeedDataInitializerBase<Systems.Domain.Models.Application, Guid>
     {
         /// <summary>
         /// 服务提供程序
@@ -34,10 +34,10 @@ namespace Bing.Admin.Data.Seed
         /// <summary>
         /// 重写以提供要初始化的种子数据
         /// </summary>
-        protected override Application[] SeedData() =>
+        protected override Systems.Domain.Models.Application[] SeedData() =>
             new[]
             {
-                new Application(Guid.NewGuid())
+                new Systems.Domain.Models.Application(Guid.NewGuid())
                 {
                     Code = ApplicationCode.Admin,
                     Name = "后台管理系统",
@@ -55,13 +55,13 @@ namespace Bing.Admin.Data.Seed
         /// 重写以提供判断某个实体是否存在的表达式
         /// </summary>
         /// <param name="entity">要判断的实体</param>
-        protected override Expression<Func<Application, bool>> ExistingExpression(Application entity) => x => x.Code == entity.Code;
+        protected override Expression<Func<Systems.Domain.Models.Application, bool>> ExistingExpression(Systems.Domain.Models.Application entity) => x => x.Code == entity.Code;
 
         /// <summary>
         /// 将种子数据初始化到数据库
         /// </summary>
         /// <param name="entities">实体集合</param>
-        protected override async Task SyncToDatabaseAsync(Application[] entities)
+        protected override async Task SyncToDatabaseAsync(Systems.Domain.Models.Application[] entities)
         {
             if (entities == null || entities.Length == 0)
                 return;

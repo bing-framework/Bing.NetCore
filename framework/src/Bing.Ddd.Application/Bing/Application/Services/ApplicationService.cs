@@ -29,7 +29,7 @@ namespace Bing.Application.Services
         /// <summary>
         /// 用户会话
         /// </summary>
-        public virtual ISession Session => Bing.Sessions.Session.Instance;
+        public virtual Bing.Sessions.ISession Session => Bing.Sessions.Session.Instance;
 
         /// <summary>
         /// 服务定位器

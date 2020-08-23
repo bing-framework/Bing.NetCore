@@ -11,7 +11,7 @@ namespace Bing.Admin.Data.Repositories.Systems
     /// <summary>
     /// 应用程序 仓储
     /// </summary>
-    public class ApplicationRepository : CompactRepositoryBase<Application, ApplicationPo>, IApplicationRepository
+    public class ApplicationRepository : CompactRepositoryBase<Admin.Systems.Domain.Models.Application, ApplicationPo>, IApplicationRepository
     {
         private readonly IApplicationPoStore _store;
 
@@ -25,13 +25,13 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 将持久化对象转成实体
         /// </summary>
         /// <param name="po">持久化对象</param>
-        protected override Application ToEntity(ApplicationPo po) => po.ToEntity();
+        protected override Admin.Systems.Domain.Models.Application ToEntity(ApplicationPo po) => po.ToEntity();
 
         /// <summary>
         /// 将实体转换成持久化对象
         /// </summary>
         /// <param name="entity">实体</param>
-        protected override ApplicationPo ToPo(Application entity) => entity.ToPo();
+        protected override ApplicationPo ToPo(Admin.Systems.Domain.Models.Application entity) => entity.ToPo();
 
         /// <summary>
         /// 是否允许跨域访问
@@ -43,7 +43,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 是否允许创建应用程序
         /// </summary>
         /// <param name="entity">应用程序</param>
-        public async Task<bool> CanCreateAsync(Application entity)
+        public async Task<bool> CanCreateAsync(Admin.Systems.Domain.Models.Application entity)
         {
             var exists = await _store.ExistsAsync(x => x.Code == entity.Code);
             return exists == false;
@@ -53,7 +53,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 是否允许修改应用程序
         /// </summary>
         /// <param name="entity">应用程序</param>
-        public async Task<bool> CanUpdateAsync(Application entity)
+        public async Task<bool> CanUpdateAsync(Admin.Systems.Domain.Models.Application entity)
         {
             var exists = await _store.ExistsAsync(x => x.Id != entity.Id && x.Code == entity.Code);
             return exists == false;
@@ -63,7 +63,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 通过应用程序编码查找
         /// </summary>
         /// <param name="code">应用程序编码</param>
-        public async Task<Application> GetByCodeAsync(string code)
+        public async Task<Admin.Systems.Domain.Models.Application> GetByCodeAsync(string code)
         {
             var po = await _store.SingleAsync(x => x.Code == code);
             return ToEntity(po);

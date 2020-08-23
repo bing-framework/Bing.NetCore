@@ -14,11 +14,11 @@ namespace Bing.Admin.Data.Pos.Systems.Extensions
         /// 转换为实体
         /// </summary>
         /// <param name="po">持久化对象</param>
-        public static Application ToEntity(this ApplicationPo po)
+        public static Admin.Systems.Domain.Models.Application ToEntity(this ApplicationPo po)
         {
             if (po == null)
                 return null;
-            var result = po.MapTo(new Application(po.Id));
+            var result = po.MapTo(new Admin.Systems.Domain.Models.Application(po.Id));
             var extend = JsonHelper.ToObject<ApplicationExtend>(po.Extend);
             if (extend == null)
                 return result;
@@ -30,7 +30,7 @@ namespace Bing.Admin.Data.Pos.Systems.Extensions
         /// 转换为持久化对象
         /// </summary>
         /// <param name="entity">实体</param>
-        public static ApplicationPo ToPo(this Application entity)
+        public static ApplicationPo ToPo(this Admin.Systems.Domain.Models.Application entity)
         {
             if (entity == null)
                 return null;
@@ -43,6 +43,6 @@ namespace Bing.Admin.Data.Pos.Systems.Extensions
         /// 创建扩展
         /// </summary>
         /// <param name="entity">应用程序</param>
-        private static ApplicationExtend CreateExtend(Application entity) => entity.MapTo<ApplicationExtend>();
+        private static ApplicationExtend CreateExtend(Admin.Systems.Domain.Models.Application entity) => entity.MapTo<ApplicationExtend>();
     }
 }
