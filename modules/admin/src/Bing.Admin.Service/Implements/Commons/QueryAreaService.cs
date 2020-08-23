@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 地区 查询服务
     /// </summary>
-    public class QueryAreaService : ServiceBase, IQueryAreaService
+    public class QueryAreaService : Bing.Application.Services.ApplicationServiceBase, IQueryAreaService
     {
         /// <summary>
         /// Sql查询对象

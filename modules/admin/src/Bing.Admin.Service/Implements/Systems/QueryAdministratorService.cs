@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Admin.Commons.Domain.Models;
@@ -20,7 +21,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 管理员 查询服务
     /// </summary>
-    public class QueryAdministratorService : ServiceBase, IQueryAdministratorService
+    public class QueryAdministratorService : Bing.Application.Services.ApplicationServiceBase, IQueryAdministratorService
     {
         /// <summary>
         /// Sql查询对象
@@ -33,22 +34,15 @@ namespace Bing.Admin.Service.Implements.Systems
         protected IAdministratorRepository AdministratorRepository { get; set; }
 
         /// <summary>
-        /// 当前用户
-        /// </summary>
-        protected ICurrentUser CurrentUser { get; set; }
-    
-        /// <summary>
         /// 初始化一个<see cref="QueryAdministratorService"/>类型的实例
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="administratorRepository">管理员仓储</param>
         public QueryAdministratorService( ISqlQuery sqlQuery
-            , IAdministratorRepository administratorRepository
-            , ICurrentUser currentUser)
+            , IAdministratorRepository administratorRepository)
         {
             SqlQuery = sqlQuery;
             AdministratorRepository = administratorRepository;
-            CurrentUser = currentUser;
         }
 
         /// <summary>
@@ -59,6 +53,7 @@ namespace Bing.Admin.Service.Implements.Systems
         {
             if (parameter == null)
                 return new PagerList<AdministratorResponse>();
+            Debug.WriteLine($"当前用户: {CurrentUser.UserId}, {CurrentUser.UserName}");
             var query = SqlQuery
                 .Select<User>(
                     x => new object[] { x.Id, x.Nickname, x.UserName, x.LastModificationTime, x.LastModifier },

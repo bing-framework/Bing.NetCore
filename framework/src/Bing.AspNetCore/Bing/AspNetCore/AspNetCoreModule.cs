@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using Bing.AspNetCore.Security.Claims;
+using Bing.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.AspNetCore
 {
@@ -28,15 +29,13 @@ namespace Bing.AspNetCore
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             services.AddHttpContextAccessor();
-            // 注入Http上下文用户会话
-            services.TryAddScoped<Bing.Application.ISession, HttpContextSession>();
-
             // 注入当前用户，替换Thread.CurrentPrincipal的作用
             services.AddTransient<System.Security.Principal.IPrincipal>(provider =>
             {
                 var accessor = provider.GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
                 return accessor?.HttpContext?.User;
             });
+            services.AddSingleton<ICurrentPrincipalAccessor, HttpContextCurrentPrincipalAccessor>();
             // 注入用户会话
             services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.Session>();
             // 注册编码

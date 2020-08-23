@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Abstractions.Systems
     /// <summary>
     /// 用户 服务
     /// </summary>
-    public interface IUserService : IService
+    public interface IUserService : Bing.Application.Services.IApplicationService
     {
         /// <summary>
         /// 重置密码

@@ -24,7 +24,7 @@ namespace Bing.Admin.Service.Implements
     /// <summary>
     /// 安全服务
     /// </summary>
-    public class SecurityService : ServiceBase, ISecurityService
+    public class SecurityService : Bing.Application.Services.ApplicationServiceBase, ISecurityService
     {
         /// <summary>
         /// 初始化一个<see cref="SecurityService"/>类型的实例

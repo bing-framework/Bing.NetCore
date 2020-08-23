@@ -14,7 +14,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 管理员 服务
     /// </summary>
-    public class AdministratorService : ServiceBase, IAdministratorService
+    public class AdministratorService : Bing.Application.Services.ApplicationServiceBase, IAdministratorService
     {
         /// <summary>
         /// 工作单元

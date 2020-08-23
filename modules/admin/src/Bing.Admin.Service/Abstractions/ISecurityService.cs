@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Bing.Admin.Domain.Shared.Results;
 using Bing.Admin.Service.Requests.Systems;
-using Bing.Applications;
+using Bing.Application.Services;
 using Bing.Permissions.Identity.JwtBearer;
 
 namespace Bing.Admin.Service.Abstractions
@@ -9,7 +9,7 @@ namespace Bing.Admin.Service.Abstractions
     /// <summary>
     /// 安全服务
     /// </summary>
-    public interface ISecurityService : IService
+    public interface ISecurityService : IApplicationService
     {
         /// <summary>
         /// 登录

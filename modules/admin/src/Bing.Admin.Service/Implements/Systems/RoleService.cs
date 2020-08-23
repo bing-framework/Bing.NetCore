@@ -1,4 +1,4 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 using Bing.Admin.Data;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 角色 服务
     /// </summary>
-    public class RoleService : ServiceBase, IRoleService
+    public class RoleService : Bing.Application.Services.ApplicationServiceBase, IRoleService
     {
         /// <summary>
         /// 工作单元

@@ -1,4 +1,4 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 using Bing.Admin.Data;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 应用程序 服务
     /// </summary>
-    public class ApplicationService : ServiceBase, IApplicationService
+    public class ApplicationService : Bing.Application.Services.ApplicationServiceBase, IApplicationService
     {
         /// <summary>
         /// 工作单元

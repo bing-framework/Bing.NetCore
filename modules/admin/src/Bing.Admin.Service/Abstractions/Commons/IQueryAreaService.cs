@@ -1,11 +1,11 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 
 namespace Bing.Admin.Service.Abstractions.Commons
 {
     /// <summary>
     /// 地区 查询服务
     /// </summary>
-    public interface IQueryAreaService : IService
+    public interface IQueryAreaService : Bing.Application.Services.IApplicationService
     {
     }
 }

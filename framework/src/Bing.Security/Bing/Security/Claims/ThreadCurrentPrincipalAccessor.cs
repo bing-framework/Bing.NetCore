@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading;
-using Bing.DependencyInjection;
 
 namespace Bing.Security.Claims
 {
     /// <summary>
     /// 当前线程安全主体访问器
     /// </summary>
-    public class ThreadCurrentPrincipalAccessor : ICurrentPrincipalAccessor, ISingletonDependency
+    public class ThreadCurrentPrincipalAccessor : ICurrentPrincipalAccessor
     {
         /// <summary>
         /// 当前安全主体

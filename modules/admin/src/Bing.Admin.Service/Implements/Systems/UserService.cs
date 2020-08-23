@@ -13,7 +13,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 用户 服务
     /// </summary>
-    public class UserService : ServiceBase, IUserService
+    public class UserService : Bing.Application.Services.ApplicationServiceBase, IUserService
     {
         /// <summary>
         /// 工作单元
@@ -65,7 +65,7 @@ namespace Bing.Admin.Service.Implements.Systems
         public async Task ChangePasswordAsync(Guid? userId, string currentPassword, string newPassword)
         {
             if (userId == null)
-                userId = Session.UserId.ToGuidOrNull();
+                userId = CurrentUser.UserId.ToGuidOrNull();
             var user = await UserRepository.FindAsync(userId);
             await UserManager.ChangePasswordAsync(user, currentPassword, newPassword);
             await UnitOfWork.CommitAsync();

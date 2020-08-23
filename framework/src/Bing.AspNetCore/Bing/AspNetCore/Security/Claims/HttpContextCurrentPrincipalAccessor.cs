@@ -7,7 +7,7 @@ namespace Bing.AspNetCore.Security.Claims
     /// <summary>
     /// 当前Http上下文安全主体访问器
     /// </summary>
-    public class HttpContextCurrentPrincipalAccessor: ThreadCurrentPrincipalAccessor
+    public class HttpContextCurrentPrincipalAccessor : ThreadCurrentPrincipalAccessor
     {
         /// <summary>
         /// Http上下文访问器

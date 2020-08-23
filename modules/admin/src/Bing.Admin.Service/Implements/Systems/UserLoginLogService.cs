@@ -1,4 +1,4 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 using Bing.Admin.Data;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 用户登录日志 服务
     /// </summary>
-    public class UserLoginLogService : ServiceBase, IUserLoginLogService
+    public class UserLoginLogService : Bing.Application.Services.ApplicationServiceBase, IUserLoginLogService
     {
         /// <summary>
         /// 工作单元

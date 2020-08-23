@@ -1,11 +1,11 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 
 namespace Bing.Admin.Service.Abstractions.Commons
 {
     /// <summary>
     /// 用户信息 服务
     /// </summary>
-    public interface IUserInfoService : IService
+    public interface IUserInfoService : Bing.Application.Services.IApplicationService
     {
     }
 }

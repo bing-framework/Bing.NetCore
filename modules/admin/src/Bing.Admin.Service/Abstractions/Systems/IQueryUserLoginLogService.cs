@@ -1,11 +1,11 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {
     /// <summary>
     /// 用户登录日志 查询服务
     /// </summary>
-    public interface IQueryUserLoginLogService : IService
+    public interface IQueryUserLoginLogService : Bing.Application.Services.IApplicationService
     {
     }
 }

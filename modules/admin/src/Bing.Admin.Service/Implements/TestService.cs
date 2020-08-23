@@ -12,7 +12,7 @@ namespace Bing.Admin.Service.Implements
     /// <summary>
     /// 测试服务
     /// </summary>
-    public class TestService : ServiceBase, ITestService
+    public class TestService : Bing.Application.Services.ApplicationServiceBase, ITestService
     {
         /// <summary>
         /// 工作单元

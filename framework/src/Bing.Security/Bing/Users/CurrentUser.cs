@@ -42,6 +42,8 @@ namespace Bing.Users
             {
                 var result = this.FindClaimValue(BingClaimTypes.UserId);
                 if (string.IsNullOrWhiteSpace(result))
+                    result = this.FindClaimValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (string.IsNullOrWhiteSpace(result))
                     result = this.FindClaimValue("sid");
                 if (string.IsNullOrWhiteSpace(result))
                     result = this.FindClaimValue("sub");
@@ -88,7 +90,7 @@ namespace Bing.Users
         /// <summary>
         /// 租户标识
         /// </summary>
-        public virtual string TenantId =>_principalAccessor.Principal?.FindTenantId()?.ToString() ?? string.Empty;
+        public virtual string TenantId => _principalAccessor.Principal?.FindTenantId()?.ToString() ?? string.Empty;
 
         /// <summary>
         /// 角色列表

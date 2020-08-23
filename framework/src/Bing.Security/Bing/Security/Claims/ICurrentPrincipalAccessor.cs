@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using Bing.Aspects;
+using Bing.DependencyInjection;
 
 namespace Bing.Security.Claims
 {
@@ -8,7 +9,7 @@ namespace Bing.Security.Claims
     /// 当前安全主体访问器
     /// </summary>
     [Ignore]
-    public interface ICurrentPrincipalAccessor
+    public interface ICurrentPrincipalAccessor : ISingletonDependency
     {
         /// <summary>
         /// 安全主体

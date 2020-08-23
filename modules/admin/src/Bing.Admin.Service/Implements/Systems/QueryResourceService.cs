@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 资源 查询服务
     /// </summary>
-    public class QueryResourceService : ServiceBase, IQueryResourceService
+    public class QueryResourceService : Bing.Application.Services.ApplicationServiceBase, IQueryResourceService
     {
         /// <summary>
         /// Sql查询对象

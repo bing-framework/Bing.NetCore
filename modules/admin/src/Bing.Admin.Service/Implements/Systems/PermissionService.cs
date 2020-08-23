@@ -1,4 +1,4 @@
-using Bing.Applications;
+﻿using Bing.Applications;
 using Bing.Admin.Data;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 权限 服务
     /// </summary>
-    public class PermissionService : ServiceBase, IPermissionService
+    public class PermissionService : Bing.Application.Services.ApplicationServiceBase, IPermissionService
     {
         /// <summary>
         /// 工作单元
