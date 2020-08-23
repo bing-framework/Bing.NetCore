@@ -36,12 +36,32 @@ namespace Bing.Users
         /// <summary>
         /// 用户标识
         /// </summary>
-        public virtual string UserId => _principalAccessor.Principal?.FindUserId()?.ToString() ?? string.Empty;
+        public virtual string UserId
+        {
+            get
+            {
+                var result = this.FindClaimValue(BingClaimTypes.UserId);
+                if (string.IsNullOrWhiteSpace(result))
+                    result = this.FindClaimValue("sid");
+                if (string.IsNullOrWhiteSpace(result))
+                    result = this.FindClaimValue("sub");
+                return result;
+            }
+        }
 
         /// <summary>
         /// 用户名
         /// </summary>
-        public virtual string UserName => this.FindClaimValue(BingClaimTypes.UserName);
+        public virtual string UserName
+        {
+            get
+            {
+                var result = this.FindClaimValue(BingClaimTypes.UserName);
+                if (string.IsNullOrWhiteSpace(result))
+                    result = this.FindClaimValue("name");
+                return result;
+            }
+        }
 
         /// <summary>
         /// 手机号码
@@ -73,7 +93,16 @@ namespace Bing.Users
         /// <summary>
         /// 角色列表
         /// </summary>
-        public virtual string[] Roles => FindClaims(BingClaimTypes.Role).Select(c => c.Value).ToArray();
+        public virtual string[] Roles
+        {
+            get
+            {
+                var result = FindClaims(BingClaimTypes.Role).Select(x => x.Value).ToArray();
+                if (!result.Any())
+                    result = FindClaims("role").Select(x => x.Value).ToArray();
+                return result;
+            }
+        }
 
         /// <summary>
         /// 查找声明

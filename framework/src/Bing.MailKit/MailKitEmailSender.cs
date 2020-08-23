@@ -1,8 +1,7 @@
 ﻿using System.Net.Mail;
 using System.Threading.Tasks;
+using Bing.Emailing;
 using Bing.MailKit.Extensions;
-using Bing.Net.Mail.Configs;
-using Bing.Net.Mail.Core;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace Bing.MailKit

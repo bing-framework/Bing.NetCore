@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Bing.Helpers;
+using Bing.Security.Claims;
 
 namespace Bing.Users
 {
@@ -39,5 +40,110 @@ namespace Bing.Users
             Debug.Assert(currentUser.UserId != null, "currentUser.UserId != null");
             return Conv.ToGuid(currentUser.UserId);
         }
+
+        /// <summary>
+        /// 获取用户标识
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="currentUser">当前用户</param>
+        public static T GetUserId<T>(this ICurrentUser currentUser) => Conv.To<T>(currentUser.UserId);
+
+        /// <summary>
+        /// 获取用户名
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetUserName(this ICurrentUser currentUser)
+        {
+            var result = currentUser.FindClaim(BingClaimTypes.UserName)?.Value;
+            if (string.IsNullOrWhiteSpace(result))
+                result = currentUser.FindClaim("name")?.Value;
+            return result;
+        }
+
+        /// <summary>
+        /// 获取姓名
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetFullName(this ICurrentUser currentUser)
+        {
+            var result = currentUser.FindClaim(BingClaimTypes.FullName)?.Value;
+            if (string.IsNullOrWhiteSpace(result))
+                result = currentUser.FindClaim("family_name")?.Value;
+            return result;
+        }
+
+        /// <summary>
+        /// 获取电子邮件
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetEmail(this ICurrentUser currentUser)
+        {
+            var result = currentUser.FindClaim(BingClaimTypes.Email)?.Value;
+            if (string.IsNullOrWhiteSpace(result))
+                result = currentUser.FindClaim("email")?.Value;
+            return result;
+        }
+
+        /// <summary>
+        /// 获取手机号码
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetPhoneNumber(this ICurrentUser currentUser)
+        {
+            var result = currentUser.FindClaim(BingClaimTypes.PhoneNumber)?.Value;
+            if (string.IsNullOrWhiteSpace(result))
+                result = currentUser.FindClaim("phone_number")?.Value;
+            return result;
+        }
+
+        /// <summary>
+        /// 获取应用程序标识
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static Guid GetApplicationId(this ICurrentUser currentUser) => Conv.ToGuid(currentUser.FindClaim(BingClaimTypes.ApplicationId)?.Value);
+
+        /// <summary>
+        /// 获取应用程序标识
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="currentUser">当前用户</param>
+        public static T GetApplicationId<T>(this ICurrentUser currentUser) => Conv.To<T>(currentUser.FindClaim(BingClaimTypes.ApplicationId)?.Value);
+
+        /// <summary>
+        /// 获取应用程序编码
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetApplicationCode(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.ApplicationCode)?.Value;
+
+        /// <summary>
+        /// 获取应用程序名称
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetApplicationName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.ApplicationName)?.Value;
+
+        /// <summary>
+        /// 获取租户标识
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static Guid GetTenantId(this ICurrentUser currentUser) => Conv.ToGuid(currentUser.FindClaim(BingClaimTypes.TenantId)?.Value);
+
+        /// <summary>
+        /// 获取租户标识
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="currentUser">当前用户</param>
+        public static T GetTenantId<T>(this ICurrentUser currentUser) => Conv.To<T>(currentUser.FindClaim(BingClaimTypes.TenantId)?.Value);
+
+        /// <summary>
+        /// 获取租户编码
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetTenantCode(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantCode)?.Value;
+
+        /// <summary>
+        /// 获取租户名称
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string GetTenantName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantName)?.Value;
     }
 }

@@ -1,5 +1,5 @@
-﻿using Bing.MailKit.Configs;
-using Bing.Net.Mail.Configs;
+﻿using Bing.Emailing;
+using Bing.MailKit.Configs;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 

@@ -70,11 +70,6 @@ namespace Bing.Domains.Entities
         public virtual TKey Id { get; protected set; }
 
         /// <summary>
-        /// 用户会话
-        /// </summary>
-        protected virtual ISession Session => Ioc.Create<ISession>();
-
-        /// <summary>
         /// 初始化一个<see cref="EntityBase{TEntity,TKey}"/>类型的实例
         /// </summary>
         protected EntityBase() { }

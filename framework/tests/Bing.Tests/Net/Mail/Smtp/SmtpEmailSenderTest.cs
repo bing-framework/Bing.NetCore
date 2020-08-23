@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using Bing.Net.Mail.Attachments;
-using Bing.Net.Mail.Configs;
-using Bing.Net.Mail.Core;
-using Bing.Net.Mail.Smtp;
-using Xunit;
+using Bing.Emailing;
+using Bing.Emailing.Smtp;
 using Xunit.Abstractions;
 
 namespace Bing.Tests.Net.Mail.Smtp

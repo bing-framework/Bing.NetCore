@@ -9,6 +9,7 @@ namespace Bing.Applications
     /// <summary>
     /// 应用服务
     /// </summary>
+    [Obsolete("请使用ApplicationService")]
     public abstract class ServiceBase : IService
     {
         /// <summary>

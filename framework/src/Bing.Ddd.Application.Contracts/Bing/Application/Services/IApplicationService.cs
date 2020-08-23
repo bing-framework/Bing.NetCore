@@ -2,11 +2,11 @@
 
 namespace Bing.Application.Services
 {
-    /// <summary>
-    /// 应用服务
-    /// </summary>
-    [IgnoreDependency]
-    public interface IApplicationService
-    {
-    }
+    ///// <summary>
+    ///// 应用服务
+    ///// </summary>
+    //[IgnoreDependency]
+    //public interface IApplicationService
+    //{
+    //}
 }

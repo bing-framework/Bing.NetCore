@@ -139,7 +139,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Validation.Abstraction
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Http", "utils\src\Bing.Utils.Http\Bing.Utils.Http.csproj", "{9405E836-7987-4206-8B76-FD428C2D6F32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Auditing", "framework\src\Bing.Auditing\Bing.Auditing.csproj", "{F084AFFB-9136-43CE-874C-777DBA4D5205}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing", "framework\src\Bing.Auditing\Bing.Auditing.csproj", "{F084AFFB-9136-43CE-874C-777DBA4D5205}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Emailing", "framework\src\Bing.Emailing\Bing.Emailing.csproj", "{5D81881D-FF17-4902-8BEB-A1D58D0EF688}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -343,6 +345,10 @@ Global
 		{F084AFFB-9136-43CE-874C-777DBA4D5205}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F084AFFB-9136-43CE-874C-777DBA4D5205}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F084AFFB-9136-43CE-874C-777DBA4D5205}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -403,6 +409,7 @@ Global
 		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{9405E836-7987-4206-8B76-FD428C2D6F32} = {82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}
 		{F084AFFB-9136-43CE-874C-777DBA4D5205} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
+		{5D81881D-FF17-4902-8BEB-A1D58D0EF688} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

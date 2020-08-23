@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Emailing\Bing.Emailing.csproj" />
     <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
   </ItemGroup>

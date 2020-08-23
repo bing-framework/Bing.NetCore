@@ -1,4 +1,4 @@
-﻿using Bing.Net.Mail.Abstractions;
+﻿using Bing.Emailing;
 
 namespace Bing.MailKit
 {

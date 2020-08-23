@@ -39,7 +39,7 @@ namespace Bing.Logs.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bing.Logs.Properties.LogResource", typeof(LogResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Properties.LogResource", typeof(LogResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

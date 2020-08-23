@@ -1,6 +1,6 @@
 ﻿using System;
+using Bing.Emailing;
 using Bing.MailKit.Configs;
-using Bing.Net.Mail.Configs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

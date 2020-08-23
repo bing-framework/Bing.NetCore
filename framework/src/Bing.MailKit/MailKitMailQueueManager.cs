@@ -1,8 +1,6 @@
 ﻿using System;
+using Bing.Emailing;
 using Bing.Logs;
-using Bing.Net.Mail.Abstractions;
-using Bing.Net.Mail.Configs;
-using Bing.Net.Mail.Core;
 
 namespace Bing.MailKit
 {
