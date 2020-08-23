@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using Bing.Helpers;
+using Bing.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bing.Core.Modularity
 {
@@ -21,7 +23,11 @@ namespace Bing.Core.Modularity
         /// 添加服务。将模块服务添加到依赖注入服务容器中
         /// </summary>
         /// <param name="services">服务集合</param>
-        public override IServiceCollection AddServices(IServiceCollection services) => services;
+        public override IServiceCollection AddServices(IServiceCollection services)
+        {
+            services.TryAddSingleton<StartupLogger>();
+            return services;
+        }
 
         /// <summary>
         /// 应用模块服务
