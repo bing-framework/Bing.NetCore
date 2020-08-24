@@ -6,6 +6,7 @@ using Bing.Core.Options;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Builders
@@ -117,10 +118,18 @@ namespace Bing.Core.Builders
             // 按先层级后顺序的规则进行排序
             _modules = _modules.OrderBy(m => m.Level).ThenBy(m => m.Order).ToList();
 
+            var logName = typeof(BingBuilder).FullName;
             tmpModules = _modules.Except(tmpModules).ToArray();
             foreach (var tmpModule in tmpModules)
+            {
+                var moduleType = tmpModule.GetType();
+                var moduleName = Reflections.GetDescription(moduleType);
+                Services.LogInformation($"添加模块 “{moduleName} ({moduleType.Name})” 的服务", logName);
+                var tmp = Services.ToArray();
                 AddModule(Services, tmpModule);
-
+                Services.ServiceLogDebug(tmp, moduleType.FullName);
+                Services.LogInformation($"模块 “{moduleName} ({moduleType.Name})” 的服务添加完毕，添加了 {Services.Count - tmp.Length} 个服务\n", logName);
+            }
             return this;
         }
 
@@ -169,8 +178,6 @@ namespace Bing.Core.Builders
                 AddModule(module.GetType());
             return this;
         }
-
-        
 
         #endregion AddModule(添加模块)
 

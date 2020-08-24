@@ -2,6 +2,7 @@
 using Bing.AspNetCore;
 using Bing.AspNetCore.ExceptionHandling;
 using Bing.AspNetCore.Tracing;
+using Bing.Logging;
 using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -65,6 +66,11 @@ namespace Microsoft.AspNetCore.Builder
             var provider = app.ApplicationServices;
             var logger = provider.GetLogger(FrameworkLog);
             logger.LogInformation("Bing框架初始化开始");
+
+            // 输出注入服务的日志
+            //var startupLogger = provider.GetService<StartupLogger>();
+            //startupLogger.Output(provider);
+
             var watch = Stopwatch.StartNew();
             var modules = provider.GetAllModules();
             foreach (var module in modules)

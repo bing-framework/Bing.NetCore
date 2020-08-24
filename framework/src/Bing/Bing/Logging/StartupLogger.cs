@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -57,7 +58,7 @@ namespace Bing.Logging
                     logger = provider.GetLogger(info.LogName);
                     dict[info.LogName] = logger;
                 }
-
+                //Debug.WriteLine($"[{info.CreatedTime}]:{nameof(StartupLogger)}:{info.LogName}:{info.LogLevel}:{info.Message}:{info.Exception}");
                 switch (info.LogLevel)
                 {
                     case LogLevel.Trace:
