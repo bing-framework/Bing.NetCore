@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Application.Services
 {
     /// <summary>
-    /// 应用服务基类
+    /// 应用服务
     /// </summary>
     public abstract class ApplicationServiceBase : IApplicationService
     {

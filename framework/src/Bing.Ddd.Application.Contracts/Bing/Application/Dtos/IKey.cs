@@ -1,13 +1,13 @@
 ﻿namespace Bing.Application.Dtos
 {
     /// <summary>
-    /// 定义总行数
+    /// 标识
     /// </summary>
-    public interface IHasTotalCount
+    public interface IKey
     {
         /// <summary>
-        /// 总行数
+        /// 标识
         /// </summary>
-        long TotalCount { get; set; }
+        string Id { get; set; }
     }
 }
