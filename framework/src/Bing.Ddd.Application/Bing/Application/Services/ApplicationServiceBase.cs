@@ -1,5 +1,6 @@
 ﻿using System;
 using Bing.Aspects;
+using Bing.Linq;
 using Bing.Logs;
 using Bing.Users;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +58,16 @@ namespace Bing.Application.Services
         /// 当前用户
         /// </summary>
         private ICurrentUser _currentUser;
+
+        /// <summary>
+        /// 异步查询执行器
+        /// </summary>
+        protected IAsyncQueryableExecuter AsyncExecuter => LazyGetRequiredService(ref _asyncExecuter);
+
+        /// <summary>
+        /// 异步查询执行器
+        /// </summary>
+        private IAsyncQueryableExecuter _asyncExecuter;
 
         /// <summary>
         /// 日志

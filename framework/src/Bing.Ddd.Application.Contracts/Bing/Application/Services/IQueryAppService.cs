@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Datas.Queries;
-using Bing.DependencyInjection;
 using Bing.Domains.Repositories;
 
 namespace Bing.Application.Services
@@ -11,7 +10,6 @@ namespace Bing.Application.Services
     /// </summary>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
-    [IgnoreDependency]
     public interface IQueryAppService<TDto, in TQueryParameter> : IApplicationService
         where TDto : new()
         where TQueryParameter : IQueryParameter
