@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bing.Extensions;
 
@@ -8,6 +9,7 @@ namespace Bing.Webs.Controllers.Trees
     /// 树型表格结果
     /// </summary>
     /// <typeparam name="TNode">树型节点类型</typeparam>
+    [Obsolete]
     public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : TreeDto<TNode>
     {
         /// <summary>

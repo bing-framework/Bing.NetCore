@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 地区 服务
     /// </summary>
-    public class AreaService : Bing.Application.Services.ApplicationServiceBase, IAreaService
+    public class AreaService : Bing.Application.Services.AppServiceBase, IAreaService
     {
         /// <summary>
         /// 工作单元

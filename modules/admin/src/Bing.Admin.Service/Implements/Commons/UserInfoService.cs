@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 用户信息 服务
     /// </summary>
-    public class UserInfoService : Bing.Application.Services.ApplicationServiceBase, IUserInfoService
+    public class UserInfoService : Bing.Application.Services.AppServiceBase, IUserInfoService
     {
         /// <summary>
         /// 工作单元

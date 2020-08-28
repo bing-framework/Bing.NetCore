@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bing.Applications.Trees;
 using Bing.Datas.Queries.Trees;
 using Bing.Extensions;
@@ -12,6 +13,7 @@ namespace Bing.Webs.Controllers.Trees
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
+    [Obsolete]
     public abstract class ControllerBase<TDto, TQuery, TParentId> : ApiControllerBase
         where TDto : class, ITreeNode, new()
         where TQuery : class, ITreeQueryParameter<TParentId>

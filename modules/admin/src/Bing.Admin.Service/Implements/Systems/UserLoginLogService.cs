@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 用户登录日志 服务
     /// </summary>
-    public class UserLoginLogService : Bing.Application.Services.ApplicationServiceBase, IUserLoginLogService
+    public class UserLoginLogService : Bing.Application.Services.AppServiceBase, IUserLoginLogService
     {
         /// <summary>
         /// 工作单元

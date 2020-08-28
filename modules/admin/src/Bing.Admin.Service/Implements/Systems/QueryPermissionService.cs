@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 权限 查询服务
     /// </summary>
-    public class QueryPermissionService : Bing.Application.Services.ApplicationServiceBase, IQueryPermissionService
+    public class QueryPermissionService : Bing.Application.Services.AppServiceBase, IQueryPermissionService
     {
         /// <summary>
         /// Sql查询对象

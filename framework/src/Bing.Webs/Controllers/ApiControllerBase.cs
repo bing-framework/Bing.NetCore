@@ -1,4 +1,5 @@
-﻿using Bing.Logs;
+﻿using System;
+using Bing.Logs;
 using Bing.Sessions;
 using Bing.Webs.Commons;
 using Bing.Webs.Filters;
@@ -11,6 +12,7 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Obsolete]
     //[ErrorLog]
     //[TraceLog]
     public abstract class ApiControllerBase : Controller

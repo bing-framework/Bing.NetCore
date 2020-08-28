@@ -141,7 +141,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Http", "utils\sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing", "framework\src\Bing.Auditing\Bing.Auditing.csproj", "{F084AFFB-9136-43CE-874C-777DBA4D5205}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Emailing", "framework\src\Bing.Emailing\Bing.Emailing.csproj", "{5D81881D-FF17-4902-8BEB-A1D58D0EF688}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Emailing", "framework\src\Bing.Emailing\Bing.Emailing.csproj", "{5D81881D-FF17-4902-8BEB-A1D58D0EF688}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.Mvc.Contracts", "framework\src\Bing.AspNetCore.Mvc.Contracts\Bing.AspNetCore.Mvc.Contracts.csproj", "{256EB128-60DC-406C-BED0-9D0013A6B49A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.Mvc", "framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj", "{027BE8C0-24D8-45BC-9A97-08B6924FB39D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -349,6 +353,14 @@ Global
 		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D81881D-FF17-4902-8BEB-A1D58D0EF688}.Release|Any CPU.Build.0 = Release|Any CPU
+		{256EB128-60DC-406C-BED0-9D0013A6B49A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{256EB128-60DC-406C-BED0-9D0013A6B49A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{256EB128-60DC-406C-BED0-9D0013A6B49A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{256EB128-60DC-406C-BED0-9D0013A6B49A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{027BE8C0-24D8-45BC-9A97-08B6924FB39D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{027BE8C0-24D8-45BC-9A97-08B6924FB39D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{027BE8C0-24D8-45BC-9A97-08B6924FB39D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{027BE8C0-24D8-45BC-9A97-08B6924FB39D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -410,6 +422,8 @@ Global
 		{9405E836-7987-4206-8B76-FD428C2D6F32} = {82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}
 		{F084AFFB-9136-43CE-874C-777DBA4D5205} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{5D81881D-FF17-4902-8BEB-A1D58D0EF688} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
+		{256EB128-60DC-406C-BED0-9D0013A6B49A} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
+		{027BE8C0-24D8-45BC-9A97-08B6924FB39D} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 角色 查询服务
     /// </summary>
-    public class QueryRoleService : Bing.Application.Services.ApplicationServiceBase, IQueryRoleService
+    public class QueryRoleService : Bing.Application.Services.AppServiceBase, IQueryRoleService
     {
         /// <summary>
         /// Sql查询对象

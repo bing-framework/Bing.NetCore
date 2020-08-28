@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 资源 服务
     /// </summary>
-    public class ResourceService : Bing.Application.Services.ApplicationServiceBase, IResourceService
+    public class ResourceService : Bing.Application.Services.AppServiceBase, IResourceService
     {
         /// <summary>
         /// 工作单元

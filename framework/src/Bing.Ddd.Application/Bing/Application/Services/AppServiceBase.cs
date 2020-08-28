@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Application.Services
 {
     /// <summary>
-    /// 应用服务
+    /// 应用服务基类
     /// </summary>
-    public abstract class ApplicationServiceBase : IApplicationService
+    public abstract class AppServiceBase : IAppService
     {
         /// <summary>
         /// 服务定位器

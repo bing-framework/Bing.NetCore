@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 权限 服务
     /// </summary>
-    public class PermissionService : Bing.Application.Services.ApplicationServiceBase, IPermissionService
+    public class PermissionService : Bing.Application.Services.AppServiceBase, IPermissionService
     {
         /// <summary>
         /// 工作单元

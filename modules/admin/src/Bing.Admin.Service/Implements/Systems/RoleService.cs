@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 角色 服务
     /// </summary>
-    public class RoleService : Bing.Application.Services.ApplicationServiceBase, IRoleService
+    public class RoleService : Bing.Application.Services.AppServiceBase, IRoleService
     {
         /// <summary>
         /// 工作单元

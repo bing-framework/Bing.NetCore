@@ -15,6 +15,7 @@ namespace Bing.Webs.Controllers.Trees
     /// <typeparam name="TTreeResult">树型结果</typeparam>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">父标识类型</typeparam>
+    [Obsolete]
     public abstract class TreeControllerBase<TTreeResult, TDto, TQuery> : TreeControllerBase<TTreeResult, TDto, TQuery, Guid?>
         where TTreeResult : class, new()
         where TDto : class, ITreeNode, new()
@@ -36,6 +37,7 @@ namespace Bing.Webs.Controllers.Trees
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
+    [Obsolete]
     public abstract class TreeControllerBase<TTreeResult, TDto, TQuery, TParentId> : ControllerBase<TDto, TQuery, TParentId>
         where TTreeResult : class, new()
         where TDto : class, ITreeNode, new()

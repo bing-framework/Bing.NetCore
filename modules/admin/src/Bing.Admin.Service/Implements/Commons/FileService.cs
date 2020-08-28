@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 文件 服务
     /// </summary>
-    public class FileService : Bing.Application.Services.ApplicationServiceBase, IFileService
+    public class FileService : Bing.Application.Services.AppServiceBase, IFileService
     {
         /// <summary>
         /// 工作单元

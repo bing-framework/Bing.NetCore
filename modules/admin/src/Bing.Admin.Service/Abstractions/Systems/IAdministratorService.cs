@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Abstractions.Systems
     /// <summary>
     /// 管理员 服务
     /// </summary>
-    public interface IAdministratorService : Bing.Application.Services.IApplicationService
+    public interface IAdministratorService : Bing.Application.Services.IAppService
     {
         /// <summary>
         /// 创建

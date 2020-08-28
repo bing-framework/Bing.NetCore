@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Webs.Controllers
 {
@@ -7,6 +8,7 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[area]/[controller]/[action]")]
+    [Obsolete]
     public abstract class AreaApiControllerBase : Controller
     {
     }

@@ -5,7 +5,7 @@ namespace Bing.Admin.Service.Abstractions.Commons
     /// <summary>
     /// 用户信息 服务
     /// </summary>
-    public interface IUserInfoService : Bing.Application.Services.IApplicationService
+    public interface IUserInfoService : Bing.Application.Services.IAppService
     {
     }
 }

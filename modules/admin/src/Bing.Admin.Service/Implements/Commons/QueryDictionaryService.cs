@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 字典 查询服务
     /// </summary>
-    public class QueryDictionaryService : Bing.Application.Services.ApplicationServiceBase, IQueryDictionaryService
+    public class QueryDictionaryService : Bing.Application.Services.AppServiceBase, IQueryDictionaryService
     {
         /// <summary>
         /// Sql查询对象

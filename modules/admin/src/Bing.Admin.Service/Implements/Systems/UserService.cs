@@ -13,7 +13,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 用户 服务
     /// </summary>
-    public class UserService : Bing.Application.Services.ApplicationServiceBase, IUserService
+    public class UserService : Bing.Application.Services.AppServiceBase, IUserService
     {
         /// <summary>
         /// 工作单元

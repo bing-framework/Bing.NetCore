@@ -8,7 +8,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 字典 服务
     /// </summary>
-    public class DictionaryService : Bing.Application.Services.ApplicationServiceBase, IDictionaryService
+    public class DictionaryService : Bing.Application.Services.AppServiceBase, IDictionaryService
     {
         /// <summary>
         /// 工作单元

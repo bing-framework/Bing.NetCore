@@ -9,7 +9,7 @@ namespace Bing.Admin.Service.Abstractions
     /// <summary>
     /// 安全服务
     /// </summary>
-    public interface ISecurityService : IApplicationService
+    public interface ISecurityService : IAppService
     {
         /// <summary>
         /// 登录

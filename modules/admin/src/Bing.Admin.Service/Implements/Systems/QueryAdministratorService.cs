@@ -21,7 +21,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 管理员 查询服务
     /// </summary>
-    public class QueryAdministratorService : Bing.Application.Services.ApplicationServiceBase, IQueryAdministratorService
+    public class QueryAdministratorService : Bing.Application.Services.AppServiceBase, IQueryAdministratorService
     {
         /// <summary>
         /// Sql查询对象

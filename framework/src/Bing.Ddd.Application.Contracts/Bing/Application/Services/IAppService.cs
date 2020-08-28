@@ -6,7 +6,7 @@ namespace Bing.Application.Services
     /// 应用服务
     /// </summary>
     [IgnoreDependency]
-    public interface IApplicationService : IScopedDependency
+    public interface IAppService : IScopedDependency
     {
     }
 }
