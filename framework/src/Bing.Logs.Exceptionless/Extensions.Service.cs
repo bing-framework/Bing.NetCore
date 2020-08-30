@@ -24,7 +24,7 @@ namespace Bing.Logs.Exceptionless
         {
             services.TryAddScoped<ILogProviderFactory, Bing.Logs.Exceptionless.LogProviderFactory>();
             services.TryAddSingleton(typeof(ILogFormat), t => NullLogFormat.Instance);
-            services.TryAddScoped<ILogContext, Bing.Logs.Exceptionless.LogContext>();
+            services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
             services.TryAddScoped<ILog, Log>();
 
             configAction?.Invoke(ExceptionlessClient.Default.Configuration);
@@ -39,7 +39,7 @@ namespace Bing.Logs.Exceptionless
         public static void AddExceptionlessWithFactory(this IServiceCollection services, Action<ExceptionlessConfiguration> configAction, string name = LogConst.DefaultExceptionlessName)
         {
             services.AddScoped<ILogFactory, DefaultLogFactory>();
-            services.AddScoped<ILogContext, Bing.Logs.Exceptionless.LogContext>();
+            services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
             services.AddScoped<ILog, Log>(x =>
             {
                 var provider = new LogProviderFactory().Create(name, NullLogFormat.Instance);

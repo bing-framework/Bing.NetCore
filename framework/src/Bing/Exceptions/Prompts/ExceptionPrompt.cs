@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Properties;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Bing.Exceptions.Prompts
 {
@@ -49,7 +47,7 @@ namespace Bing.Exceptions.Prompts
                 return prompt;
             if (exception is Warning warning)
                 return warning.Message;
-            if (Web.Environment.IsDevelopment() || IsShowSystemException)
+            if (IsShowSystemException)
                 return exception.Message;
             return R.SystemError;
         }

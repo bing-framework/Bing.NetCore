@@ -35,9 +35,10 @@ namespace Bing.AspNetCore
                 var accessor = provider.GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
                 return accessor?.HttpContext?.User;
             });
-            services.AddSingleton<ICurrentPrincipalAccessor, HttpContextCurrentPrincipalAccessor>();
+
             // 注入用户会话
-            services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.Session>();
+            services.AddSingleton<ICurrentPrincipalAccessor, HttpContextCurrentPrincipalAccessor>();
+            services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.HttpContextSession>();
             // 注册编码
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             return services;

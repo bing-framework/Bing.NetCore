@@ -8,6 +8,7 @@ namespace Bing.Webs.Commons
     /// <summary>
     /// 返回结果
     /// </summary>
+    [Obsolete("请使用Bing.AspNetCore.Mvc.ApiResult")]
     public class Result : JsonResult
     {
         /// <summary>

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace Bing.Webs.Commons
+namespace Bing.AspNetCore.Mvc
 {
     /// <summary>
     /// 验证失败结果
     /// </summary>
-    [Obsolete("请使用Bing.AspNetCore.Mvc.ValidationFailedResult")]
     public class ValidationFailedResult : ObjectResult
     {
         /// <summary>
@@ -36,7 +34,6 @@ namespace Bing.Webs.Commons
     /// <summary>
     /// 验证错误
     /// </summary>
-    [Obsolete("请使用Bing.AspNetCore.Mvc.ValidationError")]
     public class ValidationError
     {
         /// <summary>

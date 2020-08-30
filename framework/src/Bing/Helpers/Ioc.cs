@@ -52,7 +52,6 @@ namespace Bing.Helpers
         /// </summary>
         public static void Dispose()
         {
-            throw new NotImplementedException();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[area]/[controller]/[action]")]
-    [Obsolete]
+    [Obsolete("请使用Bing.AspNetCore.Mvc.AreaApiControllerBase")]
     public abstract class AreaApiControllerBase : Controller
     {
     }

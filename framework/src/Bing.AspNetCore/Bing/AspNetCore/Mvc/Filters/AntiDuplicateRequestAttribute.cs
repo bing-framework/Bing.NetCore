@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Bing.Helpers;
 using Bing.Locks;
 using Bing.Properties;
 using Bing.Sessions;
-using Bing.Webs.Commons;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bing.Webs.Filters
+namespace Bing.AspNetCore.Mvc.Filters
 {
     /// <summary>
     /// 防止重复提交过滤器
     /// </summary>
-    [Obsolete("请使用Bing.AspNetCore.Mvc.Filters.AntiDuplicateRequestAttribute")]
     [AttributeUsage(AttributeTargets.Method)]
     public class AntiDuplicateRequestAttribute : ActionFilterAttribute
     {
@@ -45,7 +42,7 @@ namespace Bing.Webs.Filters
             if (next == null)
                 throw new ArgumentNullException(nameof(next));
 
-            var @lock = CreateLock();
+            var @lock = CreateLock(context);
             var key = GetKey(context);
             var isSuccess = false;
             try
@@ -53,7 +50,7 @@ namespace Bing.Webs.Filters
                 isSuccess = @lock.Lock(key, GetExpiration());
                 if (isSuccess == false)
                 {
-                    context.Result = new Result(StateCode.Fail, GetFailMessage());
+                    context.Result = new ApiResult(StatusCode.Fail, GetFailMessage());
                     return;
                 }
 
@@ -78,7 +75,8 @@ namespace Bing.Webs.Filters
         /// <summary>
         /// 创建业务锁
         /// </summary>
-        private ILock CreateLock() => Ioc.Create<ILock>() ?? NullLock.Instance;
+        /// <param name="context">操作执行上下文</param>
+        private ILock CreateLock(ActionExecutingContext context) => context.HttpContext.RequestServices.GetService<ILock>() ?? NullLock.Instance;
 
         /// <summary>
         /// 获取锁定标识
@@ -88,9 +86,9 @@ namespace Bing.Webs.Filters
         {
             var session = context.HttpContext.RequestServices.GetService<ISession>();
             var userId = string.Empty;
-            if (Type == LockType.User) 
+            if (Type == LockType.User)
                 userId = $"{session.UserId}_";
-            return string.IsNullOrWhiteSpace(Key) ? $"{userId}{Web.Request.Path}" : $"{userId}{Key}";
+            return string.IsNullOrWhiteSpace(Key) ? $"{userId}{context.HttpContext.Request.Path}" : $"{userId}{Key}";
         }
 
         /// <summary>
@@ -117,7 +115,6 @@ namespace Bing.Webs.Filters
     /// <summary>
     /// 锁类型
     /// </summary>
-    [Obsolete("请使用Bing.AspNetCore.Mvc.Filters.LockType")]
     public enum LockType
     {
         /// <summary>

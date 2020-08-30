@@ -2,8 +2,8 @@
 using Bing.Logs;
 using Bing.Sessions;
 using Bing.Webs.Commons;
-using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Webs.Controllers
 {
@@ -12,9 +12,7 @@ namespace Bing.Webs.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    [Obsolete]
-    //[ErrorLog]
-    //[TraceLog]
+    [Obsolete("请使用Bing.AspNetCore.Mvc.ApiControllerBase")]
     public abstract class ApiControllerBase : Controller
     {
         /// <summary>
@@ -25,12 +23,12 @@ namespace Bing.Webs.Controllers
         /// <summary>
         /// 日志
         /// </summary>
-        public ILog Log => _log ??= GetLog();
+        protected ILog Log => _log ??= GetLog();
 
         /// <summary>
         /// 会话
         /// </summary>
-        public virtual ISession Session => Bing.Sessions.Session.Instance;
+        protected virtual ISession Session => HttpContext.RequestServices.GetService<ISession>();
 
         /// <summary>
         /// 获取日志操作

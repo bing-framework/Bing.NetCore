@@ -9,7 +9,7 @@ namespace Bing.Webs.Controllers.Trees
     /// 树型表格结果
     /// </summary>
     /// <typeparam name="TNode">树型节点类型</typeparam>
-    [Obsolete]
+    [Obsolete("请使用Bing.Application.Dtos.TreeTableResult")]
     public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : TreeDto<TNode>
     {
         /// <summary>

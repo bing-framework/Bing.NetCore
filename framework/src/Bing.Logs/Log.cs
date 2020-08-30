@@ -163,11 +163,11 @@ namespace Bing.Logs
         {
             try
             {
-                return ServiceLocator.Instance.GetService<ISession>() ?? Bing.Sessions.Session.Null;
+                return ServiceLocator.Instance.GetService<ISession>() ?? Bing.Sessions.NullSession.Instance;
             }
             catch
             {
-                return Bing.Sessions.Session.Instance;
+                return Bing.Sessions.NullSession.Instance;
             }
         }
     }

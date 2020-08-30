@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace Bing.Webs.Commons
 {
     /// <summary>
     /// 状态码
     /// </summary>
+    [Obsolete("请使用Bing.AspNetCore.Mvc.StatusCode")]
     public enum StateCode
     {
         /// <summary>

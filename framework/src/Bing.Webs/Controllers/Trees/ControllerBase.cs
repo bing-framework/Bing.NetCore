@@ -13,7 +13,7 @@ namespace Bing.Webs.Controllers.Trees
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
-    [Obsolete]
+    [Obsolete("请使用Bing.AspNetCore.Mvc.TreesControllerBase")]
     public abstract class ControllerBase<TDto, TQuery, TParentId> : ApiControllerBase
         where TDto : class, ITreeNode, new()
         where TQuery : class, ITreeQueryParameter<TParentId>

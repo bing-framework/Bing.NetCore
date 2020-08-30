@@ -16,7 +16,7 @@ namespace Bing.Webs.Controllers
     /// </summary>
     /// <typeparam name="TDto">数据传输对象类型</typeparam>
     /// <typeparam name="TQuery">查询参数类型</typeparam>
-    [Obsolete]
+    [Obsolete("请使用Bing.AspNetCore.Mvc.QueryControllerBase")]
     public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
         where TQuery : IQueryParameter
         where TDto : IResponse, new()

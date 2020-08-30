@@ -8,7 +8,7 @@ namespace Bing.Webs.Controllers.Trees
     /// 树型数据传输对象
     /// </summary>
     /// <typeparam name="TNode">树节点类型</typeparam>
-    [Obsolete]
+    [Obsolete("请使用Bing.Application.Dtos.TreeDto")]
     public class TreeDto<TNode> : TreeDto where TNode : TreeDto<TNode>
     {
         /// <summary>
@@ -25,7 +25,7 @@ namespace Bing.Webs.Controllers.Trees
     /// <summary>
     /// 树型数据传输对象
     /// </summary>
-    [Obsolete]
+    [Obsolete("请使用Bing.Application.Dtos.TreeDto")]
     public class TreeDto : TreeDtoBase
     {
         /// <summary>

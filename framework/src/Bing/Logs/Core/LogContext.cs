@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Net;
 using Bing.Collections;
 using Bing.DependencyInjection;
-using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
 
@@ -89,7 +88,6 @@ namespace Bing.Logs.Core
         {
             var key = "Bing.Logs.LogContext_orderId";
             _scopedDictionary.AddOrUpdate(key, ++_orderId);
-
         }
         /// <summary>
         /// 获取日志上下文信息
@@ -115,20 +113,13 @@ namespace Bing.Logs.Core
             {
                 TraceId = GetTraceId(),
                 Stopwatch = GetStopwatch(),
-                Ip = Web.IP,
                 Host = Dns.GetHostName(),
-                Browser = Web.Browser,
-                Url = Web.Url,
             };
 
         /// <summary>
         /// 获取跟踪号
         /// </summary>
-        protected string GetTraceId()
-        {
-            var traceId = Web.HttpContext?.TraceIdentifier;
-            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : traceId;
-        }
+        protected virtual string GetTraceId() => Guid.NewGuid().ToString();
 
         /// <summary>
         /// 获取计时器

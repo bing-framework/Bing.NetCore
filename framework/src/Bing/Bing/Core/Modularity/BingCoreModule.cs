@@ -35,8 +35,8 @@ namespace Bing.Core.Modularity
         /// <param name="provider">服务提供程序</param>
         public override void UseModule(IServiceProvider provider)
         {
-            var environment = provider.GetService<IHostingEnvironment>();
-            Web.Environment = environment;
+            //var environment = provider.GetService<IHostingEnvironment>();
+            //Web.Environment = environment;
             base.UseModule(provider);
         }
     }

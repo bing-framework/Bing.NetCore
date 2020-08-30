@@ -8,6 +8,7 @@ using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
 using Bing.Security.Extensions;
+using Bing.Sessions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis.Systems
