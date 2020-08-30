@@ -14,6 +14,11 @@
         /// 系统管理员
         /// </summary>
         public static string Admin => "SystemAdmin";
+
+        /// <summary>
+        /// 租户管理员
+        /// </summary>
+        public static string TenantAdmin => "TenantAdmin";
     }
 
     /// <summary>
@@ -25,5 +30,10 @@
         /// 系统角色
         /// </summary>
         public static string SystemRole => "SystemRole";
+
+        /// <summary>
+        /// 租户角色
+        /// </summary>
+        public static string TenantRole => "TenantRole";
     }
 }

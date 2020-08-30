@@ -23,6 +23,12 @@ namespace Bing.AspNetCore.Mvc
             OperationTime = DateTime.Now;
         }
 
+        /// <summary>
+        /// 初始化一个<see cref="ApiResult"/>类型的实例
+        /// </summary>
+        /// <param name="code">错误码</param>
+        /// <param name="message">消息</param>
+        /// <param name="data">数据</param>
         public ApiResult(StatusCode code, string message, dynamic data = null) : base(null)
         {
             Code = (int)code;

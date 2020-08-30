@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Admin.Service.Requests.Systems;
+using Bing.Admin.Service.Shared.Requests.Systems;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {

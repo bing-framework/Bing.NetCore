@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Bing.Webs.Controllers;
 using Bing.Admin.Service.Abstractions.Systems;
-using Bing.Admin.Service.Requests.Systems;
+using Bing.Admin.Service.Shared.Requests.Systems;
+using Bing.AspNetCore.Mvc;
+using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis.Systems
@@ -15,7 +16,7 @@ namespace Bing.Admin.Apis.Systems
         /// 用户 服务
         /// </summary>
         public IUserService UserService { get; }
-    
+
         /// <summary>
         /// 用户 查询服务
         /// </summary>
@@ -26,7 +27,7 @@ namespace Bing.Admin.Apis.Systems
         /// </summary>
         /// <param name="service">用户服务</param>
         /// <param name="queryService">用户查询服务</param>
-        public UserController( IUserService service, IQueryUserService queryService)
+        public UserController(IUserService service, IQueryUserService queryService)
         {
             UserService = service;
             QueryUserService = queryService;
@@ -51,6 +52,17 @@ namespace Bing.Admin.Apis.Systems
         public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
         {
             await UserService.ResetPasswordAsync(request);
+            return Success();
+        }
+
+        /// <summary>
+        /// 设置角色
+        /// </summary>
+        /// <param name="request">请求</param>
+        [HttpPost("setRoles")]
+        public async Task<IActionResult> SetRolesAsync([FromBody] SetUserRoleRequest request)
+        {
+            await UserService.SetRolesAsync(request.UserId, request.RoleIds.ToGuidList());
             return Success();
         }
     }

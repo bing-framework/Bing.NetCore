@@ -170,7 +170,5 @@ namespace Bing.Logs
                 return Bing.Sessions.Session.Instance;
             }
         }
-
-        private static ScopedDictionary GetScopedDictionary() => ServiceLocator.Instance.GetService<ScopedDictionary>();
     }
 }

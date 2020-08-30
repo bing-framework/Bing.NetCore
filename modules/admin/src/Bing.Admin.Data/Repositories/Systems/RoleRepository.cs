@@ -233,6 +233,23 @@ namespace Bing.Admin.Data.Repositories.Systems
 
         #endregion
 
+        #region GetUserIdsAsync(获取角色的用户标识列表)
+
+        /// <summary>
+        /// 获取角色的用户标识列表
+        /// </summary>
+        /// <param name="roleId">角色标识</param>
+        public async Task<List<Guid>> GetUserIdsAsync(Guid roleId)
+        {
+            var userIds = await UnitOfWork.Set<UserRole>()
+                .Where(x => x.RoleId == roleId)
+                .Select(x => x.UserId)
+                .ToListAsync();
+            return userIds;
+        }
+
+        #endregion
+
         #region GetExistsUserIdsAsync(获取已添加的用户标识列表)
 
         /// <summary>

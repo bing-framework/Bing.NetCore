@@ -1,7 +1,7 @@
 ﻿using Bing.Admin.Service.Abstractions;
-using Bing.Admin.Service.Queries.Systems;
-using Bing.Admin.Service.Responses.Systems;
-using Bing.Webs.Controllers;
+using Bing.Admin.Service.Shared.Queries.Systems;
+using Bing.Admin.Service.Shared.Responses.Systems;
+using Bing.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Bing.Admin.Apis

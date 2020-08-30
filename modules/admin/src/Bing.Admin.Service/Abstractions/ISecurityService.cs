@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Bing.Admin.Domain.Shared.Results;
-using Bing.Admin.Service.Requests.Systems;
+using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Application.Services;
 using Bing.Permissions.Identity.JwtBearer;
 

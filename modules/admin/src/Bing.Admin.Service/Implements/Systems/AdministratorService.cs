@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Applications;
 using Bing.Admin.Data;
 using Bing.Admin.Domain.Shared;
 using Bing.Admin.Service.Abstractions.Systems;
-using Bing.Admin.Service.Requests.Systems;
-using Bing.Admin.Service.Requests.Systems.Extensions;
+using Bing.Admin.Service.Shared.Requests.Systems;
+using Bing.Admin.Service.Shared.Requests.Systems.Extensions;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
 
 namespace Bing.Admin.Service.Implements.Systems

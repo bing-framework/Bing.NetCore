@@ -1,5 +1,4 @@
 ﻿using Bing.Admin.Data.Pos.Systems.Models;
-using Bing.Admin.Systems.Domain.Models;
 using Bing.Mapping;
 using Bing.Utils.Json;
 

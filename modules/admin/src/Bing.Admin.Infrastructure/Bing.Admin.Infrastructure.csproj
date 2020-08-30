@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Biz\Bing.Biz.csproj" />

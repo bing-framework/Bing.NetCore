@@ -37,4 +37,13 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Models/Module.*.cs">
+      <DependentUpon>Module.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Operation.*.cs">
+      <DependentUpon>Operation.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Admin.Service.Requests.Systems;
-using Bing.Applications;
+using Bing.Admin.Service.Shared.Requests.Systems;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {
@@ -23,5 +23,12 @@ namespace Bing.Admin.Service.Abstractions.Systems
         /// <param name="currentPassword">当前密码</param>
         /// <param name="newPassword">新密码</param>
         Task ChangePasswordAsync(Guid? userId, string currentPassword, string newPassword);
+
+        /// <summary>
+        /// 设置角色
+        /// </summary>
+        /// <param name="userId">用户标识</param>
+        /// <param name="roleIds">角色标识列表</param>
+        Task SetRolesAsync(Guid userId, List<Guid> roleIds);
     }
 }

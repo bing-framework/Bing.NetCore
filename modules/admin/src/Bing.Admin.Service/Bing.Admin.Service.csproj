@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
+    <ProjectReference Include="..\Bing.Admin.Service.Shared\Bing.Admin.Service.Shared.csproj" />
   </ItemGroup>
 
 </Project>

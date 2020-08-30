@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -34,13 +34,15 @@ namespace Bing.Admin.Systems.Domain.Models
         /// 角色标识
         ///</summary>
         [Display(Name = "角色标识")]
-        public Guid? RoleId { get; set; }
+        [Required(ErrorMessage = "角色标识不能为空")]
+        public Guid RoleId { get; set; }
     
         /// <summary>
         /// 资源标识
         ///</summary>
         [Display(Name = "资源标识")]
-        public Guid? ResourceId { get; set; }
+        [Required(ErrorMessage = "资源标识不能为空")]
+        public Guid ResourceId { get; set; }
     
         /// <summary>
         /// 拒绝

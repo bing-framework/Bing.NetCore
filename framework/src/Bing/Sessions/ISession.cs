@@ -1,8 +1,11 @@
-﻿namespace Bing.Sessions
+﻿using System;
+
+namespace Bing.Sessions
 {
     /// <summary>
     /// 用户会话
     /// </summary>
+    [Obsolete("请使用ICurrentUser")]
     public interface ISession
     {
         /// <summary>
