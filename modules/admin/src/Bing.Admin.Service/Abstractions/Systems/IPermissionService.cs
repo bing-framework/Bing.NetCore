@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems;
-using Bing.Applications;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {

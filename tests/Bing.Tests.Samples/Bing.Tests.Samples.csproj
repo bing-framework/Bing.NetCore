@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\framework\src\Bing.Applications\Bing.Applications.csproj" />
     <ProjectReference Include="..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

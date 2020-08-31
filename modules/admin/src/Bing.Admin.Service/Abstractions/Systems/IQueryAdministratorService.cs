@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
-using Bing.Applications;
 using Bing.Domains.Repositories;
 
 namespace Bing.Admin.Service.Abstractions.Systems

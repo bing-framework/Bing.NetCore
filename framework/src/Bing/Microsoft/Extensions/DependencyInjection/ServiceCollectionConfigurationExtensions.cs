@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -21,12 +20,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// 获取 <see cref="IConfiguration"/> 配置信息
         /// </summary>
         /// <param name="services">服务集合</param>
-        public static IConfiguration GetConfiguration(this IServiceCollection services)
-        {
-            var hostBuilderContext = services.GetSingletonInstanceOrNull<HostBuilderContext>();
-            if (hostBuilderContext?.Configuration != null)
-                return hostBuilderContext.Configuration as IConfigurationRoot;
-            return services.GetSingletonInstanceOrNull<IConfiguration>();
-        }
+        public static IConfiguration GetConfiguration(this IServiceCollection services) => services.GetSingletonInstanceOrNull<IConfiguration>();
     }
 }

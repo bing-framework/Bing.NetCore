@@ -14,7 +14,7 @@ namespace Bing.AspNetCore.Extensions
     /// <summary>
     /// 服务集合(<see cref="IServiceCollection"/>)扩展
     /// </summary>
-    public static partial class ServiceCollectionExtensions
+    public static class BingServiceCollectionExtensions
     {
         /// <summary>
         /// 注册配置类型

@@ -29,7 +29,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="services">服务集合</param>
-        public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services) => (T)services.FirstOrDefault(x => x.ServiceType == typeof(T))?.ImplementationInstance;
+        public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services)
+        {
+            var descriptor =
+                services.FirstOrDefault(x => x.ServiceType == typeof(T) && x.Lifetime == ServiceLifetime.Singleton);
+            if (descriptor?.ImplementationInstance != null)
+                return (T)descriptor.ImplementationInstance;
+            if (descriptor?.ImplementationFactory != null)
+                return (T)descriptor.ImplementationFactory.Invoke(null);
+            return default;
+        }
 
         /// <summary>
         /// 获取单例注册服务对象
@@ -84,9 +93,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static TServiceType GetOrAddSingletonInstance<TServiceType>(this IServiceCollection services,
             Func<TServiceType> factory) where TServiceType : class
         {
-            var item = (TServiceType)services
-                .FirstOrDefault(x => x.ServiceType == typeof(TServiceType) && x.Lifetime == ServiceLifetime.Singleton)
-                ?.ImplementationInstance;
+            var item = GetSingletonInstanceOrNull<TServiceType>(services);
             if (item == null)
             {
                 item = factory();

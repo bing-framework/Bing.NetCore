@@ -15,4 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Bing.Utils\Bing.Utils.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Bing\Date\Extensions\" />
+  </ItemGroup>
 </Project>

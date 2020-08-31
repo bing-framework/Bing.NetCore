@@ -24,7 +24,7 @@
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Permissions\Bing.Permissions.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Webs\Bing.Webs.csproj" />
+    <ProjectReference Include="..\..\..\..\utils\src\Bing.Utils.Http\Bing.Utils.Http.csproj" />
   </ItemGroup>
 
 </Project>

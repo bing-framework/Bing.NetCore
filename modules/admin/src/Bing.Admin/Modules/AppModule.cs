@@ -2,14 +2,14 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Extensions;
 using Bing.AspNetCore.Mvc.Filters;
-using Bing.Auditing;
 using Bing.Core.Modularity;
 using Bing.DependencyInjection;
+using Bing.Helpers;
 using Bing.Security.Claims;
-using Bing.Webs.Extensions;
-using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -71,7 +71,8 @@ namespace Bing.Admin.Modules
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseErrorLog();
-            app.UseStaticHttpContext();
+            // 初始化Http上下文访问器
+            Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
             app.UseMvc(routes =>
             {

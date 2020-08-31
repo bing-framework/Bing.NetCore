@@ -5,7 +5,6 @@ using Bing.Admin.Commons.Domain.Models;
 using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
-using Bing.Applications;
 
 namespace Bing.Admin.Service.Implements
 {

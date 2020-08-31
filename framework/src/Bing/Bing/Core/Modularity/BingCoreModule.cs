@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
-using Bing.Helpers;
 using Bing.Logging;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

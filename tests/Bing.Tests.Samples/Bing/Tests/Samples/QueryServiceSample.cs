@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
-using Bing.Applications;
-using Bing.Applications.Dtos;
+using Bing.Application.Dtos;
+using Bing.Application.Services;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
 
@@ -37,7 +37,7 @@ namespace Bing.Tests.Samples
     /// <summary>
     /// 查询服务样例
     /// </summary>
-    public class QueryServiceSample : QueryServiceBase<EntitySample, DtoSample, QueryParameterSample>
+    public class QueryServiceSample : QueryAppServiceBase<EntitySample, DtoSample, QueryParameterSample>
     {
         /// <summary>
         /// 初始化一个<see cref="QueryServiceSample"/>类型的实例

@@ -1,5 +1,5 @@
-﻿using Bing.Webs.Controllers;
-using Bing.Admin.Service.Abstractions.Commons;
+﻿using Bing.Admin.Service.Abstractions.Commons;
+using Bing.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis.Commons
 {

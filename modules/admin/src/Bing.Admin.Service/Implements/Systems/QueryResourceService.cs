@@ -1,5 +1,4 @@
-﻿using Bing.Applications;
-using Bing.Datas.Sql;
+﻿using Bing.Datas.Sql;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
 

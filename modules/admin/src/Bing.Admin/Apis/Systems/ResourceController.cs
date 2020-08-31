@@ -1,5 +1,5 @@
-﻿using Bing.Webs.Controllers;
-using Bing.Admin.Service.Abstractions.Systems;
+﻿using Bing.Admin.Service.Abstractions.Systems;
+using Bing.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis.Systems
 {

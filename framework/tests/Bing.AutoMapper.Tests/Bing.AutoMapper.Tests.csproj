@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
   </ItemGroup>

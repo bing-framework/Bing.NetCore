@@ -1,5 +1,4 @@
-﻿using Bing.Applications;
-
+﻿
 namespace Bing.Admin.Service.Abstractions.Commons
 {
     /// <summary>

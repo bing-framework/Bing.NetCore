@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Applications;
+using Bing.Application.Services;
 using Bing.Auditing;
 using Bing.Datas.Queries;
 using Bing.Domains.Repositories;
@@ -13,7 +13,7 @@ namespace Bing.Tests.Samples
     /// <summary>
     /// 增删改查服务样例
     /// </summary>
-    public interface ICrudServiceSample : ICrudService<DtoSample, QueryParameterSample>
+    public interface ICrudServiceSample : ICrudAppService<DtoSample, QueryParameterSample>
     {
     }
 
@@ -51,7 +51,7 @@ namespace Bing.Tests.Samples
     /// <summary>
     /// 增删改查服务样例
     /// </summary>
-    public class CrudServiceSample : CrudServiceBase<EntitySample, DtoSample, QueryParameterSample>, ICrudServiceSample
+    public class CrudServiceSample : CrudAppServiceBase<EntitySample, DtoSample, QueryParameterSample>, ICrudServiceSample
     {
         /// <summary>
         /// 初始化一个<see cref="CrudServiceSample"/>类型的实例
