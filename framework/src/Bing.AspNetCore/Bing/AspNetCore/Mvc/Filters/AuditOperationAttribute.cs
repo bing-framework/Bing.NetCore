@@ -59,9 +59,9 @@ namespace Bing.AspNetCore.Mvc.Filters
             if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
                 context.HttpContext.User.Identity is ClaimsIdentity identity)
             {
-                _auditOperationEntry.UserId = identity.GetUserId();
-                _auditOperationEntry.UserName = identity.GetUserName();
-                _auditOperationEntry.NickName = identity.GetNickName();
+                //_auditOperationEntry.UserId = identity.GetUserId();
+                //_auditOperationEntry.UserName = identity.GetUserName();
+                //_auditOperationEntry.NickName = identity.GetNickName();
             }
             else
             {

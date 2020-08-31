@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Security.Claims;
-using IdentityModel;
 
 namespace Bing.Sessions
 {
@@ -52,7 +51,7 @@ namespace Bing.Sessions
         /// <param name="session">会话</param>
         public static string GetUserName(this ISession session)
         {
-            var result = session.FindClaimValue(JwtClaimTypes.Name);
+            var result = session.FindClaimValue("name");// JwtClaimTypes.Name
             return string.IsNullOrWhiteSpace(result)
                 ? session.FindClaimValue(System.Security.Claims.ClaimTypes.Name)
                 : result;

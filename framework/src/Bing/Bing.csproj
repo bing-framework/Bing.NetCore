@@ -19,7 +19,7 @@
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="2.1.0" />
     <PackageReference Include="AspectCore.Extensions.Configuration" Version="2.1.0" />
     <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.1.0" />
-    <PackageReference Include="IdentityModel" Version="3.10.10" />
+    <!--<PackageReference Include="IdentityModel" Version="3.10.10" />-->
     <!--<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />-->
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />

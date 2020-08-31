@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="DotNetCore.CAP.MySql" Version="2.6.0" />
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="2.6.0" />
+    <PackageReference Include="IdentityModel" Version="3.10.10" />
   </ItemGroup>
 
   <ItemGroup>

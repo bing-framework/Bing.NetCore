@@ -1,5 +1,4 @@
-﻿using IdentityModel;
-
+﻿
 namespace Bing.Security.Claims
 {
     /// <summary>
@@ -10,17 +9,17 @@ namespace Bing.Security.Claims
         /// <summary>
         /// 姓名
         /// </summary>
-        public static string FullName { get; set; } = JwtClaimTypes.FamilyName;
+        public static string FullName { get; set; } = "family_name"; // IdentityModel.JwtClaimTypes.FamilyName
 
         /// <summary>
         /// 电子邮件
         /// </summary>
-        public static string Email { get; set; } = JwtClaimTypes.Email;
+        public static string Email { get; set; } = "email"; // IdentityModel.JwtClaimTypes.Email
 
         /// <summary>
         /// 手机号
         /// </summary>
-        public static string Mobile { get; set; } = JwtClaimTypes.PhoneNumber;
+        public static string Mobile { get; set; } = "phone_number"; // IdentityModel.JwtClaimTypes.PhoneNumber
 
         /// <summary>
         /// 应用程序标识
@@ -55,7 +54,7 @@ namespace Bing.Security.Claims
         /// <summary>
         /// 角色标识列表
         /// </summary>
-        public static string RoleIds { get; set; } = JwtClaimTypes.Role;
+        public static string RoleIds { get; set; } = "role"; // IdentityModel.JwtClaimTypes.Role
 
         /// <summary>
         /// 角色名

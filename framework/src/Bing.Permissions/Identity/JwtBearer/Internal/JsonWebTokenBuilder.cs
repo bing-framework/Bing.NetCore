@@ -120,7 +120,8 @@ namespace Bing.Permissions.Identity.JwtBearer.Internal
         /// <param name="payload">负载列表</param>
         private string GetUserId(IDictionary<string, string> payload)
         {
-            var userId = payload.GetOrDefault(IdentityModel.JwtClaimTypes.Subject, string.Empty);
+            //var userId = payload.GetOrDefault(IdentityModel.JwtClaimTypes.Subject, string.Empty);
+            var userId = payload.GetOrDefault("sub", string.Empty);
             if (userId.IsEmpty())
                 userId = payload.GetOrDefault(System.Security.Claims.ClaimTypes.NameIdentifier, string.Empty);
             return userId;
