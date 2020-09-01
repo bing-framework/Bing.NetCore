@@ -155,6 +155,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Service.Shared",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.Mvc.UI", "framework\src\Bing.AspNetCore.Mvc.UI\Bing.AspNetCore.Mvc.UI.csproj", "{72DFB0D0-9D28-4788-9FD2-123E3C7E5032}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Data", "framework\src\Bing.Data\Bing.Data.csproj", "{3E497AE7-0721-4E65-B953-05DF15F206A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -369,6 +371,10 @@ Global
 		{72DFB0D0-9D28-4788-9FD2-123E3C7E5032}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72DFB0D0-9D28-4788-9FD2-123E3C7E5032}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72DFB0D0-9D28-4788-9FD2-123E3C7E5032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E497AE7-0721-4E65-B953-05DF15F206A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E497AE7-0721-4E65-B953-05DF15F206A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E497AE7-0721-4E65-B953-05DF15F206A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E497AE7-0721-4E65-B953-05DF15F206A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -436,6 +442,7 @@ Global
 		{BC0DA397-CCD6-407C-B675-87E5B702318A} = {BDBABE46-FAAE-459D-BC78-B5BA6503EBBA}
 		{08534D50-E0D2-47C6-8DCD-4F0A4ADD7AF7} = {24481196-FEE8-4AD7-9FA6-5C9655A80C18}
 		{72DFB0D0-9D28-4788-9FD2-123E3C7E5032} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
+		{3E497AE7-0721-4E65-B953-05DF15F206A6} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

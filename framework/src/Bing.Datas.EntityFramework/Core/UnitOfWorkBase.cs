@@ -467,15 +467,15 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取用户标识
         /// </summary>
-        protected virtual string GetUserId() => GetSession().UserId;
+        protected virtual string GetUserId() => CurrentUser.UserId;
 
         /// <summary>
         /// 获取用户名称
         /// </summary>
         protected virtual string GetUserName()
         {
-            var name = GetSession().GetFullName();
-            return string.IsNullOrEmpty(name) ? GetSession().GetUserName() : name;
+            var name = CurrentUser.GetFullName();
+            return string.IsNullOrEmpty(name) ? CurrentUser.GetUserName() : name;
         }
 
         /// <summary>
