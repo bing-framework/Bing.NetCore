@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Bing.Datas.Test.Integration.Samples
+namespace Bing.Data.Test.Integration.Samples
 {
     /// <summary>
     /// 测试样例3

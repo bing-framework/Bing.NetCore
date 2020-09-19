@@ -12,8 +12,7 @@ using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Application.Services;
-using Bing.Datas.Queries;
-using Bing.Domains.Repositories;
+using Bing.Data.Queries;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

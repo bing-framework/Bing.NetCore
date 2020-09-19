@@ -1,4 +1,4 @@
-﻿using Bing.Domains.Entities;
+﻿using Bing.Domain.Entities;
 
 namespace Bing.Tests.Samples
 {

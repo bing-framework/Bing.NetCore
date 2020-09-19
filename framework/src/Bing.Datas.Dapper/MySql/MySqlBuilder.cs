@@ -1,7 +1,7 @@
-﻿using Bing.Datas.Sql;
-using Bing.Datas.Sql.Builders;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Sql.Matedatas;
+﻿using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Matedatas;
 
 namespace Bing.Datas.Dapper.MySql
 {

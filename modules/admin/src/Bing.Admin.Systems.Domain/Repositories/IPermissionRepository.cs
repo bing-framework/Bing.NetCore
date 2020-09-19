@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Domains.Repositories;
+using Bing.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Models;
 
 namespace Bing.Admin.Systems.Domain.Repositories

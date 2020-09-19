@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Application.Dtos;
-using Bing.Datas.Queries.Trees;
+using Bing.Data.Queries;
 
 namespace Bing.Application.Services
 {

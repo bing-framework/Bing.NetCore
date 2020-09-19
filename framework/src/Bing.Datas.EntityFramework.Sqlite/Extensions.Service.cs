@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Datas.Configs;
+using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Uow;

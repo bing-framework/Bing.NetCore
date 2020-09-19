@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Domains.Entities.Trees;
+using Bing.Domain.Entities;
 
 namespace Bing.Tests.Samples
 {

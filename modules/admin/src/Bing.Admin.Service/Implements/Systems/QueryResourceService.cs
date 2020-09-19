@@ -1,6 +1,6 @@
-﻿using Bing.Datas.Sql;
-using Bing.Admin.Systems.Domain.Repositories;
+﻿using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
+using Bing.Data;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

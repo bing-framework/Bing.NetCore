@@ -8,12 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.Aspects;
 using Bing.Auditing;
-using Bing.Datas.Configs;
+using Bing.Data;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Matedatas;
+using Bing.Data.Transaction;
 using Bing.Datas.EntityFramework.Logs;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Matedatas;
-using Bing.Datas.Transactions;
-using Bing.Domains.Entities;
+using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
@@ -323,95 +323,6 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         #endregion
-
-        /// <summary>
-        /// 获取审计实体集合
-        /// </summary>
-        public IEnumerable<AuditEntityEntry> GetAuditEntities()
-        {
-            var entities = new List<AuditEntityEntry>();
-            foreach (var entry in ChangeTracker.Entries())
-            {
-                AuditEntityEntry auditEntity = null;
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        auditEntity = GetAuditEntityEntry(entry, OperationType.Insert);
-                        break;
-                    case EntityState.Modified:
-                        auditEntity = GetAuditEntityEntry(entry, OperationType.Update);
-                        break;
-                    case EntityState.Deleted:
-                        auditEntity = GetAuditEntityEntry(entry, OperationType.Delete);
-                        break;
-                }
-                if(auditEntity!=null)
-                    entities.Add(auditEntity);
-            }
-            return entities;
-        }
-
-        protected virtual AuditEntityEntry GetAuditEntityEntry(EntityEntry entry, OperationType operationType)
-        {
-            var type = entry.Entity.GetType();
-            var typeName = type.FullName;
-            var entityId = string.Empty;
-            var properties = new List<AuditPropertyEntry>();
-            foreach (var property in entry.CurrentValues.Properties)
-            {
-                if(property.IsConcurrencyToken)
-                    continue;
-                var propertyName = property.Name;
-                var propertyEntry = entry.Property(property.Name);
-                if (property.IsPrimaryKey())
-                {
-                    entityId = entry.State == EntityState.Deleted
-                        ? propertyEntry.OriginalValue?.ToString()
-                        : propertyEntry.CurrentValue?.ToString();
-                }
-
-                var propertyType = property.ClrType.ToString();
-                var originalValue = string.Empty;
-                var newValue = string.Empty;
-                if (entry.State == EntityState.Added)
-                {
-                    newValue = propertyEntry.CurrentValue?.ToString();
-                }
-                else if (entry.State == EntityState.Deleted)
-                {
-                    originalValue = propertyEntry.OriginalValue?.ToString();
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    var currentValue = propertyEntry.CurrentValue?.ToString();
-                    originalValue = propertyEntry.OriginalValue?.ToString();
-                    if(currentValue==originalValue)
-                        continue;
-                    newValue = currentValue;
-                }
-
-                if (string.IsNullOrWhiteSpace(originalValue))
-                {
-                    // 原值为空，新值不为空则记录
-                    if (!string.IsNullOrWhiteSpace(newValue))
-                        properties.Add(new AuditPropertyEntry(propertyName, propertyType, originalValue, newValue));
-                }
-                else
-                {
-                    if (!originalValue.Equals(newValue))
-                        properties.Add(new AuditPropertyEntry(propertyName, propertyType, originalValue, newValue));
-                }
-            }
-
-            var auditedEntity=new AuditEntityEntry
-            {
-                TypeName = typeName,
-                EntityId = entityId,
-                OperationType = operationType
-            };
-            auditedEntity.AddProperties(properties);
-            return auditedEntity;
-        }
 
         #region SaveChanges(保存更改)
 

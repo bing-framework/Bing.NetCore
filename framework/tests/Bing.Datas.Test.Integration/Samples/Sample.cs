@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Bing.Logs;
 
-namespace Bing.Datas.Test.Integration.Samples
+namespace Bing.Data.Test.Integration.Samples
 {
     public interface ISample
     {

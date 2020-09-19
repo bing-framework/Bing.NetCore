@@ -8,9 +8,9 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
 using Bing.Biz.Enums;
+using Bing.Data;
 using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Tenants;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Commons.Domain.Models
 {
@@ -18,7 +18,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 用户信息
     /// </summary>
     [Display(Name = "用户信息")]
-    public partial class UserInfo : AggregateRoot<UserInfo>,IDelete,IAuditedWithNameObject
+    public partial class UserInfo : AggregateRoot<UserInfo>,ISoftDelete,IAuditedWithNameObject
     {
         /// <summary>
         /// 初始化一个<see cref="UserInfo"/>类型的实例

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Admin.Commons.Domain.Models;
 using Bing.Admin.Commons.Domain.Repositories;
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Parameters.Extensions;

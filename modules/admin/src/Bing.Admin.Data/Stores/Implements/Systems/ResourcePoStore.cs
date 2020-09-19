@@ -6,8 +6,8 @@ using Bing.Admin.Data.Pos.Systems;
 using Bing.Admin.Data.Stores.Abstractions.Systems;
 using Bing.Admin.Domain.Shared.Enums;
 using Bing.Admin.Systems.Domain.Models;
+using Bing.Data.Sql;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Datas.Sql;
 
 namespace Bing.Admin.Data.Stores.Implements.Systems
 {

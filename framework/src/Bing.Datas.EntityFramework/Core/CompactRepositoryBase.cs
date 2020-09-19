@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Bing.Datas.Stores;
-using Bing.Domains.Entities;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Domain.Entities;
+using Bing.Domain.Repositories;
 
 namespace Bing.Datas.EntityFramework.Core
 {

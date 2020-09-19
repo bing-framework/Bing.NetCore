@@ -1,5 +1,5 @@
-﻿using Bing.Datas.Queries;
-using Bing.Datas.Queries.Criterias;
+﻿using Bing.Data.Queries;
+using Bing.Data.Queries.Criterias;
 using Bing.Tests.Samples;
 using Xunit;
 

@@ -1,4 +1,4 @@
-﻿using Bing.Domains.Repositories;
+﻿using Bing.Data;
 using Xunit;
 
 namespace Bing.Tests.Domains.Repositories

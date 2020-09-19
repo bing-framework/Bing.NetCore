@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Bing.Datas.Attributes;
+using Bing.Data.Attributes;
 using Bing.Datas.EntityFramework.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;

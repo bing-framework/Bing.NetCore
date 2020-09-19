@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Bing.Datas.Queries;
-using Bing.Datas.Stores;
-using Bing.Domains.Entities;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Queries;
+using Bing.Domain.Entities;
 using Bing.Helpers;
 using Bing.Mapping;
 
@@ -214,10 +213,10 @@ namespace Bing.Application.Services
             var queryable = Filter(query);
             queryable = Filter(queryable, parameter);
             var pager = query.GetPager();
-            Bing.Datas.Queries.Internal.Helper.InitOrder(queryable, pager);
+            Bing.Data.Queries.Internal.Helper.InitOrder(queryable, pager);
             if (pager.TotalCount <= 0)
                 pager.TotalCount = await AsyncExecuter.CountAsync(queryable);
-            var orderedQueryable = Bing.Datas.Queries.Internal.Helper.GetOrderedQueryable(queryable, pager);
+            var orderedQueryable = Bing.Data.Queries.Internal.Helper.GetOrderedQueryable(queryable, pager);
             if (orderedQueryable == null)
                 throw new ArgumentException("必须设置排序字段");
             queryable = orderedQueryable.Skip(pager.GetSkipCount()).Take(pager.PageSize);

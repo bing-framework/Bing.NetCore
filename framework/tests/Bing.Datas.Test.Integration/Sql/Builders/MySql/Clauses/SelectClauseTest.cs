@@ -1,9 +1,9 @@
 ﻿using Bing.Datas.Dapper.MySql;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
 using Xunit;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.MySql.Clauses
+namespace Bing.Data.Test.Integration.Sql.Builders.MySql.Clauses
 {
     /// <summary>
     /// Select子句测试

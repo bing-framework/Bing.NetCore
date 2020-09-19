@@ -9,11 +9,6 @@
     <PackageId>Bing.Core</PackageId>
     <RootNamespace />
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="Domains\Entities\Caching\**" />
-    <EmbeddedResource Remove="Domains\Entities\Caching\**" />
-    <None Remove="Domains\Entities\Caching\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="2.1.0" />

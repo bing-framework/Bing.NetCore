@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Datas.Persistence;
+using Bing.Data.Persistence;
 
 namespace Bing.Tests.Samples
 {

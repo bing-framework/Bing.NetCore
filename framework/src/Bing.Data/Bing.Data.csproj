@@ -5,9 +5,7 @@
     <RootNamespace />
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Bing\Data\" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\..\..\utils\src\Bing.Utils\Bing.Utils.csproj" />
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
 

@@ -1,14 +1,14 @@
 ﻿using System;
 using Bing.Auditing;
-using Bing.Datas.Persistence;
-using Bing.Domains.Entities;
+using Bing.Data;
+using Bing.Data.Persistence;
 
 namespace Bing.Admin.Data.Pos.Systems
 {
     /// <summary>
     /// 应用程序持久化对象
     /// </summary>
-    public class ApplicationPo : PersistentObjectBase<Guid>, IDelete, IAuditedWithNameObject
+    public class ApplicationPo : PersistentObjectBase<Guid>, ISoftDelete, IAuditedWithNameObject
     {
         /// <summary>
         /// 应用程序编码

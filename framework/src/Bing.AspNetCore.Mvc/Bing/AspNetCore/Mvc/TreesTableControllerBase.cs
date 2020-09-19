@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Application.Dtos;
 using Bing.Application.Services;
-using Bing.Datas.Queries.Trees;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Queries;
 using Bing.Trees;
 using Microsoft.AspNetCore.Mvc;
 

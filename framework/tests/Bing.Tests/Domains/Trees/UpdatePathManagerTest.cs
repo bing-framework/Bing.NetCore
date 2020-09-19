@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Domains.Entities.Trees;
+using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Properties;

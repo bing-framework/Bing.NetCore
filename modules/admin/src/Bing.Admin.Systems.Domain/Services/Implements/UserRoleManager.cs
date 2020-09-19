@@ -1,4 +1,4 @@
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
 

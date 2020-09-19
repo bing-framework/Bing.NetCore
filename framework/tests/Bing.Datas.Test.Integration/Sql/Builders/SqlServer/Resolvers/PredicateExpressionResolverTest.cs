@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql.Builders;
-using Bing.Datas.Sql.Builders.Conditions;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Test.Integration.Samples;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Conditions;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Test.Integration.Samples;
 using Xunit;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer.Resolvers
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Resolvers
 {
     /// <summary>
     /// 谓词表达式解析器测试

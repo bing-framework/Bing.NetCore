@@ -1,6 +1,6 @@
 ﻿using System;
-using Bing.Domains.Entities;
-using Bing.Domains.Repositories;
+using Bing.Domain.Entities;
+using Bing.Domain.Repositories;
 using Bing.Uow;
 
 namespace Bing.Datas.EntityFramework.Core

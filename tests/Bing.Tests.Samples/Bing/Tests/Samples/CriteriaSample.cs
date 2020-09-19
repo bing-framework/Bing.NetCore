@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Bing.Domains.Repositories;
+using Bing.Data.Queries;
 
 namespace Bing.Tests.Samples
 {

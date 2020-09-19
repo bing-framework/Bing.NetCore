@@ -15,10 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\components\src\Bing.Biz\Bing.Biz.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Biz\Bing.Biz.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />

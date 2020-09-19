@@ -1,11 +1,11 @@
 ﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Matedatas;
-using Bing.Datas.Test.Integration.Samples;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Matedatas;
+using Bing.Data.Test.Integration.Samples;
 using Xunit;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
 {
     /// <summary>
     /// Sql Server Sql生成器测试 - Select子句

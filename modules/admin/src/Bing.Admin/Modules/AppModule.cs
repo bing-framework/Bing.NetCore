@@ -70,7 +70,7 @@ namespace Bing.Admin.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            app.UseErrorLog();
+            app.UseBingExceptionHandling();
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();

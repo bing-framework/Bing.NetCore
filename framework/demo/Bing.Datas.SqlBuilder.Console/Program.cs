@@ -1,7 +1,7 @@
 ﻿using System;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Matedatas;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Matedatas;
 using Bing.Datas.SqlBuilder.Models;
 
 // ReSharper disable once CheckNamespace

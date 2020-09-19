@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Queries;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Conditions;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Test.Integration.Samples;
-using Bing.Datas.Test.Integration.Sql.Builders.Samples;
-using Bing.Datas.Test.Integration.XUnitHelpers;
+using Bing.Data.Queries;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Conditions;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Test.Integration.Sql.Builders.Samples;
+using Bing.Data.Test.Integration.XUnitHelpers;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer.Clauses
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses
 {
     /// <summary>
     /// Where子句测试

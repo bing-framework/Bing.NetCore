@@ -1,4 +1,4 @@
-﻿namespace Bing.Datas.Test.Integration.Samples
+﻿namespace Bing.Data.Test.Integration.Samples
 {
     public class Sample4
     {

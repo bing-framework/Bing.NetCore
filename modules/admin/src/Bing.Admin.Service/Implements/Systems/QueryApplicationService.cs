@@ -9,8 +9,7 @@ using Bing.Admin.Service.Shared.Dtos.Systems;
 using Bing.Admin.Service.Shared.Dtos.Systems.Extensions;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Application.Services;
-using Bing.Datas.Queries;
-using Bing.Domains.Repositories;
+using Bing.Data.Queries;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

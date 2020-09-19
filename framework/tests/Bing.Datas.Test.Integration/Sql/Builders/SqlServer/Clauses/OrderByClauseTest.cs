@@ -1,12 +1,12 @@
 ﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Test.Integration.Samples;
-using Bing.Datas.Test.Integration.Sql.Builders.Samples;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Test.Integration.Sql.Builders.Samples;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer.Clauses
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses
 {
     /// <summary>
     /// 排序子句测试

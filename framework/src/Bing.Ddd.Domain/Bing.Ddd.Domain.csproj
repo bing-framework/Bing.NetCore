@@ -5,11 +5,11 @@
     <RootNamespace />
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Bing.Auditing\Bing.Auditing.csproj" />
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Bing\Auditing\" />
-    <Folder Include="Bing\Domain\Entities\" />
   </ItemGroup>
 
 </Project>

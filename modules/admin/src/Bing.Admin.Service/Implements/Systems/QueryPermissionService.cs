@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Datas.Sql;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
+using Bing.Data;
 using Bing.Extensions;
 
 namespace Bing.Admin.Service.Implements.Systems

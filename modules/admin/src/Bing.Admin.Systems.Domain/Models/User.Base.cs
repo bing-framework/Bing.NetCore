@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Bing.Auditing;
-using Bing.Domains.Entities;
+using Bing.Data;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models
 {
@@ -11,7 +12,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 用户
     /// </summary>
     [Display(Name = "用户")]
-    public partial class User : Bing.Permissions.Identity.Models.UserBase<User, Guid>, IDelete,IAuditedWithNameObject
+    public partial class User : Bing.Permissions.Identity.Models.UserBase<User, Guid>, ISoftDelete,IAuditedWithNameObject
     {
         /// <summary>
         /// 初始化一个<see cref="User"/>类型的实例

@@ -1,4 +1,4 @@
-using Bing.Domains.Repositories;
+using Bing.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Models;
 
 namespace Bing.Admin.Systems.Domain.Repositories

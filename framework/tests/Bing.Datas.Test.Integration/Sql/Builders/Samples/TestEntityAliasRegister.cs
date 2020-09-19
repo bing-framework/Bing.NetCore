@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Datas.Sql.Builders;
-using Bing.Datas.Sql.Builders.Core;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
+namespace Bing.Data.Test.Integration.Sql.Builders.Samples
 {
     /// <summary>
     /// 实体别名注册器

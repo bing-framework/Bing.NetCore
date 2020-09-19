@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel;
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
-using Bing.Datas.Configs;
+using Bing.Data.Enums;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
-using Bing.Datas.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

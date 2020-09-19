@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AspectCore.DynamicProxy;
 using Xunit;
 
-namespace Bing.Datas.Test.Integration.XUnitHelpers
+namespace Bing.Data.Test.Integration.XUnitHelpers
 {
     /// <summary>
     /// 断言操作

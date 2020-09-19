@@ -1,10 +1,9 @@
-﻿using Bing.Datas.Sql.Builders.Conditions;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Utils;
+﻿using Bing.Data.Sql.Builders.Conditions;
+using Bing.Data.Sql.Builders.Core;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Base
+namespace Bing.Data.Test.Integration.Sql.Builders.Base
 {
     /// <summary>
     /// 表连接项测试

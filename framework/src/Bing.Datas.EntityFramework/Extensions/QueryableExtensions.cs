@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Datas.Queries.Internal;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Queries.Internal;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Extensions

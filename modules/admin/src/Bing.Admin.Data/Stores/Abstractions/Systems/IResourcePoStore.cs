@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Admin.Data.Pos.Systems;
-using Bing.Datas.Stores;
+using Bing.Data;
 
 namespace Bing.Admin.Data.Stores.Abstractions.Systems
 {

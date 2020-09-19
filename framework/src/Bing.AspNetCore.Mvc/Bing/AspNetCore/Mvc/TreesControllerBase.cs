@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Application.Dtos;
 using Bing.Application.Services;
-using Bing.Datas.Queries.Trees;
+using Bing.Data.Queries;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Trees;

@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bing.Application.Services;
-using Bing.Auditing;
-using Bing.Datas.Queries;
-using Bing.Domains.Repositories;
+using Bing.Data.Queries;
 using Bing.Extensions;
 using Bing.Mapping;
 using Bing.Uow;
@@ -38,14 +35,6 @@ namespace Bing.Tests.Samples
         /// 提交，返回影响的行数
         /// </summary>
         public Task<int> CommitAsync() => Task.FromResult(1);
-
-        /// <summary>
-        /// 获取审计实体集合
-        /// </summary>
-        public IEnumerable<AuditEntityEntry> GetAuditEntities()
-        {
-            throw new System.NotImplementedException();
-        }
     }
 
     /// <summary>

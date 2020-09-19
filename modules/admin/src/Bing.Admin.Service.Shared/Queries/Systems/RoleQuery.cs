@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Bing.Datas.Queries.Trees;
+using Bing.Data.Queries;
 
 namespace Bing.Admin.Service.Shared.Queries.Systems
 {

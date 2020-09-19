@@ -1,11 +1,11 @@
 ﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Sql.Matedatas;
-using Bing.Datas.Test.Integration.Sql.Builders.Samples;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Matedatas;
+using Bing.Data.Test.Integration.Sql.Builders.Samples;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Base
+namespace Bing.Data.Test.Integration.Sql.Builders.Base
 {
     /// <summary>
     /// 名称项测试

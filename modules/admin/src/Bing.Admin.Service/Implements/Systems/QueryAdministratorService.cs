@@ -4,16 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Admin.Commons.Domain.Models;
-using Bing.Datas.Sql;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
 using Bing.Admin.Systems.Domain.Models;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Sql;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Users;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

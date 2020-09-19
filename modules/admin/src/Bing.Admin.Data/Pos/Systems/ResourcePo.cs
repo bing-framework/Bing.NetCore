@@ -1,15 +1,15 @@
 ﻿using System;
 using Bing.Admin.Domain.Shared.Enums;
 using Bing.Auditing;
-using Bing.Datas.Persistence;
-using Bing.Domains.Entities;
+using Bing.Data;
+using Bing.Data.Persistence;
 
 namespace Bing.Admin.Data.Pos.Systems
 {
     /// <summary>
     /// 资源持久化对象
     /// </summary>
-    public class ResourcePo : TreePersistentObjectBase, IDelete, IAuditedWithNameObject
+    public class ResourcePo : TreePersistentObjectBase, ISoftDelete, IAuditedWithNameObject
     {
         /// <summary>
         /// 应用程序标识

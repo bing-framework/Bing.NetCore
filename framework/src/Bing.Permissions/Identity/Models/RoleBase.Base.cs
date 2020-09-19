@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Bing.Auditing;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Trees;
+using Bing.Data;
+using Bing.Domain.Entities;
 
 namespace Bing.Permissions.Identity.Models
 {
@@ -13,7 +13,7 @@ namespace Bing.Permissions.Identity.Models
     /// <typeparam name="TKey">角色标识类型</typeparam>
     /// <typeparam name="TParentId">角色父标识类型</typeparam>
     [Display(Name = "角色")]
-    public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<TRole, TKey, TParentId>, IDelete, IAuditedObject where TRole : RoleBase<TRole, TKey, TParentId>
+    public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<TRole, TKey, TParentId>, ISoftDelete, IAuditedObject where TRole : RoleBase<TRole, TKey, TParentId>
     {
         #region 属性
 

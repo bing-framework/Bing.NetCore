@@ -6,7 +6,7 @@ using Bing.Admin.Domain.Shared;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
-using Bing.Datas.Seed;
+using Bing.Data;
 using Bing.Uow;
 using Microsoft.Extensions.DependencyInjection;
 

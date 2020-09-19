@@ -1,4 +1,4 @@
-﻿using Bing.Domains.Repositories;
+﻿using Bing.Domain.Repositories;
 using Bing.Permissions.Identity.Models;
 
 namespace Bing.Permissions.Identity.Repositories

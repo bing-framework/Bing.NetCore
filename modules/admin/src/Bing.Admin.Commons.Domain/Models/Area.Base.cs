@@ -1,16 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Bing;
-using Bing.Utils;
-using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Auditing;
-using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Trees;
-using Bing.Domains.Entities.Tenants;
+using Bing.Data;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Commons.Domain.Models
 {
@@ -18,7 +10,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 地区
     /// </summary>
     [Display(Name = "地区")]
-    public partial class Area : TreeEntityBase<Area>,IDelete,IAuditedWithNameObject
+    public partial class Area : TreeEntityBase<Area>,ISoftDelete,IAuditedWithNameObject
     {
         /// <summary>
         /// 初始化一个<see cref="Area"/>类型的实例

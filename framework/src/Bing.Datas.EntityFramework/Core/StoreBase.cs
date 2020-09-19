@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Bing.Datas.Stores;
-using Bing.Domains.Entities;
+using Bing.Data;
+using Bing.Domain.Entities;
 using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
@@ -169,7 +169,7 @@ namespace Bing.Datas.EntityFramework.Core
         {
             if (entity == null)
                 return;
-            if (entity is IDelete model)
+            if (entity is ISoftDelete model)
             {
                 model.IsDeleted = true;
                 return;
@@ -211,9 +211,9 @@ namespace Bing.Datas.EntityFramework.Core
                 return;
             if (!list.Any())
                 return;
-            if (list[0] is IDelete)
+            if (list[0] is ISoftDelete)
             {
-                foreach (var entity in list.Select(t => (IDelete)t))
+                foreach (var entity in list.Select(t => (ISoftDelete)t))
                     entity.IsDeleted = true;
                 return;
             }

@@ -1,4 +1,4 @@
-﻿using Bing.Datas.Sql.Builders.Core;
+﻿using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Datas.Dapper.Sqlite
 {

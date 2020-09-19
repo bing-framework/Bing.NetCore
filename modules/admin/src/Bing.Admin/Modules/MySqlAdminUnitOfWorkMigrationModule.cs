@@ -4,8 +4,8 @@ using Bing.Admin.Data.Seed;
 using Bing.Admin.Data.UnitOfWorks.MySql;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
+using Bing.Data;
 using Bing.Datas.EntityFramework;
-using Bing.Datas.Seed;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules

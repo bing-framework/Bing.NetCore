@@ -1,6 +1,6 @@
 ﻿using System;
 using Bing.Biz.Enums;
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 
 namespace Bing.Admin.Systems.Domain.Parameters
 {

@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Datas.Queries;
+using Bing.Data.Queries;
 
 namespace Bing.Admin.Service.Shared.Queries.Systems
 {

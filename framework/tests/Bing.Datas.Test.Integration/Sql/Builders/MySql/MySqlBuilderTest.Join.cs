@@ -1,11 +1,11 @@
-﻿using Bing.Datas.Sql;
-using Bing.Datas.Test.Integration.Samples;
+﻿using Bing.Data.Sql;
+using Bing.Data.Test.Integration.Samples;
 using Bing.Utils;
 using Bing.Utils.Helpers;
 using Xunit;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.MySql
+namespace Bing.Data.Test.Integration.Sql.Builders.MySql
 {
     /// <summary>
     /// MySql Sql生成器测试 - Join子句

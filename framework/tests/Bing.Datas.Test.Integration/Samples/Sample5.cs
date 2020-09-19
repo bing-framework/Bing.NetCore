@@ -1,8 +1,8 @@
 ﻿using Bing.Domains.Entities;
 
-namespace Bing.Datas.Test.Integration.Samples
+namespace Bing.Data.Test.Integration.Samples
 {
-    public class Sample5 : Sample, IDelete
+    public class Sample5 : Sample, ISoftDelete
     {
     }
 }

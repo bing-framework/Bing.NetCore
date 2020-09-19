@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Bing.Auditing;
-using Bing.Domains.Entities;
+using Bing.Data;
+using Bing.Domain.Entities;
 
 namespace Bing.Permissions.Identity.Models
 {
@@ -11,7 +12,7 @@ namespace Bing.Permissions.Identity.Models
     /// <typeparam name="TApplication">应用程序类型</typeparam>
     /// <typeparam name="TKey">应用程序标识类型</typeparam>
     [Display(Name = "应用程序")]
-    public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoot<TApplication, TKey>, IDelete, IAuditedObject
+    public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoot<TApplication, TKey>, ISoftDelete, IAuditedObject
         where TApplication : ApplicationBase<TApplication, TKey>
     {
         #region 属性

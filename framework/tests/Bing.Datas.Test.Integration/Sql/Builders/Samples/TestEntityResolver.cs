@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Bing.Datas.Sql.Builders;
-using Bing.Datas.Test.Integration.Samples;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Test.Integration.Samples;
 using Bing.Expressions;
 using Bing.Extensions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
+namespace Bing.Data.Test.Integration.Sql.Builders.Samples
 {
     /// <summary>
     /// 实体解析器

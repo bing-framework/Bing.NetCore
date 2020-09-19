@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Application.Dtos;
-using Bing.Datas.Queries.Trees;
-using Bing.Datas.Stores;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Trees;
+using Bing.Data;
+using Bing.Data.Queries;
+using Bing.Data.Queries.Criterias;
+using Bing.Domain.Entities;
 using Bing.Helpers;
+using Bing.Trees;
 using Bing.Uow;
 
 namespace Bing.Application.Services

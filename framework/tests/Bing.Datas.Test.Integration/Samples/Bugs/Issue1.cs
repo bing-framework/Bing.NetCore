@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Bing.Auditing;
-using Bing.Domains.Entities;
+using Bing.Domain.Entities;
 
-namespace Bing.Datas.Test.Integration.Samples.Bugs
+namespace Bing.Data.Test.Integration.Samples.Bugs
 {
-    public class Issue1 : AggregateRoot<Issue1>, IDelete, IAuditedObject
+    public class Issue1 : AggregateRoot<Issue1>, ISoftDelete, IAuditedObject
     {
         /// <summary>
         /// 初始化一个<see cref="Issue1"/>类型的实例

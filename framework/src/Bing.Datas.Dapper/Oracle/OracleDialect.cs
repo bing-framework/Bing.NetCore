@@ -1,4 +1,4 @@
-﻿using Bing.Datas.Sql.Builders.Core;
+﻿using Bing.Data.Sql.Builders.Core;
 using Bing.Extensions;
 using Bing.Helpers;
 

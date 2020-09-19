@@ -1,8 +1,8 @@
-﻿using Bing.Datas.Sql.Builders.Core;
+﻿using Bing.Data.Sql.Builders.Core;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Base
+namespace Bing.Data.Test.Integration.Sql.Builders.Base
 {
     /// <summary>
     /// 列集合测试

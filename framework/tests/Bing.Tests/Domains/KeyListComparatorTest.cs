@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Domains.Entities;
+using Bing.Domain.Entities;
 using Bing.Tests.XUnitHelpers;
 using Xunit;
 

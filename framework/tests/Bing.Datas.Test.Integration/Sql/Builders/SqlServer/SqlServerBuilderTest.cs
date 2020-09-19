@@ -1,17 +1,17 @@
 ﻿using System;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Queries;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Builders.Filters;
-using Bing.Datas.Test.Integration.Samples;
-using Bing.Datas.Test.Integration.XUnitHelpers;
+using Bing.Data.Queries;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Builders.Filters;
+using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Test.Integration.XUnitHelpers;
 using Bing.Properties;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
 {
     /// <summary>
     /// Sql Server Sql生成器测试

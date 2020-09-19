@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Bing.Datas.Transactions;
+using Bing.Data.Transaction;
 using Bing.Events.Messages;
 using Bing.Logs;
 using Bing.Utils.Json;

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Bing.Application.Dtos;
 using Bing.Application.Services;
-using Bing.Datas.Queries;
+using Bing.Data.Queries;
 using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc;
 

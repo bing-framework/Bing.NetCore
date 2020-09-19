@@ -1,5 +1,5 @@
 ﻿using Bing.Datas.EntityFramework.Core;
-using Bing.Domains.Entities;
+using Bing.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Bing.Datas.EntityFramework.MySql

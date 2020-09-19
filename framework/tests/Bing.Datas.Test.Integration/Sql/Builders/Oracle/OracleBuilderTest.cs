@@ -1,13 +1,13 @@
 ﻿using Bing.Datas.Dapper.Oracle;
-using Bing.Datas.Sql;
-using Bing.Datas.Test.Integration.Samples;
+using Bing.Data.Sql;
+using Bing.Data.Test.Integration.Samples;
 using Bing.Utils;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Oracle
+namespace Bing.Data.Test.Integration.Sql.Builders.Oracle
 {
     /// <summary>
     /// Oracle Sql生成器测试

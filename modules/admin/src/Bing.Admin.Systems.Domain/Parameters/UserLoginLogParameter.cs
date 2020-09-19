@@ -1,5 +1,5 @@
 ﻿using System;
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 
 namespace Bing.Admin.Systems.Domain.Parameters
 {

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Bing.Datas.SqlBuilder.Models
 {
     /// <summary>

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Executor;
-using Bing.Datas.Transactions;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Executor;
+using Bing.Data.Transaction;
 using Dapper;
 
 namespace Bing.Datas.Dapper

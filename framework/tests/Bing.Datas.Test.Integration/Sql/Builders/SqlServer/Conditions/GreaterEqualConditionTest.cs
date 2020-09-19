@@ -1,8 +1,8 @@
-﻿using Bing.Datas.Sql.Builders.Conditions;
+﻿using Bing.Data.Sql.Builders.Conditions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer.Conditions
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Conditions
 {
     /// <summary>
     /// Sql大于等于查询条件测试

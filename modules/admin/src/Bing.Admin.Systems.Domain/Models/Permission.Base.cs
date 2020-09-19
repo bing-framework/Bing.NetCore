@@ -7,9 +7,9 @@ using Bing.Utils;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
+using Bing.Data;
 using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Tenants;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models
 {
@@ -17,7 +17,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 权限
     /// </summary>
     [Display(Name = "权限")]
-    public partial class Permission : AggregateRoot<Permission>,IDelete,IAuditedWithNameObject
+    public partial class Permission : AggregateRoot<Permission>,ISoftDelete,IAuditedWithNameObject
     {
         /// <summary>
         /// 初始化一个<see cref="Permission"/>类型的实例

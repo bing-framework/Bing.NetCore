@@ -1,4 +1,4 @@
-﻿using Bing.Datas.Queries;
+﻿using Bing.Data.Queries;
 using Xunit;
 
 namespace Bing.Tests.Datas.Queries

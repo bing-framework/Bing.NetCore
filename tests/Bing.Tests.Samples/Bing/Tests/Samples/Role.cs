@@ -1,6 +1,6 @@
 ﻿using System;
-using Bing.Domains.Entities.Trees;
-using Bing.Domains.Repositories;
+using Bing.Domain.Entities;
+using Bing.Domain.Repositories;
 
 namespace Bing.Tests.Samples
 {

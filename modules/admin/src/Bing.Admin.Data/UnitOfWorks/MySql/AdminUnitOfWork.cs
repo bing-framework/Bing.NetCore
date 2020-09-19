@@ -2,7 +2,7 @@
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using Bing.Datas.Transactions;
+using Bing.Data.Transaction;
 using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

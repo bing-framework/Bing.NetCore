@@ -3,8 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Bing.Application.Dtos;
 using Bing.Application.Services;
-using Bing.Datas.Queries;
-using Bing.Domains.Repositories;
+using Bing.Data.Queries;
 
 namespace Bing.Tests.Samples
 {

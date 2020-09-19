@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 
 namespace Bing.Admin.Systems.Domain.Services.Abstractions
 {

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Datas.Sql;
-using Bing.Domains.Repositories;
+using Bing.Data;
 using Dapper;
 
 namespace Bing.Datas.Dapper

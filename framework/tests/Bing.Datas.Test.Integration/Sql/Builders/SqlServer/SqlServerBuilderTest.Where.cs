@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Builders.Conditions;
-using Bing.Datas.Test.Integration.Samples;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Builders.Conditions;
+using Bing.Data.Test.Integration.Samples;
 using Bing.Logs;
 using Bing.Utils;
 using Bing.Utils.Helpers;
 using Xunit;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
 {
     /// <summary>
     /// Sql Server Sql生成器测试 - Where子句

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Datas.Queries;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Queries;
 
 namespace Bing.Application.Services
 {

@@ -1,11 +1,11 @@
 ﻿using Bing.Datas.Dapper.PgSql;
-using Bing.Datas.Sql;
+using Bing.Data.Sql;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.PgSql
+namespace Bing.Data.Test.Integration.Sql.Builders.PgSql
 {
     /// <summary>
     /// PgSql Sql生成器测试

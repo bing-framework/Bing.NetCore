@@ -1,7 +1,7 @@
 ﻿using System;
-using Bing.Datas.Sql.Matedatas;
+using Bing.Data.Sql.Matedatas;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Samples
+namespace Bing.Data.Test.Integration.Sql.Builders.Samples
 {
     /// <summary>
     /// 测试实体元数据

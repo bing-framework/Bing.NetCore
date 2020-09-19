@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Parameters;
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 
 namespace Bing.Admin.Systems.Domain.Services.Abstractions
 {

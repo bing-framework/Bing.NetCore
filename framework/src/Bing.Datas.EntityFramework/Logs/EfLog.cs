@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Bing.Datas.Configs;
+using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Extensions;
 using Bing.Helpers;

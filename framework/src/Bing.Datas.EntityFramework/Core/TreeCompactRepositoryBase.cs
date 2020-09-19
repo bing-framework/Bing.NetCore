@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Bing.Datas.Stores;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Trees;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Domain.Entities;
+using Bing.Domain.Repositories;
 using Bing.Extensions;
+using Bing.Trees;
 using Bing.Validations.Abstractions;
 using Microsoft.EntityFrameworkCore;
 

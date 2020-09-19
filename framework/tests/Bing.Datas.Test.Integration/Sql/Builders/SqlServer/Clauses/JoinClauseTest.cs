@@ -1,15 +1,15 @@
 ﻿using System;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Test.Integration.Samples;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Test.Integration.Samples;
 using Bing.Utils;
 using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer.Clauses
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses
 {
     /// <summary>
     /// 表连接子句测试

@@ -1,10 +1,10 @@
 ﻿using Bing.Datas.Dapper.PgSql;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.PgSql.Clauses
+namespace Bing.Data.Test.Integration.Sql.Builders.PgSql.Clauses
 {
     /// <summary>
     /// Select子句测试

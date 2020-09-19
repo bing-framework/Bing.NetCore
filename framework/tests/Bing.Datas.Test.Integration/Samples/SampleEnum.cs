@@ -1,4 +1,4 @@
-﻿namespace Bing.Datas.Test.Integration.Samples
+﻿namespace Bing.Data.Test.Integration.Samples
 {
     /// <summary>
     /// 简单枚举

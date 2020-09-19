@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Bing.Domains.Values;
+using Bing.Domain.Values;
 
 namespace Bing.Tests.Samples
 {

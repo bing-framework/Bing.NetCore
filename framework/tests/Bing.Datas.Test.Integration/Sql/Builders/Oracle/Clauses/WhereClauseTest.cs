@@ -1,13 +1,13 @@
 ﻿using Bing.Datas.Dapper.Oracle;
 using Bing.Datas.Dapper.SqlServer;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Sql.Matedatas;
-using Bing.Datas.Test.Integration.Sql.Builders.Samples;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Matedatas;
+using Bing.Data.Test.Integration.Sql.Builders.Samples;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.Oracle.Clauses
+namespace Bing.Data.Test.Integration.Sql.Builders.Oracle.Clauses
 {
     /// <summary>
     /// Where子句测试

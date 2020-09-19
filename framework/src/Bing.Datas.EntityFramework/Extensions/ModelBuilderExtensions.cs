@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using Bing.Domains.Entities;
+using Bing.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -41,7 +41,7 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <param name="modelBuilder">实体生成器</param>
         public static ModelBuilder HasGlobalDeleteQueryFilter(this ModelBuilder modelBuilder)
         {
-            modelBuilder.Model.GetEntityTypes().Where(entityType => typeof(IDelete).IsAssignableFrom(entityType.ClrType))
+            modelBuilder.Model.GetEntityTypes().Where(entityType => typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
                 .ToList().ForEach(x =>
                 {
                     modelBuilder.Entity(x.ClrType).Property<bool>("IsDeleted");

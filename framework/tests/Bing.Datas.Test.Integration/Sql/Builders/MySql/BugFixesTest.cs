@@ -1,11 +1,11 @@
 ﻿using System;
 using Bing.Datas.Dapper.MySql;
-using Bing.Datas.Sql;
-using Bing.Datas.Test.Integration.Samples.Bugs;
+using Bing.Data.Sql;
+using Bing.Data.Test.Integration.Samples.Bugs;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.MySql
+namespace Bing.Data.Test.Integration.Sql.Builders.MySql
 {
     public class BugFixesTest
     {

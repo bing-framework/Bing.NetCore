@@ -6,8 +6,10 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using Bing.Domains.Entities;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Queries;
+using Bing.Domain.Entities;
+using Bing.Domain.Repositories;
 using Bing.Uow;
 
 namespace Bing.Tests.Samples

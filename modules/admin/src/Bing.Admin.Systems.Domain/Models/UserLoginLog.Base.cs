@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -8,8 +8,7 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
 using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Tenants;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models
 {

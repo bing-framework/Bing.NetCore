@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Bing.Core.Modularity;
-using Bing.Datas.Seed;
+using Bing.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

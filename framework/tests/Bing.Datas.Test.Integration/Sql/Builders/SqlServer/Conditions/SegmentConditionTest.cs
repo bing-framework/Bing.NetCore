@@ -1,9 +1,9 @@
-﻿using Bing.Datas.Queries;
-using Bing.Datas.Sql.Builders.Conditions;
+﻿using Bing.Data.Queries;
+using Bing.Data.Sql.Builders.Conditions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Datas.Test.Integration.Sql.Builders.SqlServer.Conditions
+namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Conditions
 {
     /// <summary>
     /// 范围过滤条件测试

@@ -5,7 +5,8 @@
     <RootNamespace />
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
+    <ProjectReference Include="..\..\..\utils\src\Bing.Utils\Bing.Utils.csproj" />
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
   </ItemGroup>
 
 </Project>

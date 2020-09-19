@@ -1,4 +1,4 @@
-﻿using Bing.Domains.Repositories;
+﻿using Bing.Data;
 using Bing.Tests.Samples;
 using Bing.Utils.Json;
 using Xunit;
