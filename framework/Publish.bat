@@ -55,9 +55,6 @@ dotnet pack src/Bing.Datas.EntityFramework.PgSql -c Release -o nuget_pub
 dotnet pack src/Bing.Datas.EntityFramework.SqlServer -c Release -o nuget_pub
 dotnet pack src/Bing.Datas.EntityFramework.Oracle -c Release -o nuget_pub
 
-::Applications
-dotnet pack src/Bing.Applications -c Release -o nuget_pub
-
 ::Caching
 dotnet pack src/Bing.EasyCaching -c Release -o nuget_pub
 dotnet pack src/Bing.Caching.CSRedis -c Release -o nuget_pub
