@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace />
+    <Description>Bing.AspNetCore.Mvc 组件，提供AspNetCore的Mvc功能的封装</Description>
   </PropertyGroup>
 
   <ItemGroup>
