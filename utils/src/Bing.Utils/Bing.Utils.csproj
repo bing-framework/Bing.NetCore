@@ -6,6 +6,7 @@
 Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
     <PackageLicenseUrl />
     <RootNamespace />
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -17,7 +18,6 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.Reflection" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <!--<PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />-->
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
