@@ -151,7 +151,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore.Mvc.UI", "f
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Data", "framework\src\Bing.Data\Bing.Data.csproj", "{3E497AE7-0721-4E65-B953-05DF15F206A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Data.Sql", "framework\src\Bing.Data.Sql\Bing.Data.Sql.csproj", "{2DD64F70-8DAF-4C70-8986-BF2812A95C8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Data.Sql", "framework\src\Bing.Data.Sql\Bing.Data.Sql.csproj", "{2DD64F70-8DAF-4C70-8986-BF2812A95C8F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-components", "03-components", "{8E2070BF-F6CF-47CC-8DB8-56B74EDFA7EB}"
 EndProject
@@ -165,6 +165,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz.OAuthLogin", "components\src\Bing.Biz.OAuthLogin\Bing.Biz.OAuthLogin.csproj", "{83EF98FE-4212-4C92-9F8A-E3BAC081DF1F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz.Payments", "components\src\Bing.Biz.Payments\Bing.Biz.Payments.csproj", "{9B472B86-C6CD-42D8-A610-A54012BDCEC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.MultiTenancy", "framework\src\Bing.MultiTenancy\Bing.MultiTenancy.csproj", "{C19FEF8C-99C0-4C8A-9499-138A79433AA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -388,6 +390,10 @@ Global
 		{9B472B86-C6CD-42D8-A610-A54012BDCEC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B472B86-C6CD-42D8-A610-A54012BDCEC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B472B86-C6CD-42D8-A610-A54012BDCEC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C19FEF8C-99C0-4C8A-9499-138A79433AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C19FEF8C-99C0-4C8A-9499-138A79433AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C19FEF8C-99C0-4C8A-9499-138A79433AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C19FEF8C-99C0-4C8A-9499-138A79433AA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -458,6 +464,7 @@ Global
 		{E15B13DE-7E40-4441-A825-B6931E01C0D6} = {9EC1188A-A524-4D44-B3DA-37065AA96E2D}
 		{83EF98FE-4212-4C92-9F8A-E3BAC081DF1F} = {9EC1188A-A524-4D44-B3DA-37065AA96E2D}
 		{9B472B86-C6CD-42D8-A610-A54012BDCEC5} = {9EC1188A-A524-4D44-B3DA-37065AA96E2D}
+		{C19FEF8C-99C0-4C8A-9499-138A79433AA7} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
