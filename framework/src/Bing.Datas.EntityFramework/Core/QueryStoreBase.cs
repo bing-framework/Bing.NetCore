@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.Data;
 using Bing.Data.Queries;
+using Bing.Data.Sql;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Domain.Entities;
 using Bing.Extensions;

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Data;
+using Bing.Data.Sql;
 using Dapper;
 
 namespace Bing.Datas.Dapper

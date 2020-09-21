@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 
-namespace Bing.Data
+namespace Bing.Data.Sql
 {
     /// <summary>
     /// Sql查询对象
