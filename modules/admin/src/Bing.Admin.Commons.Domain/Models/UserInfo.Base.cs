@@ -9,7 +9,6 @@ using Bing.Helpers;
 using Bing.Auditing;
 using Bing.Biz.Enums;
 using Bing.Data;
-using Bing.Domains;
 using Bing.Domain.Entities;
 
 namespace Bing.Admin.Commons.Domain.Models

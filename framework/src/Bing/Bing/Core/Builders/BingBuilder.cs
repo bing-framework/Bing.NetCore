@@ -49,7 +49,7 @@ namespace Bing.Core.Builders
         /// <param name="services">服务集合</param>
         private static List<BingModule> GetAllModules(IServiceCollection services)
         {
-            var moduleTypeFinder = services.GetOrAddTypeFinder<IBingModuleTypeFinder>(assemblyFiner => new BingModuleTypeFinder(assemblyFiner));
+            var moduleTypeFinder = services.GetOrAddTypeFinder<IBingModuleTypeFinder>(assemblyFinder => new BingModuleTypeFinder(assemblyFinder));
             var moduleTypes = moduleTypeFinder.FindAll();
             return moduleTypes.Select(m => (BingModule)Activator.CreateInstance(m))
                 .OrderBy(m => m.Level)

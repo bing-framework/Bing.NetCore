@@ -6,7 +6,9 @@ using Bing.Admin.Domain.Shared;
 using Bing.Admin.Service.Abstractions.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems.Extensions;
+using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
+using Bing.Mapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {
@@ -51,7 +53,8 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="request">请求</param>
         public async Task<Guid> CreateAsync(AdministratorCreateRequest request)
         {
-            var user = await AdministratorManager.CreateAsync(request.ToParameter());
+            //var user = await AdministratorManager.CreateAsync(request.ToParameter());
+            var user = await AdministratorManager.CreateAsync(request.MapTo<UserParameter>());
             await RoleManager.AddUserToRoleAsync(user.Id, RoleCode.Admin);
             await UnitOfWork.CommitAsync();
             return user.Id;

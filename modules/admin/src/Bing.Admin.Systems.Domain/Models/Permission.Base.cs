@@ -8,7 +8,6 @@ using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
 using Bing.Data;
-using Bing.Domains;
 using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models

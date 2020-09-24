@@ -63,16 +63,9 @@ namespace Bing.Admin.EventHandlers.Implements.Systems
         /// </summary>
         /// <param name="message">消息</param>
         [DebugLog]
-        [CapSession]
         [EventHandler(MessageEventConst.UserLogin, Group = QueueGroupConst.UserLoginLog)]
         public async Task UserLoginAsync(UserLoginMessage message)
         {
-            var session = CurrentPrincipalAccessor.Principal.Identity as ClaimsIdentity;
-            //Debug.WriteLine(
-            //    $"【事件会话】用户标识: {session.GetUserId()}, 名称: {session.GetUserName()}, 昵称: {session.GetNickName()}, Email: {session.GetValue(Bing.Security.Claims.ClaimTypes.Email)}, 手机号: {session.GetValue(Bing.Security.Claims.ClaimTypes.Mobile)}");
-
-            Debug.WriteLine(
-                $"【事件会话】用户标识: {CurrentUser.UserId}, 名称: {CurrentUser.UserName}, 昵称: {CurrentUser.FindClaimValue(Bing.Security.Claims.ClaimTypes.FullName)}, Email: {CurrentUser.Email}, 手机号: {CurrentUser.PhoneNumber}");
             await UserLoginLogManager.CreateAsync(message.MapTo(new UserLoginLogParameter()));
             await UnitOfWork.CommitAsync();
         }

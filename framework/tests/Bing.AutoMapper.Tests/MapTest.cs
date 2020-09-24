@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AutoMapper;
 using Bing.Helpers;
 using Bing.Mapping;
 using Bing.Tests.Samples;
@@ -13,6 +14,11 @@ namespace Bing.AutoMapper.Tests
     {
         public MapTest()
         {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<TestMapperConfiguration>();
+            });
+            AutoMapperConfiguration.Init(config);
             var mapper = new AutoMapperMapper();
             MapperExtensions.SetMapper(mapper);
         }
@@ -192,6 +198,17 @@ namespace Bing.AutoMapper.Tests
             var proxy3 = proxyGenerator.CreateClassProxy<EntitySample>();
             sample2.MapTo(proxy3);
             Assert.Equal("c", proxy3.Name);
+        }
+
+        /// <summary>
+        /// 测试自定义配置
+        /// </summary>
+        [Fact]
+        public void Test_MapTo_CustomProfile()
+        {
+            var source = new AutoMapperSourceSample {SourceStringValue = "666"};
+            var target = source.MapTo<AutoMapperTargetSample>();
+            Assert.Equal("666", target.TargetSampleValue);
         }
     }
 }

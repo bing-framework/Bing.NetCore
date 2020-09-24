@@ -18,11 +18,6 @@ namespace Bing.AutoMapper
         /// </summary>
         private static readonly object Sync = new object();
 
-        /// <summary>
-        /// 配置提供器
-        /// </summary>
-        private static IConfigurationProvider _config;
-
         #region MapTo(将源对象映射到目标对象)
 
         /// <summary>
@@ -104,7 +99,7 @@ namespace Bing.AutoMapper
         /// </summary>
         /// <param name="sourceType">源类型</param>
         /// <param name="destinationType">目标类型</param>
-        private static bool Exists(Type sourceType, Type destinationType) => _config?.FindTypeMapFor(sourceType, destinationType) != null;
+        private static bool Exists(Type sourceType, Type destinationType) => AutoMapperConfiguration.MapperConfiguration?.FindTypeMapFor(sourceType, destinationType) != null;
 
         /// <summary>
         /// 初始化
@@ -113,15 +108,20 @@ namespace Bing.AutoMapper
         /// <param name="destinationType">目标类型</param>
         private static void Init(Type sourceType, Type destinationType)
         {
-            if (_config == null)
+            if (AutoMapperConfiguration.MapperConfiguration == null)
             {
-                _config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
-                return;
+                var config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
+                AutoMapperConfiguration.Init(config);
             }
-            var maps = _config.GetAllTypeMaps();
-            _config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
-            foreach (var map in maps)
-                _config.RegisterTypeMap(map);
+            else
+            {
+                var maps = AutoMapperConfiguration.MapperConfiguration.GetAllTypeMaps();
+                var config = new MapperConfiguration(t => t.CreateMap(sourceType, destinationType));
+                foreach (var map in maps)
+                    config.RegisterTypeMap(map);
+                AutoMapperConfiguration.Init(config);
+            }
+            
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Bing.AutoMapper
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source">源对象</param>
         /// <param name="destination">目标对象</param>
-        private static TDestination GetResult<TDestination>(object source, TDestination destination) => new Mapper(_config).Map(source, destination);
+        private static TDestination GetResult<TDestination>(object source, TDestination destination) => AutoMapperConfiguration.Mapper.Map(source, destination);
 
         #endregion
 
@@ -153,7 +153,7 @@ namespace Bing.AutoMapper
         /// <typeparam name="TOutputDto">输出Dto类型</typeparam>
         /// <param name="source">源类型</param>
         /// <param name="membersToExpand">成员展开</param>
-        public IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source, params Expression<Func<TOutputDto, object>>[] membersToExpand) => source.ProjectTo(_config, membersToExpand);
+        public IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source, params Expression<Func<TOutputDto, object>>[] membersToExpand) => source.ProjectTo(AutoMapperConfiguration.MapperConfiguration, membersToExpand);
 
         #endregion
     }
