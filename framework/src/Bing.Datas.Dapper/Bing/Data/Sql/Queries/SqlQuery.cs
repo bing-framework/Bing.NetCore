@@ -3,17 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Data;
-using Bing.Data.Sql;
-using Bing.Data.Sql.Queries;
 using Bing.Helpers;
 using Bing.Logs;
 using Dapper;
 
-namespace Bing.Datas.Dapper
+namespace Bing.Data.Sql.Queries
 {
     /// <summary>
-    /// Dapper Sql查询对象
+    /// 基于Dapper的Sql查询对象
     /// </summary>
     public class SqlQuery : SqlQueryBase
     {
@@ -78,8 +75,7 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
         public override async Task<TResult> ToAsync<TResult>(IDbConnection connection = null) =>
-            await QueryAsync(
-                async (con, sql, sqlParams) => await con.QueryFirstOrDefaultAsync<TResult>(sql, sqlParams), connection);
+            await QueryAsync(async (con, sql, sqlParams) => await con.QueryFirstOrDefaultAsync<TResult>(sql, sqlParams), connection);
 
         /// <summary>
         /// 获取列表
@@ -95,8 +91,7 @@ namespace Bing.Datas.Dapper
         /// <typeparam name="TResult">返回结果类型</typeparam>
         /// <param name="connection">数据库连接</param>
         public override async Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null) =>
-            await QueryAsync(
-                async (con, sql, sqlParams) => (await con.QueryAsync<TResult>(sql, sqlParams)).ToList(), connection);
+            await QueryAsync(async (con, sql, sqlParams) => (await con.QueryAsync<TResult>(sql, sqlParams)).ToList(), connection);
 
         /// <summary>
         /// 获取列表

@@ -3,6 +3,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Queries;
 using Bing.Datas.Dapper.Handlers;
 using Bing.Datas.Dapper.MySql;
 using Bing.Datas.Dapper.Oracle;
