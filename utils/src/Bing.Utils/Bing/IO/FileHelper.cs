@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -26,9 +25,7 @@ namespace Bing.IO
         public static void CreateIfNotExists(string fileName)
         {
             if (File.Exists(fileName))
-            {
                 return;
-            }
             File.Create(fileName);
         }
 
@@ -43,9 +40,7 @@ namespace Bing.IO
         public static void Delete(IEnumerable<string> filePaths)
         {
             foreach (var filePath in filePaths)
-            {
                 Delete(filePath);
-            }
         }
 
         /// <summary>
@@ -55,14 +50,9 @@ namespace Bing.IO
         public static void Delete(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
-            {
                 return;
-            }
-
             if (!File.Exists(filePath))
-            {
                 return;
-            }
 
             // 设置文件的属性为正常（如果文件为只读的话直接删除会报错）
             File.SetAttributes(filePath, FileAttributes.Normal);
@@ -217,111 +207,6 @@ namespace Bing.IO
 
         #endregion
 
-        #region GetAllFiles(获取目录中全部文件列表)
-
-        /// <summary>
-        /// 获取目录中全部文件列表，包括子目录
-        /// </summary>
-        /// <param name="directoryPath">目录绝对路径</param>
-        /// <returns></returns>
-        public static List<string> GetAllFiles(string directoryPath)
-        {
-            return Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories).ToList();
-        }
-
-        #endregion
-
-        #region Read(读取文件到字符串)
-
-        /// <summary>
-        /// 读取文件到字符串
-        /// </summary>
-        /// <param name="filePath">文件的绝对路径</param>
-        public static string Read(string filePath) => Read(filePath, Encoding.UTF8);
-
-        /// <summary>
-        /// 读取文件到字符串
-        /// </summary>
-        /// <param name="filePath">文件的绝对路径</param>
-        /// <param name="encoding">字符编码</param>
-        public static string Read(string filePath, Encoding encoding)
-        {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            if (!File.Exists(filePath))
-                return string.Empty;
-            using var reader = new StreamReader(filePath, encoding);
-            return reader.ReadToEnd();
-        }
-
-        #endregion
-
-        #region ReadToBytes(将文件读取到字节流中)
-
-        /// <summary>
-        /// 将文件读取到字节流中
-        /// </summary>
-        /// <param name="filePath">文件的绝对路径</param>
-        /// <returns></returns>
-        public static byte[] ReadToBytes(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            return ReadToBytes(new FileInfo(filePath));
-        }
-
-        /// <summary>
-        /// 将文件读取到字节流中
-        /// </summary>
-        /// <param name="fileInfo">文件信息</param>
-        /// <returns></returns>
-        public static byte[] ReadToBytes(FileInfo fileInfo)
-        {
-            if (fileInfo == null)
-            {
-                return null;
-            }
-
-            int fileSize = (int)fileInfo.Length;
-            using (var reader = new BinaryReader(fileInfo.Open(FileMode.Open)))
-            {
-                return reader.ReadBytes(fileSize);
-            }
-        }
-
-        #endregion
-
-        #region Write(将字节流写入文件)
-
-        /// <summary>
-        /// 将字符串写入文件，文件不存在则创建
-        /// </summary>
-        /// <param name="filePath">文件的绝对路径</param>
-        /// <param name="content">数据</param>
-        public static void Write(string filePath, string content)
-        {
-            Write(filePath, FileHelper.ToBytes(content.SafeString()));
-        }
-
-        /// <summary>
-        /// 将字符串写入文件，文件不存在则创建
-        /// </summary>
-        /// <param name="filePath">文件的绝对路径</param>
-        /// <param name="bytes">数据</param>
-        public static void Write(string filePath, byte[] bytes)
-        {
-            if (string.IsNullOrWhiteSpace(filePath))
-                return;
-            if (bytes == null)
-                return;
-            File.WriteAllBytes(filePath, bytes);
-        }
-
-        #endregion
-
         #region JoinPath(连接基路径和子路径)
 
         /// <summary>
@@ -329,7 +214,6 @@ namespace Bing.IO
         /// </summary>
         /// <param name="basePath">基路径，范例：c:</param>
         /// <param name="subPath">子路径，可以是文件名，范例：test.doc</param>
-        /// <returns></returns>
         public static string JoinPath(string basePath, string subPath)
         {
             basePath = basePath.TrimEnd('/').TrimEnd('\\');
@@ -350,44 +234,23 @@ namespace Bing.IO
         public static async Task<string> CopyToStringAsync(Stream stream, Encoding encoding = null)
         {
             if (stream == null)
-            {
                 return string.Empty;
-            }
-
-            if (encoding == null)
-            {
+            if (encoding == null) 
                 encoding = Encoding.UTF8;
-            }
-
             if (stream.CanRead == false)
-            {
                 return string.Empty;
-            }
 
-            using (var memoryStream = new MemoryStream())
-            {
-                using (var reader = new StreamReader(memoryStream, encoding))
-                {
-                    if (stream.CanSeek)
-                    {
-                        stream.Seek(0, SeekOrigin.Begin);
-                    }
-
-                    stream.CopyTo(memoryStream);
-                    if (memoryStream.CanSeek)
-                    {
-                        memoryStream.Seek(0, SeekOrigin.Begin);
-                    }
-
-                    var result = await reader.ReadToEndAsync();
-                    if (stream.CanSeek)
-                    {
-                        stream.Seek(0, SeekOrigin.Begin);
-                    }
-
-                    return result;
-                }
-            }
+            using var memoryStream = new MemoryStream();
+            using var reader = new StreamReader(memoryStream, encoding);
+            if (stream.CanSeek) 
+                stream.Seek(0, SeekOrigin.Begin);
+            stream.CopyTo(memoryStream);
+            if (memoryStream.CanSeek) 
+                memoryStream.Seek(0, SeekOrigin.Begin);
+            var result = await reader.ReadToEndAsync();
+            if (stream.CanSeek) 
+                stream.Seek(0, SeekOrigin.Begin);
+            return result;
         }
 
         #endregion
@@ -405,35 +268,26 @@ namespace Bing.IO
         public static void Combine(IList<string> files, string fileName, bool delete = false, bool encrypt = false, int sign = 0)
         {
             if (files == null || files.Count == 0)
-            {
                 return;
-            }
 
             files.Sort();
-            using (var ws = new FileStream(fileName, FileMode.Create))
+            using var ws = new FileStream(fileName, FileMode.Create);
+            foreach (var file in files)
             {
-                foreach (var file in files)
+                if (file == null || !File.Exists(file))
+                    continue;
+                using (var rs = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
-                    if (file == null || !File.Exists(file))
+                    var data = new byte[1024];
+                    var readLen = 0;
+                    while ((readLen = rs.Read(data, 0, data.Length)) > 0)
                     {
-                        continue;
-                    }
-
-                    using (var rs = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                        var data = new byte[1024];
-                        var readLen = 0;
-                        while ((readLen = rs.Read(data, 0, data.Length)) > 0)
-                        {
-                            ws.Write(data, 0, readLen);
-                            ws.Flush();
-                        }
-                    }
-                    if (delete)
-                    {
-                        Delete(file);
+                        ws.Write(data, 0, readLen);
+                        ws.Flush();
                     }
                 }
+                if (delete) 
+                    Delete(file);
             }
         }
 
@@ -522,18 +376,12 @@ namespace Bing.IO
         /// </summary>
         /// <param name="file">文件</param>
         /// <param name="saveFile">保存文件</param>
-        /// <returns></returns>
         public static bool Compress(string file, string saveFile)
         {
             if (string.IsNullOrWhiteSpace(file) || string.IsNullOrWhiteSpace(saveFile))
-            {
                 return false;
-            }
-
             if (!File.Exists(file))
-            {
                 return false;
-            }
 
             try
             {
@@ -564,23 +412,14 @@ namespace Bing.IO
         /// </summary>
         /// <param name="file">文件</param>
         /// <param name="saveFile">保存文件</param>
-        /// <returns></returns>
         public static bool Decompress(string file, string saveFile)
         {
             if (string.IsNullOrWhiteSpace(file))
-            {
                 return false;
-            }
-
             if (string.IsNullOrWhiteSpace(saveFile))
-            {
                 return false;
-            }
-
             if (!File.Exists(file))
-            {
                 return false;
-            }
 
             try
             {
@@ -614,9 +453,7 @@ namespace Bing.IO
         public static void CompressMulti(string[] sourceFileList, string saveFullPath)
         {
             if (sourceFileList == null || sourceFileList.Length == 0 || string.IsNullOrWhiteSpace(saveFullPath))
-            {
                 return;
-            }
 
             using (var ms = new MemoryStream())
             {
@@ -663,9 +500,7 @@ namespace Bing.IO
         public static void DecompressMulti(string zipPath, string targetPath)
         {
             if (string.IsNullOrWhiteSpace(zipPath) || string.IsNullOrWhiteSpace(targetPath))
-            {
                 return;
-            }
 
             byte[] fileSize = new byte[4];
             if (!File.Exists(zipPath))

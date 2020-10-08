@@ -16,19 +16,12 @@ namespace Bing.IO
         /// </summary>
         /// <param name="data">数据</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public static string ToString(byte[] data, Encoding encoding = null)
         {
             if (data == null || data.Length == 0)
-            {
                 return string.Empty;
-            }
-
-            if (encoding == null)
-            {
+            if (encoding == null) 
                 encoding = Encoding.UTF8;
-            }
-
             return encoding.GetString(data);
         }
 
@@ -39,40 +32,21 @@ namespace Bing.IO
         /// <param name="encoding">字符串编码</param>
         /// <param name="bufferSize">缓冲区大小</param>
         /// <param name="isCloseStream">读取完成是否释放流，默认为true</param>
-        /// <returns></returns>
-        public static string ToString(Stream stream, Encoding encoding = null, int bufferSize = 1024 * 2,
-            bool isCloseStream = true)
+        public static string ToString(Stream stream, Encoding encoding = null, int bufferSize = 1024 * 2, bool isCloseStream = true)
         {
             if (stream == null)
-            {
                 return string.Empty;
-            }
-
-            if (encoding == null)
-            {
+            if (encoding == null) 
                 encoding = Encoding.UTF8;
-            }
-
             if (stream.CanRead == false)
-            {
                 return string.Empty;
-            }
-
-            using (var reader = new StreamReader(stream, encoding, true, bufferSize, !isCloseStream))
-            {
-                if (stream.CanSeek)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
-                var result = reader.ReadToEnd();
-                if (stream.CanSeek)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
-                return result;
-            }
+            using var reader = new StreamReader(stream, encoding, true, bufferSize, !isCloseStream);
+            if (stream.CanSeek) 
+                stream.Seek(0, SeekOrigin.Begin);
+            var result = reader.ReadToEnd();
+            if (stream.CanSeek) 
+                stream.Seek(0, SeekOrigin.Begin);
+            return result;
         }
 
         /// <summary>
@@ -82,41 +56,21 @@ namespace Bing.IO
         /// <param name="encoding">字符串编码</param>
         /// <param name="bufferSize">缓冲区大小</param>
         /// <param name="isCloseStream">读取完成是否释放流，默认为true</param>
-        /// <returns></returns>
-        public static async Task<string> ToStringAsync(Stream stream, Encoding encoding = null,
-            int bufferSize = 1024 * 2,
-            bool isCloseStream = true)
+        public static async Task<string> ToStringAsync(Stream stream, Encoding encoding = null, int bufferSize = 1024 * 2, bool isCloseStream = true)
         {
             if (stream == null)
-            {
                 return string.Empty;
-            }
-
-            if (encoding == null)
-            {
+            if (encoding == null) 
                 encoding = Encoding.UTF8;
-            }
-
             if (stream.CanRead == false)
-            {
                 return string.Empty;
-            }
-
-            using (var reader = new StreamReader(stream, encoding, true, bufferSize, !isCloseStream))
-            {
-                if (stream.CanSeek)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
-                var result = await reader.ReadToEndAsync();
-                if (stream.CanSeek)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
-                return result;
-            }
+            using var reader = new StreamReader(stream, encoding, true, bufferSize, !isCloseStream);
+            if (stream.CanSeek) 
+                stream.Seek(0, SeekOrigin.Begin);
+            var result = await reader.ReadToEndAsync();
+            if (stream.CanSeek) 
+                stream.Seek(0, SeekOrigin.Begin);
+            return result;
         }
 
         #endregion
@@ -124,23 +78,16 @@ namespace Bing.IO
         #region ToStream(转换成流)
 
         /// <summary>
-        /// 字符串转换成流
+        /// 字符串转换成流。需要释放内存流
         /// </summary>
         /// <param name="data">数据</param>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public static Stream ToStream(string data, Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(data))
-            {
                 return Stream.Null;
-            }
-
-            if (encoding == null)
-            {
+            if (encoding == null) 
                 encoding = Encoding.UTF8;
-            }
-
             return new MemoryStream(ToBytes(data, encoding));
         }
 
@@ -152,10 +99,7 @@ namespace Bing.IO
         /// 字符串转换为字节数组
         /// </summary>
         /// <param name="data">数据。默认字符编码：utf-8</param>
-        public static byte[] ToBytes(string data)
-        {
-            return ToBytes(data, Encoding.UTF8);
-        }
+        public static byte[] ToBytes(string data) => ToBytes(data, Encoding.UTF8);
 
         /// <summary>
         /// 字符串转换成字节数组
@@ -165,9 +109,7 @@ namespace Bing.IO
         public static byte[] ToBytes(string data, Encoding encoding)
         {
             if (string.IsNullOrWhiteSpace(data))
-            {
                 return new byte[] { };
-            }
             return encoding.GetBytes(data);
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Bing.Extensions;
 using Bing.Helpers;
@@ -20,14 +21,9 @@ namespace Bing.IO
         public static void CreateIfNotExists(string directory)
         {
             if (string.IsNullOrWhiteSpace(directory))
-            {
                 return;
-            }
-
             if (!Directory.Exists(directory))
-            {
                 Directory.CreateDirectory(directory);
-            }
         }
 
         #endregion
@@ -58,15 +54,11 @@ namespace Bing.IO
             Check.NotNull(childDirectory, nameof(childDirectory));
 
             if (parentDirectory.FullName == childDirectory.FullName)
-            {
                 return true;
-            }
 
             var parentOfChild = childDirectory.Parent;
             if (parentOfChild == null)
-            {
                 return false;
-            }
 
             return IsSubDirectoryOf(parentDirectory, parentOfChild);
         }
@@ -83,77 +75,66 @@ namespace Bing.IO
         {
             var currentDirectory = Directory.GetCurrentDirectory();
             if (currentDirectory.Equals(targetDirectory, StringComparison.OrdinalIgnoreCase))
-            {
                 return NullDisposable.Instance;
-            }
-
             Directory.SetCurrentDirectory(targetDirectory);
-
             return new DisposeAction(() => { Directory.SetCurrentDirectory(currentDirectory); });
         }
 
         #endregion
 
-        #region GetFileNames(获取指定目录中的文件列表)
+        #region GetFiles(获取指定目录中的文件列表)
 
         /// <summary>
         /// 获取指定目录中的文件列表
         /// </summary>
-        /// <param name="directoryPath">目录的绝对路径</param>
-        /// <param name="pattern">通配符</param>
-        /// <returns></returns>
-        public static string[] GetFileNames(string directoryPath, string pattern = "*")
+        /// <param name="directoryPath">目录绝对路径</param>
+        /// <param name="pattern">模式字符串。"*"代表0或N个字符，"?"代表1个字符。范例："Log*.xml"表示搜索所有以Log开头的Xml文件。默认：*</param>
+        /// <param name="includeChildPath">是否包含子目录</param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        public static string[] GetFiles(string directoryPath, string pattern = "*", bool includeChildPath = false)
         {
             if (!Directory.Exists(directoryPath))
-            {
-                throw new FileNotFoundException();
-            }
-
-            return Directory.GetFiles(directoryPath, pattern);
-        }
-
-        /// <summary>
-        /// 获取指定目录及子目录中所有文件列表
-        /// </summary>
-        /// <param name="directoryPath">目录的绝对路径</param>
-        /// <param name="searchPattern">模式字符串。"*"代表0或N个字符，"?"代表1个字符。范例："Log*.xml"表示搜索所有以Log开头的Xml文件。</param>
-        /// <param name="isSearchChild">是否搜索子目录</param>
-        /// <returns></returns>
-        public static string[] GetFileNames(string directoryPath, string searchPattern, bool isSearchChild)
-        {
-            if (!Directory.Exists(directoryPath))
-            {
-                throw new FileNotFoundException();
-            }
-
-            try
-            {
-                return Directory.GetFiles(directoryPath, searchPattern,
-                    isSearchChild ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            }
-            catch (IOException e)
-            {
-                throw e;
-            }
+                throw new DirectoryNotFoundException($"目录\"{directoryPath}\"不存在");
+            return Directory.GetFiles(directoryPath, pattern,
+                includeChildPath ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
         #endregion
 
-        #region GetDirectories(获取指定目录中所有子目录列表)
+        #region GetFileNames(获取指定目录中的文件名称列表)
 
         /// <summary>
-        /// 获取指定目录中所有子目录列表
+        /// 获取指定目录中的文件名称列表
         /// </summary>
-        /// <param name="directoryPath">目录的绝对路径</param>
-        /// <returns></returns>
-        public static string[] GetDirectories(string directoryPath)
+        /// <param name="directoryPath">目录绝对路径</param>
+        /// <param name="pattern">模式字符串。"*"代表0或N个字符，"?"代表1个字符。范例："Log*.xml"表示搜索所有以Log开头的Xml文件。默认：*</param>
+        /// <param name="includeChildPath">是否包含子目录</param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        public static string[] GetFileNames(string directoryPath, string pattern = "*", bool includeChildPath = false)
+        {
+            var names = new List<string>();
+            foreach (var filePath in GetFiles(directoryPath,pattern,includeChildPath))
+                names.Add(Path.GetFileName(filePath));
+            return names.ToArray();
+        }
+
+        #endregion
+
+        #region GetDirectories(获取指定目录中的目录列表)
+
+        /// <summary>
+        /// 获取指定目录中的目录列表
+        /// </summary>
+        /// <param name="directoryPath">目录绝对路径</param>
+        /// <param name="pattern">模式字符串。"*"代表0或N个字符，"?"代表1个字符。</param>
+        /// <param name="includeChildPath">是否包含子目录</param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        public static string[] GetDirectories(string directoryPath, string pattern = "*", bool includeChildPath = false)
         {
             if (!Directory.Exists(directoryPath))
-            {
-                throw new FileNotFoundException();
-            }
-
-            return Directory.GetDirectories(directoryPath);
+                throw new DirectoryNotFoundException($"目录\"{directoryPath}\"不存在");
+            return Directory.GetDirectories(directoryPath, pattern,
+                includeChildPath ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
 
         #endregion
@@ -164,20 +145,12 @@ namespace Bing.IO
         /// 查找指定目录中是否存在指定的文件
         /// </summary>
         /// <param name="directoryPath">目录的绝对路径</param>
-        /// <param name="searchPattern">模式字符串。"*"代表0或N个字符，"?"代表1个字符。范例："Log*.xml"表示搜索所有以Log开头的Xml文件。</param>
-        /// <param name="isSearchChild">是否搜索子目录</param>
-        /// <returns></returns>
-        public static bool Contains(string directoryPath, string searchPattern, bool isSearchChild = false)
+        /// <param name="pattern">模式字符串。"*"代表0或N个字符，"?"代表1个字符。范例："Log*.xml"表示搜索所有以Log开头的Xml文件。</param>
+        /// <param name="includeChildPath">是否包含子目录</param>
+        public static bool Contains(string directoryPath, string pattern, bool includeChildPath = false)
         {
-            try
-            {
-                var fileNames = GetFileNames(directoryPath, searchPattern, isSearchChild);
-                return fileNames.Length != 0;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            var fileNames = GetFiles(directoryPath, pattern, includeChildPath);
+            return fileNames.Length != 0;
         }
 
         #endregion
@@ -188,24 +161,41 @@ namespace Bing.IO
         /// 是否空目录
         /// </summary>
         /// <param name="directoryPath">目录的绝对路径</param>
-        /// <returns></returns>
         public static bool IsEmpty(string directoryPath)
         {
             try
             {
-                var fileNames = GetFileNames(directoryPath);
+                var fileNames = GetFiles(directoryPath, includeChildPath: true);
                 if (fileNames.Length > 0)
-                {
                     return false;
-                }
-
-                var direcotryNames = GetDirectories(directoryPath);
-                return direcotryNames.Length <= 0;
+                var directoryNames = GetDirectories(directoryPath, includeChildPath: true);
+                return directoryNames.Length <= 0;
             }
             catch
             {
                 return true;
             }
+        }
+
+        #endregion
+
+        #region GetDirectoryPath(获取目录路径)
+
+        /// <summary>
+        /// 获取目录路径
+        /// </summary>
+        /// <param name="path">路径。例如：C:\Users\A\</param>
+        public static string GetDirectoryPath(string path)
+        {
+            var result = "";
+            if (path.IndexOf("\\", StringComparison.OrdinalIgnoreCase) > 0)
+                path = path.Replace("\\", "/");
+            var sArray = path.Split('/');
+            for (var i = 0; i < sArray.Length - 1; i++)
+                result += sArray[i] + "/";
+            if (result == "/")
+                result = "";
+            return result;
         }
 
         #endregion
@@ -224,14 +214,10 @@ namespace Bing.IO
             sourcePath.CheckNotNullOrEmpty(nameof(targetPath));
 
             if (!Directory.Exists(sourcePath))
-            {
-                throw new DirectoryNotFoundException("递归复制文件夹时源目录不存在。");
-            }
+                throw new DirectoryNotFoundException($"递归复制文件夹时源目录\"{sourcePath}\"不存在。");
 
-            if (!Directory.Exists(targetPath))
-            {
+            if (!Directory.Exists(targetPath)) 
                 Directory.CreateDirectory(targetPath);
-            }
 
             string[] dirs = Directory.GetDirectories(sourcePath);
             if (dirs.Length > 0)
@@ -282,7 +268,6 @@ namespace Bing.IO
         /// </summary>
         /// <param name="directory">目录路径</param>
         /// <param name="isDeleteRoot">是否删除根目录</param>
-        /// <returns></returns>
         public static bool Delete(string directory, bool isDeleteRoot = true)
         {
             directory.CheckNotNullOrEmpty(nameof(directory));
