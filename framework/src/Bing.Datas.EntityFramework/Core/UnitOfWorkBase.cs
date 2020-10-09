@@ -13,6 +13,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
 using Bing.Datas.EntityFramework.Logs;
+using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.Extensions;
@@ -143,7 +144,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) : base(options)
         {
             TraceId = Guid.NewGuid().ToString();
-            _serviceProvider = serviceProvider ?? Ioc.Create<IServiceProvider>();
+            _serviceProvider = serviceProvider ?? ServiceLocator.Instance.GetService<IServiceProvider>();
             RegisterToManager();
         }
 

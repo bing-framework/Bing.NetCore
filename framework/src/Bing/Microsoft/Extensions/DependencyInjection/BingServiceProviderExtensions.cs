@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using Bing.Core.Modularity;
+using Bing.Reflection;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -63,8 +64,10 @@ namespace Microsoft.Extensions.DependencyInjection
             var modules = serviceProvider.GetServices<BingModule>().ToArray();
             foreach (var module in modules)
             {
+                var moduleName = Reflections.GetDescription(module.GetType());
+                logger.LogInformation($"正在初始化模块 “{moduleName}”");
                 module.UseModule(serviceProvider);
-                logger.LogInformation($"模块{module.GetType()}加载成功");
+                logger.LogInformation($"模块 “{moduleName}” 初始化完成");
             }
             watch.Stop();
             logger.LogInformation($"Bing框架初始化完毕，耗时：{watch.Elapsed}");

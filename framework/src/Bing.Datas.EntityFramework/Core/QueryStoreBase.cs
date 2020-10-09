@@ -10,6 +10,7 @@ using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Data.Sql;
 using Bing.Datas.EntityFramework.Extensions;
+using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Extensions;
 using Bing.Helpers;
@@ -68,7 +69,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         protected virtual ISqlQuery CreateSqlQuery()
         {
-            var result = Ioc.Create<ISqlQuery>();
+            var result = ServiceLocator.Instance.GetService<ISqlQuery>();
             result.SetConnection(Connection);
             return result;
         }

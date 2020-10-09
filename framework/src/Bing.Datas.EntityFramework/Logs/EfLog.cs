@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
+using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
@@ -56,7 +57,7 @@ namespace Bing.Datas.EntityFramework.Logs
         {
             try
             {
-                var options = Ioc.Create<IOptionsSnapshot<DataConfig>>();
+                var options = ServiceLocator.Instance.GetService<IOptionsSnapshot<DataConfig>>();
                 return options.Value;
             }
             catch
@@ -87,7 +88,7 @@ namespace Bing.Datas.EntityFramework.Logs
         {
             try
             {
-                var unitOfWork = Ioc.Create<IUnitOfWork>();
+                var unitOfWork = ServiceLocator.Instance.GetService<IUnitOfWork>();
                 return unitOfWork as UnitOfWorkBase;
             }
             catch

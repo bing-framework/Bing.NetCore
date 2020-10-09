@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.Data.Queries;
 using Bing.Data.Sql;
+using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Extensions;
 using Bing.FreeSQL.Extensions;
@@ -68,7 +69,7 @@ namespace Bing.Data.Stores
         /// </summary>
         protected virtual ISqlQuery CreateSqlQuery()
         {
-            var result = Ioc.Create<ISqlQuery>();
+            var result = ServiceLocator.Instance.GetService<ISqlQuery>();
             result.SetConnection(Connection);
             return result;
         }

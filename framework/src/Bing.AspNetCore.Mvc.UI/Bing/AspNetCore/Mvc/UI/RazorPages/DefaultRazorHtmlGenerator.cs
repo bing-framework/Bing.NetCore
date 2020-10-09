@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
@@ -49,9 +50,9 @@ namespace Bing.AspNetCore.Mvc.UI.RazorPages
         /// <param name="info">路由信息</param>
         public async Task<string> RenderToStringAsync(RouteInformation info)
         {
-            var razorViewEngine = Ioc.Create<IRazorViewEngine>();
-            var tempDataProvider = Ioc.Create<ITempDataProvider>();
-            var serviceProvider = Ioc.Create<IServiceProvider>();
+            var razorViewEngine = ServiceLocator.Instance.GetService<IRazorViewEngine>();
+            var tempDataProvider = ServiceLocator.Instance.GetService<ITempDataProvider>();
+            var serviceProvider = ServiceLocator.Instance.GetService<IServiceProvider>();
             var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
             var actionContext = new ActionContext(httpContext, GetRouteData(info), new ActionDescriptor());
             var viewResult = GetView(razorViewEngine, actionContext, info);

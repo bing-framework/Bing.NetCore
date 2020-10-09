@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
-using Bing.Helpers;
+using System.Linq;
+using AspectCore.Extensions.DependencyInjection;
+using Bing.DependencyInjection;
 using Bing.Tests.Samples;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Bing.Tests.Helpers
@@ -15,6 +18,12 @@ namespace Bing.Tests.Helpers
         /// </summary>
         public IocTest()
         {
+            var services = new ServiceCollection();
+            services.AddScoped<ISample, Sample>();
+            services.AddBing();
+            services.AddLogging();
+            var serviceProvider = services.BuildServiceContextProvider();
+            serviceProvider.UseBing();
         }
 
         /// <summary>
@@ -23,17 +32,7 @@ namespace Bing.Tests.Helpers
         [Fact]
         public void TestCreate()
         {
-            var sample = Ioc.Create<ISample>();
-            Assert.NotNull(sample);
-        }
-
-        /// <summary>
-        /// 测试创建实例
-        /// </summary>
-        [Fact]
-        public void TestCreate_2()
-        {
-            var sample = Ioc.Create<ISample>(typeof(ISample));
+            var sample = ServiceLocator.Instance.GetService<ISample>();
             Assert.NotNull(sample);
         }
 
@@ -43,7 +42,7 @@ namespace Bing.Tests.Helpers
         [Fact]
         public void TestCollection()
         {
-            var samples = Ioc.Create<IEnumerable<ISample>>();
+            var samples = ServiceLocator.Instance.GetService<IEnumerable<ISample>>();
             Assert.NotNull(samples);
             Assert.Single(samples);
         }
@@ -54,7 +53,7 @@ namespace Bing.Tests.Helpers
         [Fact]
         public void TestCreateList()
         {
-            var samples = Ioc.CreateList<ISample>();
+            var samples = ServiceLocator.Instance.GetServices<ISample>().ToList();
             Assert.NotNull(samples);
             Assert.Single(samples);
         }
@@ -65,7 +64,7 @@ namespace Bing.Tests.Helpers
         [Fact]
         public void TestCreateList_2()
         {
-            var samples = Ioc.CreateList<ISample>(typeof(ISample));
+            var samples = ((IEnumerable<ISample>)ServiceLocator.Instance.GetServices(typeof(ISample))).ToList();
             Assert.NotNull(samples);
             Assert.Single(samples);
         }

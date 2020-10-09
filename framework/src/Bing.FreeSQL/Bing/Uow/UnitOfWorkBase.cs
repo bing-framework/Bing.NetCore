@@ -10,6 +10,7 @@ using Bing.Auditing;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
+using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.FreeSQL;
@@ -124,7 +125,7 @@ namespace Bing.Uow
         protected UnitOfWorkBase(IFreeSql orm,  IServiceProvider serviceProvider) : base(orm, null)
         {
             TraceId = Guid.NewGuid().ToString();
-            _serviceProvider = serviceProvider ?? Ioc.Create<IServiceProvider>();
+            _serviceProvider = serviceProvider ?? ServiceLocator.Instance.GetService<IServiceProvider>();
             RegisterToManager();
         }
 

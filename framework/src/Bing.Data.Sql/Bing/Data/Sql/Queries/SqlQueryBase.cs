@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.DependencyInjection;
 using Bing.Helpers;
 using Microsoft.Extensions.Options;
 
@@ -111,7 +112,7 @@ namespace Bing.Data.Sql.Queries
         {
             try
             {
-                var options = Ioc.Create<IOptionsSnapshot<SqlOptions>>();
+                var options = ServiceLocator.Instance.GetService<IOptionsSnapshot<SqlOptions>>();
                 return options == null ? new SqlOptions() : options.Value;
             }
             catch
