@@ -1,5 +1,5 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace Bing
 {
@@ -7,6 +7,7 @@ namespace Bing
     /// 列表项
     /// </summary>
     [Serializable]
+    [DataContract]
     public class Item : IComparable<Item>
     {
         /// <summary>
@@ -34,31 +35,31 @@ namespace Bing
         /// <summary>
         /// 文本
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [DataMember(EmitDefaultValue = false)]
         public string Text { get; set; }
 
         /// <summary>
         /// 值
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [DataMember(EmitDefaultValue = false)]
         public object Value { get; set; }
 
         /// <summary>
         /// 排序号
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [DataMember(EmitDefaultValue = false)]
         public int? SortId { get; set; }
 
         /// <summary>
         /// 组
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [DataMember(EmitDefaultValue = false)]
         public string Group { get; set; }
 
         /// <summary>
         /// 禁用
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [DataMember(EmitDefaultValue = false)]
         public bool? Disabled { get; set; }
 
         /// <summary>

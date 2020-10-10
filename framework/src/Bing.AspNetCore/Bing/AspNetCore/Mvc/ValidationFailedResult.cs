@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Bing.AspNetCore.Mvc
 {
@@ -34,17 +34,19 @@ namespace Bing.AspNetCore.Mvc
     /// <summary>
     /// 验证错误
     /// </summary>
+    [DataContract]
     public class ValidationError
     {
         /// <summary>
         /// 名称
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [DataMember(EmitDefaultValue = false)]
         public string Name { get; set; }
 
         /// <summary>
         /// 错误消息
         /// </summary>
+        [DataMember]
         public string Message { get; set; }
     }
 }
