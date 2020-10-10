@@ -139,7 +139,7 @@ namespace Bing.Domain.Entities
         /// <summary>
         /// 创建标识
         /// </summary>
-        protected virtual TKey CreateId() => Conv.To<TKey>(DomainOptions.GuidGenerateFunc());
+        protected virtual TKey CreateId() => Conv.To<TKey>(EntityHelper.GuidGenerateFunc());
 
         /// <summary>
         /// 验证

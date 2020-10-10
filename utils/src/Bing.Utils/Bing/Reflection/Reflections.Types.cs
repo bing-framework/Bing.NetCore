@@ -30,7 +30,7 @@ namespace Bing.Reflection
                 return null;
             return Nullable.GetUnderlyingType(type) ?? type;
         }
-        
+
         /// <summary>
         /// 获取基础类型
         /// </summary>
@@ -57,11 +57,11 @@ namespace Bing.Reflection
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
-            if(genericType is null)
+            if (genericType is null)
                 throw new ArgumentNullException(nameof(genericType));
             if (!genericType.IsGenericType)
                 return null;
-            while (type!=null&&type!=TypeClass.ObjectClass)
+            while (type != null && type != TypeClass.ObjectClass)
             {
                 var testFlag = _checkRawGenericType(type);
                 if (testFlag)

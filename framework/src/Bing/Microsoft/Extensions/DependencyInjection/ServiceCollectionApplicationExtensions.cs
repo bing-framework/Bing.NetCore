@@ -1,4 +1,5 @@
-﻿using Bing.Core.Builders;
+﻿using Bing;
+using Bing.Core.Builders;
 using Bing.Helpers;
 using Bing.Reflection;
 using Microsoft.Extensions.Configuration;

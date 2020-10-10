@@ -46,6 +46,18 @@ namespace Bing.Reflection
         /// <typeparam name="T">对象类型</typeparam>
         public static T DefaultValue<T>() => TypeDefault.Of<T>();
 
+        /// <summary>
+        /// 获取默认值
+        /// </summary>
+        /// <param name="type">对象类型，仅支持值类型</param>
+        /// <returns>如果是类型为默认值则返回默认值，否则返回 null</returns>
+        public static object DefaultValue(Type type)
+        {
+            if (type.IsValueType)
+                return Activator.CreateInstance(type);
+            return null;
+        }
+
         #endregion
 
         #region IsGenericImplementation(是否泛型实现类型)
@@ -150,6 +162,33 @@ namespace Bing.Reflection
         /// </summary>
         /// <param name="typeInfo">类型信息</param>
         public static bool IsNullableType(TypeInfo typeInfo) => TypeJudgment.IsNullableType(typeInfo);
+
+        #endregion
+
+        #region IsDefaultValue(是否默认值)
+
+        /// <summary>
+        /// 是否默认值
+        /// </summary>
+        /// <param name="obj">对象</param>
+        public static bool IsDefaultValue(object obj)
+        {
+            if (obj == null)
+                return true;
+            return obj.Equals(DefaultValue(obj.GetType()));
+        }
+
+        /// <summary>
+        /// 是否默认值
+        /// </summary>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <param name="obj">对象</param>
+        public static bool IsDefaultValue<T>(T obj)
+        {
+            if (obj == null)
+                return true;
+            return obj.Equals(DefaultValue<T>());
+        }
 
         #endregion
 
