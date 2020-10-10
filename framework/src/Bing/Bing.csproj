@@ -10,6 +10,14 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
     <AssemblyName>Bing.Core</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.AspectScope" Version="2.1.0" />
     <PackageReference Include="AspectCore.Extensions.Configuration" Version="2.1.0" />
