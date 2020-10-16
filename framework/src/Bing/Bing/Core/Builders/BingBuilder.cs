@@ -179,7 +179,7 @@ namespace Bing.Core.Builders
             return this;
         }
 
-        #endregion AddModule(添加模块)
+        #endregion
 
         #region AddOptions(添加选项配置)
 
