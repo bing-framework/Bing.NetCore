@@ -60,8 +60,11 @@ namespace Bing.AspNetCore.Logs
         /// </summary>
         protected override string GetTraceId()
         {
+            var correlationId = HttpContextAccessor.HttpContext?.Request.Headers["X-Correlation-Id"];
+            if (!string.IsNullOrWhiteSpace(correlationId))
+                return correlationId;
             var traceId = HttpContextAccessor.HttpContext?.TraceIdentifier;
-            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : traceId;
+            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : Guid.TryParse(traceId, out var traceIdGuid) ? traceId : traceIdGuid.ToString();
         }
     }
 }
