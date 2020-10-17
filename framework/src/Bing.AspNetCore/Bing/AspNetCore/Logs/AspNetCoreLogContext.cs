@@ -64,7 +64,7 @@ namespace Bing.AspNetCore.Logs
             if (!string.IsNullOrWhiteSpace(correlationId))
                 return correlationId;
             var traceId = HttpContextAccessor.HttpContext?.TraceIdentifier;
-            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : Guid.TryParse(traceId, out var traceIdGuid) ? traceId : traceIdGuid.ToString();
+            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : Guid.TryParse(traceId, out _) ? traceId : Guid.NewGuid().ToString();
         }
     }
 }
