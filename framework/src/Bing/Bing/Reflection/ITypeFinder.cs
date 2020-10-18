@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Bing.DependencyInjection;
 using Bing.Finders;
 
 namespace Bing.Reflection
@@ -8,6 +9,7 @@ namespace Bing.Reflection
     /// <summary>
     /// 定义类型查找器
     /// </summary>
+    [IgnoreDependency]
     public interface ITypeFinder : IFinder<Type>
     {
         /// <summary>

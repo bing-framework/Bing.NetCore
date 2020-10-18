@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bing.Locks;
 using Bing.Properties;
-using Bing.Sessions;
+using Bing.Users;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -56,19 +56,14 @@ namespace Bing.AspNetCore.Mvc.Filters
 
                 OnActionExecuting(context);
                 if (context.Result != null)
-                {
                     return;
-                }
-
                 var executedContext = await next();
                 OnActionExecuted(executedContext);
             }
             finally
             {
-                if (isSuccess)
-                {
+                if (isSuccess) 
                     @lock.UnLock();
-                }
             }
         }
 
@@ -84,32 +79,22 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// <param name="context">操作执行上下文</param>
         protected virtual string GetKey(ActionExecutingContext context)
         {
-            var session = context.HttpContext.RequestServices.GetService<ISession>();
+            var currentUser = context.HttpContext.RequestServices.GetService<ICurrentUser>();
             var userId = string.Empty;
             if (Type == LockType.User)
-                userId = $"{session.UserId}_";
+                userId = $"{currentUser.UserId}_";
             return string.IsNullOrWhiteSpace(Key) ? $"{userId}{context.HttpContext.Request.Path}" : $"{userId}{Key}";
         }
 
         /// <summary>
         /// 获取到期时间间隔
         /// </summary>
-        private TimeSpan? GetExpiration()
-        {
-            if (Interval == 0)
-                return null;
-            return TimeSpan.FromSeconds(Interval);
-        }
+        private TimeSpan? GetExpiration() => Interval == 0 ? (TimeSpan?)null : TimeSpan.FromSeconds(Interval);
 
         /// <summary>
         /// 获取失败消息
         /// </summary>
-        protected virtual string GetFailMessage()
-        {
-            if (Type == LockType.User)
-                return R.UserDuplicateRequest;
-            return R.GlobalDuplicateRequest;
-        }
+        protected virtual string GetFailMessage() => Type == LockType.User ? R.UserDuplicateRequest : R.GlobalDuplicateRequest;
     }
 
     /// <summary>

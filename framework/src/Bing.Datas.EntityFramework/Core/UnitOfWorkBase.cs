@@ -100,16 +100,6 @@ namespace Bing.Datas.EntityFramework.Core
         }
 
         /// <summary>
-        /// 用户会话
-        /// </summary>
-        protected ISession Session => LazyGetRequiredService(ref _session);
-
-        /// <summary>
-        /// 用户会话
-        /// </summary>
-        private ISession _session;
-
-        /// <summary>
         /// 当前用户
         /// </summary>
         protected ICurrentUser CurrentUser => LazyGetRequiredService(ref _currentUser);
@@ -389,11 +379,6 @@ namespace Bing.Datas.EntityFramework.Core
             var name = CurrentUser.GetFullName();
             return string.IsNullOrEmpty(name) ? CurrentUser.GetUserName() : name;
         }
-
-        /// <summary>
-        /// 获取用户会话
-        /// </summary>
-        protected virtual ISession GetSession() => Session;
 
         /// <summary>
         /// 初始化修改审计信息

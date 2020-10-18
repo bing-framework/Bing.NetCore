@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 using Bing.Conversions;
-using Bing.Extensions;
 using Bing.Text;
 
 namespace Bing

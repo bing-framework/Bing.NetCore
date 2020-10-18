@@ -1,10 +1,12 @@
-﻿using Bing.DependencyInjection;
+﻿using System;
+using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;
 using Bing.Logs.Formats;
 using Bing.Security.Extensions;
 using Bing.Sessions;
+using Bing.Users;
 
 namespace Bing.Logs
 {

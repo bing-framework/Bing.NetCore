@@ -16,13 +16,15 @@ namespace Bing.Finders
         private readonly object _lockObj = new object();
 
         /// <summary>
-        /// 项缓存
+        /// 已缓存的项目
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         protected readonly List<TItem> ItemsCache = new List<TItem>();
 
         /// <summary>
-        /// 是否已查找过
+        /// 标记是否已完成查找
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         protected bool Found = false;
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace Bing.Finders
         }
 
         /// <summary>
-        /// 重写已实现所有项的查找
+        /// 执行所有项目的查找工作
         /// </summary>
         protected abstract TItem[] FindAllItems();
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.DependencyInjection;
 
 namespace Bing.Finders
 {
@@ -6,6 +7,7 @@ namespace Bing.Finders
     /// 定义查找器
     /// </summary>
     /// <typeparam name="TItem">要查找的项类型</typeparam>
+    [IgnoreDependency]
     public interface IFinder<out TItem>
     {
         /// <summary>

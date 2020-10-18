@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.AspNetCore.ExceptionHandling
+﻿namespace Bing.AspNetCore.ExceptionHandling
 {
     /// <summary>
     /// 异常处理选项配置
