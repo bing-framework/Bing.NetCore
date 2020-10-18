@@ -4,6 +4,7 @@ using Bing.Aspects;
 using Bing.DependencyInjection;
 using Bing.Logs;
 using Bing.Logs.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Samples.Hangfire.Jobs
 {
@@ -25,9 +26,12 @@ namespace Bing.Samples.Hangfire.Jobs
         [Autowired]
         protected ILog Logger { get; set; }
 
-        public DebugLogJob(ILogContext logContext)
+        protected ILogger<DebugLogJob> SysLogger { get; set; }
+
+        public DebugLogJob(ILogContext logContext, ILogger<DebugLogJob> logger)
         {
             LogContext = logContext;
+            SysLogger = logger;
         }
 
         /// <summary>
@@ -35,17 +39,35 @@ namespace Bing.Samples.Hangfire.Jobs
         /// </summary>
         public void WriteLog()
         {
-            Debug.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志 | {LogContext.TraceId} | {LogContext.LogId}");
+            Debug.WriteLine("-------------------------------------------------------------------------------------------------------------------------------------------");
+            Debug.WriteLine($"1、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
             var log = GetLog();
             log.Class(GetType().FullName)
                 .Caption("DebugLogJob")
-                .Content($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志 | {LogContext.TraceId} | {LogContext.LogId}")
+                .Content($"2、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
                 .Trace();
 
             Logger.Class(GetType().FullName)
                 .Caption("DebugLogJob")
-                .Content($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志 | {LogContext.TraceId} | {LogContext.LogId}")
+                .Content($"3-1、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
                 .Trace();
+            Logger.Class(GetType().FullName)
+                .Caption("DebugLogJob")
+                .Content($"3-2、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
+                .Trace();
+            Logger.Class(GetType().FullName)
+                .Caption("DebugLogJob")
+                .Content($"3-3、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
+                .Trace();
+            Logger.Class(GetType().FullName)
+                .Caption("DebugLogJob")
+                .Content($"3-4、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
+                .Trace();
+
+            SysLogger.LogInformation($"4-1、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
+            SysLogger.LogInformation($"4-2、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
+            SysLogger.LogInformation($"4-3、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
+            SysLogger.LogInformation($"4-4、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
         }
 
         private ILog GetLog()

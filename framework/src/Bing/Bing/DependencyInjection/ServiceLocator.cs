@@ -10,13 +10,14 @@ namespace Bing.DependencyInjection
     /// 如果当前处于HttpContext有效的范围内，可正常解析<see cref="ServiceLifetime.Scoped"/>的服务
     /// 注：服务定位器尚不能正常解析 RootServiceProvider.CreateScope() 生命周期内的 Scoped 的服务
     /// </summary>
-    public sealed class ServiceLocator : IDisposable
+    public sealed class ServiceLocator : Disposable
     {
         #region 字段
 
         /// <summary>
         /// 懒加载实例
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         private static readonly Lazy<ServiceLocator> InstanceLazy = new Lazy<ServiceLocator>(() => new ServiceLocator());
 
         /// <summary>
@@ -189,10 +190,12 @@ namespace Bing.DependencyInjection
         /// <summary>
         /// 释放资源
         /// </summary>
-        public void Dispose()
+        /// <param name="disposing">是否释放中</param>
+        protected override void Dispose(bool disposing)
         {
             _services = null;
             _provider = null;
+            base.Dispose(disposing);
         }
 
         #endregion

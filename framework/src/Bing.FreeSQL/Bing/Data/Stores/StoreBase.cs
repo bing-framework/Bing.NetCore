@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Domain.Entities;
-using FreeSql;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 
 namespace Bing.Data.Stores
