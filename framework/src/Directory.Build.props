@@ -8,7 +8,7 @@
     <VersionQuality>20201012-1</VersionQuality>
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
     <!--<VersionSuffix></VersionSuffix>-->
-    <VersionSuffix>preview-$(VersionQuality)</VersionSuffix>
+    <!--<VersionSuffix>preview-$(VersionQuality)</VersionSuffix>-->
   </PropertyGroup>
 
   <PropertyGroup>
