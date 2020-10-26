@@ -21,6 +21,8 @@ namespace Bing.AutoMapper.Tests
         {
             CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
                 .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue));
+
+            //CreateMap<MapTest.T1, MapTest.T1Dto>();
         }
     }
 }

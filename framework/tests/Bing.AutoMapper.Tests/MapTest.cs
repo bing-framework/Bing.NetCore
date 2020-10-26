@@ -155,7 +155,8 @@ namespace Bing.AutoMapper.Tests
         [Fact]
         public void Test_MapTo_MultipleThread()
         {
-            Thread.ParallelExecute(() => {
+            Thread.ParallelExecute(() =>
+            {
                 var sample = new Sample { StringValue = "a" };
                 var sample2 = sample.MapTo<Sample2>();
                 Assert.Equal("a", sample2.StringValue);
@@ -206,9 +207,54 @@ namespace Bing.AutoMapper.Tests
         [Fact]
         public void Test_MapTo_CustomProfile()
         {
-            var source = new AutoMapperSourceSample {SourceStringValue = "666"};
+            var source = new AutoMapperSourceSample { SourceStringValue = "666" };
             var target = source.MapTo<AutoMapperTargetSample>();
             Assert.Equal("666", target.TargetSampleValue);
+        }
+
+        [Fact]
+        public void Test_MapTo_ListToList()
+        {
+            var mm = new List<T2>();
+            mm.Add(new T2 { A = "123" });
+            mm.Add(new T2 { A = "123" });
+            mm.Add(new T2 { A = "123" });
+            mm.Add(new T2 { A = "123" });
+            var ff2 = mm.MapTo<List<T2Dto>>();
+
+            var t1 = new T1();
+            t1.A = "123123";
+            t1.T2 = new List<T2>();
+            t1.T2.Add(new T2 { A = "123" });
+            t1.T2.Add(new T2 { A = "123" });
+            t1.T2.Add(new T2 { A = "123" });
+            t1.T2.Add(new T2 { A = "123" });
+            t1.T2.Add(new T2 { A = "123" });
+            var ff1 = t1.MapTo<T1Dto>();
+        }
+
+        public class T1
+        {
+            public string A { get; set; }
+
+            public List<T2> T2 { get; set; }
+        }
+
+        public class T2
+        {
+            public string A { get; set; }
+        }
+
+        public class T1Dto
+        {
+            public string A { get; set; }
+
+            public List<T2Dto> T2 { get; set; }
+        }
+
+        public class T2Dto
+        {
+            public string A { get; set; }
         }
     }
 }

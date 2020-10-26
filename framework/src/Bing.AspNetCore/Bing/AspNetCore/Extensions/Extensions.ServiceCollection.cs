@@ -21,7 +21,7 @@ namespace Bing.AspNetCore.Extensions
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="assembly">程序集</param>
-        public static void AddConfigType(this IServiceCollection services, Assembly assembly)
+        public static IServiceCollection AddConfigType(this IServiceCollection services, Assembly assembly)
         {
             var typeInfos = assembly.GetTypes().Where(type => type.GetCustomAttributes<ConfigTypeAttribute>().Any())
                 .Select(x => new {Type = x, Attribute = x.GetCustomAttributes<ConfigTypeAttribute>().FirstOrDefault()})
@@ -49,6 +49,7 @@ namespace Bing.AspNetCore.Extensions
                     return result;
                 }, attribute.ReloadOnChange ? ServiceLifetime.Transient : ServiceLifetime.Singleton));
             }
+            return services;
         }
 
         /// <summary>

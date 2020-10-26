@@ -56,8 +56,26 @@ namespace Bing.AutoMapper
             }
             catch (AutoMapperMappingException e)
             {
-                return GetResult(GetType(e.MemberMap.SourceType), GetType(e.MemberMap.DestinationType), source,
-                    destination);
+                return TryGetResult(e,source, destination);
+            }
+        }
+
+        /// <summary>
+        /// 尝试获取映射结果
+        /// </summary>
+        /// <typeparam name="TDestination">目标类型</typeparam>
+        /// <param name="ex">AutoMapper映射异常</param>
+        /// <param name="source">源对象</param>
+        /// <param name="destination">目标对象</param>
+        private static TDestination TryGetResult<TDestination>(AutoMapperMappingException ex, object source, TDestination destination)
+        {
+            try
+            {
+                return GetResult(GetType(ex.MemberMap.SourceType), GetType(ex.MemberMap.DestinationType), source, destination);
+            }
+            catch (AutoMapperMappingException)
+            {
+                return GetResult(ex.MemberMap.SourceType, ex.MemberMap.DestinationType, source, destination);
             }
         }
 
@@ -121,7 +139,7 @@ namespace Bing.AutoMapper
                     config.RegisterTypeMap(map);
                 AutoMapperConfiguration.Init(config);
             }
-            
+
         }
 
         /// <summary>
