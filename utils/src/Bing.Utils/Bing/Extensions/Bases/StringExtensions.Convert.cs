@@ -16,7 +16,6 @@ namespace Bing.Extensions
     /// </summary>
     public static partial class StringExtensions
     {
-
         #region ToXDocument(转换成XDocument)
 
         /// <summary>

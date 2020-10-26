@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Bing.Helpers;
 using Enum = System.Enum;
 
 // ReSharper disable once CheckNamespace
@@ -15,7 +16,6 @@ namespace Bing.Extensions
     /// </summary>
     public static partial class StringExtensions
     {
-
         #region ExtractAround(提取指定范围字符串)
 
         /// <summary>
@@ -781,5 +781,19 @@ namespace Bing.Extensions
 
         #endregion
 
+        #region ReplacePath(替换路径)
+
+        /// <summary>
+        /// 替换路径。自动调整windows/linux下面文件目录斜杠的处理
+        /// </summary>
+        /// <param name="path">路径。</param>
+        public static string ReplacePath(this string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return string.Empty;
+            return Sys.IsWindows ? path.Replace("/", "\\") : path.Replace("\\", "/");
+        }
+
+        #endregion
     }
 }
