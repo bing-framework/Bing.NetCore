@@ -2,7 +2,7 @@
 using System.Threading;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
-using Bing.Sessions;
+using Bing.Users;
 using Enum = Bing.Helpers.Enum;
 
 namespace Bing.Logs
@@ -36,9 +36,9 @@ namespace Bing.Logs
         public ILogContext Context { get; }
 
         /// <summary>
-        /// 用户会话
+        /// 当前用户
         /// </summary>
-        public ISession Session { get; set; }
+        public ICurrentUser CurrentUser { get; set; }
 
         /// <summary>
         /// 调试级别是否启用
@@ -64,14 +64,14 @@ namespace Bing.Logs
         /// </summary>
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
-        /// <param name="session">用户会话</param>
+        /// <param name="currentUser">当前用户</param>
         protected LogBase(ILogProvider provider
             , ILogContext context
-            , Bing.Sessions.ISession session)
+            , ICurrentUser currentUser)
         {
             Provider = provider;
             Context = context;
-            Session = session ?? Bing.Sessions.NullSession.Instance;
+            CurrentUser = currentUser ?? NullCurrentUser.Instance;
         }
 
         /// <summary>
@@ -80,15 +80,15 @@ namespace Bing.Logs
         /// <param name="name">名称</param>
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
-        /// <param name="session">用户会话</param>
+        /// <param name="currentUser">当前用户</param>
         protected LogBase(string name
             , ILogProvider provider
             , ILogContext context
-            , Bing.Sessions.ISession session)
+            , ICurrentUser currentUser)
         {
             Provider = provider;
             Context = context;
-            Session = session ?? Bing.Sessions.NullSession.Instance;
+            CurrentUser = currentUser ?? NullCurrentUser.Instance;
             Name = name;
         }
 
@@ -256,7 +256,7 @@ namespace Bing.Logs
             content.ThreadId = Thread.CurrentThread.ManagedThreadId.ToString();
             content.Browser = Context.Browser;
             content.Url = Context.Url;
-            content.UserId = Session.UserId;
+            content.UserId = CurrentUser.UserId;
         }
 
         /// <summary>

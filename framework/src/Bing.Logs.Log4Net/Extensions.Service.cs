@@ -1,7 +1,7 @@
 ﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Core;
 using Bing.Logs.Formats;
-using Bing.Sessions;
+using Bing.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -46,8 +46,8 @@ namespace Bing.Logs.Log4Net
                 var format = x.GetService<ILogFormat>();
                 var provider = new LogProviderFactory().Create(name, format);
                 var context = x.GetService<ILogContext>();
-                var session = x.GetService<ISession>();
-                return new Log(name, provider, context, session, "");
+                var currentUser = x.GetService<ICurrentUser>();
+                return new Log(name, provider, context, currentUser, "");
             });
             Log4NetProvider.InitRepository(configFile);
         }

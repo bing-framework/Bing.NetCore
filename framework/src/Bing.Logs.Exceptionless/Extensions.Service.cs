@@ -1,7 +1,7 @@
 ﻿using System;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Core;
-using Bing.Sessions;
+using Bing.Users;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -44,8 +44,8 @@ namespace Bing.Logs.Exceptionless
             {
                 var provider = new LogProviderFactory().Create(name, NullLogFormat.Instance);
                 var logContext = x.GetService<ILogContext>();
-                var session = x.GetService<ISession>();
-                return new Log(name, provider, logContext, session, "");
+                var currentUser = x.GetService<ICurrentUser>();
+                return new Log(name, provider, logContext, currentUser, "");
             });
             configAction?.Invoke(ExceptionlessClient.Default.Configuration);
         }

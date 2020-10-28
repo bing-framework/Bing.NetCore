@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using Bing.Helpers;
 using Bing.Security.Claims;
 
@@ -145,5 +146,11 @@ namespace Bing.Users
         /// </summary>
         /// <param name="currentUser">当前用户</param>
         public static string GetTenantName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantName)?.Value;
+
+        /// <summary>
+        /// 获取角色名称列表
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string[] GetRoleNames(this ICurrentUser currentUser) => currentUser.FindClaims(BingClaimTypes.RoleNames)?.Select(x => x.Value).ToArray();
     }
 }

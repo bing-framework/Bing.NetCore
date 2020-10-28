@@ -1,11 +1,9 @@
-﻿using System;
+﻿using System.Linq;
 using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;
 using Bing.Logs.Formats;
-using Bing.Security.Extensions;
-using Bing.Sessions;
 using Bing.Users;
 
 namespace Bing.Logs
@@ -31,9 +29,9 @@ namespace Bing.Logs
         /// <param name="providerFactory">日志提供程序工厂</param>
         /// <param name="context">日志上下文</param>
         /// <param name="format">日志格式器</param>
-        /// <param name="session">用户会话</param>
-        public Log(ILogProviderFactory providerFactory, ILogContext context, ILogFormat format, ISession session)
-            : base(providerFactory.Create("", format), context, session)
+        /// <param name="currentUser">当前用户</param>
+        public Log(ILogProviderFactory providerFactory, ILogContext context, ILogFormat format, ICurrentUser currentUser)
+            : base(providerFactory.Create("", format), context, currentUser)
         {
         }
 
@@ -42,9 +40,9 @@ namespace Bing.Logs
         /// </summary>
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
-        /// <param name="session">用户会话</param>
+        /// <param name="currentUser">当前用户</param>
         /// <param name="class">类名</param>
-        public Log(ILogProvider provider, ILogContext context, ISession session, string @class) : base(provider, context, session) => _class = @class;
+        public Log(ILogProvider provider, ILogContext context, ICurrentUser currentUser, string @class) : base(provider, context, currentUser) => _class = @class;
 
         /// <summary>
         /// 初始化一个<see cref="Log"/>类型的实例
@@ -52,10 +50,10 @@ namespace Bing.Logs
         /// <param name="name">名称</param>
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
-        /// <param name="session">用户会话</param>
+        /// <param name="currentUser">当前用户</param>
         /// <param name="class">类名</param>
-        public Log(string name, ILogProvider provider, ILogContext context, ISession session, string @class) : base(
-            name, provider, context, session) =>
+        public Log(string name, ILogProvider provider, ILogContext context, ICurrentUser currentUser, string @class) : base(
+            name, provider, context, currentUser) =>
             _class = @class;
 
         /// <summary>
@@ -70,10 +68,10 @@ namespace Bing.Logs
         protected override void Init(LogContent content)
         {
             base.Init(content);
-            content.Tenant = Session.GetTenantName();
-            content.Application = Session.GetApplicationName();
-            content.Operator = Session.GetFullName();
-            content.Role = Session.GetRoleName();
+            content.Tenant = CurrentUser.GetTenantName();
+            content.Application = CurrentUser.GetApplicationName();
+            content.Operator = CurrentUser.GetFullName();
+            content.Role = CurrentUser.GetRoleNames()?.FirstOrDefault();
         }
 
         /// <summary>
@@ -109,8 +107,8 @@ namespace Bing.Logs
             var providerFactory = GetLogProviderFactory();
             var format = GetLogFormat();
             var context = GetLogContext();
-            var session = GetSession();
-            return new Log(providerFactory.Create(logName, format), context, session, @class);
+            var currentUser = GetCurrentUser();
+            return new Log(providerFactory.Create(logName, format), context, currentUser, @class);
         }
 
         /// <summary>
@@ -159,17 +157,17 @@ namespace Bing.Logs
         }
 
         /// <summary>
-        /// 获取用户会话
+        /// 获取当前用户
         /// </summary>
-        private static ISession GetSession()
+        private static ICurrentUser GetCurrentUser()
         {
             try
             {
-                return ServiceLocator.Instance.GetService<ISession>() ?? Bing.Sessions.NullSession.Instance;
+                return ServiceLocator.Instance.GetService<ICurrentUser>() ?? NullCurrentUser.Instance;
             }
             catch
             {
-                return Bing.Sessions.NullSession.Instance;
+                return NullCurrentUser.Instance;
             }
         }
     }
