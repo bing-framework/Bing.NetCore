@@ -4,10 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Bing.MiniProfiler是Bing应用框架的性能监测组件类库。
 Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成</Description>
+    <UserSecretsId>d526ed1d-e619-4ece-bd7e-a5df73c5d2ce</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.1.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.1" />
   </ItemGroup>
 
   <ItemGroup>

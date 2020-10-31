@@ -6,9 +6,9 @@
     <AssemblyName>Bing.FreeSQL</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FreeSql" Version="1.7.1" />
-    <PackageReference Include="FreeSql.DbContext" Version="1.7.1" />
-    <PackageReference Include="FreeSql.Extensions.Linq" Version="1.7.1" />
+    <PackageReference Include="FreeSql" Version="1.10.1" />
+    <PackageReference Include="FreeSql.DbContext" Version="1.10.1" />
+    <PackageReference Include="FreeSql.Extensions.Linq" Version="1.10.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />

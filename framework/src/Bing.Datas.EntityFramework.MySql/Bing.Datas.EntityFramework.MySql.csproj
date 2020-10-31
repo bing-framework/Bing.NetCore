@@ -7,7 +7,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.6" />
   </ItemGroup>
 
   <ItemGroup>

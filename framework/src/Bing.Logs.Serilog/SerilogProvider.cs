@@ -103,7 +103,7 @@ namespace Bing.Logs.Serilog
         /// <param name="path">路径</param>
         /// <param name="name">名称</param>
         private static LoggerConfiguration GetOutputConfiguration(LoggerConfiguration configuration, LogEventLevel level, string path, string name) =>
-            configuration.Filter.ByIncludingOnly(p => p.Level.Equals(level)).WriteTo.RollingFile(
+            configuration.Filter.ByIncludingOnly(p => p.Level.Equals(level)).WriteTo.File(
                 Path.Combine($"{path}\\{name}\\{DateTime.Now:yyyy-MM-dd}", name + "-{Hour}.log"), level);
 
         #endregion
