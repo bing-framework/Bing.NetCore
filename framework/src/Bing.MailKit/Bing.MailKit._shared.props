@@ -1,0 +1,16 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.MailKit</AssemblyName>
+    <PackageId>Bing.MailKit</PackageId>
+    <Description>Bing.MailKit是Bing应用框架的邮件操作类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Emailing\Bing.Emailing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.3.0" />
+  </ItemGroup>
+
+</Project>

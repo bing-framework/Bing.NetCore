@@ -3,25 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29911.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-utils", "01-utils", "{BAF4D46D-7249-4268-AF58-3212B9C9E7C5}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-framework", "02-framework", "{A3E29077-2385-4F4F-B2BB-01975E24979C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}"
-	ProjectSection(SolutionItems) = preProject
-		utils\src\Directory.Build.props = utils\src\Directory.Build.props
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-framework", "01-framework", "{A3E29077-2385-4F4F-B2BB-01975E24979C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}"
-	ProjectSection(SolutionItems) = preProject
-		framework\src\Directory.Build.props = framework\src\Directory.Build.props
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils", "utils\src\Bing.Utils\Bing.Utils.csproj", "{836F41B5-048D-4259-848C-2EE9ACF94AD7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.DateTime", "utils\src\Bing.Utils.DateTime\Bing.Utils.DateTime.csproj", "{F9F79EC5-4D7C-4327-9586-C683BF712993}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Drawing", "utils\src\Bing.Utils.Drawing\Bing.Utils.Drawing.csproj", "{154FD189-7AC8-4494-9D74-9FD1BA77508A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing", "framework\src\Bing\Bing.csproj", "{F573919A-D73A-4186-9E9D-9A514A5D7244}"
 EndProject
@@ -72,9 +56,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_Solution
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		common.props = common.props
 		Directory.Build.targets = Directory.Build.targets
 		LICENSE = LICENSE
 		README.md = README.md
+		version.props = version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6690993E-6659-451F-907C-A48FE1121D40}"
@@ -127,8 +113,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Application.Contra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Validation.Abstractions", "framework\src\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj", "{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Http", "utils\src\Bing.Utils.Http\Bing.Utils.Http.csproj", "{9405E836-7987-4206-8B76-FD428C2D6F32}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing", "framework\src\Bing.Auditing\Bing.Auditing.csproj", "{F084AFFB-9136-43CE-874C-777DBA4D5205}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Emailing", "framework\src\Bing.Emailing\Bing.Emailing.csproj", "{5D81881D-FF17-4902-8BEB-A1D58D0EF688}"
@@ -153,7 +137,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Data", "framework\src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Data.Sql", "framework\src\Bing.Data.Sql\Bing.Data.Sql.csproj", "{2DD64F70-8DAF-4C70-8986-BF2812A95C8F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-components", "03-components", "{8E2070BF-F6CF-47CC-8DB8-56B74EDFA7EB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-components", "02-components", "{8E2070BF-F6CF-47CC-8DB8-56B74EDFA7EB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{9EC1188A-A524-4D44-B3DA-37065AA96E2D}"
 	ProjectSection(SolutionItems) = preProject
@@ -169,13 +153,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MultiTenancy", "framework\src\Bing.MultiTenancy\Bing.MultiTenancy.csproj", "{C19FEF8C-99C0-4C8A-9499-138A79433AA7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MailKit.Tests", "framework\tests\Bing.MailKit.Tests\Bing.MailKit.Tests.csproj", "{247D8684-6AA3-45E6-B519-4332C89CE1F4}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{35084BE9-60D2-4618-A29C-55EB84DCBC92}"
-	ProjectSection(SolutionItems) = preProject
-		utils\tests\Directory.Build.props = utils\tests\Directory.Build.props
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Utils.Tests", "utils\tests\Bing.Utils.Tests\Bing.Utils.Tests.csproj", "{A509F172-CA26-4F9E-9414-2903477B1EE8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.FreeSQL", "framework\src\Bing.FreeSQL\Bing.FreeSQL.csproj", "{241F44DA-4A52-4086-8E0B-6ABDB662387F}"
 EndProject
@@ -205,7 +182,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Abstractions", "framew
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-samples", "04-samples", "{3F07E19F-C285-47B5-9441-46F375ECD5C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Hangfire", "samples\Bing.Samples.Hangfire\Bing.Samples.Hangfire.csproj", "{08B987F1-0DAC-4F94-9B56-C992B731B943}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Hangfire", "samples\Bing.Samples.Hangfire\Bing.Samples.Hangfire.csproj", "{08B987F1-0DAC-4F94-9B56-C992B731B943}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "asset", "asset", "{F40A8736-2FEC-446A-99FD-3660729893FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{D77F42E0-7AF5-4CE7-AC49-84BC6C6ADC34}"
+	ProjectSection(SolutionItems) = preProject
+		asset\props\misc.props = asset\props\misc.props
+		asset\props\package.props = asset\props\package.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -213,18 +198,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{836F41B5-048D-4259-848C-2EE9ACF94AD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{836F41B5-048D-4259-848C-2EE9ACF94AD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{836F41B5-048D-4259-848C-2EE9ACF94AD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{836F41B5-048D-4259-848C-2EE9ACF94AD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F9F79EC5-4D7C-4327-9586-C683BF712993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9F79EC5-4D7C-4327-9586-C683BF712993}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9F79EC5-4D7C-4327-9586-C683BF712993}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9F79EC5-4D7C-4327-9586-C683BF712993}.Release|Any CPU.Build.0 = Release|Any CPU
-		{154FD189-7AC8-4494-9D74-9FD1BA77508A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{154FD189-7AC8-4494-9D74-9FD1BA77508A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{154FD189-7AC8-4494-9D74-9FD1BA77508A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{154FD189-7AC8-4494-9D74-9FD1BA77508A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F573919A-D73A-4186-9E9D-9A514A5D7244}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F573919A-D73A-4186-9E9D-9A514A5D7244}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F573919A-D73A-4186-9E9D-9A514A5D7244}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -381,10 +354,6 @@ Global
 		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9405E836-7987-4206-8B76-FD428C2D6F32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9405E836-7987-4206-8B76-FD428C2D6F32}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9405E836-7987-4206-8B76-FD428C2D6F32}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9405E836-7987-4206-8B76-FD428C2D6F32}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F084AFFB-9136-43CE-874C-777DBA4D5205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F084AFFB-9136-43CE-874C-777DBA4D5205}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F084AFFB-9136-43CE-874C-777DBA4D5205}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -437,10 +406,6 @@ Global
 		{247D8684-6AA3-45E6-B519-4332C89CE1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{247D8684-6AA3-45E6-B519-4332C89CE1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{247D8684-6AA3-45E6-B519-4332C89CE1F4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A509F172-CA26-4F9E-9414-2903477B1EE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A509F172-CA26-4F9E-9414-2903477B1EE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A509F172-CA26-4F9E-9414-2903477B1EE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A509F172-CA26-4F9E-9414-2903477B1EE8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{241F44DA-4A52-4086-8E0B-6ABDB662387F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{241F44DA-4A52-4086-8E0B-6ABDB662387F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{241F44DA-4A52-4086-8E0B-6ABDB662387F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -462,11 +427,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A} = {BAF4D46D-7249-4268-AF58-3212B9C9E7C5}
 		{472FFE79-B8B1-41A1-91F2-CFA0F8406BC9} = {A3E29077-2385-4F4F-B2BB-01975E24979C}
-		{836F41B5-048D-4259-848C-2EE9ACF94AD7} = {82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}
-		{F9F79EC5-4D7C-4327-9586-C683BF712993} = {82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}
-		{154FD189-7AC8-4494-9D74-9FD1BA77508A} = {82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}
 		{F573919A-D73A-4186-9E9D-9A514A5D7244} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 		{7884D11A-8935-4BB0-B027-64EE9CC2CE33} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 		{EA652176-7921-4F6C-9B38-C722B96D7A0E} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
@@ -510,7 +471,6 @@ Global
 		{CAC738F2-8F95-4940-90D2-76DABF403581} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{577D3EA3-5342-4E0D-AE51-39CBEE217089} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{DB0D25EE-7489-4DD1-8CF9-A8F839B58446} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
-		{9405E836-7987-4206-8B76-FD428C2D6F32} = {82B3C8E7-C7BE-4922-BD2E-2B1FE462ED3A}
 		{F084AFFB-9136-43CE-874C-777DBA4D5205} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{5D81881D-FF17-4902-8BEB-A1D58D0EF688} = {B8142AAE-3792-44C0-9197-0F14A9749E33}
 		{256EB128-60DC-406C-BED0-9D0013A6B49A} = {052D4342-8B65-4836-A9B6-681A7812760E}
@@ -529,8 +489,6 @@ Global
 		{9B472B86-C6CD-42D8-A610-A54012BDCEC5} = {16E3259B-3FBE-43BB-976E-F23409F73787}
 		{C19FEF8C-99C0-4C8A-9499-138A79433AA7} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{247D8684-6AA3-45E6-B519-4332C89CE1F4} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
-		{35084BE9-60D2-4618-A29C-55EB84DCBC92} = {BAF4D46D-7249-4268-AF58-3212B9C9E7C5}
-		{A509F172-CA26-4F9E-9414-2903477B1EE8} = {35084BE9-60D2-4618-A29C-55EB84DCBC92}
 		{241F44DA-4A52-4086-8E0B-6ABDB662387F} = {93A682FB-8EA0-4F10-AC03-CD688025E624}
 		{2F9FBA44-C1F8-4E34-B3CE-9EEBEB1AA7B2} = {93A682FB-8EA0-4F10-AC03-CD688025E624}
 		{16E3259B-3FBE-43BB-976E-F23409F73787} = {9EC1188A-A524-4D44-B3DA-37065AA96E2D}
@@ -545,6 +503,8 @@ Global
 		{B5285F1C-479F-43F5-B3DE-3E930516AF6D} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{040209E9-B364-47E0-8922-89210ACCFB24} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 		{08B987F1-0DAC-4F94-9B56-C992B731B943} = {3F07E19F-C285-47B5-9441-46F375ECD5C9}
+		{F40A8736-2FEC-446A-99FD-3660729893FC} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
+		{D77F42E0-7AF5-4CE7-AC49-84BC6C6ADC34} = {F40A8736-2FEC-446A-99FD-3660729893FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

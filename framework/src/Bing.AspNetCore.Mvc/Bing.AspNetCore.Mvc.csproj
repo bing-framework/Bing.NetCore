@@ -1,29 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\build\common.props"></Import>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace />
-    <Description>Bing.AspNetCore.Mvc 组件，提供AspNetCore的Mvc功能的封装</Description>
-  </PropertyGroup>
+  <Import Project="Bing.AspNetCore.Mvc._shared.props"/>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.AspNetCore.Mvc.Contracts\Bing.AspNetCore.Mvc.Contracts.csproj" />
-    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Bing\AspNetCore\Mvc\WebResource.Designer.cs">
-      <DependentUpon>WebResource.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Bing\AspNetCore\Mvc\WebResource.resx">
-      <LastGenOutput>WebResource.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
+  <Import Project="..\..\..\common.props"/>
 
 </Project>

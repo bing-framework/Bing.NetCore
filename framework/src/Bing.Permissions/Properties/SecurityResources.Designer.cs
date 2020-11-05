@@ -39,7 +39,7 @@ namespace Bing.Permissions.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bing.Permissions.Properties.SecurityResources", typeof(SecurityResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Properties.SecurityResources", typeof(SecurityResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

@@ -1,0 +1,27 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Logs</AssemblyName>
+    <PackageId>Bing.Logs</PackageId>
+    <Description>Bing.Logs是Bing应用框架的日志操作核心类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\LogResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LogResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\LogResource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

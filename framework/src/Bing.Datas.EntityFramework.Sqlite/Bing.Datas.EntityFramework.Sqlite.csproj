@@ -1,15 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\build\common.props"></Import>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
+  <Import Project="Bing.Datas.EntityFramework.Sqlite._shared.props"/>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.6" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
-  </ItemGroup>
+  <Import Project="..\..\..\common.props"/>
 
 </Project>

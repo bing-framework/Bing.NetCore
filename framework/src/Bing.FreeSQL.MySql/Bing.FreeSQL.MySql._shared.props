@@ -1,0 +1,12 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.FreeSQL.MySql</AssemblyName>
+    <PackageId>Bing.FreeSQL.MySql</PackageId>
+    <Description>Bing.FreeSQL.MySql 是Bing应用框架的FreeSQL.MySql数据访问类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.FreeSQL\Bing.FreeSQL.csproj" />
+  </ItemGroup>
+
+</Project>

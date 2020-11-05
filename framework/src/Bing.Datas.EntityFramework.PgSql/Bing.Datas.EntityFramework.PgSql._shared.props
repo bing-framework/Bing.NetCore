@@ -1,0 +1,16 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Datas.EntityFramework.PgSql</AssemblyName>
+    <PackageId>Bing.Datas.EntityFramework.PgSql</PackageId>
+    <Description>Bing.Datas.EntityFramework.PgSql 是Bing应用框架的EntityFrameworkCore.PgSql数据访问类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.4" />
+  </ItemGroup>
+
+</Project>
