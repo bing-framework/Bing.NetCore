@@ -1,0 +1,17 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Events</AssemblyName>
+    <PackageId>Bing.Events</PackageId>
+    <Description>Bing.Events是Bing应用框架的事件总线操作类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP" Version="2.6.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,20 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Datas.EntityFramework</AssemblyName>
+    <PackageId>Bing.Datas.EntityFramework</PackageId>
+    <Description>Bing.Datas.EntityFramework 是Bing应用框架的EntityFrameworkCore数据访问核心类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.6" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>

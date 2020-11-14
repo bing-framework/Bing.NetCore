@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Modularity;
 
 namespace Bing.Core.Modularity
 {
@@ -7,7 +6,7 @@ namespace Bing.Core.Modularity
     /// Bing 模块依赖
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class DependsOnModuleAttribute : Attribute, IDependedTypesProvider
+    public class DependsOnModuleAttribute : Attribute
     {
         /// <summary>
         /// 当前模块的依赖模块类型集合
@@ -19,10 +18,5 @@ namespace Bing.Core.Modularity
         /// </summary>
         /// <param name="dependedModuleTypes">依赖模块类型集合</param>
         public DependsOnModuleAttribute(params Type[] dependedModuleTypes) => DependedModuleTypes = dependedModuleTypes;
-
-        /// <summary>
-        /// 获取依赖类型数组
-        /// </summary>
-        public virtual Type[] GetDependedTypes() => DependedModuleTypes;
     }
 }

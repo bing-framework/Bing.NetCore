@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bing.Utils.Http" Version="1.2.2-preview-20201103-1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\components\src\Bing.Biz\Bing.Biz.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
@@ -25,7 +29,6 @@
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Permissions\Bing.Permissions.csproj" />
-    <ProjectReference Include="..\..\..\..\utils\src\Bing.Utils.Http\Bing.Utils.Http.csproj" />
   </ItemGroup>
 
 </Project>

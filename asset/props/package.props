@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup Label="Package">
+    <Authors>简玄冰</Authors>
+    <Company>简玄冰</Company>
+    <Copyright>简玄冰</Copyright>
+    <RepositoryUrl>https://github.com/bing-framework/Bing.NetCore</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/bing-framework/Bing.NetCore</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageTags>bing;applicationframework;dotnetcore;aspnetcore;</PackageTags>
+    <PackageReleaseNotes>Bing应用框架以MIT开源发布，可随意使用</PackageReleaseNotes>
+  </PropertyGroup>
+</Project>

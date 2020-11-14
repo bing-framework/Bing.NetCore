@@ -1,12 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\build\common.props"></Import>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace />
-  </PropertyGroup>
+  <Import Project="Bing.FreeSQL.MySql._shared.props"/>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.FreeSQL\Bing.FreeSQL.csproj" />
-  </ItemGroup>
+  <Import Project="..\..\..\common.props"/>
 
 </Project>

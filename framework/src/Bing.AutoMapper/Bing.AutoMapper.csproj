@@ -1,17 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\build\common.props"></Import>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Bing.AutoMapper是对象映射操作类库，解决配置映射的问题。
-Bing是一个.net core平台下的应用框架，旨在于提升小型团队的开发能力，由常用公共操作类、架构基类、第三方组件封装、第三方业务接口封装等组成。</Description>
-  </PropertyGroup>
+  <Import Project="Bing.AutoMapper._shared.props" />
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
-  </ItemGroup>
+  <Import Project="..\..\..\common.props" />
 
 </Project>

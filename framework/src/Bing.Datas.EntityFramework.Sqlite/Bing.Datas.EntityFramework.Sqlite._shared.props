@@ -1,0 +1,16 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Datas.EntityFramework.Sqlite</AssemblyName>
+    <PackageId>Bing.Datas.EntityFramework.Sqlite</PackageId>
+    <Description>Bing.Datas.EntityFramework.Sqlite 是Bing应用框架的EntityFrameworkCore.Sqlite数据访问类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.6" />
+  </ItemGroup>
+
+</Project>

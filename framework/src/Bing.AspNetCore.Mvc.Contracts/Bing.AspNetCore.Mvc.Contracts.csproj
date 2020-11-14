@@ -1,12 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\build\common.props"></Import>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Bing.AspNetCore.Mvc.Contracts 组件，抽象MVC的功能</Description>
-  </PropertyGroup>
+  <Import Project="Bing.AspNetCore.Mvc.Contracts._shared.props"/>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
-  </ItemGroup>
+  <Import Project="..\..\..\common.props"/>
 
 </Project>

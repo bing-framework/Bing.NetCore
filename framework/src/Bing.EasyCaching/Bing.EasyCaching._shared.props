@@ -1,0 +1,16 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.EasyCaching</AssemblyName>
+    <PackageId>Bing.EasyCaching</PackageId>
+    <Description>Bing.EasyCaching是实现缓存操作类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyCaching.Core" Version="0.6.1" />
+  </ItemGroup>
+
+</Project>
