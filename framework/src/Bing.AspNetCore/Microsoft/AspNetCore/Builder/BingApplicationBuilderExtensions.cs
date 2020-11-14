@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Bing.AspNetCore;
 using Bing.AspNetCore.ExceptionHandling;
+using Bing.AspNetCore.Security.Claims;
 using Bing.AspNetCore.Tracing;
 using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,12 @@ namespace Microsoft.AspNetCore.Builder
         }
 
         /// <summary>
+        /// 注册跟踪标识中间件
+        /// </summary>
+        /// <param name="app">应用程序构建器</param>
+        public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder app) => app.UseMiddleware<BingCorrelationIdMiddleware>();
+
+        /// <summary>
         /// 注册异常日志中间件
         /// </summary>
         /// <param name="app">应用程序构建器</param>
@@ -51,10 +58,11 @@ namespace Microsoft.AspNetCore.Builder
         }
 
         /// <summary>
-        /// 注册跟踪标识中间件
+        /// 注册声明映射中间件
         /// </summary>
         /// <param name="app">应用程序构建器</param>
-        public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder app) => app.UseMiddleware<BingCorrelationIdMiddleware>();
+        public static IApplicationBuilder UseBingClaimsMap(this IApplicationBuilder app) => app.UseMiddleware<BingClaimsMapMiddleware>();
+
 
         /// <summary>
         /// Bing框架初始化，适用于AspNetCore环境

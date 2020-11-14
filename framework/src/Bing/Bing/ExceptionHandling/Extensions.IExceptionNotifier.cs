@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Bing.ExceptionHandling
 {
     /// <summary>
-    /// 异常
+    /// 异常通知器(<see cref="IExceptionNotifier"/>) 扩展
     /// </summary>
     public static class ExceptionNotifierExtensions
     {
