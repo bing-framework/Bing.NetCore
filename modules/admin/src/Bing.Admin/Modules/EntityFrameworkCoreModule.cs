@@ -36,13 +36,20 @@ namespace Bing.Admin.Modules
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
             // 注册工作单元
             services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(connectionStr);
+            services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr);
             // 注册SqlQuery
-            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
-                {
-                    options.DatabaseType = DatabaseType.MySql;
-                    options.IsClearAfterExecution = true;
-                    //options.LogLevel = DataLogLevel.Off;
-                });
+            //services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
+            //    {
+            //        options.DatabaseType = DatabaseType.MySql;
+            //        options.IsClearAfterExecution = true;
+            //        //options.LogLevel = DataLogLevel.Off;
+            //    });
+            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(options =>
+            {
+                options.DatabaseType = DatabaseType.MySql;
+                options.IsClearAfterExecution = true;
+                //options.LogLevel = DataLogLevel.Off;
+            });
             // 注册SqlExecutor
             services.AddSqlExecutor();
             return services;
