@@ -112,7 +112,7 @@ namespace Bing.Uow
 
         #region 构造函数
 
-        protected UnitOfWorkBase(IFreeSql orm,  IServiceProvider serviceProvider) : base(orm, null)
+        protected UnitOfWorkBase(FreeSqlWrapper wrapper,  IServiceProvider serviceProvider) : base(wrapper.Orm, null)
         {
             TraceId = Guid.NewGuid().ToString();
             _serviceProvider = serviceProvider ?? ServiceLocator.Instance.GetService<IServiceProvider>();

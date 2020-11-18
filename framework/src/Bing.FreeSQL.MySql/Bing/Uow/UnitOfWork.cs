@@ -13,9 +13,9 @@ namespace Bing.Uow
         /// <summary>
         /// 初始化一个<see cref="UnitOfWork"/>类型的实例
         /// </summary>
-        /// <param name="orm">FreeSql</param>
+        /// <param name="wrapper">FreeSql包装</param>
         /// <param name="serviceProvider">服务提供程序</param>
-        protected UnitOfWork(IFreeSql orm, IServiceProvider serviceProvider = null) : base(orm, serviceProvider)
+        protected UnitOfWork(FreeSqlWrapper wrapper, IServiceProvider serviceProvider = null) : base(wrapper, serviceProvider)
         {
         }
 

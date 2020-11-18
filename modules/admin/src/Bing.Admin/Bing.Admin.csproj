@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj" />
     <ProjectReference Include="..\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service\Bing.Admin.Service.csproj" />
   </ItemGroup>

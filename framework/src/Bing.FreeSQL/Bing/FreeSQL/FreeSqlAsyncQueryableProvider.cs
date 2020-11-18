@@ -20,7 +20,7 @@ namespace Bing.FreeSQL
         /// <param name="queryable">数据源</param>
         public bool CanExecute<T>(IQueryable<T> queryable)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         /// <summary>

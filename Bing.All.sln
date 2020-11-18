@@ -192,6 +192,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{D77F42E0
 		asset\props\package.props = asset\props\package.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Data.FreeSQL", "modules\admin\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj", "{05DFA67F-C861-48F9-BBD9-7777972A918F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Data.EFCore", "modules\admin\src\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj", "{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -422,6 +426,14 @@ Global
 		{08B987F1-0DAC-4F94-9B56-C992B731B943}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08B987F1-0DAC-4F94-9B56-C992B731B943}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08B987F1-0DAC-4F94-9B56-C992B731B943}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05DFA67F-C861-48F9-BBD9-7777972A918F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05DFA67F-C861-48F9-BBD9-7777972A918F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05DFA67F-C861-48F9-BBD9-7777972A918F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05DFA67F-C861-48F9-BBD9-7777972A918F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -505,6 +517,8 @@ Global
 		{08B987F1-0DAC-4F94-9B56-C992B731B943} = {3F07E19F-C285-47B5-9441-46F375ECD5C9}
 		{F40A8736-2FEC-446A-99FD-3660729893FC} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 		{D77F42E0-7AF5-4CE7-AC49-84BC6C6ADC34} = {F40A8736-2FEC-446A-99FD-3660729893FC}
+		{05DFA67F-C861-48F9-BBD9-7777972A918F} = {BC0DA397-CCD6-407C-B675-87E5B702318A}
+		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57} = {BC0DA397-CCD6-407C-B675-87E5B702318A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

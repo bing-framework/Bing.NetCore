@@ -1,8 +1,15 @@
-﻿using System.ComponentModel;
-using Bing.Admin.Service.Extensions;
+﻿using System;
+using System.ComponentModel;
+using Bing.Admin.Data.Repositories.Systems;
+using Bing.Admin.Systems.Domain.Models;
+using Bing.Admin.Systems.Domain.Services.Implements;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Permissions.Extensions;
+using Bing.Permissions.Identity.Describers;
+using Bing.Permissions.Identity.Extensions;
+using Bing.Permissions.Identity.Options;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -33,13 +40,35 @@ namespace Bing.Admin.Modules
         {
             var configuration = services.GetConfiguration();
             // 添加权限服务
-            services.AddPermission(o =>
-            {
-                o.Store.StoreOriginalPassword = true;
-                o.Password.MinLength = 6;
-            });
+            AddPermission(services, o =>
+             {
+                 o.Store.StoreOriginalPassword = true;
+                 o.Password.MinLength = 6;
+             });
             // 添加Jwt认证
             services.AddJwt(configuration);
+            return services;
+        }
+
+        /// <summary>
+        /// 注册权限服务
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="setupAction">配置操作</param>
+        public IServiceCollection AddPermission(IServiceCollection services,
+            Action<PermissionOptions> setupAction = null)
+        {
+            var permissionOptions = new PermissionOptions();
+            setupAction?.Invoke(permissionOptions);
+            services.Configure(setupAction);
+            services.AddScoped<IdentityUserManager>();
+            services.AddScoped<IdentitySignInManager>();
+            services.AddIdentity<User, Role>(options => options.Load(permissionOptions))
+                .AddUserStore<UserRepository>()
+                .AddRoleStore<RoleRepository>()
+                .AddDefaultTokenProviders();
+            services.AddScoped<IdentityErrorDescriber, IdentityErrorChineseDescriber>();
+            services.AddLogging();
             return services;
         }
     }

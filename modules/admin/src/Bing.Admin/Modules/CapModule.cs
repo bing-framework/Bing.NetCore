@@ -9,6 +9,7 @@ using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Events.Cap;
 using DotNetCore.CAP;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -39,10 +40,13 @@ namespace Bing.Admin.Modules
         {
             services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
             LoadEvent(services);
+            var config = services.GetConfiguration();
+            var connection = config.GetConnectionString("DefaultConnection");
             // 添加事件总线服务
             services.AddCapEventBus(o =>
             {
-                o.UseEntityFramework<AdminUnitOfWork>();
+                //o.UseEntityFramework<AdminUnitOfWork>();
+                o.UseMySql(connection);
                 o.UseDashboard();
                 // 设置处理成功的数据在数据库中保存的时间（秒），为保证系统性能，数据会定期清理
                 o.SucceedMessageExpiredAfter = 24 * 3600;

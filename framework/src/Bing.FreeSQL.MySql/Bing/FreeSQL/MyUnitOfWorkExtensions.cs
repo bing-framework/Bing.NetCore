@@ -29,8 +29,9 @@ namespace Bing.FreeSQL
                 .UseLazyLoading(false);
             setupAction?.Invoke(freeSqlBuilder);
             var freeSql = freeSqlBuilder.Build();
+            var freeSqlWrapper = new FreeSqlWrapper() {Orm = freeSql};
             freeSql.GlobalFilter.Apply<ISoftDelete>("SoftDelete", x => x.IsDeleted == false);
-            services.AddSingleton<IFreeSql>(freeSql);
+            services.AddSingleton(freeSqlWrapper);
             services.AddScoped<TUnitOfWOrk, TUnitOfWorkImplementation>();
             return services;
         }

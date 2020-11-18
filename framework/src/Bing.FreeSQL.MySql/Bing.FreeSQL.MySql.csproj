@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Bing.FreeSQL.MySql._shared.props"/>
+  <Import Project="Bing.FreeSQL.MySql._shared.props" />
 
-  <Import Project="..\..\..\common.props"/>
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="1.10.3" />
+  </ItemGroup>
 
 </Project>

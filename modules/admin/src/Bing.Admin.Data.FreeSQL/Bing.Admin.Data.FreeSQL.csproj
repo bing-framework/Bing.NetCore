@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Bing.Admin.Data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.FreeSQL.MySql\Bing.FreeSQL.MySql.csproj" />
+    <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
+  </ItemGroup>
+
+</Project>
