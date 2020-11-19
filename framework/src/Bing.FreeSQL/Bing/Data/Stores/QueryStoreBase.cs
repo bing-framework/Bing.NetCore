@@ -128,7 +128,7 @@ namespace Bing.Data.Stores
         {
             if (id.SafeString().IsEmpty())
                 return null;
-            return await Set.Select.WhereDynamic(id).ToOneAsync();
+            return await Set.Select.WhereDynamic(id).ToOneAsync(cancellationToken);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Bing.Data.Stores
         {
             if (ids == null)
                 return null;
-            return await Set.Select.WhereDynamic(ids.ToArray()).ToListAsync();
+            return await Set.Select.WhereDynamic(ids.ToArray()).ToListAsync(cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Bing.Data.Stores
         {
             if (id == null)
                 return null;
-            return await Set.Select.NoTracking().WhereDynamic(id).ToOneAsync();
+            return await Set.Select.NoTracking().WhereDynamic(id).ToOneAsync(cancellationToken);
         }
 
         /// <summary>
@@ -247,11 +247,11 @@ namespace Bing.Data.Stores
         /// </summary>
         /// <param name="ids">标识列表</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
         {
             if (ids == null)
                 return null;
-            return await Set.Select.NoTracking().WhereDynamic(ids.ToArray()).ToListAsync();
+            return await Set.Select.NoTracking().WhereDynamic(ids.ToArray()).ToListAsync(cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -275,7 +275,7 @@ namespace Bing.Data.Stores
         /// </summary>
         /// <param name="predicate">查询条件</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await Set.Select.Where(predicate).ToOneAsync();
+        public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await Set.Select.Where(predicate).ToOneAsync(cancellationToken);
 
         /// <summary>
         /// 查找实体列表

@@ -73,7 +73,7 @@ namespace Bing.Data.Stores
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-            await Set.AddAsync(entity);
+            await Set.AddAsync(entity, cancellationToken);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Bing.Data.Stores
         {
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
-            await Set.AddRangeAsync(entities);
+            await Set.AddRangeAsync(entities, cancellationToken);
         }
 
         /// <summary>

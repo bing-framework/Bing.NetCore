@@ -21,15 +21,15 @@ namespace Bing.FreeSQL
         /// <param name="connection">连接字符串</param>
         /// <param name="setupAction">配置操作</param>
         public static IServiceCollection AddMySqlUnitOfWork<TUnitOfWOrk, TUnitOfWorkImplementation>(this IServiceCollection services, string connection, Action<FreeSqlBuilder> setupAction = null)
-        where TUnitOfWOrk : class, IUnitOfWork
-        where TUnitOfWorkImplementation : UnitOfWorkBase, TUnitOfWOrk
+            where TUnitOfWOrk : class, IUnitOfWork
+            where TUnitOfWorkImplementation : UnitOfWorkBase, TUnitOfWOrk
         {
             var freeSqlBuilder = new FreeSqlBuilder()
                 .UseConnectionString(DataType.MySql, connection)
                 .UseLazyLoading(false);
             setupAction?.Invoke(freeSqlBuilder);
             var freeSql = freeSqlBuilder.Build();
-            var freeSqlWrapper = new FreeSqlWrapper() {Orm = freeSql};
+            var freeSqlWrapper = new FreeSqlWrapper { Orm = freeSql };
             freeSql.GlobalFilter.Apply<ISoftDelete>("SoftDelete", x => x.IsDeleted == false);
             services.AddSingleton(freeSqlWrapper);
             services.AddScoped<TUnitOfWOrk, TUnitOfWorkImplementation>();

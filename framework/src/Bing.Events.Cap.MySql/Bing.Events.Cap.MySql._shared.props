@@ -1,0 +1,14 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Events.Cap.MySql</AssemblyName>
+    <PackageId>Bing.Events.Cap.MySql</PackageId>
+    <Description>Bing.Events.Cap.MySql是CAP2.6版本的源码，升级MySqlConnector，用于支持FreeSQL使用。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.35" />
+    <PackageReference Include="DotNetCore.CAP" Version="2.6.0" />
+    <PackageReference Include="MySqlConnector" Version="1.1.0" />
+  </ItemGroup>
+
+</Project>

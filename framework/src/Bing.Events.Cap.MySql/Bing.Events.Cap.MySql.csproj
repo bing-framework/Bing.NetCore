@@ -1,13 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="Bing.Events.Cap.MySql._shared.props"/>
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.35" />
-    <PackageReference Include="DotNetCore.CAP" Version="2.6.0" />
-    <PackageReference Include="MySqlConnector" Version="1.0.1" />
-  </ItemGroup>
+  <Import Project="..\..\..\common.props"/>
 
 </Project>

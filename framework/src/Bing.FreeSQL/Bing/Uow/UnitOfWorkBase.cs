@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Bing.Aspects;
 using Bing.Auditing;
@@ -14,8 +15,6 @@ using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.FreeSQL;
-using Bing.Helpers;
-using Bing.Sessions;
 using Bing.Users;
 using FreeSql;
 using FreeSql.Internal.CommonProvider;
@@ -112,6 +111,11 @@ namespace Bing.Uow
 
         #region 构造函数
 
+        /// <summary>
+        /// 初始化一个<see cref="UnitOfWorkBase"/>类型的实例
+        /// </summary>
+        /// <param name="wrapper">FreeSQL包装器</param>
+        /// <param name="serviceProvider">服务提供程序</param>
         protected UnitOfWorkBase(FreeSqlWrapper wrapper,  IServiceProvider serviceProvider) : base(wrapper.Orm, null)
         {
             TraceId = Guid.NewGuid().ToString();
@@ -148,10 +152,7 @@ namespace Bing.Uow
         /// 配置
         /// </summary>
         /// <param name="builder">配置生成器</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder builder)
-        {
-            base.OnConfiguring(builder);
-        }
+        protected override void OnConfiguring(DbContextOptionsBuilder builder) => base.OnConfiguring(builder);
 
         #endregion
 
@@ -334,12 +335,12 @@ namespace Bing.Uow
         /// <summary>
         /// 异步保存更改
         /// </summary>
-        public override async Task<int> SaveChangesAsync()
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SaveChangesBefore();
             var transactionActionManager = Create<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
-                return await base.SaveChangesAsync();
+                return await base.SaveChangesAsync(cancellationToken);
             return await TransactionCommit(transactionActionManager);
         }
 
