@@ -111,5 +111,17 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 .ToListAsync<ResourcePo>();
             return result;
         }
+
+        /// <summary>
+        /// 获取最大排序号
+        /// </summary>
+        /// <param name="applicationId">应用程序标识</param>
+        /// <param name="moduleId">模块标识</param>
+        public async Task<int?> GetMaxSortIdAsync(Guid applicationId, Guid? moduleId) =>
+            await Sql.Max<ResourcePo>(x => x.SortId)
+                .From<ResourcePo>("a")
+                .Where<ResourcePo>(x => x.ApplicationId == applicationId)
+                .Where<ResourcePo>(x => x.ParentId == moduleId)
+                .ToAsync<int?>();
     }
 }

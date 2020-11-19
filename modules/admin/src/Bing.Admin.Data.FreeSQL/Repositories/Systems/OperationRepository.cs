@@ -10,7 +10,6 @@ using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Domain.Repositories;
 using Bing.Extensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Admin.Data.Repositories.Systems
 {
@@ -52,8 +51,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// <param name="moduleId">模块标识</param>
         public async Task<int> GenerateSortIdAsync(Guid applicationId, Guid moduleId)
         {
-            var maxSortId = await _store.Find(x => x.ApplicationId == applicationId && x.ParentId == moduleId)
-                .MaxAsync(x => x.SortId);
+            var maxSortId = await _store.GetMaxSortIdAsync(applicationId, moduleId);
             return maxSortId.SafeValue() + 1;
         }
 

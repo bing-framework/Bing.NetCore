@@ -7,7 +7,6 @@ using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Domain.Repositories;
 using Bing.Extensions;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Admin.Data.Repositories.Systems
 {

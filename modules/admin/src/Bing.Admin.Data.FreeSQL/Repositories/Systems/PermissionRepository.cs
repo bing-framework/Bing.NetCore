@@ -6,7 +6,6 @@ using Bing.Admin.Data.Pos.Systems;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Domain.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Admin.Data.Repositories.Systems
 {
@@ -36,7 +35,7 @@ namespace Bing.Admin.Data.Repositories.Systems
                 where resource.ApplicationId == applicationId && permission.RoleId == roleId &&
                       permission.IsDeny == isDeny
                 select resource.Id;
-            return await queryable.ToListAsync();
+            return queryable.ToList();
 
         }
 
@@ -50,10 +49,10 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// <param name="roleId">角色标识</param>
         /// <param name="resourceIds">资源标识列表</param>
         public async Task<List<Guid>> GetPermissionIdsAsync(Guid roleId, List<Guid> resourceIds) =>
-            await Find()
+            Find()
                 .Where(t => t.RoleId == roleId && resourceIds.Contains(t.ResourceId))
                 .Select(t => t.Id)
-                .ToListAsync();
+                .ToList();
 
         #endregion
 

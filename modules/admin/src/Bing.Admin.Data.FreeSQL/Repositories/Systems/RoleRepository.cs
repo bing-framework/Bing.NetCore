@@ -8,7 +8,6 @@ using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Domain.Repositories;
 using Bing.Extensions;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Admin.Data.Repositories.Systems
 {
@@ -207,7 +206,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 获取用户的角色列表
         /// </summary>
         /// <param name="userId">用户标识</param>
-        public async Task<List<Role>> GetRolesAsync(Guid userId) => await GetRoleQueryable(userId).ToListAsync();
+        public async Task<List<Role>> GetRolesAsync(Guid userId) => GetRoleQueryable(userId).ToList();
 
         /// <summary>
         /// 获取角色查询对象
@@ -229,7 +228,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 获取用户的角色标识列表
         /// </summary>
         /// <param name="userId">用户标识</param>
-        public async Task<List<Guid>> GetRoleIdsAsync(Guid userId) => await GetRoleQueryable(userId).Select(t => t.Id).ToListAsync();
+        public async Task<List<Guid>> GetRoleIdsAsync(Guid userId) => GetRoleQueryable(userId).Select(t => t.Id).ToList();
 
         #endregion
 

@@ -24,6 +24,9 @@ namespace Bing.FreeSQL
             modelBuilder.Entity<TEntity>(builder =>
             {
                 MapTable(builder);
+                MapVersion(builder);
+                MapProperties(builder);
+                MapAssociations(builder);
             });
         }
 

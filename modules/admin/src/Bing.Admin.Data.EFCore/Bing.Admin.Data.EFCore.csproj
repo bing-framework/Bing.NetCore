@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="2.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
   </ItemGroup>

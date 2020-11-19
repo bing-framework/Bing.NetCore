@@ -43,5 +43,12 @@ namespace Bing.Admin.Data.Stores.Abstractions.Systems
         /// </summary>
         /// <param name="applicationId">应用程序标识</param>
         Task<List<ResourcePo>> GetOperationsAsync(Guid applicationId);
+
+        /// <summary>
+        /// 获取最大排序号
+        /// </summary>
+        /// <param name="applicationId">应用程序标识</param>
+        /// <param name="moduleId">模块标识</param>
+        Task<int?> GetMaxSortIdAsync(Guid applicationId, Guid? moduleId);
     }
 }
