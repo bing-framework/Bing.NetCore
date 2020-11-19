@@ -198,6 +198,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Data.EFCore", "m
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Events.Cap.MySql", "framework\src\Bing.Events.Cap.MySql\Bing.Events.Cap.MySql.csproj", "{7A4966A7-BE64-4589-8FD3-59AA8869A30F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.FreeRedis", "framework\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj", "{591D9280-33FD-4090-AFBE-D513A2A18316}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -440,6 +442,10 @@ Global
 		{7A4966A7-BE64-4589-8FD3-59AA8869A30F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A4966A7-BE64-4589-8FD3-59AA8869A30F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A4966A7-BE64-4589-8FD3-59AA8869A30F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{591D9280-33FD-4090-AFBE-D513A2A18316}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{591D9280-33FD-4090-AFBE-D513A2A18316}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{591D9280-33FD-4090-AFBE-D513A2A18316}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{591D9280-33FD-4090-AFBE-D513A2A18316}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -526,6 +532,7 @@ Global
 		{05DFA67F-C861-48F9-BBD9-7777972A918F} = {BC0DA397-CCD6-407C-B675-87E5B702318A}
 		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57} = {BC0DA397-CCD6-407C-B675-87E5B702318A}
 		{7A4966A7-BE64-4589-8FD3-59AA8869A30F} = {B5285F1C-479F-43F5-B3DE-3E930516AF6D}
+		{591D9280-33FD-4090-AFBE-D513A2A18316} = {9559AE76-7924-4647-8619-35EE39569D6C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
