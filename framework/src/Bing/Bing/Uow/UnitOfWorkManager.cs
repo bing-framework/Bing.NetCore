@@ -12,12 +12,12 @@ namespace Bing.Uow
         /// <summary>
         /// 工作单元集合
         /// </summary>
-        private readonly List<IUnitOfWork> _unitOfWorks;
+        private readonly HashSet<IUnitOfWork> _unitOfWorks;
 
         /// <summary>
         /// 初始化一个<see cref="UnitOfWorkManager"/>类型的实例
         /// </summary>
-        public UnitOfWorkManager() => _unitOfWorks = new List<IUnitOfWork>();
+        public UnitOfWorkManager() => _unitOfWorks = new HashSet<IUnitOfWork>();
 
         /// <summary>
         /// 提交
@@ -52,6 +52,6 @@ namespace Bing.Uow
         /// <summary>
         /// 获取工作单元集合
         /// </summary>
-        public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks() => _unitOfWorks.AsReadOnly();
+        public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks() => _unitOfWorks;
     }
 }
