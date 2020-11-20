@@ -39,7 +39,7 @@ namespace Bing.AspNetCore
             // 注入用户会话
             services.AddSingleton<ICurrentPrincipalAccessor, HttpContextCurrentPrincipalAccessor>();
             services.AddSingleton<Bing.Sessions.ISession, Bing.Sessions.HttpContextSession>();
-            // 注册编码
+            // 注册代码页
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             return services;
         }

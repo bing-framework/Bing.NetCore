@@ -192,13 +192,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{D77F42E0
 		asset\props\package.props = asset\props\package.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Data.FreeSQL", "modules\admin\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj", "{05DFA67F-C861-48F9-BBD9-7777972A918F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Data.FreeSQL", "modules\admin\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj", "{05DFA67F-C861-48F9-BBD9-7777972A918F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.Data.EFCore", "modules\admin\src\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj", "{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Data.EFCore", "modules\admin\src\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj", "{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Events.Cap.MySql", "framework\src\Bing.Events.Cap.MySql\Bing.Events.Cap.MySql.csproj", "{7A4966A7-BE64-4589-8FD3-59AA8869A30F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Events.Cap.MySql", "framework\src\Bing.Events.Cap.MySql\Bing.Events.Cap.MySql.csproj", "{7A4966A7-BE64-4589-8FD3-59AA8869A30F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.FreeRedis", "framework\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj", "{591D9280-33FD-4090-AFBE-D513A2A18316}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching.FreeRedis", "framework\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj", "{591D9280-33FD-4090-AFBE-D513A2A18316}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.FreeSQL", "modules\admin\src\Bing.Admin.FreeSQL\Bing.Admin.FreeSQL.csproj", "{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -446,6 +448,10 @@ Global
 		{591D9280-33FD-4090-AFBE-D513A2A18316}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{591D9280-33FD-4090-AFBE-D513A2A18316}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{591D9280-33FD-4090-AFBE-D513A2A18316}.Release|Any CPU.Build.0 = Release|Any CPU
+		{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -533,6 +539,7 @@ Global
 		{B05ACE65-AFBD-48B8-9C39-DF4DCF8B3E57} = {BC0DA397-CCD6-407C-B675-87E5B702318A}
 		{7A4966A7-BE64-4589-8FD3-59AA8869A30F} = {B5285F1C-479F-43F5-B3DE-3E930516AF6D}
 		{591D9280-33FD-4090-AFBE-D513A2A18316} = {9559AE76-7924-4647-8619-35EE39569D6C}
+		{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616} = {DB31385F-49B0-49FB-946A-DBAD2A070B7A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

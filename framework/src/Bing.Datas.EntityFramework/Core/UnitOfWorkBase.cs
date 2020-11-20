@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -15,11 +16,10 @@ using Bing.Data.Transaction;
 using Bing.Datas.EntityFramework.Logs;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
+using Bing.Domain.Entities.Events;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Logs;
-using Bing.Sessions;
 using Bing.Uow;
 using Bing.Users;
 using Microsoft.EntityFrameworkCore;
@@ -286,6 +286,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
+                var changed = ChangeTracker.Entries().Any();
+                if (!changed)
+                    return 0;
                 return SaveChanges();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -305,6 +308,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
+                var changed = ChangeTracker.Entries().Any();
+                if (!changed)
+                    return 0;
                 return await SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -408,6 +414,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="cancellationToken">取消令牌</param>
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            await DomainEventHandleAsync();
             SaveChangesBefore();
             var transactionActionManager = Create<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
@@ -440,6 +447,38 @@ namespace Bing.Datas.EntityFramework.Core
                 transaction.Rollback();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// 领域事件处理
+        /// </summary>
+        protected virtual async Task DomainEventHandleAsync()
+        {
+            var dispatcher = Create<IDomainEventDispatcher>();
+            if (dispatcher != null)
+            {
+                var domainEvents = GetDomainEvents();
+                foreach (var @event in domainEvents) 
+                    await dispatcher.DispatchAsync(@event);
+            }
+        }
+
+        /// <summary>
+        /// 获取领域事件集合
+        /// </summary>
+        private IEnumerable<DomainEvent> GetDomainEvents()
+        {
+            var domainEvents = new List<DomainEvent>();
+            foreach (var aggregateRoot in ChangeTracker.Entries<IAggregateRoot>())
+            {
+                var events = aggregateRoot.Entity.GetDomainEvents();
+                if (events != null && events.Any())
+                {
+                    domainEvents.AddRange(events);
+                    aggregateRoot.Entity.ClearDomainEvents();
+                }
+            }
+            return domainEvents;
         }
 
         #endregion

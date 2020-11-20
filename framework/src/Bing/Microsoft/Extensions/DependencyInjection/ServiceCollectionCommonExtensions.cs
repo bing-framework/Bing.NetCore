@@ -85,6 +85,16 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
+        /// 获取或添加所有程序集查找器
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        public static IAllAssemblyFinder GetOrAddAllAssemblyFinder(this IServiceCollection services)
+        {
+            var allAssemblyFinder = services.GetOrAddSingletonInstance<IAllAssemblyFinder>(() => new AppDomainAllAssemblyFinder());
+            return allAssemblyFinder;
+        }
+
+        /// <summary>
         /// 如果指定服务不存在，创建实例并添加
         /// </summary>
         /// <typeparam name="TServiceType">服务类型</typeparam>

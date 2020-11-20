@@ -1,26 +1,22 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp2.2\Bing.Admin.xml</DocumentationFile>
+    <RootNamespace>Bing.Admin</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.1" />
+    <PackageReference Include="MySqlConnector" Version="1.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <!--<PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />-->
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />
+    <ProjectReference Include="..\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj" />
     <ProjectReference Include="..\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service\Bing.Admin.Service.csproj" />
   </ItemGroup>
 
 </Project>
-  

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Bing.Admin.Infrastructure.Encryptor;
+using Bing.Admin.Systems.Domain.DomainEvents;
 using Bing.Extensions;
 using Bing.Security.Claims;
 using Bing.Security.Encryptors;
@@ -71,5 +72,15 @@ namespace Bing.Admin.Systems.Domain.Models
         /// 获取加密器
         /// </summary>
         protected override IEncryptor GetEncryptor() => AesEncryptor.Instance;
+
+        /// <summary>
+        /// 添加登录日志
+        /// </summary>
+        /// <param name="ip">IP地址</param>
+        /// <param name="userAgent">用户代理</param>
+        public void AddLoginLog(string ip, string userAgent)
+        {
+            AddDomainEvent(new UserLoginDomainEvent(this, ip, userAgent));
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Bing.Admin.Data;
@@ -13,7 +12,6 @@ using Bing.Events;
 using Bing.Extensions;
 using Bing.Logs.Aspects;
 using Bing.Mapping;
-using Bing.Permissions.Identity.Extensions;
 using Bing.Security.Claims;
 using Bing.Users;
 
@@ -91,7 +89,7 @@ namespace Bing.Admin.EventHandlers.Implements.Systems
         /// </summary>
         /// <param name="list">列表</param>
         /// <param name="claim">声明</param>
-        public void AddClaim(List<Claim> list,Claim claim)
+        public void AddClaim(List<Claim> list, Claim claim)
         {
             if (claim == null
                 || claim.Value.IsEmpty()

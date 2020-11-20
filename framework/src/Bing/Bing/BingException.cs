@@ -6,7 +6,7 @@ using Bing.Exceptions;
 namespace Bing
 {
     /// <summary>
-    /// Bing框架异常
+    /// Bing异常
     /// </summary>
     [Serializable]
     public abstract class BingException : Exception

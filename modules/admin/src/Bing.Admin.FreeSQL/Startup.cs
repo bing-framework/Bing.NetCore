@@ -33,12 +33,14 @@ namespace Bing.Admin
         /// </summary>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            //services.AddBing<AspNetCoreBingModuleManager>();
             services.AddBing()
                 .AddModule<LogModule>()
                 .AddModule<MapperModule>()
                 .AddModule<AppModule>()
                 .AddModule<AuthenticationModule>()
-                .AddModule<EntityFrameworkCoreModule>()
+                .AddModule<FreeSqlModule>()
+                //.AddModule<EntityFrameworkCoreModule>()
                 .AddModule<CacheModule>()
                 .AddModule<CapModule>()
                 //.AddModule<MySqlAdminUnitOfWorkMigrationModule>()

@@ -91,6 +91,7 @@ namespace Bing.Admin.Service.Implements
                 return new SignInWithTokenResult {Message = "用户名不存在", State = SignInState.Failed};
             await AddClaimsToUserAsync(user, ApplicationCode.Admin);
             var result = await SignInManager.SignInAsync(user, request.Password);
+            user.AddLoginLog(Web.IP,Web.Browser);
             await UnitOfWork.CommitAsync();
             return await GetLoginResultAsync(user, result, ApplicationCode.Admin);
         }
