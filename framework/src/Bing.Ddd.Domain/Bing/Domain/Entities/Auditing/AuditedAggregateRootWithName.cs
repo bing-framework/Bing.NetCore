@@ -4,26 +4,31 @@ using Bing.Auditing;
 namespace Bing.Domain.Entities.Auditing
 {
     /// <summary>
-    /// 创建审计聚合根
+    /// 审计聚合根
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     [Serializable]
-    public abstract class CreationAuditedAggregateRootWithName<TEntity> : CreationAuditedAggregateRoot<TEntity>, ICreationAuditedObjectWithName
+    public abstract class AuditedAggregateRootWithName<TEntity> : AuditedAggregateRoot<TEntity>, IAuditedObjectWithName
         where TEntity : class, IAggregateRoot
     {
         /// <summary>
         /// 创建人
         /// </summary>
         public virtual string Creator { get; set; }
+
+        /// <summary>
+        /// 最后修改人
+        /// </summary>
+        public virtual string LastModifier { get; set; }
     }
 
     /// <summary>
-    /// 创建审计聚合根
+    /// 审计聚合根
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
     [Serializable]
-    public abstract class CreationAuditedAggregateRootWithName<TEntity, TKey> : CreationAuditedAggregateRoot<TEntity, TKey>, ICreationAuditedObjectWithName<TKey>
+    public abstract class AuditedAggregateRootWithName<TEntity, TKey> : AuditedAggregateRoot<TEntity, TKey>, IAuditedObjectWithName<TKey>
         where TEntity : class, IAggregateRoot
     {
         /// <summary>
@@ -32,17 +37,22 @@ namespace Bing.Domain.Entities.Auditing
         public virtual string Creator { get; set; }
 
         /// <summary>
-        /// 初始化一个<see cref="CreationAuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
+        /// 最后修改人
         /// </summary>
-        protected CreationAuditedAggregateRootWithName() : this(default)
+        public virtual string LastModifier { get; set; }
+
+        /// <summary>
+        /// 初始化一个<see cref="AuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
+        /// </summary>
+        protected AuditedAggregateRootWithName()
         {
         }
 
         /// <summary>
-        /// 初始化一个<see cref="CreationAuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
+        /// 初始化一个<see cref="AuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
         /// </summary>
         /// <param name="id">标识</param>
-        protected CreationAuditedAggregateRootWithName(TKey id) : base(id)
+        protected AuditedAggregateRootWithName(TKey id) : base(id)
         {
         }
     }

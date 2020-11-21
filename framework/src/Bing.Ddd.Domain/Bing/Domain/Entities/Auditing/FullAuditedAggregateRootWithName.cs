@@ -4,12 +4,12 @@ using Bing.Auditing;
 namespace Bing.Domain.Entities.Auditing
 {
     /// <summary>
-    /// 审计实体
+    /// 完整审计聚合根
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     [Serializable]
-    public abstract class AuditedEntityWithName<TEntity> : AuditedEntity<TEntity>, IAuditedObjectWithName
-        where TEntity : class, IEntity
+    public abstract class FullAuditedAggregateRootWithName<TEntity> : FullAuditedAggregateRoot<TEntity>, IFullAuditedObjectWithName
+        where TEntity : class, IAggregateRoot
     {
         /// <summary>
         /// 创建人
@@ -20,16 +20,21 @@ namespace Bing.Domain.Entities.Auditing
         /// 最后修改人
         /// </summary>
         public virtual string LastModifier { get; set; }
+
+        /// <summary>
+        /// 删除人
+        /// </summary>
+        public virtual string Deleter { get; set; }
     }
 
     /// <summary>
-    /// 审计实体
+    /// 完整审计聚合根
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
     [Serializable]
-    public abstract class AuditedEntityWithName<TEntity, TKey> : AuditedEntity<TEntity, TKey>, IAuditedObjectWithName<TKey>
-        where TEntity : class, IEntity
+    public abstract class FullAuditedAggregateRootWithName<TEntity, TKey> : FullAuditedAggregateRoot<TEntity, TKey>, IFullAuditedObjectWithName<TKey>
+        where TEntity : class, IAggregateRoot
     {
         /// <summary>
         /// 创建人
@@ -42,17 +47,22 @@ namespace Bing.Domain.Entities.Auditing
         public virtual string LastModifier { get; set; }
 
         /// <summary>
-        /// 初始化一个<see cref="AuditedEntityWithName{TEntity,TKey}"/>类型的实例
+        /// 删除人
         /// </summary>
-        protected AuditedEntityWithName()
+        public virtual string Deleter { get; set; }
+
+        /// <summary>
+        /// 初始化一个<see cref="FullAuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
+        /// </summary>
+        protected FullAuditedAggregateRootWithName()
         {
         }
 
         /// <summary>
-        /// 初始化一个<see cref="AuditedEntityWithName{TEntity,TKey}"/>类型的实例
+        /// 初始化一个<see cref="FullAuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
         /// </summary>
         /// <param name="id">标识</param>
-        protected AuditedEntityWithName(TKey id) : base(id)
+        protected FullAuditedAggregateRootWithName(TKey id) : base(id)
         {
         }
     }
