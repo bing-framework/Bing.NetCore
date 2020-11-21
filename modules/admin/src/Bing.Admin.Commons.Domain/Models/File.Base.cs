@@ -9,7 +9,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 文件
     /// </summary>
     [Display(Name = "文件")]
-    public partial class File : AggregateRoot<File>,ICreationAuditedWithNameObject
+    public partial class File : AggregateRoot<File>, ICreationAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="File"/>类型的实例

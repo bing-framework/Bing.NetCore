@@ -8,7 +8,7 @@ namespace Bing.Admin.Data.Pos.Systems
     /// <summary>
     /// 应用程序持久化对象
     /// </summary>
-    public class ApplicationPo : PersistentObjectBase<Guid>, ISoftDelete, IAuditedWithNameObject
+    public class ApplicationPo : PersistentObjectBase<Guid>, ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 应用程序编码

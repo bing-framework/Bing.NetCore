@@ -16,7 +16,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 资源
     /// </summary>
     [Display(Name = "资源")]
-    public partial class Resource : TreeEntityBase<Resource>,ISoftDelete,IAuditedWithNameObject
+    public partial class Resource : TreeEntityBase<Resource>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Resource"/>类型的实例

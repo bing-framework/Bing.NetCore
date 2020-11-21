@@ -16,7 +16,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 管理员
     /// </summary>
     [Display(Name = "管理员")]
-    public partial class Administrator : AggregateRoot<Administrator>,ISoftDelete,IAuditedWithNameObject
+    public partial class Administrator : AggregateRoot<Administrator>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Administrator"/>类型的实例

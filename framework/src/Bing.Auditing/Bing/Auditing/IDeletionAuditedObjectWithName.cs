@@ -3,11 +3,11 @@
     /// <summary>
     /// 删除操作审计对象
     /// </summary>
-    public interface IDeletionAuditedWithNameObject : IDeletionAuditedObject, IHasDeleter { }
+    public interface IDeletionAuditedObjectWithName : IDeletionAuditedObject, IHasDeleter { }
 
     /// <summary>
     /// 删除操作审计对象
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public interface IDeletionAuditedWithNameObject<TKey> : IDeletionAuditedObject<TKey>, IHasDeleter { }
+    public interface IDeletionAuditedObjectWithName<TKey> : IDeletionAuditedObject<TKey>, IHasDeleter { }
 }

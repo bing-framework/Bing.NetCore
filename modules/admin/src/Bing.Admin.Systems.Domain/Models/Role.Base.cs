@@ -9,7 +9,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 角色
     /// </summary>
     [Display(Name = "角色")]
-    public partial class Role : Bing.Permissions.Identity.Models.RoleBase<Role, Guid, Guid?>, ISoftDelete,IAuditedWithNameObject
+    public partial class Role : Bing.Permissions.Identity.Models.RoleBase<Role, Guid, Guid?>, ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Role"/>类型的实例

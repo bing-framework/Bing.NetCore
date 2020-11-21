@@ -10,7 +10,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 地区
     /// </summary>
     [Display(Name = "地区")]
-    public partial class Area : TreeEntityBase<Area>,ISoftDelete,IAuditedWithNameObject
+    public partial class Area : TreeEntityBase<Area>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Area"/>类型的实例

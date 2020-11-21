@@ -9,7 +9,7 @@ namespace Bing.Admin.Data.Pos.Systems
     /// <summary>
     /// 资源持久化对象
     /// </summary>
-    public class ResourcePo : TreePersistentObjectBase, ISoftDelete, IAuditedWithNameObject
+    public class ResourcePo : TreePersistentObjectBase, ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 应用程序标识

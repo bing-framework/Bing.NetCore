@@ -17,7 +17,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 用户信息
     /// </summary>
     [Display(Name = "用户信息")]
-    public partial class UserInfo : AggregateRoot<UserInfo>,ISoftDelete,IAuditedWithNameObject
+    public partial class UserInfo : AggregateRoot<UserInfo>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="UserInfo"/>类型的实例

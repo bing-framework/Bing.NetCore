@@ -12,7 +12,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 用户
     /// </summary>
     [Display(Name = "用户")]
-    public partial class User : Bing.Permissions.Identity.Models.UserBase<User, Guid>, ISoftDelete,IAuditedWithNameObject
+    public partial class User : Bing.Permissions.Identity.Models.UserBase<User, Guid>, ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="User"/>类型的实例

@@ -16,7 +16,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 权限
     /// </summary>
     [Display(Name = "权限")]
-    public partial class Permission : AggregateRoot<Permission>,ISoftDelete,IAuditedWithNameObject
+    public partial class Permission : AggregateRoot<Permission>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Permission"/>类型的实例

@@ -10,7 +10,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 字典
     /// </summary>
     [Display(Name = "字典")]
-    public partial class Dictionary : TreeEntityBase<Dictionary>,ISoftDelete,IAuditedWithNameObject
+    public partial class Dictionary : TreeEntityBase<Dictionary>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Dictionary"/>类型的实例

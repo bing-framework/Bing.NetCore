@@ -3,11 +3,11 @@
     /// <summary>
     /// 创建操作审计对象
     /// </summary>
-    public interface ICreationAuditedWithNameObject : ICreationAuditedObject, IHasCreator { }
+    public interface ICreationAuditedObjectWithName : ICreationAuditedObject, IHasCreator { }
 
     /// <summary>
     /// 创建操作审计对象
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
-    public interface ICreationAuditedWithNameObject<TKey> : ICreationAuditedObject<TKey>, IHasCreator { }
+    public interface ICreationAuditedObjectWithName<TKey> : ICreationAuditedObject<TKey>, IHasCreator { }
 }

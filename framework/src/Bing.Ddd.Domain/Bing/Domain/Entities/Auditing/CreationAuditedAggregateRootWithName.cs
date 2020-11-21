@@ -8,7 +8,7 @@ namespace Bing.Domain.Entities.Auditing
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     [Serializable]
-    public abstract class CreationAuditedAggregateRoot<TEntity> : AggregateRoot<TEntity>, ICreationAuditedObject
+    public abstract class CreationAuditedAggregateRootWithName<TEntity> : AggregateRoot<TEntity>, ICreationAuditedObject
         where TEntity : class, IAggregateRoot
     {
         /// <summary>
@@ -29,7 +29,7 @@ namespace Bing.Domain.Entities.Auditing
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
     [Serializable]
-    public abstract class CreationAuditedAggregateRoot<TEntity, TKey> : AggregateRoot<TEntity, TKey>, ICreationAuditedObject<TKey>
+    public abstract class CreationAuditedAggregateRootWithName<TEntity, TKey> : AggregateRoot<TEntity, TKey>, ICreationAuditedObject<TKey>
         where TEntity : class, IAggregateRoot
     {
         /// <summary>
@@ -43,17 +43,17 @@ namespace Bing.Domain.Entities.Auditing
         public virtual TKey CreatorId { get; set; }
 
         /// <summary>
-        /// 初始化一个<see cref="CreationAuditedAggregateRoot{TEntity,TKey}"/>类型的实例
+        /// 初始化一个<see cref="CreationAuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
         /// </summary>
-        protected CreationAuditedAggregateRoot() : this(default)
+        protected CreationAuditedAggregateRootWithName() : this(default)
         {
         }
 
         /// <summary>
-        /// 初始化一个<see cref="CreationAuditedAggregateRoot{TEntity,TKey}"/>类型的实例
+        /// 初始化一个<see cref="CreationAuditedAggregateRootWithName{TEntity,TKey}"/>类型的实例
         /// </summary>
         /// <param name="id">标识</param>
-        protected CreationAuditedAggregateRoot(TKey id) : base(id)
+        protected CreationAuditedAggregateRootWithName(TKey id) : base(id)
         {
         }
     }
