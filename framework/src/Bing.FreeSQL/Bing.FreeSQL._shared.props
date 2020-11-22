@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="FreeSql" Version="2.0.0-preview1120" />
     <PackageReference Include="FreeSql.DbContext" Version="2.0.0-preview1120" />
-    <PackageReference Include="FreeSql.Extensions.Linq" Version="2.0.0-preview1120" />
+    <PackageReference Include="FreeSql.Extensions.Linq" Version="2.0.0-preview1119" />
   </ItemGroup>
 
 </Project>
