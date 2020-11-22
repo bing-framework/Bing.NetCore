@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿#if NETSTANDARD
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -37,3 +38,5 @@ namespace Bing.Datas.EntityFramework.Extensions
         }
     }
 }
+
+#endif

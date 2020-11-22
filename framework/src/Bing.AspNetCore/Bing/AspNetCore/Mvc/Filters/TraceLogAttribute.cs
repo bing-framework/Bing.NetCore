@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Logs;
 using Bing.Utils.Json;
-using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using FileHelper = Bing.IO.FileHelper;
 
@@ -126,7 +126,7 @@ namespace Bing.AspNetCore.Mvc.Filters
         {
             if (IsMultipart(request.ContentType))
                 return;
-            request.EnableRewind();
+            request.EnableBuffering();
             var result = await FileHelper.ToStringAsync(request.Body, isCloseStream: false);
             if (string.IsNullOrWhiteSpace(result))
                 return;

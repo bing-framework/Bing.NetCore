@@ -19,8 +19,13 @@ namespace Bing.Datas.EntityFramework.Extensions
         public static ModelBuilder SetSimpleUnderscoreTableNameConvention(this ModelBuilder modelBuilder)
         {
             var underscoreRegex = new Regex(@"((?<=.)[A-Z][a-zA-Z]*)|((?<=[a-zA-Z])\d+)");
+#if NETSTANDARD
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
                 entity.Relational().TableName = underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower();
+#else
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+                entity.SetTableName(underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower());
+#endif
             return modelBuilder;
         }
 

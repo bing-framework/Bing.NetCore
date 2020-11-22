@@ -1,4 +1,9 @@
-﻿using DotNetCore.CAP.Abstractions;
+﻿//#if NETCOREAPP3_1
+//using DotNetCore.CAP.Internal;
+//#else
+//using DotNetCore.CAP.Abstractions;
+//#endif
+using DotNetCore.CAP.Internal;
 
 namespace Bing.Events
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NETSTANDARD
+using System;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -42,3 +43,5 @@ namespace Bing.Datas.EntityFramework.Extensions
         }
     }
 }
+
+#endif

@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.MySql" Version="2.6.0" />
+    <PackageReference Include="MySqlConnector" Version="1.0.0" />
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>

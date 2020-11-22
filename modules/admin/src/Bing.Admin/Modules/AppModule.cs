@@ -2,7 +2,6 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
-using Bing.AspNetCore.Extensions;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
 using Bing.DependencyInjection;
@@ -48,10 +47,14 @@ namespace Bing.Admin.Modules
                     // 全局添加授权
                     options.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
-                .AddJsonOptions(options =>
+                .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 })
+                //.AddJsonOptions(options =>
+                //{
+                //    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                //})
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
             services.EnableAop(o =>
@@ -76,11 +79,16 @@ namespace Bing.Admin.Modules
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
+            //    routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            //});
             Enabled = true;
         }
     }

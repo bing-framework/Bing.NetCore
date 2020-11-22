@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿#if NETSTANDARD
+using System.Reflection;
 using Bing.Data.Attributes;
 using Bing.Datas.EntityFramework.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
@@ -22,3 +23,4 @@ namespace Bing.Datas.EntityFramework.Conventions
         }
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NETSTANDARD
+using System;
 using System.Reflection;
 using Bing.Data.Attributes;
 using Bing.Datas.EntityFramework.Extensions;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Bing.Datas.EntityFramework.Conventions
 {
+
     /// <summary>
     /// Decimal精确度约定，用于ModelBuilder全局设置Decimal精确度属性
     /// </summary>
@@ -32,3 +34,4 @@ namespace Bing.Datas.EntityFramework.Conventions
         }
     }
 }
+#endif

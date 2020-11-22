@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Bing.Logs;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 
 namespace Bing.AspNetCore.Logs
 {
@@ -99,7 +98,7 @@ namespace Bing.AspNetCore.Logs
         /// <param name="request">Http请求</param>
         private async Task<string> FormatRequestAsync(HttpRequest request)
         {
-            request.EnableRewind();
+            request.EnableBuffering();
             request.Body.Seek(0, SeekOrigin.Begin);
             var text = await new StreamReader(request.Body).ReadToEndAsync();
             request.Body.Seek(0, SeekOrigin.Begin);
