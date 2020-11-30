@@ -33,10 +33,12 @@ namespace Bing.AspNetCore.Mvc.Filters
 
             if (context.Result is ValidationFailedResult validationFailedResult)
             {
-                context.Result = new ApiResult(StatusCode.Fail,
-                    validationFailedResult.AllowMultipleResult
-                        ? validationFailedResult.Errors.FirstOrDefault()?.Message
-                        : "验证数据失败!", validationFailedResult.AllowMultipleResult ? validationFailedResult.Errors : null);
+                context.Result=new JsonResult(new
+                {
+                    Code = (int)StatusCode.Fail,
+                    Message = validationFailedResult.AllowMultipleResult ? validationFailedResult.Errors.FirstOrDefault()?.Message : "验证数据失败!",
+                    Errors = validationFailedResult.Errors
+                });
                 return;
             }
 

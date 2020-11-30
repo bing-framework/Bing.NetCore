@@ -45,10 +45,10 @@ namespace Bing.AspNetCore.Mvc.Filters
             {
                 var errors = context.ModelState
                     .Where(e => e.Value.Errors.Count > 0)
-                    .Select(e => new ValidationError()
+                    .Select(e => new ValidationError
                     {
                         Name = e.Key,
-                        Message = e.Value.Errors.First().ErrorMessage
+                        Message = e.Value.Errors.FirstOrDefault()?.ErrorMessage
                     }).ToList();
 
                 context.Result = new ValidationFailedResult(errors) { AllowMultipleResult = AllowMultipleResult };
