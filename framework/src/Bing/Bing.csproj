@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Bing._shared.props"/>
+  <Import Project="Bing._shared.props" />
 
-  <Import Project="..\..\..\common.props"/>
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+  </ItemGroup>
 
 </Project>
