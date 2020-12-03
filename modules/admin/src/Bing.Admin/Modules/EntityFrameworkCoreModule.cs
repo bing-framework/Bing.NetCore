@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
@@ -35,8 +36,9 @@ namespace Bing.Admin.Modules
             var configuration = services.GetConfiguration();
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
             // 注册工作单元
-            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(connectionStr);
-            services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr);
+            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(
+                connectionStr);
+            //services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr, DataLogLevel.All);
             // 注册SqlQuery
             //services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
             //    {
@@ -44,7 +46,7 @@ namespace Bing.Admin.Modules
             //        options.IsClearAfterExecution = true;
             //        //options.LogLevel = DataLogLevel.Off;
             //    });
-            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(options =>
+            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
             {
                 options.DatabaseType = DatabaseType.MySql;
                 options.IsClearAfterExecution = true;

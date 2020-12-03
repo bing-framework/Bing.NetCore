@@ -24,7 +24,7 @@ namespace Bing.DependencyInjection
         {
             services.ConfigureDynamicProxy(config =>
             {
-                config.EnableParameterAspect();
+                //config.EnableParameterAspect();
                 config.NonAspectPredicates.Add(t =>
                     Reflections.GetTopBaseType(t.DeclaringType).SafeString() ==
                     "Microsoft.EntityFrameworkCore.DbContext");
