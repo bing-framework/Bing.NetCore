@@ -47,8 +47,8 @@ namespace Bing.Admin.Modules
                 o.AddSwaggerGenAction = config =>
                 {
                     AddSwaggerGen(config);
-                    config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Service.xml"));
-                    config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Infrastructure.xml"));
+                    //config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Service.xml"));
+                    //config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Infrastructure.xml"));
 
                     #region 启用Swagger验证功能
 
