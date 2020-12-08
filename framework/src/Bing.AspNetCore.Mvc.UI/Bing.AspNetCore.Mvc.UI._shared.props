@@ -1,5 +1,9 @@
 ﻿<Project>
   <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AssemblyName>Bing.AspNetCore.Mvc.UI</AssemblyName>
     <PackageId>Bing.AspNetCore.Mvc.UI</PackageId>
     <Description>Bing.AspNetCore.Mvc.UI 组件，提供MVC关于RazorPage相关功能。</Description>

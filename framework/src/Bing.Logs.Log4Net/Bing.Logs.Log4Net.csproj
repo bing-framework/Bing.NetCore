@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Bing.Logs.Log4Net._shared.props"/>
+  <Import Project="Bing.Logs.Log4Net._shared.props" />
 
-  <Import Project="..\..\..\common.props"/>
+  <Import Project="..\..\..\framework.props" />
 
 </Project>

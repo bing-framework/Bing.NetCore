@@ -15,7 +15,7 @@ namespace Bing.Admin.Systems.Domain.Services.Implements
         /// </summary>
         /// <param name="identitySignInManager">Identity登录管理</param>
         /// <param name="userManager">用户管理</param>
-        public SignInManager(IdentitySignInManager identitySignInManager
+        public SignInManager(Microsoft.AspNetCore.Identity.SignInManager<User> identitySignInManager
             , IUserManager userManager)
             : base(identitySignInManager, userManager)
         {

@@ -17,7 +17,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <summary>
         /// Identity登录管理
         /// </summary>
-        protected IdentitySignInManager<TUser, TKey> IdentitySignInManager { get; }
+        protected Microsoft.AspNetCore.Identity.SignInManager<TUser> IdentitySignInManager { get; }
 
         /// <summary>
         /// 用户管理
@@ -29,7 +29,7 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// </summary>
         /// <param name="identitySignInManager">Identity登录管理</param>
         /// <param name="userManager">用户管理</param>
-        public SignInManager(IdentitySignInManager<TUser, TKey> identitySignInManager
+        public SignInManager(Microsoft.AspNetCore.Identity.SignInManager<TUser> identitySignInManager
             , IUserManager<TUser, TKey> userManager)
         {
             IdentitySignInManager = identitySignInManager;

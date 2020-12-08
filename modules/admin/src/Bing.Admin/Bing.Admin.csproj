@@ -11,9 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.1.0" />
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.4.1" />
-    <PackageReference Include="MySqlConnector" Version="1.0.0" />
+    <!--<PackageReference Include="MySqlConnector" Version="1.0.0" />-->
     <!--<PackageReference Include="Microsoft.AspNetCore.App" />-->
     <!--<PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />-->
   </ItemGroup>

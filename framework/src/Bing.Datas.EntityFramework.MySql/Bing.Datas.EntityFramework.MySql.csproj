@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Bing.Datas.EntityFramework.MySql._shared.props"/>
+  <PropertyGroup>
+    <UserSecretsId>d6000c23-3222-4a3e-b44a-9ae98f40e28b</UserSecretsId>
+  </PropertyGroup>
+  <Import Project="Bing.Datas.EntityFramework.MySql._shared.props" />
 
-  <Import Project="..\..\..\common.props"/>
+  <Import Project="..\..\..\framework.props" />
 
 </Project>

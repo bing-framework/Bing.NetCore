@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
+using Bing.Admin.Data;
 using Bing.Admin.Data.UnitOfWorks.MySql;
 using Bing.Admin.EventHandlers.Abstractions;
 using Bing.Admin.EventHandlers.Abstractions.Systems;
 using Bing.Admin.EventHandlers.Implements;
 using Bing.Admin.EventHandlers.Implements.Systems;
-//using Bing.Admin.Infrastructure.Cap;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Events.Cap;
@@ -39,15 +39,13 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            //services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
+            services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
             LoadEvent(services);
-            var config = services.GetConfiguration();
-            var connection = config.GetConnectionString("DefaultConnection");
             // 添加事件总线服务
             services.AddCapEventBus(o =>
             {
                 o.UseEntityFramework<AdminUnitOfWork>();
-                o.UseMySql(connection);
+                //o.UseMySql(connection);
                 //o.UseDashboard();
                 // 设置处理成功的数据在数据库中保存的时间（秒），为保证系统性能，数据会定期清理
                 o.SucceedMessageExpiredAfter = 24 * 3600;

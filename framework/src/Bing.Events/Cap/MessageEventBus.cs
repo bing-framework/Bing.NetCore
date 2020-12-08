@@ -51,27 +51,16 @@ namespace Bing.Events.Cap
         /// <param name="send">是否立即发送消息</param>
         public async Task PublishAsync(string name, object data, string callback = null, bool send = false)
         {
-            var capTransaction = GetCapTransaction();
             if (send)
             {
-                capTransaction.AutoCommit = true;
-                Publisher.Transaction.Value = capTransaction;
                 await InternalPublishAsync(name, data, callback);
                 return;
             }
             TransactionActionManager.Register(async transaction =>
             {
-                capTransaction.DbTransaction = transaction;
-                capTransaction.AutoCommit = false;
-                Publisher.Transaction.Value = capTransaction;
                 await InternalPublishAsync(name, data, callback);
             });
         }
-
-        /// <summary>
-        /// 获取CAP事务
-        /// </summary>
-        private CapTransactionBase GetCapTransaction() => Publisher.ServiceProvider.GetService<CapTransactionBase>();
 
         /// <summary>
         /// 发布事件

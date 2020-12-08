@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Bing.AspNetCore._shared.props"/>
+  <Import Project="Bing.AspNetCore._shared.props" />
 
-  <Import Project="..\..\..\common.props"/>
+  <Import Project="..\..\..\common.props" />
 </Project>

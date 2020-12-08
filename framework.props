@@ -1,4 +1,8 @@
 <Project>
+  <PropertyGroup>
+    <!--<TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>-->
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
 
   <PropertyGroup>
     <RootNamespace/>
@@ -26,5 +30,5 @@
 
   <Import Project="asset/props/misc.props"/>
 
-  <Import Project="./version.props"/>
+  <Import Project="./common.props"/>
 </Project>

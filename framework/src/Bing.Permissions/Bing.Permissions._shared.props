@@ -1,13 +1,13 @@
 ﻿<Project>
   <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AssemblyName>Bing.Permissions</AssemblyName>
     <PackageId>Bing.Permissions</PackageId>
     <Description>Bing.Permissions 是Bing应用框架的权限类库。</Description>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
-  </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />

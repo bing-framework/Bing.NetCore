@@ -14,9 +14,10 @@ namespace Bing.Admin.Systems.Domain.Events
         /// 初始化一个<see cref="UserLoginMessageEvent"/>类型的实例
         /// </summary>
         /// <param name="data">数据</param>
-        public UserLoginMessageEvent(UserLoginMessage data) : base(data)
+        /// <param name="send">是否立即发送消息</param>
+        public UserLoginMessageEvent(UserLoginMessage data,bool send = true) : base(data)
         {
-            Send = true;
+            Send = send;
             Name = MessageEventConst.UserLogin;
         }
     }

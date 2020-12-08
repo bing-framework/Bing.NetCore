@@ -1,5 +1,9 @@
 ﻿<Project>
   <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <AssemblyName>Bing.AspNetCore.Mvc</AssemblyName>
     <PackageId>Bing.AspNetCore.Mvc</PackageId>
     <Description>Bing.AspNetCore.Mvc 组件，提供AspNetCore的Mvc功能的封装。</Description>

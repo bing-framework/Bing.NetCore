@@ -1,9 +1,11 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using Bing.Security.Claims;
+using Bing.Sessions;
 using Microsoft.AspNetCore.Http;
+using ISession = Bing.Sessions.ISession;
 
-namespace Bing.Sessions
+namespace Bing.AspNetCore.Security
 {
     /// <summary>
     /// Http上下文会话

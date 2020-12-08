@@ -38,25 +38,30 @@ namespace Bing.Admin.Modules
             BingClaimTypes.UserId = IdentityModel.JwtClaimTypes.Subject;
             BingClaimTypes.UserName = IdentityModel.JwtClaimTypes.Name;
             // 注册Mvc
-            services
-                .AddMvc(options =>
-                {
-                    //options.Filters.Add<ResultHandlerAttribute>();
-                    options.Filters.Add<ExceptionHandlerAttribute>();
-                    //options.Filters.Add<AuditOperationAttribute>();
-                    // 全局添加授权
-                    options.Conventions.Add(new AuthorizeControllerModelConvention());
-                })
+            //services
+            //    .AddMvc(options =>
+            //    {
+            //        //options.Filters.Add<ResultHandlerAttribute>();
+            //        options.Filters.Add<ExceptionHandlerAttribute>();
+            //        //options.Filters.Add<AuditOperationAttribute>();
+            //        // 全局添加授权
+            //        options.Conventions.Add(new AuthorizeControllerModelConvention());
+            //    })
+            //    .AddNewtonsoftJson(options =>
+            //    {
+            //        options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            //    })
+            //    //.AddJsonOptions(options =>
+            //    //{
+            //    //    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            //    //})
+            //    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+            //    .AddControllersAsServices();
+            services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                })
-                //.AddJsonOptions(options =>
-                //{
-                //    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                //})
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddControllersAsServices();
+                });
             services.EnableAop(o =>
             {
                 o.ThrowAspectException = false;

@@ -92,6 +92,13 @@ namespace Bing.Admin.Service.Implements
             await AddClaimsToUserAsync(user, ApplicationCode.Admin);
             var result = await SignInManager.SignInAsync(user, request.Password);
             user.AddLoginLog(Web.IP,Web.Browser);
+            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
+            {
+                UserId = user.Id,
+                Name = user.Nickname,
+                Ip = Web.IP,
+                UserAgent = Web.Browser
+            },false));
             await UnitOfWork.CommitAsync();
             return await GetLoginResultAsync(user, result, ApplicationCode.Admin);
         }
@@ -159,13 +166,13 @@ namespace Bing.Admin.Service.Implements
         {
             if (signInResult.State == SignInState.Failed)
                 return new SignInWithTokenResult { UserId = signInResult.UserId, State = signInResult.State, Message = signInResult.Message };
-            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
-            {
-                UserId = user.Id,
-                Name = user.Nickname,
-                Ip = Web.IP,
-                UserAgent = Web.Browser
-            }));
+            //await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
+            //{
+            //    UserId = user.Id,
+            //    Name = user.Nickname,
+            //    Ip = Web.IP,
+            //    UserAgent = Web.Browser
+            //}));
             var result = await TokenBuilder.CreateAsync(user.GetClaims().ToDictionary(x => x.Type, x => x.Value));
             return new SignInWithTokenResult
             {

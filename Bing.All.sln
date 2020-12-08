@@ -58,6 +58,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_Solution
 		.gitignore = .gitignore
 		common.props = common.props
 		Directory.Build.targets = Directory.Build.targets
+		framework.props = framework.props
 		LICENSE = LICENSE
 		README.md = README.md
 		version.props = version.props

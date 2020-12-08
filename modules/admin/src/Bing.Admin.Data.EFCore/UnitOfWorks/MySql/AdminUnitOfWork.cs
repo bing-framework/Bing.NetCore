@@ -18,7 +18,7 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
         /// 初始化一个<see cref="AdminUnitOfWork"/>类型的实例
         /// </summary>
         /// <param name="options">配置项</param>
-        public AdminUnitOfWork( DbContextOptions<AdminUnitOfWork> options) : base( options )
+        public AdminUnitOfWork( DbContextOptions<AdminUnitOfWork> options, IServiceProvider serviceProvider) : base( options , serviceProvider)
         {
         }
 

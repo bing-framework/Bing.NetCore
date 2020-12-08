@@ -64,6 +64,7 @@ namespace Bing.Admin.EventHandlers.Implements.Systems
         [EventHandler(MessageEventConst.UserLogin, Group = QueueGroupConst.UserLoginLog)]
         public async Task UserLoginAsync(UserLoginMessage message)
         {
+            await Task.Delay(5000);
             await UserLoginLogManager.CreateAsync(message.MapTo(new UserLoginLogParameter()));
             await UnitOfWork.CommitAsync();
         }
