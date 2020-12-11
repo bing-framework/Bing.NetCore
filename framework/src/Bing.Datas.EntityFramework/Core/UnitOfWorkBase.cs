@@ -24,6 +24,7 @@ using Bing.Uow;
 using Bing.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -175,12 +176,43 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="builder">配置生成器</param>
         protected void EnableLog(DbContextOptionsBuilder builder)
         {
+            ConfiguringIgnoreEvent(builder);
             var log = GetLog();
             if (IsEnabled(log) == false)
                 return;
             builder.EnableSensitiveDataLogging();
             builder.EnableDetailedErrors();
             builder.UseLoggerFactory(LoggerFactory);
+        }
+
+        /// <summary>
+        /// 配置忽略事件
+        /// </summary>
+        /// <param name="builder">配置事件</param>
+        protected virtual void ConfiguringIgnoreEvent(DbContextOptionsBuilder builder)
+        {
+            builder.ConfigureWarnings(x => x.Ignore(
+                RelationalEventId.ConnectionOpening,
+                RelationalEventId.ConnectionOpened,
+                RelationalEventId.DataReaderDisposing,
+                RelationalEventId.ConnectionClosing,
+                RelationalEventId.ConnectionClosed,
+                CoreEventId.ServiceProviderCreated,
+                CoreEventId.ServiceProviderDebugInfo,
+                CoreEventId.SensitiveDataLoggingEnabledWarning,
+                CoreEventId.ContextInitialized,
+                CoreEventId.ContextDisposed,
+                CoreEventId.QueryModelCompiling,
+                CoreEventId.QueryModelOptimized,
+                CoreEventId.QueryExecutionPlanned,
+                CoreEventId.StartedTracking,
+                CoreEventId.DetectChangesStarting,
+                CoreEventId.DetectChangesCompleted,
+                CoreEventId.SaveChangesStarting,
+                CoreEventId.PropertyChangeDetected,
+                RelationalEventId.TransactionStarted,
+                RelationalEventId.TransactionDisposed
+            ));
         }
 
         /// <summary>

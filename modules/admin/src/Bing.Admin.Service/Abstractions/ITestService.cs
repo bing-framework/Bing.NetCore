@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Bing.Admin.Service.Abstractions
 {
@@ -11,5 +12,10 @@ namespace Bing.Admin.Service.Abstractions
         /// 批量插入文件
         /// </summary>
         Task BatchInsertFileAsync(long qty);
+
+        /// <summary>
+        /// 测试参数空异常
+        /// </summary>
+        Task TestArgumentNullAsync(List<string> list);
     }
 }

@@ -20,11 +20,14 @@ namespace Bing.DependencyInjection
         /// </summary>
         /// <param name="services">服务集合</param>
         /// <param name="configAction">Aop配置</param>
+        /// <remarks>
+        /// 默认不开启参数拦截 EnableParameterAspect()，该方法将会导致异常不能更好的定位
+        /// </remarks>
         public static void EnableAop(this IServiceCollection services, Action<IAspectConfiguration> configAction = null)
         {
             services.ConfigureDynamicProxy(config =>
             {
-                config.EnableParameterAspect();
+                //config.EnableParameterAspect();// 启用参数拦截，会导致异常不能很好的定位
                 config.NonAspectPredicates.Add(t =>
                     Reflections.GetTopBaseType(t.DeclaringType).SafeString() ==
                     "Microsoft.EntityFrameworkCore.DbContext");

@@ -60,5 +60,14 @@ namespace Bing.Admin.Service.Implements
             await FileRepository.AddAsync(list);
             await UnitOfWork.CommitAsync();
         }
+
+        /// <summary>
+        /// 测试参数空异常
+        /// </summary>
+        public Task TestArgumentNullAsync(List<string> list)
+        {
+            list.ForEach(Console.WriteLine);
+            return Task.CompletedTask;
+        }
     }
 }

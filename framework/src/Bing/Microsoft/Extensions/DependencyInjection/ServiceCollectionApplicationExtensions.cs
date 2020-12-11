@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IBingBuilder>(builder);
 
             builder.AddCoreModule();
-
+            BingLoader.RegisterTypes(services);
             return builder;
         }
     }

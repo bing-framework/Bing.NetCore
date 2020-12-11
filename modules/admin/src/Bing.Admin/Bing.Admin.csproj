@@ -10,6 +10,10 @@
     <DocumentationFile>bin\Debug\netcoreapp2.2\Bing.Admin.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netcoreapp2.2\Bing.Admin.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.1.0" />
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.1" />

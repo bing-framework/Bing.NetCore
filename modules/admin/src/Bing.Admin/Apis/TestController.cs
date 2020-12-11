@@ -83,5 +83,16 @@ namespace Bing.Admin.Apis
             await UnitOfWork.CommitAsync();
             return Success();
         }
+
+        /// <summary>
+        /// 测试参数空异常
+        /// </summary>
+        [AllowAnonymous]
+        [HttpPost("testArgumentNull")]
+        public async Task<IActionResult> TestArgumentNullAsync()
+        {
+            await TestService.TestArgumentNullAsync(null);
+            return Success();
+        }
     }
 }
