@@ -31,12 +31,12 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            services.AddNLog();
-            //services.AddExceptionless(o =>
-            //{
-            //    o.ApiKey = "FKLLqe2hMowxb1udH8w76DaGjUxFw04BZv3P0AOO";
-            //    o.ServerUrl = "http://106.12.130.45:50000";
-            //});
+            //services.AddNLog();
+            services.AddExceptionless(o =>
+            {
+                o.ApiKey = "ez9jumyxVxjTxqSm0oUQhCML3OGCkDfMGyW1hfmn";
+                o.ServerUrl = "http://10.186.132.40:5100";
+            });
             return services;
         }
     }

@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.RazorPages" Version="2.2.5" />
-    <PackageReference Include="Bing.Utils.Http" Version="1.2.2-preview-20201103-1" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.2.2" />
   </ItemGroup>
 
   <ItemGroup>
