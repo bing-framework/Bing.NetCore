@@ -50,7 +50,7 @@ namespace Bing.Admin.Modules
                 })
                 .AddJsonOptions(options =>
                 {
-                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                    //options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();

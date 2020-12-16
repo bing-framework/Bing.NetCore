@@ -3,9 +3,8 @@ using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
-using Bing.DependencyInjection;
 using Bing.Events.Messages;
-using DotNetCore.CAP;
+using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
