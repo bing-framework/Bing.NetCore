@@ -97,10 +97,10 @@ namespace Bing.Events.Cap
             if (log.IsDebugEnabled == false)
                 return;
             log.Tag(name)
-                .Caption("Cap已发送事件")
+                .Caption($"Cap已发送事件-{name}")
                 .Content($"消息名称: {name}")
                 .AddExtraProperty("event_data", data.ToJson())
-                .Debug();
+                .Trace();
         }
 
         /// <summary>
