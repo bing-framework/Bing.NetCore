@@ -318,9 +318,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
-                var changed = ChangeTracker.Entries().Any();
-                if (!changed)
-                    return 0;
+                //var changed = ChangeTracker.Entries().Any();
+                //if (!changed)
+                //    return 0;
                 return SaveChanges();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -340,9 +340,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
-                var changed = ChangeTracker.Entries().Any();
-                if (!changed)
-                    return 0;
+                //var changed = ChangeTracker.Entries().Any();
+                //if (!changed)
+                //    return 0;
                 return await SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)

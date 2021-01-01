@@ -8,7 +8,7 @@ Bing是一个.net core平台下的应用框架，旨在于提升小型团队的�
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Http" Version="1.2.2-preview-20201103-1" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.2.2" />
   </ItemGroup>
 
   <ItemGroup>
