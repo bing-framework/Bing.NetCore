@@ -27,4 +27,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="3.1.10" />
+    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.10" />
+  </ItemGroup>
+
 </Project>

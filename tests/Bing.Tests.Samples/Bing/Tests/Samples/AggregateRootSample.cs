@@ -42,7 +42,7 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 手机号
         /// </summary>
-        [Display(Name = "手机号")]
+        [Display(Description = "手机号")]
         public string MobilePhone { get; set; }
 
         /// <summary>
