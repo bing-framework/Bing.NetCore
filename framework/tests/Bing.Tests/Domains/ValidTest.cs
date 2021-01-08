@@ -1,4 +1,5 @@
 ﻿using System;
+using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.DependencyInjection;
 using Bing.DependencyInjection;
 using Bing.Exceptions;
@@ -26,7 +27,10 @@ namespace Bing.Tests.Domains
         {
             var services = new ServiceCollection();
             services.AddScoped<IRepositorySample, RepositorySample>();
-            services.EnableAop();
+            services.EnableAop(x =>
+            {
+                x.EnableParameterAspect();
+            });
             _serviceProvider = services.BuildServiceContextProvider();
         }
 
