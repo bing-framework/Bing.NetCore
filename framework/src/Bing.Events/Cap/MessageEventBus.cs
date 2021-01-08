@@ -5,7 +5,6 @@ using Bing.Events.Messages;
 using Bing.Logs;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Events.Cap
 {

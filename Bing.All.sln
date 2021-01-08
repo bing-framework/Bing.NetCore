@@ -61,6 +61,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_Solution
 		framework.props = framework.props
 		LICENSE = LICENSE
 		README.md = README.md
+		version.dev.props = version.dev.props
 		version.props = version.props
 	EndProjectSection
 EndProject
@@ -201,7 +202,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Events.Cap.MySql", "fr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching.FreeRedis", "framework\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj", "{591D9280-33FD-4090-AFBE-D513A2A18316}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Admin.FreeSQL", "modules\admin\src\Bing.Admin.FreeSQL\Bing.Admin.FreeSQL.csproj", "{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.FreeSQL", "modules\admin\src\Bing.Admin.FreeSQL\Bing.Admin.FreeSQL.csproj", "{872470DC-8FC6-4AD4-BE9E-F3F2CA9DC616}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

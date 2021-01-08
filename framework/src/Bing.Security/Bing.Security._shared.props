@@ -6,20 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />-->
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="$(MicrosoftPackageVersion)" />
   </ItemGroup>
-
-  <!--<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.1.10" />
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\Bing\Bing.csproj" />

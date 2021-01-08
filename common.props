@@ -27,4 +27,6 @@
   <Import Project="asset/props/misc.props"/>
 
   <Import Project="./version.props"/>
+
+  <Import Project="./version.dev.props"/>
 </Project>

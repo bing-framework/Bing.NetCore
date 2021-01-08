@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- All Microsoft packages -->
+    <MicrosoftPackageVersion>3.1.*</MicrosoftPackageVersion>
+  </PropertyGroup>
+</Project>

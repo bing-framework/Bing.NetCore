@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FreeRedis" Version="0.1.4" />
+    <PackageReference Include="FreeRedis" Version="0.2.7" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,4 +3,13 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <ItemGroup>
+    <Compile Update="Properties\LibraryResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Update="Properties\R.Designer.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+
 </Project>
