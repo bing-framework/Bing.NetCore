@@ -21,7 +21,7 @@ namespace Bing.Logs.Log4Net
         public static void AddLog4Net(this IServiceCollection services, string configFile = "log4net.config",
             string name = null)
         {
-            services.TryAddScoped<ILogProviderFactory, Bing.Logs.Log4Net.LogProviderFactory>();
+            services.TryAddSingleton<ILogProviderFactory, Bing.Logs.Log4Net.LogProviderFactory>();
             services.TryAddSingleton<ILogFormat, ContentFormat>();
             services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
             services.TryAddScoped<ILog, Log>();

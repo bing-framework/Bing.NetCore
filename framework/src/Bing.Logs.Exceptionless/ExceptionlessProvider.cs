@@ -41,6 +41,11 @@ namespace Bing.Logs.Exceptionless
         /// </summary>
         public bool IsDistributedLog => true;
 
+        /// <summary>
+        /// Url过滤
+        /// </summary>
+        public static string[] UrlFilter { get; } = new[] { "t", "page", "pageSize" };
+
         #endregion
 
         /// <summary>
@@ -125,7 +130,23 @@ namespace Bing.Logs.Exceptionless
         {
             if (string.IsNullOrWhiteSpace(content.Url))
                 return;
-            builder.SetSource(content.Url);
+            builder.SetSource(RemoveParams(content.Url, UrlFilter));
+        }
+
+        /// <summary>
+        /// 移除URL参数
+        /// </summary>
+        /// <param name="url">Url地址</param>
+        /// <param name="paramList">参数列表</param>
+        private static string RemoveParams(string url, string[] paramList)
+        {
+            foreach (var param in paramList)
+            {
+                var reg = $"(?<=[\\?&]){param}=[^&]*&?";
+                url = url.ReplaceWith(reg, "");
+            }
+            url = url.ReplaceWith("&+$", "");
+            return url.TrimEnd('?');
         }
 
         /// <summary>

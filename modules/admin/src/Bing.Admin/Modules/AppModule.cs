@@ -57,7 +57,10 @@ namespace Bing.Admin.Modules
             //    //})
             //    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
             //    .AddControllersAsServices();
-            services.AddControllers()
+            services.AddControllers(o =>
+                {
+                    o.Conventions.Add(new AuthorizeControllerModelConvention());
+                })
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";

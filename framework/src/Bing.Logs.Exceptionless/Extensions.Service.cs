@@ -22,7 +22,7 @@ namespace Bing.Logs.Exceptionless
         public static void AddExceptionless(this IServiceCollection services,
             Action<ExceptionlessConfiguration> configAction, string name = null)
         {
-            services.TryAddScoped<ILogProviderFactory, Bing.Logs.Exceptionless.LogProviderFactory>();
+            services.TryAddSingleton<ILogProviderFactory, Bing.Logs.Exceptionless.LogProviderFactory>();
             services.TryAddSingleton(typeof(ILogFormat), t => NullLogFormat.Instance);
             services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
             services.TryAddScoped<ILog, Log>();
