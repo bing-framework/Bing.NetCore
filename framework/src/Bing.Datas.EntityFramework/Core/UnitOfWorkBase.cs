@@ -64,51 +64,15 @@ namespace Bing.Datas.EntityFramework.Core
         public string TraceId { get; set; }
 
         /// <summary>
-        /// 服务提供程序
+        /// Lazy延迟加载服务提供程序
         /// </summary>
         [Autowired]
-        public IServiceProvider ServiceProvider { get; set; }
-
-        /// <summary>
-        /// 服务提供程序锁
-        /// </summary>
-        protected readonly object ServiceProviderLock = new object();
-
-        /// <summary>
-        /// 懒加载获取请求服务
-        /// </summary>
-        /// <typeparam name="TService">服务类型</typeparam>
-        /// <param name="reference">服务引用</param>
-        protected TService LazyGetRequiredService<TService>(ref TService reference) => LazyGetRequiredService(typeof(TService), ref reference);
-
-        /// <summary>
-        /// 懒加载获取请求服务
-        /// </summary>
-        /// <typeparam name="TRef">引用类型</typeparam>
-        /// <param name="serviceType">服务类型</param>
-        /// <param name="reference">服务引用</param>
-        protected TRef LazyGetRequiredService<TRef>(Type serviceType, ref TRef reference)
-        {
-            if (reference == null)
-            {
-                lock (ServiceProviderLock)
-                {
-                    if (reference == null)
-                        reference = (TRef)ServiceProvider.GetRequiredService(serviceType);
-                }
-            }
-            return reference;
-        }
+        public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
 
         /// <summary>
         /// 当前用户
         /// </summary>
-        protected ICurrentUser CurrentUser => LazyGetRequiredService(ref _currentUser);
-
-        /// <summary>
-        /// 当前用户
-        /// </summary>
-        private ICurrentUser _currentUser;
+        protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
 
         #endregion
 
