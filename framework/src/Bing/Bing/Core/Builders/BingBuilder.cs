@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bing.Core.Modularity;
-using Bing.Core.Options;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -71,11 +69,6 @@ namespace Bing.Core.Builders
         /// 加载的模块集合
         /// </summary>
         public IEnumerable<BingModule> Modules => _modules;
-
-        /// <summary>
-        /// Bing 选项配置委托
-        /// </summary>
-        public Action<BingOptions> OptionsAction { get; private set; }
 
         #endregion
 
@@ -176,21 +169,6 @@ namespace Bing.Core.Builders
             source = source.Except(exceptModules).ToArray();
             foreach (var module in source) 
                 AddModule(module.GetType());
-            return this;
-        }
-
-        #endregion
-
-        #region AddOptions(添加选项配置)
-
-        /// <summary>
-        /// 添加Bing选项配置
-        /// </summary>
-        /// <param name="optionsAction">选项操作</param>
-        public IBingBuilder AddOptions(Action<BingOptions> optionsAction)
-        {
-            Check.NotNull(optionsAction, nameof(optionsAction));
-            OptionsAction = optionsAction;
             return this;
         }
 

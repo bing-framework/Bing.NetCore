@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Bing.Core.Modularity;
-using Bing.Core.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Core.Builders
@@ -22,11 +21,6 @@ namespace Bing.Core.Builders
         IEnumerable<BingModule> Modules { get; }
 
         /// <summary>
-        /// Bing 选项配置委托
-        /// </summary>
-        Action<BingOptions> OptionsAction { get; }
-
-        /// <summary>
         /// 添加指定模块
         /// </summary>
         /// <typeparam name="TModule">要添加的模块类型</typeparam>
@@ -37,11 +31,5 @@ namespace Bing.Core.Builders
         /// </summary>
         /// <param name="exceptModuleTypes">要排除的模块类型</param>
         IBingBuilder AddModules(params Type[] exceptModuleTypes);
-
-        /// <summary>
-        /// 添加Bing选项配置
-        /// </summary>
-        /// <param name="optionsAction">选项操作</param>
-        IBingBuilder AddOptions(Action<BingOptions> optionsAction);
     }
 }
