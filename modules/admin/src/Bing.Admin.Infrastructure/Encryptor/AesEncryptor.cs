@@ -1,4 +1,4 @@
-﻿using Bing.Security.Encryptors;
+﻿using Bing.Security.Encryption;
 
 namespace Bing.Admin.Infrastructure.Encryptor
 {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Security.Encryptors;
+using Bing.Security.Encryption;
 using Bing.Validations;
 
 namespace Bing.Permissions.Identity.Models

@@ -1,4 +1,4 @@
-﻿namespace Bing.Security.Encryptors
+﻿namespace Bing.Security.Encryption
 {
     /// <summary>
     /// 加密器
