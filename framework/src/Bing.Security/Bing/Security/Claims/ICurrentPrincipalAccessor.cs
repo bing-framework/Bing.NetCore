@@ -9,7 +9,7 @@ namespace Bing.Security.Claims
     /// 当前安全主体访问器
     /// </summary>
     [Ignore]
-    public interface ICurrentPrincipalAccessor : ISingletonDependency
+    public interface ICurrentPrincipalAccessor: ISingletonDependency
     {
         /// <summary>
         /// 安全主体

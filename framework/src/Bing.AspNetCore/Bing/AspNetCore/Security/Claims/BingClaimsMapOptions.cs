@@ -24,6 +24,7 @@ namespace Bing.AspNetCore.Security.Claims
                 {"sub", () => BingClaimTypes.UserId},
                 {"role", () => BingClaimTypes.Role},
                 {"email", () => BingClaimTypes.Email},
+                {"name", () => BingClaimTypes.UserName},
             };
         }
     }
