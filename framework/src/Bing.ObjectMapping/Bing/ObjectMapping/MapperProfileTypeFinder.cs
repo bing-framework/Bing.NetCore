@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Bing.Finders;
 using Bing.Reflection;
 
@@ -36,24 +34,6 @@ namespace Bing.ObjectMapping
                     typeof(IObjectMapperProfile).IsAssignableFrom(type)))
                 .ToArray();
             return types;
-        }
-
-        /// <summary>
-        /// 查找类型列表
-        /// </summary>
-        /// <typeparam name="T">查找类型</typeparam>
-        /// <param name="assemblies">在指定的程序集列表中查找</param>
-        public virtual List<Type> Find<T>(List<Assembly> assemblies = null) => Find(typeof(T), assemblies);
-
-        /// <summary>
-        /// 查找类型列表
-        /// </summary>
-        /// <param name="findType">查找类型</param>
-        /// <param name="assemblies">在指定的程序集列表中查找</param>
-        public virtual List<Type> Find(Type findType, List<Assembly> assemblies = null)
-        {
-            assemblies ??= _allAssemblyFinder.FindAll(true).ToList();
-            return Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }
 }
