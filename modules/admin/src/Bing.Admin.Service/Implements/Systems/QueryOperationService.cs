@@ -6,7 +6,7 @@ using Bing.Admin.Service.Abstractions.Systems;
 using Bing.Admin.Service.Shared.Dtos.Systems;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Application.Services;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

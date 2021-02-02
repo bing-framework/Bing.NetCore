@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Bing.Exceptions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Validations;
 
 namespace Bing.Biz.OAuthLogin.Core

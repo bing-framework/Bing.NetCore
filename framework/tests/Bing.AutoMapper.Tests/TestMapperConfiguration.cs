@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Tests.Samples;
 
 namespace Bing.AutoMapper.Tests
@@ -7,22 +7,15 @@ namespace Bing.AutoMapper.Tests
     /// <summary>
     /// 测试 - 映射器配置文件
     /// </summary>
-    public class TestMapperConfiguration : Profile, IOrderedMapperProfile
+    public class TestMapperConfiguration : Profile, IObjectMapperProfile
     {
         /// <summary>
-        /// 排序
+        /// 创建映射配置
         /// </summary>
-        public int Order => 0;
-
-        /// <summary>
-        /// 初始化一个<see cref="TestMapperConfiguration"/>类型的实例
-        /// </summary>
-        public TestMapperConfiguration()
+        public void CreateMap()
         {
             CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
                 .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue));
-
-            //CreateMap<MapTest.T1, MapTest.T1Dto>();
         }
     }
 }

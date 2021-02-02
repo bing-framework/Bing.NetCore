@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
+    <ProjectReference Include="..\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
   </ItemGroup>
 
 </Project>

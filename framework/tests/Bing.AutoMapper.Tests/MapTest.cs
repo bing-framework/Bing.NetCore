@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using AutoMapper;
 using Bing.Helpers;
-using Bing.Mapping;
+using Bing.ObjectMapping;
+using Bing.Reflection;
 using Bing.Tests.Samples;
 using Xunit;
 
@@ -14,13 +17,25 @@ namespace Bing.AutoMapper.Tests
     {
         public MapTest()
         {
-            var config = new MapperConfiguration(cfg =>
+            var allAssemblyFinder = new AppDomainAllAssemblyFinder();
+            var mapperProfileTypeFinder = new MapperProfileTypeFinder(allAssemblyFinder);
+            var instances = mapperProfileTypeFinder
+                .FindAll()
+                .Select(type => Reflections.CreateInstance<IObjectMapperProfile>(type))
+                .ToList();
+            var configuration = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<TestMapperConfiguration>();
+                foreach (var instance in instances)
+                {
+
+                    Debug.WriteLine($"初始化AutoMapper配置：{instance.GetType().FullName}");
+                    instance.CreateMap();
+                    // ReSharper disable once SuspiciousTypeConversion.Global
+                    cfg.AddProfile(instance as Profile);
+                }
             });
-            AutoMapperConfiguration.Init(config);
-            var mapper = new AutoMapperMapper();
-            MapperExtensions.SetMapper(mapper);
+            var mapper = new AutoMapperObjectMapper(configuration);
+            ObjectMapperExtensions.SetMapper(mapper);
         }
 
         /// <summary>

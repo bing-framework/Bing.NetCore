@@ -8,7 +8,7 @@ using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems.Extensions;
 using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

@@ -5,7 +5,7 @@ using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Systems.Domain.Services.Implements
 {

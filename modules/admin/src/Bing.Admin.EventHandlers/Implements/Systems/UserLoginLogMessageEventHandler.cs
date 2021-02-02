@@ -11,7 +11,7 @@ using Bing.Admin.Systems.Domain.Services.Abstractions;
 using Bing.Events;
 using Bing.Extensions;
 using Bing.Logs.Aspects;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Security.Claims;
 using Bing.Users;
 

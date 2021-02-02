@@ -1,0 +1,11 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.ObjectMapping</AssemblyName>
+    <PackageId>Bing.ObjectMapping</PackageId>
+    <Description>Bing.ObjectMapping是Bing应用框架的对象映射抽象类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.csproj" />
+  </ItemGroup>
+</Project>
