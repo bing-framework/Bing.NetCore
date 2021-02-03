@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Bing.ExceptionHandling;
 using Bing.Extensions;
 using Bing.Properties;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@ namespace Bing.Exceptions
     /// 应用程序异常
     /// </summary>
     [Serializable]
-    public class Warning : Exception
+    public class Warning : Exception, IHasErrorCode
     {
         #region 属性
 
@@ -75,7 +76,7 @@ namespace Bing.Exceptions
         {
             var result = new StringBuilder();
             var list = GetExceptions(ex);
-            foreach (var exception in list) 
+            foreach (var exception in list)
                 AppendMessage(result, exception);
             return result.ToString().RemoveEnd(Environment.NewLine);
         }

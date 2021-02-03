@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using Bing.Exceptions;
 using Bing.Extensions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
@@ -15,35 +12,6 @@ namespace Microsoft.AspNetCore.Mvc.Abstractions
     /// </summary>
     public static class ActionDescriptorExtensions
     {
-        /// <summary>
-        /// 转换为控制器操作符
-        /// </summary>
-        /// <param name="actionDescriptor">操作描述符</param>
-        public static ControllerActionDescriptor AsControllerActionDescriptor(this ActionDescriptor actionDescriptor)
-        {
-            if (!actionDescriptor.IsControllerAction())
-                throw new Warning($"{nameof(actionDescriptor)} should be type of {typeof(ControllerActionDescriptor).AssemblyQualifiedName}");
-            return actionDescriptor as ControllerActionDescriptor;
-        }
-
-        /// <summary>
-        /// 是否控制器操作符
-        /// </summary>
-        /// <param name="actionDescriptor">操作描述符</param>
-        public static bool IsControllerAction(this ActionDescriptor actionDescriptor) => actionDescriptor is ControllerActionDescriptor;
-
-        /// <summary>
-        /// 获取方法信息
-        /// </summary>
-        /// <param name="actionDescriptor">操作描述符</param>
-        public static MethodInfo GetMethodInfo(this ActionDescriptor actionDescriptor) => actionDescriptor.AsControllerActionDescriptor().MethodInfo;
-
-        /// <summary>
-        /// 获取返回类型
-        /// </summary>
-        /// <param name="actionDescriptor">操作描述符</param>
-        public static Type GetReturnType(this ActionDescriptor actionDescriptor) => actionDescriptor.GetMethodInfo().ReturnType;
-
         /// <summary>
         /// 获取Action路径
         /// </summary>
@@ -63,7 +31,7 @@ namespace Microsoft.AspNetCore.Mvc.Abstractions
                 var path = (area == null ? $"{controller}/{action}" : $"{area}/{controller}/{action}").ToLower();
                 return $"{methods.ExpandAndToString()} {path}".ToLower();
             }
-            var regex=new Regex("{\\w+}");
+            var regex = new Regex("{\\w+}");
             var template = controllerAction.AttributeRouteInfo.Template.ToLower();
             template = regex.Replace(template, "{arg}");
             return $"{methods.ExpandAndToString()} {template}".ToLower();

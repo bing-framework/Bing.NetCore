@@ -1,11 +1,13 @@
 ﻿using System.Threading.Tasks;
+using Bing.DependencyInjection;
 
 namespace Bing.ExceptionHandling
 {
     /// <summary>
     /// 异常订阅器
     /// </summary>
-    public interface IExceptionSubscriber
+    [MultipleDependency]
+    public interface IExceptionSubscriber : ITransientDependency
     {
         /// <summary>
         /// 处理

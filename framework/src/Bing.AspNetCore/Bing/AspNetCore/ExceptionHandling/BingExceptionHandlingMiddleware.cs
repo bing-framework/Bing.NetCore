@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Bing.Logs;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bing.AspNetCore.ExceptionHandling
 {
@@ -16,10 +18,20 @@ namespace Bing.AspNetCore.ExceptionHandling
         private readonly RequestDelegate _next;
 
         /// <summary>
+        /// 异常处理选项配置
+        /// </summary>
+        private readonly BingExceptionHandlingOptions _options;
+
+        /// <summary>
         /// 初始化一个<see cref="BingExceptionHandlingMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        public BingExceptionHandlingMiddleware(RequestDelegate next) => _next = next;
+        /// <param name="options">异常处理选项配置</param>
+        public BingExceptionHandlingMiddleware(RequestDelegate next, IOptions<BingExceptionHandlingOptions> options)
+        {
+            _next = next;
+            _options = options.Value;
+        }
 
         /// <summary>
         /// 执行中间件拦截逻辑
@@ -33,26 +45,13 @@ namespace Bing.AspNetCore.ExceptionHandling
             }
             catch (Exception e)
             {
-                WriteLog(context, e);
-                throw;
+                var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+                    .CreateLogger<BingExceptionHandlingMiddleware>();
+                if (context.RequestAborted.IsCancellationRequested && (e is TaskCanceledException || e is OperationCanceledException))
+                    _options.OnRequestAborted?.Invoke(context, logger);
+                else
+                    _options.OnException?.Invoke(context, logger, e);
             }
-        }
-
-        /// <summary>
-        /// 写入日志
-        /// </summary>
-        /// <param name="context">Http上下文</param>
-        /// <param name="ex">异常</param>
-        private void WriteLog(HttpContext context, Exception ex)
-        {
-            if (context == null)
-                return;
-            var log = (ILog)context.RequestServices.GetService(typeof(ILog));
-            log
-                .Tag(nameof(BingExceptionHandlingMiddleware))
-                .Caption("全局异常捕获 - 错误日志中间件")
-                .Content($"状态码：{context.Response.StatusCode}");
-            ex.Log(log);
         }
     }
 }
