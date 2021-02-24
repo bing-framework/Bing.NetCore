@@ -44,6 +44,11 @@ namespace Bing.AspNetCore.ExceptionHandling
         /// <param name="exception">异常</param>
         protected virtual Exception TryToGetActualException(Exception exception)
         {
+            if (exception is AggregateException && exception.InnerException != null)
+            {
+                var aggException = exception as AggregateException;
+
+            }
             return exception;
         }
     }

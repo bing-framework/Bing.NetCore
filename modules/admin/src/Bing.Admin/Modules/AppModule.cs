@@ -59,6 +59,7 @@ namespace Bing.Admin.Modules
             //    .AddControllersAsServices();
             services.AddControllers(o =>
                 {
+                    o.Filters.Add<ResultHandlerAttribute>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
                 .AddNewtonsoftJson(options =>
