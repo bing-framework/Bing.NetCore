@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="Castle.Core" Version="4.4.0" />
+    <PackageReference Update="Castle.Core" Version="4.4.1" />
     <PackageReference Update="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
     <PackageReference Update="MessagePack" Version="1.7.3.7" />
   </ItemGroup>
