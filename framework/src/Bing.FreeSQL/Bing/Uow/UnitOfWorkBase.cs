@@ -313,7 +313,7 @@ namespace Bing.Uow
         /// <param name="transactionActionManager">事务操作管理器</param>
         private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager)
         {
-            using var transaction = UnitOfWork.GetOrBeginTransaction();
+            var transaction = UnitOfWork.GetOrBeginTransaction();
             try
             {
                 await transactionActionManager.CommitAsync(transaction);
@@ -321,7 +321,7 @@ namespace Bing.Uow
                 transaction.Commit();
                 return result;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 transaction.Rollback();
                 throw;

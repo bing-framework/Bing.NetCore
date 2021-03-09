@@ -47,8 +47,8 @@ namespace Bing.Admin.Modules
                 o.AddSwaggerGenAction = config =>
                 {
                     AddSwaggerGen(config);
-                    config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Service.xml"));
-                    config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Infrastructure.xml"));
+                    //config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Service.xml"));
+                    //config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.Infrastructure.xml"));
 
                     #region 启用Swagger验证功能
 
@@ -120,7 +120,7 @@ namespace Bing.Admin.Modules
         /// <param name="options">配置</param>
         protected virtual void AddSwaggerGen(SwaggerGenOptions options)
         {
-            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.xml"), true);
+            //options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Bing.Admin.FreeSQL.xml"), true);
         }
         /// <summary>
         /// 启用Swagger配置

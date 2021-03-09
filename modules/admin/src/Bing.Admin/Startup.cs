@@ -1,6 +1,4 @@
-﻿using System;
-using AspectCore.Extensions.DependencyInjection;
-using Bing.Admin.Modules;
+﻿using Bing.Admin.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

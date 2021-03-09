@@ -77,8 +77,9 @@ namespace Bing.Admin.Apis
         [HttpPost("testMessage")]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
-            await MessageEventBus.PublishAsync(new TestMessageEvent1(request));
-            await UnitOfWork.CommitAsync();
+            await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
+            if (request.NeedCommit) 
+                await UnitOfWork.CommitAsync();
             return Success();
         }
     }

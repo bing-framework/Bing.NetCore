@@ -6,6 +6,7 @@ using DotNetCore.CAP.MySql;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -24,11 +25,12 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapStorageMarkerService>();
             services.AddSingleton<IDataStorage, MySqlDataStorage>();
             
-            services.TryAddSingleton<IStorageInitializer, MySqlStorageInitializer>();
+            services.AddSingleton<IStorageInitializer, MySqlStorageInitializer>();
             services.AddTransient<ICapTransaction, MySqlCapTransaction>();
 
             //Add MySqlOptions
             services.Configure(_configure);
+            services.AddSingleton<IConfigureOptions<MySqlOptions>, ConfigureMySqlOptions>();
         } 
     }
 }

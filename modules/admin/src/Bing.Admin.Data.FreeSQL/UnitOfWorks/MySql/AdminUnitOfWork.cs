@@ -44,19 +44,24 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
         {
             var publisher = LazyServiceProvider.LazyGetService<ICapPublisher>();
             var capTransaction = UnitOfWork.BeginTransaction(publisher, autoCommit: false);
-            try
-            {
-                await transactionActionManager.CommitAsync(
-                    publisher.Transaction.Value.DbTransaction as IDbTransaction);
-                var result = await base.SaveChangesAsync(cancellationToken);
-                await capTransaction.CommitAsync(cancellationToken);
-                return result;
-            }
-            catch (Exception)
-            {
-                await capTransaction.RollbackAsync(cancellationToken);
-                throw;
-            }
+            await transactionActionManager.CommitAsync(
+                publisher.Transaction.Value.DbTransaction as IDbTransaction);
+            var result = await base.SaveChangesAsync(cancellationToken);
+            UnitOfWork.Commit(capTransaction);
+            return result;
+            //try
+            //{
+            //    await transactionActionManager.CommitAsync(
+            //        publisher.Transaction.Value.DbTransaction as IDbTransaction);
+            //    var result = await base.SaveChangesAsync(cancellationToken);
+            //    await capTransaction.CommitAsync(cancellationToken);
+            //    return result;
+            //}
+            //catch (Exception e)
+            //{
+            //    await capTransaction.RollbackAsync(cancellationToken);
+            //    throw;
+            //}
         }
     }
 }
