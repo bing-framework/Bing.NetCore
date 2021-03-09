@@ -53,12 +53,12 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
                         await transactionActionManager.CommitAsync(
                             publisher.Transaction.Value.DbTransaction as IDbTransaction);
                         var result = await base.SaveChangesAsync(cancellationToken);
-                        capTransaction.Commit();
+                        await capTransaction.CommitAsync(cancellationToken);
                         return result;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        capTransaction.Rollback();
+                        await capTransaction.RollbackAsync(cancellationToken);
                         throw;
                     }
                 }

@@ -433,7 +433,7 @@ namespace Bing.Datas.EntityFramework.Core
             try
             {
                 await transactionActionManager.CommitAsync(transaction);
-                Database.UseTransaction(transaction);
+                await Database.UseTransactionAsync(transaction,cancellationToken);
                 var result = await base.SaveChangesAsync(cancellationToken);
                 transaction.Commit();
                 return result;

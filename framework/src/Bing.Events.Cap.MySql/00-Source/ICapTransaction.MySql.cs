@@ -3,6 +3,9 @@
 
 using System.Data;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -28,7 +31,32 @@ namespace DotNetCore.CAP
             Flush();
         }
 
+        public override async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            Debug.Assert(DbTransaction != null);
+
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Commit();
+                    break;
+            }
+            Flush();
+        }
+
         public override void Rollback()
+        {
+            Debug.Assert(DbTransaction != null);
+
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Rollback();
+                    break;
+            }
+        }
+
+        public override async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             Debug.Assert(DbTransaction != null);
 
@@ -49,6 +77,7 @@ namespace DotNetCore.CAP
 
     public static class CapTransactionExtensions
     {
+        
         public static ICapTransaction Begin(this ICapTransaction transaction,
             IDbTransaction dbTransaction, bool autoCommit = false)
         {
@@ -74,7 +103,7 @@ namespace DotNetCore.CAP
             }
 
             var dbTransaction = dbConnection.BeginTransaction();
-            publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
+            publisher.Transaction.Value = publisher.ServiceProvider.GetService<ICapTransaction>();
             return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
         }
     }

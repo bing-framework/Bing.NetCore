@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using Bing.Data.Transaction;
 using Bing.FreeSQL;
+using DotNetCore.CAP;
 
 namespace Bing.Admin.Data.UnitOfWorks.MySql
 {
@@ -15,6 +20,43 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
         /// <param name="serviceProvider">服务提供器</param>
         public AdminUnitOfWork(FreeSqlWrapper orm, IServiceProvider serviceProvider = null) : base(orm, serviceProvider)
         {
+        }
+
+        /// <summary>
+        /// 异步保存更改
+        /// </summary>
+        /// <param name="cancellationToken">取消令牌</param>
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            SaveChangesBefore();
+            var transactionActionManager = LazyServiceProvider.LazyGetService<ITransactionActionManager>();
+            if (transactionActionManager.Count == 0)
+                return await base.SaveChangesAsync(cancellationToken);
+            return await TransactionCommit(transactionActionManager, cancellationToken);
+        }
+
+        /// <summary>
+        /// 手工创建事务提交
+        /// </summary>
+        /// <param name="transactionActionManager">事务操作管理器</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
+        {
+            var publisher = LazyServiceProvider.LazyGetService<ICapPublisher>();
+            var capTransaction = UnitOfWork.BeginTransaction(publisher, autoCommit: false);
+            try
+            {
+                await transactionActionManager.CommitAsync(
+                    publisher.Transaction.Value.DbTransaction as IDbTransaction);
+                var result = await base.SaveChangesAsync(cancellationToken);
+                await capTransaction.CommitAsync(cancellationToken);
+                return result;
+            }
+            catch (Exception)
+            {
+                await capTransaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
     }
 }
