@@ -17,6 +17,7 @@ using Bing.Exceptions;
 using Bing.FreeSQL;
 using Bing.Users;
 using FreeSql;
+using FreeSql.Aop;
 using FreeSql.Internal.CommonProvider;
 
 namespace Bing.Uow
@@ -314,18 +315,10 @@ namespace Bing.Uow
         private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager)
         {
             var transaction = UnitOfWork.GetOrBeginTransaction();
-            try
-            {
-                await transactionActionManager.CommitAsync(transaction);
-                var result = await base.SaveChangesAsync();
-                transaction.Commit();
-                return result;
-            }
-            catch (Exception e)
-            {
-                transaction.Rollback();
-                throw;
-            }
+            await transactionActionManager.CommitAsync(transaction);
+            var result = await base.SaveChangesAsync();
+            UnitOfWork.Commit();
+            return result;
         }
 
         #endregion
