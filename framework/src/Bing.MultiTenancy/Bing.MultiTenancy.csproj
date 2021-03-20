@@ -3,4 +3,8 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.csproj" />
+  </ItemGroup>
+
 </Project>

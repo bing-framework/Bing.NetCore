@@ -79,7 +79,7 @@ namespace Bing.Events.Cap
         /// <param name="name">消息名称</param>
         /// <param name="data">事件数据</param>
         /// <param name="callback">回调名称</param>
-        private void WriteLog(string name, object data,string callback)
+        private void WriteLog(string name, object data, string callback)
         {
             var log = Log.GetLog(this);
             if (log.IsDebugEnabled == false)
