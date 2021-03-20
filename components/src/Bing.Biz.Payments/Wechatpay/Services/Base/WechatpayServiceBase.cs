@@ -38,7 +38,6 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// 支付
         /// </summary>
         /// <param name="param">支付参数</param>
-        /// <returns></returns>
         public virtual async Task<PayResult> PayAsync(PayParam param)
         {
             var config = await ConfigProvider.GetConfigAsync();
@@ -83,7 +82,6 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// <summary>
         /// 获取交易类型
         /// </summary>
-        /// <returns></returns>
         protected abstract string GetTradeType();
 
         /// <summary>
@@ -111,14 +109,10 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// </summary>
         /// <param name="config">微信支付配置</param>
         /// <param name="builder">微信支付参数生辰器</param>
-        /// <returns></returns>
         protected virtual async Task<string> Request(WechatpayConfig config, WechatpayParameterBuilder builder)
         {
             if (IsSend == false)
-            {
                 return string.Empty;
-            }
-
             return await Web.Client()
                 .Post(string.IsNullOrWhiteSpace(GetOrderUrl()) ? config.GetOrderUrl() : GetOrderUrl())
                 .XmlData(builder.ToXml())
@@ -128,11 +122,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// <summary>
         /// 获取统一下单地址
         /// </summary>
-        /// <returns></returns>
-        protected virtual string GetOrderUrl()
-        {
-            return string.Empty;
-        }
+        protected virtual string GetOrderUrl() => string.Empty;
 
         /// <summary>
         /// 写日志
@@ -144,9 +134,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         {
             var log = GetLog();
             if (log.IsTraceEnabled == false)
-            {
                 return;
-            }
             log.Class(GetType().FullName)
                 .Caption("微信支付")
                 .Content($"支付方式 : {GetPayWay().Description()}")
@@ -165,23 +153,11 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(WechatpayConst.TraceLogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
-        }
+        private ILog GetLog() => Log.GetLog(WechatpayConst.TraceLogName);
 
         /// <summary>
         /// 获取支付方式
         /// </summary>
-        /// <returns></returns>
         protected abstract PayWay GetPayWay();
 
         /// <summary>
@@ -190,7 +166,6 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// <param name="config">微信支付配置</param>
         /// <param name="builder">微信支付参数生成器</param>
         /// <param name="result">微信支付结果</param>
-        /// <returns></returns>
         protected virtual async Task<PayResult> CreateResult(WechatpayConfig config, WechatpayParameterBuilder builder,
             WechatpayResult result)
         {
@@ -209,11 +184,8 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// <param name="config">微信支付配置</param>
         /// <param name="builder">微信支付参数生成器</param>
         /// <param name="result">微信支付结果</param>
-        /// <returns></returns>
         protected virtual string GetResult(WechatpayConfig config, WechatpayParameterBuilder builder,
-            WechatpayResult result)
-        {
-            return result.GetPrepayId();
-        }
+            WechatpayResult result) =>
+            result.GetPrepayId();
     }
 }

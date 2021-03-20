@@ -2,6 +2,7 @@
 using Bing.DependencyInjection;
 using Bing.Linq;
 using Bing.Logs;
+using Bing.Logs.Core;
 using Bing.Users;
 
 namespace Bing.Application.Services
@@ -30,26 +31,6 @@ namespace Bing.Application.Services
         /// <summary>
         /// 日志
         /// </summary>
-        private ILog _log;
-
-        /// <summary>
-        /// 日志
-        /// </summary>
-        protected ILog Log => _log ??= GetLog();
-
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        protected virtual ILog GetLog()
-        {
-            try
-            {
-                return Bing.Logs.Log.GetLog(this);
-            }
-            catch
-            {
-                return Bing.Logs.Log.Null;
-            }
-        }
+        protected ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
     }
 }

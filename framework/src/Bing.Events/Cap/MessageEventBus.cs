@@ -81,7 +81,7 @@ namespace Bing.Events.Cap
         /// <param name="callback">回调名称</param>
         private void WriteLog(string name, object data,string callback)
         {
-            var log = GetLog();
+            var log = Log.GetLog(this);
             if (log.IsDebugEnabled == false)
                 return;
             log.Tag(name)
@@ -89,21 +89,6 @@ namespace Bing.Events.Cap
                 .Content($"消息名称: {name}")
                 .AddExtraProperty("event_data", data.ToJson())
                 .Trace();
-        }
-
-        /// <summary>
-        /// 获取日志
-        /// </summary>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(this);
-            }
-            catch
-            {
-                return Log.Null;
-            }
         }
     }
 }

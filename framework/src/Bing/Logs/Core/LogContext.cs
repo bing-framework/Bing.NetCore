@@ -87,7 +87,7 @@ namespace Bing.Logs.Core
         public void InitLogId()
         {
             var key = "Bing.Logs.LogContext_orderId";
-            _scopedDictionary.AddOrUpdate(key, ++_orderId);
+            _scopedDictionary[key] = _scopedDictionary.ContainsKey(key) ? ++_orderId : _orderId;
         }
         /// <summary>
         /// 获取日志上下文信息
@@ -101,7 +101,7 @@ namespace Bing.Logs.Core
             if (_info != null)
                 return _info;
             _info = CreateInfo();
-            _scopedDictionary.AddOrUpdate(key, _info);
+            _scopedDictionary[key] = _info;
             return _info;
         }
 

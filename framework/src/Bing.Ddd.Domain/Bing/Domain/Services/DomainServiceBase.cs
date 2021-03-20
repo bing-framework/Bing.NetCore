@@ -1,9 +1,7 @@
-﻿using System;
-using Bing.Aspects;
+﻿using Bing.Aspects;
 using Bing.DependencyInjection;
 using Bing.Logs;
 using Bing.Logs.Core;
-using Bing.Sessions;
 
 namespace Bing.Domain.Services
 {
@@ -21,17 +19,11 @@ namespace Bing.Domain.Services
         /// <summary>
         /// 初始化一个<see cref="DomainServiceBase"/>类型的实例
         /// </summary>
-        protected DomainServiceBase() => Log = NullLog.Instance;
+        protected DomainServiceBase() { }
 
         /// <summary>
         /// 日志
         /// </summary>
-        protected ILog Log { get; set; }
-
-        /// <summary>
-        /// 用户会话
-        /// </summary>
-        [Obsolete("领域服务不该使用用户会话")]
-        protected virtual ISession Session => LazyServiceProvider.LazyGetRequiredService<ISession>();
+        protected ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
     }
 }

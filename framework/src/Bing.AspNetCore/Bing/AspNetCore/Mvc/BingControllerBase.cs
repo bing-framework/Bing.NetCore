@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Bing.Aspects;
+using Bing.DependencyInjection;
+using Bing.Logs;
+using Bing.Logs.Core;
 using Bing.Sessions;
 using Bing.Users;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +18,26 @@ namespace Bing.AspNetCore.Mvc
     public abstract class BingControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
     {
         /// <summary>
+        /// Lazy延迟加载服务提供程序
+        /// </summary>
+        [Autowired]
+        public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
+
+        /// <summary>
         /// 当前会话
         /// </summary>
+        [Obsolete("请使用ICurrentUser")]
         protected ISession Session { get; private set; }
 
         /// <summary>
         /// 当前用户
         /// </summary>
         protected ICurrentUser CurrentUser { get; private set; }
+
+        /// <summary>
+        /// 日志
+        /// </summary>
+        protected ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
 
         /// <summary>
         /// 执行结果之前。在执行结果之前异步调用。

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
@@ -104,11 +105,18 @@ namespace Bing.Logs
         /// <param name="class">类名</param>
         private static ILog GetLog(string logName, string @class)
         {
-            var providerFactory = GetLogProviderFactory();
-            var format = GetLogFormat();
-            var context = GetLogContext();
-            var currentUser = GetCurrentUser();
-            return new Log(providerFactory.Create(logName, format), context, currentUser, @class);
+            try
+            {
+                var providerFactory = GetLogProviderFactory();
+                var format = GetLogFormat();
+                var context = GetLogContext();
+                var currentUser = GetCurrentUser();
+                return new Log(providerFactory.Create(logName, format), context, currentUser, @class);
+            }
+            catch
+            {
+                return Null;
+            }
         }
 
         /// <summary>

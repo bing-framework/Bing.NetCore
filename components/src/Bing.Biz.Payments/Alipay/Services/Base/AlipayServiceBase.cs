@@ -38,7 +38,6 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// 支付
         /// </summary>
         /// <param name="param">支付参数</param>
-        /// <returns></returns>
         public virtual async Task<PayResult> PayAsync(PayParam param)
         {
             var config = await ConfigProvider.GetConfigAsync();
@@ -84,17 +83,12 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// <summary>
         /// 获取请求方法
         /// </summary>
-        /// <returns></returns>
         protected abstract string GetMethod();
 
         /// <summary>
         /// 获取场景
         /// </summary>
-        /// <returns></returns>
-        protected virtual string GetScene()
-        {
-            return string.Empty;
-        }
+        protected virtual string GetScene() => string.Empty;
 
         /// <summary>
         /// 初始化内容生成器
@@ -110,7 +104,6 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// </summary>
         /// <param name="config">支付宝配置</param>
         /// <param name="builder">支付宝参数生成器</param>
-        /// <returns></returns>
         protected virtual async Task<PayResult> RequestResult(AlipayConfig config, AlipayParameterBuilder builder)
         {
             var result = new AlipayResult(await Request(config, builder));
@@ -123,14 +116,10 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// </summary>
         /// <param name="config">支付宝配置</param>
         /// <param name="builder">支付宝参数生成器</param>
-        /// <returns></returns>
         protected virtual async Task<string> Request(AlipayConfig config, AlipayParameterBuilder builder)
         {
             if (IsSend == false)
-            {
                 return string.Empty;
-            }
-
             return await Web.Client()
                 .Post(config.GetGatewayUrl())
                 .Data(builder.GetDictionary())
@@ -147,10 +136,7 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         {
             var log = GetLog();
             if (log.IsTraceEnabled == false)
-            {
                 return;
-            }
-
             log.Class(GetType().FullName)
                 .Caption("支付宝支付")
                 .Content($"支付宝方式 : {GetPayWay().Description()}")
@@ -179,9 +165,7 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         {
             var log = GetLog();
             if (log.IsTraceEnabled == false)
-            {
                 return;
-            }
             log.Class(GetType().FullName)
                 .Content($"支付方式 : {GetPayWay().Description()}")
                 .Content($"支付网关 : {config.GetGatewayUrl()}")
@@ -199,18 +183,7 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(AlipayConst.TraceLogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
-        }
+        private ILog GetLog() => Log.GetLog(AlipayConst.TraceLogName);
 
         /// <summary>
         /// 获取支付方式
@@ -223,14 +196,11 @@ namespace Bing.Biz.Payments.Alipay.Services.Base
         /// </summary>
         /// <param name="builder">支付宝参数生成器</param>
         /// <param name="result">支付宝结果</param>
-        /// <returns></returns>
-        protected virtual PayResult CreateResult(AlipayParameterBuilder builder, AlipayResult result)
-        {
-            return new PayResult(result.Success, result.GetTradeNo(), result.Raw)
+        protected virtual PayResult CreateResult(AlipayParameterBuilder builder, AlipayResult result) =>
+            new PayResult(result.Success, result.GetTradeNo(), result.Raw)
             {
                 Parameter = builder.ToString(),
                 Message = result.GetMessage()
             };
-        }
     }
 }

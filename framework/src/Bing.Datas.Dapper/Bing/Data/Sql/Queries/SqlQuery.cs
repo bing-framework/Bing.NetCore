@@ -230,7 +230,7 @@ namespace Bing.Data.Sql.Queries
         /// <param name="debugSql">调试Sql语句</param>
         protected override void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
         {
-            var log = GetLog();
+            var log = Log.GetLog(TraceLogName);
             if (IsEnabled(log) == false)
                 return;
             log.Class(GetType().FullName)
@@ -241,21 +241,6 @@ namespace Bing.Data.Sql.Queries
                 .Sql(debugSql)
                 .SqlParams(parameters)
                 .Trace();
-        }
-
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(TraceLogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
         }
 
         /// <summary>

@@ -42,6 +42,7 @@ namespace Bing.Admin.Modules
                     o.Filters.Add<ResultHandlerAttribute>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
+                .AddControllersAsServices()// 解决属性注入无法在控制器中注入的问题
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
@@ -52,6 +53,7 @@ namespace Bing.Admin.Modules
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
             });
+            services.EnableAspectScoped();
             services.AddDomainEventDispatcher();
             //services.AddAudit();
             return services;

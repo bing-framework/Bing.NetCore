@@ -13,7 +13,8 @@ namespace Bing.Admin
 
         public static IHostBuilder CreateWebHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseServiceContext().ConfigureWebHostDefaults(
+                .UseServiceContext()
+                .ConfigureWebHostDefaults(
                     webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();
