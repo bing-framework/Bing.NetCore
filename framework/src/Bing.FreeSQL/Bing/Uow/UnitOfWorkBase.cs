@@ -3,21 +3,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Aspects;
-using Bing.Auditing;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
-using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.FreeSQL;
 using Bing.Users;
 using FreeSql;
-using FreeSql.Aop;
 using FreeSql.Internal.CommonProvider;
 
 namespace Bing.Uow
@@ -209,91 +205,6 @@ namespace Bing.Uow
 
         #endregion
 
-        #region SaveChanges(保存更改)
-
-        /// <summary>
-        /// 保存更改
-        /// </summary>
-        public override int SaveChanges()
-        {
-            SaveChangesBefore();
-            return base.SaveChanges();
-        }
-
-        /// <summary>
-        /// 保存更改前操作
-        /// </summary>
-        protected virtual void SaveChangesBefore()
-        {
-            foreach (var entry in UnitOfWork.EntityChangeReport.Report)
-            {
-                switch (entry.Type)
-                {
-                    case EntityChangeType.Insert:
-                        InterceptAddedOperation(entry);
-                        break;
-
-                    case EntityChangeType.Update:
-                        InterceptModifiedOperation(entry);
-                        break;
-
-                    case EntityChangeType.Delete:
-                        InterceptDeletedOperation(entry);
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 拦截添加操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected virtual void InterceptAddedOperation(EntityChangeReport.ChangeInfo entry)
-        {
-            InitCreationAudited(entry);
-            InitModificationAudited(entry);
-        }
-
-        /// <summary>
-        /// 初始化创建审计信息
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        private void InitCreationAudited(EntityChangeReport.ChangeInfo entry) => CreationAuditedInitializer.Init(entry.Object, GetUserId(), GetUserName());
-
-        /// <summary>
-        /// 获取用户标识
-        /// </summary>
-        protected virtual string GetUserId() => CurrentUser.UserId;
-
-        /// <summary>
-        /// 获取用户名称
-        /// </summary>
-        protected virtual string GetUserName()
-        {
-            var name = CurrentUser.GetFullName();
-            return string.IsNullOrEmpty(name) ? CurrentUser.GetUserName() : name;
-        }
-
-        /// <summary>
-        /// 初始化修改审计信息
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        private void InitModificationAudited(EntityChangeReport.ChangeInfo entry) => ModificationAuditedInitializer.Init(entry.Object, GetUserId(), GetUserName());
-
-        /// <summary>
-        /// 拦截修改操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected virtual void InterceptModifiedOperation(EntityChangeReport.ChangeInfo entry) => InitModificationAudited(entry);
-
-        /// <summary>
-        /// 拦截删除操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected virtual void InterceptDeletedOperation(EntityChangeReport.ChangeInfo entry) => DeletionAuditedInitializer.Init(entry.Object, GetUserId(), GetUserName());
-
-        #endregion
-
         #region SaveChangesAsync(异步保存更改)
 
         /// <summary>
@@ -301,7 +212,6 @@ namespace Bing.Uow
         /// </summary>
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            SaveChangesBefore();
             var transactionActionManager = Create<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
                 return await base.SaveChangesAsync(cancellationToken);
@@ -319,21 +229,6 @@ namespace Bing.Uow
             var result = await base.SaveChangesAsync();
             UnitOfWork.Commit();
             return result;
-        }
-
-        #endregion
-
-        #region InitVersion(初始化版本号)
-
-        /// <summary>
-        /// 初始化版本号
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected void InitVersion(EntityChangeReport.ChangeInfo entry)
-        {
-            if (!(entry.Object is IVersion entity))
-                return;
-            entity.Version = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
         }
 
         #endregion

@@ -28,7 +28,6 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
         /// <param name="cancellationToken">取消令牌</param>
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            SaveChangesBefore();
             var transactionActionManager = LazyServiceProvider.LazyGetService<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
                 return await base.SaveChangesAsync(cancellationToken);
