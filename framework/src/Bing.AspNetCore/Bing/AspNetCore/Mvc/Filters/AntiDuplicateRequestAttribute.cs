@@ -20,6 +20,11 @@ namespace Bing.AspNetCore.Mvc.Filters
         public string Key { get; set; }
 
         /// <summary>
+        /// 是否分布式
+        /// </summary>
+        public bool IsDistributed { get; set; }
+
+        /// <summary>
         /// 锁类型
         /// </summary>
         public LockType Type { get; set; } = LockType.User;
@@ -27,7 +32,7 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// <summary>
         /// 再次提交时间间隔，单位：秒
         /// </summary>
-        public int Interval { get; set; }
+        public int Interval { get; set; } = 30;
 
         /// <summary>
         /// 执行
@@ -44,34 +49,31 @@ namespace Bing.AspNetCore.Mvc.Filters
 
             var @lock = CreateLock(context);
             var key = GetKey(context);
-            var isSuccess = false;
-            try
+            var value = GetValue(context);
+            if (await @lock.LockTakeAsync(key, value, GetExpiration()))
             {
-                isSuccess = @lock.Lock(key, GetExpiration());
-                if (isSuccess == false)
+                try
                 {
-                    context.Result = new ApiResult(StatusCode.Fail, GetFailMessage());
-                    return;
+                    await next();
                 }
-
-                OnActionExecuting(context);
-                if (context.Result != null)
-                    return;
-                var executedContext = await next();
-                OnActionExecuted(executedContext);
+                finally
+                {
+                    await @lock.LockReleaseAsync(key, value);
+                }
             }
-            finally
+            else
             {
-                if (isSuccess) 
-                    @lock.UnLock();
+                context.Result = new ApiResult(StatusCode.Fail, GetFailMessage());
             }
         }
 
         /// <summary>
-        /// 创建业务锁
+        /// 创建锁
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        private ILock CreateLock(ActionExecutingContext context) => context.HttpContext.RequestServices.GetService<ILock>() ?? NullLock.Instance;
+        private ILock CreateLock(ActionExecutingContext context) => IsDistributed
+            ? context.HttpContext.RequestServices.GetService<IDistributedLock>()
+            : context.HttpContext.RequestServices.GetService<ILock>();
 
         /// <summary>
         /// 获取锁定标识
@@ -83,13 +85,26 @@ namespace Bing.AspNetCore.Mvc.Filters
             var userId = string.Empty;
             if (Type == LockType.User)
                 userId = $"{currentUser.UserId}_";
-            return string.IsNullOrWhiteSpace(Key) ? $"{userId}{context.HttpContext.Request.Path}" : $"{userId}{Key}";
+            return string.IsNullOrWhiteSpace(Key) ? $"ADR:{userId}{context.HttpContext.Request.Path}" : $"ADR:{userId}{Key}";
+        }
+
+        /// <summary>
+        /// 获取当前占用值
+        /// </summary>
+        /// <param name="context">操作执行上下文</param>
+        protected virtual string GetValue(ActionExecutingContext context)
+        {
+            var currentUser = context.HttpContext.RequestServices.GetService<ICurrentUser>();
+            var value = string.Empty;
+            if (Type == LockType.User && currentUser.IsAuthenticated)
+                value = $"{currentUser.GetUserId()}";
+            return string.IsNullOrWhiteSpace(value) ? "bing_global_lock" : value;
         }
 
         /// <summary>
         /// 获取到期时间间隔
         /// </summary>
-        private TimeSpan? GetExpiration() => Interval == 0 ? (TimeSpan?)null : TimeSpan.FromSeconds(Interval);
+        private TimeSpan GetExpiration() => Interval == 0 ? TimeSpan.FromSeconds(30) : TimeSpan.FromSeconds(Interval);
 
         /// <summary>
         /// 获取失败消息
