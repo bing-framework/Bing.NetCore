@@ -206,9 +206,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.FreeSQL", "modul
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectMapping", "ObjectMapping", "{CC0105D7-EE03-471A-B16D-0E897DD0D5B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.ObjectMapping", "framework\src\Bing.ObjectMapping\Bing.ObjectMapping.csproj", "{C24940A3-DFAB-488B-9A2E-6D534412D7CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ObjectMapping", "framework\src\Bing.ObjectMapping\Bing.ObjectMapping.csproj", "{C24940A3-DFAB-488B-9A2E-6D534412D7CA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{3030FE3D-DB8F-403D-A181-8152670827AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Locks", "Locks", "{F8BFB799-8ECB-49F6-AAA4-5B07F64DB3D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Locks.CSRedis", "framework\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj", "{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -464,6 +468,10 @@ Global
 		{C24940A3-DFAB-488B-9A2E-6D534412D7CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C24940A3-DFAB-488B-9A2E-6D534412D7CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C24940A3-DFAB-488B-9A2E-6D534412D7CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -555,6 +563,8 @@ Global
 		{CC0105D7-EE03-471A-B16D-0E897DD0D5B1} = {3030FE3D-DB8F-403D-A181-8152670827AB}
 		{C24940A3-DFAB-488B-9A2E-6D534412D7CA} = {CC0105D7-EE03-471A-B16D-0E897DD0D5B1}
 		{3030FE3D-DB8F-403D-A181-8152670827AB} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
+		{F8BFB799-8ECB-49F6-AAA4-5B07F64DB3D9} = {3030FE3D-DB8F-403D-A181-8152670827AB}
+		{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC} = {F8BFB799-8ECB-49F6-AAA4-5B07F64DB3D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
