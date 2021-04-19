@@ -7,8 +7,7 @@ using Bing.Admin.Service.Shared.Dtos.Systems;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
-using Bing.Security.Extensions;
-using Bing.Sessions;
+using Bing.Users;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.Admin.Apis.Systems
@@ -61,7 +60,7 @@ namespace Bing.Admin.Apis.Systems
         {
             request.Type = RoleTypeCode.TenantRole;
             request.IsSystem = false;
-            request.TenantId = Session.GetTenantCode();
+            request.TenantId = CurrentUser.GetTenantCode();
             var id = await RoleService.CreateAsync(request);
             return Success(id);
         }
@@ -129,7 +128,7 @@ namespace Bing.Admin.Apis.Systems
         [HttpGet("getTenantRoleList")]
         public async Task<IActionResult> GetTenantRoleListAsync()
         {
-            var tenantId = Session.GetTenantCode();
+            var tenantId = CurrentUser.GetTenantCode();
             var result = await RoleService.GetListAsync(RoleTypeCode.TenantRole, tenantId);
             return Success(result);
         }

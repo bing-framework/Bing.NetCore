@@ -4,7 +4,6 @@ using Bing.Aspects;
 using Bing.DependencyInjection;
 using Bing.Logs;
 using Bing.Logs.Core;
-using Bing.Sessions;
 using Bing.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -22,12 +21,6 @@ namespace Bing.AspNetCore.Mvc
         /// </summary>
         [Autowired]
         public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
-
-        /// <summary>
-        /// 当前会话
-        /// </summary>
-        [Obsolete("请使用ICurrentUser")]
-        protected ISession Session { get; private set; }
 
         /// <summary>
         /// 当前用户
@@ -77,7 +70,6 @@ namespace Bing.AspNetCore.Mvc
                 throw new ArgumentNullException(nameof(context));
             if (next == null)
                 throw new ArgumentNullException(nameof(next));
-            Session = HttpContext.RequestServices.GetService<ISession>();
             CurrentUser = HttpContext.RequestServices.GetService<ICurrentUser>();
 
             OnActionExecuting(context);

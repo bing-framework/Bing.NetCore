@@ -156,16 +156,10 @@ namespace Bing.MailKit.Extensions
             {
                 var mixed = new Multipart("mixed");
 
-                if (body != null)
-                {
+                if (body != null) 
                     mixed.Add(body);
-                }
-
-                foreach (var attachment in mail.Attachments)
-                {
+                foreach (var attachment in mail.Attachments) 
                     mixed.Add(GetMimePart(attachment));
-                }
-
                 body = mixed;
             }
 
@@ -182,7 +176,7 @@ namespace Bing.MailKit.Extensions
         {
             var mimeType = item.ContentType.ToString();
             var contentType = ContentType.Parse(mimeType);
-            var attachemt = item as Attachment;
+            var attachment = item as Attachment;
             MimePart part;
 
             if (contentType.MediaType.Equals("text", StringComparison.OrdinalIgnoreCase))
@@ -194,7 +188,7 @@ namespace Bing.MailKit.Extensions
                 part = new MimePart(contentType);
             }
 
-            if (attachemt != null)
+            if (attachment != null)
             {
                 //var disposition = attachemt.ContentDisposition.ToString();
                 //part.ContentDisposition = ContentDisposition.Parse(disposition);
@@ -230,25 +224,21 @@ namespace Bing.MailKit.Extensions
             stream.Position = 0;
 
             part.Content = new MimeContent(stream);
-            if (attachemt != null)
+            if (attachment != null)
             {
                 // 解决中文文件名乱码
                 var charset = "GB18030";
                 part.ContentType.Parameters.Clear();
                 part.ContentDisposition.Parameters.Clear();
-                var fileName = attachemt.Name;
+                var fileName = attachment.Name;
                 part.ContentType.Parameters.Add(charset, "name", fileName);
                 part.ContentDisposition.Parameters.Add(charset, "filename", fileName);
                 // 解决文件名不能超过41字符
                 foreach (var parameter in part.ContentDisposition.Parameters)
-                {
                     parameter.EncodingMethod = ParameterEncodingMethod.Rfc2047;
-                }
 
                 foreach (var parameter in part.ContentType.Parameters)
-                {
                     parameter.EncodingMethod = ParameterEncodingMethod.Rfc2047;
-                }
             }
             return part;
         }
