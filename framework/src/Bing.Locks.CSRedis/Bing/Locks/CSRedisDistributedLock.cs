@@ -5,7 +5,7 @@ using Bing.Helpers;
 namespace Bing.Locks
 {
     /// <summary>
-    /// 基于
+    /// 基于CSRedis实现的分布式锁
     /// </summary>
     // ReSharper disable once InconsistentNaming
     public class CSRedisDistributedLock : IDistributedLock
@@ -22,6 +22,8 @@ namespace Bing.Locks
             Check.NotNull(key, nameof(key));
             Check.NotNull(value, nameof(value));
             Check.NotNull(expiration, nameof(expiration));
+            if (RedisHelper.Exists(key))
+                return false;
             return RedisHelper.Set(key, value, expiration);
         }
 
@@ -37,6 +39,8 @@ namespace Bing.Locks
             Check.NotNull(key, nameof(key));
             Check.NotNull(value, nameof(value));
             Check.NotNull(expiration, nameof(expiration));
+            if (await RedisHelper.ExistsAsync(key))
+                return false;
             return await RedisHelper.SetAsync(key, value, expiration);
         }
 
@@ -50,7 +54,8 @@ namespace Bing.Locks
         {
             Check.NotNull(key, nameof(key));
             Check.NotNull(value, nameof(value));
-            RedisHelper.Del(key);
+            if(RedisHelper.Exists(key))
+                RedisHelper.Del(key);
             return true;
         }
 
@@ -64,7 +69,8 @@ namespace Bing.Locks
         {
             Check.NotNull(key, nameof(key));
             Check.NotNull(value, nameof(value));
-            await RedisHelper.DelAsync(key);
+            if(await RedisHelper.ExistsAsync(key))
+                await RedisHelper.DelAsync(key);
             return true;
         }
 

@@ -7,6 +7,7 @@ using Bing.Core.Modularity;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities.Events;
 using Bing.Helpers;
+using Bing.Locks;
 using Bing.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -55,6 +56,8 @@ namespace Bing.Admin.Modules
             });
             services.EnableAspectScoped();
             services.AddDomainEventDispatcher();
+            services.AddLocalLock();
+            services.AddRedisDistributedLock();
             //services.AddAudit();
             return services;
         }

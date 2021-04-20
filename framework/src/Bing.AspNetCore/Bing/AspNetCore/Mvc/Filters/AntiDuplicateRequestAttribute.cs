@@ -35,6 +35,11 @@ namespace Bing.AspNetCore.Mvc.Filters
         public int Interval { get; set; } = 30;
 
         /// <summary>
+        /// 锁模式
+        /// </summary>
+        public LockMode Mode { get; set; } = LockMode.Limit;
+
+        /// <summary>
         /// 执行
         /// </summary>
         /// <param name="context">操作执行上下文</param>
@@ -50,20 +55,26 @@ namespace Bing.AspNetCore.Mvc.Filters
             var @lock = CreateLock(context);
             var key = GetKey(context);
             var value = GetValue(context);
-            if (await @lock.LockTakeAsync(key, value, GetExpiration()))
+            var isSuccess = false;
+            try
             {
-                try
+                isSuccess = await @lock.LockTakeAsync(key, value, GetExpiration());
+                if (isSuccess == false)
                 {
-                    await next();
+                    context.Result = new ApiResult(StatusCode.Fail, GetFailMessage());
+                    return;
                 }
-                finally
-                {
-                    await @lock.LockReleaseAsync(key, value);
-                }
+                OnActionExecuting(context);
+                if (context.Result != null)
+                    return;
+                var executedContext = await next();
+                OnActionExecuted(executedContext);
             }
-            else
+            finally
             {
-                context.Result = new ApiResult(StatusCode.Fail, GetFailMessage());
+                // 并发模式下，需要释放锁
+                if (isSuccess && Mode == LockMode.Concurrent)
+                    await @lock.LockReleaseAsync(key, value);
             }
         }
 
@@ -126,5 +137,20 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// 全局锁，该操作同时只有一个用户请求被执行
         /// </summary>
         Global = 1
+    }
+
+    /// <summary>
+    /// 锁模式
+    /// </summary>
+    public enum LockMode
+    {
+        /// <summary>
+        /// 限制模式。一定时间内只能有一个通过
+        /// </summary>
+        Limit,
+        /// <summary>
+        /// 并发模式。在上个请求未结束，均不能通过
+        /// </summary>
+        Concurrent,
     }
 }
