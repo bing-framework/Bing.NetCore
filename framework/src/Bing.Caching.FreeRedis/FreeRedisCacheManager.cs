@@ -34,6 +34,11 @@ namespace Bing.Caching.FreeRedis
         }
 
         /// <summary>
+        /// 缓存组件名称
+        /// </summary>
+        public string Name => CacheType.Redis;
+
+        /// <summary>
         /// 是否存在指定键的缓存
         /// </summary>
         /// <param name="key">缓存键</param>
@@ -73,7 +78,7 @@ namespace Bing.Caching.FreeRedis
         {
             try
             {
-                _client.Set(key, value, GetExpiration(expiration).Seconds);
+                _client.Set(key, value, (int)GetExpiration(expiration).TotalSeconds);
                 return true;
             }
             catch
@@ -89,7 +94,7 @@ namespace Bing.Caching.FreeRedis
         /// <param name="key">缓存键</param>
         /// <param name="value">值</param>
         /// <param name="expiration">过期时间间隔</param>
-        public void Add<T>(string key, T value, TimeSpan? expiration = null) => _client.Set(key, value, GetExpiration(expiration).Seconds);
+        public void Add<T>(string key, T value, TimeSpan? expiration = null) => _client.Set(key, value, (int)GetExpiration(expiration).TotalSeconds);
 
         /// <summary>
         /// 移除缓存

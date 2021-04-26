@@ -11,6 +11,11 @@ namespace Bing.EasyCaching
     public partial class CacheManager : ICache
     {
         /// <summary>
+        /// 缓存组件名称
+        /// </summary>
+        public string Name => "EasyCaching";
+
+        /// <summary>
         /// EasyCaching缓存提供器
         /// </summary>
         private readonly IEasyCachingProvider _provider;

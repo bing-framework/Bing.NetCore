@@ -19,6 +19,11 @@ namespace Bing.Caching.CSRedis
         private readonly JsonSerializer _serializer;
 
         /// <summary>
+        /// 缓存组件名称
+        /// </summary>
+        public string Name => CacheType.Redis;
+
+        /// <summary>
         /// 初始化一个<see cref="CSRedisCacheManager"/>类型的实例
         /// </summary>
         public CSRedisCacheManager() => _serializer = JsonSerializer.Create();
