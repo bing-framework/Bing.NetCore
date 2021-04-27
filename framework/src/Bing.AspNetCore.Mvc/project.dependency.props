@@ -1,0 +1,6 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.AspNetCore.Mvc.Contracts\Bing.AspNetCore.Mvc.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+  </ItemGroup>
+</Project>

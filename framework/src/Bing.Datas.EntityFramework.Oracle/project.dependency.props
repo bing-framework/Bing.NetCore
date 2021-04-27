@@ -1,0 +1,9 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="3.19.110" />
+  </ItemGroup>
+</Project>

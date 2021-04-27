@@ -79,7 +79,7 @@ namespace Bing.Admin.EventHandlers.Implements.Systems
             //AddClaim(claims, IdentityModel.JwtClaimTypes.Name, "Test");
             AddClaim(claims, BingClaimTypes.UserId, Guid.NewGuid().ToString());
             AddClaim(claims, BingClaimTypes.UserName, "Test");
-            AddClaim(claims, Bing.Security.Claims.ClaimTypes.FullName, "测试名称");
+            AddClaim(claims, Bing.Security.Claims.BingClaimTypes.FullName, "测试名称");
             AddClaim(claims, BingClaimTypes.PhoneNumber, "123456");
             AddClaim(claims, BingClaimTypes.Email, "test@test.com");
             return new ClaimsPrincipal(new ClaimsIdentity(claims));

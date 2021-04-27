@@ -1,0 +1,23 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Security</AssemblyName>
+    <PackageId>Bing.Security</PackageId>
+    <Description>Bing.Security是Bing应用框架的安全权限类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\SecurityResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SecurityResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\SecurityResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SecurityResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

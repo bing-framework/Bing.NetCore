@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.MailKit</AssemblyName>
+    <PackageId>Bing.MailKit</PackageId>
+    <Description>Bing.MailKit是Bing应用框架的邮件操作类库。</Description>
+  </PropertyGroup>
+</Project>

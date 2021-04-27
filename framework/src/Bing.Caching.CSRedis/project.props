@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Caching.CSRedis</AssemblyName>
+    <PackageId>Bing.Caching.CSRedis</PackageId>
+    <Description>Bing.Caching.CSRedis是基于CSRedisCore实现Redis缓存操作类库。</Description>
+  </PropertyGroup>
+</Project>

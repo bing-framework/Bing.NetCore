@@ -151,9 +151,9 @@ namespace Bing.Admin.Service.Implements
             var roles = await RoleRepository.GetRolesAsync(user.Id);
             if (!roles.Any())
                 throw new Warning($"用户：{user.UserName} 未设置任何权限，不能访问系统，请联系管理员");
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.RoleIds, roles.Select(x => x.Id).Join());
+            user.AddClaim(Bing.Security.Claims.BingClaimTypes.RoleIds, roles.Select(x => x.Id).Join());
             user.AddClaim(JwtClaimTypes.RoleCode, roles.Select(x => x.Code).Join());
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.RoleName, roles.Select(x => x.Name).Join());
+            user.AddClaim(Bing.Security.Claims.BingClaimTypes.RoleNames, roles.Select(x => x.Name).Join());
         }
 
         /// <summary>

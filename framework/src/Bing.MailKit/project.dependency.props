@@ -1,0 +1,9 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Emailing\Bing.Emailing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.11.1" />
+  </ItemGroup>
+</Project>

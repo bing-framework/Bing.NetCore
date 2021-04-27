@@ -15,6 +15,7 @@ namespace Bing.Security.Principals
         /// <summary>
         /// 未认证的身份标识实例
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public static readonly UnauthenticatedIdentity Instance = new UnauthenticatedIdentity();
     }
 }

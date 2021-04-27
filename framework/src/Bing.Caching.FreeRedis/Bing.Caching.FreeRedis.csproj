@@ -1,15 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="project.props" />
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
+  <Import Project="project.dependency.props" />
 
-  <ItemGroup>
-    <PackageReference Include="FreeRedis" Version="0.2.7" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
-  </ItemGroup>
+  <Import Project="..\..\..\framework.props" />
 
 </Project>

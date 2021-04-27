@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Events.Cap.MySql</AssemblyName>
+    <PackageId>Bing.Events.Cap.MySql</PackageId>
+    <Description>Bing.Events.Cap.MySql是CAP2.6版本的源码，升级MySqlConnector，用于支持FreeSQL使用。</Description>
+  </PropertyGroup>
+</Project>

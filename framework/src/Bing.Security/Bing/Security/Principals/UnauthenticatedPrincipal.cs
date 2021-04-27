@@ -21,6 +21,7 @@ namespace Bing.Security.Principals
         /// <summary>
         /// 未认证安全主体
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public static readonly UnauthenticatedPrincipal Instance = new UnauthenticatedPrincipal();
     }
 }
