@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Bing.Admin.Systems.Domain.Events;
+using DotNetCore.CAP;
 
 namespace Bing.Admin.EventHandlers.Abstractions
 {
@@ -12,7 +13,7 @@ namespace Bing.Admin.EventHandlers.Abstractions
         /// 测试消息
         /// </summary>
         /// <param name="message">消息</param>
-        Task TestMessage1Async(TestMessage message);
+        Task TestMessage1Async(TestMessage message, [FromCap] CapHeader header);
 
         /// <summary>
         /// 测试消息

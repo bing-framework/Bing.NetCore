@@ -8,7 +8,9 @@ using Bing.Admin.EventHandlers.Abstractions;
 using Bing.Admin.Infrastructure;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.Events;
+using Bing.Events.Cap;
 using Bing.Events.Messages;
+using DotNetCore.CAP;
 
 namespace Bing.Admin.EventHandlers.Implements
 {
@@ -39,9 +41,9 @@ namespace Bing.Admin.EventHandlers.Implements
         /// <summary>
         /// 测试消息
         /// </summary>
-        /// <param name="message">消息</param>
+        [CapTrace]
         [EventHandler(MessageEventConst.TestMessage1)]
-        public async Task TestMessage1Async(TestMessage message)
+        public async Task TestMessage1Async(TestMessage message,[FromCap]CapHeader header)
         {
             if(message.ThrowException)
                 throw new NotImplementedException("主动触发，暂未生效");

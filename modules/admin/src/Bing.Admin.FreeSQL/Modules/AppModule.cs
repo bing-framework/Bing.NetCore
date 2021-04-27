@@ -9,6 +9,7 @@ using Bing.Domain.Entities.Events;
 using Bing.Helpers;
 using Bing.Locks;
 using Bing.Security.Claims;
+using Bing.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -58,6 +59,12 @@ namespace Bing.Admin.Modules
             services.AddDomainEventDispatcher();
             services.AddLocalLock();
             services.AddRedisDistributedLock();
+            // 添加跟踪ID
+            services.Configure<CorrelationIdOptions>(x =>
+            {
+                x.HttpHeaderName = "X-Correlation-Id";
+                x.SetResponseHeader = true;
+            });
             //services.AddAudit();
             return services;
         }
@@ -69,6 +76,7 @@ namespace Bing.Admin.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            app.UseCorrelationId();
             app.UseBingExceptionHandling();
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();

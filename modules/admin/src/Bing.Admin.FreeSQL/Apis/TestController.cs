@@ -77,7 +77,7 @@ namespace Bing.Admin.Apis
         /// <param name="request">请求</param>
         [AllowAnonymous]
         [HttpPost("testMessage")]
-        [AntiDuplicateRequest]
+        //[AntiDuplicateRequest]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
             Log.Info("测试日志消息Begin");

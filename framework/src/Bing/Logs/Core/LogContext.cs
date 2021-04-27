@@ -5,6 +5,7 @@ using Bing.Collections;
 using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
+using Bing.Tracing;
 
 namespace Bing.Logs.Core
 {
@@ -33,12 +34,12 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 日志标识
         /// </summary>
-        public string LogId => $"{GetInfo().TraceId}-{_orderId}";
+        public string LogId => $"{TraceId}-{_orderId}";
 
         /// <summary>
         /// 跟踪号
         /// </summary>
-        public string TraceId => $"{GetInfo().TraceId}";
+        public string TraceId => $"{TraceIdContext.Current?.TraceId ?? GetInfo().TraceId}";
 
         /// <summary>
         /// 计时器
