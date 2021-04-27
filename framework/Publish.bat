@@ -54,15 +54,23 @@ dotnet pack src/Bing.Datas.EntityFramework.MySql -c Release -o nuget_pub
 dotnet pack src/Bing.Datas.EntityFramework.PgSql -c Release -o nuget_pub
 dotnet pack src/Bing.Datas.EntityFramework.SqlServer -c Release -o nuget_pub
 dotnet pack src/Bing.Datas.EntityFramework.Oracle -c Release -o nuget_pub
+dotnet pack src/Bing.FreeSQL -c Release -o nuget_pub
+dotnet pack src/Bing.FreeSQL.MySql -c Release -o nuget_pub
 
 ::Caching
 dotnet pack src/Bing.EasyCaching -c Release -o nuget_pub
 dotnet pack src/Bing.Caching.CSRedis -c Release -o nuget_pub
+dotnet pack src/Bing.Caching.FreeRedis -c Release -o nuget_pub
 
 ::Tools
 dotnet pack src/Bing.Emailing -c Release -o nuget_pub
 dotnet pack src/Bing.MailKit -c Release -o nuget_pub
+dotnet pack src/Bing.ObjectMapping -c Release -o nuget_pub
 dotnet pack src/Bing.AutoMapper -c Release -o nuget_pub
+dotnet pack src/Bing.MiniProfiler -c Release -o nuget_pub
+dotnet pack src/Bing.Locks.CSRedis -c Release -o nuget_pub
+
+dotnet pack src/Bing.Events.Cap.MySql -c Release -o nuget_pub
 
 for /R "nuget_pub" %%s in (*symbols.nupkg) do (
     del %%s
