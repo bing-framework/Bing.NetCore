@@ -10,7 +10,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
-using MySqlConnector;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {

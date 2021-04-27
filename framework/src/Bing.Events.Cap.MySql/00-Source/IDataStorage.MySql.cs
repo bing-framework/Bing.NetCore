@@ -11,8 +11,9 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
-using MySqlConnector;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
@@ -79,6 +80,11 @@ namespace DotNetCore.CAP.MySql
             else
             {
                 var dbTrans = dbTransaction as IDbTransaction;
+                if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
+                {
+                    dbTrans = dbContextTrans.GetDbTransaction();
+                }
+
                 var conn = dbTrans?.Connection;
                 conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
             }
