@@ -3,6 +3,6 @@
 
   <Import Project="project.dependency.props" />
 
-  <Import Project="..\..\..\framework.props" />
+  <Import Project="..\..\..\common.props" />
 
 </Project>
