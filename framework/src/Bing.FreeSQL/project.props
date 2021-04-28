@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <AssemblyName>Bing.FreeSQL</AssemblyName>
-    <PackageId>Bing.FreeSQL</PackageId>
+    <PackageId>BingNS.FreeSQL</PackageId>
     <Description>Bing.FreeSQL 是Bing应用框架的FreeSQL数据访问核心类库。</Description>
   </PropertyGroup>
 </Project>
