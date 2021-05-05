@@ -15,6 +15,7 @@ namespace Bing.Users
         /// <summary>
         /// 空声明数组
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         private static readonly Claim[] EmptyClaimsArray = new Claim[0];
 
         /// <summary>
