@@ -38,10 +38,19 @@ namespace Bing.AspNetCore.Extensions
         public static void AddApiInterfaceService<TApiInterfaceService>(this IServiceCollection services) where TApiInterfaceService : class, IApiInterfaceService =>
             services.TryAddSingleton<IApiInterfaceService, TApiInterfaceService>();
 
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || NET5_0
+        /// <summary>
+        /// 获取<see cref="IWebHostEnvironment"/>环境信息
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        public static IWebHostEnvironment GetWebHostEnvironment(this IServiceCollection services) => services.GetSingletonInstance<IWebHostEnvironment>();
+#elif NETSTANDARD2_0
         /// <summary>
         /// 获取<see cref="IHostingEnvironment"/>环境信息
         /// </summary>
         /// <param name="services">服务集合</param>
         public static IHostingEnvironment GetHostingEnvironment(this IServiceCollection services) => services.GetSingletonInstance<IHostingEnvironment>();
+#endif
+
     }
 }

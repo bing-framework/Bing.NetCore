@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using Bing.AspNetCore.Security;
 using Bing.AspNetCore.Security.Claims;
 using Bing.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
