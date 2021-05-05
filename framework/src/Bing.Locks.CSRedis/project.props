@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <AssemblyName>Bing.Locks.CSRedis</AssemblyName>
-    <PackageId>BingNS.Locks.CSRedis</PackageId>
+    <PackageId>Bing.Locks.CSRedis</PackageId>
     <Description>Bing.Locks.CSRedis是Bing应用框架的基于Redis实现的分布式锁操作类库。</Description>
   </PropertyGroup>
 </Project>
