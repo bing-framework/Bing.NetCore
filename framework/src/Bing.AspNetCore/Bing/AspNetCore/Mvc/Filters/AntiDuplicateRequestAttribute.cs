@@ -35,9 +35,14 @@ namespace Bing.AspNetCore.Mvc.Filters
         public int Interval { get; set; } = 30;
 
         /// <summary>
-        /// 锁模式
+        /// 提示消息
         /// </summary>
-        public LockMode Mode { get; set; } = LockMode.Limit;
+        public string Message { get; set; }
+
+        /// <summary>
+        /// 是否自动解锁，默认：false（true:时间间隔内请求处理完成，可以继续提交）
+        /// </summary>
+        public bool AutoUnLock { get; set; } = false;
 
         /// <summary>
         /// 执行
@@ -73,7 +78,7 @@ namespace Bing.AspNetCore.Mvc.Filters
             finally
             {
                 // 并发模式下，需要释放锁
-                if (isSuccess && Mode == LockMode.Concurrent)
+                if (isSuccess && AutoUnLock)
                     await @lock.LockReleaseAsync(key, value);
             }
         }
@@ -120,7 +125,7 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// <summary>
         /// 获取失败消息
         /// </summary>
-        protected virtual string GetFailMessage() => Type == LockType.User ? R.UserDuplicateRequest : R.GlobalDuplicateRequest;
+        protected virtual string GetFailMessage() => !string.IsNullOrWhiteSpace(Message) ? Message : Type == LockType.User ? R.UserDuplicateRequest : R.GlobalDuplicateRequest;
     }
 
     /// <summary>
@@ -137,20 +142,5 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// 全局锁，该操作同时只有一个用户请求被执行
         /// </summary>
         Global = 1
-    }
-
-    /// <summary>
-    /// 锁模式
-    /// </summary>
-    public enum LockMode
-    {
-        /// <summary>
-        /// 限制模式。一定时间内只能有一个通过
-        /// </summary>
-        Limit,
-        /// <summary>
-        /// 并发模式。在上个请求未结束，均不能通过
-        /// </summary>
-        Concurrent,
     }
 }

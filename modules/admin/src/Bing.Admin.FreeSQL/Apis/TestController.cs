@@ -93,7 +93,7 @@ namespace Bing.Admin.Apis
         /// </summary>
         [AllowAnonymous]
         [HttpPost("testAntiDuplicate")]
-        [AntiDuplicateRequest(Key = "test", IsDistributed = true, Mode = LockMode.Limit)]
+        [AntiDuplicateRequest(Key = "test", IsDistributed = true)]
         public Task<IActionResult> TestAntiDuplicateAsync()
         {
             return Task.FromResult(Success());
