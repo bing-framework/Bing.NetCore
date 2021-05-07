@@ -148,6 +148,20 @@ namespace Bing.Data.Sql.Builders.Core
             AddColumn(new ColumnItem(column, columnAlias: columnAlias, isAggregation: true));
         }
 
+        /// <summary>
+        /// 添加聚合列
+        /// </summary>
+        /// <param name="aggregationFunc">聚合函数</param>
+        /// <param name="column">列</param>
+        /// <param name="tableType">表类型</param>
+        /// <param name="columnAlias">列别名</param>
+        public void AddAggregationColumn(string aggregationFunc, string column, Type tableType, string columnAlias)
+        {
+            if (column.IsEmpty())
+                return;
+            AddColumn(new ColumnItem(column, columnAlias: string.IsNullOrEmpty(columnAlias) ? column : columnAlias, isAggregation: true, tableType: tableType, aggregationFunc: aggregationFunc));
+        }
+
         #endregion
 
         #region RemoveColumns(移除列集合)

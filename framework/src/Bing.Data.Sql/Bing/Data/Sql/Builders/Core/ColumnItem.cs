@@ -39,6 +39,11 @@ namespace Bing.Data.Sql.Builders.Core
         public bool IsAggregation { get; }
 
         /// <summary>
+        /// 聚合函数
+        /// </summary>
+        public string AggregationFunc { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="ColumnItem"/>类型的实例
         /// </summary>
         /// <param name="name">列名</param>
@@ -47,7 +52,8 @@ namespace Bing.Data.Sql.Builders.Core
         /// <param name="tableType">表类型</param>
         /// <param name="raw">是否使用原始值</param>
         /// <param name="isAggregation">是否聚合函数</param>
-        public ColumnItem(string name, string tableAlias = null, string columnAlias = null, Type tableType = null, bool raw = false, bool isAggregation = false)
+        /// <param name="aggregationFunc">聚合函数</param>
+        public ColumnItem(string name, string tableAlias = null, string columnAlias = null, Type tableType = null, bool raw = false, bool isAggregation = false, string aggregationFunc = null)
         {
             Name = name;
             TableAlias = tableAlias;
@@ -55,6 +61,7 @@ namespace Bing.Data.Sql.Builders.Core
             TableType = tableType;
             Raw = raw;
             IsAggregation = isAggregation;
+            AggregationFunc = aggregationFunc;
         }
 
         /// <summary>
@@ -64,9 +71,9 @@ namespace Bing.Data.Sql.Builders.Core
         /// <param name="register">实体别名注册器</param>
         public string ToSql(IDialect dialect, IEntityAliasRegister register)
         {
-            if (Raw || IsAggregation)
+            if (Raw || IsAggregation && TableType == null && string.IsNullOrWhiteSpace(AggregationFunc))
                 return dialect.GetColumn(Name, dialect.GetSafeName(ColumnAlias));
-            var result = new SqlItem(Name, GetTableAlias(register), ColumnAlias, isResolve: false);
+            var result = new SqlItem(Name, GetTableAlias(register), ColumnAlias, isResolve: false, aggregationFunc: AggregationFunc);
             return result.ToSql(dialect);
         }
 
