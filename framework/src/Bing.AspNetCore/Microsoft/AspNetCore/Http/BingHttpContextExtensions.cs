@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Bing.Extensions;
 
 namespace Microsoft.AspNetCore.Http
 {
