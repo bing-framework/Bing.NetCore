@@ -26,21 +26,6 @@ namespace Bing.AspNetCore.Mvc.Filters
         public bool Ignore { get; set; }
 
         /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(LogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
-        }
-
-        /// <summary>
         /// 执行
         /// </summary>
         /// <param name="context">操作执行上下文</param>
@@ -51,7 +36,7 @@ namespace Bing.AspNetCore.Mvc.Filters
                 throw new ArgumentNullException(nameof(context));
             if (next == null)
                 throw new ArgumentNullException(nameof(next));
-            var log = GetLog();
+            var log = Log.GetLog(LogName);
             OnActionExecuting(context);
             await OnActionExecutingAsync(context, log);
             if (context.Result != null)

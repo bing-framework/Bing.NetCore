@@ -6,7 +6,7 @@ using Bing.Admin.Service.Abstractions.Systems;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

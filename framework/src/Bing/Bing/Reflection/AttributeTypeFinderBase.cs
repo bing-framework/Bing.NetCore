@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Bing.Extensions;
 using Bing.Finders;
 
@@ -35,26 +33,6 @@ namespace Bing.Reflection
                 .Where(type => type.IsClass && !type.IsAbstract && type.HasAttribute<TAttributeType>())
                 .Distinct()
                 .ToArray();
-        }
-
-        /// <summary>
-        /// 查找类型列表
-        /// </summary>
-        /// <typeparam name="T">查找类型</typeparam>
-        /// <param name="assemblies">在指定的程序集列表中查找</param>
-        [Obsolete]
-        public List<Type> Find<T>(List<Assembly> assemblies = null) => Find(typeof(T), assemblies);
-
-        /// <summary>
-        /// 查找类型列表
-        /// </summary>
-        /// <param name="findType">查找类型</param>
-        /// <param name="assemblies">在指定的程序集列表中查找</param>
-        [Obsolete]
-        public List<Type> Find(Type findType, List<Assembly> assemblies = null)
-        {
-            assemblies ??= _allAssemblyFinder.FindAll(true).ToList();
-            return Reflection.Reflections.FindTypes(findType, assemblies.ToArray());
         }
     }
 }

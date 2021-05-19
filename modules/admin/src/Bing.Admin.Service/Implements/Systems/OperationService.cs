@@ -9,7 +9,7 @@ using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Application.Services;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

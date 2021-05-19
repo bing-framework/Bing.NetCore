@@ -1,5 +1,5 @@
 ﻿using Bing.Admin.Data.Pos.Systems.Models;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Utils.Json;
 
 namespace Bing.Admin.Data.Pos.Systems.Extensions

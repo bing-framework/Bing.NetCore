@@ -3,7 +3,9 @@ using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
+using Bing.AspNetCore.Mvc.Filters;
 using Bing.Events.Messages;
+using Bing.Helpers;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +55,7 @@ namespace Bing.Admin.Apis
         /// 测试批量插入
         /// </summary>
         [HttpPost("testBatchInsert")]
-        public async Task<IActionResult> TestBatchInsertAsync([FromBody]long qty)
+        public async Task<IActionResult> TestBatchInsertAsync([FromBody] long qty)
         {
             await TestService.BatchInsertFileAsync(qty);
             return Success();
@@ -75,11 +77,26 @@ namespace Bing.Admin.Apis
         /// <param name="request">请求</param>
         [AllowAnonymous]
         [HttpPost("testMessage")]
+        //[AntiDuplicateRequest]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
-            await MessageEventBus.PublishAsync(new TestMessageEvent1(request));
-            await UnitOfWork.CommitAsync();
+            Log.Info("测试日志消息Begin");
+            await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
+            if (request.NeedCommit)
+                await UnitOfWork.CommitAsync();
+            Log.Info("测试日志消息End");
             return Success();
+        }
+
+        /// <summary>
+        /// 测试重复请求
+        /// </summary>
+        [AllowAnonymous]
+        [HttpPost("testAntiDuplicate")]
+        [AntiDuplicateRequest(Key = "test", IsDistributed = true)]
+        public Task<IActionResult> TestAntiDuplicateAsync()
+        {
+            return Task.FromResult(Success());
         }
     }
 }

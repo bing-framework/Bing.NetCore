@@ -89,11 +89,7 @@ namespace Bing.Data.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
-        {
-            var column = _resolver.GetColumn(expression);
-            Count(column, columnAlias);
-        }
+        public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Count", expression, columnAlias);
 
         /// <summary>
         /// 聚合
@@ -119,16 +115,20 @@ namespace Bing.Data.Sql.Builders.Clauses
             $"{func}({_dialect.SafeName(column)})", string.IsNullOrWhiteSpace(columnAlias) ? column : columnAlias);
 
         /// <summary>
+        /// 聚合
+        /// </summary>
+        /// <param name="func">函数名</param>
+        /// <param name="expression">列名表达式</param>
+        /// <param name="columnAlias">列别名</param>
+        private void Aggregate<TEntity>(string func, Expression<Func<TEntity, object>> expression, string columnAlias) => _columns.AddAggregationColumn(func, _resolver.GetColumn(expression), typeof(TEntity), columnAlias);
+
+        /// <summary>
         /// 求和
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
-        {
-            var column = _resolver.GetColumn(expression);
-            Sum(column, columnAlias);
-        }
+        public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Sum", expression, columnAlias);
 
         /// <summary>
         /// 求平均值
@@ -143,11 +143,7 @@ namespace Bing.Data.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
-        {
-            var column = _resolver.GetColumn(expression);
-            Avg(column, columnAlias);
-        }
+        public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Avg", expression, columnAlias);
 
         /// <summary>
         /// 求最大值
@@ -162,11 +158,7 @@ namespace Bing.Data.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
-        {
-            var column = _resolver.GetColumn(expression);
-            Max(column, columnAlias);
-        }
+        public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Max", expression, columnAlias);
 
         /// <summary>
         /// 求最小值
@@ -181,11 +173,7 @@ namespace Bing.Data.Sql.Builders.Clauses
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="expression">列名表达式</param>
         /// <param name="columnAlias">列别名</param>
-        public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
-        {
-            var column = _resolver.GetColumn(expression);
-            Min(column, columnAlias);
-        }
+        public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Min", expression, columnAlias);
 
         /// <summary>
         /// 设置列名

@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.AspNetCore.ExceptionHandling;
 using Bing.AspNetCore.Logs;
 using Bing.AspNetCore.RealIp;
 using Microsoft.AspNetCore.Builder;
@@ -18,7 +17,6 @@ namespace Bing.AspNetCore.Extensions
         /// </summary>
         /// <param name="builder">应用程序生成器</param>
         public static IApplicationBuilder UseRequestLog(this IApplicationBuilder builder) => builder.UseMiddleware<RequestLogMiddleware>();
-
 
         /// <summary>
         /// 注册真实IP中间件

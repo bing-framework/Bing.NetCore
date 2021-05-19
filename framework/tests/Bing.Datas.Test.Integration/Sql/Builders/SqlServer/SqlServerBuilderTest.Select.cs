@@ -34,7 +34,7 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
         /// <summary>
         /// 求总行数
         /// </summary>
-        [Fact(DisplayName = "求总行数")]
+        [Fact]
         public void Test_Count_1()
         {
             //结果
@@ -51,7 +51,7 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
         }
 
         /// <summary>
-        /// 求总行数 - 加列别名
+        /// 求总行数 - lambda表达式
         /// </summary>
         [Fact]
         public void Test_Count_2()
@@ -64,6 +64,44 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
             //执行
             _builder.Count<Sample>(t => t.DoubleValue, "a")
                 .From("b");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
+        /// 求总行数 - lambda表达式 - 默认别名
+        /// </summary>
+        [Fact]
+        public void Test_Count_3()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select Count([DoubleValue]) As [DoubleValue] ");
+            result.Append("From [b]");
+
+            //执行
+            _builder.Count<Sample>(t => t.DoubleValue)
+                .From("b");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
+        /// 求总行数 - lambda表达式 - 表前缀
+        /// </summary>
+        [Fact]
+        public void Test_Count_4()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select Count([b].[DoubleValue]) As [a] ");
+            result.Append("From [Sample] As [b]");
+
+            //执行
+            _builder.Count<Sample>(t => t.DoubleValue, "a")
+                .From<Sample>("b");
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
@@ -127,6 +165,25 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
         }
 
         /// <summary>
+        /// 求和 - lambda表达式 - 表前缀
+        /// </summary>
+        [Fact]
+        public void Test_Sum_4()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select Sum([b].[DoubleValue]) As [a] ");
+            result.Append("From [Sample] As [b]");
+
+            //执行
+            _builder.Sum<Sample>(t => t.DoubleValue, "a")
+                .From<Sample>("b");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
         /// 求平均值
         /// </summary>
         [Fact]
@@ -178,6 +235,25 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
             //执行
             _builder.Avg<Sample>(t => t.DoubleValue)
                 .From("b");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
+        /// 求平均值 - lambda表达式 - 表前缀
+        /// </summary>
+        [Fact]
+        public void Test_Avg_4()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select Avg([b].[DoubleValue]) As [a] ");
+            result.Append("From [Sample] As [b]");
+
+            //执行
+            _builder.Avg<Sample>(t => t.DoubleValue, "a")
+                .From<Sample>("b");
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());
@@ -241,6 +317,25 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
         }
 
         /// <summary>
+        /// 求最大值 - lambda表达式 - 表前缀
+        /// </summary>
+        [Fact]
+        public void Test_Max_4()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select Max([b].[DoubleValue]) As [a] ");
+            result.Append("From [Sample] As [b]");
+
+            //执行
+            _builder.Max<Sample>(t => t.DoubleValue, "a")
+                .From<Sample>("b");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
         /// 求最小值
         /// </summary>
         [Fact]
@@ -292,6 +387,25 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
             //执行
             _builder.Min<Sample>(t => t.DoubleValue)
                 .From("b");
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+        }
+
+        /// <summary>
+        /// 求最小值 - lambda表达式 - 表前缀
+        /// </summary>
+        [Fact]
+        public void Test_Min_4()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select Min([b].[DoubleValue]) As [a] ");
+            result.Append("From [Sample] As [b]");
+
+            //执行
+            _builder.Min<Sample>(t => t.DoubleValue, "a")
+                .From<Sample>("b");
 
             //验证
             Assert.Equal(result.ToString(), _builder.ToSql());

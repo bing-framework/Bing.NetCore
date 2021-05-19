@@ -13,21 +13,6 @@
         /// <summary>
         /// 日志
         /// </summary>
-        public Bing.Logs.ILog Log => _log ?? (_log = GetLog());
-
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        protected virtual Bing.Logs.ILog GetLog()
-        {
-            try
-            {
-                return Bing.Logs.Log.GetLog(this);
-            }
-            catch
-            {
-                return Bing.Logs.Log.Null;
-            }
-        }
+        public Bing.Logs.ILog Log => _log ??= Logs.Log.GetLog(this);
     }
 }

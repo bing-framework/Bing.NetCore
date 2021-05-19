@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Bing.Data.Transaction;
 using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Data.UnitOfWorks.MySql
 {
@@ -28,7 +27,7 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             SaveChangesBefore();
-            var transactionActionManager = ServiceProvider.GetService<ITransactionActionManager>();
+            var transactionActionManager = LazyServiceProvider.LazyGetService<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
                 return await base.SaveChangesAsync(cancellationToken);
             return await TransactionCommit(transactionActionManager, cancellationToken);
@@ -46,7 +45,7 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
             {
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
-                var publisher = ServiceProvider.GetService<ICapPublisher>();
+                var publisher = LazyServiceProvider.LazyGetService<ICapPublisher>();
                 using (var capTransaction = Database.BeginTransaction(publisher, autoCommit: false))
                 {
                     try
@@ -54,12 +53,12 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
                         await transactionActionManager.CommitAsync(
                             publisher.Transaction.Value.DbTransaction as IDbTransaction);
                         var result = await base.SaveChangesAsync(cancellationToken);
-                        capTransaction.Commit();
+                        await capTransaction.CommitAsync(cancellationToken);
                         return result;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        capTransaction.Rollback();
+                        await capTransaction.RollbackAsync(cancellationToken);
                         throw;
                     }
                 }

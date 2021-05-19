@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Auditing</AssemblyName>
+    <PackageId>Bing.Auditing</PackageId>
+    <Description>Bing.Auditing 是Bing应用框架的审计功能类库。</Description>
+  </PropertyGroup>
+</Project>

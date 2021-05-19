@@ -1,0 +1,13 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FreeSql" Version="2.3.200" />
+    <PackageReference Include="FreeSql.DbContext" Version="2.3.200" />
+    <PackageReference Include="FreeSql.Extensions.Linq" Version="2.3.200" />
+  </ItemGroup>
+</Project>

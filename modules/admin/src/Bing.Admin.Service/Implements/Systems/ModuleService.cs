@@ -7,7 +7,7 @@ using Bing.Admin.Service.Shared.Requests.Systems.Extensions;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Application.Services;
 using Bing.Extensions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {

@@ -1,24 +1,19 @@
 ﻿using AutoMapper;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Systems.Domain.Parameters;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Configs
 {
     /// <summary>
     /// 后台映射器配置
     /// </summary>
-    public class AdminMapperConfiguration : Profile, IOrderedMapperProfile
+    public class AdminMapperConfiguration : Profile, IObjectMapperProfile
     {
         /// <summary>
-        /// 排序
+        /// 创建映射配置
         /// </summary>
-        public int Order => 0;
-
-        /// <summary>
-        /// 初始化一个<see cref="AdminMapperConfiguration"/>类型的实例
-        /// </summary>
-        public AdminMapperConfiguration()
+        public void CreateMap()
         {
             CreateMap<AdministratorCreateRequest, UserParameter>();
         }

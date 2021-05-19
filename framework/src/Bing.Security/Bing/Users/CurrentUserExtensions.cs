@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 using Bing.Helpers;
 using Bing.Security.Claims;
@@ -36,11 +36,7 @@ namespace Bing.Users
         /// 获取用户标识
         /// </summary>
         /// <param name="currentUser">当前用户</param>
-        public static Guid GetUserId(this ICurrentUser currentUser)
-        {
-            Debug.Assert(currentUser.UserId != null, "currentUser.UserId != null");
-            return Conv.ToGuid(currentUser.UserId);
-        }
+        public static Guid GetUserId(this ICurrentUser currentUser) => Conv.ToGuid(currentUser.UserId);
 
         /// <summary>
         /// 获取用户标识
@@ -97,6 +93,8 @@ namespace Bing.Users
             return result;
         }
 
+        #region Application(应用程序)
+
         /// <summary>
         /// 获取应用程序标识
         /// </summary>
@@ -121,6 +119,10 @@ namespace Bing.Users
         /// </summary>
         /// <param name="currentUser">当前用户</param>
         public static string GetApplicationName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.ApplicationName)?.Value;
+
+        #endregion
+
+        #region Tenant(租户)
 
         /// <summary>
         /// 获取租户标识
@@ -147,10 +149,42 @@ namespace Bing.Users
         /// <param name="currentUser">当前用户</param>
         public static string GetTenantName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantName)?.Value;
 
+        #endregion
+
+        #region Role(角色)
+
+        /// <summary>
+        /// 获取角色标识列表
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static List<Guid> GetRoleIds(this ICurrentUser currentUser) => GetRoleIds<Guid>(currentUser);
+
+        /// <summary>
+        /// 获取角色标识列表
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="currentUser">当前用户</param>
+        public static List<T> GetRoleIds<T>(this ICurrentUser currentUser)
+        {
+            var result = currentUser.FindClaimValue(BingClaimTypes.RoleIds);
+            return Conv.ToList<T>(string.IsNullOrWhiteSpace(result)
+                ? currentUser.FindClaimValue(BingClaimTypes.Role)
+                : result);
+        }
+
+        /// <summary>
+        /// 获取角色编码列表
+        /// </summary>
+        /// <param name="currentUser">当前用户</param>
+        public static string[] GetRoleCodes(this ICurrentUser currentUser) => currentUser.FindClaims(BingClaimTypes.RoleCodes)?.Select(x => x.Value).ToArray();
+
         /// <summary>
         /// 获取角色名称列表
         /// </summary>
         /// <param name="currentUser">当前用户</param>
         public static string[] GetRoleNames(this ICurrentUser currentUser) => currentUser.FindClaims(BingClaimTypes.RoleNames)?.Select(x => x.Value).ToArray();
+
+        #endregion
+
     }
 }

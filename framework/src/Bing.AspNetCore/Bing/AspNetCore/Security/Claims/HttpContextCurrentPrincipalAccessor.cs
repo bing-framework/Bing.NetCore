@@ -23,6 +23,6 @@ namespace Bing.AspNetCore.Security.Claims
         /// <summary>
         /// 获取安全主体
         /// </summary>
-        public override ClaimsPrincipal GetClaimsPrincipal() => _httpContextAccessor.HttpContext?.User ?? base.GetClaimsPrincipal();
+        protected override ClaimsPrincipal GetClaimsPrincipal() => _httpContextAccessor.HttpContext?.User ?? base.GetClaimsPrincipal();
     }
 }

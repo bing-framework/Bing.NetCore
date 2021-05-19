@@ -79,10 +79,7 @@ namespace Bing.Emailing
         public virtual void Stop()
         {
             if (_tryStop)
-            {
                 return;
-            }
-
             _tryStop = true;
         }
 
@@ -97,9 +94,7 @@ namespace Bing.Emailing
                 while (true)
                 {
                     if (_tryStop)
-                    {
                         break;
-                    }
 
                     if (_mailQueueProvider.IsEmpty)
                     {

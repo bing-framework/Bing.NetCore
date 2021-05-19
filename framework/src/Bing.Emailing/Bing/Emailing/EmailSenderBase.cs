@@ -70,10 +70,10 @@ namespace Bing.Emailing
             var mail = new MailMessage();
             var config = ConfigProvider.GetConfig();
             mail.From = new MailAddress(config.FromAddress);
-            PaserMailAddress(box.To, mail.To);
-            PaserMailAddress(box.Cc, mail.CC);
-            PaserMailAddress(box.Bcc, mail.Bcc);
-            PaserMailAddress(config.FromAddress, mail.ReplyToList);
+            ParseMailAddress(box.To, mail.To);
+            ParseMailAddress(box.Cc, mail.CC);
+            ParseMailAddress(box.Bcc, mail.Bcc);
+            ParseMailAddress(config.FromAddress, mail.ReplyToList);
             mail.Subject = box.Subject;
             mail.Body = box.Body;
             mail.IsBodyHtml = box.IsBodyHtml;
@@ -90,10 +90,10 @@ namespace Bing.Emailing
             var mail = new MailMessage();
             var config = await ConfigProvider.GetConfigAsync();
             mail.From = new MailAddress(config.FromAddress, config.DisplayName);
-            PaserMailAddress(box.To, mail.To);
-            PaserMailAddress(box.Cc, mail.CC);
-            PaserMailAddress(box.Bcc, mail.Bcc);
-            PaserMailAddress(config.FromAddress, mail.ReplyToList);
+            ParseMailAddress(box.To, mail.To);
+            ParseMailAddress(box.Cc, mail.CC);
+            ParseMailAddress(box.Bcc, mail.Bcc);
+            ParseMailAddress(config.FromAddress, mail.ReplyToList);
             mail.Subject = box.Subject;
             mail.Body = box.Body;
             mail.IsBodyHtml = box.IsBodyHtml;
@@ -164,12 +164,9 @@ namespace Bing.Emailing
                 var config = ConfigProvider.GetConfig();
                 mail.From = new MailAddress(config.FromAddress, config.DisplayName, Encoding.UTF8);
             }
-            if (mail.HeadersEncoding == null)
-                mail.HeadersEncoding = Encoding.UTF8;
-            if (mail.SubjectEncoding == null)
-                mail.SubjectEncoding = Encoding.UTF8;
-            if (mail.BodyEncoding == null)
-                mail.BodyEncoding = Encoding.UTF8;
+            mail.HeadersEncoding ??= Encoding.UTF8;
+            mail.SubjectEncoding ??= Encoding.UTF8;
+            mail.BodyEncoding ??= Encoding.UTF8;
         }
 
         /// <summary>
@@ -177,13 +174,13 @@ namespace Bing.Emailing
         /// </summary>
         /// <param name="mailAddress">邮件地址</param>
         /// <param name="mailAddressCollection">邮件地址对象</param>
-        protected static void PaserMailAddress(string mailAddress, MailAddressCollection mailAddressCollection)
+        protected static void ParseMailAddress(string mailAddress, MailAddressCollection mailAddressCollection)
         {
             if (string.IsNullOrWhiteSpace(mailAddress))
                 return;
             var separator = new char[2] { ',', ';' };
             var addressArray = mailAddress.Split(separator);
-            PaserMailAddress(addressArray.ToList(), mailAddressCollection);
+            ParseMailAddress(addressArray.ToList(), mailAddressCollection);
         }
 
         /// <summary>
@@ -191,7 +188,7 @@ namespace Bing.Emailing
         /// </summary>
         /// <param name="mailAddress">邮件地址列表</param>
         /// <param name="mailAddressCollection">邮件地址对象</param>
-        protected static void PaserMailAddress(List<string> mailAddress,
+        protected static void ParseMailAddress(List<string> mailAddress,
             MailAddressCollection mailAddressCollection)
         {
             if (mailAddress == null || mailAddress.Count == 0)

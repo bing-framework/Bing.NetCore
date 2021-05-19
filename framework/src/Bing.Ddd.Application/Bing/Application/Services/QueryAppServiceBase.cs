@@ -7,7 +7,7 @@ using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Domain.Entities;
 using Bing.Helpers;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Application.Services
 {

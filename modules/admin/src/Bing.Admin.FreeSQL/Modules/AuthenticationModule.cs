@@ -62,7 +62,7 @@ namespace Bing.Admin.Modules
             setupAction?.Invoke(permissionOptions);
             services.Configure(setupAction);
             services.AddScoped<IdentityUserManager>();
-            services.AddScoped<IdentitySignInManager>();
+            //services.AddScoped<IdentitySignInManager>();
             services.AddIdentity<User, Role>(options => options.Load(permissionOptions))
                 .AddUserStore<UserRepository>()
                 .AddRoleStore<RoleRepository>()

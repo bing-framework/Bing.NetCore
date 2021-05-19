@@ -17,33 +17,23 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// <param name="context">结果执行上下文</param>
         public override void OnResultExecuting(ResultExecutingContext context)
         {
-            // 控制器过滤
-            if (context.Controller.GetType().GetCustomAttributes<IgnoreResultHandlerAttribute>().Any())
-            {
+            if (HasIgnoreResultHandler(context))
                 return;
-            }
-            // Action过滤
-            if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
-            {
-                var ignore = controllerActionDescriptor.MethodInfo
-                    .GetCustomAttributes<IgnoreResultHandlerAttribute>().Any();
-                if (ignore)
-                    return;
-            }
+            if (HasIgnoreHandle(context.Result))
+                return;
 
             if (context.Result is ValidationFailedResult validationFailedResult)
             {
-                context.Result=new JsonResult(new
+                context.Result = new JsonResult(new
                 {
                     Code = (int)StatusCode.Fail,
-                    Message = validationFailedResult.AllowMultipleResult ? validationFailedResult.Errors.FirstOrDefault()?.Message : "验证数据失败!",
+                    Message = validationFailedResult.AllowMultipleResult
+                        ? validationFailedResult.Errors.FirstOrDefault()?.Message
+                        : "验证数据失败!",
                     Errors = validationFailedResult.Errors
                 });
                 return;
             }
-
-            if (context.Result is ApiResult)
-                return;
 
             if (context.Result is BadRequestObjectResult badRequestObjectResult)
             {
@@ -67,6 +57,36 @@ namespace Bing.AspNetCore.Mvc.Filters
             {
                 context.Result = new ApiResult(StatusCode.Ok, string.Empty, jsonResult.Value);
             }
+        }
+
+        /// <summary>
+        /// 是否忽略结果处理
+        /// </summary>
+        /// <param name="context">结果执行上下文</param>
+        private bool HasIgnoreResultHandler(ResultExecutingContext context)
+        {
+            // 控制器过滤
+            if (context.Controller.GetType().GetCustomAttributes<IgnoreResultHandlerAttribute>().Any())
+                return true;
+            // Action过滤
+            if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
+            {
+                var ignore = controllerActionDescriptor.MethodInfo.GetCustomAttributes<IgnoreResultHandlerAttribute>().Any();
+                if (ignore)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 是否忽略处理
+        /// </summary>
+        /// <param name="result">操作结果</param>
+        private bool HasIgnoreHandle(IActionResult result)
+        {
+            if (result is ApiResult)
+                return true;
+            return false;
         }
     }
 }

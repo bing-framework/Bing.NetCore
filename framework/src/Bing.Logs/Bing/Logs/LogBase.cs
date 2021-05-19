@@ -244,8 +244,6 @@ namespace Bing.Logs
         protected virtual void Init(TContent content)
         {
             Context.InitLogId();
-            System.Diagnostics.Debug.WriteLine("【执行方法】初始化日志");
-            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}] LogName: {Provider.LogName}, TraceId: {Context.TraceId}, LogId: {Context.LogId}, Ip: {Context.Ip}, Host: {Context.Host}");
             content.LogName = Provider.LogName;
             content.TraceId = Context.TraceId;
             content.LogId = Context.LogId;

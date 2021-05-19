@@ -20,6 +20,11 @@ namespace Bing.AspNetCore.Mvc.Filters
         public string Key { get; set; }
 
         /// <summary>
+        /// 是否分布式
+        /// </summary>
+        public bool IsDistributed { get; set; }
+
+        /// <summary>
         /// 锁类型
         /// </summary>
         public LockType Type { get; set; } = LockType.User;
@@ -27,7 +32,17 @@ namespace Bing.AspNetCore.Mvc.Filters
         /// <summary>
         /// 再次提交时间间隔，单位：秒
         /// </summary>
-        public int Interval { get; set; }
+        public int Interval { get; set; } = 30;
+
+        /// <summary>
+        /// 提示消息
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
+        /// 是否自动解锁，默认：false（true:时间间隔内请求处理完成，可以继续提交）
+        /// </summary>
+        public bool AutoUnLock { get; set; } = false;
 
         /// <summary>
         /// 执行
@@ -44,16 +59,16 @@ namespace Bing.AspNetCore.Mvc.Filters
 
             var @lock = CreateLock(context);
             var key = GetKey(context);
+            var value = GetValue(context);
             var isSuccess = false;
             try
             {
-                isSuccess = @lock.Lock(key, GetExpiration());
+                isSuccess = await @lock.LockTakeAsync(key, value, GetExpiration());
                 if (isSuccess == false)
                 {
                     context.Result = new ApiResult(StatusCode.Fail, GetFailMessage());
                     return;
                 }
-
                 OnActionExecuting(context);
                 if (context.Result != null)
                     return;
@@ -62,16 +77,19 @@ namespace Bing.AspNetCore.Mvc.Filters
             }
             finally
             {
-                if (isSuccess) 
-                    @lock.UnLock();
+                // 并发模式下，需要释放锁
+                if (isSuccess && AutoUnLock)
+                    await @lock.LockReleaseAsync(key, value);
             }
         }
 
         /// <summary>
-        /// 创建业务锁
+        /// 创建锁
         /// </summary>
         /// <param name="context">操作执行上下文</param>
-        private ILock CreateLock(ActionExecutingContext context) => context.HttpContext.RequestServices.GetService<ILock>() ?? NullLock.Instance;
+        private ILock CreateLock(ActionExecutingContext context) => IsDistributed
+            ? context.HttpContext.RequestServices.GetService<IDistributedLock>()
+            : context.HttpContext.RequestServices.GetService<ILock>();
 
         /// <summary>
         /// 获取锁定标识
@@ -83,18 +101,31 @@ namespace Bing.AspNetCore.Mvc.Filters
             var userId = string.Empty;
             if (Type == LockType.User)
                 userId = $"{currentUser.UserId}_";
-            return string.IsNullOrWhiteSpace(Key) ? $"{userId}{context.HttpContext.Request.Path}" : $"{userId}{Key}";
+            return string.IsNullOrWhiteSpace(Key) ? $"ADR:{userId}{context.HttpContext.Request.Path}" : $"ADR:{userId}{Key}";
+        }
+
+        /// <summary>
+        /// 获取当前占用值
+        /// </summary>
+        /// <param name="context">操作执行上下文</param>
+        protected virtual string GetValue(ActionExecutingContext context)
+        {
+            var currentUser = context.HttpContext.RequestServices.GetService<ICurrentUser>();
+            var value = string.Empty;
+            if (Type == LockType.User && currentUser.IsAuthenticated)
+                value = $"{currentUser.GetUserId()}";
+            return string.IsNullOrWhiteSpace(value) ? "bing_global_lock" : value;
         }
 
         /// <summary>
         /// 获取到期时间间隔
         /// </summary>
-        private TimeSpan? GetExpiration() => Interval == 0 ? (TimeSpan?)null : TimeSpan.FromSeconds(Interval);
+        private TimeSpan GetExpiration() => Interval == 0 ? TimeSpan.FromSeconds(30) : TimeSpan.FromSeconds(Interval);
 
         /// <summary>
         /// 获取失败消息
         /// </summary>
-        protected virtual string GetFailMessage() => Type == LockType.User ? R.UserDuplicateRequest : R.GlobalDuplicateRequest;
+        protected virtual string GetFailMessage() => !string.IsNullOrWhiteSpace(Message) ? Message : Type == LockType.User ? R.UserDuplicateRequest : R.GlobalDuplicateRequest;
     }
 
     /// <summary>

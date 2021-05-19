@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bing.Core.Modularity;
-using Bing.Core.Options;
-using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,9 +16,9 @@ namespace Bing.Core.Builders
         #region 字段
 
         /// <summary>
-        /// 源
+        /// 源模块集合
         /// </summary>
-        private readonly List<BingModule> _source;
+        private readonly List<BingModule> _sourceModules;
 
         /// <summary>
         /// 模块集合
@@ -39,7 +36,7 @@ namespace Bing.Core.Builders
         public BingBuilder(IServiceCollection services)
         {
             Services = services;
-            _source = GetAllModules(services);
+            _sourceModules = GetAllModules(services);
             _modules = new List<BingModule>();
         }
 
@@ -72,11 +69,6 @@ namespace Bing.Core.Builders
         /// </summary>
         public IEnumerable<BingModule> Modules => _modules;
 
-        /// <summary>
-        /// Bing 选项配置委托
-        /// </summary>
-        public Action<BingOptions> OptionsAction { get; private set; }
-
         #endregion
 
         #region AddModule(添加模块)
@@ -94,24 +86,24 @@ namespace Bing.Core.Builders
         private IBingBuilder AddModule(Type type)
         {
             if (!type.IsBaseOn(typeof(BingModule)))
-                throw new Warning($"要加载的模块类型“{type}”不派生于基类 {nameof(BingModule)}");
+                throw new BingFrameworkException($"要加载的模块类型“{type}”不派生于基类 {nameof(BingModule)}");
             if (_modules.Any(m => m.GetType() == type))
                 return this;
 
             var tmpModules = new BingModule[_modules.Count];
             _modules.CopyTo(tmpModules);
-            var module = _source.FirstOrDefault(x => x.GetType() == type);
+            var module = _sourceModules.FirstOrDefault(x => x.GetType() == type);
             if (module == null)
-                throw new Warning($"类型为“{type.FullName}”的模块实例无法找到");
+                throw new BingFrameworkException($"类型为“{type.FullName}”的模块实例无法找到");
             _modules.AddIfNotContains(module);
 
             // 添加依赖模块
             var dependTypes = module.GetDependModuleTypes();
             foreach (var dependType in dependTypes)
             {
-                var dependModule = _source.Find(m => m.GetType() == dependType);
+                var dependModule = _sourceModules.Find(m => m.GetType() == dependType);
                 if (dependModule == null)
-                    throw new Warning($"加载模块{module.GetType().FullName}时无法找到依赖模块{dependType.FullName}");
+                    throw new BingFrameworkException($"加载模块{module.GetType().FullName}时无法找到依赖模块{dependType.FullName}");
                 _modules.AddIfNotContains(dependModule);
             }
 
@@ -171,26 +163,11 @@ namespace Bing.Core.Builders
         /// <param name="exceptModuleTypes">要排除的模块类型</param>
         public IBingBuilder AddModules(params Type[] exceptModuleTypes)
         {
-            var source = _source.ToArray();
+            var source = _sourceModules.ToArray();
             var exceptModules = source.Where(x => exceptModuleTypes.Contains(x.GetType())).ToArray();
             source = source.Except(exceptModules).ToArray();
             foreach (var module in source) 
                 AddModule(module.GetType());
-            return this;
-        }
-
-        #endregion
-
-        #region AddOptions(添加选项配置)
-
-        /// <summary>
-        /// 添加Bing选项配置
-        /// </summary>
-        /// <param name="optionsAction">选项操作</param>
-        public IBingBuilder AddOptions(Action<BingOptions> optionsAction)
-        {
-            Check.NotNull(optionsAction, nameof(optionsAction));
-            OptionsAction = optionsAction;
             return this;
         }
 

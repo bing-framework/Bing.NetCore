@@ -2,7 +2,7 @@
 using Bing.Admin.Domain.Shared.Enums;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Extensions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Utils.Json;
 
 namespace Bing.Admin.Data.Pos.Systems.Extensions

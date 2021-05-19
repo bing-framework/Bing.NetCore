@@ -6,7 +6,7 @@ using Bing.Admin.Infrastructure.Encryptor;
 using Bing.Admin.Systems.Domain.DomainEvents;
 using Bing.Extensions;
 using Bing.Security.Claims;
-using Bing.Security.Encryptors;
+using Bing.Security.Encryption;
 
 namespace Bing.Admin.Systems.Domain.Models
 {

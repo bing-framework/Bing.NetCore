@@ -40,23 +40,20 @@ namespace Bing.ExceptionHandling
         public async Task NotifyAsync(ExceptionNotificationContext context)
         {
             Check.NotNull(context, nameof(context));
-            using (var scope = ServiceScopeFactory.CreateScope())
+            using var scope = ServiceScopeFactory.CreateScope();
+            var exceptionSubscribers = scope.ServiceProvider.GetServices<IExceptionSubscriber>();
+            foreach (var exceptionSubscriber in exceptionSubscribers)
             {
-                var exceptionSubscribers = scope.ServiceProvider.GetServices<IExceptionSubscriber>();
-                foreach (var exceptionSubscriber in exceptionSubscribers)
+                try
                 {
-                    try
-                    {
-                        await exceptionSubscriber.HandleAsync(context);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogWarning($"{exceptionSubscriber.GetType().AssemblyQualifiedName} 异常订阅器抛出异常!");
-                        Logger.LogException(e, LogLevel.Warning);
-                    }
+                    await exceptionSubscriber.HandleAsync(context);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning($"{exceptionSubscriber.GetType().AssemblyQualifiedName} 异常订阅器抛出异常!");
+                    Logger.LogException(e, LogLevel.Warning);
                 }
             }
-
         }
     }
 }

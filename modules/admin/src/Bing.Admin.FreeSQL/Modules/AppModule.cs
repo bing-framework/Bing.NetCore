@@ -2,16 +2,16 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
-using Bing.AspNetCore.Extensions;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities.Events;
 using Bing.Helpers;
+using Bing.Locks;
 using Bing.Security.Claims;
+using Bing.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,28 +39,32 @@ namespace Bing.Admin.Modules
             BingClaimTypes.UserId = IdentityModel.JwtClaimTypes.Subject;
             BingClaimTypes.UserName = IdentityModel.JwtClaimTypes.Name;
             // 注册Mvc
-            services
-                .AddMvc(options =>
+            services.AddControllers(o =>
                 {
-                    //options.Filters.Add<ResultHandlerAttribute>();
-                    options.Filters.Add<ExceptionHandlerAttribute>();
-                    //options.Filters.Add<AuditOperationAttribute>();
-                    // 全局添加授权
-                    options.Conventions.Add(new AuthorizeControllerModelConvention());
+                    o.Filters.Add<ResultHandlerAttribute>();
+                    o.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
-                .AddJsonOptions(options =>
+                .AddControllersAsServices()// 解决属性注入无法在控制器中注入的问题
+                .AddNewtonsoftJson(options =>
                 {
-                    //options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddControllersAsServices();
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                });
             services.EnableAop(o =>
             {
                 o.ThrowAspectException = false;
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
             });
+            services.EnableAspectScoped();
             services.AddDomainEventDispatcher();
+            services.AddLocalLock();
+            services.AddRedisDistributedLock();
+            // 添加跟踪ID
+            services.Configure<CorrelationIdOptions>(x =>
+            {
+                x.HttpHeaderName = "X-Correlation-Id";
+                x.SetResponseHeader = true;
+            });
             //services.AddAudit();
             return services;
         }
@@ -72,14 +76,15 @@ namespace Bing.Admin.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            app.UseCorrelationId();
             app.UseBingExceptionHandling();
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
             Enabled = true;
         }

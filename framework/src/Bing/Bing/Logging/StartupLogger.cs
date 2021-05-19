@@ -53,7 +53,7 @@ namespace Bing.Logging
             IDictionary<string, ILogger> dict = new Dictionary<string, ILogger>();
             foreach (var info in LogInfos.OrderBy(m => m.CreatedTime))
             {
-                if (!dict.TryGetValue(info.LogName, out ILogger logger))
+                if (!dict.TryGetValue(info.LogName, out var logger))
                 {
                     logger = provider.GetLogger(info.LogName);
                     dict[info.LogName] = logger;

@@ -58,6 +58,11 @@ namespace Bing.Data.Sql.Builders.Core
         /// </summary>
         public string DatabaseName { get; private set; }
 
+        /// <summary>
+        /// 聚合函数
+        /// </summary>
+        public string AggregationFunc { get; private set; }
+
         #endregion
 
         #region 构造函数
@@ -71,13 +76,15 @@ namespace Bing.Data.Sql.Builders.Core
         /// <param name="raw">是否使用原始值</param>
         /// <param name="isSplit">是否用句点分割名称</param>
         /// <param name="isResolve">是否解析名称</param>
-        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true, bool isResolve = true)
+        /// <param name="aggregationFunc">聚合函数</param>
+        public SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true, bool isResolve = true, string aggregationFunc = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return;
             _prefix = prefix;
             _alias = alias;
             Raw = raw;
+            AggregationFunc = aggregationFunc;
             if (raw)
             {
                 _name = name;
@@ -159,7 +166,9 @@ namespace Bing.Data.Sql.Builders.Core
                 return null;
             if (Raw)
                 return Name;
-            var column = GetColumn(dialect, tableDatabase);
+            var column = string.IsNullOrWhiteSpace(AggregationFunc)
+                ? GetColumn(dialect, tableDatabase)
+                : $"{AggregationFunc}({GetColumn(dialect, tableDatabase)})";
             var columnAlias = GetSafeName(dialect, Alias);
             return dialect.GetColumn(column, columnAlias);
         }

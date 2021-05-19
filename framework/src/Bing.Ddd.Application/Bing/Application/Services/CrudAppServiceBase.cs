@@ -10,7 +10,7 @@ using Bing.Domain.Repositories;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Uow;
 
 namespace Bing.Application.Services

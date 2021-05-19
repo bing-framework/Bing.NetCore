@@ -42,7 +42,7 @@ namespace Bing.AspNetCore.Logs
             var message = formatter(state, exception);
             if (string.IsNullOrEmpty(message) && exception == null)
                 return;
-            var log = GetLog();
+            var log = Bing.Logs.Log.GetLog(LogName);
             log
                 .Tag(LogName)
                 .Tag(CategoryName)
@@ -72,21 +72,6 @@ namespace Bing.AspNetCore.Logs
                 case LogLevel.Critical:
                     log.Fatal();
                     break;
-            }
-        }
-
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        protected virtual ILog GetLog()
-        {
-            try
-            {
-                return Bing.Logs.Log.GetLog(LogName);
-            }
-            catch
-            {
-                return Bing.Logs.Log.Null;
             }
         }
 

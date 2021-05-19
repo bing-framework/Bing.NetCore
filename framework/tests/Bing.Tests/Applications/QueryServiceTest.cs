@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.AutoMapper;
-using Bing.Mapping;
 using Bing.Tests.Samples;
 using NSubstitute;
 using Xunit;
@@ -56,8 +54,8 @@ namespace Bing.Tests.Applications
             _entity2 = new EntitySample(_id2) { Name = "B" };
             _repository = Substitute.For<IRepositorySample>();
             _service = new QueryServiceSample(_repository);
-            var mapper = new AutoMapperMapper();
-            MapperExtensions.SetMapper(mapper);
+            //var mapper = new AutoMapperMapper();
+            //MapperExtensions.SetMapper(mapper);
         }
 
         /// <summary>

@@ -1,0 +1,9 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+  </ItemGroup>
+</Project>

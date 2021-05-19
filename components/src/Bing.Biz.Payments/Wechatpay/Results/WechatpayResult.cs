@@ -57,10 +57,7 @@ namespace Bing.Biz.Payments.Wechatpay.Results
         private void Resolve(string response)
         {
             if (response.IsEmpty())
-            {
                 return;
-            }
-
             var elements = Xml.ToElements(response);
             elements.ForEach(node =>
             {
@@ -97,150 +94,82 @@ namespace Bing.Biz.Payments.Wechatpay.Results
         /// <summary>
         /// 获取日志操作
         /// </summary>
-        /// <returns></returns>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(WechatpayConst.TraceLogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
-        }
+        private ILog GetLog() => Log.GetLog(WechatpayConst.TraceLogName);
 
         /// <summary>
         /// 获取参数
         /// </summary>
         /// <param name="name">xml节点名称</param>
-        /// <returns></returns>
-        public string GetParam(string name)
-        {
-            return _builder.GetValue(name).SafeString();
-        }
+        public string GetParam(string name) => _builder.GetValue(name).SafeString();
 
         /// <summary>
         /// 获取返回状态码
         /// </summary>
-        /// <returns></returns>
-        public string GetReturnCode()
-        {
-            return GetParam(WechatpayConst.ReturnCode);
-        }
+        public string GetReturnCode() => GetParam(WechatpayConst.ReturnCode);
 
         /// <summary>
         /// 获取业务结果代码
         /// </summary>
-        /// <returns></returns>
-        public string GetResultCode()
-        {
-            return GetParam(WechatpayConst.ReturnCode);
-        }
+        public string GetResultCode() => GetParam(WechatpayConst.ReturnCode);
 
         /// <summary>
         /// 获取返回消息
         /// </summary>
-        /// <returns></returns>
-        public string GetReturnMessage()
-        {
-            return GetParam(WechatpayConst.ReturnMessage);
-        }
+        public string GetReturnMessage() => GetParam(WechatpayConst.ReturnMessage);
 
         /// <summary>
         /// 获取应用标识
         /// </summary>
-        /// <returns></returns>
-        public string AppId()
-        {
-            return GetParam(WechatpayConst.AppId);
-        }
+        public string AppId() => GetParam(WechatpayConst.AppId);
 
         /// <summary>
         /// 获取商户号
         /// </summary>
-        /// <returns></returns>
-        public string GetMerchantId()
-        {
-            return GetParam(WechatpayConst.MerchantId);
-        }
+        public string GetMerchantId() => GetParam(WechatpayConst.MerchantId);
 
         /// <summary>
         /// 获取随机字符串
         /// </summary>
-        /// <returns></returns>
-        public string GetNonce()
-        {
-            return GetParam("nonce_str");
-        }
+        public string GetNonce() => GetParam("nonce_str");
 
         /// <summary>
         /// 获取预支付标识
         /// </summary>
-        /// <returns></returns>
-        public string GetPrepayId()
-        {
-            return GetParam("prepay_id");
-        }
+        public string GetPrepayId() => GetParam("prepay_id");
 
         /// <summary>
         /// 获取二维码链接
         /// </summary>
-        /// <returns></returns>
-        public string GetCodeUrl()
-        {
-            return GetParam("code_url");
-        }
+        public string GetCodeUrl() => GetParam("code_url");
 
         /// <summary>
         /// 获取支付跳转链接
         /// </summary>
-        /// <returns></returns>
-        public string GetMWebUrl()
-        {
-            return GetParam("mweb_url");
-        }
+        public string GetMWebUrl() => GetParam("mweb_url");
 
         /// <summary>
         /// 获取交易类型
         /// </summary>
-        /// <returns></returns>
-        public string GetTradeType()
-        {
-            return GetParam(WechatpayConst.TradeType);
-        }
+        public string GetTradeType() => GetParam(WechatpayConst.TradeType);
 
         /// <summary>
         /// 获取错误码
         /// </summary>
-        /// <returns></returns>
-        public string GetErrorCode()
-        {
-            return GetParam(WechatpayConst.ErrorCode);
-        }
+        public string GetErrorCode() => GetParam(WechatpayConst.ErrorCode);
 
         /// <summary>
         /// 获取错误码和描述
         /// </summary>
-        /// <returns></returns>
-        public string GetErrorCodeDesciption()
-        {
-            return GetParam(WechatpayConst.ErrorCodeDescription);
-        }
+        public string GetErrorCodeDesciption() => GetParam(WechatpayConst.ErrorCodeDescription);
 
         /// <summary>
         /// 获取签名
         /// </summary>
-        /// <returns></returns>
-        public string GetSign()
-        {
-            return _sign;
-        }
+        public string GetSign() => _sign;
 
         /// <summary>
         /// 获取参数列表
         /// </summary>
-        /// <returns></returns>
         public IDictionary<string, string> GetParams()
         {
             var builder = new ParameterBuilder(_builder);
@@ -251,26 +180,19 @@ namespace Bing.Biz.Payments.Wechatpay.Results
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public async Task<ValidationResultCollection> ValidateAsync()
         {
             if (GetReturnCode() != WechatpayConst.Success || GetResultCode() != WechatpayConst.Success)
-            {
                 return new ValidationResultCollection(GetErrorCodeDesciption());
-            }
-
             var isValid = await VerifySign();
             if (isValid == false)
-            {
                 return new ValidationResultCollection("签名失败");
-            }
             return ValidationResultCollection.Success;
         }
 
         /// <summary>
         /// 验证签名
         /// </summary>
-        /// <returns></returns>
         public async Task<bool> VerifySign()
         {
             var config = await _configProvider.GetConfigAsync(_builder);

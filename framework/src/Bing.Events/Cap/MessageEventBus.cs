@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bing.Data.Transaction;
 using Bing.Events.Messages;
 using Bing.Logs;
+using Bing.Tracing;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
 
@@ -50,14 +52,16 @@ namespace Bing.Events.Cap
         /// <param name="send">是否立即发送消息</param>
         public async Task PublishAsync(string name, object data, string callback = null, bool send = false)
         {
+            var headers = new Dictionary<string, string> {{DotNetCore.CAP.Messages.Headers.CallbackName, callback}};
+            InitTraceIdContext(headers);
             if (send)
             {
-                await InternalPublishAsync(name, data, callback);
+                await InternalPublishAsync(name, data, headers, callback);
                 return;
             }
             TransactionActionManager.Register(async transaction =>
             {
-                await InternalPublishAsync(name, data, callback);
+                await InternalPublishAsync(name, data, headers, callback);
             });
         }
 
@@ -66,10 +70,11 @@ namespace Bing.Events.Cap
         /// </summary>
         /// <param name="name">消息名称</param>
         /// <param name="data">事件数据</param>
+        /// <param name="headers">数据投</param>
         /// <param name="callback">回调名称</param>
-        private async Task InternalPublishAsync(string name, object data, string callback)
+        private async Task InternalPublishAsync(string name, object data, IDictionary<string, string> headers, string callback)
         {
-            await Publisher.PublishAsync(name, data, callback);
+            await Publisher.PublishAsync(name, data, headers);
             WriteLog(name, data, callback);
         }
 
@@ -79,9 +84,9 @@ namespace Bing.Events.Cap
         /// <param name="name">消息名称</param>
         /// <param name="data">事件数据</param>
         /// <param name="callback">回调名称</param>
-        private void WriteLog(string name, object data,string callback)
+        private void WriteLog(string name, object data, string callback)
         {
-            var log = GetLog();
+            var log = Log.GetLog(this);
             if (log.IsDebugEnabled == false)
                 return;
             log.Tag(name)
@@ -92,18 +97,14 @@ namespace Bing.Events.Cap
         }
 
         /// <summary>
-        /// 获取日志
+        /// 初始化跟踪标识上下文
         /// </summary>
-        private ILog GetLog()
+        private static void InitTraceIdContext(IDictionary<string, string> headers)
         {
-            try
-            {
-                return Log.GetLog(this);
-            }
-            catch
-            {
-                return Log.Null;
-            }
+            if (TraceIdContext.Current == null)
+                TraceIdContext.Current = new TraceIdContext(string.Empty);
+            if(!headers.ContainsKey(Headers.TraceId))
+                headers[Headers.TraceId] = TraceIdContext.Current.TraceId;
         }
     }
 }

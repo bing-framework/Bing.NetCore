@@ -1,5 +1,5 @@
 ﻿using Bing.Admin.Systems.Domain.Models;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 
 namespace Bing.Admin.Service.Shared.Requests.Systems.Extensions
 {

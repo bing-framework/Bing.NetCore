@@ -308,30 +308,12 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <summary>
         /// 获取跟踪日志名
         /// </summary>
-        /// <returns></returns>
         protected abstract string GetTraceLogName();
 
         /// <summary>
         /// 获取授权方式
         /// </summary>
-        /// <returns></returns>
         protected abstract OAuthWay GetOAuthWay();
-
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        /// <returns></returns>
-        private ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(GetTraceLogName());
-            }
-            catch
-            {
-                return Log.Null;
-            }
-        }
 
         /// <summary>
         /// 写日志
@@ -342,11 +324,9 @@ namespace Bing.Biz.OAuthLogin.Core
         protected void WriteLog(TAuthorizationConfig config, AuthorizationParameterBuilder builder,
             AuthorizationResult result)
         {
-            var log = GetLog();
+            var log = Log.GetLog(GetTraceLogName());
             if (log.IsTraceEnabled == false)
-            {
                 return;
-            }
 
             log.Class(GetType().FullName)
                 .Caption("OAuth授权登录")

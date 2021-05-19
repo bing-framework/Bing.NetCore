@@ -2,7 +2,7 @@
 using Bing.Application.Services;
 using Bing.Data.Queries;
 using Bing.Extensions;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Uow;
 
 namespace Bing.Tests.Samples

@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Caching.FreeRedis</AssemblyName>
+    <PackageId>Bing.Caching.FreeRedis</PackageId>
+    <Description>Bing.Caching.FreeRedis是基于FreeRedis实现Redis缓存操作类库。</Description>
+  </PropertyGroup>
+</Project>

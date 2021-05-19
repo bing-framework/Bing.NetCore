@@ -1,0 +1,5235 @@
+{
+	"info": {
+		"_postman_id": "9464c1ca-e380-4465-99fd-8d91c57e5cce",
+		"name": "Bing.Admin",
+		"description": "Bing.Admin 模块",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Administrator",
+			"item": [
+				{
+					"name": "创建管理员",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nickname\": \"测试-{{$randomWord}}\",\r\n  \"userName\": \"test_{{$randomUserName}}\",\r\n  \"password\": \"123456\",\r\n  \"gender\": 1,\r\n  \"enabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Administrator",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Administrator"
+							]
+						},
+						"description": "创建管理员"
+					},
+					"response": []
+				},
+				{
+					"name": "更新",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"<string>\",\n    \"nickname\": \"<string>\",\n    \"gender\": \"<integer>\",\n    \"enabled\": \"<boolean>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Administrator",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Administrator"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"<string>\",\n    \"nickname\": \"<string>\",\n    \"gender\": \"<integer>\",\n    \"enabled\": \"<boolean>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Administrator",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Administrator"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "分页查询",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Administrator?nickname=&enabled=true&roleId=&keyword=&page=1&pageSize=10&totalCount=10&order=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Administrator"
+							],
+							"query": [
+								{
+									"key": "nickname",
+									"value": ""
+								},
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "roleId",
+									"value": ""
+								},
+								{
+									"key": "keyword",
+									"value": ""
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "totalCount",
+									"value": "10"
+								},
+								{
+									"key": "order",
+									"value": ""
+								}
+							]
+						},
+						"description": "调用范例：\r\nGET\r\n/api/customers?name=a"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Administrator?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Administrator"
+									],
+									"query": [
+										{
+											"key": "nickname",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"page\": 10696013,\n \"pageSize\": -48695042,\n \"totalCount\": -11362099,\n \"pageCount\": 15386212,\n \"order\": \"amet Ut dolor aliquip\",\n \"data\": [\n  {\n   \"nickname\": \"voluptate adipisicing do irure\",\n   \"userName\": \"dolore sit eu\",\n   \"gender\": \"<integer>\",\n   \"genderDesc\": \"id consectetur\",\n   \"enabled\": true,\n   \"lastModificationTime\": \"2000-11-29T00:49:28.642Z\",\n   \"lastModifier\": \"magna est consequat\",\n   \"roles\": [\n    {\n     \"id\": \"a23db6a0-1c91-a36a-c804-4eb1d45fae15\",\n     \"code\": \"ea eiusmod dol\",\n     \"name\": \"sed id sunt amet\"\n    },\n    {\n     \"id\": \"urn:uuid:95aa0f50-2c05-e473-d237-6b2e022a0478\",\n     \"code\": \"quis in elit\",\n     \"name\": \"velit consectetur minim amet Ut\"\n    }\n   ],\n   \"roleDesc\": \"ullamco irure eiusmod pariat\",\n   \"id\": \"anim qui labo\"\n  },\n  {\n   \"nickname\": \"voluptate dolore\",\n   \"userName\": \"occaecat\",\n   \"gender\": \"<integer>\",\n   \"genderDesc\": \"tempor do\",\n   \"enabled\": false,\n   \"lastModificationTime\": \"1948-02-04T22:29:32.683Z\",\n   \"lastModifier\": \"sunt dolore\",\n   \"roles\": [\n    {\n     \"id\": \"40701024-3534-a4fe-86ee-8d1c1e17ac8d\",\n     \"code\": \"ad elit irure\",\n     \"name\": \"reprehenderit Duis incididunt\"\n    },\n    {\n     \"id\": \"2d615a8a-19ff-8a45-e70f-dc3b3880eb98\",\n     \"code\": \"consequat fugiat\",\n     \"name\": \"laborum ad est irure\"\n    }\n   ],\n   \"roleDesc\": \"sed quis\",\n   \"id\": \"in magna velit amet\"\n  }\n ]\n}"
+						}
+					]
+				},
+				{
+					"name": "启用",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Administrator/enable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Administrator",
+								"enable"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Administrator/enable",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Administrator",
+										"enable"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "禁用",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Administrator/disable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Administrator",
+								"disable"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Administrator/disable",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Administrator",
+										"disable"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取单个实例",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Administrator/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Administrator",
+								":id"
+							],
+							"variable": [
+								{
+									"id": "5d137624-6ac2-4805-b250-8c158a889694",
+									"key": "id",
+									"value": "<uuid>",
+									"type": "string",
+									"description": "(Required) 标识"
+								}
+							]
+						},
+						"description": "调用范例：\r\nGET\r\n/api/customers/1"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Administrator/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Administrator",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"nickname\": \"commodo elit eiusmod veniam enim\",\n \"userName\": \"occ\",\n \"gender\": \"<integer>\",\n \"genderDesc\": \"consequat elit\",\n \"enabled\": true,\n \"lastModificationTime\": \"2020-07-12T06:54:41.775Z\",\n \"lastModifier\": \"irure dolore esse non\",\n \"roles\": [\n  {\n   \"id\": \"urn:uuid:1f109f3f-4bd4-9b74-1dd2-5b5e5fd5cc8a\",\n   \"code\": \"non cupidatat dolor\",\n   \"name\": \"deserunt cillum\"\n  },\n  {\n   \"id\": \"urn:uuid:0808ae56-1b8b-fbbc-96ec-0c6b80c250d4\",\n   \"code\": \"magna ullamco officia\",\n   \"name\": \"deserunt sed sunt consectetu\"\n  }\n ],\n \"roleDesc\": \"Ut\",\n \"id\": \"magna tempor nisi labore\"\n}"
+						}
+					]
+				}
+			],
+			"description": "管理员 控制器",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "OAuth",
+			"item": [
+				{
+					"name": "登录",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0ad31a7a-6b74-4365-b64a-812a0dabfa75",
+								"exec": [
+									"var jsonData = pm.response.json();//将内容转换为json字符串\r",
+									"if(jsonData.data.accessToken){\r",
+									"    console.log(jsonData.data.accessToken);\r",
+									"    postman.setEnvironmentVariable(\"token\",\"Bearer \"+jsonData.data.accessToken);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userName\": \"admin\",\r\n  \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/OAuth/signIn",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"OAuth",
+								"signIn"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "刷新令牌",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/OAuth/refreshToken",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"OAuth",
+								"refreshToken"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/OAuth/refreshToken",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"OAuth",
+										"refreshToken"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"accessToken\": \"adipisicing minim\",\n \"accessTokenUtcExpires\": -34755930,\n \"refreshToken\": \"deserunt non culpa\",\n \"refreshUtcExpires\": -86524323\n}"
+						}
+					]
+				}
+			],
+			"description": "授权",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Application",
+			"item": [
+				{
+					"name": "创建",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"test{{$randomWord}}\",\n    \"name\": \"测试{{$randomWord}}\",\n    \"applicationType\": \"1\",\n    \"enabled\": true,\n    \"registerEnabled\": true,\n    \"remark\": \"测试备注\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Application?t={{$timestamp}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application"
+							],
+							"query": [
+								{
+									"key": "t",
+									"value": "{{$timestamp}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"name\": \"<string>\",\n    \"applicationType\": \"<integer>\",\n    \"enabled\": \"<boolean>\",\n    \"registerEnabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Application",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "修改",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"<string>\",\n    \"id\": \"<string>\",\n    \"name\": \"<string>\",\n    \"applicationType\": \"<integer>\",\n    \"enabled\": \"<boolean>\",\n    \"registerEnabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Application",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"id\": \"<string>\",\n    \"name\": \"<string>\",\n    \"applicationType\": \"<integer>\",\n    \"enabled\": \"<boolean>\",\n    \"registerEnabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Application",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Application",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Application?applicationId=<uuid>&code=<string>&name=<string>&enabled=<boolean>&registerEnabled=<boolean>&remark=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&extend=<string>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "code",
+									"value": "<string>"
+								},
+								{
+									"key": "name",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "registerEnabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "remark",
+									"value": "<string>"
+								},
+								{
+									"key": "beginCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "creatorId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "creator",
+									"value": "<string>"
+								},
+								{
+									"key": "beginLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "lastModifierId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "lastModifier",
+									"value": "<string>"
+								},
+								{
+									"key": "extend",
+									"value": "<string>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Application?applicationId=<uuid>&code=<string>&name=<string>&enabled=<boolean>&registerEnabled=<boolean>&remark=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&extend=<string>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "code",
+											"value": "<string>"
+										},
+										{
+											"key": "name",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "registerEnabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "remark",
+											"value": "<string>"
+										},
+										{
+											"key": "beginCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "creatorId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "creator",
+											"value": "<string>"
+										},
+										{
+											"key": "beginLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "lastModifierId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "lastModifier",
+											"value": "<string>"
+										},
+										{
+											"key": "extend",
+											"value": "<string>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取全部应用程序",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Application/all?t={{$timestamp}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application",
+								"all"
+							],
+							"query": [
+								{
+									"key": "t",
+									"value": "{{$timestamp}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Application/all",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application",
+										"all"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"code\": \"comm\",\n  \"name\": \"sit \",\n  \"applicationType\": \"<integer>\",\n  \"applicationTypeDesc\": \"sunt cillum\",\n  \"enabled\": false,\n  \"registerEnabled\": true,\n  \"remark\": \"anim\",\n  \"isDeleted\": false,\n  \"version\": \"minim i\",\n  \"creationTime\": \"1962-10-02T18:00:10.856Z\",\n  \"creatorId\": \"urn:uuid:f23fe6c0-6421-696f-69bf-06ef0fe09a0e\",\n  \"creator\": \"ipsu\",\n  \"id\": \"nisi laboris Ut laborum\"\n },\n {\n  \"code\": \"sit \",\n  \"name\": \"offi\",\n  \"applicationType\": \"<integer>\",\n  \"applicationTypeDesc\": \"ut sunt reprehenderit\",\n  \"enabled\": false,\n  \"registerEnabled\": true,\n  \"remark\": \"amet\",\n  \"isDeleted\": true,\n  \"version\": \"a\",\n  \"creationTime\": \"1952-05-05T11:33:38.009Z\",\n  \"creatorId\": \"2e549356-51dd-8305-b2ac-49e9b7c27d9a\",\n  \"creator\": \"anim\",\n  \"id\": \"aliquip proident sunt eiusmod\"\n }\n]"
+						}
+					]
+				},
+				{
+					"name": "删除",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Application/delete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application",
+								"delete"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Application/delete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application",
+										"delete"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Application/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Application/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application",
+								":id"
+							],
+							"variable": [
+								{
+									"id": "f4792565-7386-424e-8c7c-130523899a4d",
+									"key": "id",
+									"value": "<string>",
+									"type": "string",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Application/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Application/query",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Application/query?applicationId=<uuid>&code=<string>&name=<string>&enabled=<boolean>&registerEnabled=<boolean>&remark=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&extend=<string>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application",
+								"query"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "code",
+									"value": "<string>"
+								},
+								{
+									"key": "name",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "registerEnabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "remark",
+									"value": "<string>"
+								},
+								{
+									"key": "beginCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "creatorId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "creator",
+									"value": "<string>"
+								},
+								{
+									"key": "beginLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "lastModifierId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "lastModifier",
+									"value": "<string>"
+								},
+								{
+									"key": "extend",
+									"value": "<string>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Application/query?applicationId=<uuid>&code=<string>&name=<string>&enabled=<boolean>&registerEnabled=<boolean>&remark=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&extend=<string>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application",
+										"query"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "code",
+											"value": "<string>"
+										},
+										{
+											"key": "name",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "registerEnabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "remark",
+											"value": "<string>"
+										},
+										{
+											"key": "beginCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "creatorId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "creator",
+											"value": "<string>"
+										},
+										{
+											"key": "beginLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "lastModifierId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "lastModifier",
+											"value": "<string>"
+										},
+										{
+											"key": "extend",
+											"value": "<string>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Application/items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Application/items?applicationId=<uuid>&code=<string>&name=<string>&enabled=<boolean>&registerEnabled=<boolean>&remark=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&extend=<string>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Application",
+								"items"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "code",
+									"value": "<string>"
+								},
+								{
+									"key": "name",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "registerEnabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "remark",
+									"value": "<string>"
+								},
+								{
+									"key": "beginCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "creatorId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "creator",
+									"value": "<string>"
+								},
+								{
+									"key": "beginLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "lastModifierId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "lastModifier",
+									"value": "<string>"
+								},
+								{
+									"key": "extend",
+									"value": "<string>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Application/items?applicationId=<uuid>&code=<string>&name=<string>&enabled=<boolean>&registerEnabled=<boolean>&remark=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&extend=<string>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Application",
+										"items"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "code",
+											"value": "<string>"
+										},
+										{
+											"key": "name",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "registerEnabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "remark",
+											"value": "<string>"
+										},
+										{
+											"key": "beginCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "creatorId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "creator",
+											"value": "<string>"
+										},
+										{
+											"key": "beginLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "lastModifierId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "lastModifier",
+											"value": "<string>"
+										},
+										{
+											"key": "extend",
+											"value": "<string>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "修改密码",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"confirmPassword\": \"<string>\",\n    \"newPassword\": \"<string>\",\n    \"oldPassword\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/User/changePassword",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"changePassword"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"confirmPassword\": \"<string>\",\n    \"newPassword\": \"<string>\",\n    \"oldPassword\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/User/changePassword",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"User",
+										"changePassword"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "重置密码",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"<string>\",\n    \"userId\": \"<uuid>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/User/resetPassword",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"resetPassword"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"password\": \"<string>\",\n    \"userId\": \"<uuid>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/User/resetPassword",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"User",
+										"resetPassword"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "设置角色",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"<uuid>\",\n    \"roleIds\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/User/setRoles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"setRoles"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"<uuid>\",\n    \"roleIds\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/User/setRoles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"User",
+										"setRoles"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Test",
+			"item": [
+				{
+					"name": "测试批量插入",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<long>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Test/testBatchInsert",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Test",
+								"testBatchInsert"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<long>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Test/testBatchInsert",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Test",
+										"testBatchInsert"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Test/testDisposed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Test/testDisposed",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Test",
+								"testDisposed"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Test/testDisposed",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Test",
+										"testDisposed"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "测试消息",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Test/testMessage",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Test",
+								"testMessage"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Test/testMessage",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Test",
+										"testMessage"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "测试参数空异常",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Test/testArgumentNull",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Test",
+								"testArgumentNull"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Test/testArgumentNull",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Test",
+										"testArgumentNull"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Test Query",
+			"item": [
+				{
+					"name": "/api/TestQuery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/TestQuery?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"TestQuery"
+							],
+							"query": [
+								{
+									"key": "nickname",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/TestQuery?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"TestQuery"
+									],
+									"query": [
+										{
+											"key": "nickname",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/TestQuery/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/TestQuery/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"TestQuery",
+								":id"
+							],
+							"variable": [
+								{
+									"id": "6db77d78-0913-4210-b5b5-955d97ce4618",
+									"key": "id",
+									"value": "<string>",
+									"type": "string",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/TestQuery/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"TestQuery",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/TestQuery/query",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/TestQuery/query?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"TestQuery",
+								"query"
+							],
+							"query": [
+								{
+									"key": "nickname",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/TestQuery/query?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"TestQuery",
+										"query"
+									],
+									"query": [
+										{
+											"key": "nickname",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/TestQuery/items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/TestQuery/items?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"TestQuery",
+								"items"
+							],
+							"query": [
+								{
+									"key": "nickname",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/TestQuery/items?nickname=<string>&enabled=<boolean>&roleId=<uuid>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"TestQuery",
+										"items"
+									],
+									"query": [
+										{
+											"key": "nickname",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Role",
+			"item": [
+				{
+					"name": "创建系统角色",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"<string>\",\n    \"name\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"name\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Role",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "修改角色",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"<string>\",\n    \"id\": \"<string>\",\n    \"name\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"id\": \"<string>\",\n    \"name\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Role",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Role",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Role?roleId=<uuid>&code=<string>&name=<string>&normalizedName=<string>&type=<string>&isAdmin=<boolean>&isDefault=<boolean>&isSystem=<boolean>&remark=<string>&pinYin=<string>&sign=<string>&tenantId=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&parentId=<uuid>&level=<integer>&path=<string>&enabled=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role"
+							],
+							"query": [
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "code",
+									"value": "<string>"
+								},
+								{
+									"key": "name",
+									"value": "<string>"
+								},
+								{
+									"key": "normalizedName",
+									"value": "<string>"
+								},
+								{
+									"key": "type",
+									"value": "<string>"
+								},
+								{
+									"key": "isAdmin",
+									"value": "<boolean>"
+								},
+								{
+									"key": "isDefault",
+									"value": "<boolean>"
+								},
+								{
+									"key": "isSystem",
+									"value": "<boolean>"
+								},
+								{
+									"key": "remark",
+									"value": "<string>"
+								},
+								{
+									"key": "pinYin",
+									"value": "<string>"
+								},
+								{
+									"key": "sign",
+									"value": "<string>"
+								},
+								{
+									"key": "tenantId",
+									"value": "<string>"
+								},
+								{
+									"key": "beginCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "creatorId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "creator",
+									"value": "<string>"
+								},
+								{
+									"key": "beginLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "lastModifierId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "lastModifier",
+									"value": "<string>"
+								},
+								{
+									"key": "parentId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "level",
+									"value": "<integer>"
+								},
+								{
+									"key": "path",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Role?roleId=<uuid>&code=<string>&name=<string>&normalizedName=<string>&type=<string>&isAdmin=<boolean>&isDefault=<boolean>&isSystem=<boolean>&remark=<string>&pinYin=<string>&sign=<string>&tenantId=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&parentId=<uuid>&level=<integer>&path=<string>&enabled=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role"
+									],
+									"query": [
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "code",
+											"value": "<string>"
+										},
+										{
+											"key": "name",
+											"value": "<string>"
+										},
+										{
+											"key": "normalizedName",
+											"value": "<string>"
+										},
+										{
+											"key": "type",
+											"value": "<string>"
+										},
+										{
+											"key": "isAdmin",
+											"value": "<boolean>"
+										},
+										{
+											"key": "isDefault",
+											"value": "<boolean>"
+										},
+										{
+											"key": "isSystem",
+											"value": "<boolean>"
+										},
+										{
+											"key": "remark",
+											"value": "<string>"
+										},
+										{
+											"key": "pinYin",
+											"value": "<string>"
+										},
+										{
+											"key": "sign",
+											"value": "<string>"
+										},
+										{
+											"key": "tenantId",
+											"value": "<string>"
+										},
+										{
+											"key": "beginCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "creatorId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "creator",
+											"value": "<string>"
+										},
+										{
+											"key": "beginLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "lastModifierId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "lastModifier",
+											"value": "<string>"
+										},
+										{
+											"key": "parentId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "level",
+											"value": "<integer>"
+										},
+										{
+											"key": "path",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "创建租户角色",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"<string>\",\n    \"name\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/createTenantRole",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"createTenantRole"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"name\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"remark\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/createTenantRole",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"createTenantRole"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "删除角色",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/delete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"delete"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/delete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"delete"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "添加用户列表到角色",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleId\": \"<uuid>\",\n    \"userIds\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/addUsersToRole",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"addUsersToRole"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"roleId\": \"<uuid>\",\n    \"userIds\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/addUsersToRole",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"addUsersToRole"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "从角色移除用户",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleId\": \"<uuid>\",\n    \"userIds\": \"<string>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/removeUsersFromRole",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"removeUsersFromRole"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"roleId\": \"<uuid>\",\n    \"userIds\": \"<string>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/removeUsersFromRole",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"removeUsersFromRole"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取系统角色列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/getSystemRoleList",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"getSystemRoleList"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/getSystemRoleList",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"getSystemRoleList"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"id\": \"urn:uuid:2f5308a9-e904-be27-2cdc-b1a054b87aed\",\n  \"code\": \"pariatur adipisicing tempor dolo\",\n  \"name\": \"esse aute\",\n  \"normalizedName\": \"consectetur proident ullamco\",\n  \"isAdmin\": true,\n  \"isDefault\": true,\n  \"isSystem\": false,\n  \"remark\": \"labore reprehenderit laborum anim\"\n },\n {\n  \"id\": \"8211ccec-2e70-cea3-7d79-32ae19872586\",\n  \"code\": \"laborum\",\n  \"name\": \"sunt deserunt ipsum Lorem\",\n  \"normalizedName\": \"pariatur proi\",\n  \"isAdmin\": false,\n  \"isDefault\": false,\n  \"isSystem\": true,\n  \"remark\": \"adipisicing\"\n }\n]"
+						}
+					]
+				},
+				{
+					"name": "获取租户角色列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/getTenantRoleList",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"getTenantRoleList"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/getTenantRoleList",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"getTenantRoleList"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"id\": \"urn:uuid:2f5308a9-e904-be27-2cdc-b1a054b87aed\",\n  \"code\": \"pariatur adipisicing tempor dolo\",\n  \"name\": \"esse aute\",\n  \"normalizedName\": \"consectetur proident ullamco\",\n  \"isAdmin\": true,\n  \"isDefault\": true,\n  \"isSystem\": false,\n  \"remark\": \"labore reprehenderit laborum anim\"\n },\n {\n  \"id\": \"8211ccec-2e70-cea3-7d79-32ae19872586\",\n  \"code\": \"laborum\",\n  \"name\": \"sunt deserunt ipsum Lorem\",\n  \"normalizedName\": \"pariatur proi\",\n  \"isAdmin\": false,\n  \"isDefault\": false,\n  \"isSystem\": true,\n  \"remark\": \"adipisicing\"\n }\n]"
+						}
+					]
+				},
+				{
+					"name": "/api/Role/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								":id"
+							],
+							"variable": [
+								{
+									"id": "d0d7c7c7-0a0e-4a4d-860b-025063d2bc57",
+									"key": "id",
+									"value": "<string>",
+									"type": "string",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Role/query",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/query?roleId=<uuid>&code=<string>&name=<string>&normalizedName=<string>&type=<string>&isAdmin=<boolean>&isDefault=<boolean>&isSystem=<boolean>&remark=<string>&pinYin=<string>&sign=<string>&tenantId=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&parentId=<uuid>&level=<integer>&path=<string>&enabled=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"query"
+							],
+							"query": [
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "code",
+									"value": "<string>"
+								},
+								{
+									"key": "name",
+									"value": "<string>"
+								},
+								{
+									"key": "normalizedName",
+									"value": "<string>"
+								},
+								{
+									"key": "type",
+									"value": "<string>"
+								},
+								{
+									"key": "isAdmin",
+									"value": "<boolean>"
+								},
+								{
+									"key": "isDefault",
+									"value": "<boolean>"
+								},
+								{
+									"key": "isSystem",
+									"value": "<boolean>"
+								},
+								{
+									"key": "remark",
+									"value": "<string>"
+								},
+								{
+									"key": "pinYin",
+									"value": "<string>"
+								},
+								{
+									"key": "sign",
+									"value": "<string>"
+								},
+								{
+									"key": "tenantId",
+									"value": "<string>"
+								},
+								{
+									"key": "beginCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "creatorId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "creator",
+									"value": "<string>"
+								},
+								{
+									"key": "beginLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "lastModifierId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "lastModifier",
+									"value": "<string>"
+								},
+								{
+									"key": "parentId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "level",
+									"value": "<integer>"
+								},
+								{
+									"key": "path",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/query?roleId=<uuid>&code=<string>&name=<string>&normalizedName=<string>&type=<string>&isAdmin=<boolean>&isDefault=<boolean>&isSystem=<boolean>&remark=<string>&pinYin=<string>&sign=<string>&tenantId=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&parentId=<uuid>&level=<integer>&path=<string>&enabled=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"query"
+									],
+									"query": [
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "code",
+											"value": "<string>"
+										},
+										{
+											"key": "name",
+											"value": "<string>"
+										},
+										{
+											"key": "normalizedName",
+											"value": "<string>"
+										},
+										{
+											"key": "type",
+											"value": "<string>"
+										},
+										{
+											"key": "isAdmin",
+											"value": "<boolean>"
+										},
+										{
+											"key": "isDefault",
+											"value": "<boolean>"
+										},
+										{
+											"key": "isSystem",
+											"value": "<boolean>"
+										},
+										{
+											"key": "remark",
+											"value": "<string>"
+										},
+										{
+											"key": "pinYin",
+											"value": "<string>"
+										},
+										{
+											"key": "sign",
+											"value": "<string>"
+										},
+										{
+											"key": "tenantId",
+											"value": "<string>"
+										},
+										{
+											"key": "beginCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "creatorId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "creator",
+											"value": "<string>"
+										},
+										{
+											"key": "beginLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "lastModifierId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "lastModifier",
+											"value": "<string>"
+										},
+										{
+											"key": "parentId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "level",
+											"value": "<integer>"
+										},
+										{
+											"key": "path",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/api/Role/items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Role/items?roleId=<uuid>&code=<string>&name=<string>&normalizedName=<string>&type=<string>&isAdmin=<boolean>&isDefault=<boolean>&isSystem=<boolean>&remark=<string>&pinYin=<string>&sign=<string>&tenantId=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&parentId=<uuid>&level=<integer>&path=<string>&enabled=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Role",
+								"items"
+							],
+							"query": [
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "code",
+									"value": "<string>"
+								},
+								{
+									"key": "name",
+									"value": "<string>"
+								},
+								{
+									"key": "normalizedName",
+									"value": "<string>"
+								},
+								{
+									"key": "type",
+									"value": "<string>"
+								},
+								{
+									"key": "isAdmin",
+									"value": "<boolean>"
+								},
+								{
+									"key": "isDefault",
+									"value": "<boolean>"
+								},
+								{
+									"key": "isSystem",
+									"value": "<boolean>"
+								},
+								{
+									"key": "remark",
+									"value": "<string>"
+								},
+								{
+									"key": "pinYin",
+									"value": "<string>"
+								},
+								{
+									"key": "sign",
+									"value": "<string>"
+								},
+								{
+									"key": "tenantId",
+									"value": "<string>"
+								},
+								{
+									"key": "beginCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endCreationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "creatorId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "creator",
+									"value": "<string>"
+								},
+								{
+									"key": "beginLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "endLastModificationTime",
+									"value": "<dateTime>"
+								},
+								{
+									"key": "lastModifierId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "lastModifier",
+									"value": "<string>"
+								},
+								{
+									"key": "parentId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "level",
+									"value": "<integer>"
+								},
+								{
+									"key": "path",
+									"value": "<string>"
+								},
+								{
+									"key": "enabled",
+									"value": "<boolean>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Role/items?roleId=<uuid>&code=<string>&name=<string>&normalizedName=<string>&type=<string>&isAdmin=<boolean>&isDefault=<boolean>&isSystem=<boolean>&remark=<string>&pinYin=<string>&sign=<string>&tenantId=<string>&beginCreationTime=<dateTime>&endCreationTime=<dateTime>&creatorId=<uuid>&creator=<string>&beginLastModificationTime=<dateTime>&endLastModificationTime=<dateTime>&lastModifierId=<uuid>&lastModifier=<string>&parentId=<uuid>&level=<integer>&path=<string>&enabled=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Role",
+										"items"
+									],
+									"query": [
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "code",
+											"value": "<string>"
+										},
+										{
+											"key": "name",
+											"value": "<string>"
+										},
+										{
+											"key": "normalizedName",
+											"value": "<string>"
+										},
+										{
+											"key": "type",
+											"value": "<string>"
+										},
+										{
+											"key": "isAdmin",
+											"value": "<boolean>"
+										},
+										{
+											"key": "isDefault",
+											"value": "<boolean>"
+										},
+										{
+											"key": "isSystem",
+											"value": "<boolean>"
+										},
+										{
+											"key": "remark",
+											"value": "<string>"
+										},
+										{
+											"key": "pinYin",
+											"value": "<string>"
+										},
+										{
+											"key": "sign",
+											"value": "<string>"
+										},
+										{
+											"key": "tenantId",
+											"value": "<string>"
+										},
+										{
+											"key": "beginCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endCreationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "creatorId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "creator",
+											"value": "<string>"
+										},
+										{
+											"key": "beginLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "endLastModificationTime",
+											"value": "<dateTime>"
+										},
+										{
+											"key": "lastModifierId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "lastModifier",
+											"value": "<string>"
+										},
+										{
+											"key": "parentId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "level",
+											"value": "<integer>"
+										},
+										{
+											"key": "path",
+											"value": "<string>"
+										},
+										{
+											"key": "enabled",
+											"value": "<boolean>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Permission",
+			"item": [
+				{
+					"name": "保存权限",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleId\": \"<uuid>\",\n    \"applicationId\": \"<uuid>\",\n    \"resourceIds\": \"<string>\",\n    \"isDeny\": \"<boolean>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Permission",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Permission"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"roleId\": \"<uuid>\",\n    \"applicationId\": \"<uuid>\",\n    \"resourceIds\": \"<string>\",\n    \"isDeny\": \"<boolean>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Permission",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Permission"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取资源标识列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Permission/resourceIds?applicationId=<uuid>&permissionId=<uuid>&roleId=<uuid>&resourceId=<uuid>&isDeny=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Permission",
+								"resourceIds"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "permissionId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "roleId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "resourceId",
+									"value": "<uuid>"
+								},
+								{
+									"key": "isDeny",
+									"value": "<boolean>"
+								},
+								{
+									"key": "keyword",
+									"value": "<string>"
+								},
+								{
+									"key": "page",
+									"value": "<integer>"
+								},
+								{
+									"key": "pageSize",
+									"value": "<integer>"
+								},
+								{
+									"key": "totalCount",
+									"value": "<integer>"
+								},
+								{
+									"key": "order",
+									"value": "<string>"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Permission/resourceIds?applicationId=<uuid>&permissionId=<uuid>&roleId=<uuid>&resourceId=<uuid>&isDeny=<boolean>&keyword=<string>&page=<integer>&pageSize=<integer>&totalCount=<integer>&order=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Permission",
+										"resourceIds"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "permissionId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "resourceId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "isDeny",
+											"value": "<boolean>"
+										},
+										{
+											"key": "keyword",
+											"value": "<string>"
+										},
+										{
+											"key": "page",
+											"value": "<integer>"
+										},
+										{
+											"key": "pageSize",
+											"value": "<integer>"
+										},
+										{
+											"key": "totalCount",
+											"value": "<integer>"
+										},
+										{
+											"key": "order",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取超级管理员角色菜单列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Permission/getAllMenus?applicationId=<uuid>&roleId=<uuid>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Permission",
+								"getAllMenus"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>",
+									"description": "应用程序标识"
+								},
+								{
+									"key": "roleId",
+									"value": "<uuid>",
+									"description": "角色标识"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Permission/getAllMenus?applicationId=<uuid>&roleId=<uuid>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Permission",
+										"getAllMenus"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"id\": \"urn:uuid:0b5bf9ac-b005-523d-3512-ff2ae70dffdf\",\n  \"applicationId\": \"urn:uuid:1ee14437-93d5-35e9-c13a-1b20fbed16a7\",\n  \"parentId\": \"c699fe2b-516c-1bd2-bd90-197a4546c926\",\n  \"name\": \"fugiat nisi deserunt quis\",\n  \"url\": \"ad est pariatur Lorem\",\n  \"icon\": \"fugiat dolor\",\n  \"sortId\": 75588187,\n  \"selected\": false,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   }\n  ],\n  \"buttons\": [\n   {\n    \"id\": \"urn:uuid:0bb9da61-44f3-1d8b-54ba-9cc8d65c7c3b\",\n    \"moduleId\": \"urn:uuid:2da57a43-1147-faf3-5ad1-32d11994cb18\",\n    \"code\": \"incididunt in\",\n    \"name\": \"ea adipisicing\",\n    \"icon\": \"Duis adipisicing dolor anim\",\n    \"enabled\": true,\n    \"sortId\": -2920179,\n    \"selected\": true\n   },\n   {\n    \"id\": \"f85c35be-b1a1-6ba7-c995-1bf544dc3938\",\n    \"moduleId\": \"49ad5df9-d093-0e6f-eb5b-4ac9bac9ba26\",\n    \"code\": \"ea\",\n    \"name\": \"ut eiusmod dolor eu fugiat\",\n    \"icon\": \"qui sed amet cupidatat\",\n    \"enabled\": true,\n    \"sortId\": -1690966,\n    \"selected\": true\n   }\n  ]\n },\n {\n  \"id\": \"08e295e1-1162-a226-6a67-46a025f1127e\",\n  \"applicationId\": \"urn:uuid:5242663b-b070-9870-c11d-bb3cd483859b\",\n  \"parentId\": \"c4bff3e7-d6ab-ff1b-4167-76f9dcc64722\",\n  \"name\": \"eiusmod\",\n  \"url\": \"voluptate dolore sit\",\n  \"icon\": \"ut anim\",\n  \"sortId\": -85748564,\n  \"selected\": false,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   }\n  ],\n  \"buttons\": [\n   {\n    \"id\": \"052e6d68-ab66-135b-518d-819760951041\",\n    \"moduleId\": \"urn:uuid:e5decee9-f1be-0fb1-addd-fe717b31f754\",\n    \"code\": \"nisi mollit velit\",\n    \"name\": \"occaecat\",\n    \"icon\": \"incidi\",\n    \"enabled\": true,\n    \"sortId\": -70078848,\n    \"selected\": true\n   },\n   {\n    \"id\": \"urn:uuid:84a2a5ee-ddeb-1bd8-c32b-2050e3da8ac1\",\n    \"moduleId\": \"urn:uuid:e2bc320e-1425-ff94-2c67-22390525bc93\",\n    \"code\": \"velit quis laboris\",\n    \"name\": \"sint minim laborum\",\n    \"icon\": \"fugiat quis ad\",\n    \"enabled\": true,\n    \"sortId\": -98656278,\n    \"selected\": true\n   }\n  ]\n }\n]"
+						}
+					]
+				},
+				{
+					"name": "获取商户下角色菜单列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Permission/getRoleMenus?applicationId=<uuid>&roleId=<uuid>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Permission",
+								"getRoleMenus"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>",
+									"description": "应用程序标识"
+								},
+								{
+									"key": "roleId",
+									"value": "<uuid>",
+									"description": "角色标识"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Permission/getRoleMenus?applicationId=<uuid>&roleId=<uuid>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Permission",
+										"getRoleMenus"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "roleId",
+											"value": "<uuid>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"id\": \"urn:uuid:0b5bf9ac-b005-523d-3512-ff2ae70dffdf\",\n  \"applicationId\": \"urn:uuid:1ee14437-93d5-35e9-c13a-1b20fbed16a7\",\n  \"parentId\": \"c699fe2b-516c-1bd2-bd90-197a4546c926\",\n  \"name\": \"fugiat nisi deserunt quis\",\n  \"url\": \"ad est pariatur Lorem\",\n  \"icon\": \"fugiat dolor\",\n  \"sortId\": 75588187,\n  \"selected\": false,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   }\n  ],\n  \"buttons\": [\n   {\n    \"id\": \"urn:uuid:0bb9da61-44f3-1d8b-54ba-9cc8d65c7c3b\",\n    \"moduleId\": \"urn:uuid:2da57a43-1147-faf3-5ad1-32d11994cb18\",\n    \"code\": \"incididunt in\",\n    \"name\": \"ea adipisicing\",\n    \"icon\": \"Duis adipisicing dolor anim\",\n    \"enabled\": true,\n    \"sortId\": -2920179,\n    \"selected\": true\n   },\n   {\n    \"id\": \"f85c35be-b1a1-6ba7-c995-1bf544dc3938\",\n    \"moduleId\": \"49ad5df9-d093-0e6f-eb5b-4ac9bac9ba26\",\n    \"code\": \"ea\",\n    \"name\": \"ut eiusmod dolor eu fugiat\",\n    \"icon\": \"qui sed amet cupidatat\",\n    \"enabled\": true,\n    \"sortId\": -1690966,\n    \"selected\": true\n   }\n  ]\n },\n {\n  \"id\": \"08e295e1-1162-a226-6a67-46a025f1127e\",\n  \"applicationId\": \"urn:uuid:5242663b-b070-9870-c11d-bb3cd483859b\",\n  \"parentId\": \"c4bff3e7-d6ab-ff1b-4167-76f9dcc64722\",\n  \"name\": \"eiusmod\",\n  \"url\": \"voluptate dolore sit\",\n  \"icon\": \"ut anim\",\n  \"sortId\": -85748564,\n  \"selected\": false,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/SelectModuleResponse detected>\"\n   }\n  ],\n  \"buttons\": [\n   {\n    \"id\": \"052e6d68-ab66-135b-518d-819760951041\",\n    \"moduleId\": \"urn:uuid:e5decee9-f1be-0fb1-addd-fe717b31f754\",\n    \"code\": \"nisi mollit velit\",\n    \"name\": \"occaecat\",\n    \"icon\": \"incidi\",\n    \"enabled\": true,\n    \"sortId\": -70078848,\n    \"selected\": true\n   },\n   {\n    \"id\": \"urn:uuid:84a2a5ee-ddeb-1bd8-c32b-2050e3da8ac1\",\n    \"moduleId\": \"urn:uuid:e2bc320e-1425-ff94-2c67-22390525bc93\",\n    \"code\": \"velit quis laboris\",\n    \"name\": \"sint minim laborum\",\n    \"icon\": \"fugiat quis ad\",\n    \"enabled\": true,\n    \"sortId\": -98656278,\n    \"selected\": true\n   }\n  ]\n }\n]"
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Operation",
+			"item": [
+				{
+					"name": "创建操作",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"<string>\",\n    \"moduleId\": \"<uuid>\",\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Operation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Operation"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"moduleId\": \"<uuid>\",\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Operation",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Operation"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "修改操作",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"<string>\",\n    \"id\": \"<string>\",\n    \"moduleId\": \"<uuid>\",\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Operation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Operation"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"<string>\",\n    \"id\": \"<string>\",\n    \"moduleId\": \"<uuid>\",\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Operation",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Operation"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "删除操作",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Operation/delete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Operation",
+								"delete"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Operation/delete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Operation",
+										"delete"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取操作",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Operation/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Operation",
+								":id"
+							],
+							"variable": [
+								{
+									"id": "0fc57d7d-d2a5-4752-ae98-8de60eec4515",
+									"key": "id",
+									"value": "<string>",
+									"type": "string",
+									"description": "(Required) 操作标识"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Operation/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Operation",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"adip\",\n \"moduleId\": \"urn:uuid:01d09de7-fabe-427a-4a2e-7f56941a2bb7\",\n \"name\": \"aliq\",\n \"applicationId\": \"7fb0cab4-f118-bdba-272a-6ae26ebf9614\",\n \"icon\": \"Duis occaecat do dolore\",\n \"remark\": \"cons\",\n \"pinYin\": \"proi\",\n \"enabled\": false,\n \"sortId\": 61833676,\n \"creatorId\": \"f90e7262-0fd9-4fe3-e80a-090cdf90ed68\",\n \"creationTime\": \"1951-11-10T12:08:19.396Z\",\n \"lastModificationTime\": \"2009-05-19T23:55:29.869Z\",\n \"lastModifierId\": \"860f5c5b-f927-a2f0-ffa6-d942d760b52c\",\n \"id\": \"Excepteur eiusmod mollit veniam\"\n}"
+						}
+					]
+				},
+				{
+					"name": "获取操作列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Operation/getOperations?moduleId=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Operation",
+								"getOperations"
+							],
+							"query": [
+								{
+									"key": "moduleId",
+									"value": "<string>",
+									"description": "模块标识"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Operation/getOperations?moduleId=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Operation",
+										"getOperations"
+									],
+									"query": [
+										{
+											"key": "moduleId",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"code\": \"dolo\",\n  \"moduleId\": \"urn:uuid:d42b9e35-eaca-c9bf-24ac-6828de4fd67a\",\n  \"name\": \"sint\",\n  \"applicationId\": \"urn:uuid:7596daab-7067-a81a-f983-cda9f7e5533e\",\n  \"icon\": \"dolore cillum amet occaecat\",\n  \"remark\": \"eius\",\n  \"pinYin\": \"volu\",\n  \"enabled\": false,\n  \"sortId\": 14623523,\n  \"creatorId\": \"48b381bb-6bde-ed60-07a5-33fd93439348\",\n  \"creationTime\": \"1990-08-06T00:06:03.245Z\",\n  \"lastModificationTime\": \"1999-06-24T21:34:24.154Z\",\n  \"lastModifierId\": \"6ce17de9-9c95-dc13-b41c-6e68eeab4fea\",\n  \"id\": \"commodo sunt sit Excepteur\"\n },\n {\n  \"code\": \"elit\",\n  \"moduleId\": \"urn:uuid:6d352de9-347b-ed4c-9d63-a69b635d32e7\",\n  \"name\": \"veli\",\n  \"applicationId\": \"7dfbd574-0198-9190-30c0-98d89a34251a\",\n  \"icon\": \"commodo mollit exercitation consectetur\",\n  \"remark\": \"labo\",\n  \"pinYin\": \"nost\",\n  \"enabled\": false,\n  \"sortId\": 3260069,\n  \"creatorId\": \"urn:uuid:6e491911-4df2-b9ec-8ed0-6ae13997766e\",\n  \"creationTime\": \"2000-01-31T15:52:33.060Z\",\n  \"lastModificationTime\": \"2005-08-25T19:30:57.252Z\",\n  \"lastModifierId\": \"812dc808-6587-5704-f5ea-3318b58ccdb4\",\n  \"id\": \"comm\"\n }\n]"
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Module",
+			"item": [
+				{
+					"name": "创建模块",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"parentId\": \"<uuid>\",\n    \"url\": \"<string>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Module",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Module"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"parentId\": \"<uuid>\",\n    \"url\": \"<string>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Module",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Module"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "修改模块",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"<string>\",\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"parentId\": \"<uuid>\",\n    \"url\": \"<string>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Module",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Module"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"<string>\",\n    \"name\": \"<string>\",\n    \"applicationId\": \"<uuid>\",\n    \"parentId\": \"<uuid>\",\n    \"url\": \"<string>\",\n    \"icon\": \"<string>\",\n    \"remark\": \"<string>\",\n    \"enabled\": \"<boolean>\",\n    \"sortId\": \"<integer>\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Module",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Module"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "获取模块树型列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Module/getModuleTree?applicationId=<uuid>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Module",
+								"getModuleTree"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>",
+									"description": "应用程序标识"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Module/getModuleTree?applicationId=<uuid>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Module",
+										"getModuleTree"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"id\": \"d7e22741-6883-1327-3411-1ef01b15ff34\",\n  \"applicationId\": \"urn:uuid:f2f00a32-8814-2d50-ce18-6f7e706410e2\",\n  \"parentId\": \"urn:uuid:907b2173-85ab-2452-d8f5-051270ae5938\",\n  \"name\": \"proident commodo non cupidatat\",\n  \"url\": \"irure enim fugiat aliqua ea\",\n  \"icon\": \"ipsum mollit\",\n  \"remark\": \"adipisicing\",\n  \"enabled\": false,\n  \"sortId\": 75267121,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   }\n  ]\n },\n {\n  \"id\": \"abc5d053-1614-b952-612c-f2505d6591a3\",\n  \"applicationId\": \"urn:uuid:f017c149-fab3-4aaf-1045-2674d744fd30\",\n  \"parentId\": \"46023936-5e19-c417-39cf-79f272629870\",\n  \"name\": \"\",\n  \"url\": \"cillum tempor irure ea ut\",\n  \"icon\": \"e\",\n  \"remark\": \"esse enim\",\n  \"enabled\": true,\n  \"sortId\": -3611556,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   }\n  ]\n }\n]"
+						}
+					]
+				},
+				{
+					"name": "获取子模块列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Module/getChildren?applicationId=<uuid>&moduleId=<uuid>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Module",
+								"getChildren"
+							],
+							"query": [
+								{
+									"key": "applicationId",
+									"value": "<uuid>",
+									"description": "(Required) 应用程序标识"
+								},
+								{
+									"key": "moduleId",
+									"value": "<uuid>",
+									"description": "模块标识"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/Module/getChildren?applicationId=<uuid>&moduleId=<uuid>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Module",
+										"getChildren"
+									],
+									"query": [
+										{
+											"key": "applicationId",
+											"value": "<uuid>"
+										},
+										{
+											"key": "moduleId",
+											"value": "<uuid>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"id\": \"d7e22741-6883-1327-3411-1ef01b15ff34\",\n  \"applicationId\": \"urn:uuid:f2f00a32-8814-2d50-ce18-6f7e706410e2\",\n  \"parentId\": \"urn:uuid:907b2173-85ab-2452-d8f5-051270ae5938\",\n  \"name\": \"proident commodo non cupidatat\",\n  \"url\": \"irure enim fugiat aliqua ea\",\n  \"icon\": \"ipsum mollit\",\n  \"remark\": \"adipisicing\",\n  \"enabled\": false,\n  \"sortId\": 75267121,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   }\n  ]\n },\n {\n  \"id\": \"abc5d053-1614-b952-612c-f2505d6591a3\",\n  \"applicationId\": \"urn:uuid:f017c149-fab3-4aaf-1045-2674d744fd30\",\n  \"parentId\": \"46023936-5e19-c417-39cf-79f272629870\",\n  \"name\": \"\",\n  \"url\": \"cillum tempor irure ea ut\",\n  \"icon\": \"e\",\n  \"remark\": \"esse enim\",\n  \"enabled\": true,\n  \"sortId\": -3611556,\n  \"children\": [\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   },\n   {\n    \"value\": \"<Circular reference to #/components/schemas/ModuleResponse detected>\"\n   }\n  ]\n }\n]"
+						}
+					]
+				},
+				{
+					"name": "删除模块",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"<string>\"",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Module/delete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Module",
+								"delete"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": {
+											"content": "Added as a part of security scheme: apikey",
+											"type": "text/plain"
+										},
+										"key": "Authorization",
+										"value": "<API Key>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\"<string>\""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/Module/delete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"Module",
+										"delete"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

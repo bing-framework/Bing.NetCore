@@ -11,6 +11,16 @@
         public static string UserName { get; set; } = System.Security.Claims.ClaimTypes.Name;
 
         /// <summary>
+        /// 名字，默认：<see cref="System.Security.Claims.ClaimTypes.GivenName"/>
+        /// </summary>
+        public static string Name { get; set; } = System.Security.Claims.ClaimTypes.GivenName;
+
+        /// <summary>
+        /// 姓。默认：<see cref="System.Security.Claims.ClaimTypes.Surname"/>
+        /// </summary>
+        public static string SurName { get; set; } = System.Security.Claims.ClaimTypes.Surname;
+
+        /// <summary>
         /// 姓名。默认："full_name"
         /// </summary>
         public static string FullName { get; set; } = "full_name";

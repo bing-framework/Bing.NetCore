@@ -1,7 +1,6 @@
 ﻿using System;
 using AspectCore.Configuration;
 using AspectCore.DynamicProxy;
-using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
 using Bing.Extensions;

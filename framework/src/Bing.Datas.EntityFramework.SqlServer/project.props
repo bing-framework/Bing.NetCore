@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Datas.EntityFramework.SqlServer</AssemblyName>
+    <PackageId>Bing.Datas.EntityFramework.SqlServer</PackageId>
+    <Description>Bing.Datas.EntityFramework.SqlServer 是Bing应用框架的EntityFrameworkCore.SqlServer数据访问类库。</Description>
+  </PropertyGroup>
+</Project>

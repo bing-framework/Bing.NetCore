@@ -1,0 +1,38 @@
+﻿<Project>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.Permissions</AssemblyName>
+    <PackageId>Bing.Permissions</PackageId>
+    <Description>Bing.Permissions 是Bing应用框架的权限类库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\SecurityResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SecurityResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\SecurityResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SecurityResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Identity/Models/RoleBase.*.cs">
+      <DependentUpon>RoleBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Identity/Models/UserBase.*.cs">
+      <DependentUpon>UserBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Identity/Models/ApplicationBase.*.cs">
+      <DependentUpon>ApplicationBase.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+</Project>

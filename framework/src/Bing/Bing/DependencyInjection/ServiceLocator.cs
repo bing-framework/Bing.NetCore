@@ -125,6 +125,9 @@ namespace Bing.DependencyInjection
         /// <typeparam name="T">服务类型</typeparam>
         public T GetService<T>()
         {
+            if (!IsProviderEnabled)
+                return default;
+
             Check.NotNull(_services, nameof(_services));
             Check.NotNull(_provider, nameof(_provider));
 
@@ -140,6 +143,9 @@ namespace Bing.DependencyInjection
         /// <param name="serviceType">服务类型</param>
         public object GetService(Type serviceType)
         {
+            if (!IsProviderEnabled)
+                return null;
+
             Check.NotNull(_services, nameof(_services));
             Check.NotNull(_provider, nameof(_provider));
 

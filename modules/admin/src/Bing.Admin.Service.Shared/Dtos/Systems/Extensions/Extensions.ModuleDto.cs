@@ -1,6 +1,6 @@
 ﻿using Bing.Admin.Data.Pos.Systems;
 using Bing.Admin.Data.Pos.Systems.Models;
-using Bing.Mapping;
+using Bing.ObjectMapping;
 using Bing.Utils.Json;
 
 namespace Bing.Admin.Service.Shared.Dtos.Systems.Extensions

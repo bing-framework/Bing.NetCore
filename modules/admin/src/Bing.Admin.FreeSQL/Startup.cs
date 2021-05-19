@@ -1,6 +1,5 @@
-﻿using System;
-using AspectCore.Extensions.DependencyInjection;
-using Bing.Admin.Modules;
+﻿using Bing.Admin.Modules;
+using Bing.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,9 +30,8 @@ namespace Bing.Admin
         /// <summary>
         /// 配置服务
         /// </summary>
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddBing<AspNetCoreBingModuleManager>();
             services.AddBing()
                 .AddModule<LogModule>()
                 .AddModule<MapperModule>()
@@ -45,14 +43,14 @@ namespace Bing.Admin
                 .AddModule<CapModule>()
                 //.AddModule<MySqlAdminUnitOfWorkMigrationModule>()
                 .AddModule<SwaggerModule>();
-            return services.BuildServiceContextProvider();
         }
 
         /// <summary>
         /// 配置请求管道
         /// </summary>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            Web.Environment = env;
             loggerFactory.AddSysLogProvider();
             app.UseBing();
         }

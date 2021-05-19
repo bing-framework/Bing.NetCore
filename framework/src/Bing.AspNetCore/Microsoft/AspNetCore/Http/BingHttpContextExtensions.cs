@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Bing.Extensions;
 
 namespace Microsoft.AspNetCore.Http
 {
@@ -15,7 +16,15 @@ namespace Microsoft.AspNetCore.Http
         {
             var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
             if (string.IsNullOrEmpty(ip))
+            {
                 ip = context.Connection.RemoteIpAddress?.ToString();
+#if DEBUG
+                if (ip.Contains("::ffff:"))
+                    return ip.Split("::ffff:")[1];
+                if (ip == "::1" || ip.Contains("127.0.0.1"))
+                    return "127.0.0.1";
+#endif
+            }
             return ip;
         }
     }

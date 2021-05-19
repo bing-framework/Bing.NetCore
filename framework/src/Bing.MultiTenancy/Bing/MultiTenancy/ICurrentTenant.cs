@@ -15,7 +15,12 @@ namespace Bing.MultiTenancy
         /// <summary>
         /// 租户标识
         /// </summary>
-        string TenantId { get; }
+        string Id { get; }
+
+        /// <summary>
+        /// 租户编码
+        /// </summary>
+        string Code { get; }
 
         /// <summary>
         /// 租户名称
@@ -26,7 +31,8 @@ namespace Bing.MultiTenancy
         /// 变更
         /// </summary>
         /// <param name="tenantId">租户标识</param>
+        /// <param name="code">租户编码</param>
         /// <param name="name">租户名称</param>
-        IDisposable Change(string tenantId, string name = null);
+        IDisposable Change(string tenantId, string code = null, string name = null);
     }
 }

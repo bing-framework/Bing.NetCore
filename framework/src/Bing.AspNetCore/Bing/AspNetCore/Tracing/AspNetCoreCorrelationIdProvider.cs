@@ -48,11 +48,10 @@ namespace Bing.AspNetCore.Tracing
             {
                 lock (HttpContextAccessor.HttpContext.Request.Headers)
                 {
-                    if (correlationId.IsEmpty())
-                    {
-                        correlationId = CreateNewCorrelationId();
-                        HttpContextAccessor.HttpContext.Request.Headers[Options.HttpHeaderName] = correlationId;
-                    }
+                    if (!correlationId.IsEmpty())
+                        return correlationId;
+                    correlationId = CreateNewCorrelationId();
+                    HttpContextAccessor.HttpContext.Request.Headers[Options.HttpHeaderName] = correlationId;
                 }
             }
 

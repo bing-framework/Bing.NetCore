@@ -1,0 +1,26 @@
+﻿<Project>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.AspNetCore.Mvc</AssemblyName>
+    <PackageId>Bing.AspNetCore.Mvc</PackageId>
+    <Description>Bing.AspNetCore.Mvc 组件，提供AspNetCore的Mvc功能的封装。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Bing\AspNetCore\Mvc\WebResource.Designer.cs">
+      <DependentUpon>WebResource.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Bing\AspNetCore\Mvc\WebResource.resx">
+      <LastGenOutput>WebResource.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

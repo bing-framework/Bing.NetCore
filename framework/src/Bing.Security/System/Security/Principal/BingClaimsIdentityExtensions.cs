@@ -141,5 +141,49 @@ namespace System.Security.Principal
         }
 
         #endregion
+
+        #region Add(添加)
+
+        /// <summary>
+        /// 添加。如果不存在指定声明，则进行添加
+        /// </summary>
+        /// <param name="claimsIdentity">声明标识</param>
+        /// <param name="claim">声明</param>
+        public static ClaimsIdentity AddIfNotContains(this ClaimsIdentity claimsIdentity, Claim claim)
+        {
+            Check.NotNull(claimsIdentity, nameof(claimsIdentity));
+            if (!claimsIdentity.Claims.Any(x => string.Equals(x.Type, claim.Type, StringComparison.OrdinalIgnoreCase)))
+                claimsIdentity.AddClaim(claim);
+            return claimsIdentity;
+        }
+
+        /// <summary>
+        /// 添加或替换。如果指定声明不存在直接添加，否则进行替换
+        /// </summary>
+        /// <param name="claimsIdentity">声明标识</param>
+        /// <param name="claim">声明</param>
+        public static ClaimsIdentity AddOrReplace(this ClaimsIdentity claimsIdentity, Claim claim)
+        {
+            Check.NotNull(claimsIdentity, nameof(claimsIdentity));
+            foreach (var x in claimsIdentity.FindAll(claim.Type).ToList())
+                claimsIdentity.RemoveClaim(x);
+            claimsIdentity.AddClaim(claim);
+            return claimsIdentity;
+        }
+
+        /// <summary>
+        /// 添加。如果不存在指定声明标识，则进行添加
+        /// </summary>
+        /// <param name="principal">声明主体</param>
+        /// <param name="identity">声明标识</param>
+        public static ClaimsPrincipal AddIdentityIfNotContains(this ClaimsPrincipal principal, ClaimsIdentity identity)
+        {
+            Check.NotNull(principal, nameof(principal));
+            if (!principal.Identities.Any(x => string.Equals(x.AuthenticationType, identity.AuthenticationType, StringComparison.OrdinalIgnoreCase)))
+                principal.AddIdentity(identity);
+            return principal;
+        }
+
+        #endregion
     }
 }

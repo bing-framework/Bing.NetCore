@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -7,13 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.1" />
-    <PackageReference Include="MySqlConnector" Version="1.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.4.1" />
-    <!--<PackageReference Include="Microsoft.AspNetCore.App" />-->
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.2.0" />
+    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.2" />
+    <PackageReference Include="MySqlConnector" Version="1.2.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.6.3" />
+    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj" />
     <ProjectReference Include="..\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service\Bing.Admin.Service.csproj" />

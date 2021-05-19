@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Logs.Log4Net</AssemblyName>
+    <PackageId>Bing.Logs.Log4Net</PackageId>
+    <Description>Bing.Logs.Log4Net是Bing应用框架的log4net日志操作类库。</Description>
+  </PropertyGroup>
+</Project>
