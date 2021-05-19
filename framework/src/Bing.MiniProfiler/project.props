@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <AssemblyName>Bing.MiniProfiler</AssemblyName>
-    <PackageId>BingNS.MiniProfiler</PackageId>
+    <PackageId>Bing.MiniProfiler</PackageId>
     <Description>Bing.MiniProfiler 是Bing应用框架的性能监测组件类库。</Description>
   </PropertyGroup>
 </Project>
