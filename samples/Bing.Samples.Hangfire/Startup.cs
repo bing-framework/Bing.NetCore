@@ -1,6 +1,4 @@
-﻿using System;
-using AspectCore.Extensions.DependencyInjection;
-using Bing.Samples.Hangfire.Modules;
+﻿using Bing.Samples.Hangfire.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -32,13 +30,12 @@ namespace Bing.Samples.Hangfire
         /// 配置服务
         /// </summary>
         /// <param name="services">服务集合</param>
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddBing()
                 .AddModule<AppModule>()
                 .AddModule<LogModule>()
                 .AddModule<HangfireModule>();
-            return services.BuildServiceContextProvider();
         }
 
         /// <summary>
@@ -46,7 +43,7 @@ namespace Bing.Samples.Hangfire
         /// </summary>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddSysLogProvider();
+            //loggerFactory.AddSysLogProvider();
             app.UseBing();
         }
     }

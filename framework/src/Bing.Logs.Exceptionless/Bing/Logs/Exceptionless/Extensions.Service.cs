@@ -28,6 +28,7 @@ namespace Bing.Logs.Exceptionless
             services.TryAddScoped<ILog, Log>();
 
             configAction?.Invoke(ExceptionlessClient.Default.Configuration);
+            ExceptionlessClient.Default.Startup();
         }
 
         /// <summary>

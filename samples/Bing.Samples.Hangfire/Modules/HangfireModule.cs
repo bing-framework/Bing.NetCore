@@ -50,7 +50,7 @@ namespace Bing.Samples.Hangfire.Modules
             GlobalConfiguration.Configuration.UseActivator(new HangfireDIActivator(app.ApplicationServices));
             app.UseHangfireDashboard();
             app.UseHangfireServer();
-            RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0/5 * * * * ? ", TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0/5 5 * * * ? ", TimeZoneInfo.Local);
         }
     }
 

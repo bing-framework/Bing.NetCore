@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
+using Bing.Logs.Exceptionless;
 using Bing.Logs.NLog;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,7 +31,12 @@ namespace Bing.Samples.Hangfire.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            services.AddNLog();
+            //services.AddNLog();
+            services.AddExceptionless(x =>
+            {
+                x.ServerUrl = "http://10.186.135.27:5100";
+                x.ApiKey = "yIgaHwtLwbN9VoUCP0UYpSPVzwpmeNSdVSfVIVta";
+            });
             return services;
         }
     }

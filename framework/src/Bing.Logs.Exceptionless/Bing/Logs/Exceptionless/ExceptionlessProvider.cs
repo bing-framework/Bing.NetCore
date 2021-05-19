@@ -12,7 +12,7 @@ namespace Bing.Logs.Exceptionless
     /// <summary>
     /// Exceptionless日志提供程序
     /// </summary>
-    public class ExceptionlessProvider : ILogProvider
+    internal class ExceptionlessProvider : ILogProvider
     {
         #region 属性
 
