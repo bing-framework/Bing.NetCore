@@ -5,6 +5,6 @@
     <VersionPatch>0</VersionPatch>
     <VersionQuality>20210507-1</VersionQuality>
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
-    <VersionSuffix>preview-$(VersionQuality)</VersionSuffix>
+    <!--<VersionSuffix>preview-$(VersionQuality)</VersionSuffix>-->
   </PropertyGroup>
 </Project>
