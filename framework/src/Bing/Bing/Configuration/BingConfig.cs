@@ -1,7 +1,7 @@
 ﻿using Bing.Validations.Abstractions;
 using Bing.Validations.Handlers;
 
-namespace Bing.Configurations
+namespace Bing.Configuration
 {
     /// <summary>
     /// Bing 框架配置

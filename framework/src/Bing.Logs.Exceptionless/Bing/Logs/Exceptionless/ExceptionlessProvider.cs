@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Bing.Configurations;
+using Bing.Configuration;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
