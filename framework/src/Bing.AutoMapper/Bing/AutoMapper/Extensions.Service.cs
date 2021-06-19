@@ -25,11 +25,11 @@ namespace Bing.AutoMapper
                 .FindAll()
                 .Select(type => Reflections.CreateInstance<IObjectMapperProfile>(type))
                 .ToList();
+            // 创建 AutoMapper 配置
             var configuration = new MapperConfiguration(cfg =>
             {
                 foreach (var instance in instances)
                 {
-                    
                     Debug.WriteLine($"初始化AutoMapper配置：{instance.GetType().FullName}");
                     instance.CreateMap();
                     // ReSharper disable once SuspiciousTypeConversion.Global

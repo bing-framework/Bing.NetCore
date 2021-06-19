@@ -13,6 +13,7 @@ namespace Bing.Exceptions.Prompts
         /// <summary>
         /// 异常提示组件集合
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         private static readonly List<IExceptionPrompt> Prompts = new List<IExceptionPrompt>();
 
         /// <summary>

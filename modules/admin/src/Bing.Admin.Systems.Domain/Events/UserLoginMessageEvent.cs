@@ -15,7 +15,7 @@ namespace Bing.Admin.Systems.Domain.Events
         /// </summary>
         /// <param name="data">数据</param>
         /// <param name="send">是否立即发送消息</param>
-        public UserLoginMessageEvent(UserLoginMessage data,bool send = true) : base(data)
+        public UserLoginMessageEvent(UserLoginMessage data, bool send = true) : base(data)
         {
             Send = send;
             Name = MessageEventConst.UserLogin;
@@ -25,7 +25,7 @@ namespace Bing.Admin.Systems.Domain.Events
     /// <summary>
     /// 用户登录消息
     /// </summary>
-    public class UserLoginMessage:IEventSession
+    public class UserLoginMessage : IEventSession
     {
         /// <summary>
         /// IP地址
