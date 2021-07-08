@@ -34,7 +34,7 @@ namespace Bing.MailKit.Tests
 
         public MailKitEmailSenderTest(ITestOutputHelper output) : base(output)
         {
-            _emailConfigProvider = new DefaultEmailConfigProvider(new EmailConfig()
+            _emailConfigProvider = new DefaultEmailConfigProvider(new EmailConfig
             {
                 DisplayName = "简玄冰",
                 Host = "smtp.126.com",
@@ -43,11 +43,12 @@ namespace Bing.MailKit.Tests
                 Password = "",
                 FromAddress = "@126.com"
             });
-            _mailKitConfigProvider = new DefaultMailKitConfigProvider(new MailKitConfig()
+            _mailKitConfigProvider = new DefaultMailKitConfigProvider(new MailKitConfig
             {
-                SecureSocketOption = SecureSocketOptions.None
+                SecureSocketOption = SecureSocketOptions.StartTlsWhenAvailable,
+                ServerCertificateValidationCallback = true
             });
-            _to = new List<string>() { "@126.com" };
+            _to = new List<string> { "" };
             _mailKitEmailSender = new MailKitEmailSender(_emailConfigProvider,
                 new DefaultMailKitSmtpBuilder(_emailConfigProvider, _mailKitConfigProvider));
         }
@@ -58,7 +59,7 @@ namespace Bing.MailKit.Tests
         [Fact]
         public void Test_SendEmail()
         {
-            var box = new EmailBox()
+            var box = new EmailBox
             {
                 Subject = "MailKit 测试发送邮件",
                 To = _to,

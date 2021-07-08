@@ -55,7 +55,10 @@ namespace Bing.MailKit
         /// <param name="client">SMTP客户端</param>
         protected virtual void ConfigureClient(SmtpClient client)
         {
-            var emailConfig = this._emailConfigProvider.GetConfig();
+            var emailConfig = _emailConfigProvider.GetConfig();
+            var mailKitConfig = _mailKitConfigProvider.GetConfig();
+            if (mailKitConfig.ServerCertificateValidationCallback.HasValue)
+                client.ServerCertificateValidationCallback = (s, c, h, e) => mailKitConfig.ServerCertificateValidationCallback.Value;
             client.Connect(emailConfig.Host, emailConfig.Port, GetSecureSocketOption());
             if (emailConfig.UseDefaultCredentials)
                 return;
