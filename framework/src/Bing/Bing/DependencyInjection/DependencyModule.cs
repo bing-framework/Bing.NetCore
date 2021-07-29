@@ -33,7 +33,7 @@ namespace Bing.DependencyInjection
         {
             // 服务定位器设置
             ServiceLocator.Instance.SetServiceCollection(services);
-            services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));
+            services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));// 解决循环依赖问题
             services.TryAddTransient<IHybridServiceScopeFactory, DefaultServiceScopeFactory>();
             services.AddScoped<ScopedDictionary>();
 

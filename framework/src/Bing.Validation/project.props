@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Validation</AssemblyName>
+    <PackageId>Bing.Validation</PackageId>
+    <Description>Bing.Validation是Bing应用框架的验证库。</Description>
+  </PropertyGroup>
+</Project>

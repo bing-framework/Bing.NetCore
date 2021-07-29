@@ -1,0 +1,6 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="CanalSharp" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.17" />
+  </ItemGroup>
+</Project>
