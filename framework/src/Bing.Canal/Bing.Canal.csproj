@@ -5,4 +5,8 @@
 
   <Import Project="..\..\..\common.props" />
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+  </ItemGroup>
+
 </Project>
