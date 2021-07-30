@@ -132,6 +132,7 @@ namespace Bing.Canal.Server
                     }, _loggerFactory);
                 await _canalConnection.ConnectAsync();
                 await _canalConnection.SubscribeAsync(_options.Filter);
+                await _canalConnection.RollbackAsync(0);
                 _logger.LogInformation("canal client start...");
                 LazyCanalGetEntities();
                 LazyCanalDoWork();
@@ -158,8 +159,10 @@ namespace Bing.Canal.Server
             if(_isDispose)
                 return;
             _isDispose = true;
+            _cts.Cancel();
             try
             {
+                _canalConnection.UnSubscribeAsync(_options.Filter).GetAwaiter().GetResult();
                 _canalConnection.DisConnectAsync().GetAwaiter().GetResult();
                 _logger.LogInformation("canal client stop success...");
             }
@@ -226,8 +229,7 @@ namespace Bing.Canal.Server
                         _logger.LogError(io, "canal receive data error...");
                         try
                         {
-                            await _canalConnection.ConnectAsync();
-                            await _canalConnection.SubscribeAsync(_options.Filter);
+                            await _canalConnection.ReConnectAsync();
                         }
                         catch (Exception e)
                         {
