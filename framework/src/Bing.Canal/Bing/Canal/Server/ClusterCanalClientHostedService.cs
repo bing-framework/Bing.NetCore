@@ -24,12 +24,12 @@ namespace Bing.Canal.Server
     /// <summary>
     /// Canal客户端 后台服务
     /// </summary>
-    internal class SimpleCanalClientHostedService : IHostedService
+    internal class ClusterCanalClientHostedService : IHostedService
     {
         /// <summary>
         /// 日志
         /// </summary>
-        private readonly ILogger<SimpleCanalClientHostedService> _logger;
+        private readonly ILogger<ClusterCanalClientHostedService> _logger;
 
         /// <summary>
         /// 日志工厂
@@ -44,7 +44,7 @@ namespace Bing.Canal.Server
         /// <summary>
         /// Canal 连接
         /// </summary>
-        private SimpleCanalConnection _canalConnection;
+        private ClusterCanalConnection _canalConnection;
 
         /// <summary>
         /// 是否已释放
@@ -86,10 +86,11 @@ namespace Bing.Canal.Server
         /// </summary>
         private readonly CancellationTokenSource _cts;
 
-        public SimpleCanalClientHostedService(ILogger<SimpleCanalClientHostedService> logger
+        public ClusterCanalClientHostedService(ILogger<ClusterCanalClientHostedService> logger
             , ILoggerFactory loggerFactory
             , IOptions<CanalOptions> options
             , IServiceScopeFactory serviceScopeFactory
+            , IConfiguration configuration
             , CanalConsumeRegister register)
         {
             _logger = logger;
@@ -116,7 +117,7 @@ namespace Bing.Canal.Server
         {
             try
             {
-                _canalConnection = new SimpleCanalConnection(_options.Standalone, _loggerFactory.CreateLogger<SimpleCanalConnection>());
+                _canalConnection = new ClusterCanalConnection(_options.Cluster, _loggerFactory);
                 await _canalConnection.ConnectAsync();
                 await _canalConnection.SubscribeAsync(_options.Filter);
                 // 回滚寻找上次中断的位置
@@ -220,10 +221,7 @@ namespace Bing.Canal.Server
                         try
                         {
                             _logger.LogInformation("canal receive worker reconnect...");
-                            await _canalConnection.DisposeAsync();
-                            await _canalConnection.ConnectAsync();
-                            await _canalConnection.SubscribeAsync(_options.Filter);
-                            await _canalConnection.RollbackAsync(0);
+                            await _canalConnection.ReConnectAsync();
                         }
                         catch (Exception)
                         {
@@ -236,10 +234,7 @@ namespace Bing.Canal.Server
                         try
                         {
                             _logger.LogInformation($"canal receive worker reconnect...");
-                            await _canalConnection.DisposeAsync();
-                            await _canalConnection.ConnectAsync();
-                            await _canalConnection.SubscribeAsync(_options.Filter);
-                            await _canalConnection.RollbackAsync(0);
+                            await _canalConnection.ReConnectAsync();
                         }
                         catch (Exception)
                         {
@@ -283,7 +278,7 @@ namespace Bing.Canal.Server
 
             var dotime = (int)stopwatch.Elapsed.TotalSeconds;
             var time = dotime > 1 ? ParseTimeSeconds(dotime) : $"{stopwatch.Elapsed.TotalMilliseconds}ms";
-            var canalQueueData = new CanalQueueData
+            var canalQueueData = new CanalQueueData()
             {
                 Time = time,
                 CanalBody = canalBody
@@ -384,7 +379,7 @@ namespace Bing.Canal.Server
                     // 变更类型 insert/update/delete 等等
                     var eventType = rowChange.EventType;
                     // 输出binlog信息 表名 数据库名 变更类型
-                    _logger.LogInformation($"================> binlog[{entry.Header.LogfileName}:{entry.Header.LogfileOffset}] , name[{entry.Header.SchemaName},{entry.Header.TableName}] , eventType:{eventType}, row:{rowChange.RowDatas.Count}");
+                    _logger.LogInformation($"================> binlog[{entry.Header.LogfileName}:{entry.Header.LogfileOffset}] , name[{entry.Header.SchemaName},{entry.Header.TableName}] , eventType :{eventType}");
                     // 输出 insert/update/delete 变更类型列数据
                     foreach (var rowData in rowChange.RowDatas)
                     {
@@ -392,7 +387,7 @@ namespace Bing.Canal.Server
                         {
                             DbName = entry.Header.SchemaName,
                             TableName = entry.Header.TableName,
-                            CanalDestination = _options.Standalone.Destination
+                            CanalDestination = _options.Cluster.Destination
                         };
                         if (eventType == EventType.Delete)
                         {

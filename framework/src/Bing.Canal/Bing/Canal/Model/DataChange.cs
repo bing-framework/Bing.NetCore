@@ -37,5 +37,26 @@ namespace Bing.Canal.Model
         /// 变更后
         /// </summary>
         public List<Column> AfterColumnList { get; set; }
+
+        /// <summary>
+        /// 事件常量
+        /// </summary>
+        public class EventConst
+        {
+            /// <summary>
+            /// 新增
+            /// </summary>
+            public const string Insert = "INSERT";
+
+            /// <summary>
+            /// 更新
+            /// </summary>
+            public const string Update = "UPDATE";
+
+            /// <summary>
+            /// 删除
+            /// </summary>
+            public const string Delete = "DELETE";
+        }
     }
 }

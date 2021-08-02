@@ -22,7 +22,7 @@ namespace Bing.Canal.Server
                 throw new ArgumentNullException(nameof(register.ConsumeList));
             services.AddOptions();
             services.TryAddSingleton<IConfigureOptions<CanalOptions>, ConfigureCanalOptions>();
-            services.AddTransient<IHostedService, SimpleCanalClientHostedService>();
+            services.AddHostedService<SimpleCanalClientHostedService>();
             if (register.ConsumeList.Any())
             {
                 foreach (var type in register.ConsumeList) 
@@ -32,6 +32,33 @@ namespace Bing.Canal.Server
             if (register.SingletonConsumeList.Any())
             {
                 foreach (var type in register.SingletonConsumeList) 
+                    services.TryAddSingleton(type);
+            }
+
+            services.AddSingleton(register);
+            return services;
+        }
+
+        public static IServiceCollection AddClusterCanalService(this IServiceCollection services, Action<CanalConsumeRegister> setupAction)
+        {
+            if (setupAction == null)
+                throw new ArgumentNullException(nameof(setupAction));
+            var register = new CanalConsumeRegister();
+            setupAction(register);
+            if (!register.ConsumeList.Any() && !register.SingletonConsumeList.Any())
+                throw new ArgumentNullException(nameof(register.ConsumeList));
+            services.AddOptions();
+            services.TryAddSingleton<IConfigureOptions<CanalOptions>, ConfigureCanalOptions>();
+            services.AddHostedService<ClusterCanalClientHostedService>();
+            if (register.ConsumeList.Any())
+            {
+                foreach (var type in register.ConsumeList)
+                    services.TryAddTransient(type);
+            }
+
+            if (register.SingletonConsumeList.Any())
+            {
+                foreach (var type in register.SingletonConsumeList)
                     services.TryAddSingleton(type);
             }
 
