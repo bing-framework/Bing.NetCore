@@ -5,6 +5,7 @@ using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
 using Bing.DependencyInjection;
 using Bing.Events.Messages;
+using Bing.ExceptionHandling;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
@@ -38,17 +39,24 @@ namespace Bing.Admin.Apis
         public IAdminUnitOfWork UnitOfWork { get; }
 
         /// <summary>
+        /// 异常通知器
+        /// </summary>
+        public IExceptionNotifier ExceptionNotifier { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
         /// </summary>
         public TestController(ITestService testService
             , IProcessingServer processingServer
             , IMessageEventBus messageEventBus
-            , IAdminUnitOfWork unitOfWork)
+            , IAdminUnitOfWork unitOfWork
+            , IExceptionNotifier exceptionNotifier)
         {
             TestService = testService;
             ProcessingServer = processingServer;
             MessageEventBus = messageEventBus;
             UnitOfWork = unitOfWork;
+            ExceptionNotifier = exceptionNotifier;
         }
 
         /// <summary>

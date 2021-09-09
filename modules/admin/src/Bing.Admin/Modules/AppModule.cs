@@ -2,6 +2,7 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Mvc.ExceptionHandling;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
 using Bing.DependencyInjection;
@@ -40,6 +41,7 @@ namespace Bing.Admin.Modules
             services.AddControllers(o =>
                 {
                     o.Filters.Add<ResultHandlerAttribute>();
+                    o.Filters.Add<BingExceptionFilter>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
                 .AddNewtonsoftJson(options =>
