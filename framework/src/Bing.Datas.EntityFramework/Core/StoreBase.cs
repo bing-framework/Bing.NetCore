@@ -5,8 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.Data;
 using Bing.Domain.Entities;
+using Bing.Exceptions;
+using Bing.Extensions;
 using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Bing.Datas.EntityFramework.Core
 {
@@ -98,21 +101,49 @@ namespace Bing.Datas.EntityFramework.Core
         /// <exception cref="ArgumentNullException"></exception>
         public virtual void Update(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-            UnitOfWork.Entry(entity).State = EntityState.Detached;
-            var old = Find(entity.Id);
-            var oldEntry = UnitOfWork.Entry(old);
-            if (!(entity is IVersion version))
+            entity.CheckNull(nameof(entity));
+            var entry = UnitOfWork.Entry(entity);
+            ValidateVersion(entry, entity);
+            UpdateEntity(entry, entity);
+        }
+
+        /// <summary>
+        /// 验证版本号
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        /// <param name="entity">实体</param>
+        protected void ValidateVersion(EntityEntry<TEntity> entry, TEntity entity)
+        {
+            if (entry.State == EntityState.Detached)
+                return;
+            if (entity is not IVersion current)
+                return;
+            if (current.Version == null)
+                return;
+            var oldVersion = entry.OriginalValues.GetValue<byte[]>(nameof(IVersion.Version));
+            for (var i = 0; i < oldVersion.Length; i++)
+            {
+                if (current.Version[i] != oldVersion[i])
+                    throw new ConcurrencyException($"Type:{typeof(TEntity)},Id:{entity.Id}");
+            }
+        }
+
+        /// <summary>
+        /// 更新实体
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        /// <param name="entity">实体</param>
+        protected void UpdateEntity(EntityEntry<TEntity> entry, TEntity entity)
+        {
+            var oldEntry = UnitOfWork.ChangeTracker.Entries<TEntity>().FirstOrDefault(x => x.Entity.Equals(entity));
+            if (oldEntry != null)
             {
                 oldEntry.CurrentValues.SetValues(entity);
                 return;
             }
 
-            oldEntry.State = EntityState.Detached;
-            oldEntry.CurrentValues[nameof(version.Version)] = version.Version;
-            oldEntry = UnitOfWork.Attach(old);
-            oldEntry.CurrentValues.SetValues(entity);
+            if (entry.State == EntityState.Detached)
+                UnitOfWork.Update(entity);
         }
 
         /// <summary>
