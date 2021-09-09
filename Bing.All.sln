@@ -216,6 +216,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.NLog", "framework
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Validation", "framework\src\Bing.Validation\Bing.Validation.csproj", "{D1131EC5-CF40-418F-8E8C-858AADDBCC7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.Authentication.JwtBearer", "framework\src\Bing.AspNetCore.Authentication.JwtBearer\Bing.AspNetCore.Authentication.JwtBearer.csproj", "{7F4DAD82-FB09-445C-8EA2-0F1C50FBBA28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -478,6 +480,10 @@ Global
 		{D1131EC5-CF40-418F-8E8C-858AADDBCC7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1131EC5-CF40-418F-8E8C-858AADDBCC7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1131EC5-CF40-418F-8E8C-858AADDBCC7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F4DAD82-FB09-445C-8EA2-0F1C50FBBA28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F4DAD82-FB09-445C-8EA2-0F1C50FBBA28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F4DAD82-FB09-445C-8EA2-0F1C50FBBA28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F4DAD82-FB09-445C-8EA2-0F1C50FBBA28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -572,6 +578,7 @@ Global
 		{2C0C2E7B-25AC-4B48-AF62-59E3C5808AEC} = {F8BFB799-8ECB-49F6-AAA4-5B07F64DB3D9}
 		{A073A8B8-C116-4D8E-A519-DF950F68D2DA} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
 		{D1131EC5-CF40-418F-8E8C-858AADDBCC7F} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
+		{7F4DAD82-FB09-445C-8EA2-0F1C50FBBA28} = {052D4342-8B65-4836-A9B6-681A7812760E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
