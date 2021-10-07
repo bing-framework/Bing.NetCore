@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Helpers;
 
 namespace Bing
 {
@@ -17,11 +16,7 @@ namespace Bing
         /// 初始化一个<see cref="DisposeAction"/>类型的实例
         /// </summary>
         /// <param name="action">操作</param>
-        public DisposeAction(Action action)
-        {
-            Check.NotNull(action, nameof(action));
-            _action = action;
-        }
+        public DisposeAction(Action action) => _action = action ?? throw new ArgumentNullException(nameof(action));
 
         /// <summary>
         /// 释放资源
