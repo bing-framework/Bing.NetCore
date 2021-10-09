@@ -176,6 +176,21 @@ namespace Bing.Permissions.Identity.Services.Implements
 
         #endregion
 
+        #region SetPhoneNumberAsync(设置手机号)
+
+        /// <summary>
+        /// 设置手机号
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="phone">手机号</param>
+        public virtual async Task SetPhoneNumberAsync(TUser user, string phone)
+        {
+            var result = await Manager.SetPhoneNumberAsync(user, phone);
+            result.ThrowIfError();
+        }
+
+        #endregion
+
         #region GenerateRegisterTokenAsync(生成手机号注册令牌)
 
         /// <summary>
@@ -198,6 +213,21 @@ namespace Bing.Permissions.Identity.Services.Implements
         /// <param name="application">应用程序</param>
         public virtual async Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "") =>
             await VerifyTokenAsync(phone, TokenPurpose.PhoneRegister, token, application);
+
+        #endregion
+
+        #region SetEmailAsync(设置电子邮件)
+
+        /// <summary>
+        /// 设置电子邮件
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="email">电子邮件</param>
+        public virtual async Task SetEmailAsync(TUser user, string email)
+        {
+            var result = await Manager.SetEmailAsync(user, email);
+            result.ThrowIfError();
+        }
 
         #endregion
 

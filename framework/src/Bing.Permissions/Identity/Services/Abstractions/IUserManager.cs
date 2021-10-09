@@ -59,6 +59,13 @@ namespace Bing.Permissions.Identity.Services.Abstractions
             string provider = "");
 
         /// <summary>
+        /// 设置手机号
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="phone">手机号</param>
+        Task SetPhoneNumberAsync(TUser user, string phone);
+
+        /// <summary>
         /// 生成手机号注册令牌
         /// </summary>
         /// <param name="phone">手机号</param>
@@ -78,6 +85,13 @@ namespace Bing.Permissions.Identity.Services.Abstractions
         /// </summary>
         /// <param name="user">用户</param>
         Task<string> GenerateEmailConfirmationTokenAsync(TUser user);
+
+        /// <summary>
+        /// 设置电子邮件
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="email">电子邮件</param>
+        Task SetEmailAsync(TUser user, string email);
 
         /// <summary>
         /// 激活电子邮件
