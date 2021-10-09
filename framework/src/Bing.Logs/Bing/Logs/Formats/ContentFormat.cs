@@ -28,6 +28,7 @@ namespace Bing.Logs.Formats
         /// <summary>
         /// 内容格式化器实例
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public static readonly ILogFormat Instance = new ContentFormat();
 
         /// <summary>

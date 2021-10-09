@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading;
 
 namespace Bing.Logs.Internal
 {
@@ -8,6 +9,11 @@ namespace Bing.Logs.Internal
     public class LogContextInfo
     {
         #region 属性
+
+        /// <summary>
+        /// 序号
+        /// </summary>
+        private int _orderId;
 
         /// <summary>
         /// 跟踪号
@@ -39,7 +45,31 @@ namespace Bing.Logs.Internal
         /// </summary>
         public string Url { get; set; }
 
+        /// <summary>
+        /// 当前日志上下文信息
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        private static readonly AsyncLocal<LogContextInfo> _current = new AsyncLocal<LogContextInfo>();
+
+        /// <summary>
+        /// 当前日志上下文信息
+        /// </summary>
+        public static LogContextInfo Current
+        {
+            get => _current.Value;
+            set => _current.Value = value;
+        }
+
         #endregion
 
+        /// <summary>
+        /// 初始化一个<see cref="LogContextInfo"/>类型的实例
+        /// </summary>
+        public LogContextInfo() => _orderId = 0;
+
+        /// <summary>
+        /// 获取序号
+        /// </summary>
+        public int GetOrderId() => _orderId++;
     }
 }

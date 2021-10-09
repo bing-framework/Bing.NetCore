@@ -31,9 +31,10 @@ namespace Bing.AspNetCore.Logs
         /// <param name="scopedDictionary">作用域字典</param>
         /// <param name="webClientInfoProvider">Web客户端信息提供程序</param>
         /// <param name="httpContextAccessor">Http上下文访问器</param>
-        public AspNetCoreLogContext(ScopedDictionary scopedDictionary
-            , IHttpContextAccessor httpContextAccessor
-            , IWebClientInfoProvider webClientInfoProvider)
+        public AspNetCoreLogContext(
+            ScopedDictionary scopedDictionary, 
+            IHttpContextAccessor httpContextAccessor, 
+            IWebClientInfoProvider webClientInfoProvider)
             : base(scopedDictionary)
         {
             HttpContextAccessor = httpContextAccessor;

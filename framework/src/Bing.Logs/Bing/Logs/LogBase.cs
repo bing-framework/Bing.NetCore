@@ -65,9 +65,10 @@ namespace Bing.Logs
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
         /// <param name="currentUser">当前用户</param>
-        protected LogBase(ILogProvider provider
-            , ILogContext context
-            , ICurrentUser currentUser)
+        protected LogBase(
+            ILogProvider provider, 
+            ILogContext context, 
+            ICurrentUser currentUser)
         {
             Provider = provider;
             Context = context;
@@ -81,10 +82,11 @@ namespace Bing.Logs
         /// <param name="provider">日志提供程序</param>
         /// <param name="context">日志上下文</param>
         /// <param name="currentUser">当前用户</param>
-        protected LogBase(string name
-            , ILogProvider provider
-            , ILogContext context
-            , ICurrentUser currentUser)
+        protected LogBase(
+            string name, 
+            ILogProvider provider, 
+            ILogContext context, 
+            ICurrentUser currentUser)
         {
             Provider = provider;
             Context = context;

@@ -3,7 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Bing.Logs;
+using Bing.Logs.Core;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore.Logs
 {
@@ -76,19 +78,23 @@ namespace Bing.AspNetCore.Logs
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 return;
             }
-            var log = Log.GetLog(this).Caption("请求日志中间件");
-            log.Content(new Dictionary<string, string>()
-            {
-                {"请求方法", context.Request.Method},
+
+            var log = context?.RequestServices?.GetService<ILog>() ?? NullLog.Instance;
+            log
+                .Class(this.GetType().FullName)
+                .Caption("请求日志中间件")
+                .Content(new Dictionary<string, string>
                 {
-                    "请求地址",
-                    $"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}{context.Request.QueryString}"
-                },
-                {"IP", context.Connection.RemoteIpAddress.ToString()},
-                {"请求耗时", $"{stopwatch.Elapsed.TotalMilliseconds} 毫秒"},
-                {"请求内容", await FormatRequestAsync(context.Request)},
-                {"响应内容", await FormatResponseAsync(context.Response)}
-            });
+                    { "请求方法", context.Request.Method },
+                    {
+                        "请求地址",
+                        $"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}{context.Request.QueryString}"
+                    },
+                    { "IP", context.Connection.RemoteIpAddress.ToString() },
+                    { "请求耗时", $"{stopwatch.Elapsed.TotalMilliseconds} 毫秒" },
+                    { "请求内容", await FormatRequestAsync(context.Request) },
+                    { "响应内容", await FormatResponseAsync(context.Response) }
+                });
             log.Trace();
         }
 
