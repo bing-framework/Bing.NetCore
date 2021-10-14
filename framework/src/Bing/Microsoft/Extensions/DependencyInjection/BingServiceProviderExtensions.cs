@@ -60,17 +60,21 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             var logger = serviceProvider.GetLogger(FrameworkLog);
             logger.LogInformation("Bing框架初始化开始");
+            Console.WriteLine("Bing框架初始化开始");
             var watch = Stopwatch.StartNew();
             var modules = serviceProvider.GetServices<BingModule>().ToArray();
             foreach (var module in modules)
             {
                 var moduleName = Reflections.GetDescription(module.GetType());
                 logger.LogInformation($"正在初始化模块 “{moduleName}”");
+                Console.WriteLine($"正在初始化模块 “{moduleName}”");
                 module.UseModule(serviceProvider);
                 logger.LogInformation($"模块 “{moduleName}” 初始化完成");
+                Console.WriteLine($"模块 “{moduleName}” 初始化完成");
             }
             watch.Stop();
             logger.LogInformation($"Bing框架初始化完毕，耗时：{watch.Elapsed}");
+            Console.WriteLine($"Bing框架初始化完毕，耗时：{watch.Elapsed}");
             return serviceProvider;
         }
 

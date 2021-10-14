@@ -47,7 +47,7 @@ namespace Bing.AspNetCore.RealIp
                 if (headers.ContainsKey(_options.HeaderKey))
                 {
                     context.Connection.RemoteIpAddress = IPAddress.Parse(
-                        _options.HeaderKey.ToLower() == "x-forwarded-for"
+                        _options.HeaderKey.Equals("x-forwarded-for",StringComparison.CurrentCultureIgnoreCase)
                             ? headers["X-Forwarded-For"].ToString().Split(',')[0]
                             : headers[_options.HeaderKey].ToString());
 

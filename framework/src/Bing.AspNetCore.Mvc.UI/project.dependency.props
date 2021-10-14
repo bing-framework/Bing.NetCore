@@ -1,6 +1,6 @@
 ﻿<Project>
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Http" Version="1.2.3" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.2.4" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
