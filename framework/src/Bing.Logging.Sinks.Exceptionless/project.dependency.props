@@ -1,0 +1,10 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Exceptionless.Extensions.Hosting" Version="4.6.2" />
+    <PackageReference Include="Exceptionless.Extensions.Logging" Version="4.6.2" />
+  </ItemGroup>
+</Project>

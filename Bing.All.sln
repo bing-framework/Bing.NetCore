@@ -220,13 +220,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore.Authenticat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextTemplating", "TextTemplating", "{09A94120-CE45-402F-B45A-21DF04F0C226}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.TextTemplating", "framework\src\Bing.TextTemplating\Bing.TextTemplating.csproj", "{E06DC786-72AB-417B-ACDB-AF00688544EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TextTemplating", "framework\src\Bing.TextTemplating\Bing.TextTemplating.csproj", "{E06DC786-72AB-417B-ACDB-AF00688544EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.TextTemplating.Scriban", "framework\src\Bing.TextTemplating.Scriban\Bing.TextTemplating.Scriban.csproj", "{65B439C9-4B54-4DB8-86B3-9EBE8E62DF83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TextTemplating.Scriban", "framework\src\Bing.TextTemplating.Scriban\Bing.TextTemplating.Scriban.csproj", "{65B439C9-4B54-4DB8-86B3-9EBE8E62DF83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Test.Shared", "framework\tests\Bing.Test.Shared\Bing.Test.Shared.csproj", "{D6C96AE5-8756-4278-A331-43073E08C3ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Test.Shared", "framework\tests\Bing.Test.Shared\Bing.Test.Shared.csproj", "{D6C96AE5-8756-4278-A331-43073E08C3ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ddd.Domain.Tests", "framework\tests\Bing.Ddd.Domain.Tests\Bing.Ddd.Domain.Tests.csproj", "{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Domain.Tests", "framework\tests\Bing.Ddd.Domain.Tests\Bing.Ddd.Domain.Tests.csproj", "{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logging", "framework\src\Bing.Logging\Bing.Logging.csproj", "{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logging.Sinks.Exceptionless", "framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj", "{04EB5533-6885-4292-BED1-4D06A5E162D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -510,6 +514,14 @@ Global
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -610,6 +622,8 @@ Global
 		{65B439C9-4B54-4DB8-86B3-9EBE8E62DF83} = {09A94120-CE45-402F-B45A-21DF04F0C226}
 		{D6C96AE5-8756-4278-A331-43073E08C3ED} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
+		{ECB340A3-A21C-460D-8EBC-09EA5FB8731C} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
+		{04EB5533-6885-4292-BED1-4D06A5E162D1} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
