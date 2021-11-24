@@ -228,9 +228,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Test.Shared", "framewo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Domain.Tests", "framework\tests\Bing.Ddd.Domain.Tests\Bing.Ddd.Domain.Tests.csproj", "{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logging", "framework\src\Bing.Logging\Bing.Logging.csproj", "{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging", "framework\src\Bing.Logging\Bing.Logging.csproj", "{ECB340A3-A21C-460D-8EBC-09EA5FB8731C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logging.Sinks.Exceptionless", "framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj", "{04EB5533-6885-4292-BED1-4D06A5E162D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Sinks.Exceptionless", "framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj", "{04EB5533-6885-4292-BED1-4D06A5E162D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logging.Serilog", "framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj", "{9E817B3A-BA88-42A4-A7D7-C4C935889BC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -522,6 +524,10 @@ Global
 		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04EB5533-6885-4292-BED1-4D06A5E162D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E817B3A-BA88-42A4-A7D7-C4C935889BC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E817B3A-BA88-42A4-A7D7-C4C935889BC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E817B3A-BA88-42A4-A7D7-C4C935889BC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E817B3A-BA88-42A4-A7D7-C4C935889BC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -624,6 +630,7 @@ Global
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{ECB340A3-A21C-460D-8EBC-09EA5FB8731C} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
 		{04EB5533-6885-4292-BED1-4D06A5E162D1} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
+		{9E817B3A-BA88-42A4-A7D7-C4C935889BC5} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Bing.Logging
 {
@@ -10,22 +11,36 @@ namespace Bing.Logging
         /// <summary>
         /// 初始化一个<see cref="LogContext"/>类型的实例
         /// </summary>
-        /// <param name="stopwatch">计时器</param>
-        /// <param name="traceId">跟踪标识</param>
-        public LogContext(Stopwatch stopwatch, string traceId)
-        {
-            Stopwatch = stopwatch;
-            TraceId = traceId;
-        }
+        public LogContext() => Data = new Dictionary<string, object>();
 
         /// <summary>
         /// 计时器
         /// </summary>
-        public Stopwatch Stopwatch { get; }
+        public Stopwatch Stopwatch { get; set; }
 
         /// <summary>
         /// 跟踪标识
         /// </summary>
-        public string TraceId { get; }
+        public string TraceId { get; set; }
+
+        /// <summary>
+        /// 用户标识
+        /// </summary>
+        public string UserId { get; set; }
+
+        /// <summary>
+        /// 应用程序
+        /// </summary>
+        public string Application { get; set; }
+
+        /// <summary>
+        /// 执行环境
+        /// </summary>
+        public string Environment { get; set; }
+
+        /// <summary>
+        /// 扩展数据
+        /// </summary>
+        public IDictionary<string, object> Data { get; }
     }
 }

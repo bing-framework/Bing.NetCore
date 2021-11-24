@@ -93,7 +93,7 @@ namespace Bing.Logging
                 return this;
             if (LogProperties.ContainsKey(propertyName))
             {
-                LogProperties[propertyName] = LogProperties[propertyName] + propertyValue;
+                LogProperties[propertyName] += propertyValue;
                 return this;
             }
 
@@ -296,7 +296,7 @@ namespace Bing.Logging
             {
                 result.Append(item.Key);
                 result.Append(":{");
-                result.Append(item.Value);
+                result.Append(item.Key);
                 result.Append("},");
             }
 
