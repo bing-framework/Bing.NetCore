@@ -9,7 +9,6 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Test.Integration.Samples;
 using Bing.Data.Test.Integration.Sql.Builders.Samples;
 using Bing.Data.Test.Integration.XUnitHelpers;
-using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
