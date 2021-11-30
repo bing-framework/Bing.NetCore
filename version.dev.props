@@ -2,5 +2,6 @@
   <PropertyGroup>
     <!-- All Microsoft packages -->
     <MicrosoftPackageVersion>3.1.*</MicrosoftPackageVersion>
+    <BingUtilsPackageVersion>1.2.5</BingUtilsPackageVersion>
   </PropertyGroup>
 </Project>

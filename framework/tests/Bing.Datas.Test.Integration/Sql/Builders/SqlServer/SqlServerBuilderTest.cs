@@ -6,7 +6,6 @@ using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Test.Integration.Samples;
 using Bing.Data.Test.Integration.XUnitHelpers;
 using Bing.Properties;
-using Bing.Utils.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 using Str = Bing.Helpers.Str;
