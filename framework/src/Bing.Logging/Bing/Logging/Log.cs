@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Bing.Extensions;
+using Bing.Helpers;
 using Bing.Text;
 using Microsoft.Extensions.Logging;
 
@@ -275,11 +276,14 @@ namespace Bing.Logging
         /// </summary>
         protected virtual void ConvertStateToContent()
         {
-            // TODO:此处需要将对象转换成字典的方式，键值对
-            if (LogState is IDictionary<string, object> state)
+            if (LogState == null)
+                return;
+            var state = Conv.ToDictionary(LogState);
+            foreach (var item in state) 
             {
-                foreach (var item in state)
-                    LogProperties.Add(item);
+                if(item.Value.SafeString().IsEmpty())
+                    continue;
+                LogProperties.Add(item);
             }
         }
 
