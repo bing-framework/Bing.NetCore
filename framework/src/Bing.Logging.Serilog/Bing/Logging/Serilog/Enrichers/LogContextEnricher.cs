@@ -1,4 +1,5 @@
-﻿using Bing.Extensions;
+﻿using Bing.DependencyInjection;
+using Bing.Extensions;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -15,29 +16,18 @@ namespace Bing.Logging.Serilog.Enrichers
         private LogContext _context;
 
         /// <summary>
-        /// 日志上下文访问器
-        /// </summary>
-        private readonly ILogContextAccessor _logContextAccessor;
-
-        /// <summary>
-        /// 初始化一个 <see cref="LogContextEnricher"/>类型的实例
-        /// </summary>
-        /// <param name="logContextAccessor">日志上下文访问器</param>
-        public LogContextEnricher(ILogContextAccessor logContextAccessor)
-        {
-            _logContextAccessor = logContextAccessor;
-        }
-
-        /// <summary>
         /// 扩展属性
         /// </summary>
         /// <param name="logEvent">日志事件</param>
         /// <param name="propertyFactory">日志事件属性工厂</param>
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            if (_logContextAccessor == null)
+            if (!ServiceLocator.Instance.IsProviderEnabled)
                 return;
-            _context = _logContextAccessor.Context;
+            var accessor = ServiceLocator.Instance.GetService<ILogContextAccessor>();
+            if (accessor == null)
+                return;
+            _context = accessor.Context;
             if (_context == null)
                 return;
             AddDuration(logEvent, propertyFactory);

@@ -1,4 +1,5 @@
 ﻿using System;
+using Bing.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Logging
@@ -7,7 +8,7 @@ namespace Bing.Logging
     /// 日志操作
     /// </summary>
     /// <typeparam name="TCategoryName">日志类别</typeparam>
-    public interface ILog<out TCategoryName>
+    public interface ILog<out TCategoryName> : ITransientDependency
     {
         /// <summary>
         /// 设置日志事件标识
@@ -74,7 +75,7 @@ namespace Bing.Logging
         /// 写警告日志
         /// </summary>
         ILog<TCategoryName> LogWarning();
-        
+
         /// <summary>
         /// 写错误日志
         /// </summary>
