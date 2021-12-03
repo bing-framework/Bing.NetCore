@@ -81,8 +81,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找
         /// </summary>
-        /// <param name="criteria">查询条件</param>
-        public IQueryable<EntitySample> Find(ICriteria<EntitySample> criteria)
+        /// <param name="condition">查询条件</param>
+        public IQueryable<EntitySample> Find(ICondition<EntitySample> condition)
         {
             throw new NotImplementedException();
         }
@@ -90,8 +90,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public IQueryable<EntitySample> Find(Expression<Func<EntitySample, bool>> predicate)
+        /// <param name="condition">查询条件</param>
+        public IQueryable<EntitySample> Find(Expression<Func<EntitySample, bool>> condition)
         {
             throw new NotImplementedException();
         }
@@ -247,8 +247,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找单个实体
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public EntitySample Single(Expression<Func<EntitySample, bool>> predicate)
+        /// <param name="condition">查询条件</param>
+        public EntitySample Single(Expression<Func<EntitySample, bool>> condition)
         {
             throw new NotImplementedException();
         }
@@ -256,9 +256,9 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找单个实体
         /// </summary>
-        /// <param name="predicate">查询条件</param>
+        /// <param name="condition">查询条件</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public async Task<EntitySample> SingleAsync(Expression<Func<EntitySample, bool>> predicate, CancellationToken cancellationToken = default)
+        public async Task<EntitySample> SingleAsync(Expression<Func<EntitySample, bool>> condition, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -266,8 +266,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找实体列表
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public List<EntitySample> FindAll(Expression<Func<EntitySample, bool>> predicate = null)
+        /// <param name="condition">查询条件</param>
+        public List<EntitySample> FindAll(Expression<Func<EntitySample, bool>> condition = null)
         {
             throw new NotImplementedException();
         }
@@ -275,8 +275,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找实体列表
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public async Task<List<EntitySample>> FindAllAsync(Expression<Func<EntitySample, bool>> predicate = null)
+        /// <param name="condition">查询条件</param>
+        public async Task<List<EntitySample>> FindAllAsync(Expression<Func<EntitySample, bool>> condition = null)
         {
             throw new NotImplementedException();
         }
@@ -284,8 +284,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找实体列表，不跟踪
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public List<EntitySample> FindAllNoTracking(Expression<Func<EntitySample, bool>> predicate = null)
+        /// <param name="condition">查询条件</param>
+        public List<EntitySample> FindAllNoTracking(Expression<Func<EntitySample, bool>> condition = null)
         {
             throw new NotImplementedException();
         }
@@ -293,8 +293,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找实体列表，不跟踪
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public async Task<List<EntitySample>> FindAllNoTrackingAsync(Expression<Func<EntitySample, bool>> predicate = null)
+        /// <param name="condition">查询条件</param>
+        public async Task<List<EntitySample>> FindAllNoTrackingAsync(Expression<Func<EntitySample, bool>> condition = null)
         {
             throw new NotImplementedException();
         }
@@ -338,8 +338,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 判断是否存在
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public bool Exists(Expression<Func<EntitySample, bool>> predicate)
+        /// <param name="condition">查询条件</param>
+        public bool Exists(Expression<Func<EntitySample, bool>> condition)
         {
             throw new NotImplementedException();
         }
@@ -347,8 +347,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 判断是否存在
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public async Task<bool> ExistsAsync(Expression<Func<EntitySample, bool>> predicate)
+        /// <param name="condition">查询条件</param>
+        public async Task<bool> ExistsAsync(Expression<Func<EntitySample, bool>> condition)
         {
             throw new NotImplementedException();
         }
@@ -356,8 +356,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找数量
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public int Count(Expression<Func<EntitySample, bool>> predicate = null)
+        /// <param name="condition">查询条件</param>
+        public int Count(Expression<Func<EntitySample, bool>> condition = null)
         {
             throw new NotImplementedException();
         }
@@ -365,8 +365,8 @@ namespace Bing.Tests.Samples
         /// <summary>
         /// 查找数量
         /// </summary>
-        /// <param name="predicate">查询条件</param>
-        public async Task<int> CountAsync(Expression<Func<EntitySample, bool>> predicate = null)
+        /// <param name="condition">查询条件</param>
+        public async Task<int> CountAsync(Expression<Func<EntitySample, bool>> condition = null)
         {
             throw new NotImplementedException();
         }

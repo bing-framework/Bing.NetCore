@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using Bing.Expressions;
 
-namespace Bing.Data.Queries.Criterias
+namespace Bing.Data.Queries.Conditions
 {
     /// <summary>
     /// 范围过滤条件
@@ -10,7 +10,9 @@ namespace Bing.Data.Queries.Criterias
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TProperty">属性类型</typeparam>
     /// <typeparam name="TValue">值类型</typeparam>
-    public abstract class SegmentCriteriaBase<TEntity, TProperty, TValue> : ICriteria<TEntity> where TEntity : class where TValue : struct
+    public abstract class SegmentConditionBase<TEntity, TProperty, TValue> : ICondition<TEntity> 
+        where TEntity : class 
+        where TValue : struct
     {
         /// <summary>
         /// 属性表达式
@@ -38,13 +40,13 @@ namespace Bing.Data.Queries.Criterias
         private readonly Boundary _boundary;
 
         /// <summary>
-        /// 初始化一个<see cref="SegmentCriteriaBase{TEntity,TProperty,TValue}"/>类型的实例
+        /// 初始化一个<see cref="SegmentConditionBase{TEntity,TProperty,TValue}"/>类型的实例
         /// </summary>
         /// <param name="propertyExpression">属性表达式</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界</param>
-        protected SegmentCriteriaBase(Expression<Func<TEntity, TProperty>> propertyExpression
+        protected SegmentConditionBase(Expression<Func<TEntity, TProperty>> propertyExpression
             , TValue? min
             , TValue? max
             , Boundary boundary)
@@ -62,9 +64,14 @@ namespace Bing.Data.Queries.Criterias
         protected Type GetPropertyType() => Lambdas.GetType(_propertyExpression);
 
         /// <summary>
+        /// 获取边界
+        /// </summary>
+        protected Boundary GetBoundary() => _boundary;
+
+        /// <summary>
         /// 获取查询条件
         /// </summary>
-        public Expression<Func<TEntity, bool>> GetPredicate()
+        public Expression<Func<TEntity, bool>> GetCondition()
         {
             _builder.Clear();
             Adjust(_min, _max);

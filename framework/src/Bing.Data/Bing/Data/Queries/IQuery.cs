@@ -27,9 +27,9 @@ namespace Bing.Data.Queries
         /// <summary>
         /// 添加查询条件
         /// </summary>
-        /// <param name="criteria">查询条件</param>
+        /// <param name="condition">查询条件</param>
         /// <returns></returns>
-        IQuery<TEntity, TKey> Where(ICriteria<TEntity> criteria);
+        IQuery<TEntity, TKey> Where(ICondition<TEntity> condition);
 
         /// <summary>
         /// 添加查询条件

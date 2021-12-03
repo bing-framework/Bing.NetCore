@@ -47,8 +47,8 @@ namespace Bing.Properties {
         }
         
         /// <summary>
-        ///   重写当前线程的 CurrentUICulture 属性
-        ///   重写当前线程的 CurrentUICulture 属性。
+        ///   重写当前线程的 CurrentUICulture 属性，对
+        ///   使用此强类型资源类的所有资源查找执行重写。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         public static global::System.Globalization.CultureInfo Culture {
@@ -61,11 +61,38 @@ namespace Bing.Properties {
         }
         
         /// <summary>
+        ///   查找类似 仅允许添加一个条件，条件：{0} 的本地化字符串。
+        /// </summary>
+        public static string CanOnlyOneCondition {
+            get {
+                return ResourceManager.GetString("CanOnlyOneCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 当前操作的数据已被其他人修改，请刷新后重试 的本地化字符串。
         /// </summary>
         public static string ConcurrencyExceptionMessage {
             get {
                 return ResourceManager.GetString("ConcurrencyExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 其他用户正在执行该操作，请稍后再试 的本地化字符串。
+        /// </summary>
+        public static string GlobalDuplicateRequest {
+            get {
+                return ResourceManager.GetString("GlobalDuplicateRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 标识不能为空 的本地化字符串。
+        /// </summary>
+        public static string IdIsEmpty {
+            get {
+                return ResourceManager.GetString("IdIsEmpty", resourceCulture);
             }
         }
         
@@ -97,15 +124,6 @@ namespace Bing.Properties {
         }
         
         /// <summary>
-        ///   查找类似 仅允许添加一个条件,条件：{0} 的本地化字符串。
-        /// </summary>
-        public static string OnlyOnePredicate {
-            get {
-                return ResourceManager.GetString("OnlyOnePredicate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 分页必须设置排序字段 的本地化字符串。
         /// </summary>
         public static string OrderIsEmptyForPage {
@@ -120,6 +138,24 @@ namespace Bing.Properties {
         public static string TableIsEmpty {
             get {
                 return ResourceManager.GetString("TableIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 类型{0}不是枚举 的本地化字符串。
+        /// </summary>
+        public static string TypeNotEnum {
+            get {
+                return ResourceManager.GetString("TypeNotEnum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 请不要重复提交 的本地化字符串。
+        /// </summary>
+        public static string UserDuplicateRequest {
+            get {
+                return ResourceManager.GetString("UserDuplicateRequest", resourceCulture);
             }
         }
     }
