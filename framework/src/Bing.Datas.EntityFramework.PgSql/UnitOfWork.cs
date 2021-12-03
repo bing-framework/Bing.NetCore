@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Bing.Datas.EntityFramework.PgSql
 {
@@ -26,25 +25,5 @@ namespace Bing.Datas.EntityFramework.PgSql
         /// </summary>
         /// <param name="assembly">程序集</param>
         protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
-
-        /// <summary>
-        /// 拦截添加操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected override void InterceptAddedOperation(EntityEntry entry)
-        {
-            base.InterceptAddedOperation(entry);
-            InitVersion(entry);
-        }
-
-        /// <summary>
-        /// 拦截修改操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected override void InterceptModifiedOperation(EntityEntry entry)
-        {
-            base.InterceptModifiedOperation(entry);
-            InitVersion(entry);
-        }
     }
 }
