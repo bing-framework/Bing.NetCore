@@ -46,7 +46,6 @@ namespace Bing.AspNetCore.Tracing
         {
             var correlationId = _correlationIdProvider.Get();
             TraceIdContext.Current ??= new TraceIdContext(correlationId);
-            CheckAndSetCorrelationIdOnResponse(context, _options, correlationId);
             try
             {
                 await _next(context);

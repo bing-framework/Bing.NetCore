@@ -1,4 +1,6 @@
-﻿using Bing.Helpers;
+﻿using System;
+using Bing.Helpers;
+using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Http
 {
@@ -10,7 +12,7 @@ namespace Microsoft.AspNetCore.Http
         /// <summary>
         /// 请求头：X-Requested-With
         /// </summary>
-        private const string RequestedWithHeader = "X-Requested-With";
+        private const string XRequestedWith = "X-Requested-With";
 
         /// <summary>
         /// 请求头值：XMLHttpRequest
@@ -26,7 +28,8 @@ namespace Microsoft.AspNetCore.Http
             Check.NotNull(request, nameof(request));
             if (request.Headers == null)
                 return false;
-            return request.Headers[RequestedWithHeader] == XmlHttpRequest;
+            return string.Equals(request.Query[XRequestedWith], XmlHttpRequest, StringComparison.Ordinal) ||
+                   string.Equals(request.Headers[XRequestedWith], XmlHttpRequest, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -38,7 +41,11 @@ namespace Microsoft.AspNetCore.Http
         {
             Check.NotNull(request, nameof(request));
             Check.NotNull(contentType, nameof(contentType));
-            return request.Headers["Accept"].ToString().Contains(contentType);
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || NET5_0
+            return request.Headers[HeaderNames.Accept].ToString().Contains(contentType, StringComparison.OrdinalIgnoreCase);
+#elif NETSTANDARD2_0
+            return request.Headers[HeaderNames.Accept].ToString().Contains(contentType);
+#endif
         }
     }
 }
