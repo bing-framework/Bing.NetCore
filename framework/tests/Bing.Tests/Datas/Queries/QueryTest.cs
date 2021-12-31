@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Text;
 using Bing.Data.Queries;
-using Bing.Data.Queries.Criterias;
+using Bing.Data.Queries.Conditions;
 using Bing.Extensions;
 using Bing.Properties;
 using Bing.Tests.Samples;
@@ -56,18 +56,18 @@ namespace Bing.Tests.Datas.Queries
         public void Test_Where()
         {
             _query.Where(t => t.Name == "A");
-            Assert.Equal("t => (t.Name == \"A\")", _query.GetPredicate().SafeString());
+            Assert.Equal("t => (t.Name == \"A\")", _query.GetCondition().SafeString());
 
             _query.Where(t => t.Tel == 1);
-            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetPredicate().SafeString());
+            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetCondition().SafeString());
 
             _query = new Query<AggregateRootSample>();
             _query.Where(t => t.Name == "A" && t.Tel == 1);
-            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetPredicate().SafeString());
+            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetCondition().SafeString());
 
             _query = new Query<AggregateRootSample>();
             _query.Where(t => t.Name == "");
-            Assert.NotNull(_query.GetPredicate());
+            Assert.NotNull(_query.GetCondition());
         }
 
         /// <summary>
@@ -76,12 +76,12 @@ namespace Bing.Tests.Datas.Queries
         [Fact]
         public void Test_Where_Criteria()
         {
-            _query.Where(new CriteriaSample());
-            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetPredicate().ToString());
+            _query.Where(new ConditionSample());
+            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetCondition().ToString());
 
             _query = new Query<AggregateRootSample>();
-            _query.Where(new DefaultCriteria<AggregateRootSample>(t => t.Name == null));
-            Assert.NotNull(_query.GetPredicate());
+            _query.Where(new DefaultCondition<AggregateRootSample>(t => t.Name == null));
+            Assert.NotNull(_query.GetCondition());
         }
 
         /// <summary>
@@ -91,10 +91,10 @@ namespace Bing.Tests.Datas.Queries
         public void Test_WhereIf_False()
         {
             _query.WhereIf(t => t.Name == "A", false);
-            Assert.Null(_query.GetPredicate());
+            Assert.Null(_query.GetCondition());
 
             _query.WhereIf(t => t.Name == "A", true);
-            Assert.Equal("t => (t.Name == \"A\")", _query.GetPredicate().SafeString());
+            Assert.Equal("t => (t.Name == \"A\")", _query.GetCondition().SafeString());
         }
 
         /// <summary>
@@ -104,16 +104,16 @@ namespace Bing.Tests.Datas.Queries
         public void Test_WhereIfNotEmpty()
         {
             _query.WhereIfNotEmpty(t => t.Name == "");
-            Assert.Null(_query.GetPredicate());
+            Assert.Null(_query.GetCondition());
 
             _query.WhereIfNotEmpty(t => t.Name == null);
-            Assert.Null(_query.GetPredicate());
+            Assert.Null(_query.GetCondition());
 
             _query.WhereIfNotEmpty(t => t.Name == "A");
-            Assert.Equal("t => (t.Name == \"A\")", _query.GetPredicate().ToString());
+            Assert.Equal("t => (t.Name == \"A\")", _query.GetCondition().ToString());
 
             _query.WhereIfNotEmpty(d => d.Tel == 1);
-            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Bing.Tests.Datas.Queries
             AssertHelper.Throws<InvalidOperationException>(() =>
             {
                 _query.WhereIfNotEmpty(t => t.Name == "A" && t.Tel == 1);
-            }, string.Format(LibraryResource.OnlyOnePredicate, "t => ((t.Name == \"A\") AndAlso (t.Tel == 1))"));
+            }, string.Format(LibraryResource.CanOnlyOneCondition, "t => ((t.Name == \"A\") AndAlso (t.Tel == 1))"));
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Bing.Tests.Datas.Queries
         public void Test_Between_Int()
         {
             _query.Between(t => t.Tel, 1, 10, Boundary.Left);
-            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel < 10))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel < 10))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Bing.Tests.Datas.Queries
         public void Test_Between_Double()
         {
             _query.Between(t => t.DoubleValue, 1.1, 10.1, Boundary.Right);
-            Assert.Equal("t => ((t.DoubleValue > 1.1) AndAlso (t.DoubleValue <= 10.1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.DoubleValue > 1.1) AndAlso (t.DoubleValue <= 10.1))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Bing.Tests.Datas.Queries
         public void Test_Between_Decimal()
         {
             _query.Between(t => t.DecimalValue, 1.1M, 10.1M, Boundary.Neither);
-            Assert.Equal("t => ((t.DecimalValue > 1.1) AndAlso (t.DecimalValue < 10.1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.DecimalValue > 1.1) AndAlso (t.DecimalValue < 10.1))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Bing.Tests.Datas.Queries
             result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
 
             _query.Between(t => t.DateValue, min, max, false);
-            Assert.Equal(result.ToString(), _query.GetPredicate().ToString());
+            Assert.Equal(result.ToString(), _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Bing.Tests.Datas.Queries
             result.Append(" AndAlso (t.DateValue <= Convert(Parse(\"2000/1/2 10:10:10\"), DateTime)))");
 
             _query.Between(t => t.DateValue, min, max);
-            Assert.Equal(result.ToString(), _query.GetPredicate().ToString());
+            Assert.Equal(result.ToString(), _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -216,10 +216,10 @@ namespace Bing.Tests.Datas.Queries
             Expression<Func<AggregateRootSample, bool>> expression = null;
             _query.And(expression);
             _query.And(t => t.Name == "A");
-            Assert.Equal("t => (t.Name == \"A\")", _query.GetPredicate().ToString());
+            Assert.Equal("t => (t.Name == \"A\")", _query.GetCondition().ToString());
 
             _query.And(t => t.Tel == 1);
-            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -232,14 +232,14 @@ namespace Bing.Tests.Datas.Queries
             query.Where(t => t.Name == "A");
             query.OrderBy(t => t.Name);
             _query.And(query);
-            Assert.Equal("t => (t.Name == \"A\")", _query.GetPredicate().ToString());
+            Assert.Equal("t => (t.Name == \"A\")", _query.GetCondition().ToString());
             Assert.Equal("Name", _query.GetOrder());
 
             query = new Query<AggregateRootSample>();
             query.Where(t => t.Tel == 1);
             query.OrderBy(t => t.Tel, true);
             _query.And(query);
-            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.Name == \"A\") AndAlso (t.Tel == 1))", _query.GetCondition().ToString());
             Assert.Equal("Name,Tel desc", _query.GetOrder());
         }
 
@@ -256,7 +256,7 @@ namespace Bing.Tests.Datas.Queries
             var query = new Query<AggregateRootSample>();
             query.Where(t => t.Tel == 1);
             _query.Or(query);
-            Assert.Equal("t => ((t.Name == \"A\") OrElse (t.Tel == 1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.Name == \"A\") OrElse (t.Tel == 1))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Bing.Tests.Datas.Queries
         public void Test_Or_2()
         {
             _query.Or(t => t.Name == "A", t => t.Name == "", t => t.Tel == 1);
-            Assert.Equal("t => ((t.Name == \"A\") OrElse (t.Tel == 1))", _query.GetPredicate().ToString());
+            Assert.Equal("t => ((t.Name == \"A\") OrElse (t.Tel == 1))", _query.GetCondition().ToString());
         }
 
         /// <summary>
@@ -293,7 +293,7 @@ namespace Bing.Tests.Datas.Queries
 
             Expression<Func<AggregateRootSample, bool>> expected = t => ((t.Name == "A" && t.EnglishName == "A")
                 || (t.Name == "B" && t.Age == 1)) && (t.Name == "C" && t.Age > 10);
-            Assert.Equal(expected.ToString(), _query.GetPredicate().ToString());
+            Assert.Equal(expected.ToString(), _query.GetCondition().ToString());
             Assert.Equal("Name,Age desc,Tel", _query.GetOrder());
         }
     }

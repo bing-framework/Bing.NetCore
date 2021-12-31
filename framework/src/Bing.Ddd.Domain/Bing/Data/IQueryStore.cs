@@ -42,7 +42,7 @@ namespace Bing.Data
         /// 查找
         /// </summary>
         /// <param name="criteria">查询条件</param>
-        IQueryable<TEntity> Find(ICriteria<TEntity> criteria);
+        IQueryable<TEntity> Find(ICondition<TEntity> criteria);
 
         /// <summary>
         /// 查找

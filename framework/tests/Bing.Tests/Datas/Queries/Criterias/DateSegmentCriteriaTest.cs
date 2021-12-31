@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using Bing.Data.Queries;
-using Bing.Data.Queries.Criterias;
+using Bing.Data.Queries.Conditions;
 using Bing.Tests.Samples;
 using Xunit;
 using Xunit.Abstractions;
@@ -47,16 +47,16 @@ namespace Bing.Tests.Datas.Queries.Criterias
             var result = new StringBuilder();
             result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), DateTime))");
             result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
-            var criteria = new DateSegmentCriteria<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max);
-            _output.WriteLine(criteria.GetPredicate().ToString());
-            Assert.Equal(result.ToString(), criteria.GetPredicate().ToString());
+            var criteria = new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Both);
+            _output.WriteLine(criteria.GetCondition().ToString());
+            Assert.Equal(result.ToString(), criteria.GetCondition().ToString());
 
             result = new StringBuilder();
             result.Append("t => ((t.NullableDateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), Nullable`1))");
             result.Append(" AndAlso (t.NullableDateValue < Convert(Parse(\"2000/1/3 0:00:00\"), Nullable`1)))");
-            var criteria2 = new DateSegmentCriteria<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max);
-            _output.WriteLine(criteria2.GetPredicate().ToString());
-            Assert.Equal(result.ToString(), criteria2.GetPredicate().ToString());
+            var criteria2 = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Both);
+            _output.WriteLine(criteria2.GetCondition().ToString());
+            Assert.Equal(result.ToString(), criteria2.GetCondition().ToString());
         }
 
         /// <summary>
@@ -68,26 +68,26 @@ namespace Bing.Tests.Datas.Queries.Criterias
             var result = new StringBuilder();
             result.Append("t => ((t.DateValue > Convert(Parse(\"2000/1/1 0:00:00\"), DateTime))");
             result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
-            var criteria = new DateSegmentCriteria<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Neither);
-            Assert.Equal(result.ToString(), criteria.GetPredicate().ToString());
+            var criteria = new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Neither);
+            Assert.Equal(result.ToString(), criteria.GetCondition().ToString());
 
             result = new StringBuilder();
             result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), DateTime))");
             result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
-            criteria = new DateSegmentCriteria<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Left);
-            Assert.Equal(result.ToString(), criteria.GetPredicate().ToString());
+            criteria = new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Left);
+            Assert.Equal(result.ToString(), criteria.GetCondition().ToString());
 
             result = new StringBuilder();
             result.Append("t => ((t.NullableDateValue > Convert(Parse(\"2000/1/1 0:00:00\"), Nullable`1))");
             result.Append(" AndAlso (t.NullableDateValue <= Convert(Parse(\"2000/1/3 0:00:00\"), Nullable`1)))");
-            var criteria2 = new DateSegmentCriteria<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Right);
-            Assert.Equal(result.ToString(), criteria2.GetPredicate().ToString());
+            var criteria2 = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Right);
+            Assert.Equal(result.ToString(), criteria2.GetCondition().ToString());
 
             result = new StringBuilder();
             result.Append("t => ((t.NullableDateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), Nullable`1))");
             result.Append(" AndAlso (t.NullableDateValue <= Convert(Parse(\"2000/1/3 0:00:00\"), Nullable`1)))");
-            criteria2 = new DateSegmentCriteria<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Both);
-            Assert.Equal(result.ToString(), criteria2.GetPredicate().ToString());
+            criteria2 = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Both);
+            Assert.Equal(result.ToString(), criteria2.GetCondition().ToString());
         }
     }
 }

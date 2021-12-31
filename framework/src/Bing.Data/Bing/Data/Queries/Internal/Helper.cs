@@ -25,7 +25,7 @@ namespace Bing.Data.Queries.Internal
             if (predicate == null)
                 return null;
             if (Lambdas.GetConditionCount(predicate) > 1)
-                throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, predicate));
+                throw new InvalidOperationException(string.Format(LibraryResource.CanOnlyOneCondition, predicate));
             var value = predicate.Value();
             if (string.IsNullOrWhiteSpace(value.SafeString()))
                 return null;

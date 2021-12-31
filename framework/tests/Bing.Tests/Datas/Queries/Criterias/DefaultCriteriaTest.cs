@@ -1,4 +1,4 @@
-﻿using Bing.Data.Queries.Criterias;
+﻿using Bing.Data.Queries.Conditions;
 using Bing.Tests.Samples;
 using Xunit;
 
@@ -15,8 +15,8 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_GetPredicate()
         {
-            var criteria = new DefaultCriteria<AggregateRootSample>(t => t.Name == "a");
-            Assert.Equal("t => (t.Name == \"a\")", criteria.GetPredicate().ToString());
+            var criteria = new DefaultCondition<AggregateRootSample>(t => t.Name == "a");
+            Assert.Equal("t => (t.Name == \"a\")", criteria.GetCondition().ToString());
         }
     }
 }

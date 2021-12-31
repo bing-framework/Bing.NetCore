@@ -105,7 +105,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 查找
         /// </summary>
         /// <param name="criteria">查询条件</param>
-        public IQueryable<TEntity> Find(ICriteria<TEntity> criteria) => Set.Where(criteria);
+        public IQueryable<TEntity> Find(ICondition<TEntity> criteria) => Set.Where(criteria);
 
         /// <summary>
         /// 查找

@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Net.Compilers" Version="2.*" Condition=" '$(OS)' == 'Windows_NT' ">
+    <!--<PackageReference Include="Microsoft.Net.Compilers" Version="2.*" Condition=" '$(OS)' == 'Windows_NT' ">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    </PackageReference>-->
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.*" />
     <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.*" />

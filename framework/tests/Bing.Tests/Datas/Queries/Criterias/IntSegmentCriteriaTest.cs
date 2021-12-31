@@ -1,5 +1,5 @@
 ﻿using Bing.Data.Queries;
-using Bing.Data.Queries.Criterias;
+using Bing.Data.Queries.Conditions;
 using Bing.Tests.Samples;
 using Xunit;
 
@@ -16,11 +16,11 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_GetPredicate()
         {
-            IntSegmentCriteria<AggregateRootSample, int> criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, 1, 10);
-            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel <= 10))", criteria.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int> condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, 1, 10);
+            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel <= 10))", condition.GetCondition().ToString());
 
-            IntSegmentCriteria<AggregateRootSample, int?> criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, 1, 10);
-            Assert.Equal("t => ((t.Age >= 1) AndAlso (t.Age <= 10))", criteria2.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int?> criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, 1, 10);
+            Assert.Equal("t => ((t.Age >= 1) AndAlso (t.Age <= 10))", criteria2.GetCondition().ToString());
         }
 
         /// <summary>
@@ -29,17 +29,17 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_GetPredicate_Boundary()
         {
-            IntSegmentCriteria<AggregateRootSample, int> criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, 1, 10, Boundary.Neither);
-            Assert.Equal("t => ((t.Tel > 1) AndAlso (t.Tel < 10))", criteria.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int> condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, 1, 10, Boundary.Neither);
+            Assert.Equal("t => ((t.Tel > 1) AndAlso (t.Tel < 10))", condition.GetCondition().ToString());
 
-            criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, 1, 10, Boundary.Left);
-            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel < 10))", criteria.GetPredicate().ToString());
+            condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, 1, 10, Boundary.Left);
+            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel < 10))", condition.GetCondition().ToString());
 
-            IntSegmentCriteria<AggregateRootSample, int?> criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, 1, 10, Boundary.Right);
-            Assert.Equal("t => ((t.Age > 1) AndAlso (t.Age <= 10))", criteria2.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int?> criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, 1, 10, Boundary.Right);
+            Assert.Equal("t => ((t.Age > 1) AndAlso (t.Age <= 10))", criteria2.GetCondition().ToString());
 
-            criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, 1, 10, Boundary.Both);
-            Assert.Equal("t => ((t.Age >= 1) AndAlso (t.Age <= 10))", criteria2.GetPredicate().ToString());
+            criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, 1, 10, Boundary.Both);
+            Assert.Equal("t => ((t.Age >= 1) AndAlso (t.Age <= 10))", criteria2.GetCondition().ToString());
         }
 
         /// <summary>
@@ -48,11 +48,11 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_GetPredicate_MinGreaterMax()
         {
-            IntSegmentCriteria<AggregateRootSample, int> criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, 10, 1);
-            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel <= 10))", criteria.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int> condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, 10, 1);
+            Assert.Equal("t => ((t.Tel >= 1) AndAlso (t.Tel <= 10))", condition.GetCondition().ToString());
 
-            IntSegmentCriteria<AggregateRootSample, int?> criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, 10, 1);
-            Assert.Equal("t => ((t.Age >= 1) AndAlso (t.Age <= 10))", criteria2.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int?> criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, 10, 1);
+            Assert.Equal("t => ((t.Age >= 1) AndAlso (t.Age <= 10))", criteria2.GetCondition().ToString());
         }
 
         /// <summary>
@@ -61,11 +61,11 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_GetPredicate_MinIsNull()
         {
-            IntSegmentCriteria<AggregateRootSample, int> criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, null, 10);
-            Assert.Equal("t => (t.Tel <= 10)", criteria.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int> condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, null, 10);
+            Assert.Equal("t => (t.Tel <= 10)", condition.GetCondition().ToString());
 
-            IntSegmentCriteria<AggregateRootSample, int?> criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, null, 10);
-            Assert.Equal("t => (t.Age <= 10)", criteria2.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int?> criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, null, 10);
+            Assert.Equal("t => (t.Age <= 10)", criteria2.GetCondition().ToString());
         }
 
         /// <summary>
@@ -74,11 +74,11 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_GetPredicate_MaxIsNull()
         {
-            IntSegmentCriteria<AggregateRootSample, int> criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, 1, null);
-            Assert.Equal("t => (t.Tel >= 1)", criteria.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int> condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, 1, null);
+            Assert.Equal("t => (t.Tel >= 1)", condition.GetCondition().ToString());
 
-            IntSegmentCriteria<AggregateRootSample, int?> criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, 1, null);
-            Assert.Equal("t => (t.Age >= 1)", criteria2.GetPredicate().ToString());
+            IntSegmentCondition<AggregateRootSample, int?> criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, 1, null);
+            Assert.Equal("t => (t.Age >= 1)", criteria2.GetCondition().ToString());
         }
 
         /// <summary>
@@ -87,11 +87,11 @@ namespace Bing.Tests.Datas.Queries.Criterias
         [Fact]
         public void Test_BothNull()
         {
-            IntSegmentCriteria<AggregateRootSample, int> criteria = new IntSegmentCriteria<AggregateRootSample, int>(t => t.Tel, null, null);
-            Assert.Null(criteria.GetPredicate());
+            IntSegmentCondition<AggregateRootSample, int> condition = new IntSegmentCondition<AggregateRootSample, int>(t => t.Tel, null, null);
+            Assert.Null(condition.GetCondition());
 
-            IntSegmentCriteria<AggregateRootSample, int?> criteria2 = new IntSegmentCriteria<AggregateRootSample, int?>(t => t.Age, null, null);
-            Assert.Null(criteria2.GetPredicate());
+            IntSegmentCondition<AggregateRootSample, int?> criteria2 = new IntSegmentCondition<AggregateRootSample, int?>(t => t.Age, null, null);
+            Assert.Null(criteria2.GetCondition());
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.AspNetCore.Uploads.Params;
-using Bing.Utils.Files;
+using Bing.IO;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.AspNetCore.Uploads
@@ -17,14 +17,14 @@ namespace Bing.AspNetCore.Uploads
         /// </summary>
         /// <param name="param">参数</param>
         /// <param name="cancellationToken">取消令牌</param>
-        Task<FileInfo> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
+        Task<FileDescriptor> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// 上传文件。多文件
         /// </summary>
         /// <param name="param">参数</param>
         /// <param name="cancellationToken">取消令牌</param>
-        Task<IEnumerable<FileInfo>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<FileDescriptor>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// 保存文件

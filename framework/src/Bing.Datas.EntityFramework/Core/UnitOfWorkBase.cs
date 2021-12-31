@@ -26,7 +26,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -122,6 +121,24 @@ namespace Bing.Datas.EntityFramework.Core
             if (result == null)
                 return default;
             return (T)result;
+        }
+
+        #endregion
+
+        #region 辅助操作
+
+        /// <summary>
+        /// 获取用户标识
+        /// </summary>
+        protected virtual string GetUserId() => CurrentUser.UserId;
+
+        /// <summary>
+        /// 获取用户名称
+        /// </summary>
+        protected virtual string GetUserName()
+        {
+            var name = CurrentUser.GetFullName();
+            return string.IsNullOrEmpty(name) ? CurrentUser.GetUserName() : name;
         }
 
         #endregion
@@ -282,9 +299,6 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
-                //var changed = ChangeTracker.Entries().Any();
-                //if (!changed)
-                //    return 0;
                 return SaveChanges();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -304,9 +318,6 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
-                //var changed = ChangeTracker.Entries().Any();
-                //if (!changed)
-                //    return 0;
                 return await SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -328,81 +339,9 @@ namespace Bing.Datas.EntityFramework.Core
             return base.SaveChanges();
         }
 
-        /// <summary>
-        /// 保存更改前操作
-        /// </summary>
-        protected virtual void SaveChangesBefore()
-        {
-            foreach (var entry in ChangeTracker.Entries())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        InterceptAddedOperation(entry);
-                        break;
-
-                    case EntityState.Modified:
-                        InterceptModifiedOperation(entry);
-                        break;
-
-                    case EntityState.Deleted:
-                        InterceptDeletedOperation(entry);
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 拦截添加操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected virtual void InterceptAddedOperation(EntityEntry entry)
-        {
-            InitCreationAudited(entry);
-            InitModificationAudited(entry);
-        }
-
-        /// <summary>
-        /// 初始化创建审计信息
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        private void InitCreationAudited(EntityEntry entry) => CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-
-        /// <summary>
-        /// 获取用户标识
-        /// </summary>
-        protected virtual string GetUserId() => CurrentUser.UserId;
-
-        /// <summary>
-        /// 获取用户名称
-        /// </summary>
-        protected virtual string GetUserName()
-        {
-            var name = CurrentUser.GetFullName();
-            return string.IsNullOrEmpty(name) ? CurrentUser.GetUserName() : name;
-        }
-
-        /// <summary>
-        /// 初始化修改审计信息
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        private void InitModificationAudited(EntityEntry entry) => ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-
-        /// <summary>
-        /// 拦截修改操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected virtual void InterceptModifiedOperation(EntityEntry entry) => InitModificationAudited(entry);
-
-        /// <summary>
-        /// 拦截删除操作
-        /// </summary>
-        /// <param name="entry">输入实体</param>
-        protected virtual void InterceptDeletedOperation(EntityEntry entry) => DeletionAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-
         #endregion
 
-        #region SaveChangesAsync(异步保存更改)
+        #region SaveChangesAsync(保存)
 
         /// <summary>
         /// 异步保存更改
@@ -479,18 +418,126 @@ namespace Bing.Datas.EntityFramework.Core
 
         #endregion
 
-        #region InitVersion(初始化版本号)
+        #region SaveChangesBefore(保存前操作)
 
         /// <summary>
-        /// 初始化版本号
+        /// 保存前操作
+        /// </summary>
+        protected virtual void SaveChangesBefore()
+        {
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        ApplyInterceptForAddedEntity(entry);
+                        break;
+
+                    case EntityState.Modified:
+                        ApplyInterceptForModifiedEntity(entry);
+                        break;
+
+                    case EntityState.Deleted:
+                        ApplyInterceptForDeletedEntity(entry);
+                        break;
+                }
+            }
+        }
+
+        #endregion
+
+        #region ApplyInterceptForAddedEntity(添加前操作)
+
+        /// <summary>
+        /// 添加前操作
         /// </summary>
         /// <param name="entry">输入实体</param>
-        protected void InitVersion(EntityEntry entry)
+        protected virtual void ApplyInterceptForAddedEntity(EntityEntry entry)
+        {
+            SetCreationAudited(entry);
+            SetModificationAudited(entry);
+            SetVersion(entry);
+        }
+
+        #endregion
+
+        #region ApplyInterceptForModifiedEntity(修改前操作)
+
+        /// <summary>
+        /// 修改前操作
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        protected virtual void ApplyInterceptForModifiedEntity(EntityEntry entry)
+        {
+            SetModificationAudited(entry);
+            SetVersion(entry);
+        }
+
+        #endregion
+
+        #region InterceptDeletedOperation(删除前操作
+
+        /// <summary>
+        /// 删除前操作
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        protected virtual void ApplyInterceptForDeletedEntity(EntityEntry entry)
+        {
+            SetModificationAudited(entry);
+        }
+
+        #endregion
+
+        #region SetCreationAudited(设置创建审计信息)
+
+        /// <summary>
+        /// 设置创建审计信息
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        protected virtual void SetCreationAudited(EntityEntry entry)
+        {
+            CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
+
+        #endregion
+
+        #region SetModificationAudited(设置修改审计信息)
+
+        /// <summary>
+        /// 设置修改审计信息
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        protected virtual void SetModificationAudited(EntityEntry entry)
+        {
+            ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
+        }
+
+        #endregion
+
+        #region SetVersion(设置版本号)
+
+        /// <summary>
+        /// 设置版本号
+        /// </summary>
+        /// <param name="entry">输入实体</param>
+        protected virtual void SetVersion(EntityEntry entry)
         {
             if (!(entry.Entity is IVersion entity))
                 return;
-            entity.Version = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
+            var version = GetVersion();
+            if (version == null)
+                return;
+            entity.Version = version;
         }
+
+        #endregion
+
+        #region GetVersion(获取版本号)
+
+        /// <summary>
+        /// 获取版本号
+        /// </summary>
+        protected virtual byte[] GetVersion() => Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
 
         #endregion
 
@@ -562,6 +609,31 @@ namespace Bing.Datas.EntityFramework.Core
             {
                 return property;
             }
+        }
+
+        #endregion
+
+        #region SaveChangeAfter(保存后操作)
+
+        /// <summary>
+        /// 保存后操作
+        /// </summary>
+        protected virtual async Task SaveChangesAfter()
+        {
+            await PublishEventsAsync();
+        }
+
+        #endregion
+
+        #region PublishEventsAsync(发布事件)
+
+        /// <summary>
+        /// 发布事件
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Task PublishEventsAsync()
+        {
+            return Task.CompletedTask;
         }
 
         #endregion

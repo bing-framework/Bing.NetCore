@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Bing.Data;
 using Bing.Data.Queries;
-using Bing.Data.Queries.Criterias;
+using Bing.Data.Queries.Conditions;
 using Bing.Data.Queries.Internal;
 
 // ReSharper disable once CheckNamespace
@@ -21,16 +21,16 @@ namespace Bing
         /// </summary>
         /// <typeparam name="TEntity">实体类型</typeparam>
         /// <param name="query">数据源</param>
-        /// <param name="criteria">查询条件对象</param>
+        /// <param name="condition">查询条件对象</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static IQueryable<TEntity> Where<TEntity>(this IQueryable<TEntity> query, ICriteria<TEntity> criteria)
+        public static IQueryable<TEntity> Where<TEntity>(this IQueryable<TEntity> query, ICondition<TEntity> condition)
             where TEntity : class
         {
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-            var predicate = criteria.GetPredicate();
+            if (condition == null)
+                throw new ArgumentNullException(nameof(condition));
+            var predicate = condition.GetCondition();
             if (predicate == null)
                 return query;
             return query.Where(predicate);
@@ -98,7 +98,7 @@ namespace Bing
         {
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
-            return query.Where(new IntSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+            return query.Where(new IntSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Bing
         {
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
-            return query.Where(new DoubleSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+            return query.Where(new DoubleSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Bing
         {
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
-            return query.Where(new DecimalSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+            return query.Where(new DecimalSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Bing
         {
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
-            return query.Where(new DateTimeSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+            return query.Where(new DateTimeSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
         }
 
         #endregion

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Bing.Application.Dtos;
 using Bing.Data;
 using Bing.Data.Queries;
-using Bing.Data.Queries.Criterias;
+using Bing.Data.Queries.Conditions;
 using Bing.Domain.Entities;
 using Bing.Helpers;
 using Bing.Trees;
@@ -42,7 +42,7 @@ namespace Bing.Application.Services
         /// </summary>
         /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
-        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCriteria<TEntity>(parameter));
+        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCondition<TEntity>(parameter));
 
         /// <summary>
         /// 获取直接下级子节点列表
@@ -92,7 +92,7 @@ namespace Bing.Application.Services
         /// </summary>
         /// <param name="queryable">查询条件</param>
         /// <param name="parameter">查询参数</param>
-        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCriteria<TEntity, TParentId>(parameter));
+        protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCondition<TEntity, TParentId>(parameter));
 
         /// <summary>
         /// 查找实体列表
