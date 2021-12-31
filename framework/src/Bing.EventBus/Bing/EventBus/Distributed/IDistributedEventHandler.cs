@@ -1,17 +1,17 @@
 ﻿using System.Threading.Tasks;
 
-namespace Bing.EventBus.Local
+namespace Bing.EventBus.Distributed
 {
     /// <summary>
-    /// 本地事件处理器
+    /// 分布式事件处理器
     /// </summary>
     /// <typeparam name="TEvent">事件类型</typeparam>
-    public interface ILocalEventHandler<in TEvent> : IEventHandler where TEvent : class
+    public interface IDistributedEventHandler<in TEvent> : IEventHandler
     {
         /// <summary>
         /// 处理事件
         /// </summary>
         /// <param name="eventData">事件数据</param>
-        Task HandleAsync(TEvent eventData);
+        Task HandleEventAsync(TEvent eventData);
     }
 }

@@ -9,9 +9,9 @@ namespace Bing.EventBus.Tests.Samples
     public class LocalEventHandlerSample : LocalEventHandlerBase<EventSample>
     {
         /// <inheritdoc />
-        public override Task HandleAsync(EventSample @event)
+        public override Task HandleAsync(EventSample eventData)
         {
-            @event.Result = $"1:{@event.Value}";
+            eventData.Result = $"1:{eventData.Value}";
             return Task.CompletedTask;
         }
     }
@@ -22,9 +22,9 @@ namespace Bing.EventBus.Tests.Samples
     public class LocalEventHandlerSample2 : LocalEventHandlerBase<EventSample2>
     {
         /// <inheritdoc />
-        public override Task HandleAsync(EventSample2 @event)
+        public override Task HandleAsync(EventSample2 eventData)
         {
-            @event.Result += "2";
+            eventData.Result += "2";
             return Task.CompletedTask;
         }
     }
@@ -35,9 +35,9 @@ namespace Bing.EventBus.Tests.Samples
     public class LocalEventHandlerSample3 : LocalEventHandlerBase<EventSample2>
     {
         /// <inheritdoc />
-        public override Task HandleAsync(EventSample2 @event)
+        public override Task HandleAsync(EventSample2 eventData)
         {
-            @event.Result += "3";
+            eventData.Result += "3";
             return Task.CompletedTask;
         }
     }
@@ -47,13 +47,11 @@ namespace Bing.EventBus.Tests.Samples
     /// </summary>
     public class LocalEventHandlerSample4 : LocalEventHandlerBase<EventSample3>
     {
-        /// <inheritdoc />
-        public override int Order => 2;
 
         /// <inheritdoc />
-        public override Task HandleAsync(EventSample3 @event)
+        public override Task HandleAsync(EventSample3 eventData)
         {
-            @event.Result += "4";
+            eventData.Result += "4";
             return Task.CompletedTask;
         }
     }
@@ -64,12 +62,9 @@ namespace Bing.EventBus.Tests.Samples
     public class LocalEventHandlerSample5 : LocalEventHandlerBase<EventSample3>
     {
         /// <inheritdoc />
-        public override int Order => 1;
-
-        /// <inheritdoc />
-        public override Task HandleAsync(EventSample3 @event)
+        public override Task HandleAsync(EventSample3 eventData)
         {
-            @event.Result += "5";
+            eventData.Result += "5";
             return Task.CompletedTask;
         }
     }
@@ -80,15 +75,9 @@ namespace Bing.EventBus.Tests.Samples
     public class LocalEventHandlerSample6 : LocalEventHandlerBase<EventSample3>
     {
         /// <inheritdoc />
-        public override int Order => 3;
-
-        /// <inheritdoc />
-        public override bool Enabled => false;
-
-        /// <inheritdoc />
-        public override Task HandleAsync(EventSample3 @event)
+        public override Task HandleAsync(EventSample3 eventData)
         {
-            @event.Result += "6";
+            eventData.Result += "6";
             return Task.CompletedTask;
         }
     }

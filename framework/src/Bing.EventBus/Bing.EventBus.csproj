@@ -5,8 +5,4 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <ItemGroup>
-    <Folder Include="Bing\EventBus\Distributed\" />
-  </ItemGroup>
-
 </Project>
