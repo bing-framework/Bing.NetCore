@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Bing.Data.Sql.Diagnostics;
 using Bing.Helpers;
 using Bing.Logs;
 using Dapper;
@@ -133,11 +134,25 @@ namespace Bing.Data.Sql.Queries
         /// <param name="connection">数据库连接</param>
         protected int GetCount(IDbConnection connection)
         {
-            var builder = GetCountBuilder();
-            var sql = builder.ToSql();
-            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = GetConnection(connection).ExecuteScalar(sql, builder.GetParams());
-            return Conv.ToInt(result);
+            DiagnosticsMessage message = null;
+            try
+            {
+                var builder = GetCountBuilder();
+                var sql = builder.ToSql();
+
+                message = ExecuteBefore(sql, Params);
+
+                WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
+                var result = GetConnection(connection).ExecuteScalar(sql, builder.GetParams());
+
+                ExecuteAfter(message);
+                return Conv.ToInt(result);
+            }
+            catch (Exception e)
+            {
+                ExecuteError(message, e);
+                throw;
+            }
         }
 
         /// <summary>
@@ -191,11 +206,26 @@ namespace Bing.Data.Sql.Queries
         /// <param name="connection">数据库连接</param>
         protected async Task<int> GetCountAsync(IDbConnection connection)
         {
-            var builder = GetCountBuilder();
-            var sql = builder.ToSql();
-            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = await GetConnection(connection).ExecuteScalarAsync(sql, builder.GetParams());
-            return Conv.ToInt(result);
+            DiagnosticsMessage message = null;
+            try
+            {
+                var builder = GetCountBuilder();
+                var sql = builder.ToSql();
+
+                message = ExecuteBefore(sql, Params);
+
+                WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
+                var result = await GetConnection(connection).ExecuteScalarAsync(sql, builder.GetParams());
+
+                ExecuteAfter(message);
+                return Conv.ToInt(result);
+            }
+            catch (Exception e)
+            {
+                ExecuteError(message, e);
+                throw;
+            }
+            
         }
 
         /// <summary>

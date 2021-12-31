@@ -228,9 +228,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Test.Shared", "framewo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Domain.Tests", "framework\tests\Bing.Ddd.Domain.Tests\Bing.Ddd.Domain.Tests.csproj", "{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.EventBus", "framework\src\Bing.EventBus\Bing.EventBus.csproj", "{5E8AD211-7AEF-4D9D-AFA8-C85B6F3D7C6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EventBus", "framework\src\Bing.EventBus\Bing.EventBus.csproj", "{5E8AD211-7AEF-4D9D-AFA8-C85B6F3D7C6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.EventBus.Tests", "framework\tests\Bing.EventBus.Tests\Bing.EventBus.Tests.csproj", "{0A5D1639-8EEE-4BC9-94A5-04F354FEFBFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EventBus.Tests", "framework\tests\Bing.EventBus.Tests\Bing.EventBus.Tests.csproj", "{0A5D1639-8EEE-4BC9-94A5-04F354FEFBFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

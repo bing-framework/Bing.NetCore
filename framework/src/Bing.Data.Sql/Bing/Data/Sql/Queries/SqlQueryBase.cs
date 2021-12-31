@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Diagnostics;
 using Bing.DependencyInjection;
 using Bing.Helpers;
 using Microsoft.Extensions.Options;
@@ -13,7 +14,7 @@ namespace Bing.Data.Sql.Queries
     /// <summary>
     /// Sql查询对象基类
     /// </summary>
-    public abstract class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor
+    public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor
     {
         #region 属性
 
@@ -320,11 +321,26 @@ namespace Bing.Data.Sql.Queries
         /// <param name="connection">数据库连接</param>
         public TResult Query<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, TResult> func, IDbConnection connection = null)
         {
-            var sql = GetSql();
-            WriteTraceLog(sql, Params, GetDebugSql());
-            var result = func(GetConnection(connection), sql, Params);
-            ClearAfterExecution();
-            return result;
+            DiagnosticsMessage message = null;
+            try
+            {
+                var sql = GetSql();
+
+                message = ExecuteBefore(sql, Params);
+
+                WriteTraceLog(sql, Params, GetDebugSql());
+                var result = func(GetConnection(connection), sql, Params);
+                ClearAfterExecution();
+
+                ExecuteAfter(message);
+                return result;
+            }
+            catch (Exception e)
+            {
+                ExecuteError(message, e);
+                throw;
+            }
+            
         }
 
         /// <summary>
@@ -335,11 +351,26 @@ namespace Bing.Data.Sql.Queries
         /// <param name="connection">数据库连接</param>
         public async Task<TResult> QueryAsync<TResult>(Func<IDbConnection, string, IReadOnlyDictionary<string, object>, Task<TResult>> func, IDbConnection connection = null)
         {
-            var sql = GetSql();
-            WriteTraceLog(sql, Params, GetDebugSql());
-            var result = await func(GetConnection(connection), sql, Params);
-            ClearAfterExecution();
-            return result;
+            DiagnosticsMessage message = null;
+            try
+            {
+                var sql = GetSql();
+
+                message = ExecuteBefore(sql, Params);
+
+                WriteTraceLog(sql, Params, GetDebugSql());
+                var result = await func(GetConnection(connection), sql, Params);
+                ClearAfterExecution();
+
+                ExecuteAfter(message);
+                return result;
+            }
+            catch (Exception e)
+            {
+                ExecuteError(message, e);
+                throw;
+            }
+            
         }
 
         /// <summary>
