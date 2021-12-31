@@ -22,10 +22,7 @@ namespace Bing.AspNetCore.Security.Claims
         /// 初始化一个<see cref="BingClaimsMapMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        public BingClaimsMapMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        public BingClaimsMapMiddleware(RequestDelegate next) => _next = next;
 
         /// <summary>
         /// 执行中间件拦截逻辑
