@@ -36,7 +36,7 @@ namespace Bing.AutoMapper
                     cfg.AddProfile(instance as Profile);
                 }
             });
-            var mapper = new AutoMapperObjectMapper(configuration);
+            var mapper = new AutoMapperObjectMapper(configuration, instances);
             ObjectMapperExtensions.SetMapper(mapper);
             services.TryAddSingleton<IObjectMapper>(mapper);
         }

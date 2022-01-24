@@ -34,7 +34,7 @@ namespace Bing.AutoMapper.Tests
                     cfg.AddProfile(instance as Profile);
                 }
             });
-            var mapper = new AutoMapperObjectMapper(configuration);
+            var mapper = new AutoMapperObjectMapper(configuration, instances);
             ObjectMapperExtensions.SetMapper(mapper);
         }
 
@@ -224,7 +224,28 @@ namespace Bing.AutoMapper.Tests
         {
             var source = new AutoMapperSourceSample { SourceStringValue = "666" };
             var target = source.MapTo<AutoMapperTargetSample>();
-            Assert.Equal("666", target.TargetSampleValue);
+            Assert.Equal("666-001", target.TargetSampleValue);
+        }
+
+        /// <summary>
+        /// 测试自定义配置及非自定义规则映射
+        /// </summary>
+        [Fact]
+        public void Test_MapTo_CustomProfile_WithMoreRule()
+        {
+            var source = new AutoMapperSourceSample { SourceStringValue = "666" };
+            var target = source.MapTo<AutoMapperTargetSample>();
+            Assert.Equal("666-001", target.TargetSampleValue);
+
+            var sample = new Sample();
+            var sample2 = new Sample2() { StringValue = "a" };
+            sample2.MapTo(sample);
+
+            Assert.Equal("a", sample.StringValue);
+
+            source = new AutoMapperSourceSample { SourceStringValue = "666" };
+            target = source.MapTo<AutoMapperTargetSample>();
+            Assert.Equal("666-001", target.TargetSampleValue);
         }
 
         [Fact]

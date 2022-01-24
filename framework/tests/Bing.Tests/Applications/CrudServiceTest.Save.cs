@@ -96,7 +96,7 @@ namespace Bing.Tests.Applications
                     cfg.AddProfile(instance as Profile);
                 }
             });
-            var mapper = new AutoMapperObjectMapper(configuration);
+            var mapper = new AutoMapperObjectMapper(configuration, instances);
             ObjectMapperExtensions.SetMapper(mapper);
         }
 
