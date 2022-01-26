@@ -2,6 +2,7 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Extensions;
 using Bing.AspNetCore.Mvc.ExceptionHandling;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
@@ -75,6 +76,7 @@ namespace Bing.Admin.Modules
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseCorrelationId();
             app.UseBingExceptionHandling();
+            app.UseRealIp(x => x.HeaderKey = "test");
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();

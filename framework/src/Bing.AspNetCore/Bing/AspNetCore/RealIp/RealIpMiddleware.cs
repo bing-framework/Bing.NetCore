@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using Bing.Logs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Bing.AspNetCore.RealIp
@@ -25,14 +25,21 @@ namespace Bing.AspNetCore.RealIp
         private readonly RealIpOptions _options;
 
         /// <summary>
+        /// 日志
+        /// </summary>
+        private readonly ILogger<RealIpMiddleware> _logger;
+
+        /// <summary>
         /// 初始化一个<see cref="RealIpMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
         /// <param name="options">真实IP选项</param>
-        public RealIpMiddleware(RequestDelegate next, IOptions<RealIpOptions> options)
+        /// <param name="logger">日志</param>
+        public RealIpMiddleware(RequestDelegate next, IOptions<RealIpOptions> options, ILogger<RealIpMiddleware> logger)
         {
             _next = next;
             _options = options.Value;
+            _logger = logger;
         }
 
         /// <summary>
@@ -47,32 +54,16 @@ namespace Bing.AspNetCore.RealIp
                 if (headers.ContainsKey(_options.HeaderKey))
                 {
                     context.Connection.RemoteIpAddress = IPAddress.Parse(
-                        _options.HeaderKey.Equals("x-forwarded-for",StringComparison.CurrentCultureIgnoreCase)
+                        _options.HeaderKey.Equals("x-forwarded-for", StringComparison.CurrentCultureIgnoreCase)
                             ? headers["X-Forwarded-For"].ToString().Split(',')[0]
                             : headers[_options.HeaderKey].ToString());
-
-                    WriteLog(context, context.Connection.RemoteIpAddress);
+                    _logger.LogDebug($"解析真实IP成功: {context.Connection.RemoteIpAddress}");
                 }
             }
             finally
             {
                 await _next(context);
             }
-        }
-
-        /// <summary>
-        /// 写入日志
-        /// </summary>
-        /// <param name="context">Http上下文</param>
-        /// <param name="address">IP地址</param>
-        private void WriteLog(HttpContext context, IPAddress address)
-        {
-            if (context == null)
-                return;
-            var log = Log.GetLog(this)
-                .Caption("真实IP中间件");
-            log.Content($"解析真实IP成功 : {address}")
-                .Debug();
         }
     }
 
