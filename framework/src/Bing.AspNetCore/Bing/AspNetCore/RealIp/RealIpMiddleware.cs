@@ -10,8 +10,9 @@ using Microsoft.Extensions.Options;
 namespace Bing.AspNetCore.RealIp
 {
     /// <summary>
-    /// 真实IP中间件
+    /// 远程IP中间件
     /// </summary>
+    /// <remarks>nginx 代理服务的时候需要使用才能通过RemoteIpAddress获取客户端真实IP</remarks>
     public class RealIpMiddleware : IMiddleware
     {
         /// <summary>
