@@ -23,5 +23,23 @@
                 _ => global::Exceptionless.Logging.LogLevel.Off
             };
         }
+
+        /// <summary>
+        /// 转换日志级别
+        /// </summary>
+        /// <param name="level">Serilog日志级别</param>
+        public static global::Exceptionless.Logging.LogLevel Switch(Serilog.Events.LogEventLevel level)
+        {
+            return level switch
+            {
+                Serilog.Events.LogEventLevel.Verbose => global::Exceptionless.Logging.LogLevel.Trace,
+                Serilog.Events.LogEventLevel.Debug => global::Exceptionless.Logging.LogLevel.Debug,
+                Serilog.Events.LogEventLevel.Information => global::Exceptionless.Logging.LogLevel.Info,
+                Serilog.Events.LogEventLevel.Warning => global::Exceptionless.Logging.LogLevel.Warn,
+                Serilog.Events.LogEventLevel.Error => global::Exceptionless.Logging.LogLevel.Error,
+                Serilog.Events.LogEventLevel.Fatal => global::Exceptionless.Logging.LogLevel.Fatal,
+                _ => global::Exceptionless.Logging.LogLevel.Other
+            };
+        }
     }
 }
