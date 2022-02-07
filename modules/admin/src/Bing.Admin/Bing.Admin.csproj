@@ -22,10 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />
     <ProjectReference Include="..\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service\Bing.Admin.Service.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
   

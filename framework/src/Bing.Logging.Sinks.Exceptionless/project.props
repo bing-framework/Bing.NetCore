@@ -1,0 +1,8 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Logging.Sinks.Exceptionless</AssemblyName>
+    <PackageId>Bing.Logging.Sinks.Exceptionless</PackageId>
+    <Description>Bing.Logging.Sinks.Exceptionless是Bing应用框架的Exceptionless日志操作类库。</Description>
+  </PropertyGroup>
+
+</Project>

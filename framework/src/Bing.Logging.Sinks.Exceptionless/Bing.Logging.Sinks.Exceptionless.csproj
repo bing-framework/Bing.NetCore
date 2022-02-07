@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="project.props" />
+
+  <Import Project="project.dependency.props" />
+
+  <Import Project="..\..\..\framework.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.Sinks.Exceptionless" Version="3.1.5" />
+  </ItemGroup>
+</Project>

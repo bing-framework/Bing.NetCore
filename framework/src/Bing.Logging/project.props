@@ -1,0 +1,8 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.Logging</AssemblyName>
+    <PackageId>Bing.Logging</PackageId>
+    <Description>Bing.Logging是Bing应用框架的日志操作核心类库。</Description>
+  </PropertyGroup>
+
+</Project>
