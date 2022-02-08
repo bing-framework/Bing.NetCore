@@ -17,6 +17,6 @@ namespace Bing.Core.Modularity
         /// 初始化一个<see cref="DependsOnModuleAttribute"/>类型的实例
         /// </summary>
         /// <param name="dependedModuleTypes">依赖模块类型集合</param>
-        public DependsOnModuleAttribute(params Type[] dependedModuleTypes) => DependedModuleTypes = dependedModuleTypes;
+        public DependsOnModuleAttribute(params Type[] dependedModuleTypes) => DependedModuleTypes = dependedModuleTypes ?? new Type[0];
     }
 }
