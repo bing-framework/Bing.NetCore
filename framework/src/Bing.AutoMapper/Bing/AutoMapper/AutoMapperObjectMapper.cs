@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Bing.ObjectMapping;
 
 namespace Bing.AutoMapper
 {
@@ -28,13 +30,21 @@ namespace Bing.AutoMapper
         private IMapper _mapper;
 
         /// <summary>
+        /// 映射器
+        /// </summary>
+        private readonly IReadOnlyCollection<IObjectMapperProfile> _profiles;
+
+        /// <summary>
         /// 初始化一个<see cref="AutoMapperObjectMapper"/>类型的实例
         /// </summary>
         /// <param name="configuration">AutoMapper配置提供程序</param>
-        public AutoMapperObjectMapper(IConfigurationProvider configuration)
+        /// <param name="profiles">映射器</param>
+        public AutoMapperObjectMapper(IConfigurationProvider configuration, IReadOnlyCollection<IObjectMapperProfile> profiles)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _profiles = profiles;
             _mapper = _configuration.CreateMapper();
+            
         }
 
         #region Map(将源对象映射到目标对象)
@@ -127,11 +137,13 @@ namespace Bing.AutoMapper
         private void ConfigMap(Type sourceType, Type destinationType)
         {
             var maps = _configuration.GetAllTypeMaps();
-            _configuration=new MapperConfiguration(t =>
+            _configuration = new MapperConfiguration(t =>
             {
                 t.CreateMap(sourceType, destinationType);
                 foreach (var map in maps) 
                     t.CreateMap(map.SourceType, map.DestinationType);
+                foreach (var profile in _profiles)
+                    t.AddProfile(profile as Profile);
             });
             _mapper = _configuration.CreateMapper();
         }

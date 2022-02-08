@@ -34,12 +34,24 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 日志标识
         /// </summary>
-        public string LogId => $"{TraceId}-{_orderId}";
+        public string LogId => $"{TraceId}-{GetInfo().GetOrderId()}";
 
         /// <summary>
         /// 跟踪号
         /// </summary>
         public string TraceId => $"{TraceIdContext.Current?.TraceId ?? GetInfo().TraceId}";
+
+        ///// <summary>
+        ///// 跟踪号
+        ///// </summary>
+        //public string TraceId
+        //{
+        //    get
+        //    {
+        //        TraceIdContext.Current ??= new TraceIdContext(string.Empty);
+        //        return TraceIdContext.Current.TraceId;
+        //    }
+        //}
 
         /// <summary>
         /// 计时器
@@ -90,20 +102,31 @@ namespace Bing.Logs.Core
             var key = "Bing.Logs.LogContext_orderId";
             _scopedDictionary[key] = _scopedDictionary.ContainsKey(key) ? ++_orderId : _orderId;
         }
+
+        ///// <summary>
+        ///// 获取日志上下文信息
+        ///// </summary>
+        //private LogContextInfo GetInfo()
+        //{
+        //    if (_info != null)
+        //        return _info;
+        //    var key = "Bing.Logs.LogContext";
+        //    _info = _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null;
+        //    if (_info != null)
+        //        return _info;
+        //    _info = CreateInfo();
+        //    _scopedDictionary[key] = _info;
+        //    return _info;
+        //}
+
         /// <summary>
         /// 获取日志上下文信息
         /// </summary>
         private LogContextInfo GetInfo()
         {
-            if (_info != null)
-                return _info;
-            var key = "Bing.Logs.LogContext";
-            _info = _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null;
-            if (_info != null)
-                return _info;
-            _info = CreateInfo();
-            _scopedDictionary[key] = _info;
-            return _info;
+            if (LogContextInfo.Current == null)
+                LogContextInfo.Current = CreateInfo();
+            return LogContextInfo.Current;
         }
 
         /// <summary>

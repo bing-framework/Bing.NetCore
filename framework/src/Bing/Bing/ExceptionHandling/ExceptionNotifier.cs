@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Bing.DependencyInjection;
 using Bing.Helpers;
@@ -37,11 +38,11 @@ namespace Bing.ExceptionHandling
         /// 通知
         /// </summary>
         /// <param name="context">异常通知上下文</param>
-        public async Task NotifyAsync(ExceptionNotificationContext context)
+        public virtual async Task NotifyAsync(ExceptionNotificationContext context)
         {
             Check.NotNull(context, nameof(context));
             using var scope = ServiceScopeFactory.CreateScope();
-            var exceptionSubscribers = scope.ServiceProvider.GetServices<IExceptionSubscriber>();
+            var exceptionSubscribers = scope.ServiceProvider.GetServices<IExceptionSubscriber>().OrderBy(x => x.Order);
             foreach (var exceptionSubscriber in exceptionSubscribers)
             {
                 try

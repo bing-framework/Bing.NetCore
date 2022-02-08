@@ -1,8 +1,5 @@
-﻿using System;
-using Bing.Data.Sql;
+﻿using Bing.Data.Sql;
 using Bing.Data.Test.Integration.Samples;
-using Bing.Utils;
-using Bing.Utils.Helpers;
 using Xunit;
 using Str = Bing.Helpers.Str;
 

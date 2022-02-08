@@ -5,4 +5,9 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <ItemGroup>
+    <Compile Update="Properties\LibraryResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
 </Project>

@@ -17,8 +17,7 @@ namespace Bing.ExceptionHandling
         /// <param name="exception">异常对象</param>
         /// <param name="logLevel">日志级别</param>
         /// <param name="handled">是否已处理异常</param>
-        public static Task NotifyAsync(this IExceptionNotifier exceptionNotifier, Exception exception,
-            LogLevel? logLevel = null, bool handled = true)
+        public static Task NotifyAsync(this IExceptionNotifier exceptionNotifier, Exception exception, LogLevel? logLevel = null, bool handled = true)
         {
             Check.NotNull(exceptionNotifier, nameof(exceptionNotifier));
             return exceptionNotifier.NotifyAsync(new ExceptionNotificationContext(exception, logLevel, handled));

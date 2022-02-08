@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 namespace Bing.AspNetCore.Cors
 {
     /// <summary>
-    /// 允许CORS请求中间件
+    /// 跨域中间件
     /// </summary>
     public class AllowCorsRequestMiddleware : IMiddleware
     {
@@ -25,6 +25,7 @@ namespace Bing.AspNetCore.Cors
         /// <param name="context">Http上下文</param>
         public async Task InvokeAsync(HttpContext context)
         {
+            // 若为OPTIONS跨域请求则直接返回，不进入后续管道
             if (context.Request.Method.ToLower() == "options")
             {
                 context.Response.StatusCode = StatusCodes.Status202Accepted;

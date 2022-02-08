@@ -1,6 +1,7 @@
 ﻿using System;
 using Bing.Logs.Abstractions;
 
+// ReSharper disable once CheckNamespace
 namespace Bing.Logs
 {
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
+using Bing.AspNetCore.Mvc;
 using Bing.DependencyInjection;
-using Bing.ExceptionHandling;
+using Bing.Exceptions;
 using Bing.Http;
 
 namespace Bing.AspNetCore.ExceptionHandling
@@ -15,41 +16,21 @@ namespace Bing.AspNetCore.ExceptionHandling
         /// </summary>
         /// <param name="exception">异常</param>
         /// <param name="includeSensitiveDetails">是否包含敏感信息</param>
-        public RemoteServiceErrorInfo Convert(Exception exception, bool includeSensitiveDetails)
+        public virtual RemoteServiceErrorInfo Convert(Exception exception, bool includeSensitiveDetails)
         {
-            var errorInfo = CreateErrorInfoWithoutCode(exception, includeSensitiveDetails);
-            if (exception is IHasErrorCode hasErrorCodeException) 
-                errorInfo.Code = hasErrorCodeException.Code;
-            return errorInfo;
-        }
-
-        /// <summary>
-        /// 创建错误信息（无错误码）
-        /// </summary>
-        /// <param name="exception">异常</param>
-        /// <param name="includeSensitiveDetails">是否包含敏感信息</param>
-        protected virtual RemoteServiceErrorInfo CreateErrorInfoWithoutCode(Exception exception, bool includeSensitiveDetails)
-        {
-            exception = TryToGetActualException(exception);
-
-            var errorInfo = new RemoteServiceErrorInfo();
-            errorInfo.Data = exception.Data;
-
-            return errorInfo;
-        }
-
-        /// <summary>
-        /// 尝试获取实际异常
-        /// </summary>
-        /// <param name="exception">异常</param>
-        protected virtual Exception TryToGetActualException(Exception exception)
-        {
-            if (exception is AggregateException && exception.InnerException != null)
+            if (exception is ConcurrencyException)
             {
-                var aggException = exception as AggregateException;
-
+                return new RemoteServiceErrorInfo {Code = "400001", Message = exception.GetPrompt()};
             }
-            return exception;
+
+            if (exception is Warning warning)
+                return new RemoteServiceErrorInfo
+                {
+                    Code = string.IsNullOrWhiteSpace(warning.Code) ? StatusCode.Fail.ToString() : warning.Code,
+                    Message = warning.GetPrompt()
+                };
+
+            return new RemoteServiceErrorInfo {Code = StatusCode.Fail.ToString(), Message = exception.GetPrompt()};
         }
     }
 }

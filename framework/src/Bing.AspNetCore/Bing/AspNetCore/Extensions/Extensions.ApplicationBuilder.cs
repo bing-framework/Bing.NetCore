@@ -4,6 +4,7 @@ using Bing.AspNetCore.RealIp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Bing.AspNetCore.Extensions
 {
@@ -22,7 +23,13 @@ namespace Bing.AspNetCore.Extensions
         /// 注册真实IP中间件
         /// </summary>
         /// <param name="builder">应用程序生成器</param>
-        public static IApplicationBuilder UseRealIp(this IApplicationBuilder builder) => builder.UseMiddleware<RealIpMiddleware>();
+        /// <param name="setupAct">配置操作</param>
+        public static IApplicationBuilder UseRealIp(this IApplicationBuilder builder, Action<RealIpOptions> setupAct = null)
+        {
+            var options = new RealIpOptions { HeaderKey = "x-forwarded-for" };
+            setupAct?.Invoke(options);
+            return builder.UseMiddleware<RealIpMiddleware>(Options.Create(options));
+        }
 
         /// <summary>
         /// 注册真实IP

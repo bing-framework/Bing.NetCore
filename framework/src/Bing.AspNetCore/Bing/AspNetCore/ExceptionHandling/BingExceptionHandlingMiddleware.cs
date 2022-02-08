@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Bing.ExceptionHandling;
+using Bing.Helpers;
+using Bing.Http;
+using Bing.Utils.Json;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -18,11 +23,6 @@ namespace Bing.AspNetCore.ExceptionHandling
         private readonly RequestDelegate _next;
 
         /// <summary>
-        /// 异常处理选项配置
-        /// </summary>
-        private readonly BingExceptionHandlingOptions _options;
-
-        /// <summary>
         /// 日志
         /// </summary>
         private readonly ILogger<BingExceptionHandlingMiddleware> _logger;
@@ -36,12 +36,10 @@ namespace Bing.AspNetCore.ExceptionHandling
         /// 初始化一个<see cref="BingExceptionHandlingMiddleware"/>类型的实例
         /// </summary>
         /// <param name="next">方法</param>
-        /// <param name="options">异常处理选项配置</param>
         /// <param name="logger">日志</param>
-        public BingExceptionHandlingMiddleware(RequestDelegate next, IOptions<BingExceptionHandlingOptions> options, ILogger<BingExceptionHandlingMiddleware> logger)
+        public BingExceptionHandlingMiddleware(RequestDelegate next, ILogger<BingExceptionHandlingMiddleware> logger)
         {
             _next = next;
-            _options = options.Value;
             _logger = logger;
             _clearCacheHeaderDelegate = ClearCacheHeaders;
         }
@@ -64,10 +62,7 @@ namespace Bing.AspNetCore.ExceptionHandling
                     _logger.LogWarning("An exception occurred, but response has already started!");
                     throw;
                 }
-                if (context.RequestAborted.IsCancellationRequested && (e is TaskCanceledException || e is OperationCanceledException))
-                    _options.OnRequestAborted?.Invoke(context, _logger);
-                else
-                    _options.OnException?.Invoke(context, _logger, e);
+                await HandleAndWarpException(context, e);
             }
         }
 
@@ -80,11 +75,31 @@ namespace Bing.AspNetCore.ExceptionHandling
         {
             _logger.LogException(exception);
 
-            httpContext.Response.Clear();
-            httpContext.Response.StatusCode = 200;
-            httpContext.Response.OnStarting(_clearCacheHeaderDelegate, httpContext.Response);
-            httpContext.Response.Headers.Add("_BingErrorFormat", "true");
+            var errorInfoConverter = httpContext.RequestServices.GetRequiredService<IExceptionToErrorInfoConverter>();
+            var statusCodeFinder = httpContext.RequestServices.GetRequiredService<IHttpExceptionStatusCodeFinder>();
+            var options = httpContext.RequestServices.GetRequiredService<IOptions<BingExceptionHandlingOptions>>().Value;
 
+            httpContext.Response.Clear();
+            httpContext.Response.StatusCode = (int)statusCodeFinder.GetStatusCode(httpContext, exception);
+            httpContext.Response.OnStarting(_clearCacheHeaderDelegate, httpContext.Response);
+            httpContext.Response.Headers.Add(BingHttpConst.BingErrorFormat, "true");
+
+            var remoteServiceErrorInfo = errorInfoConverter.Convert(exception, options.SendExceptionDetailsToClients);
+            await WriteJsonAsync(httpContext.Response, new {code = Conv.ToInt(remoteServiceErrorInfo.Code), message = remoteServiceErrorInfo.Message});
+
+            await httpContext.RequestServices.GetRequiredService<IExceptionNotifier>().NotifyAsync(new ExceptionNotificationContext(exception));
+        }
+
+        /// <summary>
+        /// 写入Json
+        /// </summary>
+        /// <param name="response">Http响应</param>
+        /// <param name="obj">对象</param>
+        private static async Task WriteJsonAsync(HttpResponse response, object obj)
+        {
+            var json = JsonHelper.ToJson(obj);
+            response.ContentType = "application/json; charset=utf-8";
+            await response.WriteAsync(json);
         }
 
         /// <summary>

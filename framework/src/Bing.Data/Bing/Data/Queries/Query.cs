@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Bing.Data.Queries.Criterias;
+using Bing.Data.Queries.Conditions;
 using Bing.Data.Queries.Internal;
 using Bing.Expressions;
 
@@ -69,7 +69,7 @@ namespace Bing.Data.Queries
         /// <summary>
         /// 获取查询条件
         /// </summary>
-        public Expression<Func<TEntity, bool>> GetPredicate() => _predicate;
+        public Expression<Func<TEntity, bool>> GetCondition() => _predicate;
 
         /// <summary>
         /// 获取排序条件
@@ -90,8 +90,8 @@ namespace Bing.Data.Queries
         /// <summary>
         /// 添加查询条件
         /// </summary>
-        /// <param name="criteria">查询条件</param>
-        public IQuery<TEntity, TKey> Where(ICriteria<TEntity> criteria) => And(criteria.GetPredicate());
+        /// <param name="condition">查询条件</param>
+        public IQuery<TEntity, TKey> Where(ICondition<TEntity> condition) => And(condition.GetCondition());
 
         /// <summary>
         /// 添加查询条件
@@ -121,7 +121,7 @@ namespace Bing.Data.Queries
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界，默认：包含两边</param>
-        public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, int? min, int? max, Boundary boundary = Boundary.Both) => Where(new IntSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+        public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, int? min, int? max, Boundary boundary = Boundary.Both) => Where(new IntSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
 
         /// <summary>
         /// 添加范围查询条件
@@ -131,7 +131,7 @@ namespace Bing.Data.Queries
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界，默认：包含两边</param>
-        public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max, Boundary boundary = Boundary.Both) => Where(new DoubleSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+        public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max, Boundary boundary = Boundary.Both) => Where(new DoubleSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
 
         /// <summary>
         /// 添加范围查询条件
@@ -141,7 +141,7 @@ namespace Bing.Data.Queries
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="boundary">包含边界，默认：包含两边</param>
-        public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min, decimal? max, Boundary boundary = Boundary.Both) => Where(new DecimalSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary));
+        public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min, decimal? max, Boundary boundary = Boundary.Both) => Where(new DecimalSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary));
 
         /// <summary>
         /// 添加范围查询条件
@@ -155,8 +155,8 @@ namespace Bing.Data.Queries
         public IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min, DateTime? max, bool includeTime = true,
             Boundary? boundary = null) =>
             includeTime
-                ? Where(new DateTimeSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary ?? Boundary.Both))
-                : Where(new DateSegmentCriteria<TEntity, TProperty>(propertyExpression, min, max, boundary ?? Boundary.Left));
+                ? Where(new DateTimeSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary ?? Boundary.Both))
+                : Where(new DateSegmentCondition<TEntity, TProperty>(propertyExpression, min, max, boundary ?? Boundary.Left));
 
         /// <summary>
         /// 添加排序
@@ -193,7 +193,7 @@ namespace Bing.Data.Queries
         /// <param name="query">查询对象</param>
         public IQuery<TEntity, TKey> And(IQuery<TEntity, TKey> query)
         {
-            And(query.GetPredicate());
+            And(query.GetCondition());
             OrderBy(query.GetOrder());
             return this;
         }
@@ -222,7 +222,7 @@ namespace Bing.Data.Queries
         /// <param name="query">查询对象</param>
         public IQuery<TEntity, TKey> Or(IQuery<TEntity, TKey> query)
         {
-            _predicate = _predicate.Or(query.GetPredicate());
+            _predicate = _predicate.Or(query.GetCondition());
             OrderBy(query.GetOrder());
             return this;
         }

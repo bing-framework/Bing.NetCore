@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.AspNetCore.Uploads.Params;
 using Bing.Exceptions;
+using Bing.IO;
 using Microsoft.AspNetCore.Http;
-using FileInfo = Bing.Utils.Files.FileInfo;
 
 namespace Bing.AspNetCore.Uploads
 {
@@ -22,20 +22,16 @@ namespace Bing.AspNetCore.Uploads
         /// </summary>
         /// <param name="param">参数</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public async Task<FileInfo> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<FileDescriptor> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (param.FormFile == null || param.FormFile.Length < 1)
             {
                 if (param.Request.Form.Files != null && param.Request.Form.Files.Any())
-                {
                     param.FormFile = param.Request.Form.Files[0];
-                }
             }
 
             if (param.FormFile == null || param.FormFile.Length < 1)
-            {
                 throw new Warning("请选择文件!");
-            }
 
             return await SaveAsync(param.FormFile, param.RelativePath, param.RootPath, cancellationToken);
         }
@@ -47,7 +43,7 @@ namespace Bing.AspNetCore.Uploads
         /// <param name="relativePath">相对路径</param>
         /// <param name="rootPath">根路径</param>
         /// <param name="cancellationToken">取消令牌</param>
-        private async Task<FileInfo> SaveAsync(IFormFile formFile, string relativePath, string rootPath,
+        private async Task<FileDescriptor> SaveAsync(IFormFile formFile, string relativePath, string rootPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var date = DateTime.Now;
@@ -57,16 +53,18 @@ namespace Bing.AspNetCore.Uploads
             var path = System.IO.Path.Combine(relativePath, date.ToString("yyyy"), date.ToString("MM"),
                 date.ToString("dd"));
             var id = Guid.NewGuid();
-            var fileInfo = new FileInfo(path, size, name, id.ToString());
-            fileInfo.SaveName = $"{id.ToString().Replace("-", "")}.{fileInfo.Extension}";
-
-            var fullDir = System.IO.Path.Combine(rootPath, fileInfo.Path);
-            if (!Directory.Exists(fullDir))
+            var fileInfo = new FileDescriptor(name, size)
             {
-                Directory.CreateDirectory(fullDir);
-            }
+                Id = id.ToString(),
+                DirectoryName = path,
+            };
+            fileInfo.StorageName = $"{id.ToString().Replace("-", "")}.{fileInfo.Extension}";
 
-            var fullPath = Path.Combine(fullDir, fileInfo.SaveName);
+            var fullDir = System.IO.Path.Combine(rootPath, fileInfo.DirectoryName);
+            if (!Directory.Exists(fullDir)) 
+                Directory.CreateDirectory(fullDir);
+
+            var fullPath = Path.Combine(fullDir, fileInfo.StorageName);
             fileInfo.Md5 = await SaveWithMd5Async(formFile, fullPath, cancellationToken);
             return fileInfo;
         }
@@ -76,7 +74,7 @@ namespace Bing.AspNetCore.Uploads
         /// </summary>
         /// <param name="param">参数</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public async Task<IEnumerable<FileInfo>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IEnumerable<FileDescriptor>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (param.FormFiles == null || !param.FormFiles.Any())
             {
@@ -91,7 +89,7 @@ namespace Bing.AspNetCore.Uploads
                 throw new Warning("请选择文件!");
             }
 
-            var tasks = new List<Task<FileInfo>>();
+            var tasks = new List<Task<FileDescriptor>>();
             foreach (var formFile in param.FormFiles)
             {
                 tasks.Add(SaveAsync(formFile, param.RelativePath, param.RootPath, cancellationToken));
@@ -140,14 +138,10 @@ namespace Bing.AspNetCore.Uploads
         private static string Md5(Stream stream)
         {
             if (stream == null)
-            {
                 return string.Empty;
-            }
 
-            using (var md5Hash = MD5.Create())
-            {
-                return BitConverter.ToString(md5Hash.ComputeHash(stream)).Replace("-", "");
-            }
+            using var md5Hash = MD5.Create();
+            return BitConverter.ToString(md5Hash.ComputeHash(stream)).Replace("-", "");
         }
     }
 }

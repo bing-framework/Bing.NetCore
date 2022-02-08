@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <AssemblyName>Bing.EventBus</AssemblyName>
+    <PackageId>Bing.EventBus</PackageId>
+    <Description>Bing.EventBus是Bing应用框架的事件总线操作类库。</Description>
+  </PropertyGroup>
+</Project>

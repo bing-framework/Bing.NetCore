@@ -1,5 +1,6 @@
-﻿using System.Linq;
-using Bing.Configurations;
+﻿using System;
+using System.Linq;
+using Bing.Configuration;
 using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
@@ -154,7 +155,36 @@ namespace Bing.Logs.Exceptionless
         /// </summary>
         /// <param name="builder">事件生成器</param>
         /// <param name="content">日志内容</param>
-        private void SetReferenceId(EventBuilder builder, ILogContent content) => builder.SetReferenceId($"{content.LogId}");
+        private void SetReferenceId(EventBuilder builder, ILogContent content)
+        {
+            if (!IsValidIdentifier(content.LogId))
+            {
+                builder.SetProperty("ReferenceIdException", content.LogId);
+                return;
+            }
+            builder.SetReferenceId($"{content.LogId}");
+        }
+
+        /// <summary>
+        /// 校验标识
+        /// </summary>
+        /// <param name="value">值</param>
+        private static bool IsValidIdentifier(string value)
+        {
+            if (value == null)
+                return true;
+
+            if (value.Length < 8 || value.Length > 100)
+                return false;
+
+            for (var index = 0; index < value.Length; index++)
+            {
+                if (!char.IsLetterOrDigit(value[index]) && value[index] != '-')
+                    return false;
+            }
+            return true;
+        }
+
 
         /// <summary>
         /// 设置异常

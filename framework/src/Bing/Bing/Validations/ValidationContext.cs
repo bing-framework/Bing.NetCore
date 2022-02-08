@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bing.Configurations;
+using Bing.Configuration;
 using Bing.Validations.Abstractions;
 
 namespace Bing.Validations

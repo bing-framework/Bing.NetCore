@@ -122,7 +122,7 @@ namespace Bing.Data.Sql.Builders.Clauses
                 if (condition == null)
                     continue;
                 if (Lambdas.GetConditionCount(condition) > 1)
-                    throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, condition));
+                    throw new InvalidOperationException(string.Format(LibraryResource.CanOnlyOneCondition, condition));
                 if (string.IsNullOrWhiteSpace(Lambdas.GetValue(condition).SafeString()))
                     continue;
                 var predicate = _expressionResolver.Resolve(condition);
@@ -255,7 +255,7 @@ namespace Bing.Data.Sql.Builders.Clauses
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
             if (Lambdas.GetConditionCount(expression) > 1)
-                throw new InvalidOperationException(string.Format(LibraryResource.OnlyOnePredicate, expression));
+                throw new InvalidOperationException(string.Format(LibraryResource.CanOnlyOneCondition, expression));
             if (string.IsNullOrWhiteSpace(Lambdas.GetValue(expression).SafeString()))
                 return;
             Where(expression);

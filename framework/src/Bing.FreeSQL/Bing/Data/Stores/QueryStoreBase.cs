@@ -105,7 +105,7 @@ namespace Bing.Data.Stores
         /// 查找
         /// </summary>
         /// <param name="criteria">查询条件</param>
-        public IQueryable<TEntity> Find(ICriteria<TEntity> criteria) => Set.Select.AsQueryable().Where(criteria);
+        public IQueryable<TEntity> Find(ICondition<TEntity> criteria) => Set.Select.AsQueryable().Where(criteria);
 
         /// <summary>
         /// 查找

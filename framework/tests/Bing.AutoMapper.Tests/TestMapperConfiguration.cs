@@ -15,7 +15,7 @@ namespace Bing.AutoMapper.Tests
         public void CreateMap()
         {
             CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
-                .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue));
+                .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue + "-001"));
         }
     }
 }

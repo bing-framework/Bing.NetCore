@@ -5,10 +5,13 @@ using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
 using Bing.DependencyInjection;
 using Bing.Events.Messages;
+using Bing.ExceptionHandling;
+using Bing.Logging;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Admin.Apis
 {
@@ -38,17 +41,38 @@ namespace Bing.Admin.Apis
         public IAdminUnitOfWork UnitOfWork { get; }
 
         /// <summary>
+        /// 异常通知器
+        /// </summary>
+        public IExceptionNotifier ExceptionNotifier { get; }
+
+        /// <summary>
+        /// 日志组件
+        /// </summary>
+        public ILogger<TestController> Logger { get; }
+
+        /// <summary>
+        /// 其它日志组件
+        /// </summary>
+        public ILog<TestController> OtherLog { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
         /// </summary>
         public TestController(ITestService testService
             , IProcessingServer processingServer
             , IMessageEventBus messageEventBus
-            , IAdminUnitOfWork unitOfWork)
+            , IAdminUnitOfWork unitOfWork
+            , IExceptionNotifier exceptionNotifier
+            , ILogger<TestController> logger
+            , ILog<TestController> otherLog)
         {
             TestService = testService;
             ProcessingServer = processingServer;
             MessageEventBus = messageEventBus;
             UnitOfWork = unitOfWork;
+            ExceptionNotifier = exceptionNotifier;
+            Logger = logger;
+            OtherLog = otherLog;
         }
 
         /// <summary>
@@ -79,8 +103,15 @@ namespace Bing.Admin.Apis
         [HttpPost("testMessage")]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
-            await MessageEventBus.PublishAsync(new TestMessageEvent1(request));
-            await UnitOfWork.CommitAsync();
+            Logger.LogInformation($"测试Logger消息{nameof(ILogger<TestController>)} - 0: {request.Id}");
+            OtherLog
+                .Message($"测试Logger消息{nameof(ILog<TestController>)} - 0: {request.Id}")
+                .LogInformation();
+            Log.Info("测试日志消息Begin");
+            await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
+            if (request.NeedCommit)
+                await UnitOfWork.CommitAsync();
+            Log.Info("测试日志消息End");
             return Success();
         }
 
@@ -93,6 +124,19 @@ namespace Bing.Admin.Apis
         {
             await TestService.TestArgumentNullAsync(null);
             return Success();
+        }
+        /// <summary>
+        /// 测试日志
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("testLogger")]
+        public Task<IActionResult> TestLoggerAsync(string text)
+        {
+            Logger.LogTrace($"输出调试信息: {text}");
+            Logger.LogDebug($"输出调试信息: {text}");
+            Logger.LogInformation($"输出调试信息: {text}");
+            Logger.LogWarning($"输出调试信息: {text}");
+            return Task.FromResult(Success());
         }
     }
 }

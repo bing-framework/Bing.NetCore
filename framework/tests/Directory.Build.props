@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Net.Compilers" Version="2.*" Condition=" '$(OS)' == 'Windows_NT' ">
+    <!--<PackageReference Include="Microsoft.Net.Compilers" Version="2.*" Condition=" '$(OS)' == 'Windows_NT' ">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    </PackageReference>-->
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.*" />
     <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.*" />
@@ -18,6 +18,7 @@
     <PackageReference Include="NSubstitute" Version="4.*" />
     <PackageReference Include="Castle.Core" Version="4.*" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="Moq" Version="4.16.1" />
   </ItemGroup>
 
 </Project>

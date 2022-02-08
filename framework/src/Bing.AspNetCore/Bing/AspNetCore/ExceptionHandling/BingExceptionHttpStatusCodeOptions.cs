@@ -14,6 +14,11 @@ namespace Bing.AspNetCore.ExceptionHandling
         public IDictionary<string, HttpStatusCode> ErrorCodeToHttpStatusCodeMappings { get; }
 
         /// <summary>
+        /// 全局状态码200
+        /// </summary>
+        public bool GlobalHttpStatusCode200 { get; set; } = true;
+
+        /// <summary>
         /// 初始化一个<see cref="BingExceptionHttpStatusCodeOptions"/>类型的实例
         /// </summary>
         public BingExceptionHttpStatusCodeOptions() => ErrorCodeToHttpStatusCodeMappings = new Dictionary<string, HttpStatusCode>();

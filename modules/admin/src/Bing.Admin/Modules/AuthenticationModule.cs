@@ -44,6 +44,9 @@ namespace Bing.Admin.Modules
              {
                  o.Store.StoreOriginalPassword = true;
                  o.Password.MinLength = 6;
+                 o.Password.Uppercase = true;
+                 o.Password.Lowercase = true;
+                 o.Password.Digit = true;
              });
             // 添加Jwt认证
             services.AddJwt(configuration);

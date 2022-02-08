@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
@@ -32,7 +31,11 @@ namespace Bing.Logs
         /// <param name="context">日志上下文</param>
         /// <param name="format">日志格式器</param>
         /// <param name="currentUser">当前用户</param>
-        public Log(ILogProviderFactory providerFactory, ILogContext context, ILogFormat format, ICurrentUser currentUser)
+        public Log(
+            ILogProviderFactory providerFactory, 
+            ILogContext context, 
+            ILogFormat format, 
+            ICurrentUser currentUser)
             : base(providerFactory.Create("", format), context, currentUser)
         {
         }
@@ -44,7 +47,11 @@ namespace Bing.Logs
         /// <param name="context">日志上下文</param>
         /// <param name="currentUser">当前用户</param>
         /// <param name="class">类名</param>
-        public Log(ILogProvider provider, ILogContext context, ICurrentUser currentUser, string @class) 
+        public Log(
+            ILogProvider provider, 
+            ILogContext context, 
+            ICurrentUser currentUser, 
+            string @class) 
             : base(provider, context, currentUser) => _class = @class;
 
         /// <summary>
@@ -55,7 +62,12 @@ namespace Bing.Logs
         /// <param name="context">日志上下文</param>
         /// <param name="currentUser">当前用户</param>
         /// <param name="class">类名</param>
-        public Log(string name, ILogProvider provider, ILogContext context, ICurrentUser currentUser, string @class) 
+        public Log(
+            string name, 
+            ILogProvider provider, 
+            ILogContext context, 
+            ICurrentUser currentUser, 
+            string @class) 
             : base(name, provider, context, currentUser) => _class = @class;
 
         /// <summary>
