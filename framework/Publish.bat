@@ -24,6 +24,11 @@ dotnet pack src/Bing.Logs.Log4Net -c Release -o nuget_pub
 dotnet pack src/Bing.Logs.NLog -c Release -o nuget_pub
 dotnet pack src/Bing.Logs.Serilog -c Release -o nuget_pub
 
+::Logging
+dotnet pack src/Bing.Logging -c Release -o nuget_pub
+dotnet pack src/Bing.Logging.Serilog -c Release -o nuget_pub
+dotnet pack src/Bing.Logging.Sinks.Exceptionless -c Release -o nuget_pub
+
 ::Data
 dotnet pack src/Bing.Data -c Release -o nuget_pub
 dotnet pack src/Bing.Data.Sql -c Release -o nuget_pub
