@@ -49,7 +49,7 @@ namespace Bing.Admin
         /// </summary>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddSysLogProvider();
+            //loggerFactory.AddSysLogProvider();
             app.UseBing();
         }
     }

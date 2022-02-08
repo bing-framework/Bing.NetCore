@@ -89,7 +89,7 @@ namespace Serilog.Sinks.Exceptionless
         /// <param name="logEvent">日志事件</param>
         public void Emit(LogEvent logEvent)
         {
-            if (logEvent == null || _client.Configuration.IsValid)
+            if (logEvent == null || !_client.Configuration.IsValid)
                 return;
             var minLogLevel = _client.Configuration.Settings.GetMinLogLevel(logEvent.GetSource());
             if (LogLevelSwitcher.Switch(logEvent.Level) < minLogLevel)

@@ -8,7 +8,7 @@ namespace Bing.Logging.Serilog.Enrichers
     /// <summary>
     /// 日志上下文扩展属性
     /// </summary>
-    public class LogContextEnricher : ILogEventEnricher
+    internal class LogContextEnricher : ILogEventEnricher
     {
         /// <summary>
         /// 日志上下文

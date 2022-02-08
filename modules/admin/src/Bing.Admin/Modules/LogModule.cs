@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging.Serilog;
@@ -6,6 +7,7 @@ using Bing.Logs.NLog;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Enrichers.Span;
 using serilog = Serilog;
 
 namespace Bing.Admin.Modules
@@ -51,7 +53,15 @@ namespace Bing.Admin.Modules
                     .Enrich.FromLogContext()
                     .Enrich.WithLogContext()
                     .Enrich.WithLogLevel()
-                    .WriteTo.Exceptionless()
+                    .Enrich.WithSpan()
+                    .WriteTo.Exceptionless(additionalOperation: (builder) =>
+                    {
+                        if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
+                        {
+                            builder.Target.AddTags(traceId.ToString() ?? string.Empty);
+                        }
+                        return builder;
+                    })
                     .ReadFrom.Configuration(configuration)
                     .ConfigLogLevel(configuration)
                     .CreateLogger();

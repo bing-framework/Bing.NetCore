@@ -7,7 +7,7 @@ namespace Bing.Logging.Serilog.Enrichers
     /// <summary>
     /// 日志级别扩展属性 - 用于显示标准日志级别
     /// </summary>
-    public class LogLevelEnricher : ILogEventEnricher
+    internal class LogLevelEnricher : ILogEventEnricher
     {
         /// <summary>
         /// 扩展属性

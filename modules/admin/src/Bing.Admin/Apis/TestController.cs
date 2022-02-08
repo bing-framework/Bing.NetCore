@@ -10,6 +10,7 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Admin.Apis
 {
@@ -44,19 +45,26 @@ namespace Bing.Admin.Apis
         public IExceptionNotifier ExceptionNotifier { get; }
 
         /// <summary>
+        /// 日志组件
+        /// </summary>
+        public ILogger<TestController> Logger { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
         /// </summary>
         public TestController(ITestService testService
             , IProcessingServer processingServer
             , IMessageEventBus messageEventBus
             , IAdminUnitOfWork unitOfWork
-            , IExceptionNotifier exceptionNotifier)
+            , IExceptionNotifier exceptionNotifier
+            , ILogger<TestController> logger)
         {
             TestService = testService;
             ProcessingServer = processingServer;
             MessageEventBus = messageEventBus;
             UnitOfWork = unitOfWork;
             ExceptionNotifier = exceptionNotifier;
+            Logger = logger;
         }
 
         /// <summary>
@@ -104,6 +112,19 @@ namespace Bing.Admin.Apis
         {
             await TestService.TestArgumentNullAsync(null);
             return Success();
+        }
+        /// <summary>
+        /// 测试日志
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("testLogger")]
+        public Task<IActionResult> TestLoggerAsync(string text)
+        {
+            Logger.LogTrace($"输出调试信息: {text}");
+            Logger.LogDebug($"输出调试信息: {text}");
+            Logger.LogInformation($"输出调试信息: {text}");
+            Logger.LogWarning($"输出调试信息: {text}");
+            return Task.FromResult(Success());
         }
     }
 }
