@@ -1,8 +1,16 @@
 @echo off
 
 set /p key=input key:
-set /p version=input version:
+set /p versions=input version:
+set tmpVersion=%versions%
 set source=https://api.nuget.org/v3/index.json
+:loop
+for /f "tokens=1* delims=;" %%a in ("%tmpVersion%") do (
+    ::输出第一个分段（令牌）
+    set version=%%a
+    set tmpVersion=%%b
+)
+echo %version%
 
 ::Core
 dotnet nuget delete Bing.Core %version% -s %source% -k %key% --non-interactive
@@ -12,7 +20,7 @@ dotnet nuget delete Bing.AspNetCore %version% -s %source% -k %key% --non-interac
 dotnet nuget delete Bing.Security %version% -s %source% -k %key% --non-interactive
 
 ::Logs
-dotnet nuget delete Bing.Logs. %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.Logs %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete Bing.Logs.Exceptionless %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete Bing.Logs.Log4Net %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete Bing.Logs.NLog %version% -s %source% -k %key% --non-interactive
@@ -65,4 +73,5 @@ dotnet nuget delete BingNS.MiniProfiler %version% -s %source% -k %key% --non-int
 dotnet nuget delete BingNS.Locks.CSRedis %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete BingNS.Events.Cap.MySql %version% -s %source% -k %key% --non-interactive
 
+if defined tmpVersion goto :loop
 pause
