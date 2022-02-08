@@ -6,6 +6,7 @@ using Bing.AspNetCore.Mvc;
 using Bing.DependencyInjection;
 using Bing.Events.Messages;
 using Bing.ExceptionHandling;
+using Bing.Logging;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,11 @@ namespace Bing.Admin.Apis
         public ILogger<TestController> Logger { get; }
 
         /// <summary>
+        /// 其它日志组件
+        /// </summary>
+        public ILog<TestController> OtherLog { get; }
+
+        /// <summary>
         /// 初始化一个<see cref="TestController"/>类型的实例
         /// </summary>
         public TestController(ITestService testService
@@ -57,7 +63,8 @@ namespace Bing.Admin.Apis
             , IMessageEventBus messageEventBus
             , IAdminUnitOfWork unitOfWork
             , IExceptionNotifier exceptionNotifier
-            , ILogger<TestController> logger)
+            , ILogger<TestController> logger
+            , ILog<TestController> otherLog)
         {
             TestService = testService;
             ProcessingServer = processingServer;
@@ -65,6 +72,7 @@ namespace Bing.Admin.Apis
             UnitOfWork = unitOfWork;
             ExceptionNotifier = exceptionNotifier;
             Logger = logger;
+            OtherLog = otherLog;
         }
 
         /// <summary>
@@ -95,6 +103,10 @@ namespace Bing.Admin.Apis
         [HttpPost("testMessage")]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
+            Logger.LogInformation($"测试Logger消息{nameof(ILogger<TestController>)} - 0: {request.Id}");
+            OtherLog
+                .Message($"测试Logger消息{nameof(ILog<TestController>)} - 0: {request.Id}")
+                .LogInformation();
             Log.Info("测试日志消息Begin");
             await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
             if (request.NeedCommit)

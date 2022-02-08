@@ -11,6 +11,7 @@ using Bing.Events;
 using Bing.Events.Cap;
 using Bing.Events.Messages;
 using DotNetCore.CAP;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Admin.EventHandlers.Implements
 {
@@ -22,10 +23,11 @@ namespace Bing.Admin.EventHandlers.Implements
         /// <summary>
         /// 初始化一个<see cref="TestMessageEventHandler"/>类型的实例
         /// </summary>
-        public TestMessageEventHandler(IAdminUnitOfWork unitOfWork, IMessageEventBus messageEventBus)
+        public TestMessageEventHandler(IAdminUnitOfWork unitOfWork, IMessageEventBus messageEventBus, ILogger<TestMessageEventHandler> logger)
         {
             UnitOfWork = unitOfWork;
             MessageEventBus = messageEventBus;
+            Logger = logger;
         }
 
         /// <summary>
@@ -39,6 +41,11 @@ namespace Bing.Admin.EventHandlers.Implements
         protected IMessageEventBus MessageEventBus { get; }
 
         /// <summary>
+        /// 日志
+        /// </summary>
+        protected ILogger<TestMessageEventHandler> Logger { get; }
+
+        /// <summary>
         /// 测试消息
         /// </summary>
         [CapTrace]
@@ -47,6 +54,7 @@ namespace Bing.Admin.EventHandlers.Implements
         {
             if(message.ThrowException)
                 throw new NotImplementedException("主动触发，暂未生效");
+            Logger.LogDebug($"测试一波CAP消息 - 1: {message.Id}");
             Debug.WriteLine(message.Id);
             await MessageEventBus.PublishAsync(new TestMessageEvent2(message, message.Send));
             if(message.NeedCommit)
@@ -61,6 +69,7 @@ namespace Bing.Admin.EventHandlers.Implements
         public Task TestMessage2Async(TestMessage message)
         {
             Debug.WriteLine(message.Id);
+            Logger.LogDebug($"测试一波CAP消息 - 2: {message.Id}");
             return Task.CompletedTask;
         }
     }
