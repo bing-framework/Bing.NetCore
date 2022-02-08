@@ -12,7 +12,7 @@ namespace Bing.AspNetCore.Tracing
     /// AspNetCore 跟踪关联ID提供程序
     /// </summary>
     [Dependency(ServiceLifetime.Transient, ReplaceExisting = true)]
-    public class AspNetCoreCorrelationIdProvider : ICorrelationIdProvider, ITransientDependency
+    public class AspNetCoreCorrelationIdProvider : ICorrelationIdProvider
     {
         /// <summary>
         /// Http上下文访问器
