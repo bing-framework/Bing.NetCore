@@ -65,9 +65,11 @@ namespace Bing.DependencyInjection
         {
             if (implementationType.IsAbstract || implementationType.IsInterface)
                 return;
+
             var lifetime = GetLifetimeOrNull(implementationType);
             if (lifetime == null)
                 return;
+
             var dependencyAttribute = implementationType.GetAttribute<DependencyAttribute>();
             var serviceTypes = GetImplementedInterfaces(implementationType);
 

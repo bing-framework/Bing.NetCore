@@ -48,6 +48,8 @@ namespace Bing.AspNetCore.Tracing
             TraceIdContext.Current ??= new TraceIdContext(correlationId);
             try
             {
+                // TODO: 由于可能存在某个中间件设置了Response导致当前中间件无法设置
+                CheckAndSetCorrelationIdOnResponse(context, _options, correlationId);
                 await _next(context);
             }
             finally

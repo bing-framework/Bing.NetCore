@@ -27,12 +27,14 @@ namespace Bing.DependencyInjection
         /// </summary>
         protected override Type[] FindAllItems()
         {
-            var baseTypes = new[]
-                {typeof(ISingletonDependency), typeof(IScopedDependency), typeof(ITransientDependency)};
-            var types = _allAssemblyFinder.FindAll(true).SelectMany(assembly => assembly.GetTypes().Where(type =>
-                type.IsClass && !type.IsAbstract && !type.IsInterface &&
-                !type.HasAttribute<IgnoreDependencyAttribute>() &&
-                (baseTypes.Any(b => b.IsAssignableFrom(type)) || type.HasAttribute<DependencyAttribute>()))).ToArray();
+            var baseTypes = new[] {typeof(ISingletonDependency), typeof(IScopedDependency), typeof(ITransientDependency)};
+            var types = _allAssemblyFinder.FindAll(true)
+                .SelectMany(assembly => assembly
+                    .GetTypes()
+                    .Where(type => type.IsClass && !type.IsAbstract && !type.IsInterface
+                                   && !type.HasAttribute<IgnoreDependencyAttribute>()
+                                   && (baseTypes.Any(b => b.IsAssignableFrom(type)) || type.HasAttribute<DependencyAttribute>())))
+                .ToArray();
             return types;
         }
     }

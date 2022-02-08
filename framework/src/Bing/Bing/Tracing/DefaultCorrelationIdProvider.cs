@@ -1,12 +1,14 @@
 ﻿using System;
 using Bing.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Tracing
 {
     /// <summary>
     /// 默认跟踪标识提供程序
     /// </summary>
-    internal class DefaultCorrelationIdProvider : ICorrelationIdProvider, ISingletonDependency
+    [Dependency(ServiceLifetime.Singleton, TryAdd = true)]
+    public class DefaultCorrelationIdProvider : ICorrelationIdProvider
     {
         /// <summary>
         /// 跟踪标识提供程序

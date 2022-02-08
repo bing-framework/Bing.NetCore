@@ -24,16 +24,23 @@ namespace Bing.Auditing
         private readonly string _userName;
 
         /// <summary>
+        /// 操作时间
+        /// </summary>
+        private readonly DateTime? _dateTime;
+
+        /// <summary>
         /// 初始化一个<see cref="ModificationAuditedInitializer"/>类型的实例
         /// </summary>
         /// <param name="entity">实体</param>
         /// <param name="userId">用户标识</param>
         /// <param name="userName">用户名称</param>
-        private ModificationAuditedInitializer(object entity, string userId, string userName)
+        /// <param name="dateTime">操作时间</param>
+        private ModificationAuditedInitializer(object entity, string userId, string userName, DateTime? dateTime)
         {
             _entity = entity;
             _userId = userId;
             _userName = userName;
+            _dateTime = dateTime;
         }
 
         /// <summary>
@@ -42,7 +49,16 @@ namespace Bing.Auditing
         /// <param name="entity">实体</param>
         /// <param name="userId">用户标识</param>
         /// <param name="userName">用户名称</param>
-        public static void Init(object entity, string userId, string userName) => new ModificationAuditedInitializer(entity, userId, userName).Init();
+        public static void Init(object entity, string userId, string userName) => new ModificationAuditedInitializer(entity, userId, userName, null).Init();
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="entity">实体</param>
+        /// <param name="userId">用户标识</param>
+        /// <param name="userName">用户名称</param>
+        /// <param name="dateTime">操作时间</param>
+        public static void Init(object entity, string userId, string userName, DateTime? dateTime) => new ModificationAuditedInitializer(entity, userId, userName, dateTime).Init();
 
         /// <summary>
         /// 初始化
@@ -62,7 +78,7 @@ namespace Bing.Auditing
         private void InitLastModificationTime()
         {
             if (_entity is IHasModificationTime result)
-                result.LastModificationTime = DateTime.Now;
+                result.LastModificationTime = _dateTime.HasValue ? _dateTime.SafeValue() : DateTime.Now;
         }
 
         /// <summary>
