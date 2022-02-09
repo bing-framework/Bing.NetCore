@@ -59,14 +59,14 @@ namespace Bing.MailKit.Tests
         [Fact]
         public void Test_SendEmail()
         {
-            var box = new EmailBox
-            {
-                Subject = "MailKit 测试发送邮件",
-                To = _to,
-                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
-                IsBodyHtml = true,
-            };
-            this._mailKitEmailSender.Send(box);
+            //var box = new EmailBox
+            //{
+            //    Subject = "MailKit 测试发送邮件",
+            //    To = _to,
+            //    Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+            //    IsBodyHtml = true,
+            //};
+            //this._mailKitEmailSender.Send(box);
         }
 
         /// <summary>

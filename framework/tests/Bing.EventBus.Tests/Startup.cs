@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
+
 namespace Bing.EventBus.Tests
 {
     /// <summary>

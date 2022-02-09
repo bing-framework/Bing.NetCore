@@ -27,13 +27,6 @@ namespace Bing.Data.Queries.Conditions
         }
 
         /// <summary>
-        /// 最小值是否大于最大值
-        /// </summary>
-        /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
-        protected override bool IsMinGreaterMax(DateTime? min, DateTime? max) => min > max;
-
-        /// <summary>
         /// 获取最小值表达式
         /// </summary>
         protected override Expression GetMinValueExpression()

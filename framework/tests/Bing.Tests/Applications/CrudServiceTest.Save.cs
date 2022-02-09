@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Bing.AutoMapper;
+using Bing.DependencyInjection;
 using Bing.Tests.Samples;
 using NSubstitute;
 using Xunit;
@@ -79,6 +80,7 @@ namespace Bing.Tests.Applications
             _unitOfWork = Substitute.For<IUnitOfWork>();
             _repository = Substitute.For<IRepositorySample>();
             _service = new CrudServiceSample(_unitOfWork, _repository);
+            _service.LazyServiceProvider = Substitute.For<ILazyServiceProvider>();
             var allAssemblyFinder = new AppDomainAllAssemblyFinder();
             var mapperProfileTypeFinder = new MapperProfileTypeFinder(allAssemblyFinder);
             var instances = mapperProfileTypeFinder

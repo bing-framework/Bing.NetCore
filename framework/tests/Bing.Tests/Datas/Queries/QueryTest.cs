@@ -168,7 +168,7 @@ namespace Bing.Tests.Datas.Queries
             var max = DateTime.Parse("2000-1-2 10:10:10");
             var result = new StringBuilder();
             result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), DateTime))");
-            result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
+            result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/2 0:00:00\"), DateTime)))");
 
             _query.Between(t => t.DateValue, min, max, false);
             Assert.Equal(result.ToString(), _query.GetCondition().ToString());

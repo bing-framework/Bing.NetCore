@@ -564,7 +564,7 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses
             Expression<Func<Sample, bool>> condition = t => t.Email.Contains("a") && t.IntValue == 1;
             AssertHelper.Throws<InvalidOperationException>(() => {
                 _clause.WhereIfNotEmpty(condition);
-            }, string.Format("仅允许添加一个条件,条件：{0}", condition));
+            }, $"仅允许添加一个条件，条件：{condition}");
         }
 
         #endregion
