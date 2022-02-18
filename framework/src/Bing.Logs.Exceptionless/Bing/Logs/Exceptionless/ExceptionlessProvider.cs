@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics;
 using System.Linq;
 using Bing.Configuration;
 using Bing.Extensions;
@@ -72,6 +72,7 @@ namespace Bing.Logs.Exceptionless
             // 致命错误
             if (level == LogLevel.Fatal || level == LogLevel.Error)
                 builder.MarkAsCritical();
+            Debug.WriteLine($"【Exceptionless】Thread: {content.ThreadId}, LogId: {content.LogId}, TraceId: {content.TraceId}, Message: {GetMessage(content)}, Tags: [{content.Tags.ExpandAndToString()}]");
             SetUser(content);
             SetSource(builder, content);
             SetReferenceId(builder, content);

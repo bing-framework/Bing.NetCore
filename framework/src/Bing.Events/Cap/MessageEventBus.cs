@@ -26,14 +26,23 @@ namespace Bing.Events.Cap
         public ITransactionActionManager TransactionActionManager { get; set; }
 
         /// <summary>
+        /// 日志操作
+        /// </summary>
+        protected ILog Log { get; set; }
+
+        /// <summary>
         /// 初始化一个<see cref="MessageEventBus"/>类型的实例
         /// </summary>
         /// <param name="publisher">事件发布器</param>
         /// <param name="transactionActionManager">事务操作管理器</param>
-        public MessageEventBus(ICapPublisher publisher, ITransactionActionManager transactionActionManager)
+        /// <param name="log">日志操作</param>
+        public MessageEventBus(ICapPublisher publisher, 
+            ITransactionActionManager transactionActionManager,
+            ILog log)
         {
             Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
             TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
+            Log = log;
         }
 
         /// <summary>
@@ -86,7 +95,7 @@ namespace Bing.Events.Cap
         /// <param name="callback">回调名称</param>
         private void WriteLog(string name, object data, string callback)
         {
-            var log = Log.GetLog(this);
+            var log = Log;
             if (log.IsDebugEnabled == false)
                 return;
             log.Tag(name)

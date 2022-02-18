@@ -44,9 +44,9 @@ namespace Bing.Logs.Abstractions
         /// </summary>
         string Url { get; }
 
-        /// <summary>
-        /// 初始化日志标识
-        /// </summary>
-        void InitLogId();
+        ///// <summary>
+        ///// 初始化日志标识
+        ///// </summary>
+        //void InitLogId();
     }
 }
