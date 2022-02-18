@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
-using Bing.Collections;
-using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
 using Bing.Tracing;
@@ -16,42 +14,23 @@ namespace Bing.Logs.Core
     {
         #region 属性
 
-        /// <summary>
-        /// 日志上下文信息
-        /// </summary>
-        private LogContextInfo _info;
-
-        /// <summary>
-        /// 序号
-        /// </summary>
-        private int _orderId;
-
-        /// <summary>
-        /// 作用域字典
-        /// </summary>
-        private readonly ScopedDictionary _scopedDictionary;
+        private int _orderId = 0;
 
         /// <summary>
         /// 日志标识
         /// </summary>
-        public string LogId => $"{TraceId}-{GetInfo().GetOrderId()}";
+        public string LogId => GetInfo().IsWebEnv ? $"{GetInfo().TraceId}-{_orderId++}" : GetInfo().GetLogId();
 
         /// <summary>
         /// 跟踪号
         /// </summary>
-        public string TraceId => $"{TraceIdContext.Current?.TraceId ?? GetInfo().TraceId}";
-
-        ///// <summary>
-        ///// 跟踪号
-        ///// </summary>
-        //public string TraceId
-        //{
-        //    get
-        //    {
-        //        TraceIdContext.Current ??= new TraceIdContext(string.Empty);
-        //        return TraceIdContext.Current.TraceId;
-        //    }
-        //}
+        public string TraceId
+        {
+            get
+            {
+                return (TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId;
+            }
+        }
 
         /// <summary>
         /// 计时器
@@ -80,53 +59,12 @@ namespace Bing.Logs.Core
 
         #endregion
 
-        #region 构造函数
-
-        /// <summary>
-        /// 初始化一个<see cref="LogContext"/>类型的实例
-        /// </summary>
-        /// <param name="scopedDictionary">作用域字典</param>
-        public LogContext(ScopedDictionary scopedDictionary)
-        {
-            _orderId = 0;
-            _scopedDictionary = scopedDictionary;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// 初始化日志标识
-        /// </summary>
-        public void InitLogId()
-        {
-            var key = "Bing.Logs.LogContext_orderId";
-            _scopedDictionary[key] = _scopedDictionary.ContainsKey(key) ? ++_orderId : _orderId;
-        }
-
-        ///// <summary>
-        ///// 获取日志上下文信息
-        ///// </summary>
-        //private LogContextInfo GetInfo()
-        //{
-        //    if (_info != null)
-        //        return _info;
-        //    var key = "Bing.Logs.LogContext";
-        //    _info = _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null;
-        //    if (_info != null)
-        //        return _info;
-        //    _info = CreateInfo();
-        //    _scopedDictionary[key] = _info;
-        //    return _info;
-        //}
-
         /// <summary>
         /// 获取日志上下文信息
         /// </summary>
         private LogContextInfo GetInfo()
         {
-            if (LogContextInfo.Current == null)
-                LogContextInfo.Current = CreateInfo();
-            return LogContextInfo.Current;
+            return LogContextInfo.Current ?? (LogContextInfo.Current = CreateInfo());
         }
 
         /// <summary>
@@ -143,7 +81,7 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 获取跟踪号
         /// </summary>
-        protected virtual string GetTraceId() => Guid.NewGuid().ToString();
+        protected virtual string GetTraceId() => Guid.NewGuid().ToString("N");
 
         /// <summary>
         /// 获取计时器

@@ -38,13 +38,16 @@ namespace Bing.Datas.EntityFramework.Logs
             Func<TState, Exception, string> formatter)
         {
             var config = GetConfig();
-            var log = Bing.Logs.Log.GetLog(TraceLogName);
+            var log = GetUnitOfWork()?.Log;
+            if (log == null)
+                return;
             if (IsEnabled(eventId, config, exception) == false)
                 return;
             if (!string.IsNullOrWhiteSpace(GetUnitOfWork().TraceId))
                 log.Tag(GetUnitOfWork()?.TraceId);
+            log.Tag(TraceLogName);
             log
-                .Caption("执行EF操作：")
+                .Caption($"执行EF操作：{formatter(state, exception)}")
                 .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
                 .Content($"事件ID：{eventId.Id}")
                 .Content($"事件名称：{eventId.Name}");

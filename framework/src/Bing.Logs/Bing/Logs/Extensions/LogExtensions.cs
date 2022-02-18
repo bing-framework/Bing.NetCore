@@ -25,7 +25,7 @@ namespace Bing.Logs
         {
             return log.Set<LogContent>(content =>
             {
-                if (string.IsNullOrWhiteSpace(content.BusinessId) == false) 
+                if (string.IsNullOrWhiteSpace(content.BusinessId) == false)
                     content.BusinessId += ",";
                 content.BusinessId += businessId;
             });
@@ -90,7 +90,7 @@ namespace Bing.Logs
         {
             if (dictionary == null || dictionary.Count == 0)
                 return log;
-            foreach (var item in dictionary) 
+            foreach (var item in dictionary)
                 Params(log, item.Key, item.Value.SafeString());
             return log;
         }

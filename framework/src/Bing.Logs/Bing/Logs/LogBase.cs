@@ -245,10 +245,10 @@ namespace Bing.Logs
         /// <param name="content">日志内容</param>
         protected virtual void Init(TContent content)
         {
-            Context.InitLogId();
             content.LogName = Provider.LogName;
             content.TraceId = Context.TraceId;
-            content.LogId = Context.LogId;
+            if (string.IsNullOrWhiteSpace(content.LogId))
+                content.LogId = Context.LogId;
             content.OperationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             content.Duration = Context.Stopwatch.Elapsed.Description();
             content.Ip = Context.Ip;

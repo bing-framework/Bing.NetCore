@@ -20,6 +20,7 @@ using Bing.Domain.Entities.Events;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Logs;
+using Bing.Logs.Core;
 using Bing.Uow;
 using Bing.Users;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         [Autowired]
         public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
+
+        /// <summary>
+        /// 日志
+        /// </summary>
+        public ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
 
         /// <summary>
         /// 当前用户
@@ -158,7 +164,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected void EnableLog(DbContextOptionsBuilder builder)
         {
             ConfiguringIgnoreEvent(builder);
-            var log = GetLog();
+            var log = Log;
             if (IsEnabled(log) == false)
                 return;
             builder.EnableSensitiveDataLogging();
@@ -170,6 +176,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// 配置忽略事件
         /// </summary>
         /// <param name="builder">配置事件</param>
+        /// <remarks>参考：https://docs.microsoft.com/zh-cn/ef/core/logging-events-diagnostics </remarks>
         protected virtual void ConfiguringIgnoreEvent(DbContextOptionsBuilder builder)
         {
             builder.ConfigureWarnings(x => x.Ignore(
@@ -194,21 +201,6 @@ namespace Bing.Datas.EntityFramework.Core
                 RelationalEventId.TransactionStarted,
                 RelationalEventId.TransactionDisposed
             ));
-        }
-
-        /// <summary>
-        /// 获取日志操作
-        /// </summary>
-        protected virtual ILog GetLog()
-        {
-            try
-            {
-                return Log.GetLog(EfLog.TraceLogName);
-            }
-            catch
-            {
-                return Log.Null;
-            }
         }
 
         /// <summary>

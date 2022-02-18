@@ -48,16 +48,19 @@ namespace Bing.Admin.EventHandlers.Implements
         /// <summary>
         /// 测试消息
         /// </summary>
-        [CapTrace]
+        //[CapTrace]
         [EventHandler(MessageEventConst.TestMessage1)]
-        public async Task TestMessage1Async(TestMessage message,[FromCap]CapHeader header)
+        public async Task TestMessage1Async(TestMessage message, [FromCap] CapHeader header)
         {
-            if(message.ThrowException)
+            if (message.ThrowException)
                 throw new NotImplementedException("主动触发，暂未生效");
+            Log.Info($"测试一波CAP消息 - 0: {message.Id}");
             Logger.LogDebug($"测试一波CAP消息 - 1: {message.Id}");
+            var log = Bing.Logs.Log.GetLog(nameof(TestMessageEventHandler));
+            log.Debug($"测试一波CAP消息 - 1 - 1: {message.Id}");
             Debug.WriteLine(message.Id);
             await MessageEventBus.PublishAsync(new TestMessageEvent2(message, message.Send));
-            if(message.NeedCommit)
+            if (message.NeedCommit)
                 await UnitOfWork.CommitAsync();
         }
 
@@ -70,6 +73,8 @@ namespace Bing.Admin.EventHandlers.Implements
         {
             Debug.WriteLine(message.Id);
             Logger.LogDebug($"测试一波CAP消息 - 2: {message.Id}");
+            var log = Bing.Logs.Log.GetLog(nameof(TestMessageEventHandler));
+            log.Debug($"测试一波CAP消息 - 2 - 1: {message.Id}");
             return Task.CompletedTask;
         }
     }

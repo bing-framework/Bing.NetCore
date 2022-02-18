@@ -28,14 +28,11 @@ namespace Bing.AspNetCore.Logs
         /// <summary>
         /// 初始化一个<see cref="AspNetCoreLogContext"/>类型的实例
         /// </summary>
-        /// <param name="scopedDictionary">作用域字典</param>
         /// <param name="webClientInfoProvider">Web客户端信息提供程序</param>
         /// <param name="httpContextAccessor">Http上下文访问器</param>
         public AspNetCoreLogContext(
-            ScopedDictionary scopedDictionary, 
-            IHttpContextAccessor httpContextAccessor, 
+            IHttpContextAccessor httpContextAccessor,
             IWebClientInfoProvider webClientInfoProvider)
-            : base(scopedDictionary)
         {
             HttpContextAccessor = httpContextAccessor;
             WebClientInfoProvider = webClientInfoProvider;
@@ -50,9 +47,10 @@ namespace Bing.AspNetCore.Logs
 
             logContextInfo.Ip = WebClientInfoProvider.ClientIpAddress;
             logContextInfo.Browser = WebClientInfoProvider.ClientIpAddress;
-
             logContextInfo.Url = HttpContextAccessor.HttpContext?.Request?.GetDisplayUrl();
-
+            logContextInfo.IsWebEnv = HttpContextAccessor.HttpContext?.Request != null;
+            if (logContextInfo.IsWebEnv)
+                logContextInfo.TraceId = TraceId;
             return logContextInfo;
         }
 
@@ -65,7 +63,7 @@ namespace Bing.AspNetCore.Logs
             if (!string.IsNullOrWhiteSpace(correlationId))
                 return correlationId;
             var traceId = HttpContextAccessor.HttpContext?.TraceIdentifier;
-            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : Guid.TryParse(traceId, out _) ? traceId : Guid.NewGuid().ToString();
+            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString("N") : Guid.TryParse(traceId, out _) ? traceId : Guid.NewGuid().ToString("N");
         }
     }
 }

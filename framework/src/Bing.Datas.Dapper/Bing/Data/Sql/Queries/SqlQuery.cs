@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Helpers;
 using Bing.Logs;
+using Bing.Logs.Internal;
 using Dapper;
 
 namespace Bing.Data.Sql.Queries
@@ -264,7 +265,7 @@ namespace Bing.Data.Sql.Queries
             if (IsEnabled(log) == false)
                 return;
             log.Class(GetType().FullName)
-                .Caption("SqlQuery查询调试:")
+                .Caption($"SqlQuery查询调试: {sql}")
                 .Sql("原始Sql:")
                 .Sql($"{sql}{Common.Line}")
                 .Sql("调试Sql:")

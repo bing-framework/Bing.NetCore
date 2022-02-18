@@ -46,6 +46,11 @@ namespace Bing.Logs.Internal
         public string Url { get; set; }
 
         /// <summary>
+        /// 是否Web环境
+        /// </summary>
+        public bool IsWebEnv { get; set; }
+
+        /// <summary>
         /// 当前日志上下文信息
         /// </summary>
         // ReSharper disable once InconsistentNaming
@@ -71,5 +76,15 @@ namespace Bing.Logs.Internal
         /// 获取序号
         /// </summary>
         public int GetOrderId() => _orderId++;
+
+        /// <summary>
+        /// 获取日志标识
+        /// </summary>
+        public string GetLogId()
+        {
+            var logId= $"{TraceId}-{GetOrderId()}";
+            Debug.WriteLine($"【LogContextInfo】LogId: {logId}");
+            return logId;
+        }
     }
 }

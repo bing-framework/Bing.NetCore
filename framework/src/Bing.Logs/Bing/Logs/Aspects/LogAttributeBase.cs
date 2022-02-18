@@ -3,6 +3,7 @@ using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects.Base;
 using Bing.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Logs.Aspects
 {
@@ -17,7 +18,7 @@ namespace Bing.Logs.Aspects
         public override async Task Invoke(AspectContext context, AspectDelegate next)
         {
             var methodName = GetMethodName(context);
-            var log = Log.GetLog(methodName);
+            var log = context.ServiceProvider.GetService<ILog>();
             if (!Enabled(log))
                 return;
             ExecuteBefore(log, context, methodName);

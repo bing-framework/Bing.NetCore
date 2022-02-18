@@ -4,6 +4,7 @@ using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging.Serilog;
 using Bing.Logs.NLog;
+using Bing.Tracing;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -60,6 +61,7 @@ namespace Bing.Admin.Modules
                         {
                             builder.Target.AddTags(traceId.ToString() ?? string.Empty);
                         }
+                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
                         return builder;
                     })
                     .ReadFrom.Configuration(configuration)

@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Bing.AutoMapper;
+using Bing.DependencyInjection;
+using Bing.ObjectMapping;
+using Bing.Reflection;
 using Bing.Tests.Samples;
 using NSubstitute;
 using Xunit;
@@ -54,8 +60,26 @@ namespace Bing.Tests.Applications
             _entity2 = new EntitySample(_id2) { Name = "B" };
             _repository = Substitute.For<IRepositorySample>();
             _service = new QueryServiceSample(_repository);
-            //var mapper = new AutoMapperMapper();
-            //MapperExtensions.SetMapper(mapper);
+            _service.LazyServiceProvider = Substitute.For<ILazyServiceProvider>();
+            var allAssemblyFinder = new AppDomainAllAssemblyFinder();
+            var mapperProfileTypeFinder = new MapperProfileTypeFinder(allAssemblyFinder);
+            var instances = mapperProfileTypeFinder
+                .FindAll()
+                .Select(type => Bing.Reflection.Reflections.CreateInstance<IObjectMapperProfile>(type))
+                .ToList();
+            var configuration = new MapperConfiguration(cfg =>
+            {
+                foreach (var instance in instances)
+                {
+
+                    Debug.WriteLine($"初始化AutoMapper配置：{instance.GetType().FullName}");
+                    instance.CreateMap();
+                    // ReSharper disable once SuspiciousTypeConversion.Global
+                    cfg.AddProfile(instance as Profile);
+                }
+            });
+            var mapper = new AutoMapperObjectMapper(configuration, instances);
+            ObjectMapperExtensions.SetMapper(mapper);
         }
 
         /// <summary>
