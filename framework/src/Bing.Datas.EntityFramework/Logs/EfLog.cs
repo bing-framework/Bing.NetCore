@@ -7,6 +7,7 @@ using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
+using Bing.Reflection;
 using Bing.Uow;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,7 @@ namespace Bing.Datas.EntityFramework.Logs
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
             Func<TState, Exception, string> formatter)
         {
+            var success = false;
             var config = GetConfig();
             var log = GetUnitOfWork()?.Log;
             if (log == null)
@@ -46,13 +48,31 @@ namespace Bing.Datas.EntityFramework.Logs
             if (!string.IsNullOrWhiteSpace(GetUnitOfWork().TraceId))
                 log.Tag(GetUnitOfWork()?.TraceId);
             log.Tag(TraceLogName);
-            log
-                .Caption($"执行EF操作：{formatter(state, exception)}")
-                .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
-                .Content($"事件ID：{eventId.Id}")
-                .Content($"事件名称：{eventId.Name}");
-            AddContent(state, config, log);
-            log.Exception(exception).Trace();
+            var caption = string.Empty;
+            try
+            {
+                log
+                    .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
+                    .Content($"事件ID：{eventId.Id}")
+                    .Content($"事件名称：{eventId.Name}");
+                AddContent(state, config, log);
+                log.Exception(exception);
+                caption = formatter(state, exception);
+                success = true;
+            }
+            catch (Exception e)
+            {
+                InvokeHelper.OnInvokeException?.Invoke(e);
+                success = false;
+            }
+            finally
+            {
+                log.Caption($"执行EF操作：{caption}");
+                if (success)
+                    log.Trace();
+                else
+                    log.Error();
+            }
         }
 
         /// <summary>
