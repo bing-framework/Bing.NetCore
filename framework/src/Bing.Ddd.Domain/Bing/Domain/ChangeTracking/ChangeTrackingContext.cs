@@ -75,13 +75,14 @@ namespace Bing.Domain.ChangeTracking
         /// <typeparam name="TProperty">属性类型</typeparam>
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="expression">属性表达式。范例：t => t.Name</param>
+        /// <param name="obj">领域对象</param>
         /// <param name="newValue">新值。范例：newEntity.Name</param>
-        public void Add<TObject, TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) where TObject : IDomainObject
+        public void Add<TObject, TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TObject obj, TValue newValue) where TObject : IDomainObject
         {
             var member = Lambdas.GetMemberExpression(expression);
             var name = Lambdas.GetMemberName(member);
             var desc = Reflection.Reflections.GetDisplayNameOrDescription(member.Member);
-            var value = Lambdas.GetValue(expression);
+            var value = member.Member.GetPropertyValue(obj);
             Add(name, desc, Conv.To<TValue>(value), newValue);
         }
 

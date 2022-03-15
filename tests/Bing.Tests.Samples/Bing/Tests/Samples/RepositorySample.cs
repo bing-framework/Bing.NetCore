@@ -42,6 +42,15 @@ namespace Bing.Tests.Samples
         /// </summary>
         [IgnoreMap]
         public string IgnoreValue { get; set; }
+
+        /// <summary>
+        /// 添加变更列表
+        /// </summary>
+        protected override void AddChanges(EntitySample other)
+        {
+            AddChange(x => x.Id, other.Id);
+            AddChange(x => x.Name, other.Name);
+        }
     }
 
     /// <summary>
