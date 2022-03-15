@@ -91,7 +91,7 @@ namespace Bing.Domain.Entities
         /// <typeparam name="TValue">值类型</typeparam>
         /// <param name="expression">属性表达式。范例：t => t.Name</param>
         /// <param name="newValue">新值。范例：newEntity.Name</param>
-        protected void AddChange<TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) => _changeTrackingContext.Add(expression, newValue);
+        protected void AddChange<TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) => _changeTrackingContext.Add(expression, AssignableType(this), newValue);
 
         /// <summary>
         /// 添加变更
