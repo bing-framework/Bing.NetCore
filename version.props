@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>2</VersionMinor>
-    <VersionPatch>2</VersionPatch>
+    <VersionPatch>3</VersionPatch>
     <VersionQuality>20220104-1</VersionQuality>
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
     <!--<VersionSuffix>preview-$(VersionQuality)</VersionSuffix>-->
