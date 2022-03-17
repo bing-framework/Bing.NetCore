@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Bing.Application.Dtos;
 using Bing.Application.Services;
+using Bing.Auditing;
 using Bing.Data.Queries;
 
 namespace Bing.Tests.Samples
@@ -10,7 +12,7 @@ namespace Bing.Tests.Samples
     /// <summary>
     /// 数据传输对象样例
     /// </summary>
-    public class DtoSample : DtoBase
+    public class DtoSample : DtoBase, IAuditedObjectWithName
     {
         /// <summary>
         /// 名称
@@ -23,6 +25,36 @@ namespace Bing.Tests.Samples
         /// </summary>
         [IgnoreMap]
         public string IgnoreValue { get; set; }
+
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime? CreationTime { get; set; }
+
+        /// <summary>
+        /// 创建人标识
+        /// </summary>
+        public Guid? CreatorId { get; set; }
+
+        /// <summary>
+        /// 创建人
+        /// </summary>
+        public string Creator { get; set; }
+
+        /// <summary>
+        /// 最后修改时间
+        /// </summary>
+        public DateTime? LastModificationTime { get; set; }
+
+        /// <summary>
+        /// 最后修改人标识
+        /// </summary>
+        public Guid? LastModifierId { get; set; }
+
+        /// <summary>
+        /// 最后修改人
+        /// </summary>
+        public string LastModifier { get; set; }
 
         /// <summary>
         /// 创建空集合

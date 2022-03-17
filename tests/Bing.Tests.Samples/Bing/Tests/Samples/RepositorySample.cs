@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Bing.Auditing;
 using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Domain.Entities;
@@ -18,7 +19,7 @@ namespace Bing.Tests.Samples
     /// 实体样例
     /// </summary>
     [Display(Name = "实体样例")]
-    public class EntitySample : AggregateRoot<EntitySample>
+    public class EntitySample : AggregateRoot<EntitySample>, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="EntitySample"/>类型的实例
@@ -44,12 +45,43 @@ namespace Bing.Tests.Samples
         public string IgnoreValue { get; set; }
 
         /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime? CreationTime { get; set; }
+
+        /// <summary>
+        /// 创建人标识
+        /// </summary>
+        public Guid? CreatorId { get; set; }
+
+        /// <summary>
+        /// 创建人
+        /// </summary>
+        public string Creator { get; set; }
+
+        /// <summary>
+        /// 最后修改时间
+        /// </summary>
+        public DateTime? LastModificationTime { get; set; }
+
+        /// <summary>
+        /// 最后修改人标识
+        /// </summary>
+        public Guid? LastModifierId { get; set; }
+
+        /// <summary>
+        /// 最后修改人
+        /// </summary>
+        public string LastModifier { get; set; }
+
+        /// <summary>
         /// 添加变更列表
         /// </summary>
         protected override void AddChanges(EntitySample other)
         {
             AddChange(x => x.Id, other.Id);
             AddChange(x => x.Name, other.Name);
+            AddChange(x => x.LastModificationTime, other.LastModificationTime);
         }
     }
 

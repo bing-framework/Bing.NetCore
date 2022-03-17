@@ -126,8 +126,9 @@ namespace Bing.Tests.Applications
         [Fact]
         public async Task Test_SaveAsync_Update()
         {
-            _repository.FindAsync(_id).Returns(t => new EntitySample(_id) { Name = "a" });
-            await _service.SaveAsync(new DtoSample { Id = _id.ToString(), Name = "b" });
+            var now = DateTime.Now;
+            _repository.FindAsync(_id).Returns(t => new EntitySample(_id) { Name = "a", LastModificationTime = now });
+            await _service.SaveAsync(new DtoSample { Id = _id.ToString(), Name = "b",LastModificationTime = now.AddDays(1)});
             await _repository.DidNotReceive().AddAsync(Arg.Any<EntitySample>());
             await _repository.Received().UpdateAsync(Arg.Is<EntitySample>(t => t.Name == "b"));
         }
