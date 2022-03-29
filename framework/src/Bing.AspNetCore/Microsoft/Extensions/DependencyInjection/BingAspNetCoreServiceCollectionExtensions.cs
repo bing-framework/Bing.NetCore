@@ -12,7 +12,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// 获取<see cref="IWebHostEnvironment"/>环境信息
         /// </summary>
         /// <param name="services">服务集合</param>
-        public static IWebHostEnvironment GetWebHostEnvironment(this IServiceCollection services) => services.GetSingletonInstance<IWebHostEnvironment>();
+        public static IWebHostEnvironment GetWebHostEnvironment(this IServiceCollection services)
+        {
+            var hostingEnvironment = services.GetSingletonInstanceOrNull<IWebHostEnvironment>();
+            return hostingEnvironment ?? new EmptyHostingEnvironment { EnvironmentName = Microsoft.Extensions.Hosting.Environments.Development };
+        }
 #elif NETSTANDARD2_0
         /// <summary>
         /// 获取<see cref="IHostingEnvironment"/>环境信息
