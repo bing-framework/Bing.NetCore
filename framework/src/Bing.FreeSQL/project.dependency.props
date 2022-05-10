@@ -6,8 +6,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FreeSql" Version="2.3.200" />
-    <PackageReference Include="FreeSql.DbContext" Version="2.3.200" />
-    <PackageReference Include="FreeSql.Extensions.Linq" Version="2.3.200" />
+    <PackageReference Include="FreeSql" Version="$(FreeSQLPackageVersion)" />
+    <PackageReference Include="FreeSql.DbContext" Version="$(FreeSQLPackageVersion)" />
+    <PackageReference Include="FreeSql.Extensions.Linq" Version="$(FreeSQLPackageVersion)" />
   </ItemGroup>
 </Project>
