@@ -42,6 +42,7 @@ namespace Bing.Admin.Modules
             BingClaimTypes.UserName = IdentityModel.JwtClaimTypes.Name;
             services.AddControllers(o =>
                 {
+                    o.Filters.Add<ValidationModelAttribute>();
                     o.Filters.Add<ResultHandlerAttribute>();
                     o.Filters.Add<BingExceptionFilter>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
@@ -51,6 +52,12 @@ namespace Bing.Admin.Modules
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 });
+            // 配置模型校验
+            services.Configure<ApiBehaviorOptions>(o =>
+            {
+                o.SuppressModelStateInvalidFilter = true;
+            });
+
             services.EnableAop(o =>
             {
                 o.ThrowAspectException = false;
