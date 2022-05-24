@@ -47,7 +47,7 @@ namespace Bing.Admin
         /// <summary>
         /// 配置请求管道
         /// </summary>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             //loggerFactory.AddSysLogProvider();
             app.UseBing();

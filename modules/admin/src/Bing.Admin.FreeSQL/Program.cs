@@ -4,13 +4,21 @@ using Microsoft.Extensions.Hosting;
 
 namespace Bing.Admin
 {
+    /// <summary>
+    /// 程序入口点
+    /// </summary>
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            CreateWebHostBuilder(args).Build().Run();
-        }
+        /// <summary>
+        /// 主函数
+        /// </summary>
+        /// <param name="args">参数</param>
+        public static void Main(string[] args) => CreateWebHostBuilder(args).Build().Run();
 
+        /// <summary>
+        /// 创建主机
+        /// </summary>
+        /// <param name="args">参数</param>
         public static IHostBuilder CreateWebHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseServiceContext()
