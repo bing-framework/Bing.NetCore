@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bing.Application.Aspects;
 using Bing.Application.Dtos;
 using Bing.Data.Queries;
-using Bing.Validations.Aspects;
+using Bing.Validation;
 
 namespace Bing.Application.Services
 {

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Bing.Tests.Samples;
-using Bing.Validations;
+using Bing.Validation;
 using Xunit;
 
 namespace Bing.Tests.Validations

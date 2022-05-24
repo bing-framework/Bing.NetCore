@@ -4,14 +4,14 @@ using Bing.Biz.Payments.Properties;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.ObjectMapping;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Biz.Payments.Core
 {
     /// <summary>
     /// 支付参数基类
     /// </summary>
-    public class PayParamBase : IValidation
+    public class PayParamBase : IVerifyModel
     {
         /// <summary>
         /// 订单标题
@@ -51,7 +51,7 @@ namespace Bing.Biz.Payments.Core
         /// <summary>
         /// 验证
         /// </summary>
-        public virtual ValidationResultCollection Validate()
+        public virtual IValidationResult Validate()
         {
             ValidateMoney();
             var result = DataAnnotationValidation.Validate(this);

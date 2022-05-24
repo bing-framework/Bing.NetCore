@@ -30,7 +30,7 @@ namespace Bing.Validation
                 ValidateCollection(parameter);
                 return;
             }
-            var validation = parameter.Value as IValidation;
+            var validation = parameter.Value as IVerifyModel;
             validation?.Validate();
         }
 
@@ -40,7 +40,7 @@ namespace Bing.Validation
         /// <param name="parameter">参数</param>
         private void ValidateCollection(Parameter parameter)
         {
-            if (!(parameter.Value is IEnumerable<IValidation> validations))
+            if (!(parameter.Value is IEnumerable<IVerifyModel> validations))
                 return;
             foreach (var validation in validations)
                 validation.Validate();

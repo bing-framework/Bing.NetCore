@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Bing.Exceptions;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Application.Dtos
 {
@@ -12,7 +12,7 @@ namespace Bing.Application.Dtos
         /// <summary>
         /// 验证
         /// </summary>
-        public virtual ValidationResultCollection Validate()
+        public virtual IValidationResult Validate()
         {
             var result = DataAnnotationValidation.Validate(this);
             if (result.IsValid)

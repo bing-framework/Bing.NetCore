@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Biz.Payments.Core
 {
@@ -48,7 +48,6 @@ namespace Bing.Biz.Payments.Core
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         Task<ValidationResultCollection> ValidateAsync();
 
         /// <summary>

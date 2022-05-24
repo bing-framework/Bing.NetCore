@@ -1,5 +1,6 @@
 ﻿using System;
 using Bing.Auditing;
+using Bing.Validation;
 
 namespace Bing.Domain.Entities.Auditing
 {
@@ -9,7 +10,7 @@ namespace Bing.Domain.Entities.Auditing
     /// <typeparam name="TEntity">实体类型</typeparam>
     [Serializable]
     public abstract class CreationAuditedAggregateRoot<TEntity> : AggregateRoot<TEntity>, ICreationAuditedObject
-        where TEntity : class, IAggregateRoot
+        where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 创建时间
@@ -30,7 +31,7 @@ namespace Bing.Domain.Entities.Auditing
     /// <typeparam name="TKey">标识类型</typeparam>
     [Serializable]
     public abstract class CreationAuditedAggregateRoot<TEntity, TKey> : AggregateRoot<TEntity, TKey>, ICreationAuditedObject<TKey>
-        where TEntity : class, IAggregateRoot
+        where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 创建时间

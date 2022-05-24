@@ -11,12 +11,12 @@ namespace Bing.Validation
         /// <summary>
         /// 处理验证错误
         /// </summary>
-        /// <param name="results">验证错误集合</param>
-        public void Handle(ValidationResultCollection results)
+        /// <param name="result">验证错误</param>
+        public void Handle(IValidationResult result)
         {
-            if (results.IsValid)
+            if (result.IsValid)
                 return;
-            throw new Warning(results.First().ErrorMessage);
+            throw new Warning(result.First().ErrorMessage);
         }
     }
 }

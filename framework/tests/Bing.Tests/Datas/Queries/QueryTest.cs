@@ -7,7 +7,6 @@ using Bing.Extensions;
 using Bing.Properties;
 using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;
-using Bing.Extensions;
 using Xunit;
 
 namespace Bing.Tests.Datas.Queries

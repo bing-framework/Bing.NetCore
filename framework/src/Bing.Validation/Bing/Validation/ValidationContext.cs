@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bing.Configuration;
 using Bing.Validation.Strategies;
 
 namespace Bing.Validation
@@ -113,7 +112,7 @@ namespace Bing.Validation
             if (ResultCollection.IsValid)
                 return;
             if (Handle == null)
-                Handle = op => op.HandleAll(BingConfig.Current.ValidationHandler);// 如果没有处理器操作，则使用默认操作
+                Handle = op => op.HandleAll(ValidationMe.ExposeCallbackHandler());// 如果没有处理器操作，则使用默认操作
             Handle.Invoke(ResultCollection.Handle());
         }
 

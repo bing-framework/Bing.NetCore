@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Domain.Entities;
-using Bing.Validations.Aspects;
+using Bing.Validation;
 
 namespace Bing.Data
 {

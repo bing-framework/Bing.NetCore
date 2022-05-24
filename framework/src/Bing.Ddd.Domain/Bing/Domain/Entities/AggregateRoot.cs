@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Bing.Auditing;
 using Bing.Domain.Entities.Events;
+using Bing.Validation;
 
 namespace Bing.Domain.Entities
 {
@@ -10,7 +11,7 @@ namespace Bing.Domain.Entities
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     public abstract class AggregateRoot<TEntity> : AggregateRoot<TEntity, Guid>
-        where TEntity : class, IAggregateRoot
+        where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 初始化一个<see cref="AggregateRoot{TEntity}"/>类型的实例
@@ -34,7 +35,7 @@ namespace Bing.Domain.Entities
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">标识类型</typeparam>
     public abstract class AggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, IAggregateRoot<TEntity, TKey>
-        where TEntity : class, IAggregateRoot
+        where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 领域事件列表

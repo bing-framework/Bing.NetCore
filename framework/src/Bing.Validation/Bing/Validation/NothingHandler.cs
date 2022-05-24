@@ -8,8 +8,8 @@
         /// <summary>
         /// 处理验证错误
         /// </summary>
-        /// <param name="results">验证结果集合</param>
-        public void Handle(ValidationResultCollection results)
+        /// <param name="result">验证结果</param>
+        public void Handle(IValidationResult result)
         {
         }
     }

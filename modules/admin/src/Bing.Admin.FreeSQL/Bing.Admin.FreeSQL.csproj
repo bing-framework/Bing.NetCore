@@ -20,4 +20,6 @@
     <ProjectReference Include="..\Bing.Admin.Service\Bing.Admin.Service.csproj" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System;
 using Bing.Auditing;
+using Bing.Validation;
 
 namespace Bing.Domain.Entities.Auditing
 {
@@ -9,7 +10,7 @@ namespace Bing.Domain.Entities.Auditing
     /// <typeparam name="TEntity">实体类型</typeparam>
     [Serializable]
     public abstract class CreationAuditedEntity<TEntity> : EntityBase<TEntity>, ICreationAuditedObject
-        where TEntity : class, IEntity
+        where TEntity : class, IEntity, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 创建时间
@@ -29,7 +30,7 @@ namespace Bing.Domain.Entities.Auditing
     /// <typeparam name="TKey">标识类型</typeparam>
     [Serializable]
     public abstract class CreationAuditedEntity<TEntity, TKey> : EntityBase<TEntity, TKey>, ICreationAuditedObject<TKey>
-        where TEntity : class, IEntity
+        where TEntity : class, IEntity, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 创建时间

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Bing.Domain.ChangeTracking;
-using Bing.Validations;
-using Bing.Validations.Abstractions;
+using Bing.Validation;
+using Bing.Validation.Strategies;
 
 namespace Bing.Domain.Entities
 {
@@ -11,8 +11,8 @@ namespace Bing.Domain.Entities
     /// 领域对象基类
     /// </summary>
     /// <typeparam name="TObject">领域对象</typeparam>
-    public abstract class DomainObjectBase<TObject> : IDomainObject, IValidatable<TObject>, IChangeTrackable<TObject>
-        where TObject : class, IDomainObject
+    public abstract class DomainObjectBase<TObject> : IDomainObject, IVerifyModel<TObject>, IChangeTrackable<TObject>
+        where TObject : class, IDomainObject, IVerifyModel<TObject>
     {
         /// <summary>
         /// 验证上下文
@@ -45,24 +45,32 @@ namespace Bing.Domain.Entities
         /// 设置验证处理器
         /// </summary>
         /// <param name="handler">验证处理器</param>
-        public void SetValidateHandler(IValidationHandler handler) => _validationContext.SetHandler(op => op.HandleAll(handler));
+        public void SetValidationCallback(IValidationCallbackHandler handler) => _validationContext.SetHandler(op => op.HandleAll(handler));
 
         /// <summary>
-        /// 添加验证策略
+        /// 使用全局验证规则
+        /// </summary>
+        public void UseValidationRules()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 使用验证策略
         /// </summary>
         /// <param name="strategy">验证策略</param>
-        public void AddStrategy(IValidateStrategy<TObject> strategy) => _validationContext.AddStrategy(strategy);
+        public void UseStrategy(IValidationStrategy<TObject> strategy) => _validationContext.AddStrategy(strategy);
 
         /// <summary>
-        /// 添加验证策略集合
+        /// 使用验证策略集合
         /// </summary>
         /// <param name="strategies">验证策略集合</param>
-        public void AddStrategyList(IEnumerable<IValidateStrategy<TObject>> strategies) => _validationContext.AddStrategyList(strategies);
+        public void UseStrategyList(IEnumerable<IValidationStrategy<TObject>> strategies) =>_validationContext.AddStrategyList(strategies);
 
         /// <summary>
         /// 验证
         /// </summary>
-        public virtual ValidationResultCollection Validate()
+        public virtual IValidationResult Validate()
         {
             _validationContext.Validate(Validate);
             return _validationContext.GetValidationResultCollection();

@@ -8,6 +8,10 @@ namespace Bing.Validation
     /// </summary>
     public interface IVerifyModel
     {
+        /// <summary>
+        /// 验证
+        /// </summary>
+        IValidationResult Validate();
     }
 
     /// <summary>
@@ -38,10 +42,5 @@ namespace Bing.Validation
         /// </summary>
         /// <param name="strategies">验证策略集合</param>
         void UseStrategyList(IEnumerable<IValidationStrategy<TObject>> strategies);
-
-        /// <summary>
-        /// 验证
-        /// </summary>
-        IValidationResult Validate();
     }
 }

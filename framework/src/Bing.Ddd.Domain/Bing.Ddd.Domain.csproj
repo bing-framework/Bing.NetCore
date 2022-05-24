@@ -5,4 +5,8 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Validation\Bing.Validation.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -7,7 +7,7 @@ using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
 using Bing.Application.Services;
 using Bing.Aspects;
-using Bing.Validations.Aspects;
+using Bing.Validation;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {

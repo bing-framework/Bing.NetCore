@@ -14,8 +14,8 @@ namespace Bing.Validation
         /// <typeparam name="TException">异常类型</typeparam>
         /// <param name="resultCollection">验证结果集合</param>
         /// <param name="appendAction">追加操作</param>
-        public static TException ToException<TException>(this Validations.ValidationResultCollection resultCollection,
-            Action<TException, Validations.ValidationResultCollection> appendAction = null) where TException : BingException, new()
+        public static TException ToException<TException>(this ValidationResultCollection resultCollection,
+            Action<TException, ValidationResultCollection> appendAction = null) where TException : BingException, new()
         {
             if (resultCollection == null)
                 throw new ArgumentNullException(nameof(resultCollection));
@@ -31,8 +31,8 @@ namespace Bing.Validation
         /// </summary>
         /// <param name="resultCollection">验证结果集合</param>
         /// <param name="appendAction">追加操作</param>
-        public static ValidationException ToException(this Validations.ValidationResultCollection resultCollection,
-            Action<ValidationException, Validations.ValidationResultCollection> appendAction = null)
+        public static ValidationException ToException(this ValidationResultCollection resultCollection,
+            Action<ValidationException, ValidationResultCollection> appendAction = null)
         {
             if (resultCollection == null)
                 throw new ArgumentNullException(nameof(resultCollection));
@@ -47,17 +47,17 @@ namespace Bing.Validation
         /// <typeparam name="TException">异常类型</typeparam>
         /// <param name="result">验证结果</param>
         /// <param name="appendAction">追加操作</param>
-        public static TException ToException<TException>(this Validations.Abstractions.IValidationResult result,
-            Action<TException, Validations.ValidationResultCollection> appendAction = null) where TException : BingException, new()
+        public static TException ToException<TException>(this IValidationResult result,
+            Action<TException, ValidationResultCollection> appendAction = null) where TException : BingException, new()
         {
             switch (result)
             {
-                case Validations.ValidationResultCollection fluentResult:
+                case ValidationResultCollection fluentResult:
                     return ToException(fluentResult, appendAction);
                 case null:
                     throw new ArgumentNullException(nameof(result));
                 default:
-                    throw new ArgumentException($"{nameof(Validations.ValidationResultCollection)} 的类型无效");
+                    throw new ArgumentException($"{nameof(ValidationResultCollection)} 的类型无效");
             }
         }
 
@@ -66,18 +66,18 @@ namespace Bing.Validation
         /// </summary>
         /// <param name="result">验证结果</param>
         /// <param name="appendAction">追加操作</param>
-        public static ValidationException ToException(this Validations.Abstractions.IValidationResult result,
-            Action<ValidationException, Validations.ValidationResultCollection> appendAction = null)
+        public static ValidationException ToException(this IValidationResult result,
+            Action<ValidationException, ValidationResultCollection> appendAction = null)
         {
             switch (result)
             {
-                case Validations.ValidationResultCollection fluentResult:
+                case ValidationResultCollection fluentResult:
                     return ToException(fluentResult, appendAction);
 
                 case null:
                     throw new ArgumentNullException(nameof(result));
                 default:
-                    throw new ArgumentException($"{nameof(Validations.ValidationResultCollection)} 的类型无效");
+                    throw new ArgumentException($"{nameof(ValidationResultCollection)} 的类型无效");
             }
         }
 
@@ -85,7 +85,7 @@ namespace Bing.Validation
         /// 创建基础异常
         /// </summary>
         /// <param name="result">验证结果</param>
-        private static TException CreateBasicException<TException>(Validations.Abstractions.IValidationResult result) where TException : BingException, new()
+        private static TException CreateBasicException<TException>(IValidationResult result) where TException : BingException, new()
         {
             var exception = Types.CreateInstance<TException>(result.ErrorCode, result.ToMessage(), result.Flag);
             exception.ExtraData.Add("ValidationResultCollection", result);
@@ -96,7 +96,7 @@ namespace Bing.Validation
         /// 创建验证异常
         /// </summary>
         /// <param name="result">验证结果</param>
-        private static ValidationException CreateValidationException(Validations.Abstractions.IValidationResult result)
+        private static ValidationException CreateValidationException(IValidationResult result)
         {
             var exception = new ValidationException(result.ErrorCode, result.ToMessage(), result.ToValidationMessages(),
                 result.Flag);
@@ -110,8 +110,8 @@ namespace Bing.Validation
         /// <typeparam name="TException">异常类型</typeparam>
         /// <param name="resultCollection">验证结果集合</param>
         /// <param name="appendAction">追加操作</param>
-        public static void RaiseException<TException>(this Validations.ValidationResultCollection resultCollection,
-            Action<TException, Validations.ValidationResultCollection> appendAction = null) where TException : BingException, new() =>
+        public static void RaiseException<TException>(this ValidationResultCollection resultCollection,
+            Action<TException, ValidationResultCollection> appendAction = null) where TException : BingException, new() =>
             throw resultCollection.ToException(appendAction);
 
         /// <summary>
@@ -119,8 +119,8 @@ namespace Bing.Validation
         /// </summary>
         /// <param name="resultCollection">验证结果集合</param>
         /// <param name="appendAction">追加操作</param>
-        public static void RaiseException(this Validations.ValidationResultCollection resultCollection,
-            Action<ValidationException, Validations.ValidationResultCollection> appendAction = null) =>
+        public static void RaiseException(this ValidationResultCollection resultCollection,
+            Action<ValidationException, ValidationResultCollection> appendAction = null) =>
             throw resultCollection.ToException(appendAction);
     }
 }

@@ -5,6 +5,7 @@ using Bing.Biz.Payments.Alipay.Services.Base;
 using Bing.Extensions;
 using Bing.Parameters;
 using Bing.Utils.Parameters;
+using Bing.Validation;
 using Bing.Validations;
 
 namespace Bing.Biz.Payments.Alipay.Services

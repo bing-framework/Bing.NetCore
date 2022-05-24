@@ -6,7 +6,7 @@ using Bing.Biz.Payments.Wechatpay.Signatures;
 using Bing.Extensions;
 using Bing.Logs;
 using Bing.Utils.Parameters;
-using Bing.Validations;
+using Bing.Validation;
 using Xml = Bing.Helpers.Xml;
 
 namespace Bing.Biz.Payments.Wechatpay.Results

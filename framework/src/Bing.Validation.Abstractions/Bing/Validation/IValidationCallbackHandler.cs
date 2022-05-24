@@ -8,7 +8,7 @@
         /// <summary>
         /// 处理
         /// </summary>
-        /// <param name="results">验证结果集合</param>
-        void Handle(IValidationResult results);
+        /// <param name="result">验证结果</param>
+        void Handle(IValidationResult result);
     }
 }
