@@ -5,5 +5,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing\Bing.csproj" />
+    <ProjectReference Include="..\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj" />
   </ItemGroup>
 </Project>

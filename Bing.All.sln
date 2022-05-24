@@ -111,8 +111,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Application", "fra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Application.Contracts", "framework\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj", "{577D3EA3-5342-4E0D-AE51-39CBEE217089}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Validation.Abstractions", "framework\src\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj", "{DB0D25EE-7489-4DD1-8CF9-A8F839B58446}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing", "framework\src\Bing.Auditing\Bing.Auditing.csproj", "{F084AFFB-9136-43CE-874C-777DBA4D5205}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Emailing", "framework\src\Bing.Emailing\Bing.Emailing.csproj", "{5D81881D-FF17-4902-8BEB-A1D58D0EF688}"
@@ -241,6 +239,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Tests", "framework\tests\Bing.Logging.Tests\Bing.Logging.Tests.csproj", "{73871EF9-9CF6-479F-BC1C-AD443CE037AE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Serilog.Tests", "framework\tests\Bing.Logging.Serilog.Tests\Bing.Logging.Serilog.Tests.csproj", "{857BF156-74BE-4D71-8814-A1ECAA958C2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Validation.Abstractions", "framework\src\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj", "{19A3A852-6F7B-4864-8F53-AE91A04D0732}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -552,6 +552,10 @@ Global
 		{857BF156-74BE-4D71-8814-A1ECAA958C2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{857BF156-74BE-4D71-8814-A1ECAA958C2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{857BF156-74BE-4D71-8814-A1ECAA958C2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19A3A852-6F7B-4864-8F53-AE91A04D0732}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19A3A852-6F7B-4864-8F53-AE91A04D0732}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19A3A852-6F7B-4864-8F53-AE91A04D0732}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19A3A852-6F7B-4864-8F53-AE91A04D0732}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -659,6 +663,7 @@ Global
 		{C7E17279-AAEB-4A58-BBBB-AF443F924D9E} = {33F6CAB3-FD8A-4B91-9B94-A1E2DBC2759B}
 		{73871EF9-9CF6-479F-BC1C-AD443CE037AE} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{857BF156-74BE-4D71-8814-A1ECAA958C2D} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
+		{19A3A852-6F7B-4864-8F53-AE91A04D0732} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
