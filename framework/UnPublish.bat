@@ -19,6 +19,10 @@ dotnet nuget delete Bing.AspNetCore %version% -s %source% -k %key% --non-interac
 ::Security
 dotnet nuget delete Bing.Security %version% -s %source% -k %key% --non-interactive
 
+::Validation
+dotnet nuget delete Bing.Validation.Abstractions %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.Validation %version% -s %source% -k %key% --non-interactive
+
 ::Logs
 dotnet nuget delete Bing.Logs %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete Bing.Logs.Exceptionless %version% -s %source% -k %key% --non-interactive
