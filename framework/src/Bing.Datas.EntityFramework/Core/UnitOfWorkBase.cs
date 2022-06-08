@@ -169,7 +169,7 @@ namespace Bing.Datas.EntityFramework.Core
                 return;
             builder.EnableSensitiveDataLogging();
             builder.EnableDetailedErrors();
-            builder.UseLoggerFactory(LoggerFactory);
+            //builder.UseLoggerFactory(LoggerFactory);
         }
 
         /// <summary>

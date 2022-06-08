@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Bing.Extensions;
 using Bing.Helpers;
@@ -99,6 +101,20 @@ namespace Bing.Logging
             }
 
             LogProperties.Add(propertyName, propertyValue);
+            return this;
+        }
+
+        /// <inheritdoc />
+        public virtual ILog<TCategoryName> Tags(params string[] tags)
+        {
+            if (tags == null)
+                return this;
+            if (LogContext == null)
+                return this;
+            var tagList = tags.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            if (!tagList.Any())
+                return this;
+            LogContext.Tags.AddRange(tagList);
             return this;
         }
 
@@ -267,8 +283,10 @@ namespace Bing.Logging
         {
             if (LogContext == null)
                 return;
-            Property("TraceId", LogContext.TraceId);
-            Property("Duration", LogContext.Stopwatch.Elapsed.Description());
+            if(!string.IsNullOrWhiteSpace(LogContext.TraceId))
+                Property("TraceId", LogContext.TraceId);
+            if (LogContext.Stopwatch != null)
+                Property("Duration", LogContext.Stopwatch.Elapsed.Description());
         }
 
         /// <summary>

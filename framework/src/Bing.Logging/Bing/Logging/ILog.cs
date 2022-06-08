@@ -30,6 +30,12 @@ namespace Bing.Logging
         ILog<TCategoryName> Property(string propertyName, string propertyValue);
 
         /// <summary>
+        /// 设置标签
+        /// </summary>
+        /// <param name="tags">标签</param>
+        ILog<TCategoryName> Tags(params string[] tags);
+
+        /// <summary>
         /// 设置日志状态对象
         /// </summary>
         /// <param name="state">状态对象</param>

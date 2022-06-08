@@ -1,11 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
+using Bing.Helpers;
+using Bing.Logging;
 using Bing.Logging.Serilog;
 using Bing.Logs.NLog;
 using Bing.Tracing;
 using Exceptionless;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -47,6 +51,7 @@ namespace Bing.Admin.Modules
             //ExceptionlessClient.Default.Configuration.ApiKey= "ez9jumyxVxjTxqSm0oUQhCML3OGCkDfMGyW1hfmn";
             //ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.132.40:5100";
             //ExceptionlessClient.Default.Startup();
+            services.AddSingleton<ILogContextAccessor, LogContextAccessor>();
             services.AddLogging(loggingBuilder =>
             {
                 var configuration = services.GetConfiguration();
@@ -70,6 +75,40 @@ namespace Bing.Admin.Modules
                 loggingBuilder.AddSerilog();
             });
             return services;
+        }
+    }
+
+    /// <summary>
+    /// 日志上下文访问器
+    /// </summary>
+    public class LogContextAccessor : ILogContextAccessor
+    {
+        /// <summary>
+        /// 当前日志上下文
+        /// </summary>
+        private readonly AsyncLocal<LogContext> _currentLogContext;
+
+        /// <summary>
+        /// 初始化一个<see cref="LogContextAccessor"/>类型的实例
+        /// </summary>
+        public LogContextAccessor()
+        {
+            _currentLogContext = new AsyncLocal<LogContext>();
+        }
+
+        /// <summary>
+        /// 日志上下文
+        /// </summary>
+        public LogContext Context
+        {
+            get
+            {
+                return _currentLogContext.Value ??= new LogContext();
+            }
+            set
+            {
+                _currentLogContext.Value = value;
+            }
         }
     }
 }

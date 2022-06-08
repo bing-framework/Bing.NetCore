@@ -128,6 +128,7 @@ namespace Bing.Admin.Apis
             await TestService.TestArgumentNullAsync(null);
             return Success();
         }
+
         /// <summary>
         /// 测试日志
         /// </summary>
@@ -136,9 +137,32 @@ namespace Bing.Admin.Apis
         public Task<IActionResult> TestLoggerAsync(string text)
         {
             Logger.LogTrace($"输出调试信息: {text}");
+            Logger.LogTrace("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogTrace")
+                .LogTrace();
+
             Logger.LogDebug($"输出调试信息: {text}");
+            Logger.LogDebug("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogDebug")
+                .LogDebug();
+
             Logger.LogInformation($"输出调试信息: {text}");
+            Logger.LogInformation("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogInformation")
+                .LogInformation();
+
             Logger.LogWarning($"输出调试信息: {text}");
+            Logger.LogWarning("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogWarning")
+                .LogWarning();
             return Task.FromResult(Success());
         }
     }
