@@ -28,7 +28,6 @@ namespace Bing.Biz.Payments.Core
         /// 获取参数
         /// </summary>
         /// <param name="name">参数名</param>
-        /// <returns></returns>
         string GetParam(string name);
 
         /// <summary>
@@ -36,13 +35,11 @@ namespace Bing.Biz.Payments.Core
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="name">参数名</param>
-        /// <returns></returns>
         T GetParam<T>(string name);
 
         /// <summary>
         /// 获取参数集合
         /// </summary>
-        /// <returns></returns>
         IDictionary<string, string> GetParams();
 
         /// <summary>
@@ -53,13 +50,11 @@ namespace Bing.Biz.Payments.Core
         /// <summary>
         /// 返回成功消息
         /// </summary>
-        /// <returns></returns>
         string Success();
 
         /// <summary>
         /// 返回失败消息
         /// </summary>
-        /// <returns></returns>
         string Fail();
     }
 }

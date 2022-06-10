@@ -1,0 +1,13 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="Bing.Utils.Http" Version="1.3.0" />
+    <PackageReference Include="TinyCsvParser" Version="2.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\src\Bing.Logs\Bing.Logs.csproj" />
+    <ProjectReference Include="..\..\..\framework\src\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
+    <ProjectReference Include="..\..\..\framework\src\Bing.Validation\Bing.Validation.csproj" />
+    <ProjectReference Include="..\..\..\framework\src\Bing\Bing.csproj" />
+  </ItemGroup>
+</Project>

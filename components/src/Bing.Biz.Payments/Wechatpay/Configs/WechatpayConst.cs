@@ -139,5 +139,25 @@
         /// 用户授权码
         /// </summary>
         public const string AuthCode = "auth_code";
+
+        /// <summary>
+        /// 对账单日期
+        /// </summary>
+        public const string BillDate = "bill_date";
+
+        /// <summary>
+        /// 账单类型
+        /// </summary>
+        public const string BillType = "bill_type";
+
+        /// <summary>
+        /// 压缩账单
+        /// </summary>
+        public const string TarType = "tar_type";
+
+        /// <summary>
+        /// 资金账户类型
+        /// </summary>
+        public const string AccountType = "account_type";
     }
 }

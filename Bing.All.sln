@@ -242,7 +242,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Serilog.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Validation.Abstractions", "framework\src\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj", "{19A3A852-6F7B-4864-8F53-AE91A04D0732}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Aop.AspectCore", "framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj", "{E7D1CB89-9657-44EC-8531-4C1B956D190E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Aop.AspectCore", "framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj", "{E7D1CB89-9657-44EC-8531-4C1B956D190E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{FA7995A9-43C6-405A-B924-E4F182C245C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Biz.Payments.Tests", "components\tests\Bing.Biz.Payments.Tests\Bing.Biz.Payments.Tests.csproj", "{F41CF4E3-DB29-42C2-8999-39880376D862}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -558,6 +562,10 @@ Global
 		{E7D1CB89-9657-44EC-8531-4C1B956D190E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7D1CB89-9657-44EC-8531-4C1B956D190E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7D1CB89-9657-44EC-8531-4C1B956D190E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F41CF4E3-DB29-42C2-8999-39880376D862}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F41CF4E3-DB29-42C2-8999-39880376D862}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F41CF4E3-DB29-42C2-8999-39880376D862}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F41CF4E3-DB29-42C2-8999-39880376D862}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -666,6 +674,8 @@ Global
 		{857BF156-74BE-4D71-8814-A1ECAA958C2D} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{19A3A852-6F7B-4864-8F53-AE91A04D0732} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 		{E7D1CB89-9657-44EC-8531-4C1B956D190E} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
+		{FA7995A9-43C6-405A-B924-E4F182C245C2} = {8E2070BF-F6CF-47CC-8DB8-56B74EDFA7EB}
+		{F41CF4E3-DB29-42C2-8999-39880376D862} = {FA7995A9-43C6-405A-B924-E4F182C245C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

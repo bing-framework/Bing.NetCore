@@ -3,13 +3,13 @@
 namespace Bing.Biz.Payments.Wechatpay.Parameters.Requests
 {
     /// <summary>
-    /// 微信条码支付参数
+    /// 微信H5支付参数
     /// </summary>
-    public class WechatpayBarcodePayRequest : PayParamBase
+    public class WechatpayH5PayRequest : PayParamBase
     {
         /// <summary>
-        /// 用户付款授权码
+        /// 附加数据，通知原样返回
         /// </summary>
-        public string AuthCode { get; set; }
+        public string Attach { get; set; }
     }
 }

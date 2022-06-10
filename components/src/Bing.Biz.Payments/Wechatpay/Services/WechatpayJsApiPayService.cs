@@ -13,15 +13,15 @@ using Bing.Helpers;
 namespace Bing.Biz.Payments.Wechatpay.Services
 {
     /// <summary>
-    /// 微信公众号支付服务
+    /// 微信JsApi支付服务
     /// </summary>
-    public class WechatpayPublicPayService : WechatpayServiceBase, IWechatpayPublicPayService
+    public class WechatpayJsApiPayService : WechatpayPayServiceBase, IWechatpayJsApiPayService
     {
         /// <summary>
-        /// 初始化一个<see cref="WechatpayPublicPayService"/>类型的实例
+        /// 初始化一个<see cref="WechatpayJsApiPayService"/>类型的实例
         /// </summary>
         /// <param name="configProvider">微信支付配置提供器</param>
-        public WechatpayPublicPayService(IWechatpayConfigProvider configProvider) : base(configProvider)
+        public WechatpayJsApiPayService(IWechatpayConfigProvider configProvider) : base(configProvider)
         {
         }
 
@@ -29,57 +29,45 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         /// 支付
         /// </summary>
         /// <param name="request">支付参数</param>
-        /// <returns></returns>
-        public async Task<PayResult> PayAsync(WechatpayPublicPayRequest request)
-        {
-            return await PayAsync(request.ToParam());
-        }
+        public async Task<PayResult> PayAsync(WechatpayJsApiPayRequest request) => await PayAsync(request.ToParam());
 
         /// <summary>
         /// 获取交易类型
         /// </summary>
-        /// <returns></returns>
-        protected override string GetTradeType()
-        {
-            return "JSAPI";
-        }
+        protected override string GetTradeType() => "JSAPI";
 
         /// <summary>
         /// 验证参数
         /// </summary>
-        /// <param name="param">支付参数</param>
+        /// <param name="param">请求参数</param>
         protected override void ValidateParam(PayParam param)
         {
             if (param.OpenId.IsEmpty())
-            {
-                throw new Warning("公众号支付必须设置OpenId");
-            }
+                throw new Warning("必须设置OpenId");
         }
 
         /// <summary>
-        /// 获取支付方式
+        /// 初始化参数生成器
         /// </summary>
-        /// <returns></returns>
-        protected override PayWay GetPayWay()
+        /// <param name="builder">微信支付参数生成器</param>
+        /// <param name="param">支付参数</param>
+        protected override void InitBuilder(WechatpayParameterBuilder builder, PayParam param)
         {
-            return PayWay.WechatpayPublicPay;
+            builder.OpenId(param.OpenId);
         }
 
         /// <summary>
         /// 获取结果
         /// </summary>
-        /// <param name="config">微信支付配置</param>
-        /// <param name="builder">微信支付参数生成器</param>
         /// <param name="result">微信支付结果</param>
-        /// <returns></returns>
-        protected override string GetResult(WechatpayConfig config, WechatpayParameterBuilder builder, WechatpayResult result)
+        protected override string GetResult(WechatpayResult result)
         {
-            return new WechatpayParameterBuilder(config)
-                .Add("appId", config.AppId)
+            return new WechatpayParameterBuilder(result.Config)
+                .Add("appId", result.Config.AppId)
                 .Add("timeStamp", Time.GetUnixTimestamp().SafeString())
                 .Add("nonceStr", Id.Guid())
                 .Package($"prepay_id{result.GetPrepayId()}")
-                .Add("signType", config.SignType.Description())
+                .Add("signType", result.Config.SignType.Description())
                 .Add("paySign", result.GetSign())
                 .ToJson();
         }

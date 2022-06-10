@@ -3,9 +3,9 @@
 namespace Bing.Biz.Payments.Wechatpay.Parameters.Requests
 {
     /// <summary>
-    /// 微信电脑网站支付参数
+    /// 微信扫码支付参数
     /// </summary>
-    public class WechatpayPagePayRequest : PayParamBase
+    public class WechatpayNativePayRequest : PayParamBase
     {
         /// <summary>
         /// 附加数据，通知时原样返回

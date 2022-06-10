@@ -5,15 +5,14 @@ using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 namespace Bing.Biz.Payments.Wechatpay.Abstractions
 {
     /// <summary>
-    /// 微信电脑网站支付服务
+    /// 微信JsApi支付服务
     /// </summary>
-    public interface IWechatpayPagePayService
+    public interface IWechatpayJsApiPayService
     {
         /// <summary>
         /// 支付
         /// </summary>
         /// <param name="request">支付参数</param>
-        /// <returns></returns>
-        Task<PayResult> PayAsync(WechatpayPagePayRequest request);
+        Task<PayResult> PayAsync(WechatpayJsApiPayRequest request);
     }
 }

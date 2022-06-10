@@ -19,7 +19,7 @@ namespace Bing.Biz.Payments.Alipay.Configs
         /// <summary>
         /// 应用标识
         /// </summary>
-        [Required(ErrorMessage = "应用标识[AppId]不能为空")]
+        [Required(ErrorMessage = "应用标识[GetAppId]不能为空")]
         public string AppId { get; set; }
 
         /// <summary>

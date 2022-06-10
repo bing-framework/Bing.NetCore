@@ -3,9 +3,9 @@
 namespace Bing.Biz.Payments.Wechatpay.Parameters.Requests
 {
     /// <summary>
-    /// 微信公众号支付参数
+    /// 微信JsApi支付参数
     /// </summary>
-    public class WechatpayPublicPayRequest : PayParamBase
+    public class WechatpayJsApiPayRequest : PayParamBase
     {
         /// <summary>
         /// 用户标识

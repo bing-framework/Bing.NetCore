@@ -16,13 +16,13 @@ namespace Bing.Biz.Payments.Wechatpay.Services
     /// <summary>
     /// 微信条码支付服务
     /// </summary>
-    public class WechatpayBarcodePayService : WechatpayServiceBase, IWechatpayBarcodePayService
+    public class WechatpayPaymentCodePayService : WechatpayPayServiceBase, IWechatpayPaymentCodePayService
     {
         /// <summary>
-        /// 初始化一个<see cref="WechatpayBarcodePayService"/>类型的实例
+        /// 初始化一个<see cref="WechatpayPaymentCodePayService"/>类型的实例
         /// </summary>
         /// <param name="configProvider">微信支付配置提供器</param>
-        public WechatpayBarcodePayService(IWechatpayConfigProvider configProvider) : base(configProvider)
+        public WechatpayPaymentCodePayService(IWechatpayConfigProvider configProvider) : base(configProvider)
         {
         }
 
@@ -30,29 +30,12 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         /// 支付
         /// </summary>
         /// <param name="request">支付参数</param>
-        /// <returns></returns>
-        public async Task<PayResult> PayAsync(WechatpayBarcodePayRequest request)
-        {
-            return await PayAsync(request.ToParam());
-        }
+        public async Task<PayResult> PayAsync(WechatpayPaymentCodePayRequest request) => await PayAsync(request.ToParam());
 
         /// <summary>
         /// 获取交易类型
         /// </summary>
-        /// <returns></returns>
-        protected override string GetTradeType()
-        {
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// 获取支付方式
-        /// </summary>
-        /// <returns></returns>
-        protected override PayWay GetPayWay()
-        {
-            return PayWay.WechatpayBarcodePay;
-        }
+        protected override string GetTradeType() => string.Empty;
 
         /// <summary>
         /// 验证参数
@@ -61,9 +44,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         protected override void ValidateParam(PayParam param)
         {
             if (param.AuthCode.IsEmpty())
-            {
                 throw new Warning(PayResource.AuthCodeIsEmpty);
-            }
         }
 
         /// <summary>
@@ -77,13 +58,16 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         }
 
         /// <summary>
-        /// 获取结果
+        /// 获取接口地址
         /// </summary>
         /// <param name="config">微信支付配置</param>
-        /// <param name="builder">微信支付参数生成器</param>
+        protected override string GetUrl(WechatpayConfig config) => config.GetPaymentCodePayUrl();
+
+        /// <summary>
+        /// 获取结果
+        /// </summary>
         /// <param name="result">微信支付结果</param>
-        /// <returns></returns>
-        protected override string GetResult(WechatpayConfig config, WechatpayParameterBuilder builder, WechatpayResult result)
+        protected override string GetResult(WechatpayResult result)
         {
             return result.GetParams().ToJson();
         }

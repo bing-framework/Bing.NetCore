@@ -12,7 +12,6 @@ namespace Bing.Biz.Payments.Alipay.Abstractions
         /// 支付
         /// </summary>
         /// <param name="request">支付参数</param>
-        /// <returns></returns>
         Task<string> PayAsync(AlipayAppPayRequest request);
     }
 }
