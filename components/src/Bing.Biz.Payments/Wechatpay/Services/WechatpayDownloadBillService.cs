@@ -17,9 +17,9 @@ using TinyCsvParser.Tokenizer;
 namespace Bing.Biz.Payments.Wechatpay.Services
 {
     /// <summary>
-    /// 微信支付下载对账单服务
+    /// 微信支付下载交易账单服务
     /// </summary>
-    public class WechatpayDownloadBillService : WechatpayServiceBase<WechatpayDownloadBillRequest>, IWechatpayDownloadBillService
+    public class WechatpayDownloadBillService : WechatpayServiceBase<WechatpayDownloadBillRequest, WechatpayParameterBuilder>, IWechatpayDownloadBillService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayDownloadBillService"/>类型的实例
@@ -41,6 +41,12 @@ namespace Bing.Biz.Payments.Wechatpay.Services
             ConfigBuilder(builder, request);
             return await RequestAsync(config, builder, request);
         }
+
+        /// <summary>
+        /// 创建参数生成器
+        /// </summary>
+        /// <param name="config">微信支付配置</param>
+        protected override WechatpayParameterBuilder CreateParameterBuilder(WechatpayConfig config) => new WechatpayParameterBuilder(config);
 
         /// <summary>
         /// 配置参数生成器

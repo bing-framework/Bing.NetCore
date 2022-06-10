@@ -34,7 +34,7 @@ namespace Bing.Biz.Payments.Wechatpay.Results
         /// <param name="response">xml响应消息</param>
         /// <param name="config">微信支付配置</param>
         /// <param name="parameterBuilder">微信支付参数生成器</param>
-        public WechatpayResult(IWechatpayConfigProvider configProvider, string response, WechatpayConfig config = null, WechatpayParameterBuilder parameterBuilder = null)
+        public WechatpayResult(IWechatpayConfigProvider configProvider, string response, WechatpayConfig config = null, IWechatpayParameterBuilder parameterBuilder = null)
         {
             configProvider.CheckNull(nameof(configProvider));
             ConfigProvider = configProvider;
@@ -63,7 +63,7 @@ namespace Bing.Biz.Payments.Wechatpay.Results
         /// <summary>
         /// 微信支付参数生成器
         /// </summary>
-        public WechatpayParameterBuilder Builder { get; }
+        public IWechatpayParameterBuilder Builder { get; }
 
         /// <summary>
         /// 解析响应

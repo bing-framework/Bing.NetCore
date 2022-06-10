@@ -159,5 +159,10 @@
         /// 资金账户类型
         /// </summary>
         public const string AccountType = "account_type";
+
+        /// <summary>
+        /// 随机字符串
+        /// </summary>
+        public const string NonceStr = "nonce_str";
     }
 }

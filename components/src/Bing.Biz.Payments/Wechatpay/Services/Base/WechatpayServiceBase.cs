@@ -13,7 +13,10 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
     /// 微信支付服务
     /// </summary>
     /// <typeparam name="TRequest">请求参数类型</typeparam>
-    public abstract class WechatpayServiceBase<TRequest> where TRequest : IVerifyModel
+    /// <typeparam name="TParameterBuilder">微信支付参数生成器</typeparam>
+    public abstract class WechatpayServiceBase<TRequest, TParameterBuilder>
+        where TRequest : IVerifyModel
+        where TParameterBuilder : IWechatpayParameterBuilder<TParameterBuilder>
     {
         /// <summary>
         /// 微信支付配置提供程序
@@ -21,7 +24,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         protected readonly IWechatpayConfigProvider ConfigProvider;
 
         /// <summary>
-        /// 初始化一个<see cref="WechatpayServiceBase{TRequest}"/>类型的实例
+        /// 初始化一个<see cref="WechatpayServiceBase{TRequest,TParameterBuilder}"/>类型的实例
         /// </summary>
         /// <param name="configProvider">微信支付配置提供程序</param>
         protected WechatpayServiceBase(IWechatpayConfigProvider configProvider)
@@ -43,7 +46,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         {
             var config = await ConfigProvider.GetConfigAsync(param);
             Validate(config, param);
-            var builder = new WechatpayParameterBuilder(config);
+            var builder = CreateParameterBuilder(config);
             ConfigBuilder(builder, param);
             return await RequestResult(config, builder);
         }
@@ -71,22 +74,28 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         }
 
         /// <summary>
+        /// 创建参数生成器
+        /// </summary>
+        /// <param name="config">微信支付配置</param>
+        protected abstract TParameterBuilder CreateParameterBuilder(WechatpayConfig config);
+
+        /// <summary>
         /// 配置参数生成器
         /// </summary>
         /// <param name="builder">微信支付参数生成器</param>
         /// <param name="param">请求参数</param>
-        protected abstract void ConfigBuilder(WechatpayParameterBuilder builder, TRequest param);
+        protected abstract void ConfigBuilder(TParameterBuilder builder, TRequest param);
 
         /// <summary>
         /// 请求结果
         /// </summary>
         /// <param name="config">微信支付配置</param>
         /// <param name="builder">微信支付参数生成器</param>
-        protected virtual async Task<WechatpayResult> RequestResult(WechatpayConfig config, WechatpayParameterBuilder builder)
+        protected virtual async Task<WechatpayResult> RequestResult(WechatpayConfig config, TParameterBuilder builder)
         {
             var response = await SendRequest(config, builder);
             var result = new WechatpayResult(ConfigProvider, response, config, builder);
-            WriteLog(config,builder,result);
+            WriteLog(config, builder, result);
             return result;
         }
 
@@ -95,7 +104,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// </summary>
         /// <param name="config">微信支付配置</param>
         /// <param name="builder">微信支付参数生成器</param>
-        protected virtual async Task<string> SendRequest(WechatpayConfig config, WechatpayParameterBuilder builder)
+        protected virtual async Task<string> SendRequest(WechatpayConfig config, TParameterBuilder builder)
         {
             if (IsSend == false)
                 return string.Empty;
@@ -117,10 +126,10 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
         /// <param name="config">微信支付配置</param>
         /// <param name="builder">微信支付参数生成器</param>
         /// <param name="result">微信支付结果</param>
-        protected void WriteLog(WechatpayConfig config, WechatpayParameterBuilder builder, WechatpayResult result)
+        protected void WriteLog(WechatpayConfig config, TParameterBuilder builder, WechatpayResult result)
         {
             var log = GetLog();
-            if(log.IsTraceEnabled==false)
+            if (log.IsTraceEnabled == false)
                 return;
             log.Class(GetType().FullName)
                 .Caption("微信支付")

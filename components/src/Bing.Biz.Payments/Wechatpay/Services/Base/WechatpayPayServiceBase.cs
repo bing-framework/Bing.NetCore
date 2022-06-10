@@ -9,7 +9,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
     /// <summary>
     /// 微信支付服务
     /// </summary>
-    public abstract class WechatpayPayServiceBase : WechatpayServiceBase<PayParam>, IPayService
+    public abstract class WechatpayPayServiceBase : WechatpayServiceBase<PayParam, WechatpayParameterBuilder>, IPayService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayPayServiceBase"/>类型的实例
@@ -28,6 +28,12 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
             var result = await Request(param);
             return await CreateResult(result);
         }
+
+        /// <summary>
+        /// 创建参数生成器
+        /// </summary>
+        /// <param name="config">微信支付配置</param>
+        protected override WechatpayParameterBuilder CreateParameterBuilder(WechatpayConfig config) => new WechatpayParameterBuilder(config);
 
         /// <summary>
         /// 配置参数生成器
