@@ -16,7 +16,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services.Base
     /// <typeparam name="TParameterBuilder">微信支付参数生成器</typeparam>
     public abstract class WechatpayServiceBase<TRequest, TParameterBuilder>
         where TRequest : IVerifyModel
-        where TParameterBuilder : IWechatpayParameterBuilder<TParameterBuilder>
+        where TParameterBuilder : IWechatpayParameterBuilder
     {
         /// <summary>
         /// 微信支付配置提供程序
