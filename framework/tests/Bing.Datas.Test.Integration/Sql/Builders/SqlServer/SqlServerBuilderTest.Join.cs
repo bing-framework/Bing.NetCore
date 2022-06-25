@@ -104,35 +104,6 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
         }
 
         /// <summary>
-        /// 添加Join子查询 - 委托 - Lambda
-        /// </summary>
-        [Fact]
-        public void Test_Join_4_1()
-        {
-            //结果
-            var result = new Str();
-            result.AppendLine("Select * ");
-            result.AppendLine("From [Test] ");
-            result.AppendLine("Join (Select * ");
-            result.AppendLine("From [Test2] ");
-            result.AppendLine("Where [Test2].[Name]=@_p_0) As [t] ");
-            result.Append("Where [Age]=@_p_1");
-
-            //执行
-            _builder.From("Test")
-                .Join(builder => builder.From<Test2>().Where<Test2>(x => x.Name, "a"), "t")
-                .Where("Age", 1);
-
-            Output.WriteLine(_builder.ToSql());
-
-            //验证
-            Assert.Equal(result.ToString(), _builder.ToSql());
-            Assert.Equal(2, _builder.GetParams().Count);
-            Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-            Assert.Equal(1, _builder.GetParams()["@_p_1"]);
-        }
-
-        /// <summary>
         /// 内连接 - 添加原始Sql
         /// </summary>
         [Fact]
