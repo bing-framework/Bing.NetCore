@@ -816,6 +816,41 @@ namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer
             Assert.Equal(1, _builder.GetParams()["@_p_1"]);
         }
 
+        /// <summary>
+        /// 添加Where子查询 - 委托 - 属性表达式
+        /// </summary>
+        [Fact]
+        public void TestWhereIf_8()
+        {
+            //结果
+            var result = new Str();
+            result.AppendLine("Select * ");
+            result.AppendLine("From [Sample] As [s] ");
+            result.Append("Where [s].[Email]<>");
+            result.AppendLine("(Select Count(*) ");
+            result.AppendLine("From [Test2] ");
+            result.Append("Where [Test2].[Name]=@_p_0) ");
+            result.Append("And [Age]=@_p_1");
+
+            //执行
+            _builder.From<Sample>("s")
+                .WhereIf<Sample>(t => t.Email, builder =>
+                {
+                    builder.Count().From<Test2>().Where<Test2>(x => x.Name, "b");
+                }, false)
+                .WhereIf<Sample>(t => t.Email, builder => {
+                    builder.Count().From<Test2>().Where<Test2>(x => x.Name, "a");
+                }, true, Operator.NotEqual)
+                .Where("Age", 1);
+            Output.WriteLine(_builder.ToSql());
+
+            //验证
+            Assert.Equal(result.ToString(), _builder.ToSql());
+            Assert.Equal(2, _builder.GetParams().Count);
+            Assert.Equal("a", _builder.GetParams()["@_p_0"]);
+            Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        }
+
         #endregion
 
         #region WhereIfNotEmpty
