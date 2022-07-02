@@ -15,6 +15,8 @@ namespace Bing.Logging
     /// <typeparam name="TCategoryName">日志类别</typeparam>
     public class Log<TCategoryName> : ILog<TCategoryName>
     {
+        #region 构造函数
+
         /// <summary>
         /// 初始化一个<see cref="Log{TCategoryName}"/>类型的实例
         /// </summary>
@@ -28,6 +30,19 @@ namespace Bing.Logging
             LogMessage = new StringBuilder();
             LogMessageArgs = new List<object>();
         }
+
+        #endregion
+
+        #region Null(空日志操作实例)
+
+        /// <summary>
+        /// 空日志操作实例
+        /// </summary>
+        public static ILog<TCategoryName> Null = NullLog<TCategoryName>.Instance;
+
+        #endregion
+
+        #region 属性
 
         /// <summary>
         /// 日志记录包装器
@@ -74,6 +89,10 @@ namespace Bing.Logging
         /// </summary>
         protected List<object> LogMessageArgs { get; }
 
+        #endregion
+
+        #region EventId(设置日志事件标识)
+
         /// <inheritdoc />
         public virtual ILog<TCategoryName> EventId(EventId eventId)
         {
@@ -81,12 +100,20 @@ namespace Bing.Logging
             return this;
         }
 
+        #endregion
+
+        #region Exception(设置异常)
+
         /// <inheritdoc />
         public virtual ILog<TCategoryName> Exception(Exception exception)
         {
             LogException = exception;
             return this;
         }
+
+        #endregion
+
+        #region Property(设置自定义扩展属性)
 
         /// <inheritdoc />
         public virtual ILog<TCategoryName> Property(string propertyName, string propertyValue)
@@ -98,10 +125,13 @@ namespace Bing.Logging
                 LogProperties[propertyName] += propertyValue;
                 return this;
             }
-
             LogProperties.Add(propertyName, propertyValue);
             return this;
         }
+
+        #endregion
+
+        #region Tags(设置标签)
 
         /// <inheritdoc />
         public virtual ILog<TCategoryName> Tags(params string[] tags)
@@ -117,12 +147,20 @@ namespace Bing.Logging
             return this;
         }
 
+        #endregion
+
+        #region State(设置日志状态对象)
+
         /// <inheritdoc />
         public virtual ILog<TCategoryName> State(object state)
         {
             LogState = state;
             return this;
         }
+
+        #endregion
+
+        #region Message(设置日志消息)
 
         /// <inheritdoc />
         public virtual ILog<TCategoryName> Message(string message, params object[] args)
@@ -132,11 +170,23 @@ namespace Bing.Logging
             return this;
         }
 
+        #endregion
+
+        #region IsEnabled(是否启用)
+
         /// <inheritdoc />
         public virtual bool IsEnabled(LogLevel logLevel) => Logger.IsEnabled(logLevel);
 
+        #endregion
+
+        #region BeginScope(开始日志范围)
+
         /// <inheritdoc />
         public virtual IDisposable BeginScope<TState>(TState state) => Logger.BeginScope(state);
+
+        #endregion
+
+        #region LogTrace(写跟踪日志)
 
         /// <inheritdoc />
         public virtual ILog<TCategoryName> LogTrace()
@@ -159,6 +209,10 @@ namespace Bing.Logging
             }
         }
 
+        #endregion
+
+        #region LogDebug(写调试日志)
+
         /// <inheritdoc />
         public virtual ILog<TCategoryName> LogDebug()
         {
@@ -179,6 +233,10 @@ namespace Bing.Logging
                 Clear();
             }
         }
+
+        #endregion
+
+        #region LogInformation(写信息日志)
 
         /// <inheritdoc />
         public virtual ILog<TCategoryName> LogInformation()
@@ -201,6 +259,10 @@ namespace Bing.Logging
             }
         }
 
+        #endregion
+
+        #region LogWarning(写警告日志)
+
         /// <inheritdoc />
         public virtual ILog<TCategoryName> LogWarning()
         {
@@ -221,6 +283,10 @@ namespace Bing.Logging
                 Clear();
             }
         }
+
+        #endregion
+
+        #region LogError(写错误日志)
 
         /// <inheritdoc />
         public virtual ILog<TCategoryName> LogError()
@@ -243,6 +309,10 @@ namespace Bing.Logging
             }
         }
 
+        #endregion
+
+        #region LogCritical(写致命日志)
+
         /// <inheritdoc />
         public virtual ILog<TCategoryName> LogCritical()
         {
@@ -263,6 +333,8 @@ namespace Bing.Logging
                 Clear();
             }
         }
+
+        #endregion
 
         #region 辅助方法
 
