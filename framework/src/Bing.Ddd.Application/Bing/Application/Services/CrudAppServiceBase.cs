@@ -158,30 +158,6 @@ namespace Bing.Application.Services
         /// </summary>
         /// <param name="request">请求参数</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual void Save(TRequest request)
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            SaveBefore(request);
-            var entity = ToEntity(request);
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-            if (IsNew(request, entity))
-            {
-                Create(entity);
-                request.Id = entity.Id.ToString();
-            }
-            else
-            {
-                Update(entity);
-            }
-        }
-
-        /// <summary>
-        /// 保存
-        /// </summary>
-        /// <param name="request">请求参数</param>
-        /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task SaveAsync(TRequest request)
         {
             if (request == null)
@@ -229,32 +205,6 @@ namespace Bing.Application.Services
         #endregion
 
         #region BatchSave(批量保存)
-
-        /// <summary>
-        /// 批量保存
-        /// </summary>
-        /// <param name="addList">新增列表</param>
-        /// <param name="updateList">修改列表</param>
-        /// <param name="deleteList">删除列表</param>
-        public virtual List<TDto> Save(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
-        {
-            if (addList == null && updateList == null && deleteList == null)
-                return new List<TDto>();
-            addList ??= new List<TRequest>();
-            updateList ??= new List<TRequest>();
-            deleteList ??= new List<TRequest>();
-            FilterList(addList, updateList, deleteList);
-            var addEntities = ToEntities(addList);
-            var updateEntities = ToEntities(updateList);
-            var deleteEntities = ToEntities(deleteList);
-            SaveBefore(addEntities, updateEntities, deleteEntities);
-            AddList(addEntities);
-            UpdateList(updateEntities);
-            DeleteList(deleteEntities);
-            Commit();
-            SaveAfter(addEntities, updateEntities, deleteEntities);
-            return GetResult(addEntities, updateEntities);
-        }
 
         /// <summary>
         /// 批量保存
@@ -329,18 +279,6 @@ namespace Bing.Application.Services
         /// 添加列表
         /// </summary>
         /// <param name="list">新增列表</param>
-        private void AddList(List<TEntity> list)
-        {
-            if (list.Count == 0)
-                return;
-            Log.Content("创建实体：");
-            list.ForEach(Create);
-        }
-
-        /// <summary>
-        /// 添加列表
-        /// </summary>
-        /// <param name="list">新增列表</param>
         private async Task AddListAsync(List<TEntity> list)
         {
             if (list.Count == 0)
@@ -348,18 +286,6 @@ namespace Bing.Application.Services
             Log.Content("创建实体：");
             foreach (var entity in list)
                 await CreateAsync(entity);
-        }
-
-        /// <summary>
-        /// 更新列表
-        /// </summary>
-        /// <param name="list">修改列表</param>
-        private void UpdateList(List<TEntity> list)
-        {
-            if (list.Count == 0)
-                return;
-            Log.Content("修改实体：");
-            list.ForEach(Update);
         }
 
         /// <summary>
@@ -379,18 +305,6 @@ namespace Bing.Application.Services
         /// 删除列表
         /// </summary>
         /// <param name="list">删除列表</param>
-        private void DeleteList(List<TEntity> list)
-        {
-            if (list.Count == 0)
-                return;
-            Log.Content("删除实体：");
-            list.ForEach(DeleteChilds);
-        }
-
-        /// <summary>
-        /// 删除列表
-        /// </summary>
-        /// <param name="list">删除列表</param>
         private async Task DeleteListAsync(List<TEntity> list)
         {
             if (list.Count == 0)
@@ -404,23 +318,7 @@ namespace Bing.Application.Services
         /// 删除子节点集合
         /// </summary>
         /// <param name="parent">父节点</param>
-        protected virtual void DeleteChilds(TEntity parent) => DeleteEntity(parent);
-
-        /// <summary>
-        /// 删除子节点集合
-        /// </summary>
-        /// <param name="parent">父节点</param>
         protected virtual async Task DeleteChildsAsync(TEntity parent) => await DeleteEntityAsync(parent);
-
-        /// <summary>
-        /// 删除实体
-        /// </summary>
-        /// <param name="entity">实体</param>
-        protected void DeleteEntity(TEntity entity)
-        {
-            _repository.Remove(entity.Id);
-            AddLog(entity);
-        }
 
         /// <summary>
         /// 删除实体
@@ -431,11 +329,6 @@ namespace Bing.Application.Services
             await _repository.RemoveAsync(entity.Id);
             AddLog(entity);
         }
-
-        /// <summary>
-        /// 提交
-        /// </summary>
-        private void Commit() => _unitOfWork.Commit();
 
         /// <summary>
         /// 提交
@@ -518,22 +411,6 @@ namespace Bing.Application.Services
         #region Create(创建)
 
         /// <summary>
-        /// 创建
-        /// </summary>
-        /// <param name="request">创建参数</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public virtual string Create(TCreateRequest request)
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            var entity = ToEntityFromCreateRequest(request);
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-            Create(entity);
-            return entity.Id.ToString();
-        }
-
-        /// <summary>
         /// 创建实体
         /// </summary>
         /// <param name="entity">实体</param>
@@ -604,21 +481,6 @@ namespace Bing.Application.Services
         #endregion
 
         #region Update(修改)
-
-        /// <summary>
-        /// 修改
-        /// </summary>
-        /// <param name="request">修改参数</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public virtual void Update(TUpdateRequest request)
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            var entity = ToEntityFromUpdateRequest(request);
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-            Update(entity);
-        }
 
         /// <summary>
         /// 修改实体

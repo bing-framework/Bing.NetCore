@@ -137,30 +137,6 @@ namespace Bing.Tests.Applications
         /// 测试 - 删除
         /// </summary>
         [Fact]
-        public void Test_Delete()
-        {
-            var ids = new[] { _id, _id2 };
-            _repository.FindByIds(ids.Join()).Returns(GetEntities());
-            _service.Delete(ids.Join());
-            _repository.Received().Remove(Arg.Is<List<EntitySample>>(t => t.All(d => ids.Contains(d.Id))));
-        }
-
-        /// <summary>
-        /// 测试 - 删除 - id无效
-        /// </summary>
-        [Fact]
-        public void Test_Delete_IdInvalid()
-        {
-            var ids = new[] { Guid.NewGuid(), Guid.NewGuid() };
-            _repository.FindByIds(ids.Join()).Returns(new List<EntitySample>());
-            _service.Delete(ids.Join());
-            _repository.DidNotReceive().Remove(Arg.Any<List<EntitySample>>());
-        }
-
-        /// <summary>
-        /// 测试 - 删除
-        /// </summary>
-        [Fact]
         public async Task Test_DeleteAsync()
         {
             var ids = new[] { _id, _id2 };
@@ -168,5 +144,18 @@ namespace Bing.Tests.Applications
             await _service.DeleteAsync(ids.Join());
             await _repository.Received().RemoveAsync(Arg.Is<List<EntitySample>>(t => t.All(d => ids.Contains(d.Id))));
         }
+
+        /// <summary>
+        /// 测试 - 删除 - id无效
+        /// </summary>
+        [Fact]
+        public async Task Test_DeleteAsync_IdInvalid()
+        {
+            var ids = new[] { Guid.NewGuid(), Guid.NewGuid() };
+            _repository.FindByIdsAsync(ids.Join()).Returns(new List<EntitySample>());
+            await _service.DeleteAsync(ids.Join());
+            await _repository.DidNotReceive().RemoveAsync(Arg.Any<List<EntitySample>>());
+        }
+
     }
 }
