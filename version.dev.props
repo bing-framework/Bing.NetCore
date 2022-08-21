@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- All Microsoft packages -->
     <MicrosoftPackageVersion>3.1.*</MicrosoftPackageVersion>
-    <BingUtilsPackageVersion>1.3.0</BingUtilsPackageVersion>
+    <BingUtilsPackageVersion>1.4.0-preview-20220820-1</BingUtilsPackageVersion>
     <FreeSQLPackageVersion>3.2.610</FreeSQLPackageVersion>
   </PropertyGroup>
 </Project>

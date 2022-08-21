@@ -7,6 +7,7 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Include="Bing.Utils" Version="$(BingUtilsPackageVersion)" />
+    <PackageReference Include="Bing.Utils.Collections" Version="$(BingUtilsPackageVersion)" />
 
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftPackageVersion)" />

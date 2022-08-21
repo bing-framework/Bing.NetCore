@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -55,7 +55,7 @@ namespace Bing.EventBus.Local
         /// <param name="factory">事件处理器工厂</param>
         public override IDisposable Subscribe(Type eventType, IEventHandlerFactory factory)
         {
-            GetOrCreateHandlerFactories(eventType).Locking(factories =>
+            GetOrCreateHandlerFactories(eventType).LockAndRun(factories =>
             {
                 if (!factory.IsInFactories(factories))
                     factories.Add(factory);
@@ -73,7 +73,7 @@ namespace Bing.EventBus.Local
             Check.NotNull(action, nameof(action));
 
             GetOrCreateHandlerFactories(typeof(TEvent))
-                .Locking(factories =>
+                .LockAndRun(factories =>
                 {
                     factories.RemoveAll(factory =>
                     {
@@ -96,7 +96,7 @@ namespace Bing.EventBus.Local
         public override void Unsubscribe(Type eventType, IEventHandler handler)
         {
             GetOrCreateHandlerFactories(eventType)
-                .Locking(factories =>
+                .LockAndRun(factories =>
                 {
                     factories.RemoveAll(factory =>
                         factory is SingleInstanceHandlerFactory &&
@@ -111,7 +111,7 @@ namespace Bing.EventBus.Local
         /// <param name="factory">事件处理器工厂</param>
         public override void Unsubscribe(Type eventType, IEventHandlerFactory factory)
         {
-            GetOrCreateHandlerFactories(eventType).Locking(factories => factories.Remove(factory));
+            GetOrCreateHandlerFactories(eventType).LockAndRun(factories => factories.Remove(factory));
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Bing.EventBus.Local
         /// <param name="eventType">事件类型</param>
         public override void UnsubscribeAll(Type eventType)
         {
-            GetOrCreateHandlerFactories(eventType).Locking(factories => factories.Clear());
+            GetOrCreateHandlerFactories(eventType).LockAndRun(factories => factories.Clear());
         }
 
         /// <summary>

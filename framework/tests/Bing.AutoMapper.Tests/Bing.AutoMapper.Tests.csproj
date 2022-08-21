@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,14 +9,4 @@
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="Castle.Core" Version="4.4.1" />
-    <PackageReference Update="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
-    <PackageReference Update="MessagePack" Version="1.7.3.7" />
-    <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Net.Compilers" Version="3.3.1" />
-  </ItemGroup>
-
 </Project>

@@ -50,18 +50,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MiniProfiler", "framework\src\Bing.MiniProfiler\Bing.MiniProfiler.csproj", "{43BE3B85-AA7B-47B5-AC09-EE66B52358EA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_SolutionItems", "{2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		common.props = common.props
-		Directory.Build.targets = Directory.Build.targets
-		framework.props = framework.props
-		LICENSE = LICENSE
-		README.md = README.md
-		version.dev.props = version.dev.props
-		version.props = version.props
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6690993E-6659-451F-907C-A48FE1121D40}"
 	ProjectSection(SolutionItems) = preProject
@@ -89,9 +77,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-admin", "01-admin", "{BDBABE46-FAAE-459D-BC78-B5BA6503EBBA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{5C7976B4-C243-41B9-8303-8E8FAE099D31}"
-	ProjectSection(SolutionItems) = preProject
-		framework\tests\Directory.Build.props = framework\tests\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AutoMapper.Tests", "framework\tests\Bing.AutoMapper.Tests\Bing.AutoMapper.Tests.csproj", "{741EE94D-5F03-426E-9D34-CBDA41671742}"
 EndProject
@@ -188,6 +173,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{D77F42E0
 	ProjectSection(SolutionItems) = preProject
 		asset\props\misc.props = asset\props\misc.props
 		asset\props\package.props = asset\props\package.props
+		asset\props\sourcelink.env.props = asset\props\sourcelink.env.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Data.FreeSQL", "modules\admin\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj", "{05DFA67F-C861-48F9-BBD9-7777972A918F}"
@@ -246,7 +232,36 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Aop.AspectCore", "fram
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-tests", "02-tests", "{FA7995A9-43C6-405A-B924-E4F182C245C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Biz.Payments.Tests", "components\tests\Bing.Biz.Payments.Tests\Bing.Biz.Payments.Tests.csproj", "{F41CF4E3-DB29-42C2-8999-39880376D862}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Biz.Payments.Tests", "components\tests\Bing.Biz.Payments.Tests\Bing.Biz.Payments.Tests.csproj", "{F41CF4E3-DB29-42C2-8999-39880376D862}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{3EE7B5A9-FF9B-4786-9E0F-AFD2BED68CC2}"
+	ProjectSection(SolutionItems) = preProject
+		asset\images\icon.png = asset\images\icon.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{7ABB7FBC-A1B9-432F-BCC5-53B9FD0172D8}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{4A87040E-99A6-4A3F-BD6D-D2A3C3663012}"
+	ProjectSection(SolutionItems) = preProject
+		framework\Publish.bat = framework\Publish.bat
+		framework\UnPublish.bat = framework\UnPublish.bat
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{B6E2B626-F561-4B47-8CFE-E8A305696522}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		common.props = common.props
+		common.tests.props = common.tests.props
+		framework.props = framework.props
+		LICENSE = LICENSE
+		version.dev.props = version.dev.props
+		version.props = version.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -676,6 +691,10 @@ Global
 		{E7D1CB89-9657-44EC-8531-4C1B956D190E} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 		{FA7995A9-43C6-405A-B924-E4F182C245C2} = {8E2070BF-F6CF-47CC-8DB8-56B74EDFA7EB}
 		{F41CF4E3-DB29-42C2-8999-39880376D862} = {FA7995A9-43C6-405A-B924-E4F182C245C2}
+		{3EE7B5A9-FF9B-4786-9E0F-AFD2BED68CC2} = {F40A8736-2FEC-446A-99FD-3660729893FC}
+		{7ABB7FBC-A1B9-432F-BCC5-53B9FD0172D8} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
+		{4A87040E-99A6-4A3F-BD6D-D2A3C3663012} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
+		{B6E2B626-F561-4B47-8CFE-E8A305696522} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

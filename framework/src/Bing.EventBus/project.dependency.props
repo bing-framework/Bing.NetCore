@@ -1,5 +1,9 @@
 ﻿<Project>
   <ItemGroup>
+    <PackageReference Include="Bing.Utils.Reflection" Version="$(BingUtilsPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
     <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
   </ItemGroup>

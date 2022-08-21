@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Bing.Emailing;
+using Bing.Emailing.Attachments;
 using Bing.MailKit.Configs;
 using MailKit.Security;
 using Xunit;
@@ -56,86 +57,86 @@ namespace Bing.MailKit.Tests
         /// <summary>
         /// 测试发送邮件
         /// </summary>
-        [Fact]
+        [Fact(Skip = "需要提供配置")]
         public void Test_SendEmail()
         {
-            //var box = new EmailBox
-            //{
-            //    Subject = "MailKit 测试发送邮件",
-            //    To = _to,
-            //    Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
-            //    IsBodyHtml = true,
-            //};
-            //this._mailKitEmailSender.Send(box);
+            var box = new EmailBox
+            {
+                Subject = "MailKit 测试发送邮件",
+                To = _to,
+                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+                IsBodyHtml = true,
+            };
+            this._mailKitEmailSender.Send(box);
         }
 
         /// <summary>
         /// 测试发送邮件以及附件
         /// </summary>
-        [Fact]
+        [Fact(Skip = "需要提供配置")]
         public void Test_SendEmail_Attachment()
         {
-            //var box = new EmailBox()
-            //{
-            //    Subject = "MailKit 测试发送邮件以及附件",
-            //    To = _to,
-            //    Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
-            //    IsBodyHtml = true,
-            //};
-            //box.Attachments.Add(new PhysicalFileAttachment("D:\\123.xlsx"));
-            //this._mailKitEmailSender.Send(box);
+            var box = new EmailBox()
+            {
+                Subject = "MailKit 测试发送邮件以及附件",
+                To = _to,
+                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+                IsBodyHtml = true,
+            };
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\123.xlsx"));
+            this._mailKitEmailSender.Send(box);
         }
 
         /// <summary>
         /// 测试发送邮件以及附件_中文文件名
         /// </summary>
-        [Fact]
+        [Fact(Skip = "需要提供配置")]
         public void Test_SendEmail_Attachment_ChineseFileName()
         {
-            //var box = new EmailBox()
-            //{
-            //    Subject = "MailKit 测试发送邮件以及附件_中文文件名",
-            //    To = _to,
-            //    Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
-            //    IsBodyHtml = true,
-            //};
-            //box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.xlsx"));
-            //this._mailKitEmailSender.Send(box);
+            var box = new EmailBox()
+            {
+                Subject = "MailKit 测试发送邮件以及附件_中文文件名",
+                To = _to,
+                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+                IsBodyHtml = true,
+            };
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.xlsx"));
+            this._mailKitEmailSender.Send(box);
         }
 
         /// <summary>
         /// 测试发送邮件以及附件_多个文件
         /// </summary>
-        [Fact]
+        [Fact(Skip = "需要提供配置")]
         public void Test_SendEmail_Attachment_MultiFile()
         {
-            //var box = new EmailBox()
-            //{
-            //    Subject = "MailKit 测试发送邮件以及附件_多个文件",
-            //    To = _to,
-            //    Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
-            //    IsBodyHtml = true,
-            //};
-            //box.Attachments.Add(new PhysicalFileAttachment("D:\\123.xlsx"));
-            //box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.doc"));
-            //this._mailKitEmailSender.Send(box);
+            var box = new EmailBox()
+            {
+                Subject = "MailKit 测试发送邮件以及附件_多个文件",
+                To = _to,
+                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+                IsBodyHtml = true,
+            };
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\123.xlsx"));
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件.doc"));
+            this._mailKitEmailSender.Send(box);
         }
 
         /// <summary>
         /// 测试发送邮件以及附件_长文件名
         /// </summary>
-        [Fact]
+        [Fact(Skip = "需要提供配置")]
         public void Test_SendEmail_Attachment_LongLengthFileName()
         {
-            //var box = new EmailBox()
-            //{
-            //    Subject = "MailKit 测试发送邮件以及附件_多个文件",
-            //    To = _to,
-            //    Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
-            //    IsBodyHtml = true,
-            //};
-            //box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件123456789012345678901234567894444564645666666666666.doc"));
-            //this._mailKitEmailSender.Send(box);
+            var box = new EmailBox()
+            {
+                Subject = "MailKit 测试发送邮件以及附件_多个文件",
+                To = _to,
+                Body = "<p style='color:red'>测试一下红色字体的邮件</p>",
+                IsBodyHtml = true,
+            };
+            box.Attachments.Add(new PhysicalFileAttachment("D:\\测试文件123456789012345678901234567894444564645666666666666.doc"));
+            this._mailKitEmailSender.Send(box);
         }
     }
 }
