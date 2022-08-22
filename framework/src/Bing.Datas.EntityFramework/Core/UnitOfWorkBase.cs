@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -78,6 +79,11 @@ namespace Bing.Datas.EntityFramework.Core
         /// 当前用户
         /// </summary>
         protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
+
+        /// <summary>
+        /// 审计属性设置器
+        /// </summary>
+        protected IAuditPropertySetter AuditPropertySetter => LazyServiceProvider.LazyGetRequiredService<IAuditPropertySetter>();
 
         #endregion
 
@@ -446,8 +452,10 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void ApplyInterceptForAddedEntity(EntityEntry entry)
         {
-            SetCreationAudited(entry);
-            SetModificationAudited(entry);
+            AuditPropertySetter?.SetCreationProperties(entry);
+            AuditPropertySetter?.SetModificationProperties(entry);
+            //SetCreationAudited(entry);
+            //SetModificationAudited(entry);
             SetVersion(entry);
         }
 
@@ -461,7 +469,8 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void ApplyInterceptForModifiedEntity(EntityEntry entry)
         {
-            SetModificationAudited(entry);
+            AuditPropertySetter?.SetModificationProperties(entry);
+            //SetModificationAudited(entry);
             SetVersion(entry);
         }
 
@@ -475,7 +484,9 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void ApplyInterceptForDeletedEntity(EntityEntry entry)
         {
-            SetModificationAudited(entry);
+            AuditPropertySetter?.SetDeletionProperties(entry);
+            SetVersion(entry);
+            //SetModificationAudited(entry);
         }
 
         #endregion
