@@ -60,7 +60,7 @@ namespace Bing.Admin.Modules
 
             services.EnableAop(o =>
             {
-                o.ThrowAspectException = false;
+                o.ThrowAspectException = true;
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
             });

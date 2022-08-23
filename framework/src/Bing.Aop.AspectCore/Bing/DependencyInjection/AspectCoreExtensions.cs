@@ -1,6 +1,7 @@
 ﻿using System;
 using AspectCore.Configuration;
 using AspectCore.DynamicProxy;
+using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
 using Bing.Extensions;
@@ -10,9 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.DependencyInjection
 {
     /// <summary>
-    /// AspectCore扩展
+    /// AspectCore 扩展
     /// </summary>
-    public static partial class Extensions
+    public static class AspectCoreExtensions
     {
         /// <summary>
         /// 启用Aop
@@ -27,9 +28,7 @@ namespace Bing.DependencyInjection
             services.ConfigureDynamicProxy(config =>
             {
                 //config.EnableParameterAspect();// 启用参数拦截，会导致异常不能很好的定位
-                config.NonAspectPredicates.Add(t =>
-                    Reflections.GetTopBaseType(t.DeclaringType).SafeString() ==
-                    "Microsoft.EntityFrameworkCore.DbContext");
+                config.NonAspectPredicates.Add(t => Reflections.GetTopBaseType(t.DeclaringType).SafeString() == "Microsoft.EntityFrameworkCore.DbContext");
                 configAction?.Invoke(config);
             });
             services.EnableAspectScoped();

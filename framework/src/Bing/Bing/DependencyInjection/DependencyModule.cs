@@ -33,6 +33,7 @@ namespace Bing.DependencyInjection
         {
             // 服务定位器设置
             ServiceLocator.Instance.SetServiceCollection(services);
+
             services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));// 解决循环依赖问题
             services.TryAddTransient<IHybridServiceScopeFactory, DefaultServiceScopeFactory>();
             services.AddScoped<ScopedDictionary>();
@@ -43,6 +44,7 @@ namespace Bing.DependencyInjection
             var dependencyTypes = dependencyTypeFinder.FindAll();
             foreach (var dependencyType in dependencyTypes)
                 AddToServices(services, dependencyType);
+
             return services;
         }
 
@@ -121,7 +123,7 @@ namespace Bing.DependencyInjection
         }
 
         /// <summary>
-        /// 重写以实现 从类型获取要注册的<see cref="ServiceLifetime"/>生命周期类型
+        /// 重写以实现 从类型获取要注册的 <see cref="ServiceLifetime"/> 生命周期类型
         /// </summary>
         /// <param name="type">依赖注入实现类型</param>
         protected virtual ServiceLifetime? GetLifetimeOrNull(Type type)

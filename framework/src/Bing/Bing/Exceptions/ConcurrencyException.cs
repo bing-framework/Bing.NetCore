@@ -60,5 +60,11 @@ namespace Bing.Exceptions
         /// 错误消息
         /// </summary>
         public override string Message => $"{LibraryResource.ConcurrencyExceptionMessage}.{_message}";
+
+        /// <summary>
+        /// 获取错误消息
+        /// </summary>
+        /// <param name="isProduction">是否生产环境</param>
+        public override string GetMessage(bool isProduction = true) => isProduction ? LibraryResource.ConcurrencyExceptionMessage : GetMessage(this);
     }
 }

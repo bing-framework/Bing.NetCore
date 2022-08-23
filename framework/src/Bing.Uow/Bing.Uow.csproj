@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Uow</AssemblyName>
+    <PackageId>Bing.Uow</PackageId>
+    <Description>Bing.Uow 是Bing应用框架的工作单元类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
-using Bing.Aspects.Base;
+using Bing.Aspects;
 using Bing.Tracing;
 using DotNetCore.CAP;
 

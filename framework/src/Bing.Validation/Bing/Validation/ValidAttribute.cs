@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspectCore.DynamicProxy.Parameters;
-using Bing.Aspects.Base;
+using Bing.Aspects;
 
 namespace Bing.Validation
 {

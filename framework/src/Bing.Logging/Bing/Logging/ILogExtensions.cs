@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.Extensions;
 
 namespace Bing.Logging
 {
@@ -17,7 +16,8 @@ namespace Bing.Logging
         /// <param name="args">日志消息参数</param>
         public static ILog<TCategoryName> Append<TCategoryName>(this ILog<TCategoryName> log, string message, params object[] args)
         {
-            log.CheckNull(nameof(log));
+            if (log is null)
+                throw new ArgumentNullException(nameof(log));
             log.Message(message, args);
             return log;
         }
@@ -32,7 +32,8 @@ namespace Bing.Logging
         /// <param name="args">日志消息参数</param>
         public static ILog<TCategoryName> AppendIf<TCategoryName>(this ILog<TCategoryName> log, string message, bool condition, params object[] args)
         {
-            log.CheckNull(nameof(log));
+            if (log is null)
+                throw new ArgumentNullException(nameof(log));
             if (condition)
                 log.Message(message, args);
             return log;
@@ -47,7 +48,8 @@ namespace Bing.Logging
         /// <param name="args">日志消息参数</param>
         public static ILog<TCategoryName> AppendLine<TCategoryName>(this ILog<TCategoryName> log, string message, params object[] args)
         {
-            log.CheckNull(nameof(log));
+            if (log is null)
+                throw new ArgumentNullException(nameof(log));
             log.Message(message, args);
             log.Message(Environment.NewLine);
             return log;
@@ -64,7 +66,8 @@ namespace Bing.Logging
         /// <returns></returns>
         public static ILog<TCategoryName> AppendLineIf<TCategoryName>(this ILog<TCategoryName> log, string message, bool condition, params object[] args)
         {
-            log.CheckNull(nameof(log));
+            if (log is null)
+                throw new ArgumentNullException(nameof(log));
             if (condition)
             {
                 log.Message(message, args);
@@ -80,7 +83,8 @@ namespace Bing.Logging
         /// <param name="log">日志操作</param>
         public static ILog<TCategoryName> Line<TCategoryName>(this ILog<TCategoryName> log)
         {
-            log.CheckNull(nameof(log));
+            if (log is null)
+                throw new ArgumentNullException(nameof(log));
             log.Message(Environment.NewLine);
             return log;
         }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using Bing.ExceptionHandling;
-using Bing.Extensions;
 using Bing.Properties;
 using Microsoft.Extensions.Logging;
 
@@ -12,17 +11,8 @@ namespace Bing.Exceptions
     /// 应用程序异常
     /// </summary>
     [Serializable]
-    public class Warning : Exception, IHasErrorCode
+    public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     {
-        #region 属性
-
-        /// <summary>
-        /// 错误码
-        /// </summary>
-        public string Code { get; set; }
-
-        #endregion
-
         #region 构造函数
 
         /// <summary>
@@ -46,27 +36,36 @@ namespace Bing.Exceptions
         /// </summary>
         /// <param name="message">错误消息</param>
         /// <param name="code">错误码</param>
-        public Warning(string message, string code) : this(message, code, null)
-        {
-        }
-
-        /// <summary>
-        /// 初始化一个<see cref="Warning"/>类型的实例
-        /// </summary>
-        /// <param name="message">错误消息</param>
-        /// <param name="code">错误码</param>
-        /// <param name="exception">异常</param>
-        public Warning(string message, string code, Exception exception) : base(message ?? "", exception)
+        /// <param name="exception">内部异常</param>
+        /// <param name="httpStatusCode">Http状态码</param>
+        public Warning(string message, string code = null, Exception exception = null, int httpStatusCode = default)
+            : base(message ?? "", exception)
         {
             Code = code;
+            HttpStatusCode = httpStatusCode;
         }
+
+        #endregion
+
+        #region 属性
+
+        /// <summary>
+        /// 错误码
+        /// </summary>
+        public string Code { get; set; }
+
+        /// <summary>
+        /// Http状态码
+        /// </summary>
+        public int HttpStatusCode { get; set; }
 
         #endregion
 
         /// <summary>
         /// 获取错误消息
         /// </summary>
-        public string GetMessage() => GetMessage(this);
+        /// <param name="isProduction">是否生产环境</param>
+        public virtual string GetMessage(bool isProduction = true) => GetMessage(this);
 
         /// <summary>
         /// 获取错误消息
@@ -78,7 +77,7 @@ namespace Bing.Exceptions
             var list = GetExceptions(ex);
             foreach (var exception in list)
                 AppendMessage(result, exception);
-            return result.ToString().RemoveEnd(Environment.NewLine);
+            return result.ToString().Trim(Environment.NewLine.ToCharArray());
         }
 
         /// <summary>

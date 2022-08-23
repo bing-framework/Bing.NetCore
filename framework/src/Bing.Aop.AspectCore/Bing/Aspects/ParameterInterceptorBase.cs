@@ -1,4 +1,4 @@
-﻿namespace Bing.Aop
+﻿namespace Bing.Aspects
 {
     /// <summary>
     /// 参数拦截器基类

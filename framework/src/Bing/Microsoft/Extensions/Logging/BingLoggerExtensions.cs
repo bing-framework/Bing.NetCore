@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Bing.ExceptionHandling;
 using Bing.Logging;
 
@@ -118,8 +119,11 @@ namespace Microsoft.Extensions.Logging
         {
             if (exception.Data == null || exception.Data.Count <= 0)
                 return;
-            logger.LogWithLevel(logLevel, "---------- Exception Data ----------");
-            foreach (var key in exception.Data.Keys) logger.LogWithLevel(logLevel, $"{key} = {exception.Data[key]}");
+            var sb = new StringBuilder();
+            sb.AppendLine("---------- Exception Data ----------");
+            foreach (var key in exception.Data.Keys)
+                sb.AppendLine($"{key} = {exception.Data[key]}");
+            logger.LogWithLevel(logLevel, sb.ToString());
         }
 
         /// <summary>

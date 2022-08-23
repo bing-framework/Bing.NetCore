@@ -485,6 +485,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected virtual void ApplyInterceptForDeletedEntity(EntityEntry entry)
         {
             AuditPropertySetter?.SetDeletionProperties(entry);
+            AuditPropertySetter?.SetModificationProperties(entry);
             SetVersion(entry);
             //SetModificationAudited(entry);
         }

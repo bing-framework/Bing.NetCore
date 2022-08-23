@@ -15,7 +15,7 @@ namespace Bing.Tests.Exceptions
         [Fact]
         public void TestMessage()
         {
-            Warning warning = new Warning("A");
+            var warning = new Warning("A");
             Assert.Equal("A", warning.Message);
         }
 
@@ -25,7 +25,7 @@ namespace Bing.Tests.Exceptions
         [Fact]
         public void TestMessage_Null()
         {
-            Warning warning = new Warning(null, "A");
+            var warning = new Warning(null, "A");
             Assert.Equal(string.Empty, warning.Message);
         }
 
@@ -35,7 +35,7 @@ namespace Bing.Tests.Exceptions
         [Fact]
         public void TestCode()
         {
-            Warning warning = new Warning("", "B");
+            var warning = new Warning("", "B");
             Assert.Equal("B", warning.Code);
         }
 
@@ -45,7 +45,7 @@ namespace Bing.Tests.Exceptions
         [Fact]
         public void TestException()
         {
-            Warning warning = new Warning(new Exception("A"));
+            var warning = new Warning(new Exception("A"));
             Assert.Empty(warning.Message);
             Assert.Equal("A", warning.GetMessage());
         }
@@ -56,7 +56,7 @@ namespace Bing.Tests.Exceptions
         [Fact]
         public void TestMessageAndException()
         {
-            Warning warning = new Warning("A", "", new Exception("C"));
+            var warning = new Warning("A", "", new Exception("C"));
             Assert.Equal("A", warning.Message);
             Assert.Equal($"A{Environment.NewLine}C", warning.GetMessage());
         }
@@ -67,7 +67,7 @@ namespace Bing.Tests.Exceptions
         [Fact]
         public void TestException_2Layer()
         {
-            Warning warning = new Warning("A", "", new Exception("C", new NotImplementedException("D")));
+            var warning = new Warning("A", "", new Exception("C", new NotImplementedException("D")));
             Assert.Equal(3, warning.GetExceptions().Count);
             Assert.Equal(typeof(Warning), warning.GetExceptions()[0].GetType());
             Assert.Equal(typeof(Exception), warning.GetExceptions()[1].GetType());
