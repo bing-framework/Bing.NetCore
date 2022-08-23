@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Aop.AspectCore</AssemblyName>
+    <PackageId>Bing.Aop.AspectCore</PackageId>
+    <Description>Bing.Aop.AspectCore是Bing应用框架基于 AspectCore 实现AOP拦截功能的库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

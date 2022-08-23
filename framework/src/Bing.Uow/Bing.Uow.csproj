@@ -11,8 +11,4 @@
 
   <Import Project="references.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
-  </ItemGroup>
-
 </Project>

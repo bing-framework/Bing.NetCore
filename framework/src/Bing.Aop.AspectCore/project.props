@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Aop.AspectCore</AssemblyName>
-    <PackageId>Bing.Aop.AspectCore</PackageId>
-    <Description>Bing.Aop.AspectCore是Bing应用框架基于 AspectCore 实现AOP拦截功能的库。</Description>
-  </PropertyGroup>
-</Project>

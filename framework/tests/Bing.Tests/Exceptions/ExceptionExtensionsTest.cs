@@ -1,6 +1,7 @@
 ﻿using System;
 using AspectCore.DynamicProxy;
 using Bing.Exceptions;
+using Bing.Exceptions.Prompts;
 using Bing.Properties;
 using Xunit;
 
@@ -11,6 +12,11 @@ namespace Bing.Tests.Exceptions
     /// </summary>
     public class ExceptionExtensionsTest
     {
+        public ExceptionExtensionsTest()
+        {
+            ExceptionPrompt.AddPrompt(new AspectExceptionPrompt());
+        }
+
         /// <summary>
         /// 测试 - 获取原始异常
         /// </summary>

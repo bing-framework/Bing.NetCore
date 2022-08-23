@@ -4,6 +4,7 @@ using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
+using Bing.Exceptions.Prompts;
 using Bing.Extensions;
 using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,7 @@ namespace Bing.DependencyInjection
         /// </remarks>
         public static void EnableAop(this IServiceCollection services, Action<IAspectConfiguration> configAction = null)
         {
+            ExceptionPrompt.AddPrompt(new AspectExceptionPrompt());
             services.ConfigureDynamicProxy(config =>
             {
                 //config.EnableParameterAspect();// 启用参数拦截，会导致异常不能很好的定位

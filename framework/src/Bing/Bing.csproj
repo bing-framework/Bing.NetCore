@@ -1,13 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Core</AssemblyName>
+    <PackageId>Bing.Core</PackageId>
+    <Description>Bing.Core是Bing应用框架的核心类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
 
   <ItemGroup>
     <Compile Update="Properties\LibraryResource.Designer.cs">
       <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LibraryResource.resx</DependentUpon>
     </Compile>
+    <Compile Update="Properties\R.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>R.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\LibraryResource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>LibraryResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\R.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>R.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

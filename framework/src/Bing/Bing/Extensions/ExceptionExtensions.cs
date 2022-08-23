@@ -14,18 +14,7 @@ namespace Bing
         /// 获取原始异常
         /// </summary>
         /// <param name="exception">异常</param>
-        public static Exception GetRawException(this Exception exception)
-        {
-            if (exception is null)
-                return null;
-            if (exception is AspectCore.DynamicProxy.AspectInvocationException aspectInvocationException)
-            {
-                return aspectInvocationException.InnerException is null
-                    ? aspectInvocationException
-                    : GetRawException(aspectInvocationException.InnerException);
-            }
-            return exception;
-        }
+        public static Exception GetRawException(this Exception exception) => ExceptionPrompt.GetException(exception);
 
         /// <summary>
         /// 获取异常提示
