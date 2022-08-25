@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Folder Include="Bing\Data\Stores\EntityFrameworkCore\" />
+    <Folder Include="Bing\Data\Filters\" />
   </ItemGroup>
 
   <ItemGroup>
