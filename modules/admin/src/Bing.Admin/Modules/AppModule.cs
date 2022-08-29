@@ -84,7 +84,8 @@ namespace Bing.Admin.Modules
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseCorrelationId();
             app.UseBingExceptionHandling();
-            app.UseRealIp(x => x.HeaderKey = "test");
+            app.UseRealIp();
+            //app.UseRealIp(x => x.HeaderKey = "test");
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
