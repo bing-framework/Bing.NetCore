@@ -130,6 +130,12 @@ namespace Bing.Logs.Exceptionless
         /// <param name="content">日志内容</param>
         private void SetSource(EventBuilder builder, ILogContent content)
         {
+            // 优先设置日志名称
+            if (!string.IsNullOrWhiteSpace(content.LogName))
+            {
+                builder.SetSource(content.LogName);
+                return;
+            }
             if (string.IsNullOrWhiteSpace(content.Url))
                 return;
             builder.SetSource(RemoveParams(content.Url, UrlFilter));
