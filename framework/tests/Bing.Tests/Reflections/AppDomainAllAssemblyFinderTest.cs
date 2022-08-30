@@ -2,6 +2,7 @@
 using Bing.Collections;
 using Xunit;
 using Xunit.Abstractions;
+using System.Linq;
 
 namespace Bing.Tests.Reflections
 {
@@ -30,7 +31,7 @@ namespace Bing.Tests.Reflections
         public void Test_Find()
         {
             var assemblies = _allAssemblyFinder.FindAll();
-            assemblies.ForEach(x =>
+            assemblies.ToList().ForEach(x =>
             {
                 Output.WriteLine(x.FullName);
             });

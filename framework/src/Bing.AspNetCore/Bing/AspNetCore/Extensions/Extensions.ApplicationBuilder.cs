@@ -52,5 +52,12 @@ namespace Bing.AspNetCore.Extensions
 
             return hostBuilder;
         }
+
+        /// <summary>
+        /// 注册请求响应日志中间件。必须调用 services.AddRequestResponseLog 方法方可正常使用
+        /// </summary>
+        /// <param name="builder">应用程序生成器</param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseRequestResponseLog(this IApplicationBuilder builder) => builder.UseMiddleware<RequestResponseLoggerMiddleware>();
     }
 }

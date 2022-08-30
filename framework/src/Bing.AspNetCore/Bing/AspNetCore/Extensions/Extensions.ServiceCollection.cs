@@ -1,4 +1,6 @@
-﻿using Bing.AspNetCore.Mvc;
+﻿using System;
+using Bing.AspNetCore.Logs;
+using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -36,5 +38,17 @@ namespace Bing.AspNetCore.Extensions
         /// <param name="services">服务集合</param>
         public static void AddApiInterfaceService<TApiInterfaceService>(this IServiceCollection services) where TApiInterfaceService : class, IApiInterfaceService =>
             services.TryAddSingleton<IApiInterfaceService, TApiInterfaceService>();
+
+        /// <summary>
+        /// 注册请求响应日志服务
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        /// <param name="setupAction">配置操作</param>
+        public static void AddRequestResponseLog(this IServiceCollection services, Action<RequestResponseLoggerOptions> setupAction)
+        {
+            services.Configure(setupAction);
+            services.AddSingleton<IRequestResponseLogger, DefaultRequestResponseLogger>();
+            services.AddScoped<IRequestResponseLogCreator, DefaultRequestResponseLogCreator>();
+        }
     }
 }

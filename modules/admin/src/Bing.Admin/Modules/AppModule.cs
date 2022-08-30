@@ -3,6 +3,7 @@ using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
 using Bing.AspNetCore.Extensions;
+using Bing.AspNetCore.Logs;
 using Bing.AspNetCore.Mvc.ExceptionHandling;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
@@ -42,6 +43,8 @@ namespace Bing.Admin.Modules
             BingClaimTypes.UserName = IdentityModel.JwtClaimTypes.Name;
             services.AddControllers(o =>
                 {
+                    o.Filters.Add<RequestResponseLoggerActionFilter>();
+                    o.Filters.Add<RequestResponseLoggerErrorFilter>();
                     o.Filters.Add<ValidationModelAttribute>();
                     o.Filters.Add<ResultHandlerAttribute>();
                     o.Filters.Add<BingExceptionFilter>();
@@ -72,6 +75,11 @@ namespace Bing.Admin.Modules
                 x.HttpHeaderName = "X-Correlation-Id";
                 x.SetResponseHeader = true;
             });
+            services.AddRequestResponseLog(o =>
+            {
+                o.IsEnabled = true;
+                o.Name = "Bing.Admin";
+            });
             return services;
         }
 
@@ -82,10 +90,10 @@ namespace Bing.Admin.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            app.UseCorrelationId();
-            app.UseBingExceptionHandling();
             app.UseRealIp();
-            //app.UseRealIp(x => x.HeaderKey = "test");
+            app.UseCorrelationId();
+            app.UseRequestResponseLog();
+            app.UseBingExceptionHandling();
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
