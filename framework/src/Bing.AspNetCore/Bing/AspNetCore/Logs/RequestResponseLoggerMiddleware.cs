@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bing.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -276,6 +277,13 @@ namespace Bing.AspNetCore.Logs
             // 过滤请求数据
             if (_options.RequestFilter == null || _options.RequestFilter.Count == 0)
                 return false;
+            // 请求路径 - 规则匹配
+            var path = context.Request.Path.Value.ToLowerInvariant();
+            foreach (var item in _options.RequestFilter)
+            {
+                if (FastPathMatcher.Match(item, path))
+                    return true;
+            }
             return false;
         }
     }
