@@ -8,12 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.2.0" />
-    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.2.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.6.3" />
+    <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
     <PackageReference Include="DotNetCore.CAP.Dashboard" Version="3.1.2" />
+    <PackageReference Include="Serilog.Enrichers.Span" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj" />
     <ProjectReference Include="..\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj" />

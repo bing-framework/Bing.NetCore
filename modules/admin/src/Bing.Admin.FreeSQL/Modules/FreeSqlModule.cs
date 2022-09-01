@@ -1,11 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Bing.Admin.Data;
+using Bing.Admin.Data.UnitOfWorks.MySql;
 using Bing.Core.Modularity;
 using Bing.Data.Enums;
 using Bing.Datas.Dapper;
 using Bing.FreeSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Admin.Modules
 {
@@ -35,7 +38,16 @@ namespace Bing.Admin.Modules
             var configuration = services.GetConfiguration();
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
             // 注册工作单元
-            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(connectionStr);
+            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(
+                connectionStr,
+                (serviceProvider, builder) =>
+                {
+                    var logger = serviceProvider.GetRequiredService<ILogger<AdminUnitOfWork>>();
+                    builder.UseMonitorCommand(executing: _ => { }, executed: (cmd, traceLog) =>
+                    {
+                        logger.LogInformation($"库名：{cmd?.Connection?.Database}{Environment.NewLine}{traceLog}");
+                    });
+                });
             //services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr);
             // 注册SqlQuery
             services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>

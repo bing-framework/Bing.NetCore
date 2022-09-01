@@ -111,6 +111,7 @@ namespace Bing.Admin.Modules
         /// <param name="options">配置</param>
         protected virtual void AddSwaggerEx(SwaggerExOptions options)
         {
+            options.ApiVersions.Add(new ApiVersion { Description = "默认", Version = "v1" });
             options.ProjectName = "Bing.Admin 在线文档";
         }
 
@@ -148,7 +149,7 @@ namespace Bing.Admin.Modules
         // ReSharper disable once InconsistentNaming
         protected virtual void UseSwaggerUI(SwaggerUIOptions options)
         {
-            options.SwaggerEndpoint("v1/swagger.json", "v1");
+            //options.SwaggerEndpoint("v1/swagger.json", "v1");
         }
     }
 }

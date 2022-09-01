@@ -79,8 +79,8 @@ namespace Bing.Admin.Modules
             {
                 o.IsEnabled = true;
                 o.Name = "Bing.Admin";
-                o.RequestFilter.Add("/swagger/**");
-                o.RequestFilter.Add("/swagger");
+                //o.RequestFilter.Add("/swagger/**");
+                //o.RequestFilter.Add("/swagger");
             });
             return services;
         }

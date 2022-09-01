@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,6 @@ using System.Text.RegularExpressions;
 using Bing.Extensions;
 using Bing.Finders;
 using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Bing.Reflection
 {
@@ -72,7 +72,7 @@ namespace Bing.Reflection
             }
             else
             {
-                var path = PlatformServices.Default.Application.ApplicationBasePath;
+                var path = AppContext.BaseDirectory;
                 var dllNames = Directory.GetFiles(path, "*.dll", SearchOption.TopDirectoryOnly)
                     .Concat(Directory.GetFiles(path, "*.exe", SearchOption.TopDirectoryOnly))
                     .Select(m => m.Replace(".dll", "").Replace(".exe", ""))
@@ -120,9 +120,10 @@ namespace Bing.Reflection
         /// <param name="assemblyName">程序集名称</param>
         protected virtual bool Match(string assemblyName)
         {
-            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.Views"))
+            var applicationName = Assembly.GetEntryAssembly().GetName().Name;
+            if (assemblyName.StartsWith($"{applicationName}.Views"))
                 return false;
-            if (assemblyName.StartsWith($"{PlatformServices.Default.Application.ApplicationName}.PrecompiledViews"))
+            if (assemblyName.StartsWith($"{applicationName}.PrecompiledViews"))
                 return false;
             return Regex.IsMatch(assemblyName, SkipAssemblies, RegexOptions.IgnoreCase | RegexOptions.Compiled) == false;
         }
