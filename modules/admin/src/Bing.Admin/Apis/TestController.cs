@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Systems.Domain.Events;
@@ -164,6 +165,35 @@ namespace Bing.Admin.Apis
                 .Tags(nameof(TestController), "OtherLog", "LogWarning")
                 .LogWarning();
             return Task.FromResult(Success());
+        }
+
+        /// <summary>
+        /// 测试GUID
+        /// </summary>
+        /// <param name="id"></param>
+        [AllowAnonymous]
+        [HttpGet("testGuid")]
+        public IActionResult TestGuid(Guid id)
+        {
+            return Success(id);
+        }
+
+        /// <summary>
+        /// 测试 GUID 模型
+        /// </summary>
+        /// <param name="request"></param>
+        [AllowAnonymous]
+        [HttpGet("testGuidModel")]
+        public IActionResult TestGuidModel([FromQuery] TestNullableGuidRequest request)
+        {
+            return Success(request.TestId);
+        }
+
+        public class TestNullableGuidRequest
+        {
+            public Guid? TestId { get; set; }
+
+            public Guid? TestId2 { get; set; }
         }
     }
 }

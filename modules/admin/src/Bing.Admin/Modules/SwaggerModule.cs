@@ -99,6 +99,7 @@ namespace Bing.Admin.Modules
                 {
                     UseSwaggerUI(config);
                     config.UseDefaultSwaggerUI();
+                    config.EnableValidator(null);
                     config.UseTokenStorage("oauth2");
                 };
             });

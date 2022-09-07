@@ -452,8 +452,8 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void ApplyInterceptForAddedEntity(EntityEntry entry)
         {
-            AuditPropertySetter?.SetCreationProperties(entry);
-            AuditPropertySetter?.SetModificationProperties(entry);
+            AuditPropertySetter?.SetCreationProperties(entry.Entity);
+            AuditPropertySetter?.SetModificationProperties(entry.Entity);
             //SetCreationAudited(entry);
             //SetModificationAudited(entry);
             SetVersion(entry);
@@ -469,7 +469,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void ApplyInterceptForModifiedEntity(EntityEntry entry)
         {
-            AuditPropertySetter?.SetModificationProperties(entry);
+            AuditPropertySetter?.SetModificationProperties(entry.Entity);
             //SetModificationAudited(entry);
             SetVersion(entry);
         }
@@ -484,8 +484,8 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="entry">输入实体</param>
         protected virtual void ApplyInterceptForDeletedEntity(EntityEntry entry)
         {
-            AuditPropertySetter?.SetDeletionProperties(entry);
-            AuditPropertySetter?.SetModificationProperties(entry);
+            AuditPropertySetter?.SetDeletionProperties(entry.Entity);
+            AuditPropertySetter?.SetModificationProperties(entry.Entity);
             SetVersion(entry);
             //SetModificationAudited(entry);
         }

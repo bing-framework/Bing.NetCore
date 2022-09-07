@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
@@ -14,6 +15,7 @@ using Bing.Security.Claims;
 using Bing.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -49,6 +51,8 @@ namespace Bing.Admin.Modules
                     o.Filters.Add<ResultHandlerAttribute>();
                     o.Filters.Add<BingExceptionFilter>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
+                    o.ModelBindingMessageProvider
+                        .SetNonPropertyAttemptedValueIsInvalidAccessor((x) => $"'{x}' 是不合法的参数");
                 })
                 .AddControllersAsServices()// 解决属性注入无法在控制器中注入的问题
                 .AddNewtonsoftJson(options =>
