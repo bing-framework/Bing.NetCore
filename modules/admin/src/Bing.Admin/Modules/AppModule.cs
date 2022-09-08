@@ -51,8 +51,17 @@ namespace Bing.Admin.Modules
                     o.Filters.Add<ResultHandlerAttribute>();
                     o.Filters.Add<BingExceptionFilter>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
-                    o.ModelBindingMessageProvider
-                        .SetNonPropertyAttemptedValueIsInvalidAccessor((x) => $"'{x}' 是不合法的参数");
+                    o.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor((x) => $"没有为属性 '{x}' 指定值");
+                    o.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(() => "必须指定值");
+                    o.ModelBindingMessageProvider.SetMissingRequestBodyRequiredValueAccessor(() => "请求正文不能为空");
+                    o.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor((x) => $"'{x}' 是无效的值");
+                    o.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) => $"'{x}' 不能作为 {y} 的值");
+                    o.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor((x) => $"'{x}' 是无效的值");
+                    o.ModelBindingMessageProvider.SetUnknownValueIsInvalidAccessor((x) => $"为 {x} 指定的值无效");
+                    o.ModelBindingMessageProvider.SetNonPropertyUnknownValueIsInvalidAccessor(() => "指定的值无效");
+                    o.ModelBindingMessageProvider.SetValueIsInvalidAccessor((x) => $"值 {x} 无效");
+                    o.ModelBindingMessageProvider.SetValueMustBeANumberAccessor((x)=>$"字段 {x} 的值应该是数字");
+                    o.ModelBindingMessageProvider.SetNonPropertyValueMustBeANumberAccessor(() => "字段的值应该是数字");
                 })
                 .AddControllersAsServices()// 解决属性注入无法在控制器中注入的问题
                 .AddNewtonsoftJson(options =>
