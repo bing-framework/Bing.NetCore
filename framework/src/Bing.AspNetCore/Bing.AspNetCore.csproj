@@ -4,4 +4,19 @@
   <Import Project="project.dependency.props" />
 
   <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <Compile Update="Microsoft\AspNetCore\Mvc\ModelBinding\Metadata\MvcModelBindingResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MvcModelBindingResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Microsoft\AspNetCore\Mvc\ModelBinding\Metadata\MvcModelBindingResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MvcModelBindingResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>
