@@ -1,18 +1,18 @@
 ﻿using System.Linq;
 using Bing.Exceptions;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Domain.Services
 {
     /// <summary>
     /// 参数基类
     /// </summary>
-    public abstract class ParameterBase : IValidation
+    public abstract class ParameterBase : IVerifyModel
     {
         /// <summary>
         /// 验证
         /// </summary>
-        public virtual ValidationResultCollection Validate()
+        public virtual IValidationResult Validate()
         {
             var result = DataAnnotationValidation.Validate(this);
             if (result.IsValid)

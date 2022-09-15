@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,11 +46,10 @@ namespace Bing.Core.Modularity
         /// <param name="moduleType">模块类型</param>
         internal Type[] GetDependModuleTypes(Type moduleType = null)
         {
-            if (moduleType == null)
-                moduleType = GetType();
+            moduleType ??= GetType();
             var dependAttrs = moduleType.GetAttributes<DependsOnModuleAttribute>(true).ToList();
             if (dependAttrs.Count == 0)
-                return new Type[0];
+                return Type.EmptyTypes;
             var dependTypes = new List<Type>();
             foreach (var dependAttr in dependAttrs)
             {
@@ -62,5 +62,33 @@ namespace Bing.Core.Modularity
             }
             return dependTypes.Distinct().ToArray();
         }
+
+        #region 辅助方法
+
+        /// <summary>
+        /// 判断指定类型是否<see cref="IBingModule"/>类型
+        /// </summary>
+        /// <param name="type">类型</param>
+        public static bool IsBingModule(Type type)
+        {
+            var typeInfo = type.GetTypeInfo();
+            return typeInfo.IsClass &&
+                   !typeInfo.IsAbstract &&
+                   !typeInfo.IsGenericType &&
+                   typeof(IBingModule).GetTypeInfo().IsAssignableFrom(type);
+        }
+
+        /// <summary>
+        /// 检查模块类型是否<see cref="IBingModule"/>类型
+        /// </summary>
+        /// <param name="moduleType">模块类型</param>
+        internal static void CheckBingModuleType(Type moduleType)
+        {
+            if (!IsBingModule(moduleType))
+                throw new ArgumentException("Given type is not an Bing Module: " + moduleType.AssemblyQualifiedName);
+        }
+
+        #endregion
+
     }
 }

@@ -65,17 +65,7 @@ namespace Bing.Application.Services
         /// <param name="entity">实体</param>
         protected virtual TDto ToDto(TEntity entity) => entity.MapTo<TDto>();
 
-        #region GetById(通过编号获取)
-
-        /// <summary>
-        /// 通过编号获取
-        /// </summary>
-        /// <param name="id">实体编号</param>
-        public virtual TDto GetById(object id)
-        {
-            var key = Conv.To<TKey>(id);
-            return ToDto(_store.Find(key));
-        }
+        #region GetByIdAsync(通过编号获取)
 
         /// <summary>
         /// 通过编号获取
@@ -89,13 +79,7 @@ namespace Bing.Application.Services
 
         #endregion
 
-        #region GetByIds(通过编号列表获取)
-
-        /// <summary>
-        /// 通过编号列表获取
-        /// </summary>
-        /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
-        public virtual List<TDto> GetByIds(string ids) => _store.FindByIds(ids).Select(ToDto).ToList();
+        #region GetByIdsAsync(通过编号列表获取)
 
         /// <summary>
         /// 通过编号列表获取
@@ -110,11 +94,6 @@ namespace Bing.Application.Services
         #endregion
 
         #region GetAll(获取全部)
-
-        /// <summary>
-        /// 获取全部
-        /// </summary>
-        public virtual List<TDto> GetAll() => _store.FindAll().Select(ToDto).ToList();
 
         /// <summary>
         /// 获取全部

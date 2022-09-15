@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
-using Bing.Aspects.Base;
+using Bing.Aspects;
 using Bing.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 

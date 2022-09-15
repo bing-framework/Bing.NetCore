@@ -1,4 +1,4 @@
-﻿using Bing.Validations.Abstractions;
+﻿using Bing.Validation;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Bing.AspNetCore.Mvc.Validation

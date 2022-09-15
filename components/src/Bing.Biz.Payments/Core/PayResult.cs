@@ -6,6 +6,24 @@
     public class PayResult
     {
         /// <summary>
+        /// 初始化一个<see cref="PayResult"/>类型的实例
+        /// </summary>
+        public PayResult() { }
+
+        /// <summary>
+        /// 初始化一个<see cref="PayResult"/>类型的实例
+        /// </summary>
+        /// <param name="success">是否成功</param>
+        /// <param name="tradeId">交易编号</param>
+        /// <param name="raw">支付接口返回的原始消息</param>
+        public PayResult(bool success, string tradeId, string raw)
+        {
+            Success = success;
+            TradeId = tradeId;
+            Raw = raw;
+        }
+
+        /// <summary>
         /// 是否成功
         /// </summary>
         public bool Success { get; }
@@ -34,23 +52,5 @@
         /// 请求参数
         /// </summary>
         public string Parameter { get; set; }
-
-        /// <summary>
-        /// 初始化一个<see cref="PayResult"/>类型的实例
-        /// </summary>
-        public PayResult() { }
-
-        /// <summary>
-        /// 初始化一个<see cref="PayResult"/>类型的实例
-        /// </summary>
-        /// <param name="success">是否成功</param>
-        /// <param name="tradeId">交易编号</param>
-        /// <param name="raw">支付接口返回的原始消息</param>
-        public PayResult(bool success, string tradeId, string raw)
-        {
-            Success = success;
-            TradeId = tradeId;
-            Raw = raw;
-        }
     }
 }

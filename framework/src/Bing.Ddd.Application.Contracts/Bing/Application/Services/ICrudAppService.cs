@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bing.Application.Aspects;
 using Bing.Application.Dtos;
 using Bing.Data.Queries;
-using Bing.Validations.Aspects;
+using Bing.Validation;
 
 namespace Bing.Application.Services
 {
@@ -49,21 +49,7 @@ namespace Bing.Application.Services
         /// </summary>
         /// <param name="request">请求参数</param>
         [UnitOfWork]
-        string Create([Valid] TCreateRequest request);
-
-        /// <summary>
-        /// 创建
-        /// </summary>
-        /// <param name="request">请求参数</param>
-        [UnitOfWork]
         Task<string> CreateAsync([Valid] TCreateRequest request);
-
-        /// <summary>
-        /// 修改
-        /// </summary>
-        /// <param name="request">请求参数</param>
-        [UnitOfWork]
-        void Update([Valid] TUpdateRequest request);
 
         /// <summary>
         /// 修改
@@ -93,22 +79,7 @@ namespace Bing.Application.Services
         /// </summary>
         /// <param name="request">请求参数</param>
         [UnitOfWork]
-        void Save([Valid] TRequest request);
-
-        /// <summary>
-        /// 保存
-        /// </summary>
-        /// <param name="request">请求参数</param>
-        [UnitOfWork]
         Task SaveAsync([Valid] TRequest request);
-
-        /// <summary>
-        /// 批量保存
-        /// </summary>
-        /// <param name="addList">新增列表</param>
-        /// <param name="updateList">修改列表</param>
-        /// <param name="deleteList">删除列表</param>
-        List<TDto> Save(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList);
 
         /// <summary>
         /// 批量保存

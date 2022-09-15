@@ -94,19 +94,6 @@ namespace Bing.Tests.Applications
         /// 测试 - 获取全部
         /// </summary>
         [Fact]
-        public void Test_GetAll()
-        {
-            _repository.FindAll().Returns(GetEntities());
-            var dtos = _service.GetAll();
-            Assert.Equal(2, dtos.Count);
-            Assert.Equal("A", dtos[0].Name);
-            Assert.Equal("B", dtos[1].Name);
-        }
-
-        /// <summary>
-        /// 测试 - 获取全部
-        /// </summary>
-        [Fact]
         public async Task Test_GetAllAsync()
         {
             _repository.FindAllAsync().Returns(GetEntities());
@@ -120,36 +107,11 @@ namespace Bing.Tests.Applications
         /// 测试 - 通过编号获取
         /// </summary>
         [Fact]
-        public void Test_GetById()
-        {
-            _repository.Find(_id).Returns(_entity);
-            var dto = _service.GetById(_id.ToString());
-            Assert.Equal("A", dto.Name);
-        }
-
-        /// <summary>
-        /// 测试 - 通过编号获取
-        /// </summary>
-        [Fact]
         public async Task Test_GetByIdAsync()
         {
             _repository.FindAsync(_id).Returns(_entity);
             var dto = await _service.GetByIdAsync(_id.ToString());
             Assert.Equal("A", dto.Name);
-        }
-
-        /// <summary>
-        /// 测试 - 通过编号列表获取
-        /// </summary>
-        [Fact]
-        public void Test_GetByIds()
-        {
-            var ids = $"{_id},{_id2}";
-            _repository.FindByIds(ids).Returns(GetEntities());
-            var dtos = _service.GetByIds(ids);
-            Assert.Equal(2, dtos.Count);
-            Assert.Equal("A", dtos[0].Name);
-            Assert.Equal("B", dtos[1].Name);
         }
 
         /// <summary>

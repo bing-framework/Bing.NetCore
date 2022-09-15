@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Http" Version="1.2.3" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.4.0-preview-20220831-2" />
   </ItemGroup>
 
   <ItemGroup>

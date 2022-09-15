@@ -1,4 +1,5 @@
-﻿using Bing.DependencyInjection;
+﻿using System.Linq;
+using Bing.DependencyInjection;
 using Bing.Extensions;
 using Serilog.Core;
 using Serilog.Events;
@@ -30,12 +31,14 @@ namespace Bing.Logging.Serilog.Enrichers
             _context = accessor.Context;
             if (_context == null)
                 return;
+            RemoveProperties(logEvent);
             AddDuration(logEvent, propertyFactory);
             AddTraceId(logEvent, propertyFactory);
             AddUserId(logEvent, propertyFactory);
             AddApplication(logEvent, propertyFactory);
             AddEnvironment(logEvent, propertyFactory);
             AddExtraData(logEvent, propertyFactory);
+            AddTags(logEvent, propertyFactory);
         }
 
         /// <summary>
@@ -117,6 +120,17 @@ namespace Bing.Logging.Serilog.Enrichers
                 var property = propertyFactory.CreateProperty(item.Key, item.Value);
                 logEvent.AddOrUpdateProperty(property);
             }
+        }
+
+        /// <summary>
+        /// 添加标签
+        /// </summary>
+        private void AddTags(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        {
+            if (_context.Tags.Count == 0)
+                return;
+            var property = propertyFactory.CreateProperty("Tags", _context.Tags.Distinct(), true);
+            logEvent.AddOrUpdateProperty(property);
         }
     }
 }

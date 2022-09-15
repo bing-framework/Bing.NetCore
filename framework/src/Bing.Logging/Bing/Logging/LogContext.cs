@@ -39,6 +39,11 @@ namespace Bing.Logging
         public string Environment { get; set; }
 
         /// <summary>
+        /// 标签列表
+        /// </summary>
+        public List<string> Tags { get; set; } = new List<string>();
+
+        /// <summary>
         /// 扩展数据
         /// </summary>
         public IDictionary<string, object> Data { get; }

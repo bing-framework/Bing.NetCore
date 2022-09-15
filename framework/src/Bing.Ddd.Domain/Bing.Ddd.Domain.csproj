@@ -5,4 +5,10 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\Bing.Uow\Bing.Uow.csproj" />
+    <ProjectReference Include="..\Bing.Validation\Bing.Validation.csproj" />
+  </ItemGroup>
+
 </Project>

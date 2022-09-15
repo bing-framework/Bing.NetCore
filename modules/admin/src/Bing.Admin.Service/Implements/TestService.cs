@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Bing.Admin.Commons.Domain.Models;
 using Bing.Admin.Commons.Domain.Repositories;
@@ -66,6 +67,7 @@ namespace Bing.Admin.Service.Implements
         /// </summary>
         public Task TestArgumentNullAsync(List<string> list)
         {
+            Debug.WriteLine($"调用方法: {nameof(TestArgumentNullAsync)}");
             list.ForEach(Console.WriteLine);
             return Task.CompletedTask;
         }

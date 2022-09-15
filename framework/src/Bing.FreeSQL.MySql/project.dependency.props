@@ -4,6 +4,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="2.3.200" />
+    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="$(FreeSQLPackageVersion)" />
   </ItemGroup>
 </Project>

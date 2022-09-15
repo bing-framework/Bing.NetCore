@@ -15,7 +15,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services
     /// <summary>
     /// 微信小程序支付服务
     /// </summary>
-    public class WechatpayMiniProgramPayService : WechatpayServiceBase, IWechatpayMiniProgramPayService
+    public class WechatpayMiniProgramPayService : WechatpayPayServiceBase, IWechatpayMiniProgramPayService
     {
         /// <summary>
         /// 初始化一个<see cref="WechatpayMiniProgramPayService"/>类型的实例
@@ -26,22 +26,15 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         }
 
         /// <summary>
-        /// 获取交易类型
+        /// 支付
         /// </summary>
-        /// <returns></returns>
-        protected override string GetTradeType()
-        {
-            return "JSAPI";
-        }
+        /// <param name="request">微信小程序支付参数</param>
+        public async Task<PayResult> PayAsync(WechatpayMiniProgramPayRequest request) => await PayAsync(request.ToParam());
 
         /// <summary>
-        /// 获取支付方式
+        /// 获取交易类型
         /// </summary>
-        /// <returns></returns>
-        protected override PayWay GetPayWay()
-        {
-            return PayWay.WechatpayMiniProgramPay;
-        }
+        protected override string GetTradeType() => "JSAPI";
 
         /// <summary>
         /// 验证参数
@@ -50,36 +43,31 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         protected override void ValidateParam(PayParam param)
         {
             if (param.OpenId.IsEmpty())
-            {
                 throw new Warning("小程序支付必须设置OpenId");
-            }
         }
 
         /// <summary>
-        /// 支付
+        /// 初始化参数生成器
         /// </summary>
-        /// <param name="request">微信小程序支付参数</param>
-        /// <returns></returns>
-        public async Task<PayResult> PayAsync(WechatpayMiniProgramPayRequest request)
+        /// <param name="builder">微信支付参数生成器</param>
+        /// <param name="param">支付参数</param>
+        protected override void InitBuilder(WechatpayParameterBuilder builder, PayParam param)
         {
-            return await PayAsync(request.ToParam());
+            builder.OpenId(param.OpenId);
         }
 
         /// <summary>
         /// 获取结果
         /// </summary>
-        /// <param name="config">微信支付配置</param>
-        /// <param name="builder">微信支付参数生成器</param>
         /// <param name="result">微信支付结果</param>
-        /// <returns></returns>
-        protected override string GetResult(WechatpayConfig config, WechatpayParameterBuilder builder, WechatpayResult result)
+        protected override string GetResult(WechatpayResult result)
         {
-            return new WechatpayParameterBuilder(config)
-                .Add("appId", config.AppId)
+            return new WechatpayParameterBuilder(result.Config)
+                .Add("appId", result.Config.AppId)
                 .Add("timeStamp", Time.GetUnixTimestamp().SafeString())
                 .Add("nonceStr", Id.Guid())
                 .Package($"prepay_id={result.GetPrepayId()}")
-                .Add("signType", config.SignType.Description())
+                .Add("signType", result.Config.SignType.Description())
                 .ToJson();
         }
     }

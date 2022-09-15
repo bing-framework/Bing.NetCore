@@ -1,7 +1,4 @@
-﻿using Bing.Validations.Abstractions;
-using Bing.Validations.Handlers;
-
-namespace Bing.Configuration
+﻿namespace Bing.Configuration
 {
     /// <summary>
     /// Bing 框架配置
@@ -36,11 +33,6 @@ namespace Bing.Configuration
                 return _instance;
             }
         }
-
-        /// <summary>
-        /// 验证处理器
-        /// </summary>
-        public IValidationHandler ValidationHandler { get; set; } = new ThrowHandler();
 
         /// <summary>
         /// 是否启用调试日志

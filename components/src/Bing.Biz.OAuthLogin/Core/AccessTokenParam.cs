@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Bing.Exceptions;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Biz.OAuthLogin.Core
 {
     /// <summary>
     /// 访问令牌参数
     /// </summary>
-    public class AccessTokenParam : IValidation
+    public class AccessTokenParam : IVerifyModel
     {
         /// <summary>
         /// 授权类型
@@ -31,7 +31,7 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <summary>
         /// 验证
         /// </summary>
-        public virtual ValidationResultCollection Validate()
+        public virtual IValidationResult Validate()
         {
             var result = DataAnnotationValidation.Validate(this);
             if (result.IsValid)

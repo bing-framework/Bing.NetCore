@@ -40,7 +40,6 @@ namespace Bing.Biz.Payments.Factories
         /// 创建支付服务
         /// </summary>
         /// <param name="way">支付方式</param>
-        /// <returns></returns>
         public IPayService CreatePayService(PayWay way)
         {
             switch (way)
@@ -60,23 +59,23 @@ namespace Bing.Biz.Payments.Factories
                 case PayWay.AlipayWapPay:
                     return new AlipayWapPayService(_alipayConfigProvider);
 
+                case PayWay.WechatpayPaymentCodePay:
+                    return new WechatpayPaymentCodePayService(_wechatpayConfigProvider);
+
+                case PayWay.WechatpayJsApiPay:
+                    return new WechatpayJsApiPayService(_wechatpayConfigProvider);
+
+                case PayWay.WechatpayNativePay:
+                    return new WechatpayNativePayService(_wechatpayConfigProvider);
+
                 case PayWay.WechatpayAppPay:
                     return new WechatpayAppPayService(_wechatpayConfigProvider);
 
                 case PayWay.WechatpayMiniProgramPay:
                     return new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
 
-                case PayWay.WechatpayPagePay:
-                    return new WechatpayPagePayService(_wechatpayConfigProvider);
-
-                case PayWay.WechatpayWapPay:
-                    return new WechatpayWapPayService(_wechatpayConfigProvider);
-
-                case PayWay.WechatpayPublicPay:
-                    return new WechatpayPublicPayService(_wechatpayConfigProvider);
-
-                case PayWay.WechatpayBarcodePay:
-                    return new WechatpayBarcodePayService(_wechatpayConfigProvider);
+                case PayWay.WechatpayH5Pay:
+                    return new WechatpayH5PayService(_wechatpayConfigProvider);
             }
 
             throw new NotImplementedException(way.Description());
@@ -148,64 +147,36 @@ namespace Bing.Biz.Payments.Factories
         /// <summary>
         /// 创建微信回调通知服务
         /// </summary>
-        /// <returns></returns>
-        public IWechatpayNotifyService CreateWechatpayNotifyService()
-        {
-            return new WechatpayNotifyService(_wechatpayConfigProvider);
-        }
+        public IWechatpayNotifyService CreateWechatpayNotifyService() => new WechatpayNotifyService(_wechatpayConfigProvider);
+
+        /// <summary>
+        /// 创建微信下载交易账单服务
+        /// </summary>
+        public IWechatpayDownloadBillService CreateWechatpayDownloadBillService() => new WechatpayDownloadBillService(_wechatpayConfigProvider);
+
+        /// <summary>
+        /// 创建微信付款码支付服务
+        /// </summary>
+        public IWechatpayPaymentCodePayService CreateWechatpayBarcodePayService() => new WechatpayPaymentCodePayService(_wechatpayConfigProvider);
+
+        /// <summary>
+        /// 创建微信JsApi支付服务
+        /// </summary>
+        public IWechatpayJsApiPayService CreateWechatpayJsApiPayService() => new WechatpayJsApiPayService(_wechatpayConfigProvider);
 
         /// <summary>
         /// 创建微信App支付服务
         /// </summary>
-        /// <returns></returns>
-        public IWechatpayAppPayService CreateWechatpayAppPayService()
-        {
-            return new WechatpayAppPayService(_wechatpayConfigProvider);
-        }
+        public IWechatpayAppPayService CreateWechatpayAppPayService() => new WechatpayAppPayService(_wechatpayConfigProvider);
+
+        /// <summary>
+        /// 创建微信H5支付服务
+        /// </summary>
+        public IWechatpayH5PayService CreateH5PayService() => new WechatpayH5PayService(_wechatpayConfigProvider);
 
         /// <summary>
         /// 创建微信小程序支付服务
         /// </summary>
-        /// <returns></returns>
-        public IWechatpayMiniProgramPayService CreateWechatpayMiniProgramPayService()
-        {
-            return new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
-        }
-
-        /// <summary>
-        /// 创建微信电脑网站支付服务
-        /// </summary>
-        /// <returns></returns>
-        public IWechatpayPagePayService CreateWechatpayPagePayService()
-        {
-            return new WechatpayPagePayService(_wechatpayConfigProvider);
-        }
-
-        /// <summary>
-        /// 创建微信手机网站支付服务
-        /// </summary>
-        /// <returns></returns>
-        public IWechatpayWapPayService CreateWechatpayWapPayService()
-        {
-            return new WechatpayWapPayService(_wechatpayConfigProvider);
-        }
-
-        /// <summary>
-        /// 创建微信公众号支付服务
-        /// </summary>
-        /// <returns></returns>
-        public IWechatpayPublicPayService CreateWechatpayPublicPayService()
-        {
-            return new WechatpayPublicPayService(_wechatpayConfigProvider);
-        }
-
-        /// <summary>
-        /// 创建微信条码支付服务
-        /// </summary>
-        /// <returns></returns>
-        public IWechatpayBarcodePayService CreateWechatpayBarcodePayService()
-        {
-            return new WechatpayBarcodePayService(_wechatpayConfigProvider);
-        }
+        public IWechatpayMiniProgramPayService CreateWechatpayMiniProgramPayService() => new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
     }
 }

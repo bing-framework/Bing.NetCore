@@ -17,11 +17,6 @@ namespace Bing.Exceptions.Prompts
         private static readonly List<IExceptionPrompt> Prompts = new List<IExceptionPrompt>();
 
         /// <summary>
-        /// 是否显示系统异常消息
-        /// </summary>
-        public static bool IsShowSystemException { get; set; }
-
-        /// <summary>
         /// 添加异常提示
         /// </summary>
         /// <param name="prompt">异常提示</param>
@@ -38,7 +33,8 @@ namespace Bing.Exceptions.Prompts
         /// 获取异常提示
         /// </summary>
         /// <param name="exception">异常</param>
-        public static string GetPrompt(Exception exception)
+        /// <param name="isProduction">是否生产环境</param>
+        public static string GetPrompt(Exception exception, bool isProduction)
         {
             if (exception == null)
                 return null;
@@ -47,10 +43,8 @@ namespace Bing.Exceptions.Prompts
             if (string.IsNullOrWhiteSpace(prompt) == false)
                 return prompt;
             if (exception is Warning warning)
-                return warning.Message;
-            if (IsShowSystemException)
-                return exception.Message;
-            return R.SystemError;
+                return warning.GetMessage(isProduction);
+            return isProduction ? R.SystemError : exception.Message;
         }
 
         /// <summary>
@@ -66,6 +60,23 @@ namespace Bing.Exceptions.Prompts
                     return result;
             }
             return string.Empty;
+        }
+
+        /// <summary>
+        /// 获取原始异常
+        /// </summary>
+        /// <param name="exception">异常</param>
+        public static Exception GetException(Exception exception)
+        {
+            if (exception is null)
+                return null;
+            foreach (var prompt in Prompts)
+            {
+                var result = prompt.GetRawException(exception);
+                if (result != null)
+                    return result;
+            }
+            return exception;
         }
     }
 }

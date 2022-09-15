@@ -52,19 +52,43 @@ namespace Bing.AspNetCore.RealIp
             var headers = context.Request.Headers;
             try
             {
-                if (headers.ContainsKey(_options.HeaderKey))
-                {
-                    context.Connection.RemoteIpAddress = IPAddress.Parse(
-                        _options.HeaderKey.Equals("x-forwarded-for", StringComparison.CurrentCultureIgnoreCase)
-                            ? headers["X-Forwarded-For"].ToString().Split(',')[0]
-                            : headers[_options.HeaderKey].ToString());
-                    _logger.LogDebug($"解析真实IP成功: {context.Connection.RemoteIpAddress}");
-                }
+                var ip = TryGetIpAddress(headers, _options.HeaderKey) ?? TryGetIpAddress(headers, "x-forwarded-for") ?? TryGetIpAddress(headers, "X-Forwarded-For");
+                if (ip != null) 
+                    context.Connection.RemoteIpAddress = ip;
             }
             finally
             {
                 await _next(context);
             }
+        }
+
+        /// <summary>
+        /// 尝试获取IP地址
+        /// </summary>
+        /// <param name="headers">请求头字典</param>
+        /// <param name="key">请求头</param>
+        private IPAddress TryGetIpAddress(IHeaderDictionary headers, string key)
+        {
+            if (headers.ContainsKey(key))
+            {
+                headers.TryGetValue(key, out var ip);
+                _logger.LogDebug($"解析真实IP地址: {ip}");
+                if (string.IsNullOrEmpty(ip) == false && ip.ToString().ToLower() != "unknown")
+                {
+                    var tmpIp = key.Equals("x-forwarded-for", StringComparison.CurrentCultureIgnoreCase)
+                        ? ip.ToString().Split(',')[0]
+                        : ip.ToString();
+                    if (IPAddress.TryParse(tmpIp, out var ipAddress))
+                    {
+                        _logger.LogDebug($"解析真实IP成功: {ipAddress}");
+                        return ipAddress;
+                    }
+
+                    _logger.LogError($"解析真实IP失败: {tmpIp}");
+                }
+            }
+
+            return null;
         }
     }
 

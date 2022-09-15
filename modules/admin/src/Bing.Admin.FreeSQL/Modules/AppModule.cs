@@ -2,6 +2,7 @@
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Mvc.ExceptionHandling;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
 using Bing.DependencyInjection;
@@ -12,6 +13,7 @@ using Bing.Security.Claims;
 using Bing.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +43,9 @@ namespace Bing.Admin.Modules
             // 注册Mvc
             services.AddControllers(o =>
                 {
+                    o.Filters.Add<ValidationModelAttribute>();
                     o.Filters.Add<ResultHandlerAttribute>();
+                    o.Filters.Add<BingExceptionFilter>();
                     o.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
                 .AddControllersAsServices()// 解决属性注入无法在控制器中注入的问题
@@ -49,6 +53,11 @@ namespace Bing.Admin.Modules
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 });
+            // 配置模型校验
+            services.Configure<ApiBehaviorOptions>(o =>
+            {
+                o.SuppressModelStateInvalidFilter = true;
+            });
             services.EnableAop(o =>
             {
                 o.ThrowAspectException = false;

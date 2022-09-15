@@ -129,7 +129,7 @@ namespace Bing.Tests.Domains
             AssertHelper.Throws<Warning>(() =>
             {
                 _sample.Name = "abcd";
-                _sample.AddStrategy(new ValidateStrategySample());
+                _sample.UseStrategy(new ValidateStrategySample());
                 _sample.Validate();
             }, "名称长度不能大于3");
         }
@@ -142,8 +142,8 @@ namespace Bing.Tests.Domains
         {
             _sample = AggregateRootSample.CreateSample();
             _sample.Name = "abcd";
-            _sample.AddStrategy(new ValidateStrategySample());
-            _sample.SetValidateHandler(new ValidationHandlerSample());
+            _sample.UseStrategy(new ValidateStrategySample());
+            _sample.SetValidationCallback(new ValidationHandlerSample());
             _sample.Validate();
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Extensions;
+using System.Linq;
 using Bing.Permissions.Identity.JwtBearer;
 
 namespace Bing.Permissions.Authorization.Middlewares
@@ -31,7 +31,7 @@ namespace Bing.Permissions.Authorization.Middlewares
         /// <param name="urls">路径列表</param>
         public List<string> SetAnonymousPaths(IList<string> urls)
         {
-            urls.ForEach(url =>
+            urls.ToList().ForEach(url =>
             {
                 AnonymousPaths.Add(url);
             });

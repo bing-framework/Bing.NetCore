@@ -13,7 +13,7 @@ namespace Bing.DependencyInjection
         /// <summary>
         /// 缓存服务字典
         /// </summary>
-        protected IDictionary<Type, object> CachedServices { get; set; }
+        protected Dictionary<Type, object> CachedServices { get; set; }
 
         /// <summary>
         /// 服务提供程序
@@ -40,7 +40,7 @@ namespace Bing.DependencyInjection
         /// 获取请求服务
         /// </summary>
         /// <param name="serviceType">服务类型</param>
-        public virtual object LazyGetRequiredService(Type serviceType) => CachedServices.GetOrAdd(serviceType, () => ServiceProvider.GetRequiredService(serviceType));
+        public virtual object LazyGetRequiredService(Type serviceType) => CachedServices.GetValueOrAdd(serviceType, _ => ServiceProvider.GetRequiredService(serviceType));
 
         /// <summary>
         /// 获取服务
@@ -52,7 +52,7 @@ namespace Bing.DependencyInjection
         /// 获取服务
         /// </summary>
         /// <param name="serviceType">服务类型</param>
-        public virtual object LazyGetService(Type serviceType) => CachedServices.GetOrAdd(serviceType, () => ServiceProvider.GetService(serviceType));
+        public virtual object LazyGetService(Type serviceType) => CachedServices.GetValueOrAdd(serviceType, _ => ServiceProvider.GetService(serviceType));
 
         /// <summary>
         /// 获取服务
@@ -73,7 +73,7 @@ namespace Bing.DependencyInjection
         /// </summary>
         /// <param name="serviceType">服务类型</param>
         /// <param name="factory">服务实例工厂</param>
-        public virtual object LazyGetService(Type serviceType, Func<IServiceProvider, object> factory) => CachedServices.GetOrAdd(serviceType, () => factory(ServiceProvider));
+        public virtual object LazyGetService(Type serviceType, Func<IServiceProvider, object> factory) => CachedServices.GetValueOrAdd(serviceType, _ => factory(ServiceProvider));
 
         /// <summary>
         /// 获取服务

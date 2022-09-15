@@ -103,6 +103,13 @@ namespace Bing.Logs
         public static ILog Caption(this ILog log, string caption) => log.Set<LogContent>(content => content.Caption = caption);
 
         /// <summary>
+        /// 追加标题
+        /// </summary>
+        /// <param name="log">日志操作</param>
+        /// <param name="caption">标题</param>
+        public static ILog AppendCaption(this ILog log, string caption) => log.Set<LogContent>(content => content.Caption = $"{content.Caption}{caption}");
+
+        /// <summary>
         /// 设置Sql语句
         /// </summary>
         /// <param name="log">日志操作</param>

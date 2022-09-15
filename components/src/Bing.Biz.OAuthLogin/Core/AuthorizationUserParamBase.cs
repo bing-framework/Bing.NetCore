@@ -2,14 +2,14 @@
 using System.Linq;
 using Bing.Exceptions;
 using Bing.ObjectMapping;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Biz.OAuthLogin.Core
 {
     /// <summary>
     /// 授权用户参数基类
     /// </summary>
-    public class AuthorizationUserParamBase : IValidation
+    public class AuthorizationUserParamBase : IVerifyModel
     {
         /// <summary>
         /// 访问令牌
@@ -20,7 +20,7 @@ namespace Bing.Biz.OAuthLogin.Core
         /// <summary>
         /// 验证
         /// </summary>
-        public ValidationResultCollection Validate()
+        public IValidationResult Validate()
         {
             var result = DataAnnotationValidation.Validate(this);
             if (result.IsValid)

@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 
 namespace Bing.Tests
 {
-    public class CloneTest:TestBase
+    public class CloneTest : TestBase
     {
         public CloneTest(ITestOutputHelper output) : base(output)
         {
@@ -35,7 +35,7 @@ namespace Bing.Tests
             clone.Child.One.Desc = "老王装逼套路";
             clone.SetName("苦逼了吧老王");
 
-            Assert.Equal("老铁",parent.Name);
+            Assert.Equal("老铁", parent.Name);
             Assert.Equal("老王", clone.Name);
 
             Assert.Equal("老铁Parent", parent.Child.Name);

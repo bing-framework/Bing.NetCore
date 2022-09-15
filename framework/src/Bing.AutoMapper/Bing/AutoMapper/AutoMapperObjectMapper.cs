@@ -17,7 +17,7 @@ namespace Bing.AutoMapper
         /// 同步锁
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        private static readonly object Sync = new object();
+        private static readonly object Sync = new();
 
         /// <summary>
         /// 配置提供程序
@@ -44,7 +44,7 @@ namespace Bing.AutoMapper
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _profiles = profiles;
             _mapper = _configuration.CreateMapper();
-            
+
         }
 
         #region Map(将源对象映射到目标对象)
@@ -76,7 +76,9 @@ namespace Bing.AutoMapper
             }
             catch (AutoMapperMappingException e)
             {
-                return GetResult(GetType(e.MemberMap.SourceType), GetType(e.MemberMap.DestinationType), source, destination);
+                if (e.InnerException != null && e.InnerException.Message.StartsWith("Missing type map configuration"))
+                    return GetResult(GetType(e.MemberMap.SourceType), GetType(e.MemberMap.DestinationType), source, destination);
+                throw;
             }
         }
 
@@ -140,7 +142,7 @@ namespace Bing.AutoMapper
             _configuration = new MapperConfiguration(t =>
             {
                 t.CreateMap(sourceType, destinationType);
-                foreach (var map in maps) 
+                foreach (var map in maps)
                     t.CreateMap(map.SourceType, map.DestinationType);
                 foreach (var profile in _profiles)
                     t.AddProfile(profile as Profile);

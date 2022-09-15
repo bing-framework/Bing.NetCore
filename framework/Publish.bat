@@ -14,6 +14,13 @@ for /R "nuget_pub" %%s in (*) do (
 dotnet pack src/Bing -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore -c Release -o nuget_pub
 
+::AOP
+dotnet pack src/Bing.Aop.AspectCore -c Release -o nuget_pub
+
+::Validation
+dotnet pack src/Bing.Validation.Abstractions -c Release -o nuget_pub
+dotnet pack src/Bing.Validation -c Release -o nuget_pub
+
 ::Security
 dotnet pack src/Bing.Security -c Release -o nuget_pub
 
@@ -34,6 +41,7 @@ dotnet pack src/Bing.Data -c Release -o nuget_pub
 dotnet pack src/Bing.Data.Sql -c Release -o nuget_pub
 
 ::Domain
+dotnet pack src/Bing.Uow -c Release -o nuget_pub
 dotnet pack src/Bing.Auditing -c Release -o nuget_pub
 dotnet pack src/Bing.Ddd.Domain -c Release -o nuget_pub
 

@@ -1,0 +1,11 @@
+﻿<Project>
+  <PropertyGroup>
+    <Aspect-RefVersion>2.2.0</Aspect-RefVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspectCore.Extensions.AspectScope" Version="$(Aspect-RefVersion)" />
+    <PackageReference Include="AspectCore.Extensions.Configuration" Version="$(Aspect-RefVersion)" />
+    <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="$(Aspect-RefVersion)" />
+  </ItemGroup>
+</Project>

@@ -7,6 +7,9 @@ using Bing.ObjectMapping;
 using Bing.Reflection;
 using Bing.Tests.Samples;
 using Xunit;
+using Sample = Bing.SampleClasses.Sample;
+using Sample2 = Bing.SampleClasses.Sample2;
+using Sample3Copy = Bing.SampleClasses.Sample3Copy;
 
 namespace Bing.AutoMapper.Tests
 {
@@ -45,7 +48,7 @@ namespace Bing.AutoMapper.Tests
         public void Test_MapTo_1()
         {
             var sample = new Sample();
-            var sample2 = new Sample2() { StringValue = "a" };
+            var sample2 = new Sample2 { StringValue = "a" };
             sample2.MapTo(sample);
             Assert.Equal("a", sample.StringValue);
         }

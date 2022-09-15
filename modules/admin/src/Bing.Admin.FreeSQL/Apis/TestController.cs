@@ -61,14 +61,17 @@ namespace Bing.Admin.Apis
             return Success();
         }
 
+        /// <summary>
+        /// 测试释放CAP资源
+        /// </summary>
         [AllowAnonymous]
         [HttpPost("testDisposed")]
-        public async Task<IActionResult> TestDisposed()
+        public Task<IActionResult> TestDisposed()
         {
             //var temp = ServiceLocator.Instance.GetService<IProcessingServer>();
             //temp.Dispose();
             ProcessingServer.Dispose();
-            return Success();
+            return Task.FromResult(Success());
         }
 
         /// <summary>

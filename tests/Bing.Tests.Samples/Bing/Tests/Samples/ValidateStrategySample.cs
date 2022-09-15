@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Bing.Validations.Abstractions;
+using Bing.Validation.Strategies;
 
 namespace Bing.Tests.Samples
 {
     /// <summary>
     /// 验证策略样例 - 名称长度大于3将验证失败
     /// </summary>
-    public class ValidateStrategySample : IValidateStrategy<AggregateRootSample>
+    public class ValidateStrategySample : IValidationStrategy<AggregateRootSample>
     {
         /// <summary>
         /// 策略名称

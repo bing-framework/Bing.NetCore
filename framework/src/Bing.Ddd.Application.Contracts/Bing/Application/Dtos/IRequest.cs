@@ -1,11 +1,11 @@
-﻿using Bing.Validations;
+﻿using Bing.Validation;
 
 namespace Bing.Application.Dtos
 {
     /// <summary>
     /// 请求对象
     /// </summary>
-    public interface IRequest : IValidation
+    public interface IRequest : IVerifyModel
     {
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Bing.Exceptions;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Biz.OAuthLogin.Core
 {

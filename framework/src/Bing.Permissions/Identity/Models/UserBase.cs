@@ -2,7 +2,7 @@
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Security.Encryption;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Permissions.Identity.Models
 {
@@ -51,7 +51,7 @@ namespace Bing.Permissions.Identity.Models
         /// <summary>
         /// 验证
         /// </summary>
-        public override ValidationResultCollection Validate()
+        public override IValidationResult Validate()
         {
             if (UserName.IsEmpty())
                 throw new Warning(Bing.Permissions.Properties.SecurityResources.UserNameIsEmpty);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Bing.AspNetCore.Logs
     /// <summary>
     /// 请求日志中间件
     /// </summary>
+    [Obsolete("请使用 RequestResponseLoggerMiddleware 中间件")]
     public class RequestLogMiddleware : IMiddleware
     {
         /// <summary>

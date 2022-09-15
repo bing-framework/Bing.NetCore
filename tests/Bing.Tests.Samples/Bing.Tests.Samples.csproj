@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\common.tests.props" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace />
     <AssemblyName>Bing.Tests.Samples</AssemblyName>
+    <RootNamespace/>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,9 +28,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Castle.Core" Version="4.4.1" />
     <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="3.1.10" />
     <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.*" />
+    <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.*" />
+    <PackageReference Include="MessagePack" Version="2.4.35" />
+    <PackageReference Include="NSubstitute" Version="4.4.0" />
+    <PackageReference Include="Castle.Core" Version="5.1.0" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
+    <PackageReference Include="Moq" Version="4.16.1" />
   </ItemGroup>
 
 </Project>

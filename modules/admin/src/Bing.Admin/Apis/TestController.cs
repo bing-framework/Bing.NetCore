@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Systems.Domain.Events;
@@ -85,14 +86,17 @@ namespace Bing.Admin.Apis
             return Success();
         }
 
+        /// <summary>
+        /// 测试释放CAP资源
+        /// </summary>
         [AllowAnonymous]
         [HttpPost("testDisposed")]
-        public async Task<IActionResult> TestDisposed()
+        public Task<IActionResult> TestDisposed()
         {
             //var temp = ServiceLocator.Instance.GetService<IProcessingServer>();
             //temp.Dispose();
             ProcessingServer.Dispose();
-            return Success();
+            return Task.FromResult(Success());
         }
 
         /// <summary>
@@ -125,6 +129,7 @@ namespace Bing.Admin.Apis
             await TestService.TestArgumentNullAsync(null);
             return Success();
         }
+
         /// <summary>
         /// 测试日志
         /// </summary>
@@ -133,10 +138,62 @@ namespace Bing.Admin.Apis
         public Task<IActionResult> TestLoggerAsync(string text)
         {
             Logger.LogTrace($"输出调试信息: {text}");
+            Logger.LogTrace("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogTrace")
+                .LogTrace();
+
             Logger.LogDebug($"输出调试信息: {text}");
+            Logger.LogDebug("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogDebug")
+                .LogDebug();
+
             Logger.LogInformation($"输出调试信息: {text}");
+            Logger.LogInformation("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogInformation")
+                .LogInformation();
+
             Logger.LogWarning($"输出调试信息: {text}");
+            Logger.LogWarning("输出调试信息[参数化]: {text}", text);
+            OtherLog
+                .Message("输出调试信息[参数化]: {text}", text)
+                .Tags(nameof(TestController), "OtherLog", "LogWarning")
+                .LogWarning();
             return Task.FromResult(Success());
+        }
+
+        /// <summary>
+        /// 测试GUID
+        /// </summary>
+        /// <param name="id"></param>
+        [AllowAnonymous]
+        [HttpGet("testGuid")]
+        public IActionResult TestGuid(Guid id)
+        {
+            return Success(id);
+        }
+
+        /// <summary>
+        /// 测试 GUID 模型
+        /// </summary>
+        /// <param name="request"></param>
+        [AllowAnonymous]
+        [HttpGet("testGuidModel")]
+        public IActionResult TestGuidModel([FromQuery] TestNullableGuidRequest request)
+        {
+            return Success(request.TestId);
+        }
+
+        public class TestNullableGuidRequest
+        {
+            public Guid? TestId { get; set; }
+
+            public Guid? TestId2 { get; set; }
         }
     }
 }

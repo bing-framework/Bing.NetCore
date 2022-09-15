@@ -16,12 +16,6 @@ namespace Bing.Application.Services
         /// 删除
         /// </summary>
         /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
-        void Delete(string ids);
-
-        /// <summary>
-        /// 删除
-        /// </summary>
-        /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
         Task DeleteAsync(string ids);
     }
 }

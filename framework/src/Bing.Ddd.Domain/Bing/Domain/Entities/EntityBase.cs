@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Properties;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Domain.Entities
 {
@@ -16,7 +16,7 @@ namespace Bing.Domain.Entities
         /// <summary>
         /// 验证
         /// </summary>
-        public abstract ValidationResultCollection Validate();
+        public abstract IValidationResult Validate();
 
         /// <summary>
         /// 初始化
@@ -39,7 +39,7 @@ namespace Bing.Domain.Entities
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     [Serializable]
-    public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : class, IEntity
+    public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : class, IEntity, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 初始化一个<see cref="EntityBase{TEntity}"/>类型的实例
@@ -60,7 +60,7 @@ namespace Bing.Domain.Entities
     /// <typeparam name="TKey">标识类型</typeparam>
     [Serializable]
     public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEntity<TEntity, TKey>
-        where TEntity : class, IEntity
+        where TEntity : class, IEntity, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 标识

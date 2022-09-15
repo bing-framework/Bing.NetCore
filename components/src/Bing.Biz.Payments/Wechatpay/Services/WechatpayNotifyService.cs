@@ -6,7 +6,7 @@ using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Validations;
+using Bing.Validation;
 using Xml = Bing.Helpers.Xml;
 
 namespace Bing.Biz.Payments.Wechatpay.Services
@@ -32,6 +32,17 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         private bool _isLoad;
 
         /// <summary>
+        /// 初始化一个<see cref="WechatpayNotifyService"/>类型的实例
+        /// </summary>
+        /// <param name="configProvider">微信支付配置提供器</param>
+        public WechatpayNotifyService(IWechatpayConfigProvider configProvider)
+        {
+            configProvider.CheckNotNull(nameof(configProvider));
+            _configProvider = configProvider;
+            _isLoad = false;
+        }
+
+        /// <summary>
         /// 商户订单号
         /// </summary>
         public string OrderId => GetParam(WechatpayConst.OutTradeNo);
@@ -47,21 +58,9 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         public decimal Money => GetParam(WechatpayConst.TotalFee).ToDecimal() / 100M;
 
         /// <summary>
-        /// 初始化一个<see cref="WechatpayNotifyService"/>类型的实例
-        /// </summary>
-        /// <param name="configProvider">微信支付配置提供器</param>
-        public WechatpayNotifyService(IWechatpayConfigProvider configProvider)
-        {
-            configProvider.CheckNotNull(nameof(configProvider));
-            _configProvider = configProvider;
-            _isLoad = false;
-        }
-
-        /// <summary>
         /// 获取参数
         /// </summary>
         /// <param name="name">参数名</param>
-        /// <returns></returns>
         public string GetParam(string name)
         {
             Init();
@@ -73,16 +72,11 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
         /// <param name="name">参数名</param>
-        /// <returns></returns>
-        public T GetParam<T>(string name)
-        {
-            return Conv.To<T>(GetParam(name));
-        }
+        public T GetParam<T>(string name) => Conv.To<T>(GetParam(name));
 
         /// <summary>
         /// 获取参数集合
         /// </summary>
-        /// <returns></returns>
         public IDictionary<string, string> GetParams()
         {
             Init();
@@ -95,9 +89,7 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         private void Init()
         {
             if (_isLoad)
-            {
                 return;
-            }
             InitResult();
             _isLoad = true;
         }
@@ -105,50 +97,34 @@ namespace Bing.Biz.Payments.Wechatpay.Services
         /// <summary>
         /// 初始化支付结果
         /// </summary>
-        private void InitResult()
-        {
-            _result = new WechatpayResult(_configProvider, Web.Body);
-        }
+        private void InitResult() => _result = new WechatpayResult(_configProvider, Web.Body);
 
         /// <summary>
         /// 验证
         /// </summary>
-        /// <returns></returns>
         public async Task<ValidationResultCollection> ValidateAsync()
         {
             Init();
             if (Money <= 0)
-            {
                 return new ValidationResultCollection(PayResource.InvalidMoney);
-            }
-
             return await _result.ValidateAsync();
         }
 
         /// <summary>
         /// 返回成功消息
         /// </summary>
-        /// <returns></returns>
-        public string Success()
-        {
-            return Return(WechatpayConst.Success, WechatpayConst.Ok);
-        }
+        public string Success() => Return(WechatpayConst.Success, WechatpayConst.Ok);
 
         /// <summary>
         /// 返回失败消息
         /// </summary>
-        /// <returns></returns>
-        public string Fail()
-        {
-            return Return(WechatpayConst.Fail, WechatpayConst.Fail);
-        }
+        public string Fail() => Return(WechatpayConst.Fail, WechatpayConst.Fail);
 
         /// <summary>
         /// 返回消息
         /// </summary>
         /// <param name="code">编码</param>
         /// <param name="message">消息</param>
-        /// <returns></returns>
         private string Return(string code, string message)
         {
             var xml = new Xml();

@@ -7,7 +7,7 @@ using Bing.Helpers;
 using Bing.Logs;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;
-using Bing.Validations;
+using Bing.Validation;
 
 namespace Bing.Biz.Payments.Alipay.Services.Base
 {

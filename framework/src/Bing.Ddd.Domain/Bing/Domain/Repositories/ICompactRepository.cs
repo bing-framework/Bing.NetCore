@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
-using Bing.Validations.Aspects;
+using Bing.Validation;
 
 namespace Bing.Domain.Repositories
 {

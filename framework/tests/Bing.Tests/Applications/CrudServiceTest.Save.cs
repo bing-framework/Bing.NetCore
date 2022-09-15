@@ -126,34 +126,11 @@ namespace Bing.Tests.Applications
         [Fact]
         public async Task Test_SaveAsync_Update()
         {
-            _repository.FindAsync(_id).Returns(t => new EntitySample(_id) { Name = "a" });
-            await _service.SaveAsync(new DtoSample { Id = _id.ToString(), Name = "b" });
+            var now = DateTime.Now;
+            _repository.FindAsync(_id).Returns(t => new EntitySample(_id) { Name = "a", LastModificationTime = now });
+            await _service.SaveAsync(new DtoSample { Id = _id.ToString(), Name = "b",LastModificationTime = now.AddDays(1)});
             await _repository.DidNotReceive().AddAsync(Arg.Any<EntitySample>());
             await _repository.Received().UpdateAsync(Arg.Is<EntitySample>(t => t.Name == "b"));
-        }
-
-        /// <summary>
-        /// 测试 - 删除
-        /// </summary>
-        [Fact]
-        public void Test_Delete()
-        {
-            var ids = new[] { _id, _id2 };
-            _repository.FindByIds(ids.Join()).Returns(GetEntities());
-            _service.Delete(ids.Join());
-            _repository.Received().Remove(Arg.Is<List<EntitySample>>(t => t.All(d => ids.Contains(d.Id))));
-        }
-
-        /// <summary>
-        /// 测试 - 删除 - id无效
-        /// </summary>
-        [Fact]
-        public void Test_Delete_IdInvalid()
-        {
-            var ids = new[] { Guid.NewGuid(), Guid.NewGuid() };
-            _repository.FindByIds(ids.Join()).Returns(new List<EntitySample>());
-            _service.Delete(ids.Join());
-            _repository.DidNotReceive().Remove(Arg.Any<List<EntitySample>>());
         }
 
         /// <summary>
@@ -167,5 +144,18 @@ namespace Bing.Tests.Applications
             await _service.DeleteAsync(ids.Join());
             await _repository.Received().RemoveAsync(Arg.Is<List<EntitySample>>(t => t.All(d => ids.Contains(d.Id))));
         }
+
+        /// <summary>
+        /// 测试 - 删除 - id无效
+        /// </summary>
+        [Fact]
+        public async Task Test_DeleteAsync_IdInvalid()
+        {
+            var ids = new[] { Guid.NewGuid(), Guid.NewGuid() };
+            _repository.FindByIdsAsync(ids.Join()).Returns(new List<EntitySample>());
+            await _service.DeleteAsync(ids.Join());
+            await _repository.DidNotReceive().RemoveAsync(Arg.Any<List<EntitySample>>());
+        }
+
     }
 }

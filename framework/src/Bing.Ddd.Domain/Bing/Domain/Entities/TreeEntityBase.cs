@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Validations.Abstractions;
+using Bing.Validation;
 
 namespace Bing.Domain.Entities
 {
@@ -12,7 +12,7 @@ namespace Bing.Domain.Entities
     /// </summary>
     /// <typeparam name="TEntity">树型实体类型</typeparam>
     public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid, Guid?>
-        where TEntity : class, ITreeEntity<TEntity, Guid, Guid?>, IValidatable<TEntity>
+        where TEntity : class, ITreeEntity<TEntity, Guid, Guid?>, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 初始化一个<see cref="TreeEntityBase{TEntity}"/>类型的实例
@@ -33,7 +33,7 @@ namespace Bing.Domain.Entities
     /// <typeparam name="TParentId">父编号类型</typeparam>
     public abstract class TreeEntityBase<TEntity, TKey, TParentId> : AggregateRoot<TEntity, TKey>,
         ITreeEntity<TEntity, TKey, TParentId>
-        where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>, IValidatable<TEntity>
+        where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>, IVerifyModel<TEntity>
     {
         /// <summary>
         /// 父标识

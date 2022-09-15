@@ -1,9 +1,9 @@
 <Project>
-
   <PropertyGroup>
     <RootNamespace/>
     <LangVersion>latest</LangVersion>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn Condition=" '$(Configuration)' == 'Debug' ">$(NoWarn);NETSDK1138</NoWarn>
+    <NoWarn Condition=" '$(Configuration)' == 'Release' ">$(NoWarn);CS1591;NETSDK1138</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -21,6 +21,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+
+  <Import Project="asset/props/sourcelink.env.props"/>
 
   <Import Project="asset/props/package.props"/>
 

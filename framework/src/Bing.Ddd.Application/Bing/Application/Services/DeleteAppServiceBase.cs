@@ -136,23 +136,6 @@ namespace Bing.Application.Services
         /// 删除
         /// </summary>
         /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
-        public virtual void Delete(string ids)
-        {
-            if (string.IsNullOrWhiteSpace(ids))
-                return;
-            var entities = _store.FindByIds(ids);
-            if (entities?.Count == 0)
-                return;
-            DeleteBefore(entities);
-            _store.Remove(entities);
-            _unitOfWork.Commit();
-            DeleteAfter(entities);
-        }
-
-        /// <summary>
-        /// 删除
-        /// </summary>
-        /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
         public virtual async Task DeleteAsync(string ids)
         {
             if (string.IsNullOrWhiteSpace(ids))
