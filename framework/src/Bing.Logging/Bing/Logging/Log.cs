@@ -12,17 +12,16 @@ namespace Bing.Logging
     /// <summary>
     /// 日志操作
     /// </summary>
-    /// <typeparam name="TCategoryName">日志类别</typeparam>
-    public class Log<TCategoryName> : ILog<TCategoryName>
+    public class Log : ILog
     {
         #region 构造函数
 
         /// <summary>
-        /// 初始化一个<see cref="Log{TCategoryName}"/>类型的实例
+        /// 初始化一个<see cref="Log"/>类型的实例
         /// </summary>
         /// <param name="logger">日志记录包装器</param>
         /// <param name="logContextAccessor">日志上下文访问器</param>
-        public Log(ILoggerWrapper<TCategoryName> logger, ILogContextAccessor logContextAccessor = null)
+        public Log(ILoggerWrapper logger, ILogContextAccessor logContextAccessor = null)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             LogContext = logContextAccessor?.Context;
@@ -38,7 +37,7 @@ namespace Bing.Logging
         /// <summary>
         /// 空日志操作实例
         /// </summary>
-        public static ILog<TCategoryName> Null = NullLog<TCategoryName>.Instance;
+        public static ILog Null = NullLog.Instance;
 
         #endregion
 
@@ -47,7 +46,7 @@ namespace Bing.Logging
         /// <summary>
         /// 日志记录包装器
         /// </summary>
-        protected ILoggerWrapper<TCategoryName> Logger { get; }
+        protected ILoggerWrapper Logger { get; }
 
         /// <summary>
         /// 日志上下文
@@ -94,7 +93,7 @@ namespace Bing.Logging
         #region EventId(设置日志事件标识)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> EventId(EventId eventId)
+        public virtual ILog EventId(EventId eventId)
         {
             LogEventId = eventId;
             return this;
@@ -105,7 +104,7 @@ namespace Bing.Logging
         #region Exception(设置异常)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> Exception(Exception exception)
+        public virtual ILog Exception(Exception exception)
         {
             LogException = exception;
             return this;
@@ -116,7 +115,7 @@ namespace Bing.Logging
         #region Property(设置自定义扩展属性)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> Property(string propertyName, string propertyValue)
+        public virtual ILog Property(string propertyName, string propertyValue)
         {
             if (string.IsNullOrWhiteSpace(propertyName))
                 return this;
@@ -134,7 +133,7 @@ namespace Bing.Logging
         #region Tags(设置标签)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> Tags(params string[] tags)
+        public virtual ILog Tags(params string[] tags)
         {
             if (tags == null)
                 return this;
@@ -152,7 +151,7 @@ namespace Bing.Logging
         #region State(设置日志状态对象)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> State(object state)
+        public virtual ILog State(object state)
         {
             LogState = state;
             return this;
@@ -163,7 +162,7 @@ namespace Bing.Logging
         #region Message(设置日志消息)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> Message(string message, params object[] args)
+        public virtual ILog Message(string message, params object[] args)
         {
             LogMessage.Append(message);
             LogMessageArgs.AddRange(args);
@@ -189,7 +188,7 @@ namespace Bing.Logging
         #region LogTrace(写跟踪日志)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> LogTrace()
+        public virtual ILog LogTrace()
         {
             try
             {
@@ -214,7 +213,7 @@ namespace Bing.Logging
         #region LogDebug(写调试日志)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> LogDebug()
+        public virtual ILog LogDebug()
         {
             try
             {
@@ -239,7 +238,7 @@ namespace Bing.Logging
         #region LogInformation(写信息日志)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> LogInformation()
+        public virtual ILog LogInformation()
         {
             try
             {
@@ -264,7 +263,7 @@ namespace Bing.Logging
         #region LogWarning(写警告日志)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> LogWarning()
+        public virtual ILog LogWarning()
         {
             try
             {
@@ -289,7 +288,7 @@ namespace Bing.Logging
         #region LogError(写错误日志)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> LogError()
+        public virtual ILog LogError()
         {
             try
             {
@@ -314,7 +313,7 @@ namespace Bing.Logging
         #region LogCritical(写致命日志)
 
         /// <inheritdoc />
-        public virtual ILog<TCategoryName> LogCritical()
+        public virtual ILog LogCritical()
         {
             try
             {
@@ -415,7 +414,7 @@ namespace Bing.Logging
         /// <summary>
         /// 写日志
         /// </summary>
-        protected virtual ILog<TCategoryName> WriteLog()
+        protected virtual ILog WriteLog()
         {
             Logger.Log(LogLevel, LogEventId, GetContent(), LogException, GetFormatMessage);
             return this;

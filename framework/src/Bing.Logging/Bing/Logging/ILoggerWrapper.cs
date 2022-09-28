@@ -1,5 +1,4 @@
 ﻿using System;
-using Bing.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Logging
@@ -7,8 +6,7 @@ namespace Bing.Logging
     /// <summary>
     /// 日志记录包装器
     /// </summary>
-    /// <typeparam name="TCategoryName">日志类别</typeparam>
-    public interface ILoggerWrapper<out TCategoryName> : ITransientDependency
+    public interface ILoggerWrapper
     {
         /// <summary>
         /// 是否启用

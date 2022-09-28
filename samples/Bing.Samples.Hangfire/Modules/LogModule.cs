@@ -1,9 +1,15 @@
 ﻿using System.ComponentModel;
+using System.Threading;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
-using Bing.Logs.Exceptionless;
-using Bing.Logs.NLog;
+using Bing.Logging;
+using Bing.Logging.Serilog;
+using Bing.Tracing;
+using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Enrichers.Span;
+using serilog = Serilog;
 
 namespace Bing.Samples.Hangfire.Modules
 {
@@ -32,12 +38,69 @@ namespace Bing.Samples.Hangfire.Modules
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             //services.AddNLog();
-            services.AddExceptionless(x =>
+            // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
+            Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
             {
-                x.ServerUrl = "http://10.186.135.27:5100";
-                x.ApiKey = "yIgaHwtLwbN9VoUCP0UYpSPVzwpmeNSdVSfVIVta";
+                o.ApiKey = "N8HOaOLndl0hF7ZhOfiwJ9HmOi6kPwjKEKWLCMzE";
+                o.ServerUrl = "http://10.186.132.40:5100";
+            });
+            services.AddBingLogging(x => { });
+            services.AddSingleton<ILogContextAccessor, LogContextAccessor>();
+            services.AddLogging(loggingBuilder =>
+            {
+                var configuration = services.GetConfiguration();
+                serilog.Log.Logger = new serilog.LoggerConfiguration()
+                    .Enrich.FromLogContext()
+                    .Enrich.WithLogContext()
+                    .Enrich.WithLogLevel()
+                    .Enrich.WithSpan()
+                    .WriteTo.Exceptionless(additionalOperation: (builder) =>
+                    {
+                        if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
+                            builder.Target.AddTags(traceId.ToString() ?? string.Empty);
+                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
+                        return builder;
+                    })
+                    .ReadFrom.Configuration(configuration)
+                    .ConfigLogLevel(configuration)
+                    .CreateLogger();
+                loggingBuilder.AddSerilog();
             });
             return services;
+        }
+    }
+
+    /// <summary>
+    /// 日志上下文访问器
+    /// </summary>
+    public class LogContextAccessor : ILogContextAccessor
+    {
+        /// <summary>
+        /// 当前日志上下文
+        /// </summary>
+        private readonly AsyncLocal<LogContext> _currentLogContext;
+
+        /// <summary>
+        /// 初始化一个<see cref="LogContextAccessor"/>类型的实例
+        /// </summary>
+        public LogContextAccessor()
+        {
+            _currentLogContext = new AsyncLocal<LogContext>();
+        }
+
+        /// <summary>
+        /// 日志上下文
+        /// </summary>
+        public LogContext Context
+        {
+            get
+            {
+                return _currentLogContext.Value ??= new LogContext();
+            }
+            set
+            {
+                _currentLogContext.Value = value;
+            }
         }
     }
 }
