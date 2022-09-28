@@ -51,6 +51,7 @@ namespace Bing.Admin.Modules
             //ExceptionlessClient.Default.Configuration.ApiKey= "ez9jumyxVxjTxqSm0oUQhCML3OGCkDfMGyW1hfmn";
             //ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.132.40:5100";
             //ExceptionlessClient.Default.Startup();
+            services.AddBingLogging(x => { });
             services.AddSingleton<ILogContextAccessor, LogContextAccessor>();
             services.AddLogging(loggingBuilder =>
             {

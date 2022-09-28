@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Bing.Aspects;
 using Bing.DependencyInjection;
+using Bing.Logging;
 using Bing.Logs;
 using Bing.Logs.Abstractions;
 using Exceptionless;
@@ -27,14 +28,17 @@ namespace Bing.Samples.Hangfire.Jobs
         protected ILogContext LogContext { get; }
 
         [Autowired]
-        protected ILog Logger { get; set; }
+        protected Bing.Logs.ILog Logger { get; set; }
 
         protected ILogger<DebugLogJob> SysLogger { get; set; }
 
-        public DebugLogJob(ILogContext logContext, ILogger<DebugLogJob> logger)
+        protected ILog<DebugLogJob> CurrentLog { get;  }
+
+        public DebugLogJob(ILogContext logContext, ILogger<DebugLogJob> logger, ILog<DebugLogJob> currentLog)
         {
             LogContext = logContext;
             SysLogger = logger;
+            CurrentLog = currentLog;
         }
 
         /// <summary>
@@ -54,6 +58,8 @@ namespace Bing.Samples.Hangfire.Jobs
                 .CreateLog($"隔壁老王的信息-Source【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 ", LogLevel.Info).Submit();
             el.ExceptionlessClient.Default
                 .CreateLog($"隔壁老王的信息-Source-NotLevel【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 ").Submit();
+            Debug.WriteLine($"CurrentLog: {CurrentLog.GetType()}");
+            CurrentLog.Message("测试日志信息").LogInformation();
 
             //Logger.Class(GetType().FullName)
             //    .Caption("DebugLogJob")
@@ -78,15 +84,15 @@ namespace Bing.Samples.Hangfire.Jobs
             //SysLogger.LogInformation($"4-4、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
         }
 
-        private ILog GetLog()
+        private Bing.Logs.ILog GetLog()
         {
             try
             {
-                return Log.GetLog("HangfireLog");
+                return Bing.Logs.Log.GetLog("HangfireLog");
             }
             catch
             {
-                return Log.Null;
+                return Bing.Logs.Log.Null;
             }
         }
     }

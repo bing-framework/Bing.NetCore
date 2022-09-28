@@ -43,6 +43,7 @@ namespace Bing.Logging.Tests
         /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddBingLogging(x => { });
             services.AddSingleton<ILogContextAccessor, LogContextAccessor>();
             services.AddLogging(loggingBuilder =>
             {

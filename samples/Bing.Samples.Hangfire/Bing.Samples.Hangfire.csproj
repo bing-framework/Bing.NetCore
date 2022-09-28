@@ -9,10 +9,13 @@
     <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.2.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.16" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
+    <PackageReference Include="Serilog.Enrichers.Span" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
     <ProjectReference Include="..\..\framework\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\framework\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
   </ItemGroup>

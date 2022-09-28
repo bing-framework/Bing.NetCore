@@ -46,9 +46,35 @@ namespace Bing.AspNetCore.Extensions
         /// <param name="setupAction">配置操作</param>
         public static void AddRequestResponseLog(this IServiceCollection services, Action<RequestResponseLoggerOptions> setupAction)
         {
+            AddRequestResponseLog<DefaultRequestResponseLogger, DefaultRequestResponseLogCreator>(services, setupAction);
+        }
+
+        /// <summary>
+        /// 注册请求响应日志服务
+        /// </summary>
+        /// <typeparam name="TLogger">请求响应日志记录器</typeparam>
+        /// <param name="services">服务集合</param>
+        /// <param name="setupAction">配置操作</param>
+        public static void AddRequestResponseLog<TLogger>(this IServiceCollection services, Action<RequestResponseLoggerOptions> setupAction)
+            where TLogger : class, IRequestResponseLogger
+        {
+            AddRequestResponseLog<TLogger, DefaultRequestResponseLogCreator>(services, setupAction);
+        }
+
+        /// <summary>
+        /// 注册请求响应日志服务
+        /// </summary>
+        /// <typeparam name="TLogger">请求响应日志记录器</typeparam>
+        /// <typeparam name="TLogCreator">请求响应日志创建器</typeparam>
+        /// <param name="services">服务集合</param>
+        /// <param name="setupAction">配置操作</param>
+        public static void AddRequestResponseLog<TLogger, TLogCreator>(this IServiceCollection services, Action<RequestResponseLoggerOptions> setupAction)
+            where TLogger : class, IRequestResponseLogger
+            where TLogCreator : class, IRequestResponseLogCreator
+        {
             services.Configure(setupAction);
-            services.AddSingleton<IRequestResponseLogger, DefaultRequestResponseLogger>();
-            services.AddScoped<IRequestResponseLogCreator, DefaultRequestResponseLogCreator>();
+            services.AddSingleton<IRequestResponseLogger, TLogger>();
+            services.AddScoped<IRequestResponseLogCreator, TLogCreator>();
         }
     }
 }

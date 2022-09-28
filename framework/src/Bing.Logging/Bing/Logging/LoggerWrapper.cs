@@ -6,19 +6,18 @@ namespace Bing.Logging
     /// <summary>
     /// 日志记录包装器
     /// </summary>
-    /// <typeparam name="TCategoryName">日志类别</typeparam>
-    public class LoggerWrapper<TCategoryName> : ILoggerWrapper<TCategoryName>
+    public class LoggerWrapper : ILoggerWrapper
     {
         /// <summary>
-        /// 初始化一个<see cref="LoggerWrapper{TCategoryName}"/>类型的实例
+        /// 初始化一个<see cref="LoggerWrapper"/>类型的实例
         /// </summary>
         /// <param name="logger">日志记录器</param>
-        public LoggerWrapper(ILogger<TCategoryName> logger) => Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        public LoggerWrapper(ILogger logger) => Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         /// <summary>
         /// 日志记录器
         /// </summary>
-        protected ILogger<TCategoryName> Logger { get; }
+        protected ILogger Logger { get; }
 
         /// <inheritdoc />
         public virtual bool IsEnabled(LogLevel logLevel) => Logger.IsEnabled(logLevel);
