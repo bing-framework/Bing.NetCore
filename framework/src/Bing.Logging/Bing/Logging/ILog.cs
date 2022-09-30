@@ -29,11 +29,18 @@ namespace Bing.Logging
         ILog Exception(Exception exception);
 
         /// <summary>
-        /// 设置自定义扩展属性
+        /// 设置自定义属性
         /// </summary>
         /// <param name="propertyName">属性名</param>
         /// <param name="propertyValue">属性值</param>
         ILog Property(string propertyName, string propertyValue);
+
+        /// <summary>
+        /// 设置扩展属性
+        /// </summary>
+        /// <param name="propertyName">属性名</param>
+        /// <param name="propertyValue">属性值</param>
+        ILog ExtraProperty(string propertyName, object propertyValue);
 
         /// <summary>
         /// 设置标签

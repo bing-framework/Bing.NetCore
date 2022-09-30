@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Bing;
+using Bing.Logging.ExtraSupports;
 using Bing.Logging.Sinks.Exceptionless.Internals;
 using Exceptionless;
 using Exceptionless.Dependency;
@@ -130,10 +132,20 @@ namespace Serilog.Sinks.Exceptionless
                                 builder.SetUserDescription(emailAddress, description);
                             break;
                         case "Tags" when  property.Value is SequenceValue tags:
-                            var tagList = tags.FlattenProperties() as List<object>;
-                            if(tagList is null)
-                                continue;
-                            builder.AddTags(tagList.Select(x=>x.ToString()).ToArray());
+                            {
+                                var tagList = tags.FlattenProperties() as List<object>;
+                                if (tagList is null)
+                                    continue;
+                                builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
+                            }
+                            break;
+                        case ContextDataTypes.Tags when property.Value is SequenceValue tags:
+                            {
+                                var tagList = tags.FlattenProperties() as List<object>;
+                                if (tagList is null)
+                                    continue;
+                                builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
+                            }
                             break;
                         default:
                             builder.SetProperty(property.Key, property.Value.FlattenProperties());

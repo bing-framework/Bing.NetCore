@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Bing.Aspects;
 using Bing.DependencyInjection;
@@ -59,8 +60,32 @@ namespace Bing.Samples.Hangfire.Jobs
             el.ExceptionlessClient.Default
                 .CreateLog($"隔壁老王的信息-Source-NotLevel【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 ").Submit();
             Debug.WriteLine($"CurrentLog: {CurrentLog.GetType()}");
-            CurrentLog.Message("测试日志信息").LogInformation();
+            var id = Guid.NewGuid().ToString();
+            using (CurrentLog.BeginScope(new Dictionary<string, object>
+            {
+                ["UserId"] = "svrooij",
+                ["OperationType"] = "update",
+            }))
+            {
+                CurrentLog.Message($"测试日志信息--主动设置--BeginScope {id}").LogInformation();
+            }
 
+            CurrentLog.ExtraProperty("test", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.sss"))
+                .Message($"测试日志信息--被动设置--BeginScope {id}")
+                .Tags(id)
+                .LogInformation();
+
+            using (CurrentLog.BeginScope(new Dictionary<string, object>
+            {
+                ["UserId"] = "svrooij",
+                ["OperationType"] = "update",
+            }))
+            {
+                CurrentLog.ExtraProperty("testA7777", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.sss"))
+                    .Message($"测试日志信息--双重设置--BeginScope {id}")
+                    .Tags(id)
+                    .LogInformation();
+            }
             //Logger.Class(GetType().FullName)
             //    .Caption("DebugLogJob")
             //    .Content($"3-1、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")

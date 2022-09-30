@@ -34,6 +34,13 @@ namespace Bing.Logging
         public ILog Property(string propertyName, string propertyValue) => this;
 
         /// <summary>
+        /// 设置扩展属性
+        /// </summary>
+        /// <param name="propertyName">属性名</param>
+        /// <param name="propertyValue">属性值</param>
+        public ILog ExtraProperty(string propertyName, object propertyValue) => this;
+
+        /// <summary>
         /// 设置标签
         /// </summary>
         /// <param name="tags">标签</param>
@@ -125,6 +132,13 @@ namespace Bing.Logging
         /// <param name="propertyName">属性名</param>
         /// <param name="propertyValue">属性值</param>
         public ILog Property(string propertyName, string propertyValue) => this;
+
+        /// <summary>
+        /// 设置扩展属性
+        /// </summary>
+        /// <param name="propertyName">属性名</param>
+        /// <param name="propertyValue">属性值</param>
+        public ILog ExtraProperty(string propertyName, object propertyValue) => this;
 
         /// <summary>
         /// 设置标签

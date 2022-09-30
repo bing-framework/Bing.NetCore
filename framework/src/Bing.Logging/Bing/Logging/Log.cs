@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Logging.Core;
 using Bing.Text;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +16,15 @@ namespace Bing.Logging
     /// </summary>
     public class Log : ILog
     {
+        #region 字段
+
+        /// <summary>
+        /// 当前的日志事件描述符
+        /// </summary>
+        private LogEventDescriptor CurrentDescriptor { get; set; }
+
+        #endregion
+
         #region 构造函数
 
         /// <summary>
@@ -28,6 +39,7 @@ namespace Bing.Logging
             LogProperties = new Dictionary<string, object>();
             LogMessage = new StringBuilder();
             LogMessageArgs = new List<object>();
+            CurrentDescriptor = new LogEventDescriptor();
         }
 
         #endregion
@@ -130,19 +142,27 @@ namespace Bing.Logging
 
         #endregion
 
+        #region ExtraProperty(设置扩展属性)
+
+        /// <summary>
+        /// 设置扩展属性
+        /// </summary>
+        /// <param name="propertyName">属性名</param>
+        /// <param name="propertyValue">属性值</param>
+        public ILog ExtraProperty(string propertyName, object propertyValue)
+        {
+            CurrentDescriptor.Context.SetExtraProperty(propertyName, propertyValue);
+            return this;
+        }
+
+        #endregion
+
         #region Tags(设置标签)
 
         /// <inheritdoc />
         public virtual ILog Tags(params string[] tags)
         {
-            if (tags == null)
-                return this;
-            if (LogContext == null)
-                return this;
-            var tagList = tags.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            if (!tagList.Any())
-                return this;
-            LogContext.Tags.AddRange(tagList);
+            CurrentDescriptor.Context.SetTags(tags);
             return this;
         }
 
@@ -242,6 +262,23 @@ namespace Bing.Logging
         {
             try
             {
+                var scopeDict = CurrentDescriptor.Context.ExposeScopeState();
+                if (scopeDict.Any())
+                {
+                    using (Logger.BeginScope(scopeDict))
+                    {
+                        Init();
+                        if (LogMessage.Length > 0)
+                        {
+                            Logger.LogInformation(LogEventId, LogException, GetMessage(), GetMessageArgs());
+                            return this;
+                        }
+
+                        LogLevel = LogLevel.Information;
+                        return WriteLog();
+                    }
+                }
+                Debug.WriteLine($"【调试日志】未进入作用域字典");
                 Init();
                 if (LogMessage.Length > 0)
                 {
@@ -469,6 +506,7 @@ namespace Bing.Logging
             LogProperties = new Dictionary<string, object>();
             LogMessage.Clear();
             LogMessageArgs.Clear();
+            CurrentDescriptor = new LogEventDescriptor();
         }
 
         #endregion
