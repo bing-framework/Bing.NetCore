@@ -6,6 +6,7 @@ using Bing.DependencyInjection;
 using Bing.Logging;
 using Bing.Logs;
 using Bing.Logs.Abstractions;
+using Bing.Utils.Json;
 using Exceptionless;
 using Microsoft.Extensions.Logging;
 using el = global::Exceptionless;
@@ -82,6 +83,8 @@ namespace Bing.Samples.Hangfire.Jobs
             }))
             {
                 CurrentLog.ExtraProperty("testA7777", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.sss"))
+                    .ExtraProperty("Req", new { A = 1, B = "2", C = new { C1 = 1, C2 = id } })
+                    .ExtraProperty("ReqJson", JsonHelper.ToJson(new { A = 1, B = "2", C = new { C1 = 1, C2 = id } }))
                     .Message($"测试日志信息--双重设置--BeginScope {id}")
                     .Tags(id)
                     .LogInformation();

@@ -4,6 +4,7 @@ using System.Linq;
 using Bing;
 using Bing.Logging.ExtraSupports;
 using Bing.Logging.Sinks.Exceptionless.Internals;
+using Bing.Text;
 using Exceptionless;
 using Exceptionless.Dependency;
 using Exceptionless.Logging;
@@ -148,7 +149,15 @@ namespace Serilog.Sinks.Exceptionless
                             }
                             break;
                         default:
-                            builder.SetProperty(property.Key, property.Value.FlattenProperties());
+                            {
+                                // 特殊处理扩展属性
+                                if (property.Key.StartsWith(ContextDataTypes.ExtraProperty))
+                                {
+                                    builder.SetProperty(property.Key.TrimPhraseStart(ContextDataTypes.ExtraProperty), property.Value.FlattenProperties());
+                                    break;
+                                }
+                                builder.SetProperty(property.Key, property.Value.FlattenProperties());
+                            }
                             break;
                     }
                 }

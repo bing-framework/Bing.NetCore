@@ -41,8 +41,8 @@ namespace Bing.Samples.Hangfire.Modules
             // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
             Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
             {
-                o.ApiKey = "N8HOaOLndl0hF7ZhOfiwJ9HmOi6kPwjKEKWLCMzE";
-                o.ServerUrl = "http://10.186.132.40:5100";
+                o.ApiKey = "2R8FksPOpJikquJ2SLUfZMNES6d6dIsBsFYWTJR7";
+                o.ServerUrl = "http://10.186.135.27:5100";
             });
             services.AddBingLogging(x => { });
             services.AddSingleton<ILogContextAccessor, LogContextAccessor>();

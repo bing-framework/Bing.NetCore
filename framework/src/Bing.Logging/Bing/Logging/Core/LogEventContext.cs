@@ -95,7 +95,7 @@ namespace Bing.Logging.Core
         {
             if (string.IsNullOrWhiteSpace(name))
                 return this;
-            _extraProperties.AddOrUpdateItem($"{ContextDataTypes.ExtraProperty}_{name}", value, false);
+            _extraProperties.AddOrUpdateItem($"{ContextDataTypes.ExtraProperty}{name}", value, false);
             return this;
         }
 

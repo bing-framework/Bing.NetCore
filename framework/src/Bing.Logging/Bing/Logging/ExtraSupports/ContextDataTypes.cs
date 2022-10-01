@@ -8,7 +8,7 @@
         /// <summary>
         /// 扩展属性
         /// </summary>
-        public const string ExtraProperty = "__BING_EXTRA_PROPERTY";
+        public const string ExtraProperty = "__BING_EXTRA_PROPERTY_";
 
         /// <summary>
         /// 扩展属性
