@@ -76,32 +76,32 @@ namespace Bing.Logging
         /// <summary>
         /// 写跟踪日志
         /// </summary>
-        public ILog LogTrace() => this;
+        public ILog LogTrace(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写调试日志
         /// </summary>
-        public ILog LogDebug() => this;
+        public ILog LogDebug(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写信息日志
         /// </summary>
-        public ILog LogInformation() => this;
+        public ILog LogInformation(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写警告日志
         /// </summary>
-        public ILog LogWarning() => this;
+        public ILog LogWarning(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写错误日志
         /// </summary>
-        public ILog LogError() => this;
+        public ILog LogError(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写致命日志
         /// </summary>
-        public ILog LogCritical() => this;
+        public ILog LogCritical(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
     }
 
     /// <summary>
@@ -176,31 +176,31 @@ namespace Bing.Logging
         /// <summary>
         /// 写跟踪日志
         /// </summary>
-        public ILog LogTrace() => this;
+        public ILog LogTrace(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写调试日志
         /// </summary>
-        public ILog LogDebug() => this;
+        public ILog LogDebug(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写信息日志
         /// </summary>
-        public ILog LogInformation() => this;
+        public ILog LogInformation(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写警告日志
         /// </summary>
-        public ILog LogWarning() => this;
+        public ILog LogWarning(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写错误日志
         /// </summary>
-        public ILog LogError() => this;
+        public ILog LogError(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
 
         /// <summary>
         /// 写致命日志
         /// </summary>
-        public ILog LogCritical() => this;
+        public ILog LogCritical(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => this;
     }
 }

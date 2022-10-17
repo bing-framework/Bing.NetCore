@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Logging
@@ -78,31 +79,49 @@ namespace Bing.Logging
         /// <summary>
         /// 写跟踪日志
         /// </summary>
-        ILog LogTrace();
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
 
         /// <summary>
         /// 写调试日志
         /// </summary>
-        ILog LogDebug();
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
 
         /// <summary>
         /// 写信息日志
         /// </summary>
-        ILog LogInformation();
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
 
         /// <summary>
         /// 写警告日志
         /// </summary>
-        ILog LogWarning();
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
 
         /// <summary>
         /// 写错误日志
         /// </summary>
-        ILog LogError();
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
 
         /// <summary>
         /// 写致命日志
         /// </summary>
-        ILog LogCritical();
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
     }
 }

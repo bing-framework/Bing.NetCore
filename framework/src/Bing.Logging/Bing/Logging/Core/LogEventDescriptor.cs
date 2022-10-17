@@ -1,4 +1,5 @@
-﻿namespace Bing.Logging.Core
+﻿
+namespace Bing.Logging.Core
 {
     /// <summary>
     /// 日志事件描述符

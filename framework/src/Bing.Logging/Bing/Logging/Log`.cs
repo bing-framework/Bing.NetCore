@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Logging
@@ -92,31 +93,31 @@ namespace Bing.Logging
         /// <summary>
         /// 写跟踪日志
         /// </summary>
-        public virtual ILog LogTrace() => _log.LogTrace();
+        public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogTrace();
 
         /// <summary>
         /// 写调试日志
         /// </summary>
-        public virtual ILog LogDebug() => _log.LogDebug();
+        public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogDebug();
 
         /// <summary>
         /// 写信息日志
         /// </summary>
-        public virtual ILog LogInformation() => _log.LogInformation();
+        public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogInformation();
 
         /// <summary>
         /// 写警告日志
         /// </summary>
-        public virtual ILog LogWarning() => _log.LogWarning();
+        public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogWarning();
 
         /// <summary>
         /// 写错误日志
         /// </summary>
-        public virtual ILog LogError() => _log.LogError();
+        public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogError();
 
         /// <summary>
         /// 写致命日志
         /// </summary>
-        public virtual ILog LogCritical() => _log.LogCritical();
+        public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogCritical();
     }
 }

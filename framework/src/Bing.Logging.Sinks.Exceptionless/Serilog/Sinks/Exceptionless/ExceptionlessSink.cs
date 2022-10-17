@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bing;
 using Bing.Logging.ExtraSupports;
 using Bing.Logging.Sinks.Exceptionless.Internals;
 using Bing.Text;
@@ -146,6 +145,14 @@ namespace Serilog.Sinks.Exceptionless
                                 if (tagList is null)
                                     continue;
                                 builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
+                            }
+                            break;
+                        case ContextDataTypes.CallerInfo when property.Value is ScalarValue callerInfo:
+                            {
+                                var caller = callerInfo.FlattenProperties();
+                                if (caller is null)
+                                    continue;
+                                builder.SetProperty("CallerInfo", caller);
                             }
                             break;
                         default:

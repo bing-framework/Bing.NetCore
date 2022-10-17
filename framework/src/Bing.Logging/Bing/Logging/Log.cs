@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Bing.Extensions;
 using Bing.Helpers;
@@ -208,7 +209,7 @@ namespace Bing.Logging
         #region LogTrace(写跟踪日志)
 
         /// <inheritdoc />
-        public virtual ILog LogTrace()
+        public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {
@@ -233,7 +234,7 @@ namespace Bing.Logging
         #region LogDebug(写调试日志)
 
         /// <inheritdoc />
-        public virtual ILog LogDebug()
+        public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {
@@ -258,10 +259,11 @@ namespace Bing.Logging
         #region LogInformation(写信息日志)
 
         /// <inheritdoc />
-        public virtual ILog LogInformation()
+        public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {
+                CurrentDescriptor.Context.SetCallerInfo(memberName, sourceFilePath, sourceLineNumber);
                 var scopeDict = CurrentDescriptor.Context.ExposeScopeState();
                 if (scopeDict.Any())
                 {
@@ -300,7 +302,7 @@ namespace Bing.Logging
         #region LogWarning(写警告日志)
 
         /// <inheritdoc />
-        public virtual ILog LogWarning()
+        public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {
@@ -325,7 +327,7 @@ namespace Bing.Logging
         #region LogError(写错误日志)
 
         /// <inheritdoc />
-        public virtual ILog LogError()
+        public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {
@@ -350,7 +352,7 @@ namespace Bing.Logging
         #region LogCritical(写致命日志)
 
         /// <inheritdoc />
-        public virtual ILog LogCritical()
+        public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {
@@ -390,7 +392,7 @@ namespace Bing.Logging
         {
             if (LogContext == null)
                 return;
-            if(!string.IsNullOrWhiteSpace(LogContext.TraceId))
+            if (!string.IsNullOrWhiteSpace(LogContext.TraceId))
                 Property("TraceId", LogContext.TraceId);
             if (LogContext.Stopwatch != null)
                 Property("Duration", LogContext.Stopwatch.Elapsed.Description());
@@ -404,9 +406,9 @@ namespace Bing.Logging
             if (LogState == null)
                 return;
             var state = Conv.ToDictionary(LogState);
-            foreach (var item in state) 
+            foreach (var item in state)
             {
-                if(item.Value.SafeString().IsEmpty())
+                if (item.Value.SafeString().IsEmpty())
                     continue;
                 LogProperties.Add(item);
             }
