@@ -42,11 +42,11 @@ namespace Bing.AspNetCore.Logs
             var message = formatter(state, exception);
             if (string.IsNullOrEmpty(message) && exception == null)
                 return;
-            var log = Bing.Logs.Log.GetLog(LogName);
+            var log = Bing.Logs.Log.GetLog(CategoryName);
             log
                 .Tag(LogName)
                 .Tag(CategoryName)
-                .Caption($"系统日志：{CategoryName}")
+                .Caption($"系统日志：{message}")
                 .Content($"事件ID：{eventId.Id}")
                 .Content($"事件名称：{eventId.Name}")
                 .Content(message);

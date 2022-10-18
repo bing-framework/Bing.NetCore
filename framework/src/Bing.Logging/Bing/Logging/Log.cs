@@ -209,168 +209,42 @@ namespace Bing.Logging
         #region LogTrace(写跟踪日志)
 
         /// <inheritdoc />
-        public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
-        {
-            try
-            {
-                Init();
-                if (LogMessage.Length > 0)
-                {
-                    Logger.LogTrace(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                    return this;
-                }
-
-                LogLevel = LogLevel.Trace;
-                return WriteLog();
-            }
-            finally
-            {
-                Clear();
-            }
-        }
+        public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Trace, memberName, sourceFilePath, sourceLineNumber);
 
         #endregion
 
         #region LogDebug(写调试日志)
 
         /// <inheritdoc />
-        public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
-        {
-            try
-            {
-                Init();
-                if (LogMessage.Length > 0)
-                {
-                    Logger.LogDebug(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                    return this;
-                }
-
-                LogLevel = LogLevel.Debug;
-                return WriteLog();
-            }
-            finally
-            {
-                Clear();
-            }
-        }
+        public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
 
         #endregion
 
         #region LogInformation(写信息日志)
 
         /// <inheritdoc />
-        public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
-        {
-            try
-            {
-                CurrentDescriptor.Context.SetCallerInfo(memberName, sourceFilePath, sourceLineNumber);
-                var scopeDict = CurrentDescriptor.Context.ExposeScopeState();
-                if (scopeDict.Any())
-                {
-                    using (Logger.BeginScope(scopeDict))
-                    {
-                        Init();
-                        if (LogMessage.Length > 0)
-                        {
-                            Logger.LogInformation(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                            return this;
-                        }
-
-                        LogLevel = LogLevel.Information;
-                        return WriteLog();
-                    }
-                }
-                Debug.WriteLine($"【调试日志】未进入作用域字典");
-                Init();
-                if (LogMessage.Length > 0)
-                {
-                    Logger.LogInformation(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                    return this;
-                }
-
-                LogLevel = LogLevel.Information;
-                return WriteLog();
-            }
-            finally
-            {
-                Clear();
-            }
-        }
+        public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Information, memberName, sourceFilePath, sourceLineNumber);
 
         #endregion
 
         #region LogWarning(写警告日志)
 
         /// <inheritdoc />
-        public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
-        {
-            try
-            {
-                Init();
-                if (LogMessage.Length > 0)
-                {
-                    Logger.LogWarning(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                    return this;
-                }
-
-                LogLevel = LogLevel.Warning;
-                return WriteLog();
-            }
-            finally
-            {
-                Clear();
-            }
-        }
+        public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
 
         #endregion
 
         #region LogError(写错误日志)
 
         /// <inheritdoc />
-        public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
-        {
-            try
-            {
-                Init();
-                if (LogMessage.Length > 0)
-                {
-                    Logger.LogError(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                    return this;
-                }
-
-                LogLevel = LogLevel.Error;
-                return WriteLog();
-            }
-            finally
-            {
-                Clear();
-            }
-        }
+        public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Error, memberName, sourceFilePath, sourceLineNumber);
 
         #endregion
 
         #region LogCritical(写致命日志)
 
         /// <inheritdoc />
-        public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
-        {
-            try
-            {
-                Init();
-                if (LogMessage.Length > 0)
-                {
-                    Logger.LogCritical(LogEventId, LogException, GetMessage(), GetMessageArgs());
-                    return this;
-                }
-
-                LogLevel = LogLevel.Critical;
-                return WriteLog();
-            }
-            finally
-            {
-                Clear();
-            }
-        }
+        public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Critical, memberName, sourceFilePath, sourceLineNumber);
 
         #endregion
 
@@ -453,10 +327,34 @@ namespace Bing.Logging
         /// <summary>
         /// 写日志
         /// </summary>
-        protected virtual ILog WriteLog()
+        /// <param name="level">日志级别</param>
+        /// <param name="memberName">方法名</param>
+        /// <param name="sourceFilePath">文件路径</param>
+        /// <param name="sourceLineNumber">行号</param>
+        protected virtual ILog WriteLog(LogLevel level, string memberName, string sourceFilePath, int sourceLineNumber)
         {
-            Logger.Log(LogLevel, LogEventId, GetContent(), LogException, GetFormatMessage);
-            return this;
+            try
+            {
+                LogLevel = level;
+                CurrentDescriptor.Context.SetCallerInfo(memberName, sourceFilePath, sourceLineNumber);
+                var scopeDict = CurrentDescriptor.Context.ExposeScopeState();
+                using (Logger.BeginScope(scopeDict))
+                {
+                    Init();
+                    if (LogMessage.Length > 0)
+                    {
+                        Logger.Log(level, LogEventId, LogException, GetMessage(), GetMessageArgs());
+                        return this;
+                    }
+
+                    Logger.Log(LogLevel, LogEventId, GetContent(), LogException, GetFormatMessage);
+                    return this;
+                }
+            }
+            finally
+            {
+                Clear();
+            }
         }
 
         /// <summary>

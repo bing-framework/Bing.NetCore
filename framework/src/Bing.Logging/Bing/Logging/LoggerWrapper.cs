@@ -26,10 +26,13 @@ namespace Bing.Logging
         public virtual void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) => Logger.Log(logLevel, eventId, state, exception, formatter);
 
         /// <inheritdoc />
+        public virtual void Log(LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args) => Logger.Log(logLevel, eventId, exception, message, args);
+
+        /// <inheritdoc />
         public virtual IDisposable BeginScope<TState>(TState state) => Logger.BeginScope(state);
 
         /// <inheritdoc />
-        public void LogTrace(EventId eventId, Exception exception, string message, params object[] args) => Logger.LogTrace(eventId,exception,message,args);
+        public void LogTrace(EventId eventId, Exception exception, string message, params object[] args) => Logger.LogTrace(eventId, exception, message, args);
 
         /// <inheritdoc />
         public void LogDebug(EventId eventId, Exception exception, string message, params object[] args) => Logger.LogDebug(eventId, exception, message, args);

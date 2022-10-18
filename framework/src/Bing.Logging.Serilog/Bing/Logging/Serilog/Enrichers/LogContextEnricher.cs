@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Bing.DependencyInjection;
 using Bing.Extensions;
+using Bing.Tracing;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -69,9 +70,12 @@ namespace Bing.Logging.Serilog.Enrichers
         /// </summary>
         private void AddTraceId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            if (string.IsNullOrWhiteSpace(_context.TraceId))
+            var traceId = _context.TraceId;
+            if (!_context.IsWebEnv) 
+                traceId = TraceIdContext.Current?.TraceId;
+            if (string.IsNullOrWhiteSpace(traceId))
                 return;
-            var property = propertyFactory.CreateProperty("TraceId", _context.TraceId);
+            var property = propertyFactory.CreateProperty("TraceId", traceId);
             logEvent.AddOrUpdateProperty(property);
         }
 

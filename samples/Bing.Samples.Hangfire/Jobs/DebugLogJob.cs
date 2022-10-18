@@ -79,7 +79,9 @@ namespace Bing.Samples.Hangfire.Jobs
                 ["OperationType"] = "update",
             }))
             {
-                CurrentLog.Message($"测试日志信息--主动设置--BeginScope {id}").LogInformation();
+                CurrentLog
+                    .Message($"测试日志信息--主动设置--BeginScope {id}")
+                    .LogDebug();
             }
 
             CurrentLog.ExtraProperty("test", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.sss"))
@@ -98,7 +100,7 @@ namespace Bing.Samples.Hangfire.Jobs
                     .ExtraProperty("ReqJson", JsonHelper.ToJson(new { A = 1, B = "2", C = new { C1 = 1, C2 = id } }))
                     .Message($"测试日志信息--双重设置--BeginScope {id}")
                     .Tags(id)
-                    .LogInformation();
+                    .LogWarning();
             }
 
             Logger.Class(GetType().FullName)
@@ -114,10 +116,10 @@ namespace Bing.Samples.Hangfire.Jobs
                 .Caption($"3-4、【ILog】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
                 .Warn();
 
-            SysLogger.LogInformation($"4-1、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
-            SysLogger.LogInformation($"4-2、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
+            SysLogger.LogTrace($"4-1、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
+            SysLogger.LogDebug($"4-2、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
             SysLogger.LogInformation($"4-3、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
-            SysLogger.LogInformation($"4-4、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
+            SysLogger.LogWarning($"4-4、【系统日志】【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志");
         }
 
         private Bing.Logs.ILog GetLog()

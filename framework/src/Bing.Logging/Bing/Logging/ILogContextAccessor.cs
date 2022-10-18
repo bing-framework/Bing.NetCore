@@ -8,6 +8,6 @@
         /// <summary>
         /// 日志上下文
         /// </summary>
-        LogContext Context { get; set; }
+        LogContext Context { get; }
     }
 }

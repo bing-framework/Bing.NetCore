@@ -7,6 +7,7 @@ using Bing.Logging.Serilog;
 using Bing.Tracing;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Enrichers.Span;
 using serilog = Serilog;
@@ -45,7 +46,6 @@ namespace Bing.Samples.Hangfire.Modules
                 o.ServerUrl = "http://10.186.135.27:5100";
             });
             services.AddBingLogging(x => { });
-            services.AddSingleton<ILogContextAccessor, LogContextAccessor>();
             services.AddLogging(loggingBuilder =>
             {
                 var configuration = services.GetConfiguration();
@@ -67,40 +67,6 @@ namespace Bing.Samples.Hangfire.Modules
                 loggingBuilder.AddSerilog();
             });
             return services;
-        }
-    }
-
-    /// <summary>
-    /// 日志上下文访问器
-    /// </summary>
-    public class LogContextAccessor : ILogContextAccessor
-    {
-        /// <summary>
-        /// 当前日志上下文
-        /// </summary>
-        private readonly AsyncLocal<LogContext> _currentLogContext;
-
-        /// <summary>
-        /// 初始化一个<see cref="LogContextAccessor"/>类型的实例
-        /// </summary>
-        public LogContextAccessor()
-        {
-            _currentLogContext = new AsyncLocal<LogContext>();
-        }
-
-        /// <summary>
-        /// 日志上下文
-        /// </summary>
-        public LogContext Context
-        {
-            get
-            {
-                return _currentLogContext.Value ??= new LogContext();
-            }
-            set
-            {
-                _currentLogContext.Value = value;
-            }
         }
     }
 }

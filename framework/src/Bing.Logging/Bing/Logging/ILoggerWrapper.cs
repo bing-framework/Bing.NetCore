@@ -26,6 +26,16 @@ namespace Bing.Logging
         void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter);
 
         /// <summary>
+        /// 写日志
+        /// </summary>
+        /// <param name="logLevel">日志级别</param>
+        /// <param name="eventId">日志事件标识</param>
+        /// <param name="exception">异常</param>
+        /// <param name="message">日志消息</param>
+        /// <param name="args">日志消息参数</param>
+        void Log(LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args);
+
+        /// <summary>
         /// 开启日志范围
         /// </summary>
         /// <typeparam name="TState">日志状态类型</typeparam>
