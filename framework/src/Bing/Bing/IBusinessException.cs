@@ -1,4 +1,4 @@
-﻿namespace Bing.Exceptions
+﻿namespace Bing
 {
     /// <summary>
     /// 业务异常
