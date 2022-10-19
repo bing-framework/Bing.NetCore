@@ -63,7 +63,6 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app">应用程序构建器</param>
         public static IApplicationBuilder UseBingClaimsMap(this IApplicationBuilder app) => app.UseMiddleware<BingClaimsMapMiddleware>();
 
-
         /// <summary>
         /// Bing框架初始化，适用于AspNetCore环境
         /// </summary>

@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Serilog\Bing.AspNetCore.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />

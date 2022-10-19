@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Globalization;
 using System.Text;
 using AspectCore.Configuration;
 using Bing.AspNetCore;
@@ -15,7 +14,6 @@ using Bing.Security.Claims;
 using Bing.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -98,6 +96,7 @@ namespace Bing.Admin.Modules
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseRealIp();
             app.UseCorrelationId();
+            app.UseBingSerilogEnrichers();
             app.UseRequestResponseLog();
             app.UseBingExceptionHandling();
             // 初始化Http上下文访问器

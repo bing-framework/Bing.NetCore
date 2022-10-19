@@ -91,7 +91,7 @@ namespace Bing.Users
         /// <summary>
         /// 租户标识
         /// </summary>
-        public virtual string TenantId => _principalAccessor.Principal?.FindTenantId()?.ToString() ?? string.Empty;
+        public virtual string TenantId => _principalAccessor.Principal?.FindTenantId()?.ToString();
 
         /// <summary>
         /// 角色列表

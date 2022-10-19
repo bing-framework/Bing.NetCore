@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.AspNetCore.Serilog</AssemblyName>
+    <PackageId>Bing.AspNetCore.Serilog</PackageId>
+    <Description>Bing.AspNetCore.Serilog是Bing应用框架的Serilog日志扩展</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+</Project>

@@ -263,7 +263,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{B6
 		version.props = version.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Uow", "framework\src\Bing.Uow\Bing.Uow.csproj", "{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Uow", "framework\src\Bing.Uow\Bing.Uow.csproj", "{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.Serilog", "framework\src\Bing.AspNetCore.Serilog\Bing.AspNetCore.Serilog.csproj", "{46718841-DF9E-41A4-AF87-C8E81AAE6F55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -587,6 +589,10 @@ Global
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -702,6 +708,7 @@ Global
 		{4A87040E-99A6-4A3F-BD6D-D2A3C3663012} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 		{B6E2B626-F561-4B47-8CFE-E8A305696522} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55} = {052D4342-8B65-4836-A9B6-681A7812760E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
