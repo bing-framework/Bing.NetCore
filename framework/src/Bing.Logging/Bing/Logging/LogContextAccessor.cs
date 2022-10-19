@@ -31,7 +31,7 @@ namespace Bing.Logging
         /// <summary>
         /// 创建日志上下文
         /// </summary>
-        protected virtual LogContext Create() => new LogContext { TraceId = GetTraceId(), Stopwatch = GetStopwatch(), Host = Dns.GetHostName() };
+        protected virtual LogContext Create() => new() { TraceId = GetTraceId(), Stopwatch = GetStopwatch(), Host = Dns.GetHostName() };
 
         /// <summary>
         /// 获取跟踪标识

@@ -67,7 +67,7 @@ namespace Bing.Logging
         /// <summary>
         /// 标签列表
         /// </summary>
-        public List<string> Tags { get; set; } = new List<string>();
+        public List<string> Tags { get; set; } = new();
 
         /// <summary>
         /// 扩展数据
@@ -78,7 +78,7 @@ namespace Bing.Logging
         /// 当前日志上下文
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        private static readonly AsyncLocal<LogContext> _current = new AsyncLocal<LogContext>();
+        private static readonly AsyncLocal<LogContext> _current = new();
 
         /// <summary>
         /// 当前日志上下文
