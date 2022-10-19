@@ -31,93 +31,49 @@ namespace Bing.Logging
         /// </summary>
         public static ILog<TCategoryName> Null = NullLog<TCategoryName>.Instance;
 
-        /// <summary>
-        /// 设置日志事件标识
-        /// </summary>
-        /// <param name="eventId">日志事件标识</param>
+        /// <inheritdoc />
         public virtual ILog EventId(EventId eventId) => _log.EventId(eventId);
 
-        /// <summary>
-        /// 设置异常
-        /// </summary>
-        /// <param name="exception">异常</param>
+        /// <inheritdoc />
         public virtual ILog Exception(Exception exception) => _log.Exception(exception);
 
-        /// <summary>
-        /// 设置自定义扩展属性
-        /// </summary>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="propertyValue">属性值</param>
+        /// <inheritdoc />
         public virtual ILog Property(string propertyName, string propertyValue) => _log.Property(propertyName, propertyValue);
 
-        /// <summary>
-        /// 设置扩展属性
-        /// </summary>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="propertyValue">属性值</param>
+        /// <inheritdoc />
         public virtual ILog ExtraProperty(string propertyName, object propertyValue) => _log.ExtraProperty(propertyName, propertyValue);
 
-        /// <summary>
-        /// 设置标签
-        /// </summary>
-        /// <param name="tags">标签</param>
+        /// <inheritdoc />
         public virtual ILog Tags(params string[] tags) => _log.Tags(tags);
 
-        /// <summary>
-        /// 设置日志状态对象
-        /// </summary>
-        /// <param name="state">状态对象</param>
+        /// <inheritdoc />
         public virtual ILog State(object state) => _log.State(state);
 
-        /// <summary>
-        /// 设置日志消息
-        /// </summary>
-        /// <param name="message">日志消息</param>
-        /// <param name="args">日志消息参数</param>
+        /// <inheritdoc />
         public virtual ILog Message(string message, params object[] args) => _log.Message(message, args);
 
-        /// <summary>
-        /// 是否启用
-        /// </summary>
-        /// <param name="logLevel">日志级别</param>
-        /// <returns>true=启用；false=禁用</returns>
+        /// <inheritdoc />
         public virtual bool IsEnabled(LogLevel logLevel) => _log.IsEnabled(logLevel);
 
-        /// <summary>
-        /// 开启日志范围
-        /// </summary>
-        /// <typeparam name="TState">日志状态类型</typeparam>
-        /// <param name="state">日志状态</param>
+        /// <inheritdoc />
         public virtual IDisposable BeginScope<TState>(TState state) => _log.BeginScope(state);
 
-        /// <summary>
-        /// 写跟踪日志
-        /// </summary>
+        /// <inheritdoc />
         public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogTrace();
 
-        /// <summary>
-        /// 写调试日志
-        /// </summary>
+        /// <inheritdoc />
         public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogDebug();
 
-        /// <summary>
-        /// 写信息日志
-        /// </summary>
+        /// <inheritdoc />
         public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogInformation();
 
-        /// <summary>
-        /// 写警告日志
-        /// </summary>
+        /// <inheritdoc />
         public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogWarning();
 
-        /// <summary>
-        /// 写错误日志
-        /// </summary>
+        /// <inheritdoc />
         public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogError();
 
-        /// <summary>
-        /// 写致命日志
-        /// </summary>
+        /// <inheritdoc />
         public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogCritical();
     }
 }

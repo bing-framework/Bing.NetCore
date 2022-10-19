@@ -16,7 +16,7 @@ namespace Bing.Logging.Core
         /// <summary>
         /// 标签列表
         /// </summary>
-        private readonly List<string> _tags = new List<string>();
+        private readonly List<string> _tags = new();
 
         /// <summary>
         /// 标签列表
@@ -49,7 +49,7 @@ namespace Bing.Logging.Core
         /// <summary>
         /// 参数列表
         /// </summary>
-        private readonly List<object> _parameters = new List<object>();
+        private readonly List<object> _parameters = new();
 
         /// <summary>
         /// 设置参数
@@ -86,7 +86,7 @@ namespace Bing.Logging.Core
         /// <summary>
         /// 扩展属性
         /// </summary>
-        private readonly ContextData _extraProperties = new ContextData();
+        private readonly ContextData _extraProperties = new();
 
         /// <summary>
         /// 设置扩展属性
