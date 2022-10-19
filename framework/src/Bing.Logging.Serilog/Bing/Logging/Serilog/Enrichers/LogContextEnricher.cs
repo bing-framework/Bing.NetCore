@@ -32,7 +32,7 @@ namespace Bing.Logging.Serilog.Enrichers
             _context = accessor.Context;
             if (_context == null)
                 return;
-            RemoveProperties(logEvent);
+            //RemoveProperties(logEvent);
             AddDuration(logEvent, propertyFactory);
             AddTraceId(logEvent, propertyFactory);
             AddUserId(logEvent, propertyFactory);

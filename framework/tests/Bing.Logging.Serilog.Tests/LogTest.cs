@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Bing.Helpers;
 using Bing.Logging.Tests.Samples;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +24,6 @@ namespace Bing.Logging.Tests
         {
             serviceProvider.UseBing();
             _log = log;
-            accessor.Context = new LogContext {Stopwatch = Stopwatch.StartNew(), TraceId = Id.NewString()};
         }
 
         /// <summary>
