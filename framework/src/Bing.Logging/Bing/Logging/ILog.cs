@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Bing.Logging.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Logging
@@ -37,17 +38,10 @@ namespace Bing.Logging
         ILog Property(string propertyName, string propertyValue);
 
         /// <summary>
-        /// 设置扩展属性
+        /// 设置日志事件描述符
         /// </summary>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="propertyValue">属性值</param>
-        ILog ExtraProperty(string propertyName, object propertyValue);
-
-        /// <summary>
-        /// 设置标签
-        /// </summary>
-        /// <param name="tags">标签</param>
-        ILog Tags(params string[] tags);
+        /// <param name="action">操作</param>
+        ILog Set(Action<LogEventDescriptor> action);
 
         /// <summary>
         /// 设置日志状态对象

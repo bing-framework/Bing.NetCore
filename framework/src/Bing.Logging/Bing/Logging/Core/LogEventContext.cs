@@ -108,7 +108,7 @@ namespace Bing.Logging.Core
 
         #endregion
 
-        #region CallerInfo
+        #region CallerInfo(调用者信息)
 
         /// <summary>
         /// 调用者信息
@@ -124,9 +124,7 @@ namespace Bing.Logging.Core
         public LogEventContext SetCallerInfo(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0)
         {
             if (!string.IsNullOrWhiteSpace(memberName) || !string.IsNullOrWhiteSpace(sourceFilePath) || sourceLineNumber > 0)
-            {
                 _callerInfo = new LogCallerInfo(memberName, sourceFilePath, sourceLineNumber);
-            }
             return this;
         }
 

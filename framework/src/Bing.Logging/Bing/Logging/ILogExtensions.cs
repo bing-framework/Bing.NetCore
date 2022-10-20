@@ -83,5 +83,28 @@ namespace Bing.Logging
             log.Message(Environment.NewLine);
             return log;
         }
+
+        /// <summary>
+        /// 设置扩展属性
+        /// </summary>
+        /// <param name="log">日志</param>
+        /// <param name="propertyName">属性名</param>
+        /// <param name="propertyValue">属性值</param>
+        public static ILog ExtraProperty(this ILog log, string propertyName, object propertyValue) =>
+            log.Set(x => x.Context.SetExtraProperty(propertyName, propertyValue));
+
+        /// <summary>
+        /// 设置标签列表
+        /// </summary>
+        /// <param name="log">日志</param>
+        /// <param name="tags">标签列表</param>
+        public static ILog Tags(this ILog log, params string[] tags) => log.Set(x => x.Context.SetTags(tags));
+
+        /// <summary>
+        /// 设置标签
+        /// </summary>
+        /// <param name="log">日志</param>
+        /// <param name="tag">标签</param>
+        public static ILog Tag(this ILog log, string tag) => log.Set(x => x.Context.SetTags(tag));
     }
 }

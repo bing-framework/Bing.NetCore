@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Bing.Logging.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Bing.Logging
@@ -41,10 +42,7 @@ namespace Bing.Logging
         public virtual ILog Property(string propertyName, string propertyValue) => _log.Property(propertyName, propertyValue);
 
         /// <inheritdoc />
-        public virtual ILog ExtraProperty(string propertyName, object propertyValue) => _log.ExtraProperty(propertyName, propertyValue);
-
-        /// <inheritdoc />
-        public virtual ILog Tags(params string[] tags) => _log.Tags(tags);
+        public virtual ILog Set(Action<LogEventDescriptor> action) => _log.Set(action);
 
         /// <inheritdoc />
         public virtual ILog State(object state) => _log.State(state);

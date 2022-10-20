@@ -143,27 +143,17 @@ namespace Bing.Logging
 
         #endregion
 
-        #region ExtraProperty(设置扩展属性)
+        #region Set(设置日志事件描述符)
 
         /// <summary>
-        /// 设置扩展属性
+        /// 设置日志事件描述符
         /// </summary>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="propertyValue">属性值</param>
-        public ILog ExtraProperty(string propertyName, object propertyValue)
+        /// <param name="action">操作</param>
+        public ILog Set(Action<LogEventDescriptor> action)
         {
-            CurrentDescriptor.Context.SetExtraProperty(propertyName, propertyValue);
-            return this;
-        }
-
-        #endregion
-
-        #region Tags(设置标签)
-
-        /// <inheritdoc />
-        public virtual ILog Tags(params string[] tags)
-        {
-            CurrentDescriptor.Context.SetTags(tags);
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            action(CurrentDescriptor);
             return this;
         }
 
