@@ -56,6 +56,7 @@ dotnet pack src/Bing.Permissions -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore.Mvc.Contracts -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore.Mvc -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore.Mvc.UI -c Release -o nuget_pub
+dotnet pack src/Bing.AspNetCore.Serilog -c Release -o nuget_pub
 
 ::Events
 dotnet pack src/Bing.Events -c Release -o nuget_pub
