@@ -170,6 +170,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{D77F42E0
 		asset\props\misc.props = asset\props\misc.props
 		asset\props\package.props = asset\props\package.props
 		asset\props\sourcelink.env.props = asset\props\sourcelink.env.props
+		asset\props\target.feature.props = asset\props\target.feature.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Data.FreeSQL", "modules\admin\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj", "{05DFA67F-C861-48F9-BBD9-7777972A918F}"

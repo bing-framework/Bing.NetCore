@@ -1,60 +1,56 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace Bing.Serialization;
 
-namespace Bing.Serialization
+/// <summary>
+/// 对象序列化器元接口
+/// </summary>
+/// <typeparam name="TData">指定的目标序列化类型</typeparam>
+public interface IObjectSerializer<TData> : ISerializer, ISerializerAsync
 {
     /// <summary>
-    /// 对象序列化器
+    /// 序列化
     /// </summary>
-    /// <typeparam name="TSerializedType">目标序列化类型</typeparam>
-    public interface IObjectSerializer<TSerializedType> : ISerializer
-    {
-        /// <summary>
-        /// 序列化
-        /// </summary>
-        /// <typeparam name="T">序列化对象类型</typeparam>
-        /// <param name="o">被序列化对象</param>
-        /// <returns>序列化结果</returns>
-        TSerializedType Serialize<T>(T o);
+    /// <typeparam name="TValue">序列化对象类型</typeparam>
+    /// <param name="value">被序列化对象</param>
+    /// <returns>序列化结果</returns>
+    TData Serialize<TValue>(TValue value);
 
-        /// <summary>
-        /// 反序列化
-        /// </summary>
-        /// <typeparam name="T">被序列化对象类型</typeparam>
-        /// <param name="data">被反序列化对象</param>
-        /// <returns>反序列化结果</returns>
-        T Deserialize<T>(TSerializedType data);
+    /// <summary>
+    /// 反序列化
+    /// </summary>
+    /// <typeparam name="TValue">被序列化对象类型</typeparam>
+    /// <param name="data">被反序列化对象</param>
+    /// <returns>反序列化结果</returns>
+    TValue Deserialize<TValue>(TData data);
 
-        /// <summary>
-        /// 反序列化
-        /// </summary>
-        /// <param name="data">被反序列化对象</param>
-        /// <param name="type">被序列化对象类型</param>
-        /// <returns>反序列化结果</returns>
-        object Deserialize(TSerializedType data, Type type);
+    /// <summary>
+    /// 反序列化
+    /// </summary>
+    /// <param name="type">被序列化对象类型</param>
+    /// <param name="data">被反序列化对象</param>
+    /// <returns>反序列化结果</returns>
+    object Deserialize(Type type, TData data);
 
-        /// <summary>
-        /// 序列化
-        /// </summary>
-        /// <typeparam name="T">序列化对象类型</typeparam>
-        /// <param name="o">被序列化对象</param>
-        /// <returns>序列化结果</returns>
-        Task<TSerializedType> SerializeAsync<T>(T o);
+    /// <summary>
+    /// 序列化
+    /// </summary>
+    /// <typeparam name="TValue">序列化对象类型</typeparam>
+    /// <param name="value">被序列化对象</param>
+    /// <returns>序列化结果</returns>
+    Task<TData> SerializeAsync<TValue>(TValue value);
 
-        /// <summary>
-        /// 反序列化
-        /// </summary>
-        /// <typeparam name="T">被序列化对象类型</typeparam>
-        /// <param name="data">被反序列化对象</param>
-        /// <returns>反序列化结果</returns>
-        Task<T> DeserializeAsync<T>(TSerializedType data);
+    /// <summary>
+    /// 反序列化
+    /// </summary>
+    /// <typeparam name="TValue">被序列化对象类型</typeparam>
+    /// <param name="data">被反序列化对象</param>
+    /// <returns>反序列化结果</returns>
+    Task<TValue> DeserializeAsync<TValue>(TData data);
 
-        /// <summary>
-        /// 反序列化
-        /// </summary>
-        /// <param name="data">被反序列化对象</param>
-        /// <param name="type">被序列化对象类型</param>
-        /// <returns>反序列化结果</returns>
-        Task<object> DeserializeAsync(TSerializedType data, Type type);
-    }
+    /// <summary>
+    /// 反序列化
+    /// </summary>
+    /// <param name="type">被序列化对象类型</param>
+    /// <param name="data">被反序列化对象</param>
+    /// <returns>反序列化结果</returns>
+    Task<object> DeserializeAsync(Type type, TData data);
 }

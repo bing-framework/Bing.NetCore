@@ -1,8 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netstandard2.1;netstandard2.0;</TargetFrameworks>
+  </PropertyGroup>
 
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Abstractions</AssemblyName>
+    <PackageId>Bing.Abstractions</PackageId>
+    <Description>Bing.Abstractions是Bing应用框架的核心抽象类库。</Description>
+  </PropertyGroup>
 
-  <Import Project="..\..\..\framework.props" />
+  <Import Project="dependency.props" />
+
+  <Import Project="..\..\..\common.props" />
 
 </Project>

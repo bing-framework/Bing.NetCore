@@ -22,6 +22,8 @@
     <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
+  <Import Project="asset/props/target.feature.props"/>
+
   <Import Project="asset/props/sourcelink.env.props"/>
 
   <Import Project="asset/props/package.props"/>
