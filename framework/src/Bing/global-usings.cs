@@ -1,4 +1,6 @@
-﻿global using System.Reflection;
+﻿global using System.Collections;
+global using System.Reflection;
+global using System.Text;
 
 #if NETSTANDARD
 global using System;

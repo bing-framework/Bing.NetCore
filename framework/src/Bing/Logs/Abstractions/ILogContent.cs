@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Bing.Logs.Abstractions;
+﻿namespace Bing.Logs.Abstractions;
 
 /// <summary>
 /// 日志内容

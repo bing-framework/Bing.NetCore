@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Bing.Collections;
+﻿namespace Bing.Collections;
 
 /// <summary>
 /// 类型列表

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Bing.Http;
+﻿namespace Bing.Http;
 
 /// <summary>
 /// 远程服务错误信息
