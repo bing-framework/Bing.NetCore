@@ -1,13 +1,12 @@
-﻿namespace Bing.Trees
+﻿namespace Bing.Trees;
+
+/// <summary>
+/// 排序号
+/// </summary>
+public interface ISortId
 {
     /// <summary>
     /// 排序号
     /// </summary>
-    public interface ISortId
-    {
-        /// <summary>
-        /// 排序号
-        /// </summary>
-        int? SortId { get; set; }
-    }
+    int? SortId { get; set; }
 }

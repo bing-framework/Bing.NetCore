@@ -1,33 +1,32 @@
 ﻿using Bing.Helpers;
 
-namespace Bing.Logging.Tests
+namespace Bing.Logging.Tests;
+
+/// <summary>
+/// 日志上下文访问器
+/// </summary>
+public class LogContextAccessor : ILogContextAccessor
 {
     /// <summary>
-    /// 日志上下文访问器
+    /// 日志上下文键名
     /// </summary>
-    public class LogContextAccessor : ILogContextAccessor
+    public const string LogContextKey = "Bing.Logging.LogContext";
+
+    /// <summary>
+    /// 日志上下文
+    /// </summary>
+    public LogContext Context
     {
-        /// <summary>
-        /// 日志上下文键名
-        /// </summary>
-        public const string LogContextKey = "Bing.Logging.LogContext";
-
-        /// <summary>
-        /// 日志上下文
-        /// </summary>
-        public LogContext Context
+        get
         {
-            get
-            {
-                var slot = System.Threading.Thread.GetNamedDataSlot(LogContextKey);
-                return Conv.To<LogContext>(System.Threading.Thread.GetData(slot));
+            var slot = System.Threading.Thread.GetNamedDataSlot(LogContextKey);
+            return Conv.To<LogContext>(System.Threading.Thread.GetData(slot));
 
-            }
-            set
-            {
-                var slot = System.Threading.Thread.GetNamedDataSlot(LogContextKey);
-                System.Threading.Thread.SetData(slot, value);
-            }
+        }
+        set
+        {
+            var slot = System.Threading.Thread.GetNamedDataSlot(LogContextKey);
+            System.Threading.Thread.SetData(slot, value);
         }
     }
 }

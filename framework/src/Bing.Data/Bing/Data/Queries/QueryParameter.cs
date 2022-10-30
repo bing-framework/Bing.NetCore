@@ -1,13 +1,12 @@
-﻿namespace Bing.Data.Queries
+﻿namespace Bing.Data.Queries;
+
+/// <summary>
+/// 查询参数
+/// </summary>
+public class QueryParameter : Pager, IQueryParameter
 {
     /// <summary>
-    /// 查询参数
+    /// 搜索关键字
     /// </summary>
-    public class QueryParameter : Pager, IQueryParameter
-    {
-        /// <summary>
-        /// 搜索关键字
-        /// </summary>
-        public string Keyword { get; set; }
-    }
+    public string Keyword { get; set; }
 }

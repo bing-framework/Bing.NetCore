@@ -1,13 +1,12 @@
-﻿namespace Bing.Logs.Contents
+﻿namespace Bing.Logs.Contents;
+
+/// <summary>
+/// 标题
+/// </summary>
+public interface ICaption
 {
     /// <summary>
     /// 标题
     /// </summary>
-    public interface ICaption
-    {
-        /// <summary>
-        /// 标题
-        /// </summary>
-        string Caption { get; }
-    }
+    string Caption { get; }
 }

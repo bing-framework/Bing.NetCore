@@ -1,33 +1,32 @@
-﻿namespace Bing.Data.Enums
+﻿namespace Bing.Data.Enums;
+
+/// <summary>
+/// 数据库类型
+/// </summary>
+public enum DatabaseType
 {
     /// <summary>
-    /// 数据库类型
+    /// Sql Server数据库
     /// </summary>
-    public enum DatabaseType
-    {
-        /// <summary>
-        /// Sql Server数据库
-        /// </summary>
-        SqlServer,
+    SqlServer,
 
-        /// <summary>
-        /// MySql数据库
-        /// </summary>
-        MySql,
+    /// <summary>
+    /// MySql数据库
+    /// </summary>
+    MySql,
 
-        /// <summary>
-        /// PostgreSQL数据库
-        /// </summary>
-        PgSql,
+    /// <summary>
+    /// PostgreSQL数据库
+    /// </summary>
+    PgSql,
 
-        /// <summary>
-        /// Oracle数据库
-        /// </summary>
-        Oracle,
+    /// <summary>
+    /// Oracle数据库
+    /// </summary>
+    Oracle,
 
-        /// <summary>
-        /// Sqlite数据库
-        /// </summary>
-        Sqlite
-    }
+    /// <summary>
+    /// Sqlite数据库
+    /// </summary>
+    Sqlite
 }

@@ -1,23 +1,22 @@
-﻿namespace Bing.Permissions.Identity.Results
+﻿namespace Bing.Permissions.Identity.Results;
+
+/// <summary>
+/// 登录状态
+/// </summary>
+public enum SignInState
 {
     /// <summary>
-    /// 登录状态
+    /// 登录成功
     /// </summary>
-    public enum SignInState
-    {
-        /// <summary>
-        /// 登录成功
-        /// </summary>
-        Succeeded,
+    Succeeded,
 
-        /// <summary>
-        /// 失败
-        /// </summary>
-        Failed,
+    /// <summary>
+    /// 失败
+    /// </summary>
+    Failed,
 
-        /// <summary>
-        /// 需要两阶段认证
-        /// </summary>
-        TwoFactor
-    }
+    /// <summary>
+    /// 需要两阶段认证
+    /// </summary>
+    TwoFactor
 }

@@ -1,20 +1,19 @@
 ﻿using Bing.Utils.Parameters.Formats;
 
-namespace Bing.Tests.Samples
+namespace Bing.Tests.Samples;
+
+/// <summary>
+/// 参数格式化器样例
+/// </summary>
+public class ParameterFormatterSample : ParameterFormatBase
 {
     /// <summary>
-    /// 参数格式化器样例
+    /// 格式化分割符
     /// </summary>
-    public class ParameterFormatterSample : ParameterFormatBase
-    {
-        /// <summary>
-        /// 格式化分割符
-        /// </summary>
-        protected override string FormatSeparator => ":";
+    protected override string FormatSeparator => ":";
 
-        /// <summary>
-        /// 连接符
-        /// </summary>
-        protected override string JoinSeparator => "|";
-    }
+    /// <summary>
+    /// 连接符
+    /// </summary>
+    protected override string JoinSeparator => "|";
 }

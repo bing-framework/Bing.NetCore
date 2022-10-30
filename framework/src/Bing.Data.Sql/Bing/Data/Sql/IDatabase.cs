@@ -1,17 +1,16 @@
 ﻿using System.Data;
 using Bing.Aspects;
 
-namespace Bing.Data.Sql
+namespace Bing.Data.Sql;
+
+/// <summary>
+/// 数据库
+/// </summary>
+[Ignore]
+public interface IDatabase
 {
     /// <summary>
-    /// 数据库
+    /// 获取数据库连接
     /// </summary>
-    [Ignore]
-    public interface IDatabase
-    {
-        /// <summary>
-        /// 获取数据库连接
-        /// </summary>
-        IDbConnection GetConnection();
-    }
+    IDbConnection GetConnection();
 }

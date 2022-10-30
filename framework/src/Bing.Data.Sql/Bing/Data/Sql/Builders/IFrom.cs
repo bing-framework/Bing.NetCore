@@ -1,9 +1,8 @@
-﻿namespace Bing.Data.Sql.Builders
+﻿namespace Bing.Data.Sql.Builders;
+
+/// <summary>
+/// From子句操作
+/// </summary>
+public interface IFrom
 {
-    /// <summary>
-    /// From子句操作
-    /// </summary>
-    public interface IFrom
-    {
-    }
 }

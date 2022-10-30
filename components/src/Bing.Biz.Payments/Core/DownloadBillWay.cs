@@ -1,13 +1,12 @@
-﻿namespace Bing.Biz.Payments.Core
+﻿namespace Bing.Biz.Payments.Core;
+
+/// <summary>
+/// 下载对账单方式
+/// </summary>
+public enum DownloadBillWay
 {
-    /// <summary>
-    /// 下载对账单方式
-    /// </summary>
-    public enum DownloadBillWay
-    {
-        WechatAllBill,
-        WechatSuccessBill,
-        WechatRefundBill,
-        WechatRechargeRefund,
-    }
+    WechatAllBill,
+    WechatSuccessBill,
+    WechatRefundBill,
+    WechatRechargeRefund,
 }

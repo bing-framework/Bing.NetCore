@@ -1,13 +1,12 @@
-﻿namespace Bing.Http
+﻿namespace Bing.Http;
+
+/// <summary>
+/// Http常量
+/// </summary>
+public static class BingHttpConst
 {
     /// <summary>
-    /// Http常量
+    /// 错误格式
     /// </summary>
-    public static class BingHttpConst
-    {
-        /// <summary>
-        /// 错误格式
-        /// </summary>
-        public const string BingErrorFormat = "_BingErrorFormat";
-    }
+    public const string BingErrorFormat = "_BingErrorFormat";
 }

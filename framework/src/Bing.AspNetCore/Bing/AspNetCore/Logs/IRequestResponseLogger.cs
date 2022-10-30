@@ -1,14 +1,13 @@
-﻿namespace Bing.AspNetCore.Logs
+﻿namespace Bing.AspNetCore.Logs;
+
+/// <summary>
+/// 请求响应记录器
+/// </summary>
+public interface IRequestResponseLogger
 {
     /// <summary>
-    /// 请求响应记录器
+    /// 写入日志
     /// </summary>
-    public interface IRequestResponseLogger
-    {
-        /// <summary>
-        /// 写入日志
-        /// </summary>
-        /// <param name="logCreator">请求响应日志创建者</param>
-        void Log(IRequestResponseLogCreator logCreator);
-    }
+    /// <param name="logCreator">请求响应日志创建者</param>
+    void Log(IRequestResponseLogCreator logCreator);
 }

@@ -1,9 +1,8 @@
-﻿namespace Bing.Application.Dtos
+﻿namespace Bing.Application.Dtos;
+
+/// <summary>
+/// 响应对象
+/// </summary>
+public interface IResponse
 {
-    /// <summary>
-    /// 响应对象
-    /// </summary>
-    public interface IResponse
-    {
-    }
 }

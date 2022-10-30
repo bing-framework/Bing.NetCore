@@ -1,9 +1,8 @@
-﻿namespace Bing.Data.Common
+﻿namespace Bing.Data.Common;
+
+/// <summary>
+/// DbContext 元接口
+/// </summary>
+public interface IDbContext
 {
-    /// <summary>
-    /// DbContext 元接口
-    /// </summary>
-    public interface IDbContext
-    {
-    }
 }

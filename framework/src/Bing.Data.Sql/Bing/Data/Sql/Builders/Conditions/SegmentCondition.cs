@@ -1,102 +1,101 @@
 ﻿using Bing.Data.Queries;
 
-namespace Bing.Data.Sql.Builders.Conditions
+namespace Bing.Data.Sql.Builders.Conditions;
+
+/// <summary>
+/// 范围过滤条件
+/// </summary>
+public class SegmentCondition : ICondition
 {
     /// <summary>
-    /// 范围过滤条件
+    /// 列名
     /// </summary>
-    public class SegmentCondition : ICondition
+    private readonly string _name;
+
+    /// <summary>
+    /// 最小值
+    /// </summary>
+    private readonly string _min;
+
+    /// <summary>
+    /// 最大值
+    /// </summary>
+    private readonly string _max;
+
+    /// <summary>
+    /// 包含边界
+    /// </summary>
+    private readonly Boundary _boundary;
+
+    /// <summary>
+    /// 初始化一个<see cref="SegmentCondition"/>类型的实例
+    /// </summary>
+    /// <param name="name">列名</param>
+    /// <param name="min">最小值</param>
+    /// <param name="max">最大值</param>
+    /// <param name="boundary">包含边界</param>
+    public SegmentCondition(string name, string min, string max, Boundary boundary)
     {
-        /// <summary>
-        /// 列名
-        /// </summary>
-        private readonly string _name;
+        _name = name;
+        _min = min;
+        _max = max;
+        _boundary = boundary;
+    }
 
-        /// <summary>
-        /// 最小值
-        /// </summary>
-        private readonly string _min;
+    /// <summary>
+    /// 获取查询条件
+    /// </summary>
+    public string GetCondition()
+    {
+        if (string.IsNullOrWhiteSpace(_name))
+            return null;
+        var condition = new AndCondition(CreateLeftCondition(), CreateRightCondition());
+        return condition.GetCondition();
+    }
 
-        /// <summary>
-        /// 最大值
-        /// </summary>
-        private readonly string _max;
+    /// <summary>
+    /// 创建左条件
+    /// </summary>
+    private ICondition CreateLeftCondition()
+    {
+        if (string.IsNullOrWhiteSpace(_min))
+            return NullCondition.Instance;
+        return SqlConditionFactory.Create(_name, _min, CreateLeftOperator());
+    }
 
-        /// <summary>
-        /// 包含边界
-        /// </summary>
-        private readonly Boundary _boundary;
-
-        /// <summary>
-        /// 初始化一个<see cref="SegmentCondition"/>类型的实例
-        /// </summary>
-        /// <param name="name">列名</param>
-        /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
-        /// <param name="boundary">包含边界</param>
-        public SegmentCondition(string name, string min, string max, Boundary boundary)
+    /// <summary>
+    /// 创建左操作符
+    /// </summary>
+    private Operator CreateLeftOperator()
+    {
+        return _boundary switch
         {
-            _name = name;
-            _min = min;
-            _max = max;
-            _boundary = boundary;
-        }
+            Boundary.Left => Operator.GreaterEqual,
+            Boundary.Both => Operator.GreaterEqual,
+            _ => Operator.Greater
+        };
+    }
 
-        /// <summary>
-        /// 获取查询条件
-        /// </summary>
-        public string GetCondition()
-        {
-            if (string.IsNullOrWhiteSpace(_name))
-                return null;
-            var condition = new AndCondition(CreateLeftCondition(), CreateRightCondition());
-            return condition.GetCondition();
-        }
+    /// <summary>
+    /// 创建右条件
+    /// </summary>
+    private ICondition CreateRightCondition()
+    {
+        if (string.IsNullOrWhiteSpace(_max))
+            return NullCondition.Instance;
+        return SqlConditionFactory.Create(_name, _max, CreateRightOperator());
+    }
 
-        /// <summary>
-        /// 创建左条件
-        /// </summary>
-        private ICondition CreateLeftCondition()
+    /// <summary>
+    /// 创建右操作符
+    /// </summary>
+    private Operator CreateRightOperator()
+    {
+        return _boundary switch
         {
-            if (string.IsNullOrWhiteSpace(_min))
-                return NullCondition.Instance;
-            return SqlConditionFactory.Create(_name, _min, CreateLeftOperator());
-        }
-
-        /// <summary>
-        /// 创建左操作符
-        /// </summary>
-        private Operator CreateLeftOperator()
-        {
-            return _boundary switch
-            {
-                Boundary.Left => Operator.GreaterEqual,
-                Boundary.Both => Operator.GreaterEqual,
-                _ => Operator.Greater
-            };
-        }
-
-        /// <summary>
-        /// 创建右条件
-        /// </summary>
-        private ICondition CreateRightCondition()
-        {
-            if (string.IsNullOrWhiteSpace(_max))
-                return NullCondition.Instance;
-            return SqlConditionFactory.Create(_name, _max, CreateRightOperator());
-        }
-
-        /// <summary>
-        /// 创建右操作符
-        /// </summary>
-        private Operator CreateRightOperator()
-        {
-            return _boundary switch
-            {
-                Boundary.Right => Operator.LessEqual,
-                Boundary.Both => Operator.LessEqual,
-                _ => Operator.Less
-            };
-        }
+            Boundary.Right => Operator.LessEqual,
+            Boundary.Both => Operator.LessEqual,
+            _ => Operator.Less
+        };
     }
 }

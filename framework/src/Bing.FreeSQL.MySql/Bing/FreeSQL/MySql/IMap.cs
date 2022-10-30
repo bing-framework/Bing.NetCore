@@ -1,9 +1,8 @@
-﻿namespace Bing.FreeSQL.MySql
+﻿namespace Bing.FreeSQL.MySql;
+
+/// <summary>
+/// 映射
+/// </summary>
+public interface IMap : Bing.FreeSQL.IMap
 {
-    /// <summary>
-    /// 映射
-    /// </summary>
-    public interface IMap : Bing.FreeSQL.IMap
-    {
-    }
 }

@@ -1,9 +1,8 @@
-﻿namespace Bing.Data.Sql.Builders
+﻿namespace Bing.Data.Sql.Builders;
+
+/// <summary>
+/// Select子句操作
+/// </summary>
+public interface ISelect
 {
-    /// <summary>
-    /// Select子句操作
-    /// </summary>
-    public interface ISelect
-    {
-    }
 }
