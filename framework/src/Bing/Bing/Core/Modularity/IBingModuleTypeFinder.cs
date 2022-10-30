@@ -1,11 +1,10 @@
 ﻿using Bing.Reflection;
 
-namespace Bing.Core.Modularity
+namespace Bing.Core.Modularity;
+
+/// <summary>
+/// Bing 模块类型查找器
+/// </summary>
+public interface IBingModuleTypeFinder : ITypeFinder
 {
-    /// <summary>
-    /// Bing 模块类型查找器
-    /// </summary>
-    public interface IBingModuleTypeFinder : ITypeFinder
-    {
-    }
 }

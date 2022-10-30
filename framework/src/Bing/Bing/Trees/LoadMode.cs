@@ -1,23 +1,22 @@
-﻿namespace Bing.Trees
+﻿namespace Bing.Trees;
+
+/// <summary>
+/// 加载模式
+/// </summary>
+public enum LoadMode
 {
     /// <summary>
-    /// 加载模式
+    /// 同步
     /// </summary>
-    public enum LoadMode
-    {
-        /// <summary>
-        /// 同步
-        /// </summary>
-        Sync,
+    Sync,
 
-        /// <summary>
-        /// 异步
-        /// </summary>
-        Async,
+    /// <summary>
+    /// 异步
+    /// </summary>
+    Async,
 
-        /// <summary>
-        /// 根节点异步加载，下级节点一次性加载
-        /// </summary>
-        OnlyRootAsync
-    }
+    /// <summary>
+    /// 根节点异步加载，下级节点一次性加载
+    /// </summary>
+    OnlyRootAsync
 }

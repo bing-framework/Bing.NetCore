@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿namespace Bing.Logs.Abstractions;
 
-namespace Bing.Logs.Abstractions
+/// <summary>
+/// 日志转换器
+/// </summary>
+public interface ILogConvert
 {
     /// <summary>
-    /// 日志转换器
+    /// 转换
     /// </summary>
-    public interface ILogConvert
-    {
-        /// <summary>
-        /// 转换
-        /// </summary>
-        List<Item> To();
-    }
+    List<Item> To();
 }

@@ -1,16 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Bing.Logging
+namespace Bing.Logging;
+
+/// <summary>
+/// 安全记录异常
+/// </summary>
+public interface IExceptionWithSelfLogging
 {
     /// <summary>
-    /// 安全记录异常
+    /// 记录
     /// </summary>
-    public interface IExceptionWithSelfLogging
-    {
-        /// <summary>
-        /// 记录
-        /// </summary>
-        /// <param name="logger">日志</param>
-        void Log(ILogger logger);
-    }
+    /// <param name="logger">日志</param>
+    void Log(ILogger logger);
 }

@@ -1,9 +1,8 @@
-﻿namespace Bing.Locks
+﻿namespace Bing.Locks;
+
+/// <summary>
+/// 分布式锁
+/// </summary>
+public interface IDistributedLock : ILock
 {
-    /// <summary>
-    /// 分布式锁
-    /// </summary>
-    public interface IDistributedLock : ILock
-    {
-    }
 }
