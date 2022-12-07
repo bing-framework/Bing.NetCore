@@ -1,13 +1,12 @@
-﻿namespace Bing.Events
+﻿namespace Bing.Events;
+
+/// <summary>
+/// 事件会话
+/// </summary>
+public interface IEventSession
 {
     /// <summary>
-    /// 事件会话
+    /// 会话标识
     /// </summary>
-    public interface IEventSession
-    {
-        /// <summary>
-        /// 会话标识
-        /// </summary>
-        string SessionId { get; set; }
-    }
+    string SessionId { get; set; }
 }

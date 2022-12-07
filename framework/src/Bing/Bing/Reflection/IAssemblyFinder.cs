@@ -1,12 +1,10 @@
-﻿using System.Reflection;
-using Bing.Finders;
+﻿using Bing.Finders;
 
-namespace Bing.Reflection
+namespace Bing.Reflection;
+
+/// <summary>
+/// 定义程序集查找器
+/// </summary>
+public interface IAssemblyFinder : IFinder<Assembly>
 {
-    /// <summary>
-    /// 定义程序集查找器
-    /// </summary>
-    public interface IAssemblyFinder : IFinder<Assembly>
-    {
-    }
 }

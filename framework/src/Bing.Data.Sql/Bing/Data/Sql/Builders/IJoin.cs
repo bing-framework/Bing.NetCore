@@ -1,9 +1,8 @@
-﻿namespace Bing.Data.Sql.Builders
+﻿namespace Bing.Data.Sql.Builders;
+
+/// <summary>
+/// Join子句操作
+/// </summary>
+public interface IJoin
 {
-    /// <summary>
-    /// Join子句操作
-    /// </summary>
-    public interface IJoin
-    {
-    }
 }

@@ -1,9 +1,8 @@
-﻿namespace Bing.Data.ObjectExtending
+﻿namespace Bing.Data.ObjectExtending;
+
+/// <summary>
+/// 扩展属性
+/// </summary>
+public interface IHasExtraProperties
 {
-    /// <summary>
-    /// 扩展属性
-    /// </summary>
-    public interface IHasExtraProperties
-    {
-    }
 }

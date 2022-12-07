@@ -1,7 +1,6 @@
-﻿namespace Bing.Tests.Samples
+﻿namespace Bing.Tests.Samples;
+
+public class AutoMapperSourceSample
 {
-    public class AutoMapperSourceSample
-    {
-        public string SourceStringValue { get; set; }
-    }
+    public string SourceStringValue { get; set; }
 }

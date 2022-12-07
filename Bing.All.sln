@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29911.84
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-framework", "01-framework", "{A3E29077-2385-4F4F-B2BB-01975E24979C}"
 EndProject
@@ -85,10 +85,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Tests", "framework\tests\Bing.Tests\Bing.Tests.csproj", "{58BE2219-6694-4630-85E6-7953A608A2D6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Test.Integration", "framework\tests\Bing.Datas.Test.Integration\Bing.Datas.Test.Integration.csproj", "{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-demo", "03-demo", "{2DABEEC3-E915-44D7-A4B4-50972CAF45FB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.SqlBuilder.Console", "framework\demo\Bing.Datas.SqlBuilder.Console\Bing.Datas.SqlBuilder.Console.csproj", "{77817263-DB2A-4500-86A5-1ADBE3318A73}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Domain", "framework\src\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj", "{25107D91-1E7D-422C-8B03-B1C94EE3A1B5}"
 EndProject
@@ -174,6 +170,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{D77F42E0
 		asset\props\misc.props = asset\props\misc.props
 		asset\props\package.props = asset\props\package.props
 		asset\props\sourcelink.env.props = asset\props\sourcelink.env.props
+		asset\props\target.feature.props = asset\props\target.feature.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Data.FreeSQL", "modules\admin\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj", "{05DFA67F-C861-48F9-BBD9-7777972A918F}"
@@ -263,7 +260,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{B6
 		version.props = version.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Uow", "framework\src\Bing.Uow\Bing.Uow.csproj", "{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Uow", "framework\src\Bing.Uow\Bing.Uow.csproj", "{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore.Serilog", "framework\src\Bing.AspNetCore.Serilog\Bing.AspNetCore.Serilog.csproj", "{46718841-DF9E-41A4-AF87-C8E81AAE6F55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Authorization.Abstractions", "framework\src\Bing.Authorization.Abstractions\Bing.Authorization.Abstractions.csproj", "{4B50588D-013B-462C-AA1E-169BEDBA206E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -403,10 +404,6 @@ Global
 		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77817263-DB2A-4500-86A5-1ADBE3318A73}.Release|Any CPU.Build.0 = Release|Any CPU
 		{25107D91-1E7D-422C-8B03-B1C94EE3A1B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{25107D91-1E7D-422C-8B03-B1C94EE3A1B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25107D91-1E7D-422C-8B03-B1C94EE3A1B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -587,6 +584,14 @@ Global
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B50588D-013B-462C-AA1E-169BEDBA206E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B50588D-013B-462C-AA1E-169BEDBA206E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B50588D-013B-462C-AA1E-169BEDBA206E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B50588D-013B-462C-AA1E-169BEDBA206E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -629,8 +634,6 @@ Global
 		{A66F9341-005F-4FAC-BF93-D676329A34B4} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{58BE2219-6694-4630-85E6-7953A608A2D6} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{0F86BCCF-6A1D-41DD-A9C0-4B3BF8A840BF} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
-		{2DABEEC3-E915-44D7-A4B4-50972CAF45FB} = {A3E29077-2385-4F4F-B2BB-01975E24979C}
-		{77817263-DB2A-4500-86A5-1ADBE3318A73} = {2DABEEC3-E915-44D7-A4B4-50972CAF45FB}
 		{25107D91-1E7D-422C-8B03-B1C94EE3A1B5} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{CAC738F2-8F95-4940-90D2-76DABF403581} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{577D3EA3-5342-4E0D-AE51-39CBEE217089} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
@@ -702,6 +705,8 @@ Global
 		{4A87040E-99A6-4A3F-BD6D-D2A3C3663012} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 		{B6E2B626-F561-4B47-8CFE-E8A305696522} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 		{659C6450-6A39-44A3-A1A5-449ECAA1AFBE} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
+		{46718841-DF9E-41A4-AF87-C8E81AAE6F55} = {052D4342-8B65-4836-A9B6-681A7812760E}
+		{4B50588D-013B-462C-AA1E-169BEDBA206E} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

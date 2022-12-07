@@ -1,6 +1,5 @@
-﻿namespace Bing.Data.Test.Integration.Samples
+﻿namespace Bing.Data.Test.Integration.Samples;
+
+public class Sample6 : Sample, ISoftDelete
 {
-    public class Sample6 : Sample, ISoftDelete
-    {
-    }
 }

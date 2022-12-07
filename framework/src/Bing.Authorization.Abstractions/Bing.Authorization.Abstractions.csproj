@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Authorization.Abstractions</AssemblyName>
+    <PackageId>Bing.Authorization.Abstractions</PackageId>
+    <Description>Bing.Authorization.Abstractions是Bing应用框架的API功能授权的抽象类库。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Bing\Authorization\Functions\" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+</Project>

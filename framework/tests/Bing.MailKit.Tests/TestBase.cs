@@ -2,15 +2,14 @@ using System;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.MailKit.Tests
-{
-    public class TestBase
-    {
-        protected ITestOutputHelper Output;
+namespace Bing.MailKit.Tests;
 
-        public TestBase(ITestOutputHelper output)
-        {
-            Output = output;
-        }
+public class TestBase
+{
+    protected ITestOutputHelper Output;
+
+    public TestBase(ITestOutputHelper output)
+    {
+        Output = output;
     }
 }

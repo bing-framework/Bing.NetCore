@@ -1,0 +1,17 @@
+﻿<Project>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
+  </ItemGroup>
+</Project>

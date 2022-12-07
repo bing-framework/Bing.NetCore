@@ -4,21 +4,21 @@ using Bing.Biz.Payments.Wechatpay.Enums;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Xunit;
 
-namespace Bing.Biz.Payments.Tests.Wechatpay.Results
+namespace Bing.Biz.Payments.Tests.Wechatpay.Results;
+
+/// <summary>
+/// 微信支付结果测试
+/// </summary>
+public class WechatpayResultTest
 {
     /// <summary>
-    /// 微信支付结果测试
+    /// 测试 - 校验响应内容
     /// </summary>
-    public class WechatpayResultTest
+    [Fact]
+    public async Task Test_VerifyResponse()
     {
-        /// <summary>
-        /// 测试 - 校验响应内容
-        /// </summary>
-        [Fact]
-        public async Task Test_VerifyResponse()
-        {
-            // 设置响应内容
-            var response = @"<xml>
+        // 设置响应内容
+        var response = @"<xml>
                                 <return_code><![CDATA[SUCCESS]]></return_code>
                                 <return_msg><![CDATA[OK]]></return_msg>
                                 <appid><![CDATA[wx9b90e1788b39fec6]]></appid>
@@ -30,41 +30,40 @@ namespace Bing.Biz.Payments.Tests.Wechatpay.Results
                                 <trade_type><![CDATA[APP]]></trade_type>
                             </xml>";
 
-            // 操作
-            var result = new WechatpayResult(new TestConfigProvider(), response);
+        // 操作
+        var result = new WechatpayResult(new TestConfigProvider(), response);
 
-            // 验证
-            Assert.Equal("SUCCESS", result.GetReturnCode());
-            Assert.Equal("OK", result.GetReturnMessage());
-            Assert.Equal("wx9b90e1788b39fec6", result.GetAppId());
-            Assert.Equal("1985518532", result.GetMerchantId());
-            Assert.Equal("wrKodsjUFk34qYno", result.GetNonce());
-            Assert.Equal("5F721ADF22DD2C60B4E171228F8DA36E", result.GetSign());
-            Assert.Equal("SUCCESS", result.GetResultCode());
-            Assert.Equal("wx141217433636466fe2c3b2a10139084028", result.GetPrepayId());
-            Assert.Equal("APP", result.GetTradeType());
-            var isValid = (await result.ValidateAsync()).IsValid;
-            Assert.True(isValid);
-        }
+        // 验证
+        Assert.Equal("SUCCESS", result.GetReturnCode());
+        Assert.Equal("OK", result.GetReturnMessage());
+        Assert.Equal("wx9b90e1788b39fec6", result.GetAppId());
+        Assert.Equal("1985518532", result.GetMerchantId());
+        Assert.Equal("wrKodsjUFk34qYno", result.GetNonce());
+        Assert.Equal("5F721ADF22DD2C60B4E171228F8DA36E", result.GetSign());
+        Assert.Equal("SUCCESS", result.GetResultCode());
+        Assert.Equal("wx141217433636466fe2c3b2a10139084028", result.GetPrepayId());
+        Assert.Equal("APP", result.GetTradeType());
+        var isValid = (await result.ValidateAsync()).IsValid;
+        Assert.True(isValid);
     }
+}
 
+/// <summary>
+/// 微信支付测试配置提供器
+/// </summary>
+public class TestConfigProvider : IWechatpayConfigProvider
+{
     /// <summary>
-    /// 微信支付测试配置提供器
+    /// 获取配置
     /// </summary>
-    public class TestConfigProvider : IWechatpayConfigProvider
+    /// <param name="parameter">参数</param>
+    public Task<WechatpayConfig> GetConfigAsync(object parameter = null)
     {
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <param name="parameter">参数</param>
-        public Task<WechatpayConfig> GetConfigAsync(object parameter = null)
+        var config = new WechatpayConfig
         {
-            var config = new WechatpayConfig
-            {
-                SignType = WechatpaySignType.Md5,
-                PrivateKey = "VVHZOaJEj44WbX0f3Lj7DHkfwEqvlURA"
-            };
-            return Task.FromResult(config);
-        }
+            SignType = WechatpaySignType.Md5,
+            PrivateKey = "VVHZOaJEj44WbX0f3Lj7DHkfwEqvlURA"
+        };
+        return Task.FromResult(config);
     }
 }

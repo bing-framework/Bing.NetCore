@@ -1,15 +1,12 @@
-﻿using System;
+﻿namespace Bing.DependencyInjection;
 
-namespace Bing.DependencyInjection
+/// <summary>
+/// 服务提供程序访问器
+/// </summary>
+public interface IServiceProviderAccessor
 {
     /// <summary>
-    /// 服务提供程序访问器
+    /// 服务提供程序
     /// </summary>
-    public interface IServiceProviderAccessor
-    {
-        /// <summary>
-        /// 服务提供程序
-        /// </summary>
-        IServiceProvider ServiceProvider { get; }
-    }
+    IServiceProvider ServiceProvider { get; }
 }

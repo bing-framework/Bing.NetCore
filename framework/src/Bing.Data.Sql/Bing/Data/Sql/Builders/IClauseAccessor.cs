@@ -1,38 +1,37 @@
-﻿namespace Bing.Data.Sql.Builders
+﻿namespace Bing.Data.Sql.Builders;
+
+/// <summary>
+/// Sql子句访问器
+/// </summary>
+public interface IClauseAccessor
 {
     /// <summary>
-    /// Sql子句访问器
+    /// Select子句
     /// </summary>
-    public interface IClauseAccessor
-    {
-        /// <summary>
-        /// Select子句
-        /// </summary>
-        ISelectClause SelectClause { get; }
+    ISelectClause SelectClause { get; }
 
-        /// <summary>
-        /// From子句
-        /// </summary>
-        IFromClause FromClause { get; }
+    /// <summary>
+    /// From子句
+    /// </summary>
+    IFromClause FromClause { get; }
 
-        /// <summary>
-        /// Join子句
-        /// </summary>
-        IJoinClause JoinClause { get; }
+    /// <summary>
+    /// Join子句
+    /// </summary>
+    IJoinClause JoinClause { get; }
 
-        /// <summary>
-        /// Where子句
-        /// </summary>
-        IWhereClause WhereClause { get; }
+    /// <summary>
+    /// Where子句
+    /// </summary>
+    IWhereClause WhereClause { get; }
 
-        /// <summary>
-        /// GroupBy子句
-        /// </summary>
-        IGroupByClause GroupByClause { get; }
+    /// <summary>
+    /// GroupBy子句
+    /// </summary>
+    IGroupByClause GroupByClause { get; }
 
-        /// <summary>
-        /// OrderBy子句
-        /// </summary>
-        IOrderByClause OrderByClause { get; }
-    }
+    /// <summary>
+    /// OrderBy子句
+    /// </summary>
+    IOrderByClause OrderByClause { get; }
 }

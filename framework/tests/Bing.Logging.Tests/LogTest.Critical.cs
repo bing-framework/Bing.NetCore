@@ -5,42 +5,41 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Bing.Logging.Tests
+namespace Bing.Logging.Tests;
+
+/// <summary>
+/// 日志操作测试 - 测试致命级别
+/// </summary>
+public partial class LogTest
 {
     /// <summary>
-    /// 日志操作测试 - 测试致命级别
+    /// 测试写致命日志 - 同时设置自定义扩展属性、状态对象、日志消息
     /// </summary>
-    public partial class LogTest
+    [Fact]
+    public void Test_LogCritical_Message()
     {
-        /// <summary>
-        /// 测试写致命日志 - 同时设置自定义扩展属性、状态对象、日志消息
-        /// </summary>
-        [Fact]
-        public void Test_LogCritical_Message()
-        {
-            var product = new Product { Code = "a", Name = "b", Price = 123 };
-            _log.Message("a{b}{c}", 1, 2)
-                .Property("d", "3")
-                .Property("e", "4")
-                .State(product)
-                .LogCritical();
-            _mockLogger.Verify(t => t.LogCritical(0, null, "[d:{d},e:{e},Code:{Code},Name:{Name},Price:{Price}]a{b}{c}", "3", "4", "a", "b", 123, 1, 2));
-        }
+        var product = new Product { Code = "a", Name = "b", Price = 123 };
+        _log.Message("a{b}{c}", 1, 2)
+            .Property("d", "3")
+            .Property("e", "4")
+            .State(product)
+            .LogCritical();
+        _mockLogger.Verify(t => t.LogCritical(0, null, "[d:{d},e:{e},Code:{Code},Name:{Name},Price:{Price}]a{b}{c}", "3", "4", "a", "b", 123, 1, 2));
+    }
 
-        /// <summary>
-        /// 测试写致命日志 - 设置自定义扩展属性、状态对象
-        /// </summary>
-        [Fact]
-        public void Test_LogCritical_Property()
-        {
-            var product = new Product { Code = "a", Name = "b", Price = 123 };
-            _log.Property("Age", "18")
-                .State(product)
-                .LogCritical();
-            _mockLogger.Verify(t => t.Log(LogLevel.Critical, 0,
-                It.Is<IDictionary<string, object>>(dict => dict.Count == 4 && dict["Age"].ToString() == "18" && dict["Name"].ToString() == "b"),
-                null,
-                It.IsAny<Func<IDictionary<string, object>, Exception, string>>()));
-        }
+    /// <summary>
+    /// 测试写致命日志 - 设置自定义扩展属性、状态对象
+    /// </summary>
+    [Fact]
+    public void Test_LogCritical_Property()
+    {
+        var product = new Product { Code = "a", Name = "b", Price = 123 };
+        _log.Property("Age", "18")
+            .State(product)
+            .LogCritical();
+        _mockLogger.Verify(t => t.Log(LogLevel.Critical, 0,
+            It.Is<IDictionary<string, object>>(dict => dict.Count == 4 && dict["Age"].ToString() == "18" && dict["Name"].ToString() == "b"),
+            null,
+            It.IsAny<Func<IDictionary<string, object>, Exception, string>>()));
     }
 }

@@ -1,15 +1,14 @@
-﻿namespace Bing.Monitoring.Health
+﻿namespace Bing.Monitoring.Health;
+
+/// <summary>
+/// 定义业务健康检查
+/// </summary>
+public interface IBusHealth
 {
     /// <summary>
-    /// 定义业务健康检查
+    /// 业务名称
     /// </summary>
-    public interface IBusHealth
-    {
-        /// <summary>
-        /// 业务名称
-        /// </summary>
-        string Name { get; }
+    string Name { get; }
 
 
-    }
 }

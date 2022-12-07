@@ -1,18 +1,17 @@
-﻿namespace Bing.Trees
+﻿namespace Bing.Trees;
+
+/// <summary>
+/// 树型物化路径
+/// </summary>
+public interface IPath
 {
     /// <summary>
-    /// 树型物化路径
+    /// 路径
     /// </summary>
-    public interface IPath
-    {
-        /// <summary>
-        /// 路径
-        /// </summary>
-        string Path { get; }
+    string Path { get; }
 
-        /// <summary>
-        /// 级数
-        /// </summary>
-        int Level { get; }
-    }
+    /// <summary>
+    /// 级数
+    /// </summary>
+    int Level { get; }
 }

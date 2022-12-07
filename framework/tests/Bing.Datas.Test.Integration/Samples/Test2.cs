@@ -1,7 +1,6 @@
-﻿namespace Bing.Data.Test.Integration.Samples
+﻿namespace Bing.Data.Test.Integration.Samples;
+
+public class Test2
 {
-    public class Test2
-    {
-        public string Name { get; set; }
-    }
+    public string Name { get; set; }
 }

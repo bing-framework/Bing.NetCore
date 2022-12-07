@@ -3,27 +3,26 @@ using System.Linq;
 using Bing.Exceptions;
 using Microsoft.AspNetCore.Identity;
 
-namespace Bing.Permissions.Identity.Extensions
+namespace Bing.Permissions.Identity.Extensions;
+
+/// <summary>
+/// 授权结果(<see cref="IdentityResult"/>) 扩展
+/// </summary>
+public static class IdentityResultExtensions
 {
+    #region ThrowIfError(失败抛出异常)
+
     /// <summary>
-    /// 授权结果(<see cref="IdentityResult"/>) 扩展
+    /// 失败抛出异常
     /// </summary>
-    public static class IdentityResultExtensions
+    /// <param name="result">Identity结果</param>
+    public static void ThrowIfError(this IdentityResult result)
     {
-        #region ThrowIfError(失败抛出异常)
-
-        /// <summary>
-        /// 失败抛出异常
-        /// </summary>
-        /// <param name="result">Identity结果</param>
-        public static void ThrowIfError(this IdentityResult result)
-        {
-            if (result == null)
-                throw new ArgumentNullException(nameof(result));
-            if (result.Succeeded == false)
-                throw new Warning(result.Errors.First().Description);
-        }
-
-        #endregion
+        if (result == null)
+            throw new ArgumentNullException(nameof(result));
+        if (result.Succeeded == false)
+            throw new Warning(result.Errors.First().Description);
     }
+
+    #endregion
 }

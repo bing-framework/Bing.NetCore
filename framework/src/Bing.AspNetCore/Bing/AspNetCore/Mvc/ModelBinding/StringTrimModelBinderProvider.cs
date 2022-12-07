@@ -1,23 +1,22 @@
 ﻿using Bing.Helpers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace Bing.AspNetCore.Mvc.ModelBinding
+namespace Bing.AspNetCore.Mvc.ModelBinding;
+
+/// <summary>
+/// <see cref="StringTrimModelBinder"/>提供程序。提供对字符串前后空白进行Trim操作的模型绑定能力
+/// </summary>
+public class StringTrimModelBinderProvider : IModelBinderProvider
 {
     /// <summary>
-    /// <see cref="StringTrimModelBinder"/>提供程序。提供对字符串前后空白进行Trim操作的模型绑定能力
+    /// 获取绑定器
     /// </summary>
-    public class StringTrimModelBinderProvider : IModelBinderProvider
+    /// <param name="context">模型绑定提供程序上下文</param>
+    public IModelBinder GetBinder(ModelBinderProviderContext context)
     {
-        /// <summary>
-        /// 获取绑定器
-        /// </summary>
-        /// <param name="context">模型绑定提供程序上下文</param>
-        public IModelBinder GetBinder(ModelBinderProviderContext context)
-        {
-            Check.NotNull(context, nameof(context));
-            if (context.Metadata.UnderlyingOrModelType == typeof(string))
-                return new StringTrimModelBinder();
-            return null;
-        }
+        Check.NotNull(context, nameof(context));
+        if (context.Metadata.UnderlyingOrModelType == typeof(string))
+            return new StringTrimModelBinder();
+        return null;
     }
 }

@@ -9,28 +9,27 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+internal class MySqlCapOptionsExtension : ICapOptionsExtension
 {
-    internal class MySqlCapOptionsExtension : ICapOptionsExtension
+    private readonly Action<MySqlOptions> _configure;
+
+    public MySqlCapOptionsExtension(Action<MySqlOptions> configure)
     {
-        private readonly Action<MySqlOptions> _configure;
-
-        public MySqlCapOptionsExtension(Action<MySqlOptions> configure)
-        {
-            _configure = configure;
-        }
-
-        public void AddServices(IServiceCollection services)
-        {
-            services.AddSingleton<CapStorageMarkerService>();
-            services.AddSingleton<IDataStorage, MySqlDataStorage>();
-            
-            services.TryAddSingleton<IStorageInitializer, MySqlStorageInitializer>();
-            services.AddTransient<ICapTransaction, MySqlCapTransaction>();
-
-            //Add MySqlOptions
-            services.Configure(_configure);
-            services.AddSingleton<IConfigureOptions<MySqlOptions>, ConfigureMySqlOptions>();
-        } 
+        _configure = configure;
     }
+
+    public void AddServices(IServiceCollection services)
+    {
+        services.AddSingleton<CapStorageMarkerService>();
+        services.AddSingleton<IDataStorage, MySqlDataStorage>();
+            
+        services.TryAddSingleton<IStorageInitializer, MySqlStorageInitializer>();
+        services.AddTransient<ICapTransaction, MySqlCapTransaction>();
+
+        //Add MySqlOptions
+        services.Configure(_configure);
+        services.AddSingleton<IConfigureOptions<MySqlOptions>, ConfigureMySqlOptions>();
+    } 
 }

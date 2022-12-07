@@ -5,196 +5,195 @@ using Bing.Domain.ChangeTracking;
 using Bing.Validation;
 using Bing.Validation.Strategies;
 
-namespace Bing.Domain.Entities
+namespace Bing.Domain.Entities;
+
+/// <summary>
+/// 领域对象基类
+/// </summary>
+/// <typeparam name="TObject">领域对象</typeparam>
+public abstract class DomainObjectBase<TObject> : IDomainObject, IVerifyModel<TObject>, IChangeTrackable<TObject>
+    where TObject : class, IDomainObject, IVerifyModel<TObject>
 {
     /// <summary>
-    /// 领域对象基类
+    /// 验证上下文
     /// </summary>
-    /// <typeparam name="TObject">领域对象</typeparam>
-    public abstract class DomainObjectBase<TObject> : IDomainObject, IVerifyModel<TObject>, IChangeTrackable<TObject>
-        where TObject : class, IDomainObject, IVerifyModel<TObject>
+    private readonly ValidationContext<TObject> _validationContext;
+
+    /// <summary>
+    /// 描述上下文
+    /// </summary>
+    private readonly DescriptionContext _descriptionContext;
+
+    /// <summary>
+    /// 变更跟踪上下文
+    /// </summary>
+    private readonly ChangeTrackingContext _changeTrackingContext;
+
+    /// <summary>
+    /// 初始化一个<see cref="DomainObjectBase{TObject}"/>类型的实例
+    /// </summary>
+    protected DomainObjectBase()
     {
-        /// <summary>
-        /// 验证上下文
-        /// </summary>
-        private readonly ValidationContext<TObject> _validationContext;
+        _validationContext = new ValidationContext<TObject>(AssignableType(this));
+        _descriptionContext = new DescriptionContext();
+        _changeTrackingContext = new ChangeTrackingContext();
+    }
 
-        /// <summary>
-        /// 描述上下文
-        /// </summary>
-        private readonly DescriptionContext _descriptionContext;
+    #region Validation(验证)
 
-        /// <summary>
-        /// 变更跟踪上下文
-        /// </summary>
-        private readonly ChangeTrackingContext _changeTrackingContext;
+    /// <summary>
+    /// 设置验证处理器
+    /// </summary>
+    /// <param name="handler">验证处理器</param>
+    public void SetValidationCallback(IValidationCallbackHandler handler) => _validationContext.SetHandler(op => op.HandleAll(handler));
 
-        /// <summary>
-        /// 初始化一个<see cref="DomainObjectBase{TObject}"/>类型的实例
-        /// </summary>
-        protected DomainObjectBase()
-        {
-            _validationContext = new ValidationContext<TObject>(AssignableType(this));
-            _descriptionContext = new DescriptionContext();
-            _changeTrackingContext = new ChangeTrackingContext();
-        }
+    /// <summary>
+    /// 使用全局验证规则
+    /// </summary>
+    public void UseValidationRules()
+    {
+        throw new NotImplementedException();
+    }
 
-        #region Validation(验证)
+    /// <summary>
+    /// 使用验证策略
+    /// </summary>
+    /// <param name="strategy">验证策略</param>
+    public void UseStrategy(IValidationStrategy<TObject> strategy) => _validationContext.AddStrategy(strategy);
 
-        /// <summary>
-        /// 设置验证处理器
-        /// </summary>
-        /// <param name="handler">验证处理器</param>
-        public void SetValidationCallback(IValidationCallbackHandler handler) => _validationContext.SetHandler(op => op.HandleAll(handler));
+    /// <summary>
+    /// 使用验证策略集合
+    /// </summary>
+    /// <param name="strategies">验证策略集合</param>
+    public void UseStrategyList(IEnumerable<IValidationStrategy<TObject>> strategies) =>_validationContext.AddStrategyList(strategies);
 
-        /// <summary>
-        /// 使用全局验证规则
-        /// </summary>
-        public void UseValidationRules()
-        {
-            throw new NotImplementedException();
-        }
+    /// <summary>
+    /// 验证
+    /// </summary>
+    public virtual IValidationResult Validate()
+    {
+        _validationContext.Validate(Validate);
+        return _validationContext.GetValidationResultCollection();
+    }
 
-        /// <summary>
-        /// 使用验证策略
-        /// </summary>
-        /// <param name="strategy">验证策略</param>
-        public void UseStrategy(IValidationStrategy<TObject> strategy) => _validationContext.AddStrategy(strategy);
+    /// <summary>
+    /// 验证并添加到验证结果集合
+    /// </summary>
+    /// <param name="results">验证结果集合</param>
+    protected virtual void Validate(ValidationResultCollection results) { }
 
-        /// <summary>
-        /// 使用验证策略集合
-        /// </summary>
-        /// <param name="strategies">验证策略集合</param>
-        public void UseStrategyList(IEnumerable<IValidationStrategy<TObject>> strategies) =>_validationContext.AddStrategyList(strategies);
+    #endregion
 
-        /// <summary>
-        /// 验证
-        /// </summary>
-        public virtual IValidationResult Validate()
-        {
-            _validationContext.Validate(Validate);
-            return _validationContext.GetValidationResultCollection();
-        }
+    #region ChangeTracking(变更跟踪)
 
-        /// <summary>
-        /// 验证并添加到验证结果集合
-        /// </summary>
-        /// <param name="results">验证结果集合</param>
-        protected virtual void Validate(ValidationResultCollection results) { }
+    /// <summary>
+    /// 添加变更列表
+    /// </summary>
+    /// <param name="newObj">新对象</param>
+    protected virtual void AddChanges(TObject newObj) { }
 
-        #endregion
+    /// <summary>
+    /// 添加变更
+    /// </summary>
+    /// <typeparam name="TProperty">属性类型</typeparam>
+    /// <typeparam name="TValue">值类型</typeparam>
+    /// <param name="expression">属性表达式。范例：t => t.Name</param>
+    /// <param name="newValue">新值。范例：newEntity.Name</param>
+    protected void AddChange<TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) => _changeTrackingContext.Add(expression, AssignableType(this), newValue);
 
-        #region ChangeTracking(变更跟踪)
+    /// <summary>
+    /// 添加变更
+    /// </summary>
+    /// <param name="objectBeforeChangeTrackable">对象变更前跟踪</param>
+    /// <param name="objectAfterChange">变更后的对象</param>
+    protected void AddChange<TDomainObject>(IChangeTrackable<TDomainObject> objectBeforeChangeTrackable,
+        TDomainObject objectAfterChange) where TDomainObject : IDomainObject =>
+        _changeTrackingContext.Add(objectBeforeChangeTrackable, objectAfterChange);
 
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        /// <param name="newObj">新对象</param>
-        protected virtual void AddChanges(TObject newObj) { }
+    /// <summary>
+    /// 添加变更
+    /// </summary>
+    /// <param name="leftObjs">左对象列表</param>
+    /// <param name="rightObjs">右对象列表</param>
+    protected void AddChange<TDomainObject>(IEnumerable<IChangeTrackable<TDomainObject>> leftObjs,
+        IEnumerable<TDomainObject> rightObjs) where TDomainObject : IDomainObject =>
+        _changeTrackingContext.Add(leftObjs, rightObjs);
 
-        /// <summary>
-        /// 添加变更
-        /// </summary>
-        /// <typeparam name="TProperty">属性类型</typeparam>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="expression">属性表达式。范例：t => t.Name</param>
-        /// <param name="newValue">新值。范例：newEntity.Name</param>
-        protected void AddChange<TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TValue newValue) => _changeTrackingContext.Add(expression, AssignableType(this), newValue);
+    /// <summary>
+    /// 添加变更
+    /// </summary>
+    /// <typeparam name="TValue">值类型</typeparam>
+    /// <param name="propertyName">属性名</param>
+    /// <param name="description">描述</param>
+    /// <param name="valueBeforeChange">变更前的值。范例：this.Name</param>
+    /// <param name="valueAfterChange">变更后的值。范例：newEntity.Name</param>
+    protected void AddChange<TValue>(string propertyName, string description, TValue valueBeforeChange,
+        TValue valueAfterChange) =>
+        _changeTrackingContext.Add(propertyName, description, valueBeforeChange, valueAfterChange);
 
-        /// <summary>
-        /// 添加变更
-        /// </summary>
-        /// <param name="objectBeforeChangeTrackable">对象变更前跟踪</param>
-        /// <param name="objectAfterChange">变更后的对象</param>
-        protected void AddChange<TDomainObject>(IChangeTrackable<TDomainObject> objectBeforeChangeTrackable,
-            TDomainObject objectAfterChange) where TDomainObject : IDomainObject =>
-            _changeTrackingContext.Add(objectBeforeChangeTrackable, objectAfterChange);
-
-        /// <summary>
-        /// 添加变更
-        /// </summary>
-        /// <param name="leftObjs">左对象列表</param>
-        /// <param name="rightObjs">右对象列表</param>
-        protected void AddChange<TDomainObject>(IEnumerable<IChangeTrackable<TDomainObject>> leftObjs,
-            IEnumerable<TDomainObject> rightObjs) where TDomainObject : IDomainObject =>
-            _changeTrackingContext.Add(leftObjs, rightObjs);
-
-        /// <summary>
-        /// 添加变更
-        /// </summary>
-        /// <typeparam name="TValue">值类型</typeparam>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="description">描述</param>
-        /// <param name="valueBeforeChange">变更前的值。范例：this.Name</param>
-        /// <param name="valueAfterChange">变更后的值。范例：newEntity.Name</param>
-        protected void AddChange<TValue>(string propertyName, string description, TValue valueBeforeChange,
-            TValue valueAfterChange) =>
-            _changeTrackingContext.Add(propertyName, description, valueBeforeChange, valueAfterChange);
-
-        /// <summary>
-        /// 获取变更值集合
-        /// </summary>
-        /// <param name="otherObj">其它对象</param>
-        public ChangedValueDescriptorCollection GetChanges(TObject otherObj)
-        {
-            _changeTrackingContext.FlushCache();
-            if (Equals(otherObj, null))
-                return _changeTrackingContext.GetChangedValueDescriptor();
-            AddChanges(otherObj);
+    /// <summary>
+    /// 获取变更值集合
+    /// </summary>
+    /// <param name="otherObj">其它对象</param>
+    public ChangedValueDescriptorCollection GetChanges(TObject otherObj)
+    {
+        _changeTrackingContext.FlushCache();
+        if (Equals(otherObj, null))
             return _changeTrackingContext.GetChangedValueDescriptor();
-        }
+        AddChanges(otherObj);
+        return _changeTrackingContext.GetChangedValueDescriptor();
+    }
 
-        #endregion
+    #endregion
 
-        #region Descriptin(描述)
+    #region Descriptin(描述)
 
-        /// <summary>
-        /// 添加描述
-        /// </summary>
-        protected virtual void AddDescriptions() { }
+    /// <summary>
+    /// 添加描述
+    /// </summary>
+    protected virtual void AddDescriptions() { }
 
-        /// <summary>
-        /// 添加描述
-        /// </summary>
-        /// <param name="description">描述</param>
-        protected void AddDescription(string description) => _descriptionContext.Add(description);
+    /// <summary>
+    /// 添加描述
+    /// </summary>
+    /// <param name="description">描述</param>
+    protected void AddDescription(string description) => _descriptionContext.Add(description);
 
-        /// <summary>
-        /// 添加描述
-        /// </summary>
-        /// <typeparam name="TValue">属性类型</typeparam>
-        /// <param name="name">属性名</param>
-        /// <param name="value">属性值</param>
-        protected void AddDescription<TValue>(string name, TValue value) => _descriptionContext.Add(name, value);
+    /// <summary>
+    /// 添加描述
+    /// </summary>
+    /// <typeparam name="TValue">属性类型</typeparam>
+    /// <param name="name">属性名</param>
+    /// <param name="value">属性值</param>
+    protected void AddDescription<TValue>(string name, TValue value) => _descriptionContext.Add(name, value);
 
-        /// <summary>
-        /// 添加描述
-        /// </summary>
-        /// <typeparam name="TProperty">属性类型</typeparam>
-        /// <param name="expression">属性表达式。范例：t => t.Name</param>
-        protected void AddDescription<TProperty>(Expression<Func<TObject, TProperty>> expression) =>
-            _descriptionContext.Add(expression);
+    /// <summary>
+    /// 添加描述
+    /// </summary>
+    /// <typeparam name="TProperty">属性类型</typeparam>
+    /// <param name="expression">属性表达式。范例：t => t.Name</param>
+    protected void AddDescription<TProperty>(Expression<Func<TObject, TProperty>> expression) =>
+        _descriptionContext.Add(expression);
 
-        #endregion
+    #endregion
 
-        #region Misc(杂项)
+    #region Misc(杂项)
 
-        /// <summary>
-        /// 分配类型
-        /// </summary>
-        /// <param name="me">领域对象基类</param>
-        private TObject AssignableType(DomainObjectBase<TObject> me) => me as TObject;
+    /// <summary>
+    /// 分配类型
+    /// </summary>
+    /// <param name="me">领域对象基类</param>
+    private TObject AssignableType(DomainObjectBase<TObject> me) => me as TObject;
 
-        #endregion
+    #endregion
 
-        /// <summary>
-        /// 输出对象状态
-        /// </summary>
-        public override string ToString()
-        {
-            _descriptionContext.FlushCache();
-            AddDescriptions();
-            return _descriptionContext.Output();
-        }
+    /// <summary>
+    /// 输出对象状态
+    /// </summary>
+    public override string ToString()
+    {
+        _descriptionContext.FlushCache();
+        AddDescriptions();
+        return _descriptionContext.Output();
     }
 }

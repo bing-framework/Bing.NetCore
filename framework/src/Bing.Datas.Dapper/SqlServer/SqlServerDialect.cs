@@ -1,11 +1,10 @@
 ﻿using Bing.Data.Sql.Builders.Core;
 
-namespace Bing.Datas.Dapper.SqlServer
+namespace Bing.Datas.Dapper.SqlServer;
+
+/// <summary>
+/// Sql Server方言
+/// </summary>
+public class SqlServerDialect : DialectBase
 {
-    /// <summary>
-    /// Sql Server方言
-    /// </summary>
-    public class SqlServerDialect : DialectBase
-    {
-    }
 }

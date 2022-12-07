@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel;
 
-namespace Bing.MiniProfiler
+namespace Bing.MiniProfiler;
+
+/// <summary>
+/// MiniProfiler 模块
+/// </summary>
+[Description("MiniProfiler模块")]
+public class MiniProfilerModule : MiniProfilerModuleBase
 {
-    /// <summary>
-    /// MiniProfiler 模块
-    /// </summary>
-    [Description("MiniProfiler模块")]
-    public class MiniProfilerModule : MiniProfilerModuleBase
-    {
-    }
 }

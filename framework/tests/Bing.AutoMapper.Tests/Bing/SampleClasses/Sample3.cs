@@ -1,27 +1,26 @@
 ﻿using System.ComponentModel;
 
-namespace Bing.SampleClasses
+namespace Bing.SampleClasses;
+
+/// <summary>
+/// 测试样例3
+/// </summary>
+[DisplayName("测试样例3")]
+public class Sample3
 {
     /// <summary>
-    /// 测试样例3
+    /// string值
     /// </summary>
-    [DisplayName("测试样例3")]
-    public class Sample3
-    {
-        /// <summary>
-        /// string值
-        /// </summary>
-        public string StringValue { get; set; }
-    }
+    public string StringValue { get; set; }
+}
 
+/// <summary>
+/// 测试样例3
+/// </summary>
+public class Sample3Copy
+{
     /// <summary>
-    /// 测试样例3
+    /// string值
     /// </summary>
-    public class Sample3Copy
-    {
-        /// <summary>
-        /// string值
-        /// </summary>
-        public string StringValue { get; set; }
-    }
+    public string StringValue { get; set; }
 }
