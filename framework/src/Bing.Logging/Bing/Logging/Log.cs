@@ -253,8 +253,6 @@ public class Log : ILog
             return;
         if (!string.IsNullOrWhiteSpace(LogContext.TraceId))
             Property("TraceId", LogContext.TraceId);
-        if (LogContext.Stopwatch != null)
-            Property("Duration", LogContext.Stopwatch.Elapsed.Description());
     }
 
     /// <summary>
@@ -286,7 +284,7 @@ public class Log : ILog
         var result = new StringBuilder();
         result.Append("[");
         // 解决遍历时，字典更新的问题
-        foreach (var item in LogProperties.AsReadOnlyDictionary())
+        foreach (var item in LogProperties.ToList())
         {
             result.Append(item.Key);
             result.Append(":{");

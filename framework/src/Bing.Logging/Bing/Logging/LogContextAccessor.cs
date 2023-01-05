@@ -30,20 +30,10 @@ public class LogContextAccessor : ILogContextAccessor
     /// <summary>
     /// 创建日志上下文
     /// </summary>
-    protected virtual LogContext Create() => new() { TraceId = GetTraceId(), Stopwatch = GetStopwatch(), Host = Dns.GetHostName() };
+    protected virtual LogContext Create() => new() { TraceId = GetTraceId(), Host = Dns.GetHostName() };
 
     /// <summary>
     /// 获取跟踪标识
     /// </summary>
     protected virtual string GetTraceId() => Guid.NewGuid().ToString("N");
-
-    /// <summary>
-    /// 获取计时器
-    /// </summary>
-    protected Stopwatch GetStopwatch()
-    {
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-        return stopwatch;
-    }
 }
