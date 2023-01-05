@@ -32,7 +32,7 @@ public class Log : ILog
     {
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         LogContext = logContextAccessor?.Context;
-        LogProperties = new ConcurrentDictionary<string, object>();
+        LogProperties = new Dictionary<string, object>();
         LogMessage = new StringBuilder();
         LogMessageArgs = new List<object>();
         CurrentDescriptor = new LogEventDescriptor();
@@ -79,7 +79,7 @@ public class Log : ILog
     /// <summary>
     /// 日志内容
     /// </summary>
-    protected ConcurrentDictionary<string, object> LogProperties { get; set; }
+    protected IDictionary<string, object> LogProperties { get; set; }
 
     /// <summary>
     /// 日志状态
@@ -132,7 +132,7 @@ public class Log : ILog
             LogProperties[propertyName] += propertyValue;
             return this;
         }
-        LogProperties.TryAdd(propertyName, propertyValue);
+        LogProperties.Add(propertyName, propertyValue);
         return this;
     }
 
@@ -269,7 +269,7 @@ public class Log : ILog
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            LogProperties.TryAdd(item.Key,item.Value);
+            LogProperties.Add(item.Key, item.Value);
         }
     }
 
@@ -282,7 +282,8 @@ public class Log : ILog
             return LogMessage.ToString();
         var result = new StringBuilder();
         result.Append("[");
-        foreach (var item in LogProperties)
+        // 解决遍历时，字典更新的问题
+        foreach (var item in LogProperties.AsReadOnlyDictionary())
         {
             result.Append(item.Key);
             result.Append(":{");
@@ -388,7 +389,7 @@ public class Log : ILog
         LogEventId = 0;
         LogException = null;
         LogState = null;
-        LogProperties = new ConcurrentDictionary<string, object>();
+        LogProperties = new Dictionary<string, object>();
         LogMessage.Clear();
         LogMessageArgs.Clear();
         CurrentDescriptor = new LogEventDescriptor();
