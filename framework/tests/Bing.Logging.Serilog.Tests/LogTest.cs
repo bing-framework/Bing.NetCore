@@ -113,8 +113,9 @@ public class LogTest
         _log.EventId(119)
             .Message("Test_LogTrace_Message_9_{id}", $"id_{Id.NewString()}")
             .State(new Product { Code = "a", Name = "b", Price = 123 })
-            .Property("Age","18")
-            .Property("Description","hello")
+            .Property("Code", "a")
+            .Property("Age", "18")
+            .Property("Description", "hello")
             .LogTrace();
     }
 

@@ -269,7 +269,10 @@ public class Log : ILog
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            LogProperties.Add(item);
+            if (LogProperties.ContainsKey(item.Key)) 
+                LogProperties[item.Key] = item.Value;
+            else
+                LogProperties.Add(item.Key, item.Value);
         }
     }
 
