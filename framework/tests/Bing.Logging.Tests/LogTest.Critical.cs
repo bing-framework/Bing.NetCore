@@ -24,7 +24,7 @@ public partial class LogTest
             .Property("e", "4")
             .State(product)
             .LogCritical();
-        _mockLogger.Verify(t => t.LogCritical(0, null, "[d:{d},e:{e},Code:{Code},Name:{Name},Price:{Price}]a{b}{c}", "3", "4", "a", "b", 123, 1, 2));
+        _mockLogger.Verify(t => t.Log(LogLevel.Critical, 0, null, "[d:{d},e:{e},Code:{Code},Name:{Name},Price:{Price}]a{b}{c}", "3", "4", "a", "b", 123, 1, 2));
     }
 
     /// <summary>

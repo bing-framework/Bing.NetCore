@@ -1,4 +1,6 @@
-﻿using Bing.Extensions;
+﻿using System.Collections.Concurrent;
+using Bing.Collections;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logging.Core;
 using Bing.Text;
@@ -267,7 +269,7 @@ public class Log : ILog
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            LogProperties.Add(item);
+            LogProperties.Add(item.Key, item.Value);
         }
     }
 
@@ -280,7 +282,8 @@ public class Log : ILog
             return LogMessage.ToString();
         var result = new StringBuilder();
         result.Append("[");
-        foreach (var item in LogProperties)
+        // 解决遍历时，字典更新的问题
+        foreach (var item in LogProperties.AsReadOnlyDictionary())
         {
             result.Append(item.Key);
             result.Append(":{");
