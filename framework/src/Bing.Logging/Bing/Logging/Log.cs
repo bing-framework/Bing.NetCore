@@ -1,4 +1,6 @@
-﻿using Bing.Extensions;
+﻿using System.Collections.Concurrent;
+using Bing.Collections;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logging.Core;
 using Bing.Text;
@@ -30,7 +32,7 @@ public class Log : ILog
     {
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         LogContext = logContextAccessor?.Context;
-        LogProperties = new Dictionary<string, object>();
+        LogProperties = new ConcurrentDictionary<string, object>();
         LogMessage = new StringBuilder();
         LogMessageArgs = new List<object>();
         CurrentDescriptor = new LogEventDescriptor();
@@ -77,7 +79,7 @@ public class Log : ILog
     /// <summary>
     /// 日志内容
     /// </summary>
-    protected IDictionary<string, object> LogProperties { get; set; }
+    protected ConcurrentDictionary<string, object> LogProperties { get; set; }
 
     /// <summary>
     /// 日志状态
@@ -130,7 +132,7 @@ public class Log : ILog
             LogProperties[propertyName] += propertyValue;
             return this;
         }
-        LogProperties.Add(propertyName, propertyValue);
+        LogProperties.TryAdd(propertyName, propertyValue);
         return this;
     }
 
@@ -267,7 +269,7 @@ public class Log : ILog
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            LogProperties.Add(item);
+            LogProperties.TryAdd(item.Key,item.Value);
         }
     }
 
@@ -386,7 +388,7 @@ public class Log : ILog
         LogEventId = 0;
         LogException = null;
         LogState = null;
-        LogProperties = new Dictionary<string, object>();
+        LogProperties = new ConcurrentDictionary<string, object>();
         LogMessage.Clear();
         LogMessageArgs.Clear();
         CurrentDescriptor = new LogEventDescriptor();
