@@ -83,11 +83,11 @@ namespace Bing.Admin.Apis
         //[AntiDuplicateRequest]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
-            Log.Info("测试日志消息Begin");
+            Log.LogInformation("测试日志消息Begin");
             await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
             if (request.NeedCommit)
                 await UnitOfWork.CommitAsync();
-            Log.Info("测试日志消息End");
+            Log.LogInformation("测试日志消息End");
             return Success();
         }
 

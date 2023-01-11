@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.AspNetCore.Mvc;
 
@@ -15,12 +13,14 @@ public class ApiResult : JsonResult
     /// <param name="code">错误码</param>
     /// <param name="message">消息</param>
     /// <param name="data">数据</param>
-    public ApiResult(int code, string message, dynamic data = null) : base(null)
+    /// <param name="httpStatusCode">Http状态码</param>
+    public ApiResult(int code, string message, dynamic data = null, int? httpStatusCode = null) : base(null)
     {
         Code = code;
         Message = message;
         Data = data;
         OperationTime = DateTime.Now;
+        StatusCode = httpStatusCode;
     }
 
     /// <summary>
@@ -29,12 +29,14 @@ public class ApiResult : JsonResult
     /// <param name="code">错误码</param>
     /// <param name="message">消息</param>
     /// <param name="data">数据</param>
-    public ApiResult(StatusCode code, string message, dynamic data = null) : base(null)
+    /// <param name="httpStatusCode">Http状态码</param>
+    public ApiResult(StatusCode code, string message, dynamic data = null, int? httpStatusCode = null) : base(null)
     {
         Code = (int)code;
         Message = message;
         Data = data;
         OperationTime = DateTime.Now;
+        StatusCode = httpStatusCode;
     }
 
     /// <summary>
@@ -64,7 +66,7 @@ public class ApiResult : JsonResult
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
-        this.Value = new { Code = Code, Message = Message, OperationTime = OperationTime, Data = Data };
+        Value = new { Code = Code, Message = Message, OperationTime = OperationTime, Data = Data };
         return base.ExecuteResultAsync(context);
     }
 }

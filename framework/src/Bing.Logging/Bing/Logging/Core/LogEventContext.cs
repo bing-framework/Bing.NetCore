@@ -93,6 +93,8 @@ public class LogEventContext
     /// <param name="value">值</param>
     public LogEventContext SetExtraProperty(string name, object value)
     {
+        if (value is null)
+            return this;
         if (string.IsNullOrWhiteSpace(name))
             return this;
         _extraProperties.AddOrUpdateItem($"{ContextDataTypes.ExtraProperty}{name}", value, false);

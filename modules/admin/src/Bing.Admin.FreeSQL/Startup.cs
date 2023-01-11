@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Bing.Admin
 {
@@ -48,10 +47,9 @@ namespace Bing.Admin
         /// <summary>
         /// 配置请求管道
         /// </summary>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             Web.Environment = env;
-            loggerFactory.AddSysLogProvider();
             app.UseBing();
         }
     }

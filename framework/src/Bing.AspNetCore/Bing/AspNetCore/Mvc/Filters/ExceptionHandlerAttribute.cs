@@ -26,9 +26,9 @@ public class ExceptionHandlerAttribute : ExceptionFilterAttribute
         }
         else
         {
-            var log = Log.GetLog(context).Tag(nameof(ExceptionHandlerAttribute)).Caption("WebApi全局异常");
-            context.Exception.GetRawException().Log(log);
-            context.Result = new ApiResult(StatusCode.Fail, context.Exception.GetPrompt());
+            //var log = Log.GetLog(context).Tag(nameof(ExceptionHandlerAttribute)).Caption("WebApi全局异常");
+            //context.Exception.GetRawException().Log(log);
+            //context.Result = new ApiResult(StatusCode.Fail, context.Exception.GetPrompt());
         }
     }
 }

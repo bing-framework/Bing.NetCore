@@ -16,7 +16,7 @@ public class ErrorLogAttribute : ExceptionFilterAttribute
     {
         if (context == null)
             return;
-        var log = Log.GetLog(context).Caption("WebApi全局异常");
-        context.Exception.Log(log);
+        //var log = Log.GetLog(context).Caption("WebApi全局异常");
+        //context.Exception.Log(log);
     }
 }

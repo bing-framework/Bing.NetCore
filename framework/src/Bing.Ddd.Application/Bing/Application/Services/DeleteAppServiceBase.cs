@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Application.Dtos;
+﻿using Bing.Application.Dtos;
 using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Domain.Entities;
-using Bing.Extensions;
-using Bing.Logs;
 using Bing.Uow;
 
 namespace Bing.Application.Services;
@@ -82,9 +76,6 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey>
     /// <param name="caption">标题</param>
     protected void WriteLog(string caption)
     {
-        Log.Class(typeof(TEntity).FullName)
-            .Caption(caption)
-            .Info();
     }
 
     /// <summary>
@@ -115,8 +106,6 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey>
     /// <param name="entity">实体</param>
     protected void AddLog(TEntity entity)
     {
-        Log.BusinessId(entity.Id.SafeString());
-        Log.Content(entity.ToString());
     }
 
     /// <summary>
@@ -125,9 +114,6 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey>
     /// <param name="entities">实体集合</param>
     protected void AddLog(IList<TEntity> entities)
     {
-        Log.BusinessId(entities.Select(t => t.Id).Join());
-        foreach (var entity in entities)
-            Log.Content(entity.ToString());
     }
 
     #endregion
@@ -163,7 +149,5 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey>
     /// <param name="entities">实体集合</param>
     protected virtual void DeleteAfter(List<TEntity> entities)
     {
-        AddLog(entities);
-        WriteLog($"删除{EntityDescription}成功");
     }
 }

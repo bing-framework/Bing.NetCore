@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Filters;
+﻿namespace Bing.Data.Filters;
 
 /// <summary>
 /// 数据过滤器开关

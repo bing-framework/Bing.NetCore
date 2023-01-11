@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Helpers;
 using Bing.Logs;
-using Bing.Logs.Internal;
 using Dapper;
 
 namespace Bing.Data.Sql.Queries;

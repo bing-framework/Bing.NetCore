@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
-    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
     <ProjectReference Include="..\Bing\Bing.csproj" />
   </ItemGroup>
 </Project>

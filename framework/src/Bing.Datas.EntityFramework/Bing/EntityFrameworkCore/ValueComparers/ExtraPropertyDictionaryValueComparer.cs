@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Bing.Data.ObjectExtending;
+﻿using Bing.Data.ObjectExtending;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Bing.EntityFrameworkCore.ValueComparers;

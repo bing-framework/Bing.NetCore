@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.Data.Transaction;
+﻿using Bing.Data.Transaction;
 using Bing.Events.Messages;
-using Bing.Logs;
+using Bing.Logging;
 using Bing.Tracing;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
@@ -29,7 +25,7 @@ public class MessageEventBus : IMessageEventBus
     /// <summary>
     /// 日志操作
     /// </summary>
-    protected ILog Log { get; set; }
+    protected ILog<MessageEventBus> Log { get; set; }
 
     /// <summary>
     /// 初始化一个<see cref="MessageEventBus"/>类型的实例
@@ -39,7 +35,7 @@ public class MessageEventBus : IMessageEventBus
     /// <param name="log">日志操作</param>
     public MessageEventBus(ICapPublisher publisher,
         ITransactionActionManager transactionActionManager,
-        ILog log)
+        ILog<MessageEventBus> log)
     {
         Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
@@ -70,11 +66,17 @@ public class MessageEventBus : IMessageEventBus
         InitTraceIdContext(headers);
         if (send)
         {
+            Log.Tag(name)
+                .Message($"Cap发送事件[{name}]【事务外】")
+                .LogTrace();
             await InternalPublishAsync(name, data, headers, callback, cancellationToken);
             return;
         }
         TransactionActionManager.Register(async transaction =>
         {
+            Log.Tag(name)
+                .Message($"Cap发送事件[{name}]【事务内】")
+                .LogTrace();
             await InternalPublishAsync(name, data, headers, callback, cancellationToken);
         });
     }
@@ -84,13 +86,14 @@ public class MessageEventBus : IMessageEventBus
     /// </summary>
     /// <param name="name">消息名称</param>
     /// <param name="data">事件数据</param>
-    /// <param name="headers">数据投</param>
+    /// <param name="headers">数据头</param>
     /// <param name="callback">回调名称</param>
     /// <param name="cancellationToken">取消令牌</param>
     private async Task InternalPublishAsync(string name, object data, IDictionary<string, string> headers, string callback, CancellationToken cancellationToken = default)
     {
+        WriteLog(name, data, headers, callback);
         await Publisher.PublishAsync(name, data, headers, cancellationToken);
-        WriteLog(name, data, callback);
+        WriteLog(name, data, headers, callback, true);
     }
 
     /// <summary>
@@ -98,17 +101,19 @@ public class MessageEventBus : IMessageEventBus
     /// </summary>
     /// <param name="name">消息名称</param>
     /// <param name="data">事件数据</param>
+    /// <param name="headers">数据头</param>
     /// <param name="callback">回调名称</param>
-    private void WriteLog(string name, object data, string callback)
+    /// <param name="isEnd">是否结束</param>
+    private void WriteLog(string name, object data, IDictionary<string, string> headers, string callback, bool isEnd = false)
     {
-        var log = Log;
-        if (log.IsDebugEnabled == false)
-            return;
-        log.Tag(name)
-            .Caption($"Cap已发送事件-{name}")
-            .Content($"消息名称: {name}")
-            .AddExtraProperty("event_data", data.ToJson())
-            .Trace();
+        var end = isEnd ? "结束" : "开始";
+        Log.Tag(name)
+            .Message($"Cap发送事件[{name}]")
+            .AppendIf($"-{callback}", !string.IsNullOrWhiteSpace(callback))
+            .Append($"-{end}")
+            .ExtraPropertyIf("event_headers", headers.ToJson(), headers.Any())
+            .ExtraProperty("event_data", data.ToJson())
+            .LogTrace();
     }
 
     /// <summary>

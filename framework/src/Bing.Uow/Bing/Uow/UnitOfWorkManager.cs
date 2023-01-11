@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace Bing.Uow;
+﻿namespace Bing.Uow;
 
 /// <summary>
 /// 工作单元管理器

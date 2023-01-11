@@ -43,16 +43,13 @@ namespace Bing.Admin.Modules
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             //services.AddNLog();
+            services.AddBingLogging(x => { });
             // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
             Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
             {
-                o.ApiKey = "N8HOaOLndl0hF7ZhOfiwJ9HmOi6kPwjKEKWLCMzE";
-                o.ServerUrl = "http://10.186.132.40:5100";
+                o.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+                o.ServerUrl = "http://10.186.135.147:5100";
             });
-            //ExceptionlessClient.Default.Configuration.ApiKey= "ez9jumyxVxjTxqSm0oUQhCML3OGCkDfMGyW1hfmn";
-            //ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.132.40:5100";
-            //ExceptionlessClient.Default.Startup();
-            services.AddBingLogging(x => { });
             services.AddLogging(loggingBuilder =>
             {
                 var configuration = services.GetConfiguration();

@@ -9,6 +9,8 @@ namespace Bing.Logs;
 /// </summary>
 public static partial class LogExtensions
 {
+    #region Content(设置内容)
+
     /// <summary>
     /// 设置内容
     /// </summary>
@@ -48,6 +50,10 @@ public static partial class LogExtensions
         return log;
     }
 
+    #endregion
+
+    #region Tag(设置标签)
+
     /// <summary>
     /// 设置标签
     /// </summary>
@@ -73,4 +79,6 @@ public static partial class LogExtensions
         log.Set<ILogContent>(content => content.Tags.AddRange(tags));
         return log;
     }
+
+    #endregion
 }
