@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Matedatas;
 using Bing.Extensions;
 using Bing.Helpers;
 

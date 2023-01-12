@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Bing.Data.Sql.Builders;
+﻿namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// 实体别名注册器

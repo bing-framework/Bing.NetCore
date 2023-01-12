@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Bing.Data.Sql.Builders;
+﻿using Bing.Data.Sql.Builders;
 
 namespace Bing.Data.Sql;
 

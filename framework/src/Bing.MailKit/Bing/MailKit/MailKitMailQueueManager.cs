@@ -1,6 +1,5 @@
-﻿using System;
-using Bing.Emailing;
-using Bing.Logs;
+﻿using Bing.Emailing;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.MailKit;
 

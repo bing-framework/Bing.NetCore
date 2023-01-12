@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Test.Integration.Samples;
-using Bing.Logs;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Str = Bing.Helpers.Str;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Events.Default;
+﻿using Bing.Events.Default;
 using Bing.Events.Handlers;
 using Bing.Events.Messages;
 using DotNetCore.CAP;

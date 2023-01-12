@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data.Enums;
+﻿using Bing.Data.Enums;
 
 namespace Bing.Data.Sql.Diagnostics;
 

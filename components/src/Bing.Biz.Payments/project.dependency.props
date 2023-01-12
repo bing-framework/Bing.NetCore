@@ -5,7 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\framework\src\Bing.Logs\Bing.Logs.csproj" />
     <ProjectReference Include="..\..\..\framework\src\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
     <ProjectReference Include="..\..\..\framework\src\Bing.Validation\Bing.Validation.csproj" />
     <ProjectReference Include="..\..\..\framework\src\Bing\Bing.csproj" />

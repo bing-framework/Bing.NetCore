@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Text;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Properties;

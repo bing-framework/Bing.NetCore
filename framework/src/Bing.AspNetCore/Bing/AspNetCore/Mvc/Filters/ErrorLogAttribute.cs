@@ -1,5 +1,4 @@
-﻿using Bing.Logs;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.AspNetCore.Mvc.Filters;
 

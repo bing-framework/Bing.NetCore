@@ -1,7 +1,6 @@
 ﻿<Project>
   <ItemGroup>
     <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
-    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Aspects;
+﻿using Bing.Aspects;
 
 namespace Bing.Data.Sql.Matedatas;
 

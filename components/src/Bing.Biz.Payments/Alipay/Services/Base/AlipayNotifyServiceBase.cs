@@ -1,10 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Biz.Payments.Alipay.Configs;
+﻿using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Logs;
 using Bing.Utils.Parameters;
 using Bing.Utils.Signatures;
 using Bing.Validation;
@@ -108,14 +104,14 @@ public abstract class AlipayNotifyServiceBase
     /// </summary>
     protected void WriteLog()
     {
-        var log = Log.GetLog(AlipayConst.TraceLogName);
-        if (log.IsTraceEnabled == false)
-            return;
-        log.Class(GetType().FullName)
-            .Caption(GetCaption())
-            .Content("原始参数:")
-            .Content(GetParams())
-            .Trace();
+        //var log = Log.GetLog(AlipayConst.TraceLogName);
+        //if (log.IsTraceEnabled == false)
+        //    return;
+        //log.Class(GetType().FullName)
+        //    .Caption(GetCaption())
+        //    .Content("原始参数:")
+        //    .Content(GetParams())
+        //    .Trace();
     }
 
     /// <summary>

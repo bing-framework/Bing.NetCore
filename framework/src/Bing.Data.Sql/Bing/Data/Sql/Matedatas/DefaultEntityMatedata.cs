@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Sql.Matedatas;
+﻿namespace Bing.Data.Sql.Matedatas;
 
 /// <summary>
 /// 实体元数据

@@ -1,6 +1,5 @@
 ﻿using Bing.Exceptions;
 using Bing.Helpers;
-using Bing.Logs;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.AspNetCore.Mvc.Filters;

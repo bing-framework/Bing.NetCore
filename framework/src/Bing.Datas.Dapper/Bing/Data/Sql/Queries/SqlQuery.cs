@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Helpers;
-using Bing.Logs;
+using Bing.Logging;
 using Dapper;
 
 namespace Bing.Data.Sql.Queries;
@@ -256,17 +256,17 @@ public class SqlQuery : SqlQueryBase
     /// <param name="debugSql">调试Sql语句</param>
     protected override void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
     {
-        var log = Log.GetLog(TraceLogName);
-        if (IsEnabled(log) == false)
-            return;
-        log.Class(GetType().FullName)
-            .Caption($"SqlQuery查询调试: {sql}")
-            .Sql("原始Sql:")
-            .Sql($"{sql}{Common.Line}")
-            .Sql("调试Sql:")
-            .Sql(debugSql)
-            .SqlParams(parameters)
-            .Trace();
+        //var log = Log.GetLog(TraceLogName);
+        //if (IsEnabled(log) == false)
+        //    return;
+        //log.Class(GetType().FullName)
+        //    .Caption($"SqlQuery查询调试: {sql}")
+        //    .Sql("原始Sql:")
+        //    .Sql($"{sql}{Common.Line}")
+        //    .Sql("调试Sql:")
+        //    .Sql(debugSql)
+        //    .SqlParams(parameters)
+        //    .Trace();
     }
 
     /// <summary>
@@ -277,8 +277,8 @@ public class SqlQuery : SqlQueryBase
     {
         if (SqlOptions.LogLevel == DataLogLevel.Off)
             return false;
-        if (log.IsTraceEnabled == false)
-            return false;
+        //if (log.IsTraceEnabled == false)
+        //    return false;
         return true;
     }
 }

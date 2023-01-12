@@ -1,4 +1,5 @@
-﻿using Bing.Extensions;
+﻿using System.Text;
+using Bing.Extensions;
 using Bing.Logs.Abstractions;
 
 // ReSharper disable once CheckNamespace

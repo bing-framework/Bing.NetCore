@@ -3,6 +3,5 @@
     <ProjectReference Include="..\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
     <ProjectReference Include="..\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
     <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
-    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
   </ItemGroup>
 </Project>

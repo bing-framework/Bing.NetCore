@@ -1,7 +1,7 @@
 ﻿<Project>
   <ItemGroup>
     <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
-    <ProjectReference Include="..\Bing.Logs\Bing.Logs.csproj" />
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

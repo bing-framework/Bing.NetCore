@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Bing.Biz.Payments.Wechatpay.Abstractions;
+﻿using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Enums;
 using Bing.Biz.Payments.Wechatpay.Parameters;
@@ -10,6 +7,7 @@ using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Biz.Payments.Wechatpay.Services.Base;
 using Bing.Biz.Payments.Wechatpay.Services.CsvMappings;
 using Bing.Extensions;
+using Microsoft.Extensions.Logging;
 using TinyCsvParser;
 using TinyCsvParser.Mapping;
 using TinyCsvParser.Tokenizer;
@@ -25,7 +23,9 @@ public class WechatpayDownloadBillService : WechatpayServiceBase<WechatpayDownlo
     /// 初始化一个<see cref="WechatpayDownloadBillService"/>类型的实例
     /// </summary>
     /// <param name="configProvider">微信支付配置提供程序</param>
-    public WechatpayDownloadBillService(IWechatpayConfigProvider configProvider) : base(configProvider)
+    /// <param name="loggerFactory">日志工厂</param>
+    public WechatpayDownloadBillService(IWechatpayConfigProvider configProvider, ILoggerFactory loggerFactory) 
+        : base(configProvider, loggerFactory)
     {
     }
 
