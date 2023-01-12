@@ -1,9 +1,10 @@
-﻿using Bing.Data.Transaction;
+﻿using System.Text;
+using Bing.Data.Transaction;
 using Bing.Events.Messages;
-using Bing.Logging;
 using Bing.Tracing;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Events.Cap;
 
@@ -23,23 +24,23 @@ public class MessageEventBus : IMessageEventBus
     public ITransactionActionManager TransactionActionManager { get; set; }
 
     /// <summary>
-    /// 日志操作
+    /// 日志
     /// </summary>
-    protected ILog<MessageEventBus> Log { get; set; }
+    protected ILogger<MessageEventBus> Logger { get; }
 
     /// <summary>
     /// 初始化一个<see cref="MessageEventBus"/>类型的实例
     /// </summary>
     /// <param name="publisher">事件发布器</param>
     /// <param name="transactionActionManager">事务操作管理器</param>
-    /// <param name="log">日志操作</param>
+    /// <param name="logger">日志</param>
     public MessageEventBus(ICapPublisher publisher,
         ITransactionActionManager transactionActionManager,
-        ILog<MessageEventBus> log)
+        ILogger<MessageEventBus> logger)
     {
         Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
-        Log = log;
+        Logger = logger;
     }
 
     /// <summary>
@@ -66,17 +67,11 @@ public class MessageEventBus : IMessageEventBus
         InitTraceIdContext(headers);
         if (send)
         {
-            Log.Tag(name)
-                .Message($"Cap发送事件[{name}]【事务外】")
-                .LogTrace();
             await InternalPublishAsync(name, data, headers, callback, cancellationToken);
             return;
         }
         TransactionActionManager.Register(async transaction =>
         {
-            Log.Tag(name)
-                .Message($"Cap发送事件[{name}]【事务内】")
-                .LogTrace();
             await InternalPublishAsync(name, data, headers, callback, cancellationToken);
         });
     }
@@ -106,14 +101,21 @@ public class MessageEventBus : IMessageEventBus
     /// <param name="isEnd">是否结束</param>
     private void WriteLog(string name, object data, IDictionary<string, string> headers, string callback, bool isEnd = false)
     {
-        var end = isEnd ? "结束" : "开始";
-        Log.Tag(name)
-            .Message($"Cap发送事件[{name}]")
-            .AppendIf($"-{callback}", !string.IsNullOrWhiteSpace(callback))
-            .Append($"-{end}")
-            .ExtraPropertyIf("event_headers", headers.ToJson(), headers.Any())
-            .ExtraProperty("event_data", data.ToJson())
-            .LogTrace();
+        if (Logger.IsEnabled(LogLevel.Trace) == false)
+            return;
+        var dict = new Dictionary<string, object>
+        {
+            { "EventHeader", headers.ToJson() },
+            { "EventData", data.ToJson() },
+        };
+        using (Logger.BeginScope(dict))
+        {
+            var end = isEnd ? "结束" : "开始";
+            var sb = new StringBuilder();
+            sb.Append("Cap发送事件[{EventName}]");
+            sb.Append(end);
+            Logger.LogTrace(sb.ToString(), name);
+        }
     }
 
     /// <summary>

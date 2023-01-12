@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Bing.Collections;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logging.Core;
 using Bing.Text;
@@ -18,6 +16,12 @@ public class Log : ILog
     /// 当前的日志事件描述符
     /// </summary>
     private LogEventDescriptor CurrentDescriptor { get; set; }
+
+    /// <summary>
+    /// 日志错误事件ID
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    public static readonly EventId LogErrorEventId = new(91000);
 
     #endregion
 
@@ -267,7 +271,7 @@ public class Log : ILog
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            if (LogProperties.ContainsKey(item.Key)) 
+            if (LogProperties.ContainsKey(item.Key))
                 LogProperties[item.Key] = item.Value;
             else
                 LogProperties.Add(item.Key, item.Value);
@@ -337,6 +341,11 @@ public class Log : ILog
                 Logger.Log(LogLevel, LogEventId, GetContent(), LogException, GetFormatMessage);
                 return this;
             }
+        }
+        catch (Exception e)
+        {
+            Logger.LogCritical(LogErrorEventId, e, $"未知异常错误信息: {e.Message}");
+            return this;
         }
         finally
         {
