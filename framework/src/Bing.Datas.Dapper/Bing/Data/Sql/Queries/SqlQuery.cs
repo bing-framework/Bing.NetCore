@@ -1,8 +1,10 @@
 ﻿using System.Data;
+using System.Text;
 using Bing.Data.Sql.Diagnostics;
+using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Logging;
 using Dapper;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Data.Sql.Queries;
 
@@ -12,33 +14,36 @@ namespace Bing.Data.Sql.Queries;
 public class SqlQuery : SqlQueryBase
 {
     /// <summary>
-    /// 跟踪日志名称
-    /// </summary>
-    public const string TraceLogName = "SqlQueryLog";
-
-    /// <summary>
     /// 初始化一个<see cref="SqlQuery"/>类型的实例
     /// </summary>
+    /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="sqlBuilder">Sql生成器</param>
     /// <param name="database">数据库</param>
-    public SqlQuery(ISqlBuilder sqlBuilder, IDatabase database = null) : base(sqlBuilder, database)
+    public SqlQuery(IServiceProvider serviceProvider, ISqlBuilder sqlBuilder, IDatabase database = null) : base(serviceProvider, sqlBuilder, database)
     {
     }
 
     /// <summary>
     /// 初始化一个<see cref="SqlQuery"/>类型的实例
     /// </summary>
+    /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="sqlBuilder">Sql生成器</param>
     /// <param name="database">数据库</param>
     /// <param name="sqlQueryOptions">Sql查询配置</param>
-    protected SqlQuery(ISqlBuilder sqlBuilder, IDatabase database, SqlOptions sqlQueryOptions) : base(sqlBuilder, database, sqlQueryOptions) { }
+    protected SqlQuery(IServiceProvider serviceProvider, ISqlBuilder sqlBuilder, IDatabase database, SqlOptions sqlQueryOptions) : base(serviceProvider, sqlBuilder, database, sqlQueryOptions) { }
+
+    #region 属性
+
+
+
+    #endregion
 
     /// <summary>
     /// 克隆
     /// </summary>
     public override ISqlQuery Clone()
     {
-        var result = new SqlQuery(Builder.Clone(), Database, SqlOptions);
+        var result = new SqlQuery(ServiceProvider, Builder.Clone(), Database, SqlOptions);
         result.SetConnection(Connection);
         return result;
     }
@@ -47,7 +52,7 @@ public class SqlQuery : SqlQueryBase
     /// 获取单值
     /// </summary>
     /// <param name="connection">数据库连接</param>
-    public override object ToScalar(IDbConnection connection = null) => 
+    public override object ToScalar(IDbConnection connection = null) =>
         Query((con, sql, sqlParams) => con.ExecuteScalar(sql, sqlParams), connection);
 
     /// <summary>
@@ -63,7 +68,7 @@ public class SqlQuery : SqlQueryBase
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>
     /// <param name="connection">数据库连接</param>
-    public override TResult To<TResult>(IDbConnection connection = null) => 
+    public override TResult To<TResult>(IDbConnection connection = null) =>
         Query((con, sql, sqlParams) => con.QueryFirstOrDefault<TResult>(sql, sqlParams), connection);
 
     /// <summary>
@@ -79,7 +84,7 @@ public class SqlQuery : SqlQueryBase
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>
     /// <param name="connection">数据库连接</param>
-    public override List<TResult> ToList<TResult>(IDbConnection connection = null) => 
+    public override List<TResult> ToList<TResult>(IDbConnection connection = null) =>
         Query((con, sql, sqlParams) => con.Query<TResult>(sql, sqlParams).ToList(), connection);
 
     /// <summary>
@@ -96,7 +101,7 @@ public class SqlQuery : SqlQueryBase
     /// <typeparam name="TResult">返回结果类型</typeparam>
     /// <param name="sql">Sql语句</param>
     /// <param name="connection">数据库连接</param>
-    public override async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null) => 
+    public override async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null) =>
         (await GetConnection(connection).QueryAsync<TResult>(sql, Params)).ToList();
 
     /// <summary>
@@ -105,7 +110,7 @@ public class SqlQuery : SqlQueryBase
     /// <typeparam name="TResult">返回结果类型</typeparam>
     /// <param name="parameter">分页参数</param>
     /// <param name="connection">数据库连接</param>
-    public override PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null) => 
+    public override PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null) =>
         PagerQuery(() => ToList<TResult>(connection), parameter, connection);
 
     /// <summary>
@@ -118,7 +123,7 @@ public class SqlQuery : SqlQueryBase
     public override PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter, IDbConnection connection = null)
     {
         parameter = GetPage(parameter);
-        if (parameter.TotalCount == 0) 
+        if (parameter.TotalCount == 0)
             parameter.TotalCount = GetCount(connection);
         SetPager(parameter);
         return new PagerList<TResult>(parameter, func());
@@ -168,7 +173,7 @@ public class SqlQuery : SqlQueryBase
     /// <param name="page">页数</param>
     /// <param name="pageSize">每页显示行数</param>
     /// <param name="connection">数据库连接</param>
-    public override PagerList<TResult> ToPagerList<TResult>(int page, int pageSize, IDbConnection connection = null) => 
+    public override PagerList<TResult> ToPagerList<TResult>(int page, int pageSize, IDbConnection connection = null) =>
         ToPagerList<TResult>(new Pager(page, pageSize), connection);
 
     /// <summary>
@@ -177,7 +182,7 @@ public class SqlQuery : SqlQueryBase
     /// <typeparam name="TResult">返回结果类型</typeparam>
     /// <param name="parameter">分页参数</param>
     /// <param name="connection">数据库连接</param>
-    public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null) => 
+    public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null) =>
         await PagerQueryAsync(async () => await ToListAsync<TResult>(connection), parameter, connection);
 
     /// <summary>
@@ -190,7 +195,7 @@ public class SqlQuery : SqlQueryBase
     public override async Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter, IDbConnection connection = null)
     {
         parameter = GetPage(parameter);
-        if (parameter.TotalCount == 0) 
+        if (parameter.TotalCount == 0)
             parameter.TotalCount = await GetCountAsync(connection);
         SetPager(parameter);
         return new PagerList<TResult>(parameter, await func());
@@ -221,7 +226,7 @@ public class SqlQuery : SqlQueryBase
             ExecuteError(message, e);
             throw;
         }
-            
+
     }
 
     /// <summary>
@@ -231,7 +236,7 @@ public class SqlQuery : SqlQueryBase
     /// <param name="page">页数</param>
     /// <param name="pageSize">每页显示行数</param>
     /// <param name="connection">数据库连接</param>
-    public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null) => 
+    public override async Task<PagerList<TResult>> ToPagerListAsync<TResult>(int page, int pageSize, IDbConnection connection = null) =>
         await ToPagerListAsync<TResult>(new Pager(page, pageSize), connection);
 
     /// <summary>
@@ -256,29 +261,36 @@ public class SqlQuery : SqlQueryBase
     /// <param name="debugSql">调试Sql语句</param>
     protected override void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
     {
-        //var log = Log.GetLog(TraceLogName);
-        //if (IsEnabled(log) == false)
-        //    return;
-        //log.Class(GetType().FullName)
-        //    .Caption($"SqlQuery查询调试: {sql}")
-        //    .Sql("原始Sql:")
-        //    .Sql($"{sql}{Common.Line}")
-        //    .Sql("调试Sql:")
-        //    .Sql(debugSql)
-        //    .SqlParams(parameters)
-        //    .Trace();
+        if (Logger.IsEnabled(LogLevel.Trace) == false)
+            return;
+        var message = new StringBuilder();
+        foreach (var param in parameters)
+            message.AppendLine($"    {param.Key} : {GetParamLiterals(param.Value)} : {param.Value?.GetType()},");
+        var result = message.ToString().RemoveEnd($",{Common.Line}");
+        Logger.LogTrace("原始Sql:\r\n{Sql}\r\n调试Sql:\r\n{DebugSql}\r\nSql参数:\r\n{SqlParam}\r\n", sql, debugSql, result);
     }
 
     /// <summary>
-    /// 是否启用日志
+    /// 获取参数字面值
     /// </summary>
-    /// <param name="log">日志操作</param>
-    private bool IsEnabled(ILog log)
+    /// <param name="value">参数值</param>
+    private static string GetParamLiterals(object value)
     {
-        if (SqlOptions.LogLevel == DataLogLevel.Off)
-            return false;
-        //if (log.IsTraceEnabled == false)
-        //    return false;
-        return true;
+        if (value == null)
+            return "''";
+        switch (value.GetType().Name.ToLower())
+        {
+            case "boolean":
+                return Conv.ToBool(value) ? "1" : "0";
+            case "int16":
+            case "int32":
+            case "int64":
+            case "single":
+            case "double":
+            case "decimal":
+                return value.SafeString();
+            default:
+                return $"'{value}'";
+        }
     }
 }
