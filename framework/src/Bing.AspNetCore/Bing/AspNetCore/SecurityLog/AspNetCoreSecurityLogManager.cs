@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Bing.AspNetCore.WebClientInfo;
+﻿using Bing.AspNetCore.WebClientInfo;
 using Bing.Clients;
 using Bing.DependencyInjection;
 using Bing.SecurityLog;

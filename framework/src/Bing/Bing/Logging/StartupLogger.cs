@@ -54,7 +54,6 @@ public class StartupLogger
                 logger = provider.GetLogger(info.LogName);
                 dict[info.LogName] = logger;
             }
-            //Debug.WriteLine($"[{info.CreatedTime}]:{nameof(StartupLogger)}:{info.LogName}:{info.LogLevel}:{info.Message}:{info.Exception}");
             switch (info.LogLevel)
             {
                 case LogLevel.Trace:

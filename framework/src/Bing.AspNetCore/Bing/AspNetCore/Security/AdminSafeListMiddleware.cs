@@ -46,7 +46,8 @@ public class AdminSafeListMiddleware : IMiddleware
         if (context.Request.Method != "GET")
         {
             var remoteIp = context.Connection.RemoteIpAddress;
-            _logger.LogTrace($"来自远程IP地址的请求：{remoteIp}");
+            if(_logger.IsEnabled(LogLevel.Trace)) 
+                _logger.LogTrace($"来自远程IP地址的请求：{remoteIp}");
 
             var ips = _whitelist.Split(';');
             var bytes = remoteIp.GetAddressBytes();
