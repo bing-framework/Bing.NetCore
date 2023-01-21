@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AspectCore.DynamicProxy.Parameters;
+﻿using AspectCore.DynamicProxy.Parameters;
 using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
