@@ -206,7 +206,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 获取用户的角色列表
         /// </summary>
         /// <param name="userId">用户标识</param>
-        public async Task<List<Role>> GetRolesAsync(Guid userId) => GetRoleQueryable(userId).ToList();
+        public Task<List<Role>> GetRolesAsync(Guid userId) => Task.FromResult(GetRoleQueryable(userId).ToList());
 
         /// <summary>
         /// 获取角色查询对象
@@ -228,7 +228,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// 获取用户的角色标识列表
         /// </summary>
         /// <param name="userId">用户标识</param>
-        public async Task<List<Guid>> GetRoleIdsAsync(Guid userId) => GetRoleQueryable(userId).Select(t => t.Id).ToList();
+        public Task<List<Guid>> GetRoleIdsAsync(Guid userId) => Task.FromResult(GetRoleQueryable(userId).Select(t => t.Id).ToList());
 
         #endregion
 
