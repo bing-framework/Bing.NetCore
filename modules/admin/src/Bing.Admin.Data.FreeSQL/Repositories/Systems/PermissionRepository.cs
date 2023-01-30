@@ -28,14 +28,14 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// <param name="applicationId">应用程序标识</param>
         /// <param name="roleId">角色标识</param>
         /// <param name="isDeny">是否拒绝</param>
-        public async Task<List<Guid>> GetResourceIdsAsync(Guid applicationId, Guid roleId, bool isDeny)
+        public Task<List<Guid>> GetResourceIdsAsync(Guid applicationId, Guid roleId, bool isDeny)
         {
             var queryable = from permission in Set.Select.AsQueryable()
                 join resource in UnitOfWork.Set<ResourcePo>().Select.AsQueryable() on permission.ResourceId equals resource.Id
                 where resource.ApplicationId == applicationId && permission.RoleId == roleId &&
                       permission.IsDeny == isDeny
                 select resource.Id;
-            return queryable.ToList();
+            return Task.FromResult(queryable.ToList());
 
         }
 
@@ -48,11 +48,11 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// </summary>
         /// <param name="roleId">角色标识</param>
         /// <param name="resourceIds">资源标识列表</param>
-        public async Task<List<Guid>> GetPermissionIdsAsync(Guid roleId, List<Guid> resourceIds) =>
-            Find()
+        public Task<List<Guid>> GetPermissionIdsAsync(Guid roleId, List<Guid> resourceIds) =>
+            Task.FromResult(Find()
                 .Where(t => t.RoleId == roleId && resourceIds.Contains(t.ResourceId))
                 .Select(t => t.Id)
-                .ToList();
+                .ToList());
 
         #endregion
 
