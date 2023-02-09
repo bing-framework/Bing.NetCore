@@ -25,8 +25,7 @@ public static class ServiceCollectionApplicationExtensions
         // 初始化所有程序集查找器
         services.TryAddSingleton<IAllAssemblyFinder>(new AppDomainAllAssemblyFinder());
 
-        var builder = services.GetSingletonInstanceOrNull<IBingBuilder>() ?? new BingBuilder(services);
-        services.TryAddSingleton<IBingBuilder>(builder);
+        var builder = services.GetOrAddSingletonInstance<IBingBuilder>(() => new BingBuilder(services));
 
         builder.AddCoreModule();
         BingLoader.RegisterTypes(services);
