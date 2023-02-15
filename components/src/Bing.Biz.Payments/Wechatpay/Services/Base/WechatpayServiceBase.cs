@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Logs;
 using Bing.Validation;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.Biz.Payments.Wechatpay.Services.Base;
 
@@ -24,13 +25,26 @@ public abstract class WechatpayServiceBase<TRequest, TParameterBuilder>
     protected readonly IWechatpayConfigProvider ConfigProvider;
 
     /// <summary>
+    /// 日志工厂
+    /// </summary>
+    protected ILoggerFactory LoggerFactory { get; }
+
+    /// <summary>
+    /// 日志
+    /// </summary>
+    protected ILogger Logger { get; }
+
+    /// <summary>
     /// 初始化一个<see cref="WechatpayServiceBase{TRequest,TParameterBuilder}"/>类型的实例
     /// </summary>
     /// <param name="configProvider">微信支付配置提供程序</param>
-    protected WechatpayServiceBase(IWechatpayConfigProvider configProvider)
+    /// <param name="loggerFactory">日志工厂</param>
+    protected WechatpayServiceBase(IWechatpayConfigProvider configProvider, ILoggerFactory loggerFactory)
     {
         configProvider.CheckNull(nameof(configProvider));
         ConfigProvider = configProvider;
+        LoggerFactory = loggerFactory;
+        Logger = loggerFactory?.CreateLogger(GetType().FullName) ?? NullLogger.Instance;
     }
 
     /// <summary>
@@ -128,35 +142,11 @@ public abstract class WechatpayServiceBase<TRequest, TParameterBuilder>
     /// <param name="result">微信支付结果</param>
     protected void WriteLog(WechatpayConfig config, TParameterBuilder builder, WechatpayResult result)
     {
-        var log = GetLog();
-        if (log.IsTraceEnabled == false)
-            return;
-        log.Class(GetType().FullName)
-            .Caption("微信支付")
-            .Content($"支付网关: {GetUrl(config)}")
-            .Content("请求参数: ")
-            .Content(builder.ToXml())
-            .Content()
-            .Content("返回结果: ")
-            .Content(result.GetParams())
-            .Content()
-            .Content("原始响应: ")
-            .Content(result.Raw)
-            .Trace();
-    }
-
-    /// <summary>
-    /// 获取日志操作
-    /// </summary>
-    private ILog GetLog()
-    {
-        try
-        {
-            return Log.GetLog(WechatpayConst.TraceLogName);
-        }
-        catch
-        {
-            return Log.Null;
-        }
+        var sb = new StringBuilder();
+        sb.AppendLine($"[微信支付]支付网关：{GetUrl(config)}");
+        sb.AppendLine($"请求参数: [{builder.ToXml()}]");
+        sb.AppendLine($"返回结果: [{result.GetParams()}]");
+        sb.AppendLine($"原始响应: [{result.Raw}]");
+        Logger.LogTrace(sb.ToString());
     }
 }

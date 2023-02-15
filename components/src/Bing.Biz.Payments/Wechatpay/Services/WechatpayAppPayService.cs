@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Biz.Payments.Core;
+﻿using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
@@ -7,6 +6,7 @@ using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 using Bing.Biz.Payments.Wechatpay.Results;
 using Bing.Biz.Payments.Wechatpay.Services.Base;
 using Bing.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Biz.Payments.Wechatpay.Services;
 
@@ -19,7 +19,9 @@ public class WechatpayAppPayService : WechatpayPayServiceBase, IWechatpayAppPayS
     /// 初始化一个<see cref="WechatpayAppPayService"/>类型的实例
     /// </summary>
     /// <param name="configProvider">微信支付配置提供器</param>
-    public WechatpayAppPayService(IWechatpayConfigProvider configProvider) : base(configProvider)
+    /// <param name="loggerFactory">日志工厂</param>
+    public WechatpayAppPayService(IWechatpayConfigProvider configProvider, ILoggerFactory loggerFactory) 
+        : base(configProvider, loggerFactory)
     {
     }
 
@@ -38,7 +40,7 @@ public class WechatpayAppPayService : WechatpayPayServiceBase, IWechatpayAppPayS
     /// 获取结果
     /// </summary>
     /// <param name="result">微信支付结果</param>
-    protected override string GetResult( WechatpayResult result)
+    protected override string GetResult(WechatpayResult result)
     {
         return new WechatpayParameterBuilder(result.Config)
             .AppId(result.Config.AppId)

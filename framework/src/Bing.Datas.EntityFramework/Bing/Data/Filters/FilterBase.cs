@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace Bing.Data.Filters;
 
@@ -40,5 +39,5 @@ public abstract class FilterBase<TFilterType> : IFilter<TFilterType> where TFilt
     /// 获取过滤表达式
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
-    public abstract Expression<Func<TEntity, bool>> GetExpression<TEntity>() where TEntity : class;
+    public abstract Expression<Func<TEntity, bool>> GetExpression<TEntity>() where TEntity : class;// TODO: 由于EF Core 自身的原因，导致无法从外部传递表达式进去，需要定义 值在 DbContext 中方可正常使用
 }

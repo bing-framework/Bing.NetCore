@@ -1,6 +1,5 @@
 ﻿using Bing.Exceptions;
 using Bing.Helpers;
-using Bing.Logs;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.AspNetCore.Mvc.Filters;
@@ -26,9 +25,9 @@ public class ExceptionHandlerAttribute : ExceptionFilterAttribute
         }
         else
         {
-            var log = Log.GetLog(context).Tag(nameof(ExceptionHandlerAttribute)).Caption("WebApi全局异常");
-            context.Exception.GetRawException().Log(log);
-            context.Result = new ApiResult(StatusCode.Fail, context.Exception.GetPrompt());
+            //var log = Log.GetLog(context).Tag(nameof(ExceptionHandlerAttribute)).Caption("WebApi全局异常");
+            //context.Exception.GetRawException().Log(log);
+            //context.Result = new ApiResult(StatusCode.Fail, context.Exception.GetPrompt());
         }
     }
 }

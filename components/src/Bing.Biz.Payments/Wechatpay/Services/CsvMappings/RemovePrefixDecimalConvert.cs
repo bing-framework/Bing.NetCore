@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using TinyCsvParser.TypeConverter;
 
 namespace Bing.Biz.Payments.Wechatpay.Services.CsvMappings;

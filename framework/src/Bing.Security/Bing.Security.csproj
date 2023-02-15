@@ -9,4 +9,8 @@
     <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Bing\Authorization\Modules\" />
+  </ItemGroup>
+
 </Project>

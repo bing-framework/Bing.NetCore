@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Biz.Payments.Wechatpay.Configs;
+﻿using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
 using Bing.Biz.Payments.Wechatpay.Signatures;
 using Bing.Extensions;
-using Bing.Logs;
 using Bing.Utils.Parameters;
 using Bing.Validation;
 using Xml = Bing.Helpers.Xml;
@@ -92,24 +88,24 @@ public class WechatpayResult
     /// </summary>
     protected void WriteLog()
     {
-        var log = GetLog();
-        if (log.IsTraceEnabled == false)
-        {
-            log.Class(GetType().FullName)
-                .Content("微信支付返回")
-                .Content("参数:")
-                .Content(GetParams())
-                .Content()
-                .Content("原始响应")
-                .Content(Raw)
-                .Trace();
-        }
+        //var log = GetLog();
+        //if (log.IsTraceEnabled == false)
+        //{
+        //    log.Class(GetType().FullName)
+        //        .Content("微信支付返回")
+        //        .Content("参数:")
+        //        .Content(GetParams())
+        //        .Content()
+        //        .Content("原始响应")
+        //        .Content(Raw)
+        //        .Trace();
+        //}
     }
 
-    /// <summary>
-    /// 获取日志操作
-    /// </summary>
-    private ILog GetLog() => Log.GetLog(WechatpayConst.TraceLogName);
+    ///// <summary>
+    ///// 获取日志操作
+    ///// </summary>
+    //private ILog GetLog() => Log.GetLog(WechatpayConst.TraceLogName);
 
     /// <summary>
     /// 获取参数

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Sql.Builders.Extensions;
+﻿namespace Bing.Data.Sql.Builders.Extensions;
 
 /// <summary>
 /// 实体解析器扩展

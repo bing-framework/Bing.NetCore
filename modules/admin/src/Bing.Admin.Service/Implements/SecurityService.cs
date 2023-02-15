@@ -86,6 +86,7 @@ namespace Bing.Admin.Service.Implements
         /// <param name="request">请求</param>
         public async Task<SignInWithTokenResult> SignInAsync(AdminLoginRequest request)
         {
+            Log.Message("开始登录").LogTrace();
             var user = await GetUserAsync(request.UserName);
             if (user == null)
                 return new SignInWithTokenResult {Message = "用户名不存在", State = SignInState.Failed};
@@ -100,6 +101,7 @@ namespace Bing.Admin.Service.Implements
                 UserAgent = Web.Browser
             },false));
             await UnitOfWork.CommitAsync();
+            Log.Message("登录成功").LogTrace();
             return await GetLoginResultAsync(user, result, ApplicationCode.Admin);
         }
 

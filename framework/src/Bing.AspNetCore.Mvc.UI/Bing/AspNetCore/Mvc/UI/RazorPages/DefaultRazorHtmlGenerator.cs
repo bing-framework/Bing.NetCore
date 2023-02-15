@@ -1,10 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.IO;
-using Bing.Logs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -14,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.AspNetCore.Mvc.UI.RazorPages;
 
@@ -22,13 +19,26 @@ namespace Bing.AspNetCore.Mvc.UI.RazorPages;
 /// </summary>
 public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
 {
+    /// <summary>
+    /// 路由分析器
+    /// </summary>
     private readonly IRouteAnalyzer _routeAnalyzer;
+
+    /// <summary>
+    /// 日志
+    /// </summary>
+    private readonly ILogger<DefaultRazorHtmlGenerator> _logger;
 
     /// <summary>
     /// 初始化一个<see cref="DefaultRazorHtmlGenerator"/>类型的实例
     /// </summary>
     /// <param name="routeAnalyzer">路由分析器</param>
-    public DefaultRazorHtmlGenerator(IRouteAnalyzer routeAnalyzer) => _routeAnalyzer = routeAnalyzer;
+    /// <param name="logger">日志</param>
+    public DefaultRazorHtmlGenerator(IRouteAnalyzer routeAnalyzer, ILogger<DefaultRazorHtmlGenerator> logger)
+    {
+        _routeAnalyzer = routeAnalyzer;
+        _logger = logger;
+    }
 
     /// <summary>
     /// 生成Html文件
@@ -88,7 +98,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
         }
         catch (Exception ex)
         {
-            ex.Log(Log.GetLog().Caption("生成html静态文件失败"));
+            _logger.LogError(ex, "生成html静态文件失败");
         }
     }
 

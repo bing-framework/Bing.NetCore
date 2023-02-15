@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Logs.Abstractions;
+﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Core;
 using Bing.Users;
 using Exceptionless;

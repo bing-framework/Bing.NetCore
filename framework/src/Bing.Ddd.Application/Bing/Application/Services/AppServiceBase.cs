@@ -1,8 +1,7 @@
 ﻿using Bing.Aspects;
 using Bing.DependencyInjection;
 using Bing.Linq;
-using Bing.Logs;
-using Bing.Logs.Core;
+using Bing.Logging;
 using Bing.Users;
 
 namespace Bing.Application.Services;
@@ -29,7 +28,12 @@ public abstract class AppServiceBase : IAppService
     protected IAsyncQueryableExecuter AsyncExecuter => LazyServiceProvider.LazyGetRequiredService<IAsyncQueryableExecuter>();
 
     /// <summary>
-    /// 日志
+    /// 日志工厂
     /// </summary>
-    protected ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
+    protected ILogFactory LogFactory => LazyServiceProvider.LazyGetRequiredService<ILogFactory>();
+
+    /// <summary>
+    /// 日志操作
+    /// </summary>
+    protected ILog Log => LazyServiceProvider.LazyGetService<ILog>(provider => LogFactory?.CreateLog(GetType().FullName) ?? NullLog.Instance);
 }

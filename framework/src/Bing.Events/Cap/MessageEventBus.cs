@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Bing.Data.Transaction;
 using Bing.Events.Messages;
-using Bing.Logs;
 using Bing.Tracing;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Events.Cap;
 
@@ -27,23 +24,23 @@ public class MessageEventBus : IMessageEventBus
     public ITransactionActionManager TransactionActionManager { get; set; }
 
     /// <summary>
-    /// 日志操作
+    /// 日志
     /// </summary>
-    protected ILog Log { get; set; }
+    protected ILogger<MessageEventBus> Logger { get; }
 
     /// <summary>
     /// 初始化一个<see cref="MessageEventBus"/>类型的实例
     /// </summary>
     /// <param name="publisher">事件发布器</param>
     /// <param name="transactionActionManager">事务操作管理器</param>
-    /// <param name="log">日志操作</param>
+    /// <param name="logger">日志</param>
     public MessageEventBus(ICapPublisher publisher,
         ITransactionActionManager transactionActionManager,
-        ILog log)
+        ILogger<MessageEventBus> logger)
     {
         Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
-        Log = log;
+        Logger = logger;
     }
 
     /// <summary>
@@ -84,13 +81,14 @@ public class MessageEventBus : IMessageEventBus
     /// </summary>
     /// <param name="name">消息名称</param>
     /// <param name="data">事件数据</param>
-    /// <param name="headers">数据投</param>
+    /// <param name="headers">数据头</param>
     /// <param name="callback">回调名称</param>
     /// <param name="cancellationToken">取消令牌</param>
     private async Task InternalPublishAsync(string name, object data, IDictionary<string, string> headers, string callback, CancellationToken cancellationToken = default)
     {
+        WriteLog(name, data, headers, callback);
         await Publisher.PublishAsync(name, data, headers, cancellationToken);
-        WriteLog(name, data, callback);
+        WriteLog(name, data, headers, callback, true);
     }
 
     /// <summary>
@@ -98,17 +96,26 @@ public class MessageEventBus : IMessageEventBus
     /// </summary>
     /// <param name="name">消息名称</param>
     /// <param name="data">事件数据</param>
+    /// <param name="headers">数据头</param>
     /// <param name="callback">回调名称</param>
-    private void WriteLog(string name, object data, string callback)
+    /// <param name="isEnd">是否结束</param>
+    private void WriteLog(string name, object data, IDictionary<string, string> headers, string callback, bool isEnd = false)
     {
-        var log = Log;
-        if (log.IsDebugEnabled == false)
+        if (Logger.IsEnabled(LogLevel.Trace) == false)
             return;
-        log.Tag(name)
-            .Caption($"Cap已发送事件-{name}")
-            .Content($"消息名称: {name}")
-            .AddExtraProperty("event_data", data.ToJson())
-            .Trace();
+        var dict = new Dictionary<string, object>
+        {
+            { "EventHeader", headers.ToJson() },
+            { "EventData", data.ToJson() },
+        };
+        using (Logger.BeginScope(dict))
+        {
+            var end = isEnd ? "结束" : "开始";
+            var sb = new StringBuilder();
+            sb.Append("Cap发送事件[{EventName}]");
+            sb.Append(end);
+            Logger.LogTrace(sb.ToString(), name);
+        }
     }
 
     /// <summary>

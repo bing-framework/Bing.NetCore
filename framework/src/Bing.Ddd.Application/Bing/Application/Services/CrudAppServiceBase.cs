@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Application.Dtos;
+﻿using Bing.Application.Dtos;
 using Bing.Data.Queries;
 using Bing.Domain.ChangeTracking;
 using Bing.Domain.Entities;
 using Bing.Domain.Repositories;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Logs;
 using Bing.ObjectMapping;
 using Bing.Uow;
 
@@ -200,7 +195,9 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// <summary>
     /// 保存后操作
     /// </summary>
-    protected virtual void SaveAfter() => WriteLog($"保存{EntityDescription}成功");
+    protected virtual void SaveAfter()
+    {
+    }
 
     #endregion
 
@@ -283,7 +280,6 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     {
         if (list.Count == 0)
             return;
-        Log.Content("创建实体：");
         foreach (var entity in list)
             await CreateAsync(entity);
     }
@@ -296,7 +292,6 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     {
         if (list.Count == 0)
             return;
-        Log.Content("修改实体：");
         foreach (var entity in list)
             await UpdateAsync(entity);
     }
@@ -309,7 +304,6 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     {
         if (list.Count == 0)
             return;
-        Log.Content("删除实体：");
         foreach (var entity in list)
             await DeleteChildsAsync(entity);
     }
@@ -523,9 +517,9 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// </summary>
     /// <param name="entity">实体</param>
     /// <param name="changeValues">变更值集合</param>
-    protected virtual void UpdateAfter(TEntity entity, ChangedValueDescriptorCollection changeValues) => Log
-        .BusinessId(entity.Id.SafeString())
-        .Content(changeValues.SafeString());
+    protected virtual void UpdateAfter(TEntity entity, ChangedValueDescriptorCollection changeValues)
+    {
+    }
 
     /// <summary>
     /// 修改

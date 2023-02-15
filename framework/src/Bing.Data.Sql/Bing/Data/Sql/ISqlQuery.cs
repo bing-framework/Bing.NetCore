@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Bing.Data.Sql.Builders;
 
 namespace Bing.Data.Sql;

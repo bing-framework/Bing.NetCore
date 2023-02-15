@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data.Sql.Builders;
+﻿using Bing.Data.Sql.Builders;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Data.Sql;

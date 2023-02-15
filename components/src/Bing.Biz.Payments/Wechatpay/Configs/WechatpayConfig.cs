@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using Bing.Biz.Payments.Wechatpay.Enums;
 using Bing.Exceptions;
 using Bing.Helpers;

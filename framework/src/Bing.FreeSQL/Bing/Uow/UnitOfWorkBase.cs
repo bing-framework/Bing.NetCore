@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Aspects;
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;

@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Bing.Aspects;
 
-namespace Bing.Data.Sql;
+namespace Bing.Data;
 
 /// <summary>
 /// 数据库

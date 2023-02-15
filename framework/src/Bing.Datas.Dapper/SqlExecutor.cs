@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Executor;
 using Bing.Data.Transaction;

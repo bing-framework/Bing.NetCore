@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Bing.Events.Messages;
+﻿using Bing.Events.Messages;
 
 namespace Bing.Events.Cap;
 

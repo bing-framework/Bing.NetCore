@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Data.Sql.Builders.Conditions;
+﻿using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Matedatas;
 

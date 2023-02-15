@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Events.Handlers;
 
 namespace Bing.Events.Default;

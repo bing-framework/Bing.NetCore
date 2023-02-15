@@ -18,7 +18,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ILogFactory, LogFactory>();
         services.TryAddScoped<ILogContextAccessor, LogContextAccessor>();
         services.TryAddTransient(typeof(ILog<>), typeof(Log<>));
-        services.TryAddTransient(typeof(ILoggerWrapper), typeof(LoggerWrapper));
         services.TryAddTransient(typeof(ILog), t => t.GetService<ILogFactory>()?.CreateLog("default") ?? NullLog.Instance);
         var options = new BingLoggingOptions();
         setupAction(options);

@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Data;
-using System.Diagnostics;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Bing.Aspects;
 using Bing.Auditing;
 using Bing.Data;
+using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
-using Bing.Datas.EntityFramework.Logs;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Domain.Entities.Events;
+using Bing.EntityFrameworkCore.Modeling;
 using Bing.Exceptions;
+using Bing.Expressions;
 using Bing.Extensions;
 using Bing.Logs;
 using Bing.Logs.Core;
@@ -27,9 +24,8 @@ using Bing.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Bing.Datas.EntityFramework.Core;
 
@@ -46,44 +42,14 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     private static readonly ConcurrentDictionary<Type, IEnumerable<IMap>> Maps;
 
     /// <summary>
-    /// 日志工厂
-    /// </summary>
-    private static readonly ILoggerFactory LoggerFactory;
-
-    /// <summary>
     /// 服务提供器
     /// </summary>
     private readonly IServiceProvider _serviceProvider;
 
-    #endregion
-
-    #region 属性
-
     /// <summary>
-    /// 跟踪号
+    /// 配置
     /// </summary>
-    public string TraceId { get; set; }
-
-    /// <summary>
-    /// Lazy延迟加载服务提供程序
-    /// </summary>
-    [Autowired]
-    public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
-
-    /// <summary>
-    /// 日志
-    /// </summary>
-    public ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
-
-    /// <summary>
-    /// 当前用户
-    /// </summary>
-    protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
-
-    /// <summary>
-    /// 审计属性设置器
-    /// </summary>
-    protected IAuditPropertySetter AuditPropertySetter => LazyServiceProvider.LazyGetRequiredService<IAuditPropertySetter>();
+    private static readonly MethodInfo ConfigureBasePropertiesMethodInfo = typeof(UnitOfWorkBase).GetMethod(nameof(ConfigureBaseProperties), BindingFlags.Instance | BindingFlags.NonPublic);
 
     #endregion
 
@@ -95,7 +61,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     static UnitOfWorkBase()
     {
         Maps = new ConcurrentDictionary<Type, IEnumerable<IMap>>();
-        LoggerFactory = new LoggerFactory(new[] { new EfLogProvider(), });
     }
 
     #endregion
@@ -137,6 +102,41 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
 
     #endregion
 
+    #region 属性
+
+    /// <summary>
+    /// 跟踪号
+    /// </summary>
+    public string TraceId { get; set; }
+
+    /// <summary>
+    /// Lazy延迟加载服务提供程序
+    /// </summary>
+    [Autowired]
+    public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
+
+    /// <summary>
+    /// 当前用户
+    /// </summary>
+    protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
+
+    /// <summary>
+    /// 审计属性设置器
+    /// </summary>
+    protected IAuditPropertySetter AuditPropertySetter => LazyServiceProvider.LazyGetRequiredService<IAuditPropertySetter>();
+
+    /// <summary>
+    /// 数据过滤管理器
+    /// </summary>
+    protected IFilterManager FilterManager => LazyServiceProvider.LazyGetRequiredService<IFilterManager>();
+
+    /// <summary>
+    /// 逻辑删除过滤器是否启用
+    /// </summary>
+    protected virtual bool IsSoftDeleteFilterEnabled => FilterManager?.IsEnabled<ISoftDelete>() ?? false;
+
+    #endregion
+
     #region 辅助操作
 
     /// <summary>
@@ -161,21 +161,23 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// 配置
     /// </summary>
     /// <param name="builder">配置生成器</param>
-    protected override void OnConfiguring(DbContextOptionsBuilder builder) => EnableLog(builder);
+    protected override void OnConfiguring(DbContextOptionsBuilder builder)
+    {
+        ConfiguringLog(builder);
+    }
+
+    #endregion
+
+    #region ConfiguringLog(配置日志)
 
     /// <summary>
-    /// 启用日志
+    /// 配置日志
     /// </summary>
     /// <param name="builder">配置生成器</param>
-    protected void EnableLog(DbContextOptionsBuilder builder)
+    protected virtual void ConfiguringLog(DbContextOptionsBuilder builder)
     {
         ConfiguringIgnoreEvent(builder);
-        var log = Log;
-        if (IsEnabled(log) == false)
-            return;
-        builder.EnableSensitiveDataLogging();
-        builder.EnableDetailedErrors();
-        //builder.UseLoggerFactory(LoggerFactory);
+        builder.EnableDetailedErrors().EnableSensitiveDataLogging();
     }
 
     /// <summary>
@@ -209,46 +211,17 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         ));
     }
 
-    /// <summary>
-    /// 是否启用EF日志
-    /// </summary>
-    /// <param name="log">日志操作</param>
-    private bool IsEnabled(ILog log)
-    {
-        var config = GetConfig();
-        if (config.LogLevel == DataLogLevel.Off)
-            return false;
-        if (log.IsTraceEnabled == false)
-            return false;
-        return true;
-    }
-
-    /// <summary>
-    /// 获取配置
-    /// </summary>
-    private DataConfig GetConfig()
-    {
-        try
-        {
-            var options = Create<IOptionsSnapshot<DataConfig>>();
-            return options.Value;
-        }
-        catch
-        {
-            return new DataConfig { LogLevel = DataLogLevel.Sql };
-        }
-    }
-
     #endregion
 
-    #region OnModelCreating(配置映射)
+    #region OnModelCreating(配置模型)
 
     /// <summary>
-    /// 配置映射
+    /// 配置模型
     /// </summary>
     /// <param name="modelBuilder">映射生成器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ApplyConfigurations(modelBuilder);
         var mappers = GetMaps();
         foreach (var mapper in mappers)
             mapper.Map(modelBuilder);
@@ -285,6 +258,86 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// 获取定义映射配置的程序集列表
     /// </summary>
     protected virtual Assembly[] GetAssemblies() => new[] { GetType().Assembly };
+
+    #endregion
+
+    #region ApplyConfigurations(配置实体类型)
+
+    /// <summary>
+    /// 配置实体类型
+    /// </summary>
+    /// <param name="modelBuilder">模型生成器</param>
+    protected virtual void ApplyConfigurations(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            ConfigureBasePropertiesMethodInfo
+                .MakeGenericMethod(entityType.ClrType)
+                .Invoke(this, new object[] { modelBuilder, entityType });
+        }
+    }
+
+    /// <summary>
+    /// 配置基础属性
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="modelBuilder">模型生成器</param>
+    /// <param name="entityType">实体类型</param>
+    protected virtual void ConfigureBaseProperties<TEntity>(ModelBuilder modelBuilder, IMutableEntityType entityType) 
+        where TEntity:class
+    {
+        if(entityType.IsOwned())
+            return;
+        modelBuilder.Entity<TEntity>().ConfigureByConvention();
+        ConfigureGlobalFilters<TEntity>(modelBuilder, entityType);
+    }
+
+    #endregion
+
+    #region ConfigureGlobalFilters(配置全局过滤器)
+
+    /// <summary>
+    /// 配置过滤器
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="modelBuilder">模型生成器</param>
+    /// <param name="entityType">实体类型</param>
+    protected virtual void ConfigureGlobalFilters<TEntity>(ModelBuilder modelBuilder, IMutableEntityType entityType) 
+        where TEntity : class
+    {
+        if (FilterManager == null)
+            return;
+        if (entityType.BaseType == null && FilterManager.IsEntityEnabled<TEntity>())
+        {
+            var filterExpression = CreateFilterExpression<TEntity>();
+            if (filterExpression != null)
+                modelBuilder.Entity<TEntity>().HasQueryFilter(filterExpression);
+        }
+    }
+
+    /// <summary>
+    /// 创建过滤器表达式
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    protected virtual Expression<Func<TEntity, bool>> CreateFilterExpression<TEntity>() where TEntity : class
+    {
+        return GetSoftDeleteFilterExpression<TEntity>();
+    }
+
+    /// <summary>
+    /// 获取逻辑删除过滤器表达式
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    protected virtual Expression<Func<TEntity, bool>> GetSoftDeleteFilterExpression<TEntity>() where TEntity : class
+    {
+        var filter = FilterManager.GetFilter<ISoftDelete>();
+        if (filter.IsEntityEnabled<TEntity>() == false)
+            return null;
+        var expression = filter.GetExpression<TEntity>();
+        Expression<Func<TEntity, bool>> result = entity => !IsSoftDeleteFilterEnabled;
+        return result.Or(expression);
+    }
 
     #endregion
 
@@ -370,7 +423,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         try
         {
             await transactionActionManager.CommitAsync(transaction);
-            await Database.UseTransactionAsync(transaction,cancellationToken);
+            await Database.UseTransactionAsync(transaction, cancellationToken);
             var result = await base.SaveChangesAsync(cancellationToken);
             transaction.Commit();
             return result;
@@ -454,8 +507,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     {
         AuditPropertySetter?.SetCreationProperties(entry.Entity);
         AuditPropertySetter?.SetModificationProperties(entry.Entity);
-        //SetCreationAudited(entry);
-        //SetModificationAudited(entry);
         SetVersion(entry);
     }
 
@@ -470,7 +521,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     protected virtual void ApplyInterceptForModifiedEntity(EntityEntry entry)
     {
         AuditPropertySetter?.SetModificationProperties(entry.Entity);
-        //SetModificationAudited(entry);
         SetVersion(entry);
     }
 
@@ -487,33 +537,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         AuditPropertySetter?.SetDeletionProperties(entry.Entity);
         AuditPropertySetter?.SetModificationProperties(entry.Entity);
         SetVersion(entry);
-        //SetModificationAudited(entry);
-    }
-
-    #endregion
-
-    #region SetCreationAudited(设置创建审计信息)
-
-    /// <summary>
-    /// 设置创建审计信息
-    /// </summary>
-    /// <param name="entry">输入实体</param>
-    protected virtual void SetCreationAudited(EntityEntry entry)
-    {
-        CreationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
-    }
-
-    #endregion
-
-    #region SetModificationAudited(设置修改审计信息)
-
-    /// <summary>
-    /// 设置修改审计信息
-    /// </summary>
-    /// <param name="entry">输入实体</param>
-    protected virtual void SetModificationAudited(EntityEntry entry)
-    {
-        ModificationAuditedInitializer.Init(entry.Entity, GetUserId(), GetUserName());
     }
 
     #endregion

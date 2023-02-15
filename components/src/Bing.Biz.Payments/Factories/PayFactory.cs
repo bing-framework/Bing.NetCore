@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Biz.Payments.Alipay.Abstractions;
+﻿using Bing.Biz.Payments.Alipay.Abstractions;
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Services;
 using Bing.Biz.Payments.Core;
@@ -7,6 +6,7 @@ using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Services;
 using Bing.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Biz.Payments.Factories;
 
@@ -26,14 +26,24 @@ public class PayFactory : IPayFactory
     private readonly IWechatpayConfigProvider _wechatpayConfigProvider;
 
     /// <summary>
+    /// 日志工厂
+    /// </summary>
+    private readonly ILoggerFactory _loggerFactory;
+
+    /// <summary>
     /// 初始化一个<see cref="PayFactory"/>类型的实例
     /// </summary>
     /// <param name="alipayConfigProvider">支付宝配置提供器</param>
     /// <param name="wechatpayConfigProvider">微信支付配置提供器</param>
-    public PayFactory(IAlipayConfigProvider alipayConfigProvider, IWechatpayConfigProvider wechatpayConfigProvider)
+    /// <param name="loggerFactory">日志工厂</param>
+    public PayFactory(
+        IAlipayConfigProvider alipayConfigProvider, 
+        IWechatpayConfigProvider wechatpayConfigProvider, 
+        ILoggerFactory loggerFactory)
     {
         _alipayConfigProvider = alipayConfigProvider;
         _wechatpayConfigProvider = wechatpayConfigProvider;
+        _loggerFactory = loggerFactory;
     }
 
     /// <summary>
@@ -60,22 +70,22 @@ public class PayFactory : IPayFactory
                 return new AlipayWapPayService(_alipayConfigProvider);
 
             case PayWay.WechatpayPaymentCodePay:
-                return new WechatpayPaymentCodePayService(_wechatpayConfigProvider);
+                return new WechatpayPaymentCodePayService(_wechatpayConfigProvider, _loggerFactory);
 
             case PayWay.WechatpayJsApiPay:
-                return new WechatpayJsApiPayService(_wechatpayConfigProvider);
+                return new WechatpayJsApiPayService(_wechatpayConfigProvider, _loggerFactory);
 
             case PayWay.WechatpayNativePay:
-                return new WechatpayNativePayService(_wechatpayConfigProvider);
+                return new WechatpayNativePayService(_wechatpayConfigProvider, _loggerFactory);
 
             case PayWay.WechatpayAppPay:
-                return new WechatpayAppPayService(_wechatpayConfigProvider);
+                return new WechatpayAppPayService(_wechatpayConfigProvider, _loggerFactory);
 
             case PayWay.WechatpayMiniProgramPay:
-                return new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
+                return new WechatpayMiniProgramPayService(_wechatpayConfigProvider, _loggerFactory);
 
             case PayWay.WechatpayH5Pay:
-                return new WechatpayH5PayService(_wechatpayConfigProvider);
+                return new WechatpayH5PayService(_wechatpayConfigProvider, _loggerFactory);
         }
 
         throw new NotImplementedException(way.Description());
@@ -152,30 +162,30 @@ public class PayFactory : IPayFactory
     /// <summary>
     /// 创建微信下载交易账单服务
     /// </summary>
-    public IWechatpayDownloadBillService CreateWechatpayDownloadBillService() => new WechatpayDownloadBillService(_wechatpayConfigProvider);
+    public IWechatpayDownloadBillService CreateWechatpayDownloadBillService() => new WechatpayDownloadBillService(_wechatpayConfigProvider, _loggerFactory);
 
     /// <summary>
     /// 创建微信付款码支付服务
     /// </summary>
-    public IWechatpayPaymentCodePayService CreateWechatpayBarcodePayService() => new WechatpayPaymentCodePayService(_wechatpayConfigProvider);
+    public IWechatpayPaymentCodePayService CreateWechatpayBarcodePayService() => new WechatpayPaymentCodePayService(_wechatpayConfigProvider, _loggerFactory);
 
     /// <summary>
     /// 创建微信JsApi支付服务
     /// </summary>
-    public IWechatpayJsApiPayService CreateWechatpayJsApiPayService() => new WechatpayJsApiPayService(_wechatpayConfigProvider);
+    public IWechatpayJsApiPayService CreateWechatpayJsApiPayService() => new WechatpayJsApiPayService(_wechatpayConfigProvider, _loggerFactory);
 
     /// <summary>
     /// 创建微信App支付服务
     /// </summary>
-    public IWechatpayAppPayService CreateWechatpayAppPayService() => new WechatpayAppPayService(_wechatpayConfigProvider);
+    public IWechatpayAppPayService CreateWechatpayAppPayService() => new WechatpayAppPayService(_wechatpayConfigProvider, _loggerFactory);
 
     /// <summary>
     /// 创建微信H5支付服务
     /// </summary>
-    public IWechatpayH5PayService CreateH5PayService() => new WechatpayH5PayService(_wechatpayConfigProvider);
+    public IWechatpayH5PayService CreateH5PayService() => new WechatpayH5PayService(_wechatpayConfigProvider, _loggerFactory);
 
     /// <summary>
     /// 创建微信小程序支付服务
     /// </summary>
-    public IWechatpayMiniProgramPayService CreateWechatpayMiniProgramPayService() => new WechatpayMiniProgramPayService(_wechatpayConfigProvider);
+    public IWechatpayMiniProgramPayService CreateWechatpayMiniProgramPayService() => new WechatpayMiniProgramPayService(_wechatpayConfigProvider, _loggerFactory);
 }

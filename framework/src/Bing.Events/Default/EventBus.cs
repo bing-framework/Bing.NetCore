@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Bing.Events.Handlers;
+﻿using Bing.Events.Handlers;
 
 namespace Bing.Events.Default;
 

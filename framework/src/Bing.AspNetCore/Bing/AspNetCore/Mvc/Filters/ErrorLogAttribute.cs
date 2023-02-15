@@ -1,5 +1,4 @@
-﻿using Bing.Logs;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.AspNetCore.Mvc.Filters;
 
@@ -16,7 +15,7 @@ public class ErrorLogAttribute : ExceptionFilterAttribute
     {
         if (context == null)
             return;
-        var log = Log.GetLog(context).Caption("WebApi全局异常");
-        context.Exception.Log(log);
+        //var log = Log.GetLog(context).Caption("WebApi全局异常");
+        //context.Exception.Log(log);
     }
 }

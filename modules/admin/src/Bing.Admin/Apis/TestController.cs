@@ -4,11 +4,9 @@ using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
-using Bing.DependencyInjection;
 using Bing.Events.Messages;
 using Bing.ExceptionHandling;
 using Bing.Logging;
-using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -111,11 +109,11 @@ namespace Bing.Admin.Apis
             OtherLog
                 .Message($"测试Logger消息{nameof(ILog<TestController>)} - 0: {request.Id}")
                 .LogInformation();
-            Log.Info("测试日志消息Begin");
+            Log.LogInformation("测试日志消息Begin");
             await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
             if (request.NeedCommit)
                 await UnitOfWork.CommitAsync();
-            Log.Info("测试日志消息End");
+            Log.LogInformation("测试日志消息End");
             return Success();
         }
 

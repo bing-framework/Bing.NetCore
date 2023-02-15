@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Diagnostics;
 using Bing.DependencyInjection;
-using Bing.Helpers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Bing.Data.Sql.Queries;
@@ -16,7 +15,70 @@ namespace Bing.Data.Sql.Queries;
 /// </summary>
 public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor
 {
+    #region 构造函数
+
+    /// <summary>
+    /// 初始化一个<see cref="SqlQueryBase"/>类型的实例
+    /// </summary>
+    /// <param name="serviceProvider">服务提供程序</param>
+    /// <param name="sqlBuilder">Sql生成器</param>
+    /// <param name="database">数据库</param>
+    /// <param name="sqlOptions">Sql配置</param>
+    protected SqlQueryBase(IServiceProvider serviceProvider, ISqlBuilder sqlBuilder, IDatabase database = null, SqlOptions sqlOptions = null)
+    {
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
+        Database = database;
+        Connection = database?.GetConnection();
+        SqlOptions = sqlOptions ?? GetOptions();
+        Logger = CreateLogger();
+    }
+
+    /// <summary>
+    /// 获取配置
+    /// </summary>
+    private SqlOptions GetOptions()
+    {
+        try
+        {
+            var options = ServiceLocator.Instance.GetService<IOptionsSnapshot<SqlOptions>>();
+            return options == null ? new SqlOptions() : options.Value;
+        }
+        catch
+        {
+            return new SqlOptions();
+        }
+    }
+
+    /// <summary>
+    /// 创建日志
+    /// </summary>
+    private ILogger CreateLogger()
+    {
+        var loggerFactory = ServiceProvider.GetService<ILoggerFactory>();
+        if (loggerFactory == null)
+            return NullLogger.Instance;
+        return loggerFactory.CreateLogger(SqlOptions.LogCategory);
+    }
+
+    #endregion
+
     #region 属性
+
+    /// <summary>
+    /// 上下文标识
+    /// </summary>
+    public string ContextId { get; private set; }
+
+    /// <summary>
+    /// 服务提供程序
+    /// </summary>
+    protected IServiceProvider ServiceProvider { get; }
+
+    /// <summary>
+    /// 日志操作
+    /// </summary>
+    protected ILogger Logger { get; }
 
     /// <summary>
     /// 数据库
@@ -87,40 +149,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 公用表表达式CTE集合
     /// </summary>
     public List<BuilderItem> CteItems => ((ICteAccessor)Builder).CteItems;
-
-    #endregion
-
-    #region 构造函数
-
-    /// <summary>
-    /// 初始化一个<see cref="SqlQueryBase"/>类型的实例
-    /// </summary>
-    /// <param name="sqlBuilder">Sql生成器</param>
-    /// <param name="database">数据库</param>
-    /// <param name="sqlOptions">Sql配置</param>
-    protected SqlQueryBase(ISqlBuilder sqlBuilder, IDatabase database = null, SqlOptions sqlOptions = null)
-    {
-        Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
-        Database = database;
-        Connection = database?.GetConnection();
-        SqlOptions = sqlOptions ?? GetOptions();
-    }
-
-    /// <summary>
-    /// 获取配置
-    /// </summary>
-    private SqlOptions GetOptions()
-    {
-        try
-        {
-            var options = ServiceLocator.Instance.GetService<IOptionsSnapshot<SqlOptions>>();
-            return options == null ? new SqlOptions() : options.Value;
-        }
-        catch
-        {
-            return new SqlOptions();
-        }
-    }
 
     #endregion
 
