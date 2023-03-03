@@ -42,10 +42,12 @@ public class RemoteServiceErrorInfo
     /// <param name="message">错误消息</param>
     /// <param name="details">错误详情</param>
     /// <param name="code">错误码</param>
-    public RemoteServiceErrorInfo(string message, string details = null, string code = null)
+    /// <param name="data">数据</param>
+    public RemoteServiceErrorInfo(string message, string details = null, string code = null, IDictionary data = null)
     {
         Message = message;
         Details = details;
         Code = code;
+        Data = data;
     }
 }

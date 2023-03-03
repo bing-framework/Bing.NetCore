@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj" />
-    <ProjectReference Include="..\..\src\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj" />
   </ItemGroup>
 </Project>
