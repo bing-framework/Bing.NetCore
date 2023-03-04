@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Xunit;
 
-namespace Bing.Caching.FreeRedis.Tests.Integration;
+namespace Bing.Caching.FreeRedis.Tests;
 
 /// <summary>
 /// FreeRedis 缓存测试

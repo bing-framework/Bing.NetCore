@@ -2,7 +2,8 @@
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <XunitStartupFullName>Bing.Caching.FreeRedis.Tests.Integration.Startup</XunitStartupFullName>
+    <RootNamespace>Bing.Caching.FreeRedis.Tests</RootNamespace>
+    <XunitStartupFullName>Bing.Caching.FreeRedis.Tests.Startup</XunitStartupFullName>
   </PropertyGroup>
 
   <ItemGroup>
