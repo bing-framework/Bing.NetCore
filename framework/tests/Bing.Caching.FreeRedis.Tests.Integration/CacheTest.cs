@@ -91,11 +91,8 @@ public class CacheTest
     [Fact]
     public async Task Test_GetAsync_Object()
     {
-        TestCacheModel result = null;
-        for (var i = 0; i < 3; i++)
-        {
-            result = await _cache.GetAsync("a-1", typeof(TestCacheModel)) as TestCacheModel;
-        }
+        await _cache.TryAddAsync("a-2", new TestCacheModel { Id = 1, Name = "test-01" });
+        var result = await _cache.GetAsync("a-2", typeof(TestCacheModel)) as TestCacheModel;
         Assert.Equal(1, result?.Id);
     }
 
