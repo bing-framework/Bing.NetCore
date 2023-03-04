@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using FreeRedis;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Xunit.DependencyInjection.Logging;
 using Xunit.DependencyInjection;
+using System.Diagnostics;
+using Microsoft.Extensions.Hosting;
 
 namespace Bing.Caching.FreeRedis.Tests.Integration;
 
@@ -26,6 +29,12 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
+        var redisClient = new RedisClient("127.0.0.1:6379,database=0");
+        // 配置默认使用Newtonsoft.Json作为序列化工具
+        redisClient.Serialize = JsonConvert.SerializeObject;
+        redisClient.Deserialize = JsonConvert.DeserializeObject;
+        // 注入到IServiceCollection中
+        services.AddSingleton(redisClient);
         services.AddScoped<ICache, FreeRedisCacheManager>();
     }
 
@@ -36,5 +45,11 @@ public class Startup
     {
         // 添加单元测试日志提供程序，并配置日志过滤
         loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(accessor, (s, logLevel) => logLevel >= LogLevel.Trace));
+
+        var listener = new ActivityListener();
+        listener.ShouldListenTo += _ => true;
+        listener.Sample += delegate { return ActivitySamplingResult.AllDataAndRecorded; };
+
+        ActivitySource.AddActivityListener(listener);
     }
 }

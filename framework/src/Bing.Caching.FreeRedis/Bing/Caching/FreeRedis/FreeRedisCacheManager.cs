@@ -1,7 +1,6 @@
 ﻿using Bing.Extensions;
 using Bing.Helpers;
 using FreeRedis;
-using Newtonsoft.Json;
 
 namespace Bing.Caching.FreeRedis;
 
@@ -12,11 +11,6 @@ namespace Bing.Caching.FreeRedis;
 public partial class FreeRedisCacheManager : ICache
 {
     /// <summary>
-    /// Json序列化器
-    /// </summary>
-    private readonly JsonSerializer _serializer;
-
-    /// <summary>
     /// Redis客户端
     /// </summary>
     private readonly RedisClient _client;
@@ -26,8 +20,9 @@ public partial class FreeRedisCacheManager : ICache
     /// </summary>
     public FreeRedisCacheManager(RedisClient client)
     {
+        if (client.Serialize == null || client.Deserialize == null)
+            throw new ArgumentException("FreeRedis 必须设置了序列化/反序列化 client.Serialize/Deserialize");
         _client = client;
-        _serializer = JsonSerializer.Create();
     }
 
     /// <summary>
@@ -139,7 +134,6 @@ public partial class FreeRedisCacheManager : ICache
     private string[] SearchRedisKeys(string pattern)
     {
         var keys = new List<string>();
-
         long nextCursor = 0;
         do
         {

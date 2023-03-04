@@ -1,6 +1,4 @@
-﻿using System.Text;
-using Bing.Helpers;
-using Newtonsoft.Json;
+﻿using Bing.Helpers;
 
 namespace Bing.Caching.FreeRedis;
 
@@ -10,19 +8,6 @@ namespace Bing.Caching.FreeRedis;
 // ReSharper disable once InconsistentNaming
 public partial class FreeRedisCacheManager : ICache
 {
-    /// <summary>
-    /// 反序列化
-    /// </summary>
-    /// <param name="bytes">字节数组</param>
-    /// <param name="type">类型</param>
-    internal object Deserialize(byte[] bytes, Type type)
-    {
-        using var ms = new MemoryStream(bytes);
-        using var sr = new StreamReader(ms, Encoding.UTF8);
-        using var jtr = new JsonTextReader(sr);
-        return _serializer.Deserialize(jtr, type);
-    }
-
     /// <summary>
     /// 是否存在指定键的缓存
     /// </summary>
@@ -55,10 +40,10 @@ public partial class FreeRedisCacheManager : ICache
     /// <param name="cancellationToken">取消令牌</param>
     public async Task<object> GetAsync(string key, Type type, CancellationToken cancellationToken = default)
     {
-        var result = await _client.GetAsync<byte[]>(key);
+        var result = await _client.GetAsync(key);
         if (result != null)
         {
-            var value = Deserialize(result, type);
+            var value = _client.Deserialize(result, type);
             return value;
         }
         return null;
