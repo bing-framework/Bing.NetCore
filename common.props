@@ -22,6 +22,12 @@
     <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!--移除Xml、DotSettings-->
+    <None Remove="$(AssemblyName).xml" />
+    <None Remove="$(AssemblyName).csproj.DotSettings" />
+  </ItemGroup>
+
   <Import Project="asset/props/target.feature.props"/>
 
   <Import Project="asset/props/sourcelink.env.props"/>
