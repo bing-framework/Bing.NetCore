@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Auditing;
+﻿namespace Bing.Auditing;
 
 /// <summary>
 /// 修改时间

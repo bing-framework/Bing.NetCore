@@ -1,4 +1,4 @@
-﻿namespace Bing.Data;
+﻿namespace Bing;
 
 /// <summary>
 /// 逻辑删除

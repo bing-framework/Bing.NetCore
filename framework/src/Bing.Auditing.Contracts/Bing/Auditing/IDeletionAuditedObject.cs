@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Auditing;
+﻿namespace Bing.Auditing;
 
 /// <summary>
 /// 删除操作审计对象
