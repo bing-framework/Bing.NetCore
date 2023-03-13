@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Bing.SecurityLog;
+﻿namespace Bing.SecurityLog;
 
 /// <summary>
 /// 安全日志信息

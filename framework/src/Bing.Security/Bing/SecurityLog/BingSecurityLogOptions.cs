@@ -6,6 +6,11 @@
 public class BingSecurityLogOptions
 {
     /// <summary>
+    /// 初始化一个<see cref="BingSecurityLogOptions"/>类型的实例
+    /// </summary>
+    public BingSecurityLogOptions() => IsEnabled = true;
+
+    /// <summary>
     /// 是否已启用
     /// </summary>
     public bool IsEnabled { get; set; }
@@ -14,9 +19,4 @@ public class BingSecurityLogOptions
     /// 应用程序名称
     /// </summary>
     public string ApplicationName { get; set; }
-
-    /// <summary>
-    /// 初始化一个<see cref="BingSecurityLogOptions"/>类型的实例
-    /// </summary>
-    public BingSecurityLogOptions() => IsEnabled = true;
 }

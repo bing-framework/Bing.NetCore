@@ -15,6 +15,12 @@ public class CurrentClient : ICurrentClient, ITransientDependency
     private readonly ICurrentPrincipalAccessor _principalAccessor;
 
     /// <summary>
+    /// 初始化一个<see cref="CurrentClient"/>类型的实例
+    /// </summary>
+    /// <param name="principalAccessor">安全主体访问器</param>
+    public CurrentClient(ICurrentPrincipalAccessor principalAccessor) => _principalAccessor = principalAccessor;
+
+    /// <summary>
     /// 标识
     /// </summary>
     public virtual string Id => _principalAccessor.Principal?.FindClientId();
@@ -23,10 +29,4 @@ public class CurrentClient : ICurrentClient, ITransientDependency
     /// 是否已认证
     /// </summary>
     public virtual bool IsAuthenticated => Id != null;
-
-    /// <summary>
-    /// 初始化一个<see cref="CurrentClient"/>类型的实例
-    /// </summary>
-    /// <param name="principalAccessor">安全主体访问器</param>
-    public CurrentClient(ICurrentPrincipalAccessor principalAccessor) => _principalAccessor = principalAccessor;
 }

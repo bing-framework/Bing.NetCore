@@ -3,7 +3,7 @@
 namespace Bing.Auditing;
 
 /// <summary>
-/// 审计日志贡献上下文
+/// 审计日志构造上下文
 /// </summary>
 public class AuditLogContributionContext : IServiceProviderAccessor
 {
