@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <Aspect-RefVersion>2.2.0</Aspect-RefVersion>
+    <Aspect-RefVersion>2.3.0</Aspect-RefVersion>
   </PropertyGroup>
 
   <ItemGroup>
