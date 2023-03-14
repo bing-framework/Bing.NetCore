@@ -310,7 +310,7 @@ public class Log : ILog
         if (LogProperties.Count == 0)
             return LogMessageArgs.ToArray();
         var result = new List<object>();
-        result.AddRange(LogProperties.Values);
+        result.AddRange(LogProperties.Values);//TODO: 此处造成字符串拼接异常
         result.AddRange(LogMessageArgs);
         return result.ToArray();
     }
@@ -344,7 +344,7 @@ public class Log : ILog
         }
         catch (Exception e)
         {
-            Logger.LogCritical(LogErrorEventId, e, $"未知异常错误信息: {e.Message}");
+            Logger.LogCritical(LogErrorEventId, e, $"未知异常错误信息: {e.Message}. MemberName={memberName},FilePath={sourceFilePath},LineNumber={sourceLineNumber}.");
             return this;
         }
         finally

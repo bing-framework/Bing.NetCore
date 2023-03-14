@@ -13,14 +13,14 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">安装配置</param>
-    public static BingLoggingBuilder AddBingLogging(this IServiceCollection services, Action<BingLoggingOptions> setupAction)
+    public static BingLoggingBuilder AddBingLogging(this IServiceCollection services, Action<BingLoggingOptions> setupAction = null)
     {
         services.TryAddSingleton<ILogFactory, LogFactory>();
         services.TryAddScoped<ILogContextAccessor, LogContextAccessor>();
         services.TryAddTransient(typeof(ILog<>), typeof(Log<>));
         services.TryAddTransient(typeof(ILog), t => t.GetService<ILogFactory>()?.CreateLog("default") ?? NullLog.Instance);
         var options = new BingLoggingOptions();
-        setupAction(options);
+        setupAction?.Invoke(options);
         foreach (var serviceExtension in options.Extensions) 
             serviceExtension.AddServices(services);
         return new BingLoggingBuilder(services);
