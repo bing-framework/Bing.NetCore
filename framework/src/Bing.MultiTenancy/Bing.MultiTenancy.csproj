@@ -4,5 +4,4 @@
   <Import Project="project.dependency.props" />
 
   <Import Project="..\..\..\framework.props" />
-
 </Project>
