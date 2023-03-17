@@ -51,11 +51,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MiniProfiler", "framew
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_SolutionItems", "{2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6690993E-6659-451F-907C-A48FE1121D40}"
-	ProjectSection(SolutionItems) = preProject
-		build\common.props = build\common.props
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-modules", "03-modules", "{4A4E88DE-5CE7-433E-BED8-D269E385ECFD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Admin.Infrastructure", "modules\admin\src\Bing.Admin.Infrastructure\Bing.Admin.Infrastructure.csproj", "{8C24C67A-DFF6-4752-827F-98BE6190EF47}"
@@ -280,7 +275,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Caching", "Caching", "{52F6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auditing", "Auditing", "{98340528-C7CB-4503-96F3-7CE090622C2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Auditing.Contracts", "framework\src\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj", "{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing.Contracts", "framework\src\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj", "{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -643,7 +638,6 @@ Global
 		{B72B3024-B5A6-4C42-9519-349B2D1B9DF1} = {B5285F1C-479F-43F5-B3DE-3E930516AF6D}
 		{D58C77ED-ED4B-45F1-B6C4-A14FE6B70083} = {B8142AAE-3792-44C0-9197-0F14A9749E33}
 		{43BE3B85-AA7B-47B5-AC09-EE66B52358EA} = {3030FE3D-DB8F-403D-A181-8152670827AB}
-		{6690993E-6659-451F-907C-A48FE1121D40} = {2BA5C677-C0B9-458B-8A6D-D3E74B6F60EA}
 		{8C24C67A-DFF6-4752-827F-98BE6190EF47} = {BC0DA397-CCD6-407C-B675-87E5B702318A}
 		{A8F21802-C874-4EA1-A02F-C6C0000C6284} = {525BCCB3-B4EC-4DDD-BE84-513242EEE2E8}
 		{66E249CA-9BE0-4E09-AC85-A61EB68D56F8} = {525BCCB3-B4EC-4DDD-BE84-513242EEE2E8}
