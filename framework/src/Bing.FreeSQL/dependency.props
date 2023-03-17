@@ -1,0 +1,7 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="FreeSql" Version="$(FreeSQLPackageVersion)" />
+    <PackageReference Include="FreeSql.DbContext" Version="$(FreeSQLPackageVersion)" />
+    <PackageReference Include="FreeSql.Extensions.Linq" Version="$(FreeSQLPackageVersion)" />
+  </ItemGroup>
+</Project>

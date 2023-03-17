@@ -1,8 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Datas.EntityFramework.PgSql</AssemblyName>
+    <PackageId>Bing.Datas.EntityFramework.PgSql</PackageId>
+    <Description>Bing.Datas.EntityFramework.PgSql 是Bing应用框架的EntityFrameworkCore.PgSql数据访问类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Datas.Dapper</AssemblyName>
-    <PackageId>Bing.Datas.Dapper</PackageId>
-    <Description>Bing.Datas.Dapper是Bing应用框架的Dapper数据访问类库。</Description>
-  </PropertyGroup>
-</Project>

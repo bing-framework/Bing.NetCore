@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Validation</AssemblyName>
+    <PackageId>Bing.Validation</PackageId>
+    <Description>Bing.Validation是Bing应用框架的验证库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
-  </ItemGroup>
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

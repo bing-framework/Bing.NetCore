@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Datas.EntityFramework.PgSql</AssemblyName>
-    <PackageId>Bing.Datas.EntityFramework.PgSql</PackageId>
-    <Description>Bing.Datas.EntityFramework.PgSql 是Bing应用框架的EntityFrameworkCore.PgSql数据访问类库。</Description>
-  </PropertyGroup>
-</Project>

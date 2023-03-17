@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Data</AssemblyName>
+    <PackageId>Bing.Data</PackageId>
+    <Description>Bing.Data 是Bing应用框架的数据抽象类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
-  </ItemGroup>
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="3.19.110" />
+  </ItemGroup>
+</Project>

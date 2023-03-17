@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Validation.Abstractions</AssemblyName>
-    <PackageId>Bing.Validation.Abstractions</PackageId>
-    <Description>Bing.Validation.Abstractions是Bing应用框架的验证模块的抽象库。</Description>
-  </PropertyGroup>
-</Project>

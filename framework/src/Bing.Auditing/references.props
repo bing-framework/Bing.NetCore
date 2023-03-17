@@ -1,0 +1,7 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
+    <ProjectReference Include="..\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
+  </ItemGroup>
+</Project>

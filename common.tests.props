@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;NETSDK1138</NoWarn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

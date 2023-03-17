@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Auditing</AssemblyName>
+    <PackageId>Bing.Auditing</PackageId>
+    <Description>Bing.Auditing 是Bing应用框架的审计功能类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj" />
-    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
-  </ItemGroup>
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

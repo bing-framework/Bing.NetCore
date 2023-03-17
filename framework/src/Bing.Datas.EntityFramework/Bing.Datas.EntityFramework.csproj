@@ -1,18 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Datas.EntityFramework</AssemblyName>
+    <PackageId>Bing.Datas.EntityFramework</PackageId>
+    <Description>Bing.Datas.EntityFramework 是Bing应用框架的EntityFrameworkCore数据访问核心类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
   <ItemGroup>
     <Folder Include="Bing\Data\Stores\EntityFrameworkCore\" />
     <Folder Include="Bing\EntityFrameworkCore\Internal\" />
     <Folder Include="Bing\EntityFrameworkCore\Modeling\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

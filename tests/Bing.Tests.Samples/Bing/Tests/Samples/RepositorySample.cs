@@ -452,7 +452,7 @@ public class RepositorySample : IRepositorySample
     /// 查询
     /// </summary>
     /// <param name="query">查询对象</param>
-    public async Task<List<EntitySample>> QueryAsync(IQueryBase<EntitySample> query)
+    public Task<List<EntitySample>> QueryAsync(IQueryBase<EntitySample> query)
     {
         throw new NotImplementedException();
     }
@@ -470,7 +470,7 @@ public class RepositorySample : IRepositorySample
     /// 分页查询
     /// </summary>
     /// <param name="query">查询对象</param>
-    public async Task<PagerList<EntitySample>> PagerQueryAsync(IQueryBase<EntitySample> query)
+    public Task<PagerList<EntitySample>> PagerQueryAsync(IQueryBase<EntitySample> query)
     {
         throw new NotImplementedException();
     }
