@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Bing.Aspects;
 using Bing.DependencyInjection;
 

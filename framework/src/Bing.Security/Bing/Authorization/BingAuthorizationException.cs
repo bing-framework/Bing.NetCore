@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
 using Bing.Logging;
 using Microsoft.Extensions.Logging;
 
