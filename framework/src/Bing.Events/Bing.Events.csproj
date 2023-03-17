@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Events</AssemblyName>
+    <PackageId>Bing.Events</PackageId>
+    <Description>Bing.Events是Bing应用框架的事件总线操作类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
-  </ItemGroup>
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

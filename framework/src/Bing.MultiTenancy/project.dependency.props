@@ -1,6 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
-    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
-  </ItemGroup>
-</Project>

@@ -1,9 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP" Version="3.1.2" />
-  </ItemGroup>
-</Project>

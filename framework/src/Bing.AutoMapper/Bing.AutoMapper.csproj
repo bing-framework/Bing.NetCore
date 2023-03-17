@@ -1,7 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.AutoMapper</AssemblyName>
+    <PackageId>Bing.AutoMapper</PackageId>
+    <Description>Bing.AutoMapper是对象映射操作类库，解决配置映射的问题。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 </Project>

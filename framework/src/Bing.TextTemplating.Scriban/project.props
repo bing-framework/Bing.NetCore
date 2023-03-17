@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.TextTemplating.Scriban</AssemblyName>
-    <PackageId>Bing.TextTemplating.Scriban</PackageId>
-    <Description>Bing.TextTemplating.Scriban是基于Scriban实现文本模板操作类库。</Description>
-  </PropertyGroup>
-</Project>

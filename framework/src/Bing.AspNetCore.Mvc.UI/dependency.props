@@ -1,0 +1,9 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="Bing.Utils.Http" Version="$(BingUtilsPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.RazorPages" Version="2.2.5" />
+  </ItemGroup>
+</Project>

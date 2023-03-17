@@ -1,7 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Locks.CSRedis</AssemblyName>
+    <PackageId>Bing.Locks.CSRedis</PackageId>
+    <Description>Bing.Locks.CSRedis是Bing应用框架的基于Redis实现的分布式锁操作类库。</Description>
+  </PropertyGroup>
   
-  <Import Project="project.dependency.props" />
-
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
 </Project>

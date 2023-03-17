@@ -1,0 +1,6 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+  </ItemGroup>
+</Project>

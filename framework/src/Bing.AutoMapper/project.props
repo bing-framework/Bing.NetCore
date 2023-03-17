@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.AutoMapper</AssemblyName>
-    <PackageId>Bing.AutoMapper</PackageId>
-    <Description>Bing.AutoMapper是对象映射操作类库，解决配置映射的问题。</Description>
-  </PropertyGroup>
-</Project>

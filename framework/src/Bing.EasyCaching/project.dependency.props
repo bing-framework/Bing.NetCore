@@ -1,9 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <PackageReference Include="EasyCaching.Core" Version="1.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
-  </ItemGroup>
-</Project>

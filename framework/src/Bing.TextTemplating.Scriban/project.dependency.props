@@ -1,9 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.TextTemplating\Bing.TextTemplating.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Scriban" Version="4.0.2" />
-  </ItemGroup>
-</Project>

@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.EasyCaching</AssemblyName>
-    <PackageId>Bing.EasyCaching</PackageId>
-    <Description>Bing.EasyCaching是实现缓存操作类库。</Description>
-  </PropertyGroup>
-</Project>

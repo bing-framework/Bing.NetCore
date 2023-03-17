@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="CSRedisCore" Version="3.8.670" />
+  </ItemGroup>
+</Project>

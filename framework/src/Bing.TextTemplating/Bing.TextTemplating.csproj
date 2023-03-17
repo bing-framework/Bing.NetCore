@@ -1,8 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.TextTemplating</AssemblyName>
+    <PackageId>Bing.TextTemplating</PackageId>
+    <Description>Bing.TextTemplating是文本模板抽象类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

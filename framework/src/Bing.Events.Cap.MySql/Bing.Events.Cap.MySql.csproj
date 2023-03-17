@@ -1,8 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
 
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Events.Cap.MySql</AssemblyName>
+    <PackageId>Bing.Events.Cap.MySql</PackageId>
+    <Description>Bing.Events.Cap.MySql是CAP2.6版本的源码，升级MySqlConnector，用于支持FreeSQL使用。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\common.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

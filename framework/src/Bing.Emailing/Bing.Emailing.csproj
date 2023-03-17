@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Emailing</AssemblyName>
+    <PackageId>Bing.Emailing</PackageId>
+    <Description>Bing.Emailing 是邮件操作类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>
