@@ -16,5 +16,6 @@ public interface IUnitOfWork : IDisposable
     /// <summary>
     /// 提交，返回影响的行数
     /// </summary>
-    Task<int> CommitAsync();
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<int> CommitAsync(CancellationToken cancellationToken = default);
 }

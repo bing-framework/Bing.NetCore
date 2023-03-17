@@ -365,11 +365,12 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 异步提交，返回影响的行数
     /// </summary>
-    public async Task<int> CommitAsync()
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return await SaveChangesAsync();
+            return await SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException ex)
         {

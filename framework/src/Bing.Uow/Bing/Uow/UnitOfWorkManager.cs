@@ -27,10 +27,11 @@ public class UnitOfWorkManager : IUnitOfWorkManager
     /// <summary>
     /// 提交
     /// </summary>
-    public async Task CommitAsync()
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         foreach (var unitOfWork in _unitOfWorks)
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(cancellationToken);
     }
 
     /// <summary>

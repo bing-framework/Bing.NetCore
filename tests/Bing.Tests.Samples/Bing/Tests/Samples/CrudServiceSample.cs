@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Bing.Application.Services;
 using Bing.Data.Queries;
 using Bing.Extensions;
@@ -34,7 +35,8 @@ public class UnitOfWorkSample : IUnitOfWork
     /// <summary>
     /// 提交，返回影响的行数
     /// </summary>
-    public Task<int> CommitAsync() => Task.FromResult(1);
+    /// <param name="cancellationToken">取消令牌</param>
+    public Task<int> CommitAsync(CancellationToken cancellationToken = default) => Task.FromResult(1);
 }
 
 /// <summary>
