@@ -9,6 +9,8 @@
 
   <Import Project="dependency.props" />
 
+  <Import Project="references.props" />
+
   <ItemGroup>
     <Compile Update="Properties\LibraryResource.Designer.cs">
       <DesignTime>True</DesignTime>

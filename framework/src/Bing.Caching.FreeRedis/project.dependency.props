@@ -1,9 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <PackageReference Include="FreeRedis" Version="0.2.7" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
-  </ItemGroup>
-</Project>

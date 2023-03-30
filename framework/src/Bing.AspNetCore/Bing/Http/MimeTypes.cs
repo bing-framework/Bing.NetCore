@@ -1,4 +1,5 @@
-﻿namespace Bing.Http;
+﻿// ReSharper disable UnusedMember.Global
+namespace Bing.Http;
 
 /// <summary>
 /// 媒体类型。

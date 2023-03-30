@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 
 namespace Bing.Uow;
 
@@ -17,7 +15,8 @@ public interface IUnitOfWorkManager : IScopedDependency
     /// <summary>
     /// 提交
     /// </summary>
-    Task CommitAsync();
+    /// <param name="cancellationToken">取消令牌</param>
+    Task CommitAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 注册工作单元

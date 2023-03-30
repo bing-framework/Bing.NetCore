@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Logs;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Bing.Emailing.Smtp;
 
@@ -19,7 +18,11 @@ public class SmtpMailQueueManager : MailQueueManagerBase, IMailQueueManager
     /// <param name="emailConfigProvider">电子邮件配置提供器</param>
     /// <param name="mailQueueProvider">邮件队列提供程序</param>
     /// <param name="smtpEmailSender">SMTP电子邮件发送器</param>
-    public SmtpMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, ISmtpEmailSender smtpEmailSender) : base(emailConfigProvider, mailQueueProvider) => _smtpEmailSender = smtpEmailSender;
+    public SmtpMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, ISmtpEmailSender smtpEmailSender) 
+        : base(emailConfigProvider, mailQueueProvider)
+    {
+        _smtpEmailSender = smtpEmailSender;
+    }
 
     /// <summary>
     /// 发送邮件

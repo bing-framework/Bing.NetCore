@@ -1,8 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.MultiTenancy</AssemblyName>
+    <PackageId>Bing.MultiTenancy</PackageId>
+    <Description>Bing.MultiTenancy 是Bing应用框架的多租户类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 </Project>

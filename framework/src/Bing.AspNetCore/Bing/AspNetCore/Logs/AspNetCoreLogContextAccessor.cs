@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using Bing.AspNetCore.WebClientInfo;
+﻿using Bing.AspNetCore.WebClientInfo;
 using Bing.DependencyInjection;
 using Bing.Logging;
 using Bing.Tracing;

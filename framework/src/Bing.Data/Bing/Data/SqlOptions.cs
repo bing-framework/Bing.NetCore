@@ -21,4 +21,9 @@ public class SqlOptions
     /// 数据日志级别
     /// </summary>
     public DataLogLevel LogLevel { get; set; } = DataLogLevel.Sql;
+
+    /// <summary>
+    /// 日志类别
+    /// </summary>
+    public string LogCategory { get; set; } = "Bing.Data.Sql";
 }

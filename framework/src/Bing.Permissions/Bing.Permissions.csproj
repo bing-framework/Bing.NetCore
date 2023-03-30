@@ -1,8 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
 
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Permissions</AssemblyName>
+    <PackageId>Bing.Permissions</PackageId>
+    <Description>Bing.Permissions 是Bing应用框架的权限类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\common.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+  <ItemGroup>
+    <Compile Update="Properties\SecurityResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SecurityResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\SecurityResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SecurityResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Identity/Models/RoleBase.*.cs">
+      <DependentUpon>RoleBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Identity/Models/UserBase.*.cs">
+      <DependentUpon>UserBase.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Identity/Models/ApplicationBase.*.cs">
+      <DependentUpon>ApplicationBase.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>NETCOREAPP3_1</DefineConstants>
+  </PropertyGroup>
 
 </Project>

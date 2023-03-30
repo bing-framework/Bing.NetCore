@@ -3,5 +3,5 @@
 
   <Import Project="project.dependency.props" />
 
-  <Import Project="..\..\..\build\common.props"></Import>
+  <Import Project="..\..\..\common.props"></Import>
 </Project>

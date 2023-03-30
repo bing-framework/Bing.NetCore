@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.Data.Sql.Builders;
+﻿namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// 参数管理器

@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Users;
 

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
+﻿using System.IO.Compression;
 using System.Text;
-using System.Threading.Tasks;
 using Bing.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,21 +23,14 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     private readonly RequestResponseLoggerOptions _options;
 
     /// <summary>
-    /// 请求响应记录器
-    /// </summary>
-    private readonly IRequestResponseLogger _logger;
-
-    /// <summary>
     /// 初始化一个<see cref="RequestResponseLoggerMiddleware"/>类型的实例
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="options">请求响应记录器选项</param>
-    /// <param name="logger">请求响应记录器</param>
-    public RequestResponseLoggerMiddleware(RequestDelegate next, IOptions<RequestResponseLoggerOptions> options, IRequestResponseLogger logger)
+    public RequestResponseLoggerMiddleware(RequestDelegate next, IOptions<RequestResponseLoggerOptions> options)
     {
         _next = next;
         _options = options.Value;
-        _logger = logger;
     }
 
     /// <summary>
@@ -57,8 +45,9 @@ public class RequestResponseLoggerMiddleware : IMiddleware
             return;
         }
         var logCreator = context?.RequestServices?.GetRequiredService<IRequestResponseLogCreator>();
+        var logger = context?.RequestServices?.GetService<IRequestResponseLogger>();
         var log = logCreator?.Log;
-        if (log == null)
+        if (log == null || logger == null)
         {
             await _next(context);
             return;
@@ -125,7 +114,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
         }
 #endif
 
-        _logger.Log(logCreator);
+        logger.Log(logCreator);
     }
 
     /// <summary>

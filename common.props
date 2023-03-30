@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace/>
     <LangVersion>latest</LangVersion>
-    <NoWarn Condition=" '$(Configuration)' == 'Debug' ">$(NoWarn);NETSDK1138</NoWarn>
+    <NoWarn Condition=" '$(Configuration)' == 'Debug' ">$(NoWarn);CS1591;NETSDK1138</NoWarn>
     <NoWarn Condition=" '$(Configuration)' == 'Release' ">$(NoWarn);CS1591;NETSDK1138</NoWarn>
   </PropertyGroup>
 
@@ -21,6 +21,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!--移除Xml、DotSettings-->
+    <None Remove="$(AssemblyName).xml" />
+    <None Remove="$(AssemblyName).csproj.DotSettings" />
+  </ItemGroup>
 
   <Import Project="asset/props/target.feature.props"/>
 

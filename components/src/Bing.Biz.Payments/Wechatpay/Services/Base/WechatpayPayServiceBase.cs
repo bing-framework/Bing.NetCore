@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using Bing.Biz.Payments.Core;
+﻿using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
 using Bing.Biz.Payments.Wechatpay.Results;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Biz.Payments.Wechatpay.Services.Base;
 
@@ -15,7 +15,9 @@ public abstract class WechatpayPayServiceBase : WechatpayServiceBase<PayParam, W
     /// 初始化一个<see cref="WechatpayPayServiceBase"/>类型的实例
     /// </summary>
     /// <param name="configProvider">微信支付配置提供器</param>
-    protected WechatpayPayServiceBase(IWechatpayConfigProvider configProvider) : base(configProvider)
+    /// <param name="loggerFactory">日志工厂</param>
+    protected WechatpayPayServiceBase(IWechatpayConfigProvider configProvider, ILoggerFactory loggerFactory) 
+        : base(configProvider, loggerFactory)
     {
     }
 

@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Ddd.Domain</AssemblyName>
-    <PackageId>Bing.Ddd.Domain</PackageId>
-    <Description>Bing.Ddd.Domain 是Bing应用框架的领域模型中领域层类库。</Description>
-  </PropertyGroup>
-</Project>

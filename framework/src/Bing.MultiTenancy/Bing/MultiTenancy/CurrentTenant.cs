@@ -9,6 +9,11 @@ namespace Bing.MultiTenancy;
 public class CurrentTenant : ICurrentTenant, ITransientDependency
 {
     /// <summary>
+    /// 当前租户访问器
+    /// </summary>
+    private readonly ICurrentTenantAccessor _currentTenantAccessor;
+
+    /// <summary>
     /// 是否可用的
     /// </summary>
     public virtual bool IsAvailable => !string.IsNullOrWhiteSpace(Id);
@@ -27,11 +32,6 @@ public class CurrentTenant : ICurrentTenant, ITransientDependency
     /// 租户名称
     /// </summary>
     public string Name => _currentTenantAccessor.Current?.Name;
-
-    /// <summary>
-    /// 当前租户访问器
-    /// </summary>
-    private readonly ICurrentTenantAccessor _currentTenantAccessor;
 
     /// <summary>
     /// 初始化一个<see cref="CurrentTenant"/>类型的实例

@@ -3,6 +3,7 @@ using Bing.Biz.Payments.Tests.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 using Bing.Biz.Payments.Wechatpay.Services;
 using Bing.Extensions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Bing.Biz.Payments.Tests.Wechatpay.Services;
@@ -19,7 +20,7 @@ public class WechatpayDownloadBillServiceTest
     [Fact(Skip = "更改支付配置后测试")]
     public async Task Test_DownloadAsync()
     {
-        var service = new WechatpayDownloadBillService(new TestConfigProvider());
+        var service = new WechatpayDownloadBillService(new TestConfigProvider(), NullLoggerFactory.Instance);
         var request = new WechatpayDownloadBillRequest { BillDate = "2022-06-10".ToDate() };
         var result = await service.DownloadAsync(request);
         Assert.NotEmpty(result.Bills);

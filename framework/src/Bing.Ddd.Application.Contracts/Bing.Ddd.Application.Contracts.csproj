@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Ddd.Application.Contracts</AssemblyName>
+    <PackageId>Bing.Ddd.Application.Contracts</PackageId>
+    <Description>Bing.Ddd.Application.Contracts 是Bing应用框架的领域模型中应用层抽象类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Uow\Bing.Uow.csproj" />
-    <ProjectReference Include="..\Bing.Validation\Bing.Validation.csproj" />
-  </ItemGroup>
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

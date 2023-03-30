@@ -42,6 +42,7 @@ dotnet pack src/Bing.Data.Sql -c Release -o nuget_pub
 
 ::Domain
 dotnet pack src/Bing.Uow -c Release -o nuget_pub
+dotnet pack src/Bing.Auditing.Contracts -c Release -o nuget_pub
 dotnet pack src/Bing.Auditing -c Release -o nuget_pub
 dotnet pack src/Bing.Ddd.Domain -c Release -o nuget_pub
 

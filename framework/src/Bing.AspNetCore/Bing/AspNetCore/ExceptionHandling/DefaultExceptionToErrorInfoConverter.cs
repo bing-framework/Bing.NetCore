@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.AspNetCore.Mvc;
+﻿using Bing.AspNetCore.Mvc;
 using Bing.DependencyInjection;
 using Bing.Exceptions;
 using Bing.Http;

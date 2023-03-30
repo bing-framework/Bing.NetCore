@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="Bing.Utils.Reflection" Version="$(BingUtilsPackageVersion)" />
+  </ItemGroup>
+</Project>

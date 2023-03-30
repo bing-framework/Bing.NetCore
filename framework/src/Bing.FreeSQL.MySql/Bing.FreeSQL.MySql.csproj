@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.FreeSQL.MySql</AssemblyName>
+    <PackageId>Bing.FreeSQL.MySql</PackageId>
+    <Description>Bing.FreeSQL.MySql 是Bing应用框架的FreeSQL.MySql数据访问类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

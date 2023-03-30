@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Matedatas;
 
 namespace Bing.Data.Sql.Builders.Core;
 

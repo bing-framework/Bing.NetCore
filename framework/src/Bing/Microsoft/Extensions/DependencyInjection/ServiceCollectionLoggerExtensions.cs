@@ -39,8 +39,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="lifetime">生命周期</param>
     public static IServiceCollection ServiceLogDebug<TServiceType, TImplementType>(this IServiceCollection services, string logName, ServiceLifetime lifetime = ServiceLifetime.Singleton)
     {
-        var serviceType = typeof(TServiceType);
-        var implementType = typeof(TImplementType);
+        Type serviceType = typeof(TServiceType), implementType = typeof(TImplementType);
         return services.ServiceLogDebug(serviceType, implementType, logName, lifetime);
     }
 
@@ -54,11 +53,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="lifetime">生命周期</param>
     public static IServiceCollection ServiceLogDebug(this IServiceCollection services, Type serviceType, Type implementType, string logName, ServiceLifetime lifetime = ServiceLifetime.Singleton)
     {
-        var lifetimeType = lifetime == ServiceLifetime.Singleton
-            ? "单例"
-            : lifetime == ServiceLifetime.Scoped
-                ? "作用域"
-                : "瞬时";
+        var lifetimeType = lifetime == ServiceLifetime.Singleton ? "单例" : lifetime == ServiceLifetime.Scoped ? "作用域" : "瞬时";
         return services.LogDebug($"添加服务: {lifetimeType}, {serviceType.FullName} -> {implementType.FullName}", logName);
     }
 

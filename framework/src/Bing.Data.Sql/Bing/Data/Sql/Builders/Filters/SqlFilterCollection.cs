@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.Data.Sql.Builders.Filters;
+﻿namespace Bing.Data.Sql.Builders.Filters;
 
 /// <summary>
 /// Sql过滤器集合

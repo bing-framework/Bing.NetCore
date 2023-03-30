@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Biz.Payments.Core;
+﻿using Bing.Biz.Payments.Core;
 using Bing.Biz.Payments.Wechatpay.Abstractions;
 using Bing.Biz.Payments.Wechatpay.Configs;
 using Bing.Biz.Payments.Wechatpay.Parameters;
@@ -9,6 +8,7 @@ using Bing.Biz.Payments.Wechatpay.Services.Base;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Biz.Payments.Wechatpay.Services;
 
@@ -21,7 +21,9 @@ public class WechatpayJsApiPayService : WechatpayPayServiceBase, IWechatpayJsApi
     /// 初始化一个<see cref="WechatpayJsApiPayService"/>类型的实例
     /// </summary>
     /// <param name="configProvider">微信支付配置提供器</param>
-    public WechatpayJsApiPayService(IWechatpayConfigProvider configProvider) : base(configProvider)
+    /// <param name="loggerFactory">日志工厂</param>
+    public WechatpayJsApiPayService(IWechatpayConfigProvider configProvider, ILoggerFactory loggerFactory) 
+        : base(configProvider, loggerFactory)
     {
     }
 

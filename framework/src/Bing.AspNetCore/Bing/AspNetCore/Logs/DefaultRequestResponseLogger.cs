@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Bing.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.AspNetCore.Logs;
 
@@ -22,5 +23,44 @@ public class DefaultRequestResponseLogger : IRequestResponseLogger
     /// 写入日志
     /// </summary>
     /// <param name="logCreator">请求响应日志创建者</param>
-    public void Log(IRequestResponseLogCreator logCreator) => _logger.LogDebug(logCreator.ToJsonString());
+    public void Log(IRequestResponseLogCreator logCreator)
+    {
+        if (_logger.IsEnabled(LogLevel.Trace) == false)
+            return;
+        var dict = new Dictionary<string, object>
+        {
+            { "RequestBody", logCreator.Log.RequestBody } ,
+            { "ResponseBody", logCreator.Log.ResponseBody } ,
+            { "RequestHeaders", logCreator.Log.RequestHeaders } ,
+            { "ResponseHeaders", logCreator.Log.ResponseHeaders } ,
+            { "ExceptionStackTrace", logCreator.Log.ExceptionStackTrace } ,
+
+        };
+        using (_logger.BeginScope(dict))
+        {
+            if (logCreator.Log.IsExceptionActionLevel.HasValue && logCreator.Log.IsExceptionActionLevel.SafeValue())
+            {
+                _logger.LogError("{RequestDateTime:yyyy-MM-dd HH:mm:ss.fff} | {Node} | {ClientIp} | {RequestMethod} | {RequestPath}{RequestQuery} | {ExceptionMessage} | {ResponseDateTime:yyyy-MM-dd HH:mm:ss.fff}",
+                    logCreator.Log.RequestDateTimeUtc.SafeValue().ToLocalTime(),
+                    logCreator.Log.Node,
+                    logCreator.Log.ClientIp,
+                    logCreator.Log.RequestMethod,
+                    logCreator.Log.RequestPath,
+                    logCreator.Log.RequestQuery,
+                    logCreator.Log.ExceptionMessage,
+                    logCreator.Log.ResponseDateTimeUtc.SafeValue().ToLocalTime());
+            }
+            else
+            {
+                _logger.LogTrace("{RequestDateTime:yyyy-MM-dd HH:mm:ss.fff} | {Node} | {ClientIp} | {RequestMethod} | {RequestPath}{RequestQuery} | {ResponseDateTime:yyyy-MM-dd HH:mm:ss.fff}",
+                    logCreator.Log.RequestDateTimeUtc.SafeValue().ToLocalTime(),
+                    logCreator.Log.Node,
+                    logCreator.Log.ClientIp,
+                    logCreator.Log.RequestMethod,
+                    logCreator.Log.RequestPath,
+                    logCreator.Log.RequestQuery,
+                    logCreator.Log.ResponseDateTimeUtc.SafeValue().ToLocalTime());
+            }
+        }
+    }
 }

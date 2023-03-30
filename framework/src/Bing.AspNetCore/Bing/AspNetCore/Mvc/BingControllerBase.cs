@@ -1,12 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Bing.Aspects;
+﻿using Bing.Aspects;
 using Bing.DependencyInjection;
-using Bing.Logs;
-using Bing.Logs.Core;
+using Bing.Helpers;
+using Bing.Logging;
 using Bing.Users;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.AspNetCore.Mvc;
@@ -14,7 +11,7 @@ namespace Bing.AspNetCore.Mvc;
 /// <summary>
 /// Bing抽象控制器基类
 /// </summary>
-public abstract class BingControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
+public abstract class BingControllerBase : ControllerBase
 {
     /// <summary>
     /// Lazy延迟加载服务提供程序
@@ -25,75 +22,52 @@ public abstract class BingControllerBase : ControllerBase, IAsyncResultFilter, I
     /// <summary>
     /// 当前用户
     /// </summary>
-    protected ICurrentUser CurrentUser { get; private set; }
+    protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
+
+    /// <summary>
+    /// 日志工厂
+    /// </summary>
+    protected ILogFactory LogFactory => LazyServiceProvider.LazyGetRequiredService<ILogFactory>();
 
     /// <summary>
     /// 日志
     /// </summary>
-    protected ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
-
-    /// <summary>
-    /// 执行结果之前。在执行结果之前异步调用。
-    /// </summary>
-    /// <param name="context">执行结果上下文</param>
-    /// <param name="next">委托</param>
-    [NonAction]
-    public virtual Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next) => next();
-
-    /// <summary>
-    /// 执行操作之前。在模型绑定完成之后，在执行操作之前调用。
-    /// </summary>
-    /// <param name="context">操作执行上下文</param>
-    [NonAction]
-    public virtual void OnActionExecuting(ActionExecutingContext context)
-    {
-    }
-
-    /// <summary>
-    /// 执行操作之后。在操作执行之后，操作结果执行之前调用。
-    /// </summary>
-    /// <param name="context">已执行操作上下文</param>
-    [NonAction]
-    public virtual void OnActionExecuted(ActionExecutedContext context)
-    {
-    }
-
-    /// <summary>
-    /// 执行操作之前。在模型绑定完成之后，在执行操作之前异步调用。
-    /// </summary>
-    /// <param name="context">执行操作上下文</param>
-    /// <param name="next">委托</param>
-    [NonAction]
-    public virtual async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-    {
-        if (context == null)
-            throw new ArgumentNullException(nameof(context));
-        if (next == null)
-            throw new ArgumentNullException(nameof(next));
-        CurrentUser = HttpContext.RequestServices.GetService<ICurrentUser>();
-
-        OnActionExecuting(context);
-
-        if (context.Result != null)
-            return;
-        OnActionExecuted(await next());
-    }
+    protected ILog Log => LazyServiceProvider.LazyGetService<ILog>(provider => LogFactory?.CreateLog(GetType().FullName) ?? NullLog.Instance);
 
     /// <summary>
     /// 返回成功消息
     /// </summary>
     /// <param name="data">数据</param>
     /// <param name="message">消息</param>
-    protected virtual IActionResult Success(dynamic data = null, string message = null)
+    /// <param name="statusCode">Http状态码</param>
+    protected virtual IActionResult Success(dynamic data = null, string message = null, int? statusCode = 200)
     {
-        if (message == null)
-            message = Bing.Properties.R.Success;
-        return new ApiResult(Bing.AspNetCore.Mvc.StatusCode.Ok, message, data);
+        message ??= Bing.Properties.R.Success;
+        return GetResult(Mvc.StatusCode.Ok.ToString("d"), message, data, statusCode);
     }
 
     /// <summary>
     /// 返回失败消息
     /// </summary>
     /// <param name="message">消息</param>
-    protected IActionResult Fail(string message) => new ApiResult(Bing.AspNetCore.Mvc.StatusCode.Fail, message);
+    /// <param name="statusCode">Http状态码</param>
+    protected virtual IActionResult Fail(string message, int? statusCode = 200)
+    {
+        return GetResult(Bing.AspNetCore.Mvc.StatusCode.Fail.ToString("d"), message, null, statusCode);
+    }
+
+    /// <summary>
+    /// 获取结果
+    /// </summary>
+    /// <param name="code">业务状态码</param>
+    /// <param name="message">消息</param>
+    /// <param name="data">数据</param>
+    /// <param name="httpStatusCode">Http状态码</param>
+    private IActionResult GetResult(string code, string message, dynamic data, int? httpStatusCode)
+    {
+        var factory = HttpContext.RequestServices.GetService<IResultFactory>();
+        if (factory == null)
+            return new ApiResult(Conv.ToInt(code), message, data, httpStatusCode);
+        return factory.Create(code, message, data, httpStatusCode);
+    }
 }

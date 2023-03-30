@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Bing.Collections;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logging.Core;
 using Bing.Text;
@@ -18,6 +16,12 @@ public class Log : ILog
     /// 当前的日志事件描述符
     /// </summary>
     private LogEventDescriptor CurrentDescriptor { get; set; }
+
+    /// <summary>
+    /// 日志错误事件ID
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    public static readonly EventId LogErrorEventId = new(91000);
 
     #endregion
 
@@ -253,8 +257,6 @@ public class Log : ILog
             return;
         if (!string.IsNullOrWhiteSpace(LogContext.TraceId))
             Property("TraceId", LogContext.TraceId);
-        if (LogContext.Stopwatch != null)
-            Property("Duration", LogContext.Stopwatch.Elapsed.Description());
     }
 
     /// <summary>
@@ -269,7 +271,7 @@ public class Log : ILog
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            if (LogProperties.ContainsKey(item.Key)) 
+            if (LogProperties.ContainsKey(item.Key))
                 LogProperties[item.Key] = item.Value;
             else
                 LogProperties.Add(item.Key, item.Value);
@@ -286,7 +288,7 @@ public class Log : ILog
         var result = new StringBuilder();
         result.Append("[");
         // 解决遍历时，字典更新的问题
-        foreach (var item in LogProperties.AsReadOnlyDictionary())
+        foreach (var item in LogProperties.ToList())
         {
             result.Append(item.Key);
             result.Append(":{");
@@ -308,7 +310,7 @@ public class Log : ILog
         if (LogProperties.Count == 0)
             return LogMessageArgs.ToArray();
         var result = new List<object>();
-        result.AddRange(LogProperties.Values);
+        result.AddRange(LogProperties.Values);//TODO: 此处造成字符串拼接异常
         result.AddRange(LogMessageArgs);
         return result.ToArray();
     }
@@ -339,6 +341,11 @@ public class Log : ILog
                 Logger.Log(LogLevel, LogEventId, GetContent(), LogException, GetFormatMessage);
                 return this;
             }
+        }
+        catch (Exception e)
+        {
+            Logger.LogCritical(LogErrorEventId, e, $"未知异常错误信息: {e.Message}. MemberName={memberName},FilePath={sourceFilePath},LineNumber={sourceLineNumber}.");
+            return this;
         }
         finally
         {

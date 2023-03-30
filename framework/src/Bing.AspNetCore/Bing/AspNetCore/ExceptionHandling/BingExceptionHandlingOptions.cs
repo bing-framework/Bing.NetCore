@@ -1,7 +1,5 @@
-﻿using System;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace Bing.AspNetCore.ExceptionHandling;
 
@@ -14,6 +12,11 @@ public class BingExceptionHandlingOptions
     /// 发送异常详情到客户端
     /// </summary>
     public bool SendExceptionDetailsToClients { get; set; } = false;
+
+    /// <summary>
+    /// 发送堆栈跟踪信息到客户端
+    /// </summary>
+    public bool SendStackTraceToClients { get; set; } = true;
 
     /// <summary>
     /// 额外异常

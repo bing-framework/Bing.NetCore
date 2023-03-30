@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Ddd.Application</AssemblyName>
-    <PackageId>Bing.Ddd.Application</PackageId>
-    <Description>Bing.Ddd.Application 是Bing应用框架的领域模型中应用层类库。</Description>
-  </PropertyGroup>
-</Project>

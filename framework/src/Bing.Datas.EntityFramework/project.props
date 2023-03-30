@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Datas.EntityFramework</AssemblyName>
-    <PackageId>Bing.Datas.EntityFramework</PackageId>
-    <Description>Bing.Datas.EntityFramework 是Bing应用框架的EntityFrameworkCore数据访问核心类库。</Description>
-  </PropertyGroup>
-</Project>

@@ -1,11 +1,9 @@
-﻿using System.Threading.Tasks;
-using Bing.Biz.Payments.Alipay.Configs;
+﻿using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Parameters;
 using Bing.Biz.Payments.Alipay.Results;
 using Bing.Biz.Payments.Core;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Logs;
 
 namespace Bing.Biz.Payments.Alipay.Services.Base;
 
@@ -134,25 +132,25 @@ public abstract class AlipayServiceBase : IPayService
     /// <param name="result">支付宝结果</param>
     protected void WriteLog(AlipayConfig config, AlipayParameterBuilder builder, AlipayResult result)
     {
-        var log = GetLog();
-        if (log.IsTraceEnabled == false)
-            return;
-        log.Class(GetType().FullName)
-            .Caption("支付宝支付")
-            .Content($"支付宝方式 : {GetPayWay().Description()}")
-            .Content($"支付网关 : {config.GetGatewayUrl()}")
-            .Content("请求参数:")
-            .Content(builder.GetDictionary())
-            .Content()
-            .Content("返回结果:")
-            .Content(result.GetDictionary())
-            .Content()
-            .Content("原始请求:")
-            .Content(builder.ToString())
-            .Content()
-            .Content("原始响应:")
-            .Content(result.Raw)
-            .Trace();
+        //var log = GetLog();
+        //if (log.IsTraceEnabled == false)
+        //    return;
+        //log.Class(GetType().FullName)
+        //    .Caption("支付宝支付")
+        //    .Content($"支付宝方式 : {GetPayWay().Description()}")
+        //    .Content($"支付网关 : {config.GetGatewayUrl()}")
+        //    .Content("请求参数:")
+        //    .Content(builder.GetDictionary())
+        //    .Content()
+        //    .Content("返回结果:")
+        //    .Content(result.GetDictionary())
+        //    .Content()
+        //    .Content("原始请求:")
+        //    .Content(builder.ToString())
+        //    .Content()
+        //    .Content("原始响应:")
+        //    .Content(result.Raw)
+        //    .Trace();
     }
 
     /// <summary>
@@ -163,27 +161,27 @@ public abstract class AlipayServiceBase : IPayService
     /// <param name="content">内容</param>
     protected void WriteLog(AlipayConfig config, AlipayParameterBuilder builder, string content)
     {
-        var log = GetLog();
-        if (log.IsTraceEnabled == false)
-            return;
-        log.Class(GetType().FullName)
-            .Content($"支付方式 : {GetPayWay().Description()}")
-            .Content($"支付网关 : {config.GetGatewayUrl()}")
-            .Content("请求参数:")
-            .Content(builder.GetDictionary())
-            .Content()
-            .Content("原始请求:")
-            .Content(builder.ToString())
-            .Content()
-            .Content("内容:")
-            .Content(content)
-            .Trace();
+        //var log = GetLog();
+        //if (log.IsTraceEnabled == false)
+        //    return;
+        //log.Class(GetType().FullName)
+        //    .Content($"支付方式 : {GetPayWay().Description()}")
+        //    .Content($"支付网关 : {config.GetGatewayUrl()}")
+        //    .Content("请求参数:")
+        //    .Content(builder.GetDictionary())
+        //    .Content()
+        //    .Content("原始请求:")
+        //    .Content(builder.ToString())
+        //    .Content()
+        //    .Content("内容:")
+        //    .Content(content)
+        //    .Trace();
     }
 
-    /// <summary>
-    /// 获取日志操作
-    /// </summary>
-    private ILog GetLog() => Log.GetLog(AlipayConst.TraceLogName);
+    ///// <summary>
+    ///// 获取日志操作
+    ///// </summary>
+    //private ILog GetLog() => Log.GetLog(AlipayConst.TraceLogName);
 
     /// <summary>
     /// 获取支付方式

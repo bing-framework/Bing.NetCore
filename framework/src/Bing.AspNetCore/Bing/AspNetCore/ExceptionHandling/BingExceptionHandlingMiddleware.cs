@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Bing.ExceptionHandling;
+﻿using Bing.ExceptionHandling;
 using Bing.Helpers;
 using Bing.Http;
 using Bing.Utils.Json;

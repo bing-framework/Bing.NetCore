@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Sql.Builders;
+﻿namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// From子句

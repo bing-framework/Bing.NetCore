@@ -1,8 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Logging.Serilog</AssemblyName>
-    <PackageId>Bing.Logging.Serilog</PackageId>
-    <Description>Bing.Logging.Serilog是Bing应用框架的集成封装Serilog日志框架的核心类库，它包含了写入文件和Seq。</Description>
-  </PropertyGroup>
-
-</Project>

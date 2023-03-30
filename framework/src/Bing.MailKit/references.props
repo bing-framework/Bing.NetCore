@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Emailing\Bing.Emailing.csproj" />
+  </ItemGroup>
+</Project>

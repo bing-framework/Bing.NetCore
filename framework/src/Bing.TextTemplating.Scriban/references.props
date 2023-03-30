@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.TextTemplating\Bing.TextTemplating.csproj" />
+  </ItemGroup>
+</Project>

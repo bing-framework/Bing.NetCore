@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Security.Claims;

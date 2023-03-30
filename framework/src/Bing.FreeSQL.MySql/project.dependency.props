@@ -1,9 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.FreeSQL\Bing.FreeSQL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="$(FreeSQLPackageVersion)" />
-  </ItemGroup>
-</Project>

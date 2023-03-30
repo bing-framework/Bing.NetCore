@@ -1,8 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using Bing.Logs;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Emailing;
 

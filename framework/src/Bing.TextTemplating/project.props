@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.TextTemplating</AssemblyName>
-    <PackageId>Bing.TextTemplating</PackageId>
-    <Description>Bing.TextTemplating是文本模板抽象类库。</Description>
-  </PropertyGroup>
-</Project>

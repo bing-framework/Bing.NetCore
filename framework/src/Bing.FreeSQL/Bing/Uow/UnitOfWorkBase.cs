@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Bing.Aspects;
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
@@ -189,11 +190,12 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 提交，返回影响的行数
     /// </summary>
-    public async Task<int> CommitAsync()
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return await SaveChangesAsync();
+            return await SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {

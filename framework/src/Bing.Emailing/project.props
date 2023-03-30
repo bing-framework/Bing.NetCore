@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Emailing</AssemblyName>
-    <PackageId>Bing.Emailing</PackageId>
-    <Description>Bing.Emailing 是邮件操作类库。</Description>
-  </PropertyGroup>
-</Project>

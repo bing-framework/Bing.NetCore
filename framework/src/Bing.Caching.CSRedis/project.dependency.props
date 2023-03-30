@@ -1,9 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CSRedisCore" Version="3.6.6" />
-  </ItemGroup>
-</Project>

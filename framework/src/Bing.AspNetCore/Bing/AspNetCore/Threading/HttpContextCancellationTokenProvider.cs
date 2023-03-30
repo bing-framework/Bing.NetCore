@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;

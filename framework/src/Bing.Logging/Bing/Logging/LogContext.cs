@@ -13,11 +13,6 @@ public class LogContext
     public LogContext() => Data = new Dictionary<string, object>();
 
     /// <summary>
-    /// 计时器
-    /// </summary>
-    public Stopwatch Stopwatch { get; set; }
-
-    /// <summary>
     /// 跟踪标识
     /// </summary>
     public string TraceId { get; set; }

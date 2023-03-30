@@ -25,6 +25,8 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <exception cref="ArgumentNullException"></exception>
     public void AddItem(string name, object value, bool output = true)
     {
+        if (value is null)
+            return;
         if (ContainsKey(name))
             throw new ArgumentException($"Key '{name}' has been added.", nameof(name));
         if (value is ContextDataItem item)
@@ -41,6 +43,10 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <param name="output">是否输出</param>
     public void AddOrUpdateItem(string name, object value, bool output = true)
     {
+        if (value is null)
+            return;
+        if (string.IsNullOrWhiteSpace(name))
+            return;
         if (value is ContextDataItem item)
             AddOrUpdateInternal(item.Name, item);
         else
@@ -54,6 +60,10 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <param name="item">项</param>
     private void AddOrUpdateInternal(string name, ContextDataItem item)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+        if (item == null)
+            return;
         if (ContainsKey(name))
             this[name] = item;
         else

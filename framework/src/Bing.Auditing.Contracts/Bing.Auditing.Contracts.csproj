@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Auditing.Contracts</AssemblyName>
+    <PackageId>Bing.Auditing.Contracts</PackageId>
+    <Description>Bing.Auditing.Contracts 是Bing应用框架的审计功能抽象类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+</Project>

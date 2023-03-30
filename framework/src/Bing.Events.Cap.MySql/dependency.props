@@ -1,0 +1,8 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP" Version="3.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.10" />
+    <PackageReference Include="MySqlConnector" Version="0.60.3" />
+  </ItemGroup>
+</Project>

@@ -72,7 +72,8 @@ public class RealIpMiddleware : IMiddleware
         if (headers.ContainsKey(key))
         {
             headers.TryGetValue(key, out var ip);
-            _logger.LogDebug($"解析真实IP地址: {ip}");
+
+            WriteLog($"解析真实IP地址: {ip}");
             if (string.IsNullOrEmpty(ip) == false && ip.ToString().ToLower() != "unknown")
             {
                 var tmpIp = key.Equals("x-forwarded-for", StringComparison.CurrentCultureIgnoreCase)
@@ -80,7 +81,7 @@ public class RealIpMiddleware : IMiddleware
                     : ip.ToString();
                 if (IPAddress.TryParse(tmpIp, out var ipAddress))
                 {
-                    _logger.LogDebug($"解析真实IP成功: {ipAddress}");
+                    WriteLog($"解析真实IP成功: {ipAddress}");
                     return ipAddress;
                 }
 
@@ -89,6 +90,17 @@ public class RealIpMiddleware : IMiddleware
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// 写入日志
+    /// </summary>
+    /// <param name="message">消息</param>
+    private void WriteLog(string message)
+    {
+        if (_logger.IsEnabled(LogLevel.Trace)==false)
+            return;
+        _logger.LogTrace(message);
     }
 }
 

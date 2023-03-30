@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Bing.Logs;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Data.Test.Integration.Samples;
 

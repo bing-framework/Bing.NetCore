@@ -1,9 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
 
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.AspNetCore.Authentication.JwtBearer</AssemblyName>
+    <PackageId>Bing.AspNetCore.Authentication.JwtBearer</PackageId>
+    <Description>Bing.AspNetCore.Authentication.JwtBearer 是Bing应用框架的基于Jwt授权类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\common.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
   <ItemGroup>
     <Folder Include="Bing\AspNetCore\" />

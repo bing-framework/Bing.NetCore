@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.AspNetCore.Mvc.Contracts</AssemblyName>
+    <PackageId>Bing.AspNetCore.Mvc.Contracts</PackageId>
+    <Description>Bing.AspNetCore.Mvc.Contracts 组件，抽象MVC的功能。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props"/>
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
 
 </Project>

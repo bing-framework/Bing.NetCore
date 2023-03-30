@@ -1,7 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <AssemblyName>Bing.Logs.Serilog</AssemblyName>
-    <PackageId>Bing.Logs.Serilog</PackageId>
-    <Description>Bing.Logs.Serilog是Bing应用框架的serilog日志操作类库。</Description>
-  </PropertyGroup>
-</Project>

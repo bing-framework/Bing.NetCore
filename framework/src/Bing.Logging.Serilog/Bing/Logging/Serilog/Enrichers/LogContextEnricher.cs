@@ -1,5 +1,4 @@
 ﻿using Bing.DependencyInjection;
-using Bing.Extensions;
 using Bing.Tracing;
 
 namespace Bing.Logging.Serilog.Enrichers;
@@ -30,7 +29,6 @@ internal class LogContextEnricher : ILogEventEnricher
         if (_context == null)
             return;
         //RemoveProperties(logEvent);
-        AddDuration(logEvent, propertyFactory);
         AddTraceId(logEvent, propertyFactory);
         AddUserId(logEvent, propertyFactory);
         AddApplication(logEvent, propertyFactory);
@@ -49,17 +47,6 @@ internal class LogContextEnricher : ILogEventEnricher
         logEvent.RemovePropertyIfPresent("RequestId");
         logEvent.RemovePropertyIfPresent("RequestPath");
         logEvent.RemovePropertyIfPresent("ConnectionId");
-    }
-
-    /// <summary>
-    /// 添加执行持续时间
-    /// </summary>
-    private void AddDuration(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        if (_context.Stopwatch == null)
-            return;
-        var property = propertyFactory.CreateProperty("Duration", _context.Stopwatch.Elapsed.Description());
-        logEvent.AddOrUpdateProperty(property);
     }
 
     /// <summary>

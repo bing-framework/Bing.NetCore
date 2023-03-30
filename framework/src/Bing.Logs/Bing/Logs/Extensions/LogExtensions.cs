@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
 
@@ -16,6 +14,81 @@ namespace Bing.Logs;
 /// </summary>
 public static partial class LogExtensions
 {
+    #region Content(设置内容)
+
+    /// <summary>
+    /// 设置内容
+    /// </summary>
+    /// <param name="log">日志操作</param>
+    public static ILog Content(this ILog log) => log.Set<ILogContent>(content => content.Content(""));
+
+    /// <summary>
+    /// 设置内容
+    /// </summary>
+    /// <param name="log">日志操作</param>
+    /// <param name="value">值</param>
+    public static ILog Content(this ILog log, string value) => log.Set<ILogContent>(content => content.Content(value));
+
+    /// <summary>
+    /// 设置内容
+    /// </summary>
+    /// <param name="log">日志操作</param>
+    /// <param name="dictionary">字典</param>
+    public static ILog Content(this ILog log, IDictionary<string, object> dictionary)
+    {
+        if (dictionary == null)
+            return log;
+        return Content(log, dictionary.ToDictionary(t => t.Key, t => t.Value.SafeString()));
+    }
+
+    /// <summary>
+    /// 设置内容
+    /// </summary>
+    /// <param name="log">日志操作</param>
+    /// <param name="dictionary">字典</param>
+    public static ILog Content(this ILog log, IDictionary<string, string> dictionary)
+    {
+        if (dictionary == null)
+            return log;
+        foreach (var keyValue in dictionary)
+            log.Set<ILogContent>(content => content.Content($"{keyValue.Key} : {keyValue.Value}"));
+        return log;
+    }
+
+    #endregion
+
+    #region Tag(设置标签)
+
+    /// <summary>
+    /// 设置标签
+    /// </summary>
+    /// <param name="log">日志操作</param>
+    /// <param name="tag">标签</param>
+    public static ILog Tag(this ILog log, string tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag))
+            return log;
+        log.Set<ILogContent>(content => content.Tags.Add(tag));
+        return log;
+    }
+
+    /// <summary>
+    /// 设置标签
+    /// </summary>
+    /// <param name="log">日志操作</param>
+    /// <param name="tags">标签</param>
+    public static ILog Tags(this ILog log, params string[] tags)
+    {
+        if (tags == null)
+            return log;
+        log.Set<ILogContent>(content => content.Tags.AddRange(tags));
+        return log;
+    }
+
+    #endregion
+
+    #region BusinessId(设置业务编号)
+
     /// <summary>
     /// 设置业务编号
     /// </summary>
@@ -31,12 +104,20 @@ public static partial class LogExtensions
         });
     }
 
+    #endregion
+
+    #region Module(设置模块)
+
     /// <summary>
     /// 设置模块
     /// </summary>
     /// <param name="log">日志操作</param>
     /// <param name="module">业务编号</param>
     public static ILog Module(this ILog log, string module) => log.Set<LogContent>(content => content.Module = module);
+
+    #endregion
+
+    #region Class(设置类名)
 
     /// <summary>
     /// 设置类名
@@ -45,12 +126,20 @@ public static partial class LogExtensions
     /// <param name="class">类名</param>
     public static ILog Class(this ILog log, string @class) => log.Set<LogContent>(content => content.Class = @class);
 
+    #endregion
+
+    #region Method(设置方法)
+
     /// <summary>
     /// 设置方法
     /// </summary>
     /// <param name="log">日志操作</param>
     /// <param name="method">方法</param>
     public static ILog Method(this ILog log, string method) => log.Set<LogContent>(content => content.Method = method);
+
+    #endregion
+
+    #region Params(设置参数)
 
     /// <summary>
     /// 设置参数
@@ -95,6 +184,10 @@ public static partial class LogExtensions
         return log;
     }
 
+    #endregion
+
+    #region Caption(设置标题)
+
     /// <summary>
     /// 设置标题
     /// </summary>
@@ -108,6 +201,10 @@ public static partial class LogExtensions
     /// <param name="log">日志操作</param>
     /// <param name="caption">标题</param>
     public static ILog AppendCaption(this ILog log, string caption) => log.Set<LogContent>(content => content.Caption = $"{content.Caption}{caption}");
+
+    #endregion
+
+    #region Sql(设置Sql)
 
     /// <summary>
     /// 设置Sql语句
@@ -165,6 +262,10 @@ public static partial class LogExtensions
         }
     }
 
+    #endregion
+
+    #region Excption(设置异常)
+
     /// <summary>
     /// 设置异常
     /// </summary>
@@ -194,6 +295,10 @@ public static partial class LogExtensions
         return Exception(log, exception, exception.Code);
     }
 
+    #endregion
+
+    #region AddExtraProperty(设置扩展属性)
+
     /// <summary>
     /// 添加扩展属性
     /// </summary>
@@ -201,4 +306,7 @@ public static partial class LogExtensions
     /// <param name="name">名称</param>
     /// <param name="value">值</param>
     public static ILog AddExtraProperty(this ILog log, string name, object value) => log.Set<LogContent>(content => content.AddExtraProperty(name, value));
+
+    #endregion
+
 }

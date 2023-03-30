@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using Bing.Logs;
+﻿using System.Net;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.AspNetCore.Security;
 
@@ -11,6 +9,11 @@ namespace Bing.AspNetCore.Security;
 /// </summary>
 public class AdminSafeListMiddleware : IMiddleware
 {
+    /// <summary>
+    /// 日志
+    /// </summary>
+    private readonly ILogger<AdminSafeListMiddleware> _logger;
+
     /// <summary>
     /// 方法
     /// </summary>
@@ -26,10 +29,12 @@ public class AdminSafeListMiddleware : IMiddleware
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="whitelist">IP白名单</param>
-    public AdminSafeListMiddleware(RequestDelegate next, string whitelist)
+    /// <param name="logger">日志</param>
+    public AdminSafeListMiddleware(RequestDelegate next, string whitelist, ILogger<AdminSafeListMiddleware> logger)
     {
         _next = next;
         _whitelist = whitelist;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,8 +46,8 @@ public class AdminSafeListMiddleware : IMiddleware
         if (context.Request.Method != "GET")
         {
             var remoteIp = context.Connection.RemoteIpAddress;
-            var log = Log.GetLog(this);
-            log.Debug($"来自远程IP地址的请求：{remoteIp}");
+            if(_logger.IsEnabled(LogLevel.Trace)) 
+                _logger.LogTrace($"来自远程IP地址的请求：{remoteIp}");
 
             var ips = _whitelist.Split(';');
             var bytes = remoteIp.GetAddressBytes();
@@ -59,7 +64,7 @@ public class AdminSafeListMiddleware : IMiddleware
 
             if (badIp)
             {
-                log.Info($"来自远程IP地址的禁止请求：{remoteIp}");
+                _logger.LogWarning($"来自远程IP地址的禁止请求：{remoteIp}");
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return;
             }

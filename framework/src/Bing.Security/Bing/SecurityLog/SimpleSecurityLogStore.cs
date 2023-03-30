@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -11,16 +10,6 @@ namespace Bing.SecurityLog;
 public class SimpleSecurityLogStore : ISecurityLogStore, ITransientDependency
 {
     /// <summary>
-    /// 日志
-    /// </summary>
-    public ILogger<SimpleSecurityLogStore> Logger { get; set; }
-
-    /// <summary>
-    /// 安全日志选项配置
-    /// </summary>
-    public BingSecurityLogOptions SecurityLogOptions { get; }
-
-    /// <summary>
     /// 初始化一个<see cref="SimpleSecurityLogStore"/>类型的实例
     /// </summary>
     /// <param name="logger">日志</param>
@@ -31,6 +20,15 @@ public class SimpleSecurityLogStore : ISecurityLogStore, ITransientDependency
         SecurityLogOptions = securityLogOptions.Value;
     }
 
+    /// <summary>
+    /// 日志
+    /// </summary>
+    public ILogger<SimpleSecurityLogStore> Logger { get; set; }
+
+    /// <summary>
+    /// 安全日志选项配置
+    /// </summary>
+    public BingSecurityLogOptions SecurityLogOptions { get; }
 
     /// <summary>
     /// 保存

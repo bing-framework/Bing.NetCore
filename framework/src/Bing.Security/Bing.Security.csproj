@@ -1,12 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="project.props" />
-
-  <Import Project="project.dependency.props" />
+  <PropertyGroup>
+    <AssemblyName>Bing.Security</AssemblyName>
+    <PackageId>Bing.Security</PackageId>
+    <Description>Bing.Security是Bing应用框架的安全权限类库。</Description>
+  </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
   <ItemGroup>
-    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <Folder Include="Bing\Authorization\Modules\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\SecurityResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SecurityResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\SecurityResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SecurityResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

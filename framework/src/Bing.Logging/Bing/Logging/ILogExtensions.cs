@@ -5,6 +5,8 @@
 /// </summary>
 public static class ILogExtensions
 {
+    #region Append(添加消息)
+
     /// <summary>
     /// 添加消息
     /// </summary>
@@ -70,6 +72,11 @@ public static class ILogExtensions
         return log;
     }
 
+
+    #endregion
+
+    #region Line(消息换行)
+
     /// <summary>
     /// 消息换行
     /// </summary>
@@ -82,6 +89,10 @@ public static class ILogExtensions
         return log;
     }
 
+    #endregion
+
+    #region ExtraProperty(设置扩展属性)
+
     /// <summary>
     /// 设置扩展属性
     /// </summary>
@@ -92,6 +103,20 @@ public static class ILogExtensions
         log.Set(x => x.Context.SetExtraProperty(propertyName, propertyValue));
 
     /// <summary>
+    /// 设置扩展属性，当条件为true时
+    /// </summary>
+    /// <param name="log">日志</param>
+    /// <param name="propertyName">属性名</param>
+    /// <param name="propertyValue">属性值</param>
+    /// <param name="condition">条件，值为true时，则添加扩展属性</param>
+    public static ILog ExtraPropertyIf(this ILog log, string propertyName, object propertyValue, bool condition) =>
+        !condition ? log : log.Set(x => x.Context.SetExtraProperty(propertyName, propertyValue));
+
+    #endregion
+
+    #region Tags(设置标签)
+
+    /// <summary>
     /// 设置标签列表
     /// </summary>
     /// <param name="log">日志</param>
@@ -99,9 +124,30 @@ public static class ILogExtensions
     public static ILog Tags(this ILog log, params string[] tags) => log.Set(x => x.Context.SetTags(tags));
 
     /// <summary>
+    /// 设置标签列表，当条件为true时
+    /// </summary>
+    /// <param name="log">日志</param>
+    /// <param name="condition">条件，值为true时，则添加标签列表</param>
+    /// <param name="tags">标签列表</param>
+    public static ILog TagsIf(this ILog log, bool condition, params string[] tags) =>
+        !condition ? log : log.Set(x => x.Context.SetTags(tags));
+
+    /// <summary>
     /// 设置标签
     /// </summary>
     /// <param name="log">日志</param>
     /// <param name="tag">标签</param>
     public static ILog Tag(this ILog log, string tag) => log.Set(x => x.Context.SetTags(tag));
+
+    /// <summary>
+    /// 设置标签，当条件为true时
+    /// </summary>
+    /// <param name="log">日志</param>
+    /// <param name="tag">标签</param>
+    /// <param name="condition">条件，值为true时，则添加标签</param>
+    public static ILog TagIf(this ILog log, string tag, bool condition) =>
+        !condition ? log : log.Set(x => x.Context.SetTags(tag));
+
+    #endregion
+
 }
