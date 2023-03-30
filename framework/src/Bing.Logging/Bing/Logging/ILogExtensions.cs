@@ -5,6 +5,8 @@
 /// </summary>
 public static class ILogExtensions
 {
+    #region Append(添加消息)
+
     /// <summary>
     /// 添加消息
     /// </summary>
@@ -70,6 +72,11 @@ public static class ILogExtensions
         return log;
     }
 
+
+    #endregion
+
+    #region Line(消息换行)
+
     /// <summary>
     /// 消息换行
     /// </summary>
@@ -81,6 +88,10 @@ public static class ILogExtensions
         log.Message(Environment.NewLine);
         return log;
     }
+
+    #endregion
+
+    #region ExtraProperty(设置扩展属性)
 
     /// <summary>
     /// 设置扩展属性
@@ -100,6 +111,10 @@ public static class ILogExtensions
     /// <param name="condition">条件，值为true时，则添加扩展属性</param>
     public static ILog ExtraPropertyIf(this ILog log, string propertyName, object propertyValue, bool condition) =>
         !condition ? log : log.Set(x => x.Context.SetExtraProperty(propertyName, propertyValue));
+
+    #endregion
+
+    #region Tags(设置标签)
 
     /// <summary>
     /// 设置标签列表
@@ -132,4 +147,7 @@ public static class ILogExtensions
     /// <param name="condition">条件，值为true时，则添加标签</param>
     public static ILog TagIf(this ILog log, string tag, bool condition) =>
         !condition ? log : log.Set(x => x.Context.SetTags(tag));
+
+    #endregion
+
 }
