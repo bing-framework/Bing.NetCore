@@ -277,6 +277,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auditing", "Auditing", "{98
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing.Contracts", "framework\src\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj", "{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching", "framework\src\Bing.Caching\Bing.Caching.csproj", "{C34F077E-28B7-4DB1-99DF-76CB94A17218}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -611,6 +613,10 @@ Global
 		{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -733,6 +739,7 @@ Global
 		{52F64CF7-927F-4D55-A908-9E2239B4E5AB} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{98340528-C7CB-4503-96F3-7CE090622C2A} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7} = {98340528-C7CB-4503-96F3-7CE090622C2A}
+		{C34F077E-28B7-4DB1-99DF-76CB94A17218} = {9559AE76-7924-4647-8619-35EE39569D6C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

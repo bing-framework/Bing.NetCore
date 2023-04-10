@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Caching</AssemblyName>
+    <PackageId>Bing.Caching</PackageId>
+    <Description>Bing.Caching是Bing应用框架缓存操作基础类库。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Bing\Caching\" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+</Project>
