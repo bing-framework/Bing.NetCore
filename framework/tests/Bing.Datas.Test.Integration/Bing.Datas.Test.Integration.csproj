@@ -4,6 +4,10 @@
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <XunitStartupFullName>Bing.Data.Test.Integration.Startup</XunitStartupFullName>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.1" />
   </ItemGroup>
