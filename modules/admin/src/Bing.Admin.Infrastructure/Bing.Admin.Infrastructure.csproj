@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="3.1.2" />
-    <PackageReference Include="IdentityModel" Version="3.10.10" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="6.2.1" />
+    <PackageReference Include="IdentityModel" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Http" Version="1.4.0-preview-20220831-2" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.4.0" />
   </ItemGroup>
 
   <ItemGroup>

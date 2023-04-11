@@ -1,11 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AssemblyName>Bing.Events</AssemblyName>
     <PackageId>Bing.Events</PackageId>
     <Description>Bing.Events是Bing应用框架的事件总线操作类库。</Description>
   </PropertyGroup>
 
-  <Import Project="..\..\..\framework.props" />
+  <Import Project="..\..\..\common.props" />
 
   <Import Project="dependency.props" />
 

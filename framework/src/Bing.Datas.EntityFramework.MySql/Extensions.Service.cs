@@ -26,7 +26,7 @@ public static partial class Extensions
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(ServerVersion.AutoDetect(connection)); },
+        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection, ServerVersion.AutoDetect(connection)); },
             config => config.LogLevel = level);
     }
 
@@ -43,7 +43,7 @@ public static partial class Extensions
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(ServerVersion.AutoDetect(connection)); },
+        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection, ServerVersion.AutoDetect(connection)); },
             dataConfigAction);
     }
 
@@ -60,7 +60,7 @@ public static partial class Extensions
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(ServerVersion.AutoDetect(connection)); }, null,
+        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection, ServerVersion.AutoDetect(connection)); }, null,
             configuration);
     }
 }

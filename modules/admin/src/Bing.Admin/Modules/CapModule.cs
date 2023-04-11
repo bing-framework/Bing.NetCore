@@ -93,7 +93,7 @@ namespace Bing.Admin.Modules
         /// 初始化一个<see cref="CapSubscribeInvoker"/>类型的实例
         /// </summary>
         public CapSubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, ISerializer serializer)
-            : base(loggerFactory, serviceProvider, serializer)
+            : base(serviceProvider, serializer)
         {
             _logger = loggerFactory.CreateLogger<CapSubscribeInvoker>();
         }

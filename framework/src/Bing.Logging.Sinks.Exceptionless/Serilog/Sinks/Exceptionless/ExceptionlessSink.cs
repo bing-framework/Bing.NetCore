@@ -14,7 +14,7 @@ namespace Serilog.Sinks.Exceptionless;
 /// <summary>
 /// Exceptionless 接收器
 /// </summary>
-public class ExceptionlessSink : ILogEventSink, IAsyncDisposable
+public class ExceptionlessSink : ILogEventSink, IDisposable
 {
     /// <summary>
     /// 默认标签数组
@@ -171,13 +171,21 @@ public class ExceptionlessSink : ILogEventSink, IAsyncDisposable
         builder.Submit();
     }
 
+    ///// <summary>
+    ///// 释放资源
+    ///// </summary>
+    //public async ValueTask DisposeAsync()
+    //{
+    //    // TODO: 不确定是否释放资源时，自动刷新到队列里面
+    //    if (_client != null)
+    //        await _client.ProcessQueueAsync();
+    //}
+
     /// <summary>
     /// 释放资源
     /// </summary>
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        // TODO: 不确定是否释放资源时，自动刷新到队列里面
-        if (_client != null)
-            await _client.ProcessQueueAsync();
+        _client?.ProcessQueueAsync();
     }
 }
