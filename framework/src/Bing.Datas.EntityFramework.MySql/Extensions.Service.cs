@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Datas.EntityFramework.Extensions;
 using Bing.Uow;
@@ -27,7 +26,7 @@ public static partial class Extensions
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection); },
+        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(ServerVersion.AutoDetect(connection)); },
             config => config.LogLevel = level);
     }
 
@@ -44,7 +43,7 @@ public static partial class Extensions
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection); },
+        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(ServerVersion.AutoDetect(connection)); },
             dataConfigAction);
     }
 
@@ -61,7 +60,7 @@ public static partial class Extensions
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection); }, null,
+        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(ServerVersion.AutoDetect(connection)); }, null,
             configuration);
     }
 }

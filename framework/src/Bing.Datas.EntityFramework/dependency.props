@@ -1,8 +1,13 @@
 ﻿<Project>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(MicrosoftPackageVersion)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(MicrosoftPackageVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftPackageVersion)" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftPackageVersion)" />
+  </ItemGroup>
+
 </Project>

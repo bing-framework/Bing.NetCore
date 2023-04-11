@@ -1,5 +1,5 @@
 ﻿<Project>
-  <ItemGroup>
-    <PackageReference Include="Oracle.EntityFrameworkCore" Version="3.19.110" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="6.21.90" />
   </ItemGroup>
 </Project>

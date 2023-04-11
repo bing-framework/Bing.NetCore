@@ -41,7 +41,7 @@ public static class BingHttpRequestExtensions
     {
         Check.NotNull(request, nameof(request));
         Check.NotNull(contentType, nameof(contentType));
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || NET5_0 || NET6_0
             return request.Headers[HeaderNames.Accept].ToString().Contains(contentType, StringComparison.OrdinalIgnoreCase);
 #elif NETSTANDARD2_0
         return request.Headers[HeaderNames.Accept].ToString().Contains(contentType);

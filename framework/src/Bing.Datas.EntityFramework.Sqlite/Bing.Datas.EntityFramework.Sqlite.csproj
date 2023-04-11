@@ -1,11 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AssemblyName>Bing.Datas.EntityFramework.Sqlite</AssemblyName>
     <PackageId>Bing.Datas.EntityFramework.Sqlite</PackageId>
     <Description>Bing.Datas.EntityFramework.Sqlite 是Bing应用框架的EntityFrameworkCore.Sqlite数据访问类库。</Description>
   </PropertyGroup>
 
-  <Import Project="..\..\..\framework.props" />
+  <Import Project="..\..\..\common.props" />
 
   <Import Project="dependency.props" />
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp2.2;</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,11 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="EasyCaching.InMemory" Version="1.1.0" />
   </ItemGroup>

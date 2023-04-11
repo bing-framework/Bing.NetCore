@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Bing.ObjectMapping;
 using Bing.SampleClasses;
+using Bing.Tests.Samples;
 
 namespace Bing.AutoMapper;
 
@@ -14,9 +15,9 @@ public class TestMapperConfiguration : Profile, IObjectMapperProfile
     /// </summary>
     public void CreateMap()
     {
-        CreateMap<Sample, Sample4>()
-            .ForMember(o => o.StringValue, o => o.MapFrom((s, d) => s.StringValue + "-1"));
-        //CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
-        //    .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue + "-001"));
+        //CreateMap<Sample, Sample4>()
+        //    .ForMember(o => o.StringValue, o => o.MapFrom((s, d) => s.StringValue + "-1"));
+        CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
+            .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue + "-001"));
     }
 }

@@ -15,7 +15,7 @@ namespace Bing.Permissions.Identity.Services.Implements;
 /// <typeparam name="TKey">用户标识类型</typeparam>
 public class IdentitySignInManager<TUser, TKey> : SignInManager<TUser> where TUser : UserBase<TUser, TKey>
 {
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1_OR_GREATER
         /// <summary>
         /// 初始化一个<see cref="IdentitySignInManager{TUser,TKey}"/>类型的实例
         /// </summary>

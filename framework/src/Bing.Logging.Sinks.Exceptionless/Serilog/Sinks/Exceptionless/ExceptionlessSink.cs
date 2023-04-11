@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Bing.Logging.ExtraSupports;
+﻿using Bing.Logging.ExtraSupports;
 using Bing.Logging.Sinks.Exceptionless.Internals;
 using Bing.Text;
 using Exceptionless;
@@ -17,7 +14,7 @@ namespace Serilog.Sinks.Exceptionless;
 /// <summary>
 /// Exceptionless 接收器
 /// </summary>
-public class ExceptionlessSink : ILogEventSink, IDisposable
+public class ExceptionlessSink : ILogEventSink, IAsyncDisposable
 {
     /// <summary>
     /// 默认标签数组
@@ -177,5 +174,10 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <summary>
     /// 释放资源
     /// </summary>
-    public void Dispose() => _client?.ProcessQueue();
+    public async ValueTask DisposeAsync()
+    {
+        // TODO: 不确定是否释放资源时，自动刷新到队列里面
+        if (_client != null)
+            await _client.ProcessQueueAsync();
+    }
 }

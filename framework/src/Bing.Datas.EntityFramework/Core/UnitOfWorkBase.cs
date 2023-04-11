@@ -198,8 +198,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
             CoreEventId.SensitiveDataLoggingEnabledWarning,
             CoreEventId.ContextInitialized,
             CoreEventId.ContextDisposed,
-            CoreEventId.QueryModelCompiling,
-            CoreEventId.QueryModelOptimized,
             CoreEventId.QueryExecutionPlanned,
             CoreEventId.StartedTracking,
             CoreEventId.DetectChangesStarting,
