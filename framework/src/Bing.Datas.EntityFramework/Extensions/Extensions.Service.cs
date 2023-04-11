@@ -23,9 +23,7 @@ public static partial class Extensions
     /// <param name="configAction">配置操作</param>
     /// <param name="dataConfigAction">数据配置操作</param>
     /// <param name="configuration">配置</param>
-    public static IServiceCollection AddUnitOfWork<TService, TImplementation>(this IServiceCollection services,
-        Action<DbContextOptionsBuilder> configAction, Action<DataConfig> dataConfigAction = null,
-        IConfiguration configuration = null)
+    public static IServiceCollection AddUnitOfWork<TService, TImplementation>(this IServiceCollection services, Action<DbContextOptionsBuilder> configAction, Action<DataConfig> dataConfigAction = null, IConfiguration configuration = null)
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
