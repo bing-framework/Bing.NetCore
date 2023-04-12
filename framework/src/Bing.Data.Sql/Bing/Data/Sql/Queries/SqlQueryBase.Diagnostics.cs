@@ -41,8 +41,12 @@ public abstract partial class SqlQueryBase
     /// <param name="message">诊断消息</param>
     protected virtual void ExecuteAfter(DiagnosticsMessage message)
     {
-        if (message?.OperationTimestamp != null && _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.AfterExecute))
+        if (!_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.AfterExecute))
+            return;
+        if (message?.OperationTimestamp != null)
         {
+            message.Sql = null;
+            message.Parameters = null;
             message.Operation = SqlQueryDiagnosticListenerNames.AfterExecute;
             message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.OperationTimestamp.Value;
             _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.AfterExecute, message);

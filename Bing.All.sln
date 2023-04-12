@@ -277,7 +277,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auditing", "Auditing", "{98
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Auditing.Contracts", "framework\src\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj", "{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching", "framework\src\Bing.Caching\Bing.Caching.csproj", "{C34F077E-28B7-4DB1-99DF-76CB94A17218}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching", "framework\src\Bing.Caching\Bing.Caching.csproj", "{C34F077E-28B7-4DB1-99DF-76CB94A17218}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SkyApm", "SkyApm", "{C3558DAD-350A-440E-913D-633378472F25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Extensions.SkyApm.Diagnostics.Sql", "framework\src\Bing.Extensions.SkyApm.Diagnostics.Sql\Bing.Extensions.SkyApm.Diagnostics.Sql.csproj", "{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -617,6 +621,10 @@ Global
 		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C34F077E-28B7-4DB1-99DF-76CB94A17218}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -740,6 +748,8 @@ Global
 		{98340528-C7CB-4503-96F3-7CE090622C2A} = {AED4D92B-5196-47E9-BD2C-84D4077F5A70}
 		{3DEB20D6-4D97-41D1-BD6C-C4F63134DAD7} = {98340528-C7CB-4503-96F3-7CE090622C2A}
 		{C34F077E-28B7-4DB1-99DF-76CB94A17218} = {9559AE76-7924-4647-8619-35EE39569D6C}
+		{C3558DAD-350A-440E-913D-633378472F25} = {3030FE3D-DB8F-403D-A181-8152670827AB}
+		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B} = {C3558DAD-350A-440E-913D-633378472F25}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

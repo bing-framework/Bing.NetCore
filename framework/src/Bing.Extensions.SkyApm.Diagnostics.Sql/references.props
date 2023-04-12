@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+  </ItemGroup>
+</Project>
