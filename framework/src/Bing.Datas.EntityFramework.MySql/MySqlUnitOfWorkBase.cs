@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 using Bing.Datas.EntityFramework.Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.MySql;
 
 /// <summary>
-/// MySql 工作单元
+/// MySql 工作单元基类
 /// </summary>
-public abstract class UnitOfWork : UnitOfWorkBase
+public abstract class MySqlUnitOfWorkBase : UnitOfWorkBase
 {
     /// <summary>
-    /// 初始化一个<see cref="UnitOfWork"/>类型的实例
+    /// 初始化一个<see cref="MySqlUnitOfWorkBase"/>类型的实例
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>
-    protected UnitOfWork(DbContextOptions options, IServiceProvider serviceProvider = null) : base(options, serviceProvider)
+    protected MySqlUnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider = null) : base(options, serviceProvider)
     {
     }
 

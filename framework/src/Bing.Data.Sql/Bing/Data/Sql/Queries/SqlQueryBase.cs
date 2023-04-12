@@ -32,6 +32,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         Connection = database?.GetConnection();
         SqlOptions = sqlOptions ?? GetOptions();
         Logger = CreateLogger();
+        ContextId = Guid.NewGuid().ToString("N");
     }
 
     /// <summary>

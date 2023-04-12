@@ -7,7 +7,6 @@ using Bing.Aspects;
 using Bing.Auditing;
 using Bing.Data;
 using Bing.Data.Filters;
-using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
@@ -17,15 +16,12 @@ using Bing.EntityFrameworkCore.Modeling;
 using Bing.Exceptions;
 using Bing.Expressions;
 using Bing.Extensions;
-using Bing.Logs;
-using Bing.Logs.Core;
 using Bing.Uow;
 using Bing.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Bing.Datas.EntityFramework.Core;
 

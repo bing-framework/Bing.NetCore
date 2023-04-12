@@ -11,7 +11,7 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
     /// <summary>
     /// 工作单元
     /// </summary>
-    public class AdminUnitOfWork : Bing.Datas.EntityFramework.MySql.UnitOfWork, IAdminUnitOfWork
+    public class AdminUnitOfWork : Bing.Datas.EntityFramework.MySql.MySqlUnitOfWorkBase, IAdminUnitOfWork
     {
         /// <summary>
         /// 初始化一个<see cref="AdminUnitOfWork"/>类型的实例

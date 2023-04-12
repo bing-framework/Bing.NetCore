@@ -9,6 +9,11 @@ namespace Bing.Data.Sql;
 public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
 {
     /// <summary>
+    /// 上下文标识
+    /// </summary>
+    string ContextId { get; }
+
+    /// <summary>
     /// 设置数据库连接
     /// </summary>
     /// <param name="connection">数据库连接</param>

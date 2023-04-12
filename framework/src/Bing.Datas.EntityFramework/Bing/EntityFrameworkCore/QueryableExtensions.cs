@@ -1,11 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Data.Queries.Internal;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bing.Datas.EntityFramework.Extensions;
+namespace Bing.EntityFrameworkCore;
 
 /// <summary>
 /// <see cref="IQueryable{T}"/> 扩展
@@ -29,7 +26,7 @@ public static partial class QueryableExtensions
         if (pager == null)
             throw new ArgumentNullException(nameof(pager));
         Helper.InitOrder(query, pager);
-        if (pager.TotalCount <= 0) 
+        if (pager.TotalCount <= 0)
             pager.TotalCount = await query.CountAsync();
         var orderedQueryable = Helper.GetOrderedQueryable(query, pager);
         if (orderedQueryable == null)
@@ -47,15 +44,16 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager)
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager, CancellationToken cancellationToken = default)
     {
         if (query == null)
             throw new ArgumentNullException(nameof(query));
         if (pager == null)
             throw new ArgumentNullException(nameof(pager));
         query = await query.PageAsync(pager);
-        return new PagerList<TEntity>(pager, await query.ToListAsync());
+        return new PagerList<TEntity>(pager, await query.ToListAsync(cancellationToken));
     }
 
     #endregion

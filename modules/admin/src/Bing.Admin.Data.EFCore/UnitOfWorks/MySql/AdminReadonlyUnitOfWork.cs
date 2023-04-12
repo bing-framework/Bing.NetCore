@@ -6,7 +6,7 @@ namespace Bing.Admin.Data.UnitOfWorks.MySql
     /// <summary>
     /// 只读工作单元
     /// </summary>
-    public class AdminReadonlyUnitOfWork : Bing.Datas.EntityFramework.MySql.UnitOfWork, IAdminReadonlyUnitOfWork
+    public class AdminReadonlyUnitOfWork : Bing.Datas.EntityFramework.MySql.MySqlUnitOfWorkBase, IAdminReadonlyUnitOfWork
     {
         /// <summary>
         /// 初始化一个<see cref="AdminReadonlyUnitOfWork"/>类型的实例

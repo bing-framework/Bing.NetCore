@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
 using Bing.Uow;
 using Microsoft.EntityFrameworkCore;

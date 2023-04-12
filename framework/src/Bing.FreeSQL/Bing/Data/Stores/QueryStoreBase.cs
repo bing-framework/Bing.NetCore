@@ -120,6 +120,15 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     public virtual TEntity Find(object id) => id.SafeString().IsEmpty() ? null : Set.Select.WhereDynamic(id).ToOne();
 
     /// <summary>
+    /// 通过标识查找实体
+    /// </summary>
+    /// <param name="id">标识</param>
+    public TEntity FindById(object id)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
@@ -129,6 +138,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
         if (id.SafeString().IsEmpty())
             return null;
         return await Set.Select.WhereDynamic(id).ToOneAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// 通过标识查找实体
+    /// </summary>
+    /// <param name="id">标识</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -174,6 +193,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
         if (ids == null)
             return null;
         return await Set.Select.WhereDynamic(ids.ToArray()).ToListAsync(cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// 通过标识列表查找实体列表
+    /// </summary>
+    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -255,6 +284,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     }
 
     /// <summary>
+    /// 通过标识列表查找实体列表，不跟踪
+    /// </summary>
+    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
@@ -274,8 +313,29 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 查找单个实体
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    public TEntity Single(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找单个实体
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await Set.Select.Where(predicate).ToOneAsync(cancellationToken);
+
+    /// <summary>
+    /// 查找单个实体
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// 查找实体列表
@@ -286,6 +346,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
         if (predicate == null)
             return Set.Select.ToList();
         return Set.Select.Where(predicate).ToList();
+    }
+
+    /// <summary>
+    /// 查找实体列表
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -308,6 +378,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
         if (predicate == null)
             return Set.Select.NoTracking().ToList();
         return Set.Select.NoTracking().Where(predicate).ToList();
+    }
+
+    /// <summary>
+    /// 查找实体列表，不跟踪
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -380,6 +460,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 判断是否存在
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 判断是否存在
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
     public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
     {
         if (predicate == null)
@@ -396,6 +486,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
         if (predicate == null)
             return (int)Set.Select.Count();
         return (int)Set.Select.Where(predicate).Count();
+    }
+
+    /// <summary>
+    /// 查找数量
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -471,4 +571,10 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="query">查询对象</param>
     public virtual async Task<PagerList<TEntity>> PagerQueryAsNoTrackingAsync(IQueryBase<TEntity> query) => await FindAsNoTracking().Where(query).ToPagerListAsync(query.GetPager());
+
+    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 }
