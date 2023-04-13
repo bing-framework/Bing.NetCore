@@ -32,6 +32,13 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// </summary>
     private readonly StringOrIntValue? _component;
 
+    /// <summary>
+    /// 初始化一个<see cref="SqlQueryTracingDiagnosticProcessor"/>类型的实例
+    /// </summary>
+    /// <param name="tracingContext">跟踪上下文</param>
+    /// <param name="contextAccessor">上下文访问器</param>
+    /// <param name="configAccessor">配置访问器</param>
+    /// <param name="component">组件名</param>
     public SqlQueryTracingDiagnosticProcessor(
         ITracingContext tracingContext,
         IExitSegmentContextAccessor contextAccessor,
