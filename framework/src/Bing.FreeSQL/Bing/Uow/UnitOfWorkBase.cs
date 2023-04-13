@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Collections.Concurrent;
+using System.Data.Common;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Bing.Aspects;
 using Bing.Data;
-using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
@@ -238,7 +233,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 获取数据库连接
     /// </summary>
-    public IDbConnection GetConnection() => base.UnitOfWork.GetOrBeginTransaction()?.Connection;
+    public DbConnection GetConnection() => base.UnitOfWork.GetOrBeginTransaction()?.Connection;
 
     #region Matedata(获取元数据)
 

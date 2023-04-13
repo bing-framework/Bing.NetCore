@@ -141,7 +141,7 @@ public class SqlQuery : SqlQueryBase
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
 
-            message = ExecuteBefore(sql, Params);
+            message = ExecuteBefore(sql, Params, Connection);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
             var result = GetConnection(connection).ExecuteScalar(sql, builder.GetParams());
@@ -213,7 +213,7 @@ public class SqlQuery : SqlQueryBase
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
 
-            message = ExecuteBefore(sql, Params);
+            message = ExecuteBefore(sql, Params, Connection);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
             var result = await GetConnection(connection).ExecuteScalarAsync(sql, builder.GetParams());

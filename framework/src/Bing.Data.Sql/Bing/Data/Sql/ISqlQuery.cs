@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using Bing.Data.Sql.Builders;
 
 namespace Bing.Data.Sql;
@@ -17,7 +18,7 @@ public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, 
     /// 设置数据库连接
     /// </summary>
     /// <param name="connection">数据库连接</param>
-    ISqlQuery SetConnection(IDbConnection connection);
+    ISqlQuery SetConnection(DbConnection connection);
 
     /// <summary>
     /// 克隆

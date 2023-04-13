@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Data.Common;
+using System.Diagnostics;
 using Bing.Data.Sql.Diagnostics;
 
 namespace Bing.Data.Sql.Queries;
@@ -17,8 +18,8 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="sql">Sql语句</param>
     /// <param name="parameter">Sql参数</param>
-    /// <param name="dataSource">数据源</param>
-    protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, string dataSource = null)
+    /// <param name="connection">数据库连接</param>
+    protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, DbConnection connection)
     {
         if (!_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute))
             return null;
@@ -26,8 +27,9 @@ public abstract partial class SqlQueryBase
         {
             Sql = sql,
             Parameters = parameter,
-            DataSource = dataSource,
-            OperationTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            DataSource = Connection.DataSource,
+            Database = Connection.Database,
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute,
             DatabaseType = SqlOptions.DatabaseType,
         };
@@ -43,12 +45,10 @@ public abstract partial class SqlQueryBase
     {
         if (!_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.AfterExecute))
             return;
-        if (message?.OperationTimestamp != null)
+        if (message?.Timestamp != null)
         {
-            message.Sql = null;
-            message.Parameters = null;
             message.Operation = SqlQueryDiagnosticListenerNames.AfterExecute;
-            message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.OperationTimestamp.Value;
+            message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.Timestamp.Value;
             _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.AfterExecute, message);
         }
     }
@@ -60,11 +60,11 @@ public abstract partial class SqlQueryBase
     /// <param name="exception">异常</param>
     protected virtual void ExecuteError(DiagnosticsMessage message, Exception exception)
     {
-        if (exception != null && message?.OperationTimestamp != null && _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.ErrorExecute))
+        if (exception != null && message?.Timestamp != null && _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.ErrorExecute))
         {
             message.Exception = exception;
             message.Operation = SqlQueryDiagnosticListenerNames.ErrorExecute;
-            message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.OperationTimestamp.Value;
+            message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.Timestamp.Value;
 
             _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.ErrorExecute, message);
         }

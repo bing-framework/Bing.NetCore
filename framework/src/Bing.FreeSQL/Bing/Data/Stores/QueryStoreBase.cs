@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Data.Common;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Bing.Data.Queries;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
@@ -77,7 +72,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <summary>
     /// 数据库连接
     /// </summary>
-    protected IDbConnection Connection => UnitOfWork.GetConnection();
+    protected DbConnection Connection => UnitOfWork.GetConnection();
 
     #endregion
 

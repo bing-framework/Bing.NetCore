@@ -10,6 +10,9 @@
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.3.0" />
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.5.0" />
+    <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="3.1.32" />
+    <PackageReference Include="SkyAPM.Diagnostics.CAP" Version="2.1.0" />
+    <PackageReference Include="SkyAPM.Agent.AspNetCore" Version="2.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
     <PackageReference Include="DotNetCore.CAP.Dashboard" Version="6.2.1" />
     <PackageReference Include="Serilog.Enrichers.Span" Version="2.0.1" />
@@ -17,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Serilog\Bing.AspNetCore.Serilog.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Extensions.SkyApm.Diagnostics.Sql\Bing.Extensions.SkyApm.Diagnostics.Sql.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />

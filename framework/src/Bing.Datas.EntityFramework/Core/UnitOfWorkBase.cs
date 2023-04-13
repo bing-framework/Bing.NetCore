@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Data;
+using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -568,7 +569,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 获取数据库连接
     /// </summary>
-    public IDbConnection GetConnection() => Database.GetDbConnection();
+    public DbConnection GetConnection() => Database.GetDbConnection();
 
     #endregion
 

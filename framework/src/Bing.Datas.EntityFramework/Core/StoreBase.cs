@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using System.Data.Common;
 using System.Linq.Expressions;
 using Bing.Data;
 using Bing.Data.Sql;
@@ -95,7 +95,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <summary>
     /// 数据库连接
     /// </summary>
-    protected IDbConnection Connection => UnitOfWork.Database.GetDbConnection();
+    protected DbConnection Connection => UnitOfWork.Database.GetDbConnection();
 
     #endregion
 

@@ -1,3 +1,6 @@
 ﻿<Project>
-  
+  <ItemGroup>
+    <PackageReference Include="SkyAPM.Core" Version="2.1.0" />
+    <PackageReference Include="SkyAPM.Utilities.DependencyInjection" Version="2.1.0" />
+  </ItemGroup>
 </Project>

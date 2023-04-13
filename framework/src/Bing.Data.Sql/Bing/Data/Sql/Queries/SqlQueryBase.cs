@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Diagnostics;
@@ -89,7 +90,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <summary>
     /// 数据库连接
     /// </summary>
-    protected IDbConnection Connection { get; private set; }
+    protected DbConnection Connection { get; private set; }
 
     /// <summary>
     /// Sql配置
@@ -159,7 +160,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 设置数据库连接
     /// </summary>
     /// <param name="connection">数据库连接</param>
-    public ISqlQuery SetConnection(IDbConnection connection)
+    public ISqlQuery SetConnection(DbConnection connection)
     {
         Connection = connection;
         return this;
@@ -355,7 +356,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         {
             var sql = GetSql();
 
-            message = ExecuteBefore(sql, Params);
+            message = ExecuteBefore(sql, Params, Connection);
 
             WriteTraceLog(sql, Params, GetDebugSql());
             var result = func(GetConnection(connection), sql, Params);
@@ -385,7 +386,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         {
             var sql = GetSql();
 
-            message = ExecuteBefore(sql, Params);
+            message = ExecuteBefore(sql, Params, Connection);
 
             WriteTraceLog(sql, Params, GetDebugSql());
             var result = await func(GetConnection(connection), sql, Params);
