@@ -1,7 +1,7 @@
 ﻿using System.Data;
-using System.Data.Common;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +14,22 @@ namespace Bing.Data.Sql.Queries;
 /// <summary>
 /// Sql查询对象基类
 /// </summary>
-public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor
+public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager
 {
+    #region 字段
+
+    /// <summary>
+    /// 数据库连接
+    /// </summary>
+    private IDbConnection _connection;
+
+    /// <summary>
+    /// 事务
+    /// </summary>
+    private IDbTransaction _transaction;
+
+    #endregion
+
     #region 构造函数
 
     /// <summary>
@@ -30,7 +44,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
         Database = database;
-        Connection = database?.GetConnection();
         SqlOptions = sqlOptions ?? GetOptions();
         Logger = CreateLogger();
         ContextId = Guid.NewGuid().ToString("N");
@@ -86,11 +99,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 数据库
     /// </summary>
     protected IDatabase Database { get; private set; }
-
-    /// <summary>
-    /// 数据库连接
-    /// </summary>
-    protected DbConnection Connection { get; private set; }
 
     /// <summary>
     /// Sql配置
@@ -160,10 +168,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 设置数据库连接
     /// </summary>
     /// <param name="connection">数据库连接</param>
-    public ISqlQuery SetConnection(DbConnection connection)
+    public void SetConnection(IDbConnection connection)
     {
-        Connection = connection;
-        return this;
+        if (connection == null)
+            return;
+        _connection = connection;
     }
 
     #endregion
@@ -173,24 +182,15 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <summary>
     /// 获取数据库连接
     /// </summary>
-    /// <param name="connection">数据库连接</param>
-    protected IDbConnection GetConnection(IDbConnection connection)
+    public IDbConnection GetConnection()
     {
-        if (connection != null)
-            return connection;
-        if (Connection == null)
-            throw new ArgumentNullException(nameof(Connection));
-        return Connection;
+        if (_connection != null)
+            return _connection;
+        _connection = Database.GetConnection();
+        if (_connection == null)
+            throw new InvalidOperationException("数据库连接不能为空");
+        return _connection;
     }
-
-    #endregion
-
-    #region Clone(克隆)
-
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    public abstract ISqlQuery Clone();
 
     #endregion
 
@@ -355,11 +355,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         try
         {
             var sql = GetSql();
-
-            message = ExecuteBefore(sql, Params, Connection);
+            var conn = GetConnection();
+            message = ExecuteBefore(sql, Params, conn);
 
             WriteTraceLog(sql, Params, GetDebugSql());
-            var result = func(GetConnection(connection), sql, Params);
+            var result = func(conn, sql, Params);
             ClearAfterExecution();
 
             ExecuteAfter(message);
@@ -370,7 +370,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
             ExecuteError(message, e);
             throw;
         }
-            
+
     }
 
     /// <summary>
@@ -385,11 +385,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         try
         {
             var sql = GetSql();
-
-            message = ExecuteBefore(sql, Params, Connection);
+            var conn = GetConnection();
+            message = ExecuteBefore(sql, Params, conn);
 
             WriteTraceLog(sql, Params, GetDebugSql());
-            var result = await func(GetConnection(connection), sql, Params);
+            var result = await func(conn, sql, Params);
             ClearAfterExecution();
 
             ExecuteAfter(message);
@@ -400,7 +400,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
             ExecuteError(message, e);
             throw;
         }
-            
+
     }
 
     /// <summary>
@@ -482,4 +482,18 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
         countBuilder.ClearSelect();
         return countBuilder.Count();
     }
+
+    #region Dispose(释放资源)
+
+    /// <summary>
+    /// 释放资源
+    /// </summary>
+    public void Dispose()
+    {
+        if (_connection != null)
+            _connection.Dispose();
+        _transaction = null;
+    }
+
+    #endregion
 }

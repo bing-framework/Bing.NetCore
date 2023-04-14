@@ -43,11 +43,6 @@ public class DiagnosticsMessage
     public string Database { get; set; }
 
     /// <summary>
-    /// 数据库数据源
-    /// </summary>
-    public string DataSource { get; set; }
-
-    /// <summary>
     /// 耗时(ms)
     /// </summary>
     public long? ElapsedMilliseconds { get; set; }

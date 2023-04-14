@@ -569,7 +569,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 获取数据库连接
     /// </summary>
-    public DbConnection GetConnection() => Database.GetDbConnection();
+    public IDbConnection GetConnection() => Database.GetDbConnection();
 
     #endregion
 

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using System.Data.Common;
+using System.Data;
 using System.Reflection;
 using Bing.Aspects;
 using Bing.Data;
@@ -233,7 +233,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 获取数据库连接
     /// </summary>
-    public DbConnection GetConnection() => base.UnitOfWork.GetOrBeginTransaction()?.Connection;
+    public IDbConnection GetConnection() => base.UnitOfWork.GetOrBeginTransaction()?.Connection;
 
     #region Matedata(获取元数据)
 

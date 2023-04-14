@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+﻿using System.Data;
 using System.Diagnostics;
 using Bing.Data.Sql.Diagnostics;
 
@@ -19,7 +19,7 @@ public abstract partial class SqlQueryBase
     /// <param name="sql">Sql语句</param>
     /// <param name="parameter">Sql参数</param>
     /// <param name="connection">数据库连接</param>
-    protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, DbConnection connection)
+    protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, IDbConnection connection)
     {
         if (!_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute))
             return null;
@@ -27,8 +27,7 @@ public abstract partial class SqlQueryBase
         {
             Sql = sql,
             Parameters = parameter,
-            DataSource = Connection.DataSource,
-            Database = Connection.Database,
+            Database = connection.Database,
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute,
             DatabaseType = SqlOptions.DatabaseType,

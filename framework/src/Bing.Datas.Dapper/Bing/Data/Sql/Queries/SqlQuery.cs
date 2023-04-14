@@ -32,22 +32,6 @@ public class SqlQuery : SqlQueryBase
     /// <param name="sqlQueryOptions">Sql查询配置</param>
     protected SqlQuery(IServiceProvider serviceProvider, ISqlBuilder sqlBuilder, IDatabase database, SqlOptions sqlQueryOptions) : base(serviceProvider, sqlBuilder, database, sqlQueryOptions) { }
 
-    #region 属性
-
-
-
-    #endregion
-
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    public override ISqlQuery Clone()
-    {
-        var result = new SqlQuery(ServiceProvider, Builder.Clone(), Database, SqlOptions);
-        result.SetConnection(Connection);
-        return result;
-    }
-
     /// <summary>
     /// 获取单值
     /// </summary>
@@ -102,7 +86,7 @@ public class SqlQuery : SqlQueryBase
     /// <param name="sql">Sql语句</param>
     /// <param name="connection">数据库连接</param>
     public override async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null) =>
-        (await GetConnection(connection).QueryAsync<TResult>(sql, Params)).ToList();
+        (await GetConnection().QueryAsync<TResult>(sql, Params)).ToList();
 
     /// <summary>
     /// 获取分页列表
@@ -140,11 +124,11 @@ public class SqlQuery : SqlQueryBase
         {
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
-
-            message = ExecuteBefore(sql, Params, Connection);
+            var conn = GetConnection();
+            message = ExecuteBefore(sql, Params, conn);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = GetConnection(connection).ExecuteScalar(sql, builder.GetParams());
+            var result = conn.ExecuteScalar(sql, builder.GetParams());
 
             ExecuteAfter(message);
             return Conv.ToInt(result);
@@ -204,7 +188,6 @@ public class SqlQuery : SqlQueryBase
     /// <summary>
     /// 获取行数
     /// </summary>
-    /// <param name="connection">数据库连接</param>
     protected async Task<int> GetCountAsync(IDbConnection connection)
     {
         DiagnosticsMessage message = null;
@@ -212,11 +195,11 @@ public class SqlQuery : SqlQueryBase
         {
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
-
-            message = ExecuteBefore(sql, Params, Connection);
+            var conn = GetConnection();
+            message = ExecuteBefore(sql, Params, conn);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = await GetConnection(connection).ExecuteScalarAsync(sql, builder.GetParams());
+            var result = await conn.ExecuteScalarAsync(sql, builder.GetParams());
 
             ExecuteAfter(message);
             return Conv.ToInt(result);

@@ -7,23 +7,12 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql查询对象
 /// </summary>
-public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
+public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte, IDisposable
 {
     /// <summary>
     /// 上下文标识
     /// </summary>
     string ContextId { get; }
-
-    /// <summary>
-    /// 设置数据库连接
-    /// </summary>
-    /// <param name="connection">数据库连接</param>
-    ISqlQuery SetConnection(DbConnection connection);
-
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    ISqlQuery Clone();
 
     /// <summary>
     /// 配置

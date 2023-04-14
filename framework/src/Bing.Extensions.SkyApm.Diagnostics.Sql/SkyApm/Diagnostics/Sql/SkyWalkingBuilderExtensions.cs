@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SkyApm.Common;
-using SkyApm.Config;
-using SkyApm.Tracing;
 using SkyApm.Utilities.DependencyInjection;
 
 namespace SkyApm.Diagnostics.Sql;
@@ -15,18 +12,12 @@ public static class SkyWalkingBuilderExtensions
     /// 注册SqlQuery的SkyApm链路跟踪
     /// </summary>
     /// <param name="extensions">扩展</param>
-    /// <param name="component">自定义设定SqlQuery组件，若未设定则默认采用SqlClient组件</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public static SkyApmExtensions AddSqlQuery(this SkyApmExtensions extensions, StringOrIntValue? component = null)
+    public static SkyApmExtensions AddSqlQuery(this SkyApmExtensions extensions)
     {
         if (extensions == null)
             throw new ArgumentNullException(nameof(extensions));
-        extensions.Services.AddSingleton<ITracingDiagnosticProcessor>(sp =>
-            new SqlQueryTracingDiagnosticProcessor(
-                sp.GetRequiredService<ITracingContext>(),
-                sp.GetRequiredService<IExitSegmentContextAccessor>(),
-                sp.GetRequiredService<IConfigAccessor>(),
-                component));
+        extensions.Services.AddSingleton<ITracingDiagnosticProcessor, SqlQueryTracingDiagnosticProcessor>();
         return extensions;
     }
 }

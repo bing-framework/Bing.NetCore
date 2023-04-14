@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="2.1.2" />
+  </ItemGroup>
+</Project>

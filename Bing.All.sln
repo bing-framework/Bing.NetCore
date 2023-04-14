@@ -281,7 +281,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching", "framework\s
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SkyApm", "SkyApm", "{C3558DAD-350A-440E-913D-633378472F25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Extensions.SkyApm.Diagnostics.Sql", "framework\src\Bing.Extensions.SkyApm.Diagnostics.Sql\Bing.Extensions.SkyApm.Diagnostics.Sql.csproj", "{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Extensions.SkyApm.Diagnostics.Sql", "framework\src\Bing.Extensions.SkyApm.Diagnostics.Sql\Bing.Extensions.SkyApm.Diagnostics.Sql.csproj", "{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.MySql", "framework\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj", "{49737B99-3DFA-4567-BCAD-4719E388B608}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -625,6 +627,10 @@ Global
 		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49737B99-3DFA-4567-BCAD-4719E388B608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49737B99-3DFA-4567-BCAD-4719E388B608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49737B99-3DFA-4567-BCAD-4719E388B608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49737B99-3DFA-4567-BCAD-4719E388B608}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -750,6 +756,7 @@ Global
 		{C34F077E-28B7-4DB1-99DF-76CB94A17218} = {9559AE76-7924-4647-8619-35EE39569D6C}
 		{C3558DAD-350A-440E-913D-633378472F25} = {3030FE3D-DB8F-403D-A181-8152670827AB}
 		{67CCB21B-805E-4CEF-9DB0-F111DC3F369B} = {C3558DAD-350A-440E-913D-633378472F25}
+		{49737B99-3DFA-4567-BCAD-4719E388B608} = {93A682FB-8EA0-4F10-AC03-CD688025E624}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

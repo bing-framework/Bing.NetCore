@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Bing.Data.Queries;
@@ -65,14 +66,14 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     protected virtual ISqlQuery CreateSqlQuery()
     {
         var result = ServiceLocator.Instance.GetService<ISqlQuery>();
-        result.SetConnection(Connection);
+        //result.SetConnection(Connection);
         return result;
     }
 
     /// <summary>
     /// 数据库连接
     /// </summary>
-    protected DbConnection Connection => UnitOfWork.GetConnection();
+    protected IDbConnection Connection => UnitOfWork.GetConnection();
 
     #endregion
 
@@ -118,10 +119,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 通过标识查找实体
     /// </summary>
     /// <param name="id">标识</param>
-    public TEntity FindById(object id)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual TEntity FindById(object id) => id.SafeString().IsEmpty() ? null : Set.Select.WhereDynamic(id).ToOne();
 
     /// <summary>
     /// 查找实体
@@ -140,9 +138,11 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        if (id.SafeString().IsEmpty())
+            return null;
+        return await Set.Select.WhereDynamic(id).ToOneAsync(cancellationToken);
     }
 
     /// <summary>
@@ -195,19 +195,10 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-    public virtual async Task<List<TEntity>> FindByIdsAsync(string ids)
+    public virtual async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
         var idList = Conv.ToList<TKey>(ids);
-        return await FindByIdsAsync(idList);
+        return await FindByIdsAsync(idList, cancellationToken);
     }
 
     /// <summary>
@@ -283,19 +274,10 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 查找实体列表，不跟踪
-    /// </summary>
-    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-    public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids)
+    public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
     {
         var idList = Conv.ToList<TKey>(ids);
-        return await FindByIdsNoTrackingAsync(idList);
+        return await FindByIdsNoTrackingAsync(idList, cancellationToken);
     }
 
     /// <summary>
@@ -348,20 +330,11 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="predicate">查询条件</param>
-    public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null)
+    public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
-            return await Set.Select.ToListAsync();
-        return await Set.Select.Where(predicate).ToListAsync();
+            return await Set.Select.ToListAsync(cancellationToken);
+        return await Set.Select.Where(predicate).ToListAsync(cancellationToken);
     }
 
     /// <summary>
@@ -380,21 +353,13 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 查找实体列表，不跟踪
-    /// </summary>
-    /// <param name="predicate">查询条件</param>
-    public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null)
+    public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
-            return await Set.Select.NoTracking().ToListAsync();
-        return await Set.Select.NoTracking().Where(predicate).ToListAsync();
+            return await Set.Select.NoTracking().ToListAsync(cancellationToken);
+        return await Set.Select.NoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
+
 
     /// <summary>
     /// 判断是否存在
@@ -456,20 +421,11 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 判断是否存在
-    /// </summary>
-    /// <param name="predicate">查询条件</param>
-    public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
+    public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
             return false;
-        return await Set.Select.AnyAsync(predicate);
+        return await Set.Select.AnyAsync(predicate, cancellationToken);
     }
 
     /// <summary>
@@ -490,18 +446,9 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 查找数量
-    /// </summary>
-    /// <param name="predicate">查询条件</param>
-    public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null)
-    {
         if (predicate == null)
-            return (int)await Set.Select.CountAsync();
-        return (int)await Set.Select.Where(predicate).CountAsync();
+            return (int)await Set.Select.CountAsync(cancellationToken);
+        return (int)await Set.Select.Where(predicate).CountAsync(cancellationToken);
     }
 
     /// <summary>
