@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Data.Common;
 using Bing.Data.Sql.Builders;
 
 namespace Bing.Data.Sql;
@@ -13,6 +12,11 @@ public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, 
     /// 上下文标识
     /// </summary>
     string ContextId { get; }
+
+    /// <summary>
+    /// Sql生成器
+    /// </summary>
+    ISqlBuilder SqlBuilder { get; }
 
     /// <summary>
     /// 配置

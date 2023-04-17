@@ -23,6 +23,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     #region 字段
 
     /// <summary>
+    /// Sql生成器
+    /// </summary>
+    private ISqlBuilder _sqlBuilder;
+
+    /// <summary>
     /// 数据库连接
     /// </summary>
     private IDbConnection _connection;
@@ -43,10 +48,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <param name="sqlBuilder">Sql生成器</param>
     /// <param name="database">数据库</param>
     /// <param name="sqlOptions">Sql配置</param>
-    protected SqlQueryBase(IServiceProvider serviceProvider, ISqlBuilder sqlBuilder, IDatabase database, SqlOptions sqlOptions = null)
+    protected SqlQueryBase(IServiceProvider serviceProvider, IDatabase database, SqlOptions sqlOptions = null)
     {
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        Builder = sqlBuilder ?? throw new ArgumentNullException(nameof(sqlBuilder));
         Database = database;
         SqlOptions = sqlOptions ?? GetOptions();
         Logger = CreateLogger();
@@ -88,6 +92,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 上下文标识
     /// </summary>
     public string ContextId { get; private set; }
+
+    /// <inheritdoc />
+    public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
 
     /// <summary>
     /// 服务提供程序
@@ -163,6 +170,15 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 公用表表达式CTE集合
     /// </summary>
     public List<BuilderItem> CteItems => ((ICteAccessor)Builder).CteItems;
+
+    #endregion
+
+    #region 工厂方法
+
+    /// <summary>
+    /// 创建Sql生成器
+    /// </summary>
+    protected abstract ISqlBuilder CreateSqlBuilder();
 
     #endregion
 

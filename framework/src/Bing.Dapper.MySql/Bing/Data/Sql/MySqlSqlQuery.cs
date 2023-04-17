@@ -6,8 +6,8 @@
 public class MySqlSqlQuery : MySqlSqlQueryBase
 {
     /// <inheritdoc />
-    public MySqlSqlQuery(IServiceProvider serviceProvider, ISqlBuilder sqlBuilder, IDatabase database, SqlOptions sqlOptions = null)
-        : base(serviceProvider, sqlBuilder, database, sqlOptions)
+    public MySqlSqlQuery(IServiceProvider serviceProvider, IDatabase database, SqlOptions sqlOptions = null)
+        : base(serviceProvider, database, sqlOptions)
     {
     }
 }
