@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Dapper.PostgreSql</AssemblyName>
+    <PackageId>Bing.Dapper.PostgreSql</PackageId>
+    <Description>Bing.Dapper.PostgreSql 是Bing应用框架基于Dapper的数据访问封装类库，用于处理PostgreSql数据库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="6.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\Data\Metadata\" />
+    <Folder Include="Bing\Data\Sql\Builders\" />
+  </ItemGroup>
+
+</Project>

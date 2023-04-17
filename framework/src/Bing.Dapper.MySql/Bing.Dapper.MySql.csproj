@@ -4,10 +4,6 @@
     <PackageId>Bing.Dapper.MySql</PackageId>
     <Description>Bing.Dapper.MySql 是Bing应用框架基于Dapper的数据访问封装类库，用于处理MySql数据库。</Description>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Bing\Data\Metadata\" />
-    <Folder Include="Bing\Data\Sql\Builders\Clauses\" />
-  </ItemGroup>
 
   <Import Project="..\..\..\framework.props" />
 
