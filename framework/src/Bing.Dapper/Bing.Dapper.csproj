@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Dapper</AssemblyName>
+    <PackageId>Bing.Dapper</PackageId>
+    <Description>Bing.Dapper 是Bing应用框架基于Dapper的数据访问封装基础类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+</Project>

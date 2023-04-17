@@ -1,3 +1,5 @@
 ﻿<Project>
-  
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="6.0.8" />
+  </ItemGroup>
 </Project>

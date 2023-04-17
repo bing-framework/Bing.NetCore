@@ -1,4 +1,5 @@
-﻿using Bing.Data.Enums;
+﻿using System.Data;
+using Bing.Data.Enums;
 
 namespace Bing.Data;
 
@@ -26,4 +27,22 @@ public class SqlOptions
     /// 日志类别
     /// </summary>
     public string LogCategory { get; set; } = "Bing.Data.Sql";
+
+    /// <summary>
+    /// 数据库连接字符串
+    /// </summary>
+    public string ConnectionString { get; set; }
+
+    /// <summary>
+    /// 数据库连接
+    /// </summary>
+    public IDbConnection Connection { get; set; }
+}
+
+/// <summary>
+/// Sql配置
+/// </summary>
+/// <typeparam name="T">泛型类型</typeparam>
+public class SqlOptions<T> : SqlOptions where T : class
+{
 }

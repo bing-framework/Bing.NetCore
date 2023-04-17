@@ -11,13 +11,4 @@
 
   <Import Project="references.props" />
 
-  <ItemGroup>
-    <PackageReference Include="Npgsql" Version="6.0.8" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Bing\Data\Metadata\" />
-    <Folder Include="Bing\Data\Sql\Builders\" />
-  </ItemGroup>
-
 </Project>

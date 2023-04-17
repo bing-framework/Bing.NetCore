@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Bing.Data.Sql.Diagnostics;
 
-namespace Bing.Data.Sql.Queries;
+namespace Bing.Data.Sql;
 
 // Sql查询对象 - 诊断相关
 public abstract partial class SqlQueryBase

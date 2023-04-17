@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Bing.Extensions;
 
-namespace Bing.Data.Sql.Queries;
+namespace Bing.Data.Sql;
 
 /// <summary>
 /// Sql查询对象基类 - 事务

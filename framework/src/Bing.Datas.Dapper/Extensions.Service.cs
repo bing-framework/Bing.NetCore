@@ -1,9 +1,7 @@
-﻿using System;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Matedatas;
-using Bing.Data.Sql.Queries;
 using Bing.Datas.Dapper.Handlers;
 using Bing.Datas.Dapper.MySql;
 using Bing.Datas.Dapper.Oracle;
@@ -77,7 +75,7 @@ public static partial class Extensions
             services.TryAddScoped(database);
             services.TryAddScoped(typeof(IDatabase), t => t.GetService(database));
         }
-        services.AddTransient<ISqlQuery, SqlQuery>();
+        //services.AddTransient<ISqlQuery, SqlQuery>();
         services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
         AddSqlBuilder(services, config);
         RegisterTypeHandlers(config);
