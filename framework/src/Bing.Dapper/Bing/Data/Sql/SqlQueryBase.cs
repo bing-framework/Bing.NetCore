@@ -93,9 +93,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// </summary>
     public string ContextId { get; private set; }
 
-    /// <inheritdoc />
-    public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
-
     /// <summary>
     /// 服务提供程序
     /// </summary>
@@ -116,60 +113,58 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// </summary>
     protected SqlOptions SqlOptions { get; set; }
 
-    /// <summary>
-    /// Sql生成器
-    /// </summary>
-    protected ISqlBuilder Builder { get; }
+    /// <inheritdoc />
+    public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
 
     /// <summary>
     /// Select子句
     /// </summary>
-    public ISelectClause SelectClause => ((IClauseAccessor)Builder).SelectClause;
+    public ISelectClause SelectClause => ((IClauseAccessor)SqlBuilder).SelectClause;
 
     /// <summary>
     /// From子句
     /// </summary>
-    public IFromClause FromClause => ((IClauseAccessor)Builder).FromClause;
+    public IFromClause FromClause => ((IClauseAccessor)SqlBuilder).FromClause;
 
     /// <summary>
     /// Join子句
     /// </summary>
-    public IJoinClause JoinClause => ((IClauseAccessor)Builder).JoinClause;
+    public IJoinClause JoinClause => ((IClauseAccessor)SqlBuilder).JoinClause;
 
     /// <summary>
     /// Where子句
     /// </summary>
-    public IWhereClause WhereClause => ((IClauseAccessor)Builder).WhereClause;
+    public IWhereClause WhereClause => ((IClauseAccessor)SqlBuilder).WhereClause;
 
     /// <summary>
     /// GroupBy子句
     /// </summary>
-    public IGroupByClause GroupByClause => ((IClauseAccessor)Builder).GroupByClause;
+    public IGroupByClause GroupByClause => ((IClauseAccessor)SqlBuilder).GroupByClause;
 
     /// <summary>
     /// OrderBy子句
     /// </summary>
-    public IOrderByClause OrderByClause => ((IClauseAccessor)Builder).OrderByClause;
+    public IOrderByClause OrderByClause => ((IClauseAccessor)SqlBuilder).OrderByClause;
 
     /// <summary>
     /// 参数列表
     /// </summary>
-    protected IReadOnlyDictionary<string, object> Params => Builder.GetParams();
+    protected IReadOnlyDictionary<string, object> Params => SqlBuilder.GetParams();
 
     /// <summary>
     /// 是否包含联合操作
     /// </summary>
-    public bool IsUnion => ((IUnionAccessor)Builder).IsUnion;
+    public bool IsUnion => ((IUnionAccessor)SqlBuilder).IsUnion;
 
     /// <summary>
     /// 联合操作项集合
     /// </summary>
-    public List<BuilderItem> UnionItems => ((IUnionAccessor)Builder).UnionItems;
+    public List<BuilderItem> UnionItems => ((IUnionAccessor)SqlBuilder).UnionItems;
 
     /// <summary>
     /// 公用表表达式CTE集合
     /// </summary>
-    public List<BuilderItem> CteItems => ((ICteAccessor)Builder).CteItems;
+    public List<BuilderItem> CteItems => ((ICteAccessor)SqlBuilder).CteItems;
 
     #endregion
 
@@ -231,23 +226,23 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     {
         if (SqlOptions.IsClearAfterExecution == false)
             return;
-        Builder.Clear();
+        SqlBuilder.Clear();
     }
 
     /// <summary>
     /// 获取调试Sql语句
     /// </summary>
-    public string GetDebugSql() => Builder.ToDebugSql();
+    public string GetDebugSql() => SqlBuilder.ToDebugSql();
 
     /// <summary>
     /// 获取Sql语句
     /// </summary>
-    protected string GetSql() => Builder.ToSql();
+    protected string GetSql() => SqlBuilder.ToSql();
 
     /// <summary>
     /// 获取Sql生成器
     /// </summary>
-    public ISqlBuilder GetBuilder() => Builder;
+    public ISqlBuilder GetBuilder() => SqlBuilder;
 
     /// <summary>
     /// 获取单值
@@ -382,8 +377,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <param name="parameter">分页参数</param>
     private void SetPager(IPager parameter)
     {
-        Builder.OrderBy(parameter.Order);
-        Builder.Page(parameter);
+        SqlBuilder.OrderBy(parameter.Order);
+        SqlBuilder.Page(parameter);
     }
 
     /// <summary>
@@ -561,7 +556,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     {
         if (parameter != null)
             return parameter;
-        return Builder.Pager;
+        return SqlBuilder.Pager;
     }
 
     /// <summary>
@@ -569,7 +564,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// </summary>
     protected ISqlBuilder GetCountBuilder()
     {
-        var builder = Builder.Clone();
+        var builder = SqlBuilder.Clone();
         ClearCountBuilder(builder);
         if (IsUnion)
             return GetCountBuilderByUnion(builder);
