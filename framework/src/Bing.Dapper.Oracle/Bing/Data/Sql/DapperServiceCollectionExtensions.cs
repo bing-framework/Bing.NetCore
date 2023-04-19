@@ -69,6 +69,8 @@ public static partial class DapperServiceCollectionExtensions
     {
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
+        sqlOptions.RegisterStringTypeHandler();
+        sqlOptions.RegisterGuidTypeHandler();
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;

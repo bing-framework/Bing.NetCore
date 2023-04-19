@@ -6,7 +6,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql配置扩展
 /// </summary>
-public static class SqlOptionsExtensions
+public static partial class SqlOptionsExtensions
 {
     /// <summary>
     /// 设置数据库连接字符串
