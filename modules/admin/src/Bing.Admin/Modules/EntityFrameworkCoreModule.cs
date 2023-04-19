@@ -3,6 +3,7 @@ using Bing.Admin.Data;
 using Bing.Core.Modularity;
 using Bing.Data;
 using Bing.Data.Enums;
+using Bing.Data.Sql;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
 using Microsoft.Extensions.Configuration;
@@ -46,12 +47,20 @@ namespace Bing.Admin.Modules
             //        options.IsClearAfterExecution = true;
             //        //options.LogLevel = DataLogLevel.Off;
             //    });
-            services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
-            {
-                options.DatabaseType = DatabaseType.MySql;
-                options.IsClearAfterExecution = true;
-                //options.LogLevel = DataLogLevel.Off;
-            });
+
+            services.AddMySqlQuery(t =>
+                {
+                    t.DatabaseType = DatabaseType.MySql;
+                    t.IsClearAfterExecution = true;
+                })
+                .AddDatabase<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>()
+                .AddEntityMetadata<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>();
+            //services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
+            //{
+            //    options.DatabaseType = DatabaseType.MySql;
+            //    options.IsClearAfterExecution = true;
+            //    //options.LogLevel = DataLogLevel.Off;
+            //});
             // 注册SqlExecutor
             services.AddSqlExecutor();
             return services;

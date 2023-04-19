@@ -31,6 +31,7 @@ public static partial class DapperServiceCollectionExtensions
         where TImplementation : class, TInterface
     {
         services.TryAddScoped(typeof(TInterface), typeof(TImplementation));
+        services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
         return services;
     }
 
@@ -58,4 +59,5 @@ public static partial class DapperServiceCollectionExtensions
         services.TryAddScoped(typeof(TInterface), typeof(TImplementation));
         return services;
     }
+
 }

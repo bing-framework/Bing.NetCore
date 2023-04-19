@@ -42,6 +42,10 @@ public class MySqlBuilder : SqlBuilderBase
     protected override string GetCteKeyWord() => "With Recursive";
 
     /// <inheritdoc />
+    protected override IFromClause CreateFromClause() => 
+        new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister, TableDatabase);
+
+    /// <inheritdoc />
     protected override IJoinClause CreateJoinClause() =>
         new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
             TableDatabase);

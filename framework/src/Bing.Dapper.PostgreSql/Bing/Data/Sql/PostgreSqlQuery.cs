@@ -6,7 +6,7 @@
 public class PostgreSqlQuery : PostgreSqlQueryBase
 {
     /// <inheritdoc />
-    public PostgreSqlQuery(IServiceProvider serviceProvider, SqlOptions options, IDatabase database = null)
+    public PostgreSqlQuery(IServiceProvider serviceProvider, SqlOptions<PostgreSqlQuery> options, IDatabase database = null)
         : base(serviceProvider, options, database)
     {
     }

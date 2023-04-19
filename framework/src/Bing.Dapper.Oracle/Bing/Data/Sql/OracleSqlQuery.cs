@@ -8,7 +8,7 @@ namespace Bing.Data.Sql;
 public class OracleSqlQuery : OracleSqlQueryBase
 {
     /// <inheritdoc />
-    public OracleSqlQuery(IServiceProvider serviceProvider, SqlOptions options, IDatabase database = null)
+    public OracleSqlQuery(IServiceProvider serviceProvider, SqlOptions<OracleSqlQuery> options, IDatabase database = null)
         : base(serviceProvider, options, database)
     {
     }
