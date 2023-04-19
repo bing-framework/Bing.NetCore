@@ -23,6 +23,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     #region 字段
 
     /// <summary>
+    /// 数据库信息
+    /// </summary>
+    private IDatabase _database;
+
+    /// <summary>
     /// Sql生成器
     /// </summary>
     private ISqlBuilder _sqlBuilder;
@@ -45,32 +50,16 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 初始化一个<see cref="SqlQueryBase"/>类型的实例
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
-    /// <param name="sqlBuilder">Sql生成器</param>
+    /// <param name="options">Sql配置</param>
     /// <param name="database">数据库</param>
-    /// <param name="sqlOptions">Sql配置</param>
-    protected SqlQueryBase(IServiceProvider serviceProvider, IDatabase database, SqlOptions sqlOptions = null)
+    protected SqlQueryBase(IServiceProvider serviceProvider, SqlOptions options, IDatabase database)
     {
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        Database = database;
-        SqlOptions = sqlOptions ?? GetOptions();
+        Options = options ?? throw new ArgumentNullException(nameof(options));
         Logger = CreateLogger();
+        _connection = options.Connection;
+        _database = database;
         ContextId = Guid.NewGuid().ToString("N");
-    }
-
-    /// <summary>
-    /// 获取配置
-    /// </summary>
-    private SqlOptions GetOptions()
-    {
-        try
-        {
-            var options = ServiceLocator.Instance.GetService<IOptionsSnapshot<SqlOptions>>();
-            return options == null ? new SqlOptions() : options.Value;
-        }
-        catch
-        {
-            return new SqlOptions();
-        }
     }
 
     /// <summary>
@@ -106,12 +95,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <summary>
     /// 数据库
     /// </summary>
-    protected IDatabase Database { get; private set; }
+    protected IDatabase Database => _database ??= CreateDatabase();
 
     /// <summary>
     /// Sql配置
     /// </summary>
-    protected SqlOptions SqlOptions { get; set; }
+    protected SqlOptions Options { get; set; }
 
     /// <inheritdoc />
     public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
@@ -175,6 +164,24 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// </summary>
     protected abstract ISqlBuilder CreateSqlBuilder();
 
+    /// <summary>
+    /// 创建数据库信息
+    /// </summary>
+    protected virtual IDatabase CreateDatabase()
+    {
+        if (string.IsNullOrWhiteSpace(Options.ConnectionString))
+            throw new InvalidOperationException("数据库连接字符串不能为空");
+        var factory = CreateDatabaseFactory();
+        if (factory == null)
+            throw new InvalidOperationException("数据库工厂不能为空");
+        return factory.Create(Options.ConnectionString);
+    }
+
+    /// <summary>
+    /// 创建数据库工厂
+    /// </summary>
+    protected abstract IDatabaseFactory CreateDatabaseFactory();
+
     #endregion
 
     #region SetConnection(设置数据库连接)
@@ -215,7 +222,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// 配置
     /// </summary>
     /// <param name="configAction">配置操作</param>
-    public void Config(Action<SqlOptions> configAction) => configAction?.Invoke(SqlOptions);
+    public void Config(Action<SqlOptions> configAction) => configAction?.Invoke(Options);
 
     #endregion
 
@@ -224,7 +231,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// </summary>
     protected void ClearAfterExecution()
     {
-        if (SqlOptions.IsClearAfterExecution == false)
+        if (Options.IsClearAfterExecution == false)
             return;
         SqlBuilder.Clear();
     }

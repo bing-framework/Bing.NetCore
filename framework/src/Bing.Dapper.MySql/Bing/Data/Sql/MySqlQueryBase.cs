@@ -7,11 +7,11 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// MySql Sql查询对象 
 /// </summary>
-public abstract class MySqlSqlQueryBase : SqlQueryBase
+public abstract class MySqlQueryBase : SqlQueryBase
 {
     /// <inheritdoc />
-    protected MySqlSqlQueryBase(IServiceProvider serviceProvider, IDatabase database, SqlOptions sqlOptions = null)
-        : base(serviceProvider, database, sqlOptions)
+    protected MySqlQueryBase(IServiceProvider serviceProvider, SqlOptions options, IDatabase database)
+        : base(serviceProvider, options, database)
     {
     }
 
@@ -19,4 +19,7 @@ public abstract class MySqlSqlQueryBase : SqlQueryBase
     protected override ISqlBuilder CreateSqlBuilder() => new MySqlBuilder(
         ServiceProvider.GetService<IEntityMatedata>(),
         ServiceProvider.GetService<ITableDatabase>());
+
+    /// <inheritdoc />
+    protected override IDatabaseFactory CreateDatabaseFactory() => new MySqlDatabaseFactory();
 }

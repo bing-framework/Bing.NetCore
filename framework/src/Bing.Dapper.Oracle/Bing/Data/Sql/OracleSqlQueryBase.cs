@@ -11,8 +11,8 @@ namespace Bing.Data.Sql;
 public abstract class OracleSqlQueryBase : SqlQueryBase
 {
     /// <inheritdoc />
-    protected OracleSqlQueryBase(IServiceProvider serviceProvider, IDatabase database, SqlOptions sqlOptions = null)
-        : base(serviceProvider, database, sqlOptions)
+    protected OracleSqlQueryBase(IServiceProvider serviceProvider, SqlOptions options, IDatabase database)
+        : base(serviceProvider, options, database)
     {
     }
 
@@ -20,4 +20,7 @@ public abstract class OracleSqlQueryBase : SqlQueryBase
     protected override ISqlBuilder CreateSqlBuilder() => new OracleBuilder(
         ServiceProvider.GetService<IEntityMatedata>(),
         ServiceProvider.GetService<ITableDatabase>());
+
+    /// <inheritdoc />
+    protected override IDatabaseFactory CreateDatabaseFactory() => new OracleDatabaseFactory();
 }

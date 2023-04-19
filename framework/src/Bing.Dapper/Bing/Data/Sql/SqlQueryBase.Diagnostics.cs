@@ -30,7 +30,7 @@ public abstract partial class SqlQueryBase
             Database = connection.Database,
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute,
-            DatabaseType = SqlOptions.DatabaseType,
+            DatabaseType = Options.DatabaseType,
         };
         _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, message);
         return message;

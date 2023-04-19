@@ -7,11 +7,11 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// PostgreSql Sql查询对象
 /// </summary>
-public abstract class PostgreSqlSqlQueryBase : SqlQueryBase
+public abstract class PostgreSqlQueryBase : SqlQueryBase
 {
     /// <inheritdoc />
-    protected PostgreSqlSqlQueryBase(IServiceProvider serviceProvider, IDatabase database, SqlOptions sqlOptions = null)
-        : base(serviceProvider, database, sqlOptions)
+    protected PostgreSqlQueryBase(IServiceProvider serviceProvider, SqlOptions options, IDatabase database)
+        : base(serviceProvider, options, database)
     {
     }
 
@@ -19,4 +19,7 @@ public abstract class PostgreSqlSqlQueryBase : SqlQueryBase
     protected override ISqlBuilder CreateSqlBuilder() => new PostgreSqlBuilder(
         ServiceProvider.GetService<IEntityMatedata>(),
         ServiceProvider.GetService<ITableDatabase>());
+
+    /// <inheritdoc />
+    protected override IDatabaseFactory CreateDatabaseFactory() => new PostgreSqlDatabaseFactory();
 }

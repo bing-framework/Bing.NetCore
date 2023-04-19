@@ -1,8 +1,4 @@
-﻿using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Matedatas;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Bing.Data.Sql;
+﻿namespace Bing.Data.Sql;
 
 /// <summary>
 /// Sql Server Sql查询对象
@@ -10,13 +6,8 @@ namespace Bing.Data.Sql;
 public class SqlServerSqlQuery : SqlServerSqlQueryBase
 {
     /// <inheritdoc />
-    public SqlServerSqlQuery(IServiceProvider serviceProvider, IDatabase database = null, SqlOptions sqlOptions = null)
-        : base(serviceProvider, database, sqlOptions)
+    public SqlServerSqlQuery(IServiceProvider serviceProvider, SqlOptions options, IDatabase database = null)
+        : base(serviceProvider, options, database)
     {
     }
-
-    /// <inheritdoc />
-    protected override ISqlBuilder CreateSqlBuilder() => new SqlServerBuilder(
-        ServiceProvider.GetService<IEntityMatedata>(),
-        ServiceProvider.GetService<ITableDatabase>());
 }
