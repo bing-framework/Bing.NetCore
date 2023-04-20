@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Bing.Data;
+﻿namespace Bing.Data;
 
 /// <summary>
 /// 分页集合

@@ -1,7 +1,6 @@
-﻿using Bing.Data;
-using Xunit;
+﻿using Xunit;
 
-namespace Bing.Tests.Domains.Repositories;
+namespace Bing.Data.Tests.Pages;
 
 /// <summary>
 /// 分页参数测试

@@ -2,16 +2,16 @@
 using System.Text;
 using Bing.Data.Queries;
 using Bing.Data.Queries.Conditions;
-using Bing.Tests.Samples;
+using Bing.Data.Tests.Samples;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Tests.Datas.Queries.Criterias;
+namespace Bing.Data.Tests.Queries.Conditions;
 
 /// <summary>
 /// 测试日期范围过滤条件
 /// </summary>
-public class DateSegmentCriteriaTest
+public class DateSegmentConditionTest
 {
     /// <summary>
     /// 输出日志
@@ -29,9 +29,9 @@ public class DateSegmentCriteriaTest
     private readonly DateTime? _max;
 
     /// <summary>
-    /// 初始化一个<see cref="DateSegmentCriteriaTest"/>类型的实例
+    /// 初始化一个<see cref="DateSegmentConditionTest"/>类型的实例
     /// </summary>
-    public DateSegmentCriteriaTest(ITestOutputHelper output)
+    public DateSegmentConditionTest(ITestOutputHelper output)
     {
         _output = output;
         _min = DateTime.Parse("2000-1-1 10:10:10");
@@ -48,7 +48,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/2 0:00:00\"), DateTime))");
         result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
 
-        var condition= new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Neither);
+        var condition = new DateSegmentCondition<Sample, DateTime>(t => t.DateValue, _min, _max, Boundary.Neither);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -63,7 +63,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.NullableDateValue >= Convert(Parse(\"2000/1/2 0:00:00\"), Nullable`1))");
         result.Append(" AndAlso (t.NullableDateValue < Convert(Parse(\"2000/1/3 0:00:00\"), Nullable`1)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Neither);
+        var condition = new DateSegmentCondition<Sample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Neither);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -78,7 +78,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), DateTime))");
         result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/3 0:00:00\"), DateTime)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Left);
+        var condition = new DateSegmentCondition<Sample, DateTime>(t => t.DateValue, _min, _max, Boundary.Left);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -93,7 +93,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.NullableDateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), Nullable`1))");
         result.Append(" AndAlso (t.NullableDateValue < Convert(Parse(\"2000/1/3 0:00:00\"), Nullable`1)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Left);
+        var condition = new DateSegmentCondition<Sample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Left);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -108,7 +108,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/2 0:00:00\"), DateTime))");
         result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/4 0:00:00\"), DateTime)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Right);
+        var condition = new DateSegmentCondition<Sample, DateTime>(t => t.DateValue, _min, _max, Boundary.Right);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -123,7 +123,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.NullableDateValue >= Convert(Parse(\"2000/1/2 0:00:00\"), Nullable`1))");
         result.Append(" AndAlso (t.NullableDateValue < Convert(Parse(\"2000/1/4 0:00:00\"), Nullable`1)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Right);
+        var condition = new DateSegmentCondition<Sample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Right);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -138,7 +138,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.DateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), DateTime))");
         result.Append(" AndAlso (t.DateValue < Convert(Parse(\"2000/1/4 0:00:00\"), DateTime)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime>(t => t.DateValue, _min, _max, Boundary.Both);
+        var condition = new DateSegmentCondition<Sample, DateTime>(t => t.DateValue, _min, _max, Boundary.Both);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
@@ -153,7 +153,7 @@ public class DateSegmentCriteriaTest
         result.Append("t => ((t.NullableDateValue >= Convert(Parse(\"2000/1/1 0:00:00\"), Nullable`1))");
         result.Append(" AndAlso (t.NullableDateValue < Convert(Parse(\"2000/1/4 0:00:00\"), Nullable`1)))");
 
-        var condition = new DateSegmentCondition<AggregateRootSample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Both);
+        var condition = new DateSegmentCondition<Sample, DateTime?>(t => t.NullableDateValue, _min, _max, Boundary.Both);
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
