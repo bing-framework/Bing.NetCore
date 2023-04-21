@@ -1,15 +1,15 @@
-﻿using System.Text;
-using Bing.Data.Sql.Builders.Conditions;
-using Bing.Data.Sql.Builders.Params;
+﻿using Bing.Data.Sql.Builders.Params;
+using System.Text;
 using Bing.Data.Sql.Tests.Samples;
+using Bing.Data.Sql.Builders.Conditions;
 using Xunit;
 
 namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
 /// <summary>
-/// And连接条件测试
+/// Or连接条件测试
 /// </summary>
-public class AndConditionTest
+public class OrConditionTest
 {
     /// <summary>
     /// 参数管理器
@@ -19,7 +19,7 @@ public class AndConditionTest
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public AndConditionTest()
+    public OrConditionTest()
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
     }
@@ -35,7 +35,7 @@ public class AndConditionTest
     }
 
     /// <summary>
-    /// 测试 - 与连接条件
+    /// 测试 - 或连接条件 - 构造器传入1个条件
     /// </summary>
     [Fact]
     public void Test_1()
@@ -44,9 +44,9 @@ public class AndConditionTest
         var condition1 = new EqualSqlCondition(_parameterManager, "Name", "@Name", false);
         condition1.AppendTo(result);
         var condition2 = new GreaterSqlCondition(_parameterManager, "Age", "@Age", false);
-        var andCondition = new AndSqlCondition(condition2);
-        andCondition.AppendTo(result);
-        Assert.Equal("Name=@Name And Age>@Age", result.ToString());
+        var orCondition = new OrSqlCondition(condition2);
+        orCondition.AppendTo(result);
+        Assert.Equal("(Name=@Name Or Age>@Age)", result.ToString());
     }
 
     /// <summary>
@@ -60,9 +60,9 @@ public class AndConditionTest
         condition1.AppendTo(result);
         var condition2 = new EqualSqlCondition(_parameterManager, "Code", "@Code", false);
         var condition3 = new GreaterSqlCondition(_parameterManager, "Age", "@Age", false);
-        var orCondition = new AndSqlCondition(condition2, condition3);
+        var orCondition = new OrSqlCondition(condition2, condition3);
         orCondition.AppendTo(result);
-        Assert.Equal("Name=@Name And Code=@Code And Age>@Age", result.ToString());
+        Assert.Equal("Name=@Name And (Code=@Code Or Age>@Age)", result.ToString());
     }
 
     /// <summary>
@@ -75,9 +75,9 @@ public class AndConditionTest
         var condition1 = new EqualSqlCondition(_parameterManager, "Name", "@Name", false);
         condition1.AppendTo(result);
         var condition2 = new EqualSqlCondition(_parameterManager, "Code", "@Code", false);
-        var orCondition = new AndSqlCondition(condition2, NullSqlCondition.Instance);
+        var orCondition = new OrSqlCondition(condition2, NullSqlCondition.Instance);
         orCondition.AppendTo(result);
-        Assert.Equal("Name=@Name And Code=@Code", result.ToString());
+        Assert.Equal("(Name=@Name Or Code=@Code)", result.ToString());
     }
 
     /// <summary>
@@ -88,8 +88,8 @@ public class AndConditionTest
     {
         var result = new StringBuilder();
         var condition2 = new GreaterSqlCondition(_parameterManager, "Age", "@Age", false);
-        var andCondition = new AndSqlCondition(condition2);
-        andCondition.AppendTo(result);
+        var orCondition = new OrSqlCondition(condition2);
+        orCondition.AppendTo(result);
         Assert.Equal("Age>@Age", result.ToString());
     }
 
@@ -102,8 +102,8 @@ public class AndConditionTest
         var result = new StringBuilder();
         var condition1 = new EqualSqlCondition(_parameterManager, "Name", "@Name", false);
         condition1.AppendTo(result);
-        var andCondition = new AndSqlCondition(null);
-        andCondition.AppendTo(result);
+        var orCondition = new OrSqlCondition(null);
+        orCondition.AppendTo(result);
         Assert.Equal("Name=@Name", result.ToString());
     }
 
@@ -114,8 +114,8 @@ public class AndConditionTest
     public void Test_6()
     {
         var result = new StringBuilder();
-        var andCondition = new AndSqlCondition(null);
-        andCondition.AppendTo(result);
+        var orCondition = new OrSqlCondition(null);
+        orCondition.AppendTo(result);
         Assert.Empty(result.ToString());
     }
 }

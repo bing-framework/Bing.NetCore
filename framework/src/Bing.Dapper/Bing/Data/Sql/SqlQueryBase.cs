@@ -7,6 +7,7 @@ using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Text;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -530,7 +531,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         var message = new StringBuilder();
         foreach (var param in parameters)
             message.AppendLine($"    {param.Key} : {GetParamLiterals(param.Value)} : {param.Value?.GetType()},");
-        var result = message.ToString().RemoveEnd($",{Common.Line}");
+        var result = message.RemoveEnd($",{Common.Line}");
         Logger.LogTrace("原始Sql:\r\n{Sql}\r\n调试Sql:\r\n{DebugSql}\r\nSql参数:\r\n{SqlParam}\r\n", sql, debugSql, result);
     }
 

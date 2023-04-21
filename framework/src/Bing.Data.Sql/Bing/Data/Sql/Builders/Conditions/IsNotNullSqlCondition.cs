@@ -3,9 +3,9 @@
 namespace Bing.Data.Sql.Builders.Conditions;
 
 /// <summary>
-/// Is Null查询条件
+/// Is Not Null查询条件
 /// </summary>
-public class IsNullSqlCondition : ISqlCondition
+public class IsNotNullSqlCondition : ISqlCondition
 {
     /// <summary>
     /// 列名
@@ -13,10 +13,10 @@ public class IsNullSqlCondition : ISqlCondition
     private readonly string _name;
 
     /// <summary>
-    /// 初始化一个<see cref="IsNullSqlCondition"/>类型的实例
+    /// 初始化一个<see cref="IsNotNullSqlCondition"/>类型的实例
     /// </summary>
     /// <param name="name">列名</param>
-    public IsNullSqlCondition(string name) => _name = name;
+    public IsNotNullSqlCondition(string name) => _name = name;
 
     /// <summary>
     /// 添加到字符串生成器
@@ -26,6 +26,6 @@ public class IsNullSqlCondition : ISqlCondition
     {
         if (string.IsNullOrWhiteSpace(_name))
             return;
-        builder.AppendFormat("{0} Is Null", _name);
+        builder.AppendFormat("{0} Is Not Null", _name);
     }
 }

@@ -45,7 +45,10 @@ public abstract class SqlConditionBase : ISqlCondition
     /// </summary>
     protected bool IsParameterization { get; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 添加到字符串生成器
+    /// </summary>
+    /// <param name="builder">字符串生成器</param>
     public virtual void AppendTo(StringBuilder builder)
     {
         if (Value is ISqlBuilder sqlBuilder)
@@ -67,10 +70,7 @@ public abstract class SqlConditionBase : ISqlCondition
     /// <param name="builder">字符串生成器</param>
     /// <param name="column">列名</param>
     /// <param name="sqlBuilder">Sql生成器</param>
-    protected virtual void AppendSqlBuilder(StringBuilder builder, string column, ISqlBuilder sqlBuilder)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual void AppendSqlBuilder(StringBuilder builder, string column, ISqlBuilder sqlBuilder) => throw new NotImplementedException();
 
     /// <summary>
     /// 添加参数化条件
