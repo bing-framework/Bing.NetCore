@@ -59,9 +59,9 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(3, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_2"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(1, _builder.GetParam("@_p_2"));
     }
 
     #endregion
@@ -107,8 +107,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -131,9 +131,9 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(3, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_2"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(1, _builder.GetParam("@_p_2"));
     }
 
     /// <summary>
@@ -176,8 +176,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     #endregion
@@ -226,7 +226,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -249,7 +249,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -272,7 +272,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -299,8 +299,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -327,8 +327,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -356,8 +356,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -385,8 +385,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -407,8 +407,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("%b%", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("%b%", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -454,8 +454,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -475,7 +475,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(4, _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -495,7 +495,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(4, _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -516,7 +516,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(4, _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -537,7 +537,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(4, _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -559,7 +559,7 @@ public partial class SqlServerBuilderTest : TestBase
         // 验证
         Output.WriteLine(_builder.ToSql());
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(Guid.Empty, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(Guid.Empty, _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -581,7 +581,7 @@ public partial class SqlServerBuilderTest : TestBase
         // 验证
         Output.WriteLine(_builder.ToSql());
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(Guid.Empty, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(Guid.Empty, _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -604,7 +604,7 @@ public partial class SqlServerBuilderTest : TestBase
         // 验证
         Output.WriteLine(_builder.ToDebugSql());
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(guid, _builder.GetParams()["@_p_0"]);
+        Assert.Equal(guid, _builder.GetParam("@_p_0"));
     }
 
     private void GetSql(Guid id)
@@ -638,7 +638,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -662,7 +662,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -686,7 +686,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -713,8 +713,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -744,8 +744,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -778,8 +778,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -812,8 +812,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -847,8 +847,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal(1, _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     #endregion
@@ -876,7 +876,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -900,7 +900,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -924,7 +924,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -951,7 +951,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -974,7 +974,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1001,7 +1001,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1024,7 +1024,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1051,7 +1051,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1074,7 +1074,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1101,7 +1101,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1124,7 +1124,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1151,7 +1151,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1174,7 +1174,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1201,7 +1201,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1224,7 +1224,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1251,7 +1251,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc%", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("%abc%", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1274,7 +1274,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc%", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("%abc%", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1301,7 +1301,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc%", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc%", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1324,7 +1324,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("abc%", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("abc%", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1351,7 +1351,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("%abc", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -1374,7 +1374,7 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc", _builder.GetParams()["@_p_0"]);
+        Assert.Equal("%abc", _builder.GetParam("@_p_0"));
     }
 
     #endregion
@@ -1586,8 +1586,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1611,8 +1611,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1642,8 +1642,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("u", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("n", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("u", _builder.GetParam("@_p_0"));
+        Assert.Equal("n", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1673,8 +1673,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("u", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("n", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("u", _builder.GetParam("@_p_0"));
+        Assert.Equal("n", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1703,8 +1703,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("n", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("u", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("n", _builder.GetParam("@_p_0"));
+        Assert.Equal("u", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1733,8 +1733,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("n", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("u", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("n", _builder.GetParam("@_p_0"));
+        Assert.Equal("u", _builder.GetParam("@_p_1"));
     }
 
     #endregion
@@ -1762,8 +1762,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1787,8 +1787,8 @@ public partial class SqlServerBuilderTest : TestBase
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParams()["@_p_0"]);
-        Assert.Equal("b", _builder.GetParams()["@_p_1"]);
+        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        Assert.Equal("b", _builder.GetParam("@_p_1"));
     }
 
     #endregion
@@ -1813,8 +1813,8 @@ public partial class SqlServerBuilderTest : TestBase
             .Between("a.B", 1, 2);
 
         //验证
-        Assert.Equal(1, _builder.GetParams()["@_p_0"]);
-        Assert.Equal(2, _builder.GetParams()["@_p_1"]);
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal(2, _builder.GetParam("@_p_1"));
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 

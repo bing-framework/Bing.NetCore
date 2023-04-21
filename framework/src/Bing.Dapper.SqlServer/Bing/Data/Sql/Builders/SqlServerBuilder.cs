@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Matedatas;
 
 namespace Bing.Data.Sql.Builders;
@@ -11,10 +12,10 @@ public class SqlServerBuilder : SqlBuilderBase
     /// <summary>
     /// 初始化一个<see cref="SqlServerBuilder"/>类型的实例
     /// </summary>
-    /// <param name="matedata">实体元数据解析器</param>
+    /// <param name="metadata">实体元数据解析器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
-    public SqlServerBuilder(IEntityMatedata matedata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(matedata, tableDatabase, parameterManager) { }
+    public SqlServerBuilder(IEntityMatedata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(metadata, tableDatabase, parameterManager) { }
 
     /// <inheritdoc />
     protected override IDialect GetDialect() => SqlServerDialect.Instance;
@@ -28,7 +29,7 @@ public class SqlServerBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
-    public override ISqlBuilder New() => new SqlServerBuilder(EntityMatedata, TableDatabase, ParameterManager);
+    public override ISqlBuilder New() => new SqlServerBuilder(EntityMetadata, TableDatabase, ParameterManager);
 
     /// <inheritdoc />
     protected override string CreateLimitSql() => $"Offset {GetOffsetParam()} Rows Fetch Next {GetLimitParam()} Rows Only";

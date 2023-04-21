@@ -1,13 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using Bing.Extensions;
 
-namespace Bing.Data.Sql.Builders.Core;
+namespace Bing.Data.Sql.Builders.Params;
 
 /// <summary>
 /// 参数管理器
 /// </summary>
 public class ParameterManager : IParameterManager
 {
+    #region 字段
+
     /// <summary>
     /// 参数集合
     /// </summary>
@@ -18,10 +20,9 @@ public class ParameterManager : IParameterManager
     /// </summary>
     private int _paramIndex;
 
-    /// <summary>
-    /// Sql方言
-    /// </summary>
-    private readonly IDialect _dialect;
+    #endregion
+
+    #region 构造函数
 
     /// <summary>
     /// 初始化一个<see cref="ParameterManager"/>类型的实例
@@ -29,9 +30,9 @@ public class ParameterManager : IParameterManager
     /// <param name="dialect">Sql方言</param>
     public ParameterManager(IDialect dialect)
     {
-        _params = new Dictionary<string, object>();
+        Dialect = dialect;
         _paramIndex = 0;
-        _dialect = dialect;
+        _params = new Dictionary<string, object>();
     }
 
     /// <summary>
@@ -40,38 +41,60 @@ public class ParameterManager : IParameterManager
     /// <param name="parameterManager">参数管理器</param>
     protected ParameterManager(ParameterManager parameterManager)
     {
-        _params = new Dictionary<string, object>(parameterManager._params);
+        Dialect = parameterManager.Dialect;
         _paramIndex = parameterManager._paramIndex;
-        _dialect = parameterManager._dialect;
+        _params = new Dictionary<string, object>(parameterManager._params);
     }
 
+    #endregion
+
+    #region 属性
+
     /// <summary>
-    /// 创建参数名
+    /// Sql方言
     /// </summary>
-    public string GenerateName()
+    protected IDialect Dialect { get; }
+
+    #endregion
+
+    #region GenerateName(创建参数名)
+
+    /// <inheritdoc />
+    public virtual string GenerateName()
     {
-        var result = _dialect.GenerateName(_paramIndex);
+        var result = Dialect.GenerateName(_paramIndex);
         _paramIndex += 1;
         return result;
     }
 
-    /// <summary>
-    /// 获取参数列表
-    /// </summary>
-    public IReadOnlyDictionary<string, object> GetParams() => new ReadOnlyDictionary<string, object>(_params);
+    #endregion
 
-    /// <summary>
-    /// 添加参数，如果参数已存在则替换
-    /// </summary>
-    /// <param name="name">参数名</param>
-    /// <param name="value">参数值</param>
-    /// <param name="operator">运算符</param>
+    #region NormalizeName(标准化参数名)
+
+    /// <inheritdoc />
+    public virtual string NormalizeName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return name;
+        name = name.Trim();
+        if (name.StartsWith(Dialect.GetPrefix()))
+            return name;
+        return $"{Dialect.GetPrefix()}{name}";
+    }
+
+    
+
+    #endregion
+
+    #region Add(添加参数)
+
+    /// <inheritdoc />
     public void Add(string name, object value, Operator? @operator = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             return;
-        name = _dialect.GetParamName(name);
-        value = _dialect.GetParamValue(value);
+        name = NormalizeName(name);
+        value = Dialect.GetParamValue(value);
         if (_params.ContainsKey(name))
             _params.Remove(name);
         _params.Add(name, GetValue(value, @operator));
@@ -102,17 +125,58 @@ public class ParameterManager : IParameterManager
         }
     }
 
+    #endregion
+
+    #region GetParams(获取参数列表)
+
+    /// <summary>
+    /// 获取参数列表
+    /// </summary>
+    public IReadOnlyDictionary<string, object> GetParams() => new ReadOnlyDictionary<string, object>(_params);
+
+    #endregion
+
+    #region Contains(是否包含参数)
+
+    /// <inheritdoc />
+    public virtual bool Contains(string name)
+    {
+        name = NormalizeName(name);
+        return _params.ContainsKey(name);
+    }
+
+    #endregion
+
+    #region GetValue(获取参数值)
+
+    /// <inheritdoc />
+    public virtual object GetValue(string name)
+    {
+        name = NormalizeName(name);
+        return _params.ContainsKey(name) ? _params[name] : null;
+    }
+
+    #endregion
+
+    #region Clear(清空参数)
+
+    /// <summary>
+    /// 清空参数
+    /// </summary>
+    public virtual void Clear()
+    {
+        _paramIndex = 0;
+        _params.Clear();
+    }
+
+    #endregion
+
+    #region Clone(克隆)
+
     /// <summary>
     /// 克隆
     /// </summary>
     public IParameterManager Clone() => new ParameterManager(this);
 
-    /// <summary>
-    /// 清空参数
-    /// </summary>
-    public void Clear()
-    {
-        _paramIndex = 0;
-        _params.Clear();
-    }
+    #endregion
 }

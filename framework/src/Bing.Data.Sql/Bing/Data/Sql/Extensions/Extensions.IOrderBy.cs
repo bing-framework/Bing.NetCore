@@ -19,7 +19,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.OrderByClause.OrderBy(order, tableAlias);
         return source;
     }
@@ -34,7 +34,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.OrderByClause.AppendSql(sql);
         return source;
     }

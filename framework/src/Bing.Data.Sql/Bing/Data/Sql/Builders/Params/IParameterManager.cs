@@ -1,4 +1,4 @@
-﻿namespace Bing.Data.Sql.Builders;
+﻿namespace Bing.Data.Sql.Builders.Params;
 
 /// <summary>
 /// 参数管理器
@@ -11,9 +11,10 @@ public interface IParameterManager
     string GenerateName();
 
     /// <summary>
-    /// 获取参数列表
+    /// 标准化参数名
     /// </summary>
-    IReadOnlyDictionary<string, object> GetParams();
+    /// <param name="name">参数名</param>
+    string NormalizeName(string name);
 
     /// <summary>
     /// 添加参数，如果参数已存在则替换
@@ -22,6 +23,23 @@ public interface IParameterManager
     /// <param name="value">参数值</param>
     /// <param name="operator">运算符</param>
     void Add(string name, object value, Operator? @operator = null);
+
+    /// <summary>
+    /// 获取参数列表
+    /// </summary>
+    IReadOnlyDictionary<string, object> GetParams();
+
+    /// <summary>
+    /// 是否包含参数
+    /// </summary>
+    /// <param name="name">参数名</param>
+    bool Contains(string name);
+
+    /// <summary>
+    /// 获取参数值
+    /// </summary>
+    /// <param name="name">参数名</param>
+    object GetValue(string name);
 
     /// <summary>
     /// 克隆

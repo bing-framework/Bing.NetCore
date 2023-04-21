@@ -2,23 +2,22 @@
 using System.Text;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
-using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Helpers;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 
 namespace Bing.Data.Sql;
 
 /// <summary>
 /// Sql查询对象基类
 /// </summary>
-public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager
 {
     #region 字段
 
@@ -105,35 +104,41 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <inheritdoc />
     public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
 
+    /// <inheritdoc />
+    public IDialect Dialect => ((ISqlPartAccessor)SqlBuilder).Dialect;
+
+    /// <inheritdoc />
+    public IParameterManager ParameterManager => ((ISqlPartAccessor)SqlBuilder).ParameterManager;
+
     /// <summary>
     /// Select子句
     /// </summary>
-    public ISelectClause SelectClause => ((IClauseAccessor)SqlBuilder).SelectClause;
+    public ISelectClause SelectClause => ((ISqlPartAccessor)SqlBuilder).SelectClause;
 
     /// <summary>
     /// From子句
     /// </summary>
-    public IFromClause FromClause => ((IClauseAccessor)SqlBuilder).FromClause;
+    public IFromClause FromClause => ((ISqlPartAccessor)SqlBuilder).FromClause;
 
     /// <summary>
     /// Join子句
     /// </summary>
-    public IJoinClause JoinClause => ((IClauseAccessor)SqlBuilder).JoinClause;
+    public IJoinClause JoinClause => ((ISqlPartAccessor)SqlBuilder).JoinClause;
 
     /// <summary>
     /// Where子句
     /// </summary>
-    public IWhereClause WhereClause => ((IClauseAccessor)SqlBuilder).WhereClause;
+    public IWhereClause WhereClause => ((ISqlPartAccessor)SqlBuilder).WhereClause;
 
     /// <summary>
     /// GroupBy子句
     /// </summary>
-    public IGroupByClause GroupByClause => ((IClauseAccessor)SqlBuilder).GroupByClause;
+    public IGroupByClause GroupByClause => ((ISqlPartAccessor)SqlBuilder).GroupByClause;
 
     /// <summary>
     /// OrderBy子句
     /// </summary>
-    public IOrderByClause OrderByClause => ((IClauseAccessor)SqlBuilder).OrderByClause;
+    public IOrderByClause OrderByClause => ((ISqlPartAccessor)SqlBuilder).OrderByClause;
 
     /// <summary>
     /// 参数列表
@@ -498,11 +503,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
             var sql = GetSql();
             var conn = GetConnection();
             message = ExecuteBefore(sql, Params, conn);
-
-            WriteTraceLog(sql, Params, GetDebugSql());
+            WriteTraceLog(sql, ParameterManager.GetParams(), GetDebugSql());
             var result = await func(conn, sql, Params);
             ClearAfterExecution();
-
             ExecuteAfter(message);
             return result;
         }
@@ -602,7 +605,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     /// <param name="builder">Sql生成器</param>
     private bool IsGroup(ISqlBuilder builder)
     {
-        if (builder is IClauseAccessor accessor)
+        if (builder is ISqlPartAccessor accessor)
             return accessor.GroupByClause.IsGroup;
         return false;
     }
@@ -640,4 +643,16 @@ public abstract partial class SqlQueryBase : ISqlQuery, IClauseAccessor, IUnionA
     }
 
     #endregion
+
+    /// <inheritdoc />
+    public virtual T GetParam<T>(string name)
+    {
+        return (T)ParameterManager?.GetValue(name);
+    }
+
+    /// <inheritdoc />
+    public void ClearParams()
+    {
+        ParameterManager?.Clear();
+    }
 }

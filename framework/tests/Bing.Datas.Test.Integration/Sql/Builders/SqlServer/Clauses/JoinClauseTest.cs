@@ -1,6 +1,7 @@
 ﻿using Bing.Datas.Dapper.SqlServer;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Test.Integration.Samples;
 using Xunit;
 using Xunit.Abstractions;

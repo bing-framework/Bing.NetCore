@@ -6,6 +6,7 @@ using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Test.Integration.Samples;
 using Bing.Data.Test.Integration.Sql.Builders.Samples;
 using Bing.Data.Test.Integration.XUnitHelpers;

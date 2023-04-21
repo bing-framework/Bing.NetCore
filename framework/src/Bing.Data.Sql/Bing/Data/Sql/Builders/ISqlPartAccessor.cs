@@ -1,10 +1,22 @@
-﻿namespace Bing.Data.Sql.Builders;
+﻿using Bing.Data.Sql.Builders.Params;
+
+namespace Bing.Data.Sql.Builders;
 
 /// <summary>
-/// Sql子句访问器
+/// Sql组件访问器
 /// </summary>
-public interface IClauseAccessor
+public interface ISqlPartAccessor
 {
+    /// <summary>
+    /// Sql方言
+    /// </summary>
+    IDialect Dialect { get; }
+
+    /// <summary>
+    /// 参数管理器
+    /// </summary>
+    IParameterManager ParameterManager { get; }
+
     /// <summary>
     /// Select子句
     /// </summary>

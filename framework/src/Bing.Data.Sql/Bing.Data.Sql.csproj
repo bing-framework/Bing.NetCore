@@ -4,6 +4,9 @@
     <PackageId>Bing.Data.Sql</PackageId>
     <Description>Bing.Data.Sql 是Bing应用框架的SQL查询封装的类库。</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Bing\Data\Sql\Builders\Operations\" />
+  </ItemGroup>
 
   <Import Project="..\..\..\framework.props" />
 

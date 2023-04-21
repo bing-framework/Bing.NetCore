@@ -1,4 +1,4 @@
-﻿namespace Bing.Data.Sql.Builders;
+﻿namespace Bing.Data.Sql.Builders.Params;
 
 /// <summary>
 /// 参数字面值解析器

@@ -4,6 +4,7 @@ using Bing.Datas.Dapper.SqlServer;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Test.Integration.Samples;
 using Xunit;
 

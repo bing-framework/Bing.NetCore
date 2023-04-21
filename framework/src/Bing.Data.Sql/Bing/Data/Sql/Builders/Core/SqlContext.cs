@@ -1,4 +1,5 @@
-﻿using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Matedatas;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -30,7 +31,7 @@ public class SqlContext
     /// <summary>
     /// Sql子句访问器
     /// </summary>
-    public IClauseAccessor ClauseAccessor { get; }
+    public ISqlPartAccessor ClauseAccessor { get; }
 
     /// <summary>
     /// 初始化一个<see cref="SqlContext"/>类型的实例
@@ -40,7 +41,7 @@ public class SqlContext
     /// <param name="matedata">实体原始数据解析器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="clause">Sql子句访问器</param>
-    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMatedata matedata, IParameterManager parameterManager, IClauseAccessor clause)
+    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMatedata matedata, IParameterManager parameterManager, ISqlPartAccessor clause)
     {
         EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
         Matedata = matedata ?? new DefaultEntityMatedata();
