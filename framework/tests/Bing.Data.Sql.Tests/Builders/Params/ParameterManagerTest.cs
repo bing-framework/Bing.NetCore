@@ -1,8 +1,4 @@
-﻿using Bing.Data.Sql.Builders.Params;
-using Bing.Data.Sql.Tests.Samples;
-using Xunit;
-
-namespace Bing.Data.Sql.Tests.Builders.Params;
+﻿namespace Bing.Data.Sql.Tests.Builders.Params;
 
 /// <summary>
 /// Sql参数管理器测试

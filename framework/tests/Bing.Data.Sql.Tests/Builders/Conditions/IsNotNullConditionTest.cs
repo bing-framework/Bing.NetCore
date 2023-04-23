@@ -1,9 +1,9 @@
 ﻿namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
 /// <summary>
-/// Is Null查询条件测试
+/// Is Not Null查询条件测试
 /// </summary>
-public class IsNullConditionTest
+public class IsNotNullConditionTest
 {
     /// <summary>
     /// 获取结果
@@ -21,17 +21,17 @@ public class IsNullConditionTest
     [Fact]
     public void Test_1()
     {
-        var condition = new IsNullSqlCondition("Email");
-        Assert.Equal("Email Is Null", GetResult(condition));
+        var condition = new IsNotNullSqlCondition("Email");
+        Assert.Equal("Email Is Not Null", GetResult(condition));
     }
 
     /// <summary>
-    /// 测试 - 验证列为空
+    /// 测试 - 获取条件 - 验证列为空
     /// </summary>
     [Fact]
-    public void Test_Column_IsNull()
+    public void Test_2()
     {
-        var condition = new IsNullSqlCondition("");
+        var condition = new IsNotNullSqlCondition("");
         Assert.Empty(GetResult(condition));
     }
 }

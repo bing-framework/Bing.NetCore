@@ -1,9 +1,9 @@
 ﻿namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
 /// <summary>
-/// Sql大于查询条件测试
+/// Sql尾匹配查询条件测试
 /// </summary>
-public class GreaterConditionTest
+public class EndsConditionTest
 {
     /// <summary>
     /// 参数管理器
@@ -13,7 +13,7 @@ public class GreaterConditionTest
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public GreaterConditionTest()
+    public EndsConditionTest()
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
     }
@@ -35,7 +35,7 @@ public class GreaterConditionTest
     public void Test_Create_Validate()
     {
         Assert.Throws<ArgumentNullException>(() => {
-            var condition = new GreaterSqlCondition(_parameterManager, "", 1, true);
+            var condition = new EndsSqlCondition(_parameterManager, "", 1, true);
         });
     }
 
@@ -45,9 +45,9 @@ public class GreaterConditionTest
     [Fact]
     public void Test_GetCondition_1()
     {
-        var condition = new GreaterSqlCondition(_parameterManager, "a", 1, true);
-        Assert.Equal("a>@_p_0", GetResult(condition));
-        Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
+        var condition = new EndsSqlCondition(_parameterManager, "a", "b", true);
+        Assert.Equal("a Like @_p_0", GetResult(condition));
+        Assert.Equal("%b", _parameterManager.GetValue("@_p_0"));
     }
 
     /// <summary>
@@ -56,24 +56,8 @@ public class GreaterConditionTest
     [Fact]
     public void Test_GetCondition_2()
     {
-        var condition = new GreaterSqlCondition(_parameterManager, "a", "b", false);
-        Assert.Equal("a>b", GetResult(condition));
+        var condition = new EndsSqlCondition(_parameterManager, "a", "b", false);
+        Assert.Equal("a Like '%b'", GetResult(condition));
         Assert.Equal(0, _parameterManager.GetParams().Count);
-    }
-
-    /// <summary>
-    /// 测试 - 获取条件 - 值为ISqlBuilder
-    /// </summary>
-    [Fact]
-    public void Test_GetCondition_3()
-    {
-        var result = new StringBuilder();
-        result.Append("a>");
-        result.AppendLine("(Select [a] ");
-        result.Append("From [b])");
-
-        var builder = new TestSqlBuilder().Select("a").From("b");
-        var condition = new GreaterSqlCondition(_parameterManager, "a", builder, true);
-        Assert.Equal(result.ToString(), GetResult(condition));
     }
 }

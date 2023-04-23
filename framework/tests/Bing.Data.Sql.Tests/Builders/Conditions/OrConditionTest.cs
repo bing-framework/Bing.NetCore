@@ -1,10 +1,4 @@
-﻿using Bing.Data.Sql.Builders.Params;
-using System.Text;
-using Bing.Data.Sql.Tests.Samples;
-using Bing.Data.Sql.Builders.Conditions;
-using Xunit;
-
-namespace Bing.Data.Sql.Tests.Builders.Conditions;
+﻿namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
 /// <summary>
 /// Or连接条件测试

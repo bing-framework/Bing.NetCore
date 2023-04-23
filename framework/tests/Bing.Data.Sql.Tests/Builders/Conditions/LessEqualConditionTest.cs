@@ -1,9 +1,9 @@
 ﻿namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
 /// <summary>
-/// Sql相等查询条件测试
+/// Sql小于等于查询条件测试
 /// </summary>
-public class EqualConditionTest
+public class LessEqualConditionTest
 {
     /// <summary>
     /// 参数管理器
@@ -13,7 +13,7 @@ public class EqualConditionTest
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public EqualConditionTest()
+    public LessEqualConditionTest()
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
     }
@@ -34,9 +34,8 @@ public class EqualConditionTest
     [Fact]
     public void Test_Create_Validate()
     {
-        Assert.Throws<ArgumentNullException>(() =>
-        {
-            var condition = new EqualSqlCondition(_parameterManager, "", 1, true);
+        Assert.Throws<ArgumentNullException>(() => {
+            var condition = new LessEqualSqlCondition(_parameterManager, "", 1, true);
         });
     }
 
@@ -46,8 +45,8 @@ public class EqualConditionTest
     [Fact]
     public void Test_GetCondition_1()
     {
-        var condition = new EqualSqlCondition(_parameterManager, "a", 1, true);
-        Assert.Equal("a=@_p_0", GetResult(condition));
+        var condition = new LessEqualSqlCondition(_parameterManager, "a", 1, true);
+        Assert.Equal("a<=@_p_0", GetResult(condition));
         Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
     }
 
@@ -57,19 +56,8 @@ public class EqualConditionTest
     [Fact]
     public void Test_GetCondition_2()
     {
-        var condition = new EqualSqlCondition(_parameterManager, "a", "b", false);
-        Assert.Equal("a=b", GetResult(condition));
-        Assert.Equal(0, _parameterManager.GetParams().Count);
-    }
-
-    /// <summary>
-    /// 测试 - 获取条件 - 参数值为null,则输出 is null
-    /// </summary>
-    [Fact]
-    public void Test_GetCondition_3()
-    {
-        var condition = new EqualSqlCondition(_parameterManager, "a", null, true);
-        Assert.Equal("a Is Null", GetResult(condition));
+        var condition = new LessEqualSqlCondition(_parameterManager, "a", "b", false);
+        Assert.Equal("a<=b", GetResult(condition));
         Assert.Equal(0, _parameterManager.GetParams().Count);
     }
 
@@ -77,15 +65,15 @@ public class EqualConditionTest
     /// 测试 - 获取条件 - 值为ISqlBuilder
     /// </summary>
     [Fact]
-    public void Test_GetCondition_4()
+    public void Test_GetCondition_3()
     {
         var result = new StringBuilder();
-        result.Append("a=");
+        result.Append("a<=");
         result.AppendLine("(Select [a] ");
         result.Append("From [b])");
 
         var builder = new TestSqlBuilder().Select("a").From("b");
-        var condition = new EqualSqlCondition(_parameterManager, "a", builder, true);
+        var condition = new LessEqualSqlCondition(_parameterManager, "a", builder, true);
         Assert.Equal(result.ToString(), GetResult(condition));
     }
 }

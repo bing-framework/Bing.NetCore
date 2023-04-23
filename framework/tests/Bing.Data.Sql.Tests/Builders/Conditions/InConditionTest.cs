@@ -1,10 +1,4 @@
 ﻿using System.Collections.Generic;
-using System;
-using System.Text;
-using Bing.Data.Sql.Builders.Conditions;
-using Bing.Data.Sql.Builders.Params;
-using Bing.Data.Sql.Tests.Samples;
-using Xunit;
 
 namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
