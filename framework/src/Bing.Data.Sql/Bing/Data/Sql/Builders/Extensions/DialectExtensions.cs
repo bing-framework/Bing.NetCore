@@ -1,6 +1,7 @@
 ﻿using Bing.Extensions;
 
-namespace Bing.Data.Sql.Builders.Extensions;
+// ReSharper disable once CheckNamespace
+namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// Sql方言扩展

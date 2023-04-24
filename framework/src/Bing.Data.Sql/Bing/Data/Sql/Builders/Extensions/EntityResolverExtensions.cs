@@ -1,4 +1,5 @@
-﻿namespace Bing.Data.Sql.Builders.Extensions;
+﻿// ReSharper disable once CheckNamespace
+namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// 实体解析器扩展

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Queries;
+using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders;
@@ -7,7 +8,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// Where子句
 /// </summary>
-public interface IWhereClause : ICondition
+public interface IWhereClause : ICondition, ISqlClause
 {
     /// <summary>
     /// 克隆
@@ -22,13 +23,27 @@ public interface IWhereClause : ICondition
     /// And连接条件
     /// </summary>
     /// <param name="condition">查询条件</param>
+    [Obsolete]
     void And(ICondition condition);
 
     /// <summary>
     /// Or连接条件
     /// </summary>
     /// <param name="condition">查询条件</param>
+    [Obsolete]
     void Or(ICondition condition);
+
+    /// <summary>
+    /// And连接条件
+    /// </summary>
+    /// <param name="condition">查询条件</param>
+    void And(ISqlCondition condition);
+
+    /// <summary>
+    /// Or连接条件
+    /// </summary>
+    /// <param name="condition">查询条件</param>
+    void Or(ISqlCondition condition);
 
     /// <summary>
     /// Or连接条件

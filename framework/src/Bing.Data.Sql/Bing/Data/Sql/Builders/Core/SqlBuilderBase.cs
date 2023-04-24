@@ -23,6 +23,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     private IParameterManager _parameterManager;
 
     /// <summary>
+    /// Sql条件工厂
+    /// </summary>
+    private ISqlConditionFactory _conditionFactory;
+
+    /// <summary>
     /// 方言
     /// </summary>
     private IDialect _dialect;
@@ -99,47 +104,52 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 参数管理器
     /// </summary>
-    public IParameterManager ParameterManager => _parameterManager ?? (_parameterManager = CreateParameterManager());
+    public IParameterManager ParameterManager => _parameterManager ??= CreateParameterManager();
+
+    /// <summary>
+    /// Sql条件工厂
+    /// </summary>
+    public ISqlConditionFactory ConditionFactory => _conditionFactory ??= CreateConditionFactory();
 
     /// <summary>
     /// Sql方言
     /// </summary>
-    public IDialect Dialect => _dialect ?? (_dialect = GetDialect());
+    public IDialect Dialect => _dialect ??= GetDialect();
 
     /// <summary>
     /// Select子句
     /// </summary>
-    public ISelectClause SelectClause => _selectClause ?? (_selectClause = CreateSelectClause());
+    public ISelectClause SelectClause => _selectClause ??= CreateSelectClause();
 
     /// <summary>
     /// From子句
     /// </summary>
-    public IFromClause FromClause => _fromClause ?? (_fromClause = CreateFromClause());
+    public IFromClause FromClause => _fromClause ??= CreateFromClause();
 
     /// <summary>
     /// Join子句
     /// </summary>
-    public IJoinClause JoinClause => _joinClause ?? (_joinClause = CreateJoinClause());
+    public IJoinClause JoinClause => _joinClause ??= CreateJoinClause();
 
     /// <summary>
     /// Where子句
     /// </summary>
-    public IWhereClause WhereClause => _whereClause ?? (_whereClause = CreateWhereClause());
+    public IWhereClause WhereClause => _whereClause ??= CreateWhereClause();
 
     /// <summary>
     /// 分组子句
     /// </summary>
-    public IGroupByClause GroupByClause => _groupByClause ?? (_groupByClause = CreateGroupByClause());
+    public IGroupByClause GroupByClause => _groupByClause ??= CreateGroupByClause();
 
     /// <summary>
     /// 排序子句
     /// </summary>
-    public IOrderByClause OrderByClause => _orderByClause ?? (_orderByClause = CreateOrderByClause());
+    public IOrderByClause OrderByClause => _orderByClause ??= CreateOrderByClause();
 
     /// <summary>
     /// 参数字面值解析器
     /// </summary>
-    protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ?? (_paramLiteralsResolver = GetParamLiteralsResolver());
+    protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ??= GetParamLiteralsResolver();
 
     /// <summary>
     /// 跳过行数参数名
@@ -212,6 +222,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 创建参数管理器
     /// </summary>
     protected virtual IParameterManager CreateParameterManager() => new ParameterManager(Dialect);
+
+    /// <summary>
+    /// 创建Sql条件工厂
+    /// </summary>
+    protected virtual ISqlConditionFactory CreateConditionFactory() => new ConditionFactory(ParameterManager);
 
     /// <summary>
     /// 获取Sql方言

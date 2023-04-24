@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
@@ -13,8 +14,18 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Where子句
 /// </summary>
-public class WhereClause : IWhereClause
+public class WhereClause : ClauseBase, IWhereClause
 {
+    /// <summary>
+    /// Where子句结果
+    /// </summary>
+    protected readonly StringBuilder Result;
+
+    /// <summary>
+    /// Sql条件工厂
+    /// </summary>
+    protected readonly ISqlConditionFactory ConditionFactory;
+
     /// <summary>
     /// Sql生成器
     /// </summary>
@@ -55,7 +66,7 @@ public class WhereClause : IWhereClause
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="condition">查询条件</param>
     public WhereClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        IParameterManager parameterManager, ICondition condition = null)
+        IParameterManager parameterManager, ICondition condition = null) : base(null)
     {
         Builder = builder;
         _dialect = dialect;
@@ -63,6 +74,13 @@ public class WhereClause : IWhereClause
         _condition = condition;
         _helper = new Helper(dialect, resolver, register, parameterManager);
         _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager);
+    }
+
+    public WhereClause(SqlBuilderBase sqlBuilder, StringBuilder result = null) : base(sqlBuilder)
+    {
+        Result = result ?? new StringBuilder();
+        Builder = sqlBuilder;
+        ConditionFactory = sqlBuilder.ConditionFactory;
     }
 
     /// <summary>
@@ -86,6 +104,74 @@ public class WhereClause : IWhereClause
     /// </summary>
     /// <param name="condition">查询条件</param>
     public void Or(ICondition condition) => _condition = new OrCondition(_condition, condition);
+
+    #region And
+
+    /// <summary>
+    /// And连接条件
+    /// </summary>
+    /// <param name="condition">查询条件</param>
+    public void And(ISqlCondition condition)
+    {
+        new AndSqlCondition(condition).AppendTo(Result);
+    }
+
+    #endregion
+
+    #region Or
+
+    /// <summary>
+    /// Or连接条件
+    /// </summary>
+    /// <param name="condition">查询条件</param>
+    public void Or(ISqlCondition condition)
+    {
+        new OrSqlCondition(condition).AppendTo(Result);
+    }
+
+    #endregion
+
+    #region Where
+
+    /// <summary>
+    /// 设置查询条件
+    /// </summary>
+    /// <param name="column">列名</param>
+    /// <param name="value">值</param>
+    /// <param name="operator">运算符</param>
+    public void Where(string column, object value, Operator @operator = Operator.Equal) =>
+        And(ConditionFactory.Create(column, value, @operator));
+
+    /// <summary>
+    /// 设置子查询条件
+    /// </summary>
+    /// <param name="column">列名</param>
+    /// <param name="builder">子查询Sql生成器</param>
+    /// <param name="operator">运算符</param>
+    public void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
+    {
+        if (builder == null)
+            return;
+        column = _helper.GetColumn(column);
+        Where(column, (object)builder, @operator);
+    }
+
+    /// <summary>
+    /// 设置子查询条件
+    /// </summary>
+    /// <param name="column">列名</param>
+    /// <param name="action">子查询操作</param>
+    /// <param name="operator">运算符</param>
+    public void Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
+    {
+        if (action == null)
+            return;
+        var builder = Builder.New();
+        action(builder);
+        Where(column, builder, @operator);
+    }
+
+    #endregion
 
     /// <summary>
     /// Or连接条件
@@ -137,13 +223,7 @@ public class WhereClause : IWhereClause
     /// <param name="condition">查询条件</param>
     public void Where(ICondition condition) => And(condition);
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="value">值</param>
-    /// <param name="operator">运算符</param>
-    public void Where(string column, object value, Operator @operator = Operator.Equal) => And(_helper.CreateCondition(column, value, @operator));
+
 
     /// <summary>
     /// 设置查询条件
@@ -167,20 +247,7 @@ public class WhereClause : IWhereClause
         And(condition);
     }
 
-    /// <summary>
-    /// 设置子查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="builder">子查询Sql生成器</param>
-    /// <param name="operator">运算符</param>
-    public void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
-    {
-        if (builder == null)
-            return;
-        column = _helper.GetColumn(column);
-        var sql = $"({builder.ToSql()})";
-        And(SqlConditionFactory.Create(column, sql, @operator));
-    }
+
 
     /// <summary>
     /// 设置子查询条件
@@ -191,20 +258,7 @@ public class WhereClause : IWhereClause
     /// <param name="operator">运算符</param>
     public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), builder, @operator);
 
-    /// <summary>
-    /// 设置子查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="action">子查询操作</param>
-    /// <param name="operator">运算符</param>
-    public void Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
-    {
-        if (action == null)
-            return;
-        var builder = Builder.New();
-        action(builder);
-        Where(column, builder, @operator);
-    }
+
 
     /// <summary>
     /// 设置子查询条件
@@ -770,4 +824,22 @@ public class WhereClause : IWhereClause
     /// 获取查询条件
     /// </summary>
     public string GetCondition() => _condition?.GetCondition();
+
+    /// <summary>
+    /// 添加到字符串生成器
+    /// </summary>
+    /// <param name="builder">字符串生成器</param>
+    public void AppendTo(StringBuilder builder)
+    {
+        builder.CheckNull(nameof(builder));
+        if(Validate()==false)
+            return;
+        builder.Append("Where ");
+        builder.Append(Result);
+    }
+
+    /// <summary>
+    /// 验证
+    /// </summary>
+    public bool Validate() => Result.Length > 0;
 }

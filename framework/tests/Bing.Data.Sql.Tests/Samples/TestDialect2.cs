@@ -1,5 +1,4 @@
 ﻿using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql.Tests.Samples;
 

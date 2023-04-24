@@ -1,5 +1,4 @@
 ﻿using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql.Tests.Samples;
 
@@ -16,7 +15,7 @@ public class TestSqlBuilder : SqlBuilderBase
     /// <summary>
     /// 初始化Sql生成器
     /// </summary>
-    public TestSqlBuilder(IDialect dialect = null)
+    public TestSqlBuilder(IDialect dialect = null, IParameterManager parameterManager = null) : base(parameterManager: parameterManager)
     {
         _dialect = dialect;
     }

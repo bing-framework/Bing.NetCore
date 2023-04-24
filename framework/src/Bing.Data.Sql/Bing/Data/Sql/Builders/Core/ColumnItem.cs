@@ -1,6 +1,4 @@
-﻿using Bing.Data.Sql.Builders.Extensions;
-
-namespace Bing.Data.Sql.Builders.Core;
+﻿namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
 /// 列

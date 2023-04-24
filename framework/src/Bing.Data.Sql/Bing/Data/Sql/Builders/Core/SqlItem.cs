@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Matedatas;
 using Bing.Extensions;
 

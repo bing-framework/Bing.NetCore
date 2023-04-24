@@ -8,5 +8,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Builders\Params\" />
+    <Folder Include="Builders\Core\" />
   </ItemGroup>
 </Project>
