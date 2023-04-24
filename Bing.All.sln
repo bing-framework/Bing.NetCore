@@ -289,19 +289,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.SqlServer", "fr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.PostgreSql", "framework\src\Bing.Dapper.PostgreSql\Bing.Dapper.PostgreSql.csproj", "{2D356DD4-BEC5-46AC-9D6D-508B743A855D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.Sqlite", "framework\src\Bing.Dapper.Sqlite\Bing.Dapper.Sqlite.csproj", "{A9FBCB7F-C829-45AF-A3CE-0D7E40DD000C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.Sqlite", "framework\src\Bing.Dapper.Sqlite\Bing.Dapper.Sqlite.csproj", "{A9FBCB7F-C829-45AF-A3CE-0D7E40DD000C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.Oracle", "framework\src\Bing.Dapper.Oracle\Bing.Dapper.Oracle.csproj", "{041093B6-D162-4A62-B602-9FA7D17F2BEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.Oracle", "framework\src\Bing.Dapper.Oracle\Bing.Dapper.Oracle.csproj", "{041093B6-D162-4A62-B602-9FA7D17F2BEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper", "framework\src\Bing.Dapper\Bing.Dapper.csproj", "{FF9E1DC1-372E-4C5B-BC2F-276781840D03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper", "framework\src\Bing.Dapper\Bing.Dapper.csproj", "{FF9E1DC1-372E-4C5B-BC2F-276781840D03}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-ORM", "04-ORM", "{B94B352B-EE67-4350-88A8-04187CA7DF47}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-DDD", "03-DDD", "{957AF91A-2CD9-4C0E-8CD7-7C58FABAB312}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Data.Tests", "framework\tests\Bing.Data.Tests\Bing.Data.Tests.csproj", "{DD45D74C-0D35-4B87-8D01-CA7CF67F7FE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Data.Tests", "framework\tests\Bing.Data.Tests\Bing.Data.Tests.csproj", "{DD45D74C-0D35-4B87-8D01-CA7CF67F7FE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Data.Sql.Tests", "framework\tests\Bing.Data.Sql.Tests\Bing.Data.Sql.Tests.csproj", "{FCF42041-A3A9-43D8-B599-EC96F2820688}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Data.Sql.Tests", "framework\tests\Bing.Data.Sql.Tests\Bing.Data.Sql.Tests.csproj", "{FCF42041-A3A9-43D8-B599-EC96F2820688}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Auditing.Tests", "framework\tests\Bing.Auditing.Tests\Bing.Auditing.Tests.csproj", "{1BEB2C35-404F-458A-9645-2DA7D59D952D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -677,6 +679,10 @@ Global
 		{FCF42041-A3A9-43D8-B599-EC96F2820688}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF42041-A3A9-43D8-B599-EC96F2820688}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCF42041-A3A9-43D8-B599-EC96F2820688}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BEB2C35-404F-458A-9645-2DA7D59D952D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BEB2C35-404F-458A-9645-2DA7D59D952D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BEB2C35-404F-458A-9645-2DA7D59D952D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BEB2C35-404F-458A-9645-2DA7D59D952D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -812,6 +818,7 @@ Global
 		{957AF91A-2CD9-4C0E-8CD7-7C58FABAB312} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{DD45D74C-0D35-4B87-8D01-CA7CF67F7FE4} = {957AF91A-2CD9-4C0E-8CD7-7C58FABAB312}
 		{FCF42041-A3A9-43D8-B599-EC96F2820688} = {B94B352B-EE67-4350-88A8-04187CA7DF47}
+		{1BEB2C35-404F-458A-9645-2DA7D59D952D} = {957AF91A-2CD9-4C0E-8CD7-7C58FABAB312}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
