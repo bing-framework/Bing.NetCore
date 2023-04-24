@@ -5,6 +5,7 @@ using Bing.Helpers;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Properties;
+using Bing.Text;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Logs;

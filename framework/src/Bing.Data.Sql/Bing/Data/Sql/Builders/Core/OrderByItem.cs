@@ -1,4 +1,5 @@
 ﻿using Bing.Extensions;
+using Bing.Text;
 
 namespace Bing.Data.Sql.Builders.Core;
 

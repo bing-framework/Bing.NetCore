@@ -6,6 +6,7 @@ using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Matedatas;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Text;
 
 namespace Bing.Data.Sql.Builders.Core;
 

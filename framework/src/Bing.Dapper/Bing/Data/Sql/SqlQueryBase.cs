@@ -7,6 +7,7 @@ using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Text;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -101,13 +102,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     protected SqlOptions Options { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Sql生成器
+    /// </summary>
     public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Sql方言
+    /// </summary>
     public IDialect Dialect => ((ISqlPartAccessor)SqlBuilder).Dialect;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 参数管理器
+    /// </summary>
     public IParameterManager ParameterManager => ((ISqlPartAccessor)SqlBuilder).ParameterManager;
 
     /// <summary>
@@ -644,13 +651,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
 
     #endregion
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 获取Sql参数值
+    /// </summary>
+    /// <typeparam name="T">参数值类型</typeparam>
+    /// <param name="name">参数名</param>
     public virtual T GetParam<T>(string name)
     {
         return (T)ParameterManager?.GetValue(name);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 清空Sql参数
+    /// </summary>
     public void ClearParams()
     {
         ParameterManager?.Clear();
