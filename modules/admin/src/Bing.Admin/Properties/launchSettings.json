@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "SkyAPM.Agent.AspNetCore"
       },
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      "applicationUrl": "https://localhost:44342;http://localhost:5662"
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
