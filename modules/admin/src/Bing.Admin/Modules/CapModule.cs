@@ -64,6 +64,8 @@ namespace Bing.Admin.Modules
                     x.Password = "bing2019.00";
                     x.HostName = "10.186.132.60";
                 });
+                o.ConsumerThreadCount = 1;
+                o.UseDispatchingPerGroup = true;
             });
             return services;
         }

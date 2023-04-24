@@ -49,7 +49,6 @@ namespace Bing.Admin
         /// </summary>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            Web.Environment = env;
             app.UseBing();
         }
     }
