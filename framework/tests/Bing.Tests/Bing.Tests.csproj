@@ -10,7 +10,7 @@
     <ProjectReference Include="..\..\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />
     <ProjectReference Include="..\..\src\Bing.Emailing\Bing.Emailing.csproj" />
     <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
-    <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
+    <ProjectReference Include="..\..\src\Bing\Bing.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">

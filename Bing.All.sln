@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-framework", "01-framewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing", "framework\src\Bing\Bing.csproj", "{F573919A-D73A-4186-9E9D-9A514A5D7244}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Core", "framework\src\Bing\Bing.Core.csproj", "{F573919A-D73A-4186-9E9D-9A514A5D7244}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore", "framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj", "{7884D11A-8935-4BB0-B027-64EE9CC2CE33}"
 EndProject
