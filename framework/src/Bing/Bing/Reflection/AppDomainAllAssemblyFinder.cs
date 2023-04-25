@@ -37,7 +37,6 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
         var names = new List<string>();
         if (context != null)
         {
-                
             var dllNames = context.CompileLibraries.SelectMany(m => m.Assemblies)
                 .Distinct()
                 .Select(m => m.Replace(".dll", ""))
