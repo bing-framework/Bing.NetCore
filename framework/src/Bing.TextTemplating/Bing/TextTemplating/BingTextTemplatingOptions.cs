@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Collections;
+﻿using Bing.Collections;
 
 namespace Bing.TextTemplating;
 

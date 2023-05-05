@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using Bing.DependencyInjection;
 using Bing.Exceptions;
 using Bing.Helpers;

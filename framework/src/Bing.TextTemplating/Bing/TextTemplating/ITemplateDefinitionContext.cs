@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.TextTemplating;
+﻿namespace Bing.TextTemplating;
 
 /// <summary>
 /// 模板定义上下文
