@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.MailKit.Configs;
+﻿namespace Bing.MailKit.Configs;
 
 /// <summary>
 /// MailKit默认配置提供器

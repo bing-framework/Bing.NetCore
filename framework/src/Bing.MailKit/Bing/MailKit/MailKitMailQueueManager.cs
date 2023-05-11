@@ -14,12 +14,27 @@ public class MailKitMailQueueManager : MailQueueManagerBase, IMailQueueManager
     private readonly IMailKitEmailSender _mailKitEmailSender;
 
     /// <summary>
+    /// 日志
+    /// </summary>
+    private readonly ILogger<MailKitMailQueueManager> _logger;
+
+    /// <summary>
     /// 初始化一个<see cref="MailKitMailQueueManager"/>类型的实例
     /// </summary>
     /// <param name="emailConfigProvider">电子邮件配置提供器</param>
     /// <param name="mailQueueProvider">邮件队列提供程序</param>
     /// <param name="mailKitEmailSender">MailKit电子邮件发送器</param>
-    public MailKitMailQueueManager(IEmailConfigProvider emailConfigProvider, IMailQueueProvider mailQueueProvider, IMailKitEmailSender mailKitEmailSender) : base(emailConfigProvider, mailQueueProvider) => _mailKitEmailSender = mailKitEmailSender;
+    /// <param name="logger">日志</param>
+    public MailKitMailQueueManager(
+        IEmailConfigProvider emailConfigProvider,
+        IMailQueueProvider mailQueueProvider,
+        IMailKitEmailSender mailKitEmailSender,
+        ILogger<MailKitMailQueueManager> logger)
+        : base(emailConfigProvider, mailQueueProvider)
+    {
+        _mailKitEmailSender = mailKitEmailSender;
+        _logger = logger;
+    }
 
     /// <summary>
     /// 发送邮件
@@ -34,6 +49,6 @@ public class MailKitMailQueueManager : MailQueueManagerBase, IMailQueueManager
     /// <param name="level">日志等级</param>
     protected override void WriteLog(string log, LogLevel level)
     {
-        Console.WriteLine(log);
+        _logger.Log(level, log);
     }
 }
