@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\components\src\Bing.Biz\Bing.Biz.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Authentication.JwtBearer\Bing.AspNetCore.Authentication.JwtBearer.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />

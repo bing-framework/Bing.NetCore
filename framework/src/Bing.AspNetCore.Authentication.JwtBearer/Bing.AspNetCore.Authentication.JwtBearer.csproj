@@ -15,8 +15,4 @@
 
   <Import Project="references.props" />
 
-  <ItemGroup>
-    <Folder Include="Bing\AspNetCore\" />
-  </ItemGroup>
-
 </Project>

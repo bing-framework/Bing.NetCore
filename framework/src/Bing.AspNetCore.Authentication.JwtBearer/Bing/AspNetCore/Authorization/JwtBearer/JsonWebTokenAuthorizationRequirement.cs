@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Permissions.Identity.JwtBearer;
+﻿using Bing.Identity.JwtBearer;
 
-namespace Bing.Permissions.Authorization.Policies;
+namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
 /// JWT授权请求

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Bing.Permissions.Identity.JwtBearer;
+﻿using Bing.Identity.JwtBearer;
+using Bing.Identity.JwtBearer.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace Bing.Permissions.Authorization.Middlewares;
+namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
 /// JWT客户授权中间件

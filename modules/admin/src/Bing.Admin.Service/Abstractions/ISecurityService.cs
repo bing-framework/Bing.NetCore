@@ -2,7 +2,7 @@
 using Bing.Admin.Domain.Shared.Results;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Application.Services;
-using Bing.Permissions.Identity.JwtBearer;
+using Bing.Identity.JwtBearer;
 
 namespace Bing.Admin.Service.Abstractions
 {

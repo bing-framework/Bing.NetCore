@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Bing.Permissions.Authorization.Policies;
+namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
 /// Jwt授权

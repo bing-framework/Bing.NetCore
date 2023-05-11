@@ -1,4 +1,4 @@
-﻿using Bing.Permissions.Identity.JwtBearer;
+﻿using Bing.Identity.JwtBearer;
 using Bing.Permissions.Identity.Results;
 
 namespace Bing.Admin.Domain.Shared.Results

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Bing.Permissions.Authorization;
+namespace Bing.AspNetCore.Authorization;
 
 /// <summary>
 /// 授权结果

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Extensions;
-using Bing.Permissions.Identity.JwtBearer;
+﻿using Bing.Extensions;
+using Bing.Identity.JwtBearer;
+using Bing.Identity.JwtBearer.Abstractions;
 using Bing.Security;
 using Bing.Utils.Json;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Bing.Permissions.Authorization.Policies;
+namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
 /// Jwt授权处理器
@@ -99,7 +96,7 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     protected virtual async Task ResultHandleAsync(AuthorizationHandlerContext context,
         JsonWebTokenAuthorizationRequirement requirement)
     {
-        var filterContext = (context.Resource as AuthorizationFilterContext);
+        var filterContext = context.Resource as AuthorizationFilterContext;
         var httpContext = filterContext?.HttpContext;
         if (httpContext == null)
             return;

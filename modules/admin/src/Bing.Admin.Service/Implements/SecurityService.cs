@@ -14,7 +14,8 @@ using Bing.Events.Messages;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Permissions.Identity.JwtBearer;
+using Bing.Identity.JwtBearer;
+using Bing.Identity.JwtBearer.Abstractions;
 using Bing.Permissions.Identity.Results;
 using Bing.Security.Claims;
 

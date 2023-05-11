@@ -1,9 +1,7 @@
-﻿using System;
-using System.Text;
-using Bing.Permissions.Authorization.Middlewares;
-using Bing.Permissions.Authorization.Policies;
-using Bing.Permissions.Identity.JwtBearer;
-using Bing.Permissions.Identity.JwtBearer.Internal;
+﻿using System.Text;
+using Bing.Identity.JwtBearer;
+using Bing.Identity.JwtBearer.Abstractions;
+using Bing.Identity.JwtBearer.Internal;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Bing.Permissions.Extensions;
+namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
 /// 扩展服务

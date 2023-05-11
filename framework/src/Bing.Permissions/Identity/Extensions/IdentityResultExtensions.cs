@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
 using Microsoft.AspNetCore.Identity;
 
 namespace Bing.Permissions.Identity.Extensions;

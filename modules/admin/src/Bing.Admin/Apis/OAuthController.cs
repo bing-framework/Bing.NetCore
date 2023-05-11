@@ -2,7 +2,7 @@
 using Bing.Admin.Service.Abstractions;
 using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.AspNetCore.Mvc;
-using Bing.Permissions.Identity.JwtBearer;
+using Bing.Identity.JwtBearer;
 using Bing.Permissions.Identity.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
