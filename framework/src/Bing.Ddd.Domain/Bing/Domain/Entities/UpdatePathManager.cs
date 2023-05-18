@@ -62,7 +62,7 @@ public class UpdatePathManager<TEntity, TKey, TParentId>
         var children = await _repository.GetAllChildrenAsync(entity);
         if (children.Exists(t => t.Id.Equals(entity.ParentId)))
             throw new Warning(LibraryResource.NotSupportMoveToChildren);
-        var parent = await _repository.FindAsync(entity.ParentId);
+        var parent = await _repository.FindByIdAsync(entity.ParentId);
         entity.InitPath(parent);
         await UpdateChildrenPathAsync(entity, children);
         await _repository.UpdateAsync(children);

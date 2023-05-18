@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Domain.Entities;
 
 namespace Bing.Domain.Repositories;
@@ -63,14 +58,14 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
-    public virtual TEntity Find(object id) => ToEntity(_store.Find(id));
+    public virtual TEntity Find(object id) => ToEntity(_store.FindById(id));
 
     /// <summary>
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default) => ToEntity(await _store.FindAsync(id, cancellationToken));
+    public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default) => ToEntity(await _store.FindByIdAsync(id, cancellationToken));
 
     /// <summary>
     /// 查找实体列表

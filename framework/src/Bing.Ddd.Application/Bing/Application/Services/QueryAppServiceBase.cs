@@ -70,7 +70,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
     public virtual async Task<TDto> GetByIdAsync(object id)
     {
         var key = Conv.To<TKey>(id);
-        return ToDto(await _store.FindAsync(key));
+        return ToDto(await _store.FindByIdAsync(key));
     }
 
     #endregion

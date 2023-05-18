@@ -171,8 +171,8 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     /// <param name="swapId">目标标识</param>
     public virtual async Task SwapSortAsync(Guid id, Guid swapId)
     {
-        var entity = await _store.FindAsync(id);
-        var swapEntity = await _store.FindAsync(swapId);
+        var entity = await _store.FindByIdAsync(id);
+        var swapEntity = await _store.FindByIdAsync(swapId);
         if (entity == null || swapEntity == null)
             return;
         entity.SwapSort(swapEntity);

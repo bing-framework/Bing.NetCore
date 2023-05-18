@@ -309,7 +309,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="predicate">查询条件</param>
     /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
+    public Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }

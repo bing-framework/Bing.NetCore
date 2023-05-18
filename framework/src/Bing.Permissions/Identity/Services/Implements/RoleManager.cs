@@ -1,8 +1,6 @@
-﻿using System.Threading.Tasks;
-using Bing.Domain.Services;
+﻿using Bing.Domain.Services;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing;
 using Bing.Permissions.Identity.Extensions;
 using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Repositories;
@@ -52,7 +50,7 @@ public abstract class RoleManager<TRole, TKey, TParentId> : DomainServiceBase, I
     {
         await ValidateCreate(role);
         role.Init();
-        var parent = await Repository.FindAsync(role.ParentId);
+        var parent = await Repository.FindByIdAsync(role.ParentId);
         role.InitPath(parent);
         role.SortId = await Repository.GenerateSortIdAsync(role.ParentId);
         var result = await Manager.CreateAsync(role);

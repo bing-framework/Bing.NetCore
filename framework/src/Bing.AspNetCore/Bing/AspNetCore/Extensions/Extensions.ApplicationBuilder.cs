@@ -3,7 +3,6 @@ using Bing.AspNetCore.RealIp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Bing.AspNetCore.Extensions;
 
@@ -21,7 +20,7 @@ public static class BingApplicationBuilderExtensions
     {
         var options = new RealIpOptions { HeaderKey = "x-forwarded-for" };
         setupAct?.Invoke(options);
-        return builder.UseMiddleware<RealIpMiddleware>(Options.Create(options));
+        return builder.UseMiddleware<RealIpMiddleware>(Microsoft.Extensions.Options.Options.Create(options));
     }
 
     /// <summary>

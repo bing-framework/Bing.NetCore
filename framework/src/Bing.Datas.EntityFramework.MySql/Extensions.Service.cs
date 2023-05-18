@@ -1,12 +1,11 @@
 ﻿using System.Data.Common;
 using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Datas.EntityFramework.Extensions;
 using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySqlConnector;
 
 namespace Bing.Datas.EntityFramework.MySql;
@@ -23,14 +22,19 @@ public static partial class Extensions
     /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="connection">连接字符串</param>
-    /// <param name="level">日志级别</param>
+    /// <param name="dataConfigAction">数据配置操作</param>
+    /// <param name="setupAction">工作单元配置操作</param>
+    /// <param name="mySqlSetupAction">MySql配置操作</param>
     public static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(
-        this IServiceCollection services, string connection, DataLogLevel level = DataLogLevel.Sql)
+        this IServiceCollection services,
+        DbConnection connection,
+        Action<DataConfig> dataConfigAction = null,
+        Action<DbContextOptionsBuilder> setupAction = null,
+        Action<MySqlDbContextOptionsBuilder> mySqlSetupAction = null)
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection, ServerVersion.AutoDetect(connection)); },
-            config => config.LogLevel = level);
+        return AddMySqlUnitOfWork<TService, TImplementation>(services, null, connection, dataConfigAction, setupAction, mySqlSetupAction);
     }
 
     /// <summary>
@@ -41,30 +45,18 @@ public static partial class Extensions
     /// <param name="services">服务集合</param>
     /// <param name="connection">连接字符串</param>
     /// <param name="dataConfigAction">数据配置操作</param>
+    /// <param name="setupAction">工作单元配置操作</param>
+    /// <param name="mySqlSetupAction">MySql配置操作</param>
     public static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(
-        this IServiceCollection services, string connection, Action<DataConfig> dataConfigAction)
+        this IServiceCollection services,
+        string connection,
+        Action<DataConfig> dataConfigAction = null,
+        Action<DbContextOptionsBuilder> setupAction = null,
+        Action<MySqlDbContextOptionsBuilder> mySqlSetupAction = null)
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
     {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection, ServerVersion.AutoDetect(connection)); },
-            dataConfigAction);
-    }
-
-    /// <summary>
-    /// 注册MySql工作单元服务
-    /// </summary>
-    /// <typeparam name="TService">工作单元接口类型</typeparam>
-    /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
-    /// <param name="services">服务集合</param>
-    /// <param name="connection">连接字符串</param>
-    /// <param name="configuration">配置</param>
-    public static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(
-        this IServiceCollection services, string connection, IConfiguration configuration)
-        where TService : class, IUnitOfWork
-        where TImplementation : UnitOfWorkBase, TService
-    {
-        return services.AddUnitOfWork<TService, TImplementation>(builder => { builder.UseMySql(connection, ServerVersion.AutoDetect(connection)); }, null,
-            configuration);
+        return AddMySqlUnitOfWork<TService, TImplementation>(services, connection, null, dataConfigAction, setupAction, mySqlSetupAction);
     }
 
     /// <summary>
@@ -75,12 +67,14 @@ public static partial class Extensions
     /// <param name="services">服务集合</param>
     /// <param name="connectionString">连接字符串</param>
     /// <param name="connection">数据库连接</param>
+    /// <param name="dataConfigSetupAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="mySqlSetupAction">MySql配置操作</param>
-    private static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(this IServiceCollection services, 
-        string connectionString, 
-        DbConnection connection, 
-        Action<DbContextOptionsBuilder> setupAction, 
+    private static IServiceCollection AddMySqlUnitOfWork<TService, TImplementation>(IServiceCollection services,
+        string connectionString,
+        DbConnection connection,
+        Action<DataConfig> dataConfigSetupAction,
+        Action<DbContextOptionsBuilder> setupAction,
         Action<MySqlDbContextOptionsBuilder> mySqlSetupAction)
         where TService : class, IUnitOfWork
         where TImplementation : UnitOfWorkBase, TService
@@ -97,6 +91,16 @@ public static partial class Extensions
             if (connection != null)
                 options.UseMySql(connection, ServerVersion.AutoDetect((MySqlConnection)connection), mySqlSetupAction);
         });
+
+        var dataConfig = new DataConfig();
+        if (dataConfigSetupAction != null)
+        {
+            services.Configure(dataConfigSetupAction);
+            dataConfigSetupAction.Invoke(dataConfig);
+        }
+
+        services.TryAddScoped<TService>(t => t.GetService<TImplementation>());
+        services.TryAddScoped<IUnitOfWork>(t => t.GetService<TImplementation>());
         return services;
     }
 }

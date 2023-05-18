@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Bing.Domain.Entities.Events;
+﻿using Bing.Domain.Entities.Events;
 
 namespace Bing.Domain.Entities;
 
