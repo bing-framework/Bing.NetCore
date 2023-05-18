@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 
 namespace Microsoft.Extensions.DependencyInjection;
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_0_OR_GREATER
 /// <summary>
 /// 空主机环境变量
 /// </summary>

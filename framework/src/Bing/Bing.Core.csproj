@@ -34,4 +34,8 @@
       <LastGenOutput>R.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\Options\" />
+  </ItemGroup>
 </Project>
