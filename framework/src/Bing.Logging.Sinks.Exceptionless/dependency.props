@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <Exceptionless-RefVersion>5.0.0</Exceptionless-RefVersion>
+    <Exceptionless-RefVersion>6.0.2</Exceptionless-RefVersion>
   </PropertyGroup>
 
   <ItemGroup>

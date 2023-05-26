@@ -44,12 +44,14 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <param name="defaultTags">默认标签数组</param>
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
+    /// <param name="restrictedToMinimumLevel">将事件写入接收器所需的最低日志事件级别</param>
     public ExceptionlessSink(
         string apiKey, 
         string serverUrl = null, 
         string[] defaultTags = null, 
         Func<EventBuilder, EventBuilder> additionalOperation = null, 
-        bool includeProperties = true)
+        bool includeProperties = true,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
@@ -61,6 +63,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
                 config.ServerUrl = serverUrl;
             config.UseInMemoryStorage();
             config.UseLogger(new SelfLogLogger());
+            config.SetDefaultMinLogLevel(LogLevelSwitcher.Switch(restrictedToMinimumLevel));
         });
         _defaultTags = defaultTags;
         _additionalOperation = additionalOperation;
@@ -73,19 +76,24 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="client">Exceptionless客户端</param>
+    /// <param name="restrictedToMinimumLevel">将事件写入接收器所需的最低日志事件级别</param>
     public ExceptionlessSink(
         Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
-        ExceptionlessClient client = null)
+        ExceptionlessClient client = null,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
         _additionalOperation = additionalOperation;
         _includeProperties = includeProperties;
         _client = client ?? ExceptionlessClient.Default;
         if (_client.Configuration.Resolver.HasDefaultRegistration<IExceptionlessLog, NullExceptionlessLog>())
             _client.Configuration.UseLogger(new SelfLogLogger());
+        _client.Configuration.SetDefaultMinLogLevel(LogLevelSwitcher.Switch(restrictedToMinimumLevel));
     }
 
-    /// <summary>提交.</summary>
+    /// <summary>
+    /// 提交
+    /// </summary>
     /// <param name="logEvent">日志事件</param>
     public void Emit(LogEvent logEvent)
     {
@@ -171,21 +179,11 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
         builder.Submit();
     }
 
-    ///// <summary>
-    ///// 释放资源
-    ///// </summary>
-    //public async ValueTask DisposeAsync()
-    //{
-    //    // TODO: 不确定是否释放资源时，自动刷新到队列里面
-    //    if (_client != null)
-    //        await _client.ProcessQueueAsync();
-    //}
-
     /// <summary>
     /// 释放资源
     /// </summary>
     public void Dispose()
     {
-        _client?.ProcessQueueAsync();
+        _client?.ProcessQueueAsync().GetAwaiter().GetResult();
     }
 }
