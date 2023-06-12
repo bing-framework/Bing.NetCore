@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Bing.Trees;
+﻿using Bing.Trees;
 
 namespace Bing.Domain.Entities;
 

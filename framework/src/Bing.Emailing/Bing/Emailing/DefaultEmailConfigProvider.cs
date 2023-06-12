@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.Emailing;
+﻿namespace Bing.Emailing;
 
 /// <summary>
 /// 电子邮件默认配置提供器

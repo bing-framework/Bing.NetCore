@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AspectCore.Extensions.DependencyInjection;
+﻿using AspectCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

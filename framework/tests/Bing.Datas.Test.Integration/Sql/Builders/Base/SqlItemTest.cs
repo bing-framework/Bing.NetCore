@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Datas.Dapper.MySql;
+﻿using Bing.Datas.Dapper.MySql;
 using Bing.Datas.Dapper.PgSql;
 using Bing.Datas.Dapper.SqlServer;
 using Bing.Data.Sql.Builders.Core;

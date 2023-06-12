@@ -5,7 +5,7 @@ namespace Bing.Data.Sql.Matedatas;
 /// <summary>
 /// 实体元数据
 /// </summary>
-[Ignore]
+[IgnoreAspect]
 public interface IEntityMatedata
 {
     /// <summary>

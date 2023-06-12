@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 
 namespace Bing.Domain.Repositories;
 

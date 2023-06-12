@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using Bing.Tracing;
 
 namespace Bing.Logging;

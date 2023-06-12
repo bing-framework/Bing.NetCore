@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Application.Dtos;
+﻿using Bing.Application.Dtos;
 using Bing.Application.Services;
 using Bing.Data.Queries;
 using Bing.Extensions;

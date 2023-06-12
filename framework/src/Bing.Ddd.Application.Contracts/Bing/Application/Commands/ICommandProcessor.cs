@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace Bing.Application.Commands;
+﻿namespace Bing.Application.Commands;
 
 /// <summary>
 /// 定义命令处理器

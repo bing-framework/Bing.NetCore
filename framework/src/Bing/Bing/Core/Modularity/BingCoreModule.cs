@@ -25,15 +25,4 @@ public class BingCoreModule : BingModule
         services.TryAddSingleton<StartupLogger>();
         return services;
     }
-
-    /// <summary>
-    /// 应用模块服务
-    /// </summary>
-    /// <param name="provider">服务提供程序</param>
-    public override void UseModule(IServiceProvider provider)
-    {
-        //var environment = provider.GetService<IHostingEnvironment>();
-        //Web.Environment = environment;
-        base.UseModule(provider);
-    }
 }

@@ -2,6 +2,7 @@
 using AspectCore.DynamicProxy;
 using AspectCore.Extensions.AspectScope;
 using AspectCore.Extensions.DependencyInjection;
+using Bing.Aspects;
 using Bing.Exceptions.Prompts;
 using Bing.Extensions;
 using Bing.Reflection;
@@ -29,6 +30,7 @@ public static class AspectCoreExtensions
         {
             //config.EnableParameterAspect();// 启用参数拦截，会导致异常不能很好的定位
             config.NonAspectPredicates.Add(t => Reflections.GetTopBaseType(t.DeclaringType).SafeString() == "Microsoft.EntityFrameworkCore.DbContext");
+            config.IgnoreAspectInterfaces();
             configAction?.Invoke(config);
         });
         services.EnableAspectScoped();
@@ -43,5 +45,16 @@ public static class AspectCoreExtensions
         services.AddScoped<IAspectScheduler, ScopeAspectScheduler>();
         services.AddScoped<IAspectBuilderFactory, ScopeAspectBuilderFactory>();
         services.AddScoped<IAspectContextFactory, ScopeAspectContextFactory>();
+    }
+
+    /// <summary>
+    /// 忽略拦截接口
+    /// </summary>
+    /// <param name="configuration"></param>
+    public static void IgnoreAspectInterfaces(this IAspectConfiguration configuration)
+    {
+        var interfaces = AssemblyManager.FindTypes(x => x.IsInterface && x.HasAttribute<IgnoreAspectAttribute>()).Distinct().ToArray();
+        foreach (var @interface in interfaces)
+            configuration.NonAspectPredicates.Add(m => m.DeclaringType == @interface);
     }
 }

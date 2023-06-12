@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.Admin.Data;
 using Bing.Admin.EventHandlers.Abstractions;
 using Bing.Admin.Infrastructure;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.Events;
-using Bing.Events.Cap;
 using Bing.Events.Messages;
 using DotNetCore.CAP;
 using Microsoft.Extensions.Logging;

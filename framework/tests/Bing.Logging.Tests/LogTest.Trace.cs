@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Bing.Logging.Tests.Samples;
 using Microsoft.Extensions.Logging;
 using Moq;

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 using Bing.Domain.Entities;
 using Bing.Domain.Repositories;
 using Bing.Uow;

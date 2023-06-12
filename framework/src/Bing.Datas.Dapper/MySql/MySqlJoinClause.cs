@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data.Sql;
+﻿using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;

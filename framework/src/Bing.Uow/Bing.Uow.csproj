@@ -7,8 +7,8 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
-
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.Core.csproj" />
+  </ItemGroup>
 
 </Project>

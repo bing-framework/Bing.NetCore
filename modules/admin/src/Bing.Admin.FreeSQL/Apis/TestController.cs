@@ -5,7 +5,6 @@ using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Events.Messages;
-using Bing.Helpers;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

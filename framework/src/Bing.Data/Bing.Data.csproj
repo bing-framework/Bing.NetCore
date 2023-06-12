@@ -4,14 +4,11 @@
     <PackageId>Bing.Data</PackageId>
     <Description>Bing.Data 是Bing应用框架的数据抽象类库。</Description>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Bing\Data\Metadata\" />
-  </ItemGroup>
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
-
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.Core.csproj" />
+  </ItemGroup>
 
 </Project>

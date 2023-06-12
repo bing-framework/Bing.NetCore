@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Bing.ObjectMapping;
-using Bing.SampleClasses;
 using Bing.Tests.Samples;
 
 namespace Bing.AutoMapper;

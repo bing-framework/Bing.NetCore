@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 
 namespace Bing.Data.Stores;

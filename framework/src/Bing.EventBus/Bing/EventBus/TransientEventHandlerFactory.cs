@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Bing.EventBus;
+﻿namespace Bing.EventBus;
 
 /// <summary>
 /// 瞬时事件处理器工厂

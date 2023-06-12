@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Domain.Repositories;
+﻿using Bing.Domain.Repositories;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Properties;

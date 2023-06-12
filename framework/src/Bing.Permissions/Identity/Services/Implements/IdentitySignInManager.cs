@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Permissions.Identity.Models;
+﻿using Bing.Permissions.Identity.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

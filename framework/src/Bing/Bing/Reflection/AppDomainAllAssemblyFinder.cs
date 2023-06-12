@@ -45,8 +45,8 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
             {
                 names =
                     (from name in dllNames
-                        let i = name.LastIndexOf('/') + 1
-                        select name.Substring(i, name.Length - i))
+                     let i = name.LastIndexOf('/') + 1
+                     select name.Substring(i, name.Length - i))
                     .Distinct()
                     .WhereIf(Match, _filterNetAssembly)
                     .OrderBy(m => m)
@@ -75,8 +75,8 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
                 .ToArray();
             if (dllNames.Length > 0)
                 names = (from name in dllNames
-                        let i = name.LastIndexOf('\\') + 1
-                        select name.Substring(i, name.Length - i))
+                         let i = name.LastIndexOf('\\') + 1
+                         select name.Substring(i, name.Length - i))
                     .Distinct()
                     .WhereIf(Match, _filterNetAssembly)
                     .OrderBy(m => m)

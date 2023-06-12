@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Bing.Logging;
+﻿namespace Bing.Logging;
 
 /// <summary>
 /// 日志上下文

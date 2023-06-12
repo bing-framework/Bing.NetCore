@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Queries;
+﻿namespace Bing.Data.Queries;
 
 /// <summary>
 /// 树型查询参数

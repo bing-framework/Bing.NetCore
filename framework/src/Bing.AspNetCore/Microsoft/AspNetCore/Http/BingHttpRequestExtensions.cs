@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Helpers;
+﻿using Bing.Helpers;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Http;

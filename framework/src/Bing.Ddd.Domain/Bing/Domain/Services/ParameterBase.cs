@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
 using Bing.Validation;
 
 namespace Bing.Domain.Services;

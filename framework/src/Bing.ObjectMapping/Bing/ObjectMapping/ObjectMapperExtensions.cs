@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Bing.ObjectMapping;
+﻿namespace Bing.ObjectMapping;
 
 /// <summary>
 /// 对象映射器(<see cref="IObjectMapper"/>) 扩展

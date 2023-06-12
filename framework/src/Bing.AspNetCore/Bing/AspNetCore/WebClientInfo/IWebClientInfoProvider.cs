@@ -5,7 +5,7 @@ namespace Bing.AspNetCore.WebClientInfo;
 /// <summary>
 /// Web客户端信息提供程序
 /// </summary>
-[Ignore]
+[IgnoreAspect]
 public interface IWebClientInfoProvider
 {
     /// <summary>

@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
 using Bing.Exceptions.Prompts;
 
 // ReSharper disable once CheckNamespace

@@ -35,7 +35,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 映射字典
     /// </summary>
-    private static readonly ConcurrentDictionary<Type, IEnumerable<IMap>> Maps;
+    private static readonly ConcurrentDictionary<Type, IEnumerable<IMap>> _maps;
 
     /// <summary>
     /// 服务提供器
@@ -56,7 +56,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// </summary>
     static UnitOfWorkBase()
     {
-        Maps = new ConcurrentDictionary<Type, IEnumerable<IMap>>();
+        _maps = new ConcurrentDictionary<Type, IEnumerable<IMap>>();
     }
 
     #endregion
@@ -224,7 +224,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 获取映射配置列表
     /// </summary>
-    private IEnumerable<IMap> GetMaps() => Maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
+    private IEnumerable<IMap> GetMaps() => _maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
 
     /// <summary>
     /// 获取映射接口类型

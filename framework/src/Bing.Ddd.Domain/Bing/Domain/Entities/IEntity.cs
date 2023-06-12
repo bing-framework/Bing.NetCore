@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Domain.Entities;
+﻿namespace Bing.Domain.Entities;
 
 /// <summary>
 /// 实体

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-
-namespace Microsoft.Extensions.DependencyInjection;
+﻿namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// 服务集合(<see cref="IServiceCollection"/>) 扩展

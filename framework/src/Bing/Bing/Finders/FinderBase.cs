@@ -9,13 +9,13 @@ public abstract class FinderBase<TItem> : IFinder<TItem>
     /// <summary>
     /// 对象锁
     /// </summary>
-    private readonly object _lockObj = new object();
+    private readonly object _lockObj = new();
 
     /// <summary>
     /// 已缓存的项目
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    protected readonly List<TItem> ItemsCache = new List<TItem>();
+    protected readonly List<TItem> ItemsCache = new();
 
     /// <summary>
     /// 标记是否已完成查找

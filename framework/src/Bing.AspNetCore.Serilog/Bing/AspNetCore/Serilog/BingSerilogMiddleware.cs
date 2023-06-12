@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Bing.Clients;
+﻿using Bing.Clients;
 using Bing.DependencyInjection;
 using Bing.Tracing;
 using Bing.Users;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.EventBus.Local;
+﻿namespace Bing.EventBus.Local;
 
 /// <summary>
 /// 基于内存的本地事件总线

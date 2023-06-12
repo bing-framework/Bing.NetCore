@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Authorization;
+﻿using Bing.Authorization;
 using Bing.DependencyInjection;
 using Bing.Exceptions;
 using Bing.Text;

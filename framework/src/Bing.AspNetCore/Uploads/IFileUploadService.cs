@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.AspNetCore.Uploads.Params;
+﻿using Bing.AspNetCore.Uploads.Params;
 using Bing.IO;
 using Microsoft.AspNetCore.Http;
 

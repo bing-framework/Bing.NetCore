@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.MultiTenancy;
+﻿namespace Bing.MultiTenancy;
 
 /// <summary>
 /// 多租户

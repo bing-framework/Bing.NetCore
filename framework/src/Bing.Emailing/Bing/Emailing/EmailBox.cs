@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.Emailing;
+﻿namespace Bing.Emailing;
 
 /// <summary>
 /// 电子邮件

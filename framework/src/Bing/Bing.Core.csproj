@@ -37,5 +37,6 @@
 
   <ItemGroup>
     <Folder Include="Bing\Options\" />
+    <Folder Include="Bing\Aspects\" />
   </ItemGroup>
 </Project>

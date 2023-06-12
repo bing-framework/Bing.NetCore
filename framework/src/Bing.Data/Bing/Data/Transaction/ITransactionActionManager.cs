@@ -7,7 +7,7 @@ namespace Bing.Data.Transaction;
 /// <summary>
 /// 事务操作管理器
 /// </summary>
-[Ignore]
+[IgnoreAspect]
 public interface ITransactionActionManager : IScopedDependency
 {
     /// <summary>

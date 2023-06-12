@@ -1,7 +1,6 @@
 ﻿using Bing.Admin.Data.Pos.Systems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Bing.Admin.Systems.Domain.Models;
 
 namespace Bing.Admin.Data.Mappings.Systems.MySql
 {

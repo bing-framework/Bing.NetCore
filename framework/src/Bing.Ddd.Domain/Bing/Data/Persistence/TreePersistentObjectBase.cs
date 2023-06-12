@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Trees;
+﻿using Bing.Trees;
 
 namespace Bing.Data.Persistence;
 

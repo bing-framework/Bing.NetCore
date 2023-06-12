@@ -1,5 +1,4 @@
 ﻿using Bing.Datas.Dapper.Oracle;
-using Bing.Datas.Dapper.SqlServer;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;

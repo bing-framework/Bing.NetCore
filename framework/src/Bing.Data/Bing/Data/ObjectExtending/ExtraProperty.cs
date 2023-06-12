@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.ObjectExtending;
+﻿namespace Bing.Data.ObjectExtending;
 
 /// <summary>
 /// 扩展属性

@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Bing;
-using Bing.Utils;
-using Bing.Extensions;
-using Bing.Helpers;
-using Bing.Auditing;
 using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models

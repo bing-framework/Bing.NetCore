@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Bing.Auditing;
 using Bing.Data;
-using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models
 {

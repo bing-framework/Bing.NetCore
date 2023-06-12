@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Bing.Threading;
+﻿using Bing.Threading;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.AspNetCore.Mvc;

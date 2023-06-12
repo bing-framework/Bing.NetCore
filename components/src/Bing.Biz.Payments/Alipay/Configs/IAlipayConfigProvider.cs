@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.Biz.Payments.Alipay.Configs;
+﻿namespace Bing.Biz.Payments.Alipay.Configs;
 
 /// <summary>
 /// 支付宝配置提供器

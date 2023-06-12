@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.Biz.Payments.Wechatpay.Results;
+﻿namespace Bing.Biz.Payments.Wechatpay.Results;
 
 /// <summary>
 /// 微信支付下载对账单结果

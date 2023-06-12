@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.EventBus;
+﻿namespace Bing.EventBus;
 
 /// <summary>
 /// 事件处理器工厂

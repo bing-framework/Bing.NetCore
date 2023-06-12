@@ -3,7 +3,6 @@ using System.Diagnostics;
 using AspectCore.DependencyInjection;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
-using Bing.IdUtils;
 using Bing.Samples.Hangfire.Jobs;
 using Bing.Tracing;
 using Hangfire;
@@ -11,7 +10,6 @@ using Hangfire.Client;
 using Hangfire.Common;
 using Hangfire.MemoryStorage;
 using Hangfire.Server;
-using Hangfire.States;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 

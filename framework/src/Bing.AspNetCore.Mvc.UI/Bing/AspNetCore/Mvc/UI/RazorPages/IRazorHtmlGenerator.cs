@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.AspNetCore.Mvc.UI.RazorPages;
+﻿namespace Bing.AspNetCore.Mvc.UI.RazorPages;
 
 /// <summary>
 /// Razor Html生成器

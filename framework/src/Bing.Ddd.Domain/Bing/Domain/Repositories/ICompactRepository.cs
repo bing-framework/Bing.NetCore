@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Validation;
 

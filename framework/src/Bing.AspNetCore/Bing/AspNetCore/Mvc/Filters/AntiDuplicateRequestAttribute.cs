@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Bing.Locks;
+﻿using Bing.Locks;
 using Bing.Properties;
 using Bing.Users;
 using Microsoft.AspNetCore.Mvc.Filters;

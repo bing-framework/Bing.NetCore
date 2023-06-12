@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Auditing;
+﻿using Bing.Auditing;
 using Bing.Domain.Entities.Events;
 using Bing.Validation;
 

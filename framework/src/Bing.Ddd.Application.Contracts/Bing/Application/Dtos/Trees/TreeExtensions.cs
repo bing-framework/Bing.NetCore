@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Application.Dtos;

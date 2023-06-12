@@ -3,7 +3,6 @@ using Bing.Admin.Data.Pos.Systems;
 using Bing.Admin.Data.Pos.Systems.Extensions;
 using Bing.Admin.Data.Stores.Abstractions.Systems;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 
 namespace Bing.Admin.Data.Repositories.Systems

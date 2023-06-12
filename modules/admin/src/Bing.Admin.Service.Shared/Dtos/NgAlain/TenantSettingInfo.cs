@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Bing.Admin.Service.Shared.Dtos.NgAlain
 {

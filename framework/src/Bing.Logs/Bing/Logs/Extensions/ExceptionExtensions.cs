@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Logs;

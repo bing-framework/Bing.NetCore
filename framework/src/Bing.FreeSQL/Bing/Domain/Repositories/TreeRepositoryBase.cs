@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 using Bing.Extensions;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 

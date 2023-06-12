@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using Bing.Biz.Payments.Properties;
 using Bing.Exceptions;
 using Bing.Extensions;

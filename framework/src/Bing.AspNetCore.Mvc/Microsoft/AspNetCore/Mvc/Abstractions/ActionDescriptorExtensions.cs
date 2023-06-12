@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Bing.AspNetCore.Mvc;
 using Bing.Exceptions;
 using Microsoft.AspNetCore.Mvc.Controllers;

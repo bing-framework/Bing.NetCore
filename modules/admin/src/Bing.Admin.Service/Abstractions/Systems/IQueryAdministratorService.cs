@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
 using Bing.Data;
-using Bing.Domain.Repositories;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {

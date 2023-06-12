@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.EventBus;
+﻿namespace Bing.EventBus;
 
 /// <summary>
 /// 消息事件

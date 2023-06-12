@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Bing.Auditing;
 using Bing.Data;
 using Bing.Domain.Entities;

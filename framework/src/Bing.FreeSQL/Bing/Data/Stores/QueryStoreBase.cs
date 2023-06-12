@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Data.Common;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Bing.Data.Queries;

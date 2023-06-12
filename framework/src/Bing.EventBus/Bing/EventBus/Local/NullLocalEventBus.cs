@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace Bing.EventBus.Local;
+﻿namespace Bing.EventBus.Local;
 
 /// <summary>
 /// 空本地事件总线

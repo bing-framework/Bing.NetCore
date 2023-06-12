@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Permissions.Identity.Options;
+﻿namespace Bing.Permissions.Identity.Options;
 
 /// <summary>
 /// 登录锁定配置

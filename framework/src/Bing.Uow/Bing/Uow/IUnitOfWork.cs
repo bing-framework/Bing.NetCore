@@ -5,7 +5,8 @@ namespace Bing.Uow;
 /// <summary>
 /// 工作单元
 /// </summary>
-[Ignore]
+//[Ignore]
+[IgnoreAspect]
 public interface IUnitOfWork : IDisposable
 {
     /// <summary>

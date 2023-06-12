@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace Bing.Domain.Entities.Events;
+﻿namespace Bing.Domain.Entities.Events;
 
 /// <summary>
 /// 类型(<see cref="Type"/>) 扩展

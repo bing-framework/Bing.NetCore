@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Linq;
 using AutoMapper;
 using Bing.ObjectMapping;
 using Bing.Reflection;

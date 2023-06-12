@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Domain.Entities.Events;
+﻿namespace Bing.Domain.Entities.Events;
 
 /// <summary>
 /// 通过依赖注入实现的领域事件处理器工厂

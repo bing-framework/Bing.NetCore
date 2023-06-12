@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.EventBus.Local;
+﻿namespace Bing.EventBus.Local;
 
 /// <summary>
 /// 本地事件处理器基类

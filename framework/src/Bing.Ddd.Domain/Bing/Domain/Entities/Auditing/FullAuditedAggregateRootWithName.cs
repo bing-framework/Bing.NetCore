@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Auditing;
+﻿using Bing.Auditing;
 using Bing.Validation;
 
 namespace Bing.Domain.Entities.Auditing;

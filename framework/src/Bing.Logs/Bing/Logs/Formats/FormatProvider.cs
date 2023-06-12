@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Logs.Abstractions;
+﻿using Bing.Logs.Abstractions;
 
 namespace Bing.Logs.Formats;
 

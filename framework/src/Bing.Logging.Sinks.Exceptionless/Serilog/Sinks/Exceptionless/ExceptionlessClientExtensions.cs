@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Bing.Logging.Sinks.Exceptionless.Internals;
+﻿using Bing.Logging.Sinks.Exceptionless.Internals;
 using Exceptionless;
 using Serilog.Core;
 using Serilog.Events;

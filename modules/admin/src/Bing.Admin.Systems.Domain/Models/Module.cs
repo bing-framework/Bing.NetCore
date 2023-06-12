@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using Bing.Helpers;
 
 namespace Bing.Admin.Systems.Domain.Models

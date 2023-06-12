@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.EventBus.Local;
+﻿namespace Bing.EventBus.Local;
 
 /// <summary>
 /// 本地事件消息

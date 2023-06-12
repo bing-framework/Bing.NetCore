@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Attributes;
+﻿namespace Bing.Data.Attributes;
 
 /// <summary>
 /// 自定义 Decimal 类型的精度

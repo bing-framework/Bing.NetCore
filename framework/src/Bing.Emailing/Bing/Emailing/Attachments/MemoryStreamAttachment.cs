@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Bing.Emailing.Attachments;
+﻿namespace Bing.Emailing.Attachments;
 
 /// <summary>
 /// 内存流附件

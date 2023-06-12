@@ -10,8 +10,7 @@ public class DirectoryAssemblyFinder : IAssemblyFinder
     /// <summary>
     /// 程序集缓存字典
     /// </summary>
-    // ReSharper disable once InconsistentNaming
-    private static readonly ConcurrentDictionary<string, Assembly[]> AssemblyCacheDict;
+    private static readonly ConcurrentDictionary<string, Assembly[]> _assemblyCacheDict;
 
     /// <summary>
     /// 目录路径
@@ -21,7 +20,7 @@ public class DirectoryAssemblyFinder : IAssemblyFinder
     /// <summary>
     /// 静态构造函数
     /// </summary>
-    static DirectoryAssemblyFinder() => AssemblyCacheDict = new ConcurrentDictionary<string, Assembly[]>();
+    static DirectoryAssemblyFinder() => _assemblyCacheDict = new ConcurrentDictionary<string, Assembly[]>();
 
     /// <summary>
     /// 初始化一个<see cref="DirectoryAssemblyFinder"/>类型的实例
@@ -42,13 +41,13 @@ public class DirectoryAssemblyFinder : IAssemblyFinder
     /// <param name="fromCache">是否来自缓存</param>
     public Assembly[] FindAll(bool fromCache = false)
     {
-        if (fromCache && AssemblyCacheDict.ContainsKey(_path))
-            return AssemblyCacheDict[_path];
+        if (fromCache && _assemblyCacheDict.ContainsKey(_path))
+            return _assemblyCacheDict[_path];
         var files = Directory.GetFiles(_path, "*.dll", SearchOption.TopDirectoryOnly)
             .Concat(Directory.GetFiles(_path, "*.exe", SearchOption.TopDirectoryOnly))
             .ToArray();
         var assemblies = files.Select(Assembly.LoadFrom).Distinct().ToArray();
-        AssemblyCacheDict[_path] = assemblies;
+        _assemblyCacheDict[_path] = assemblies;
         return assemblies;
     }
 }

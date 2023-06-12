@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Security.Claims;
+﻿using Bing.Security.Claims;
 
 namespace Bing.AspNetCore.Security.Claims;
 

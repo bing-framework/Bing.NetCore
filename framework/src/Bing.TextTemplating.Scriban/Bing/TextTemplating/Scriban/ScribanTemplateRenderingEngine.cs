@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using Bing.DependencyInjection;
 using Bing.Helpers;
 using Scriban;

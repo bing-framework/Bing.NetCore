@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Domain.Services;
+﻿using Bing.Domain.Services;
 using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Results;
 

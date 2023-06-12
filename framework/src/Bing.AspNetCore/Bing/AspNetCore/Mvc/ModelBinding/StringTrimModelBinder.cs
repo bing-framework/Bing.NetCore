@@ -1,6 +1,4 @@
-﻿using System;
-using System.Runtime.ExceptionServices;
-using System.Threading.Tasks;
+﻿using System.Runtime.ExceptionServices;
 using Bing.Helpers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 

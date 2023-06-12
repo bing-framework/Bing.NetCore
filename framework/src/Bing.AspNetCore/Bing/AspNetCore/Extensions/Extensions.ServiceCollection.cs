@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.AspNetCore.Logs;
+﻿using Bing.AspNetCore.Logs;
 using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Uploads;
 using Microsoft.Extensions.DependencyInjection;

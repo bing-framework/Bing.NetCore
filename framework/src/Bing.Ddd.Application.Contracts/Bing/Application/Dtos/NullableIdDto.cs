@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Application.Dtos;
+﻿namespace Bing.Application.Dtos;
 
 /// <summary>
 /// 可空标识数据传输对象

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Bing.Biz.Payments.Alipay.Configs;
+﻿using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Extensions;
 using Newtonsoft.Json.Linq;
 

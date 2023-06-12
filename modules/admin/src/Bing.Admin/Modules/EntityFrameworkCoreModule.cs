@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
-using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Datas.Dapper;

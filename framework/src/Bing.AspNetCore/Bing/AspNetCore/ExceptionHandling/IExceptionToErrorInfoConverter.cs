@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Http;
+﻿using Bing.Http;
 
 namespace Bing.AspNetCore.ExceptionHandling;
 

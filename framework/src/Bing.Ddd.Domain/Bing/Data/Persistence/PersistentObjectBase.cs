@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 
 namespace Bing.Data.Persistence;
 

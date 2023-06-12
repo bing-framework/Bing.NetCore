@@ -1,17 +1,11 @@
 ﻿using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
-using Bing.Helpers;
 using Bing.Logging;
 using Bing.Logging.Serilog;
-using Bing.Logs.NLog;
 using Bing.Tracing;
 using Exceptionless;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Enrichers.Span;
 using serilog = Serilog;

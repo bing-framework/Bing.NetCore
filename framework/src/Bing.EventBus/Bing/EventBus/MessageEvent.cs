@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Bing.Utils.Json;
 
 namespace Bing.EventBus;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Bing.Domain.Entities;
+﻿namespace Bing.Domain.Entities;
 
 /// <summary>
 /// 实体列表比较器

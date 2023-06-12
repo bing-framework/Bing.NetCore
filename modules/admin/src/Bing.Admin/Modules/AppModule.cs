@@ -69,6 +69,7 @@ namespace Bing.Admin.Modules
                 o.ThrowAspectException = true;
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
+                //o.NonAspectPredicates.Add(m => m.DeclaringType == typeof(IUnitOfWork));
             });
             services.AddDomainEventDispatcher();
             //services.AddAudit();

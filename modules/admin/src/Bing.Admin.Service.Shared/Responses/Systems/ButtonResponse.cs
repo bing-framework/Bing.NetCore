@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bing.Admin.Service.Shared.Responses.Systems
+﻿namespace Bing.Admin.Service.Shared.Responses.Systems
 {
     /// <summary>
     /// 按钮响应
