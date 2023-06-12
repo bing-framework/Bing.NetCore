@@ -45,7 +45,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 配置
     /// </summary>
-    private static readonly MethodInfo ConfigureBasePropertiesMethodInfo = typeof(UnitOfWorkBase).GetMethod(nameof(ConfigureBaseProperties), BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly MethodInfo _configureBasePropertiesMethodInfo = typeof(UnitOfWorkBase).GetMethod(nameof(ConfigureBaseProperties), BindingFlags.Instance | BindingFlags.NonPublic);
 
     #endregion
 
@@ -266,7 +266,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            ConfigureBasePropertiesMethodInfo
+            _configureBasePropertiesMethodInfo
                 .MakeGenericMethod(entityType.ClrType)
                 .Invoke(this, new object[] { modelBuilder, entityType });
         }

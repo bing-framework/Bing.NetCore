@@ -9,7 +9,9 @@
 
   <Import Project="dependency.props" />
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.Core.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Bing\Authorization\Modules\" />
