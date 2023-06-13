@@ -108,7 +108,7 @@ namespace Bing.Admin.Systems.Domain.Services.Implements
         /// <param name="parameter">参数</param>
         public async Task UpdateAsync(UserParameter parameter)
         {
-            var entity = await AdministratorRepository.FindAsync(parameter.Id);
+            var entity = await AdministratorRepository.FindByIdAsync(parameter.Id);
             if (entity == null)
                 throw new Warning("用户不存在");
             entity.Update(parameter);
@@ -122,7 +122,7 @@ namespace Bing.Admin.Systems.Domain.Services.Implements
         /// <param name="parameter">参数</param>
         private async Task UpdateUserAsync(UserParameter parameter)
         {
-            var entity = await UserRepository.FindAsync(parameter.Id);
+            var entity = await UserRepository.FindByIdAsync(parameter.Id);
             if (entity == null)
                 throw new Warning("用户不存在");
             entity.Nickname = parameter.Nickname;
@@ -136,7 +136,7 @@ namespace Bing.Admin.Systems.Domain.Services.Implements
         /// <param name="parameter">参数</param>
         private async Task UpdateUserInfoAsync(UserParameter parameter)
         {
-            var entity = await UserInfoRepository.FindAsync(parameter.Id);
+            var entity = await UserInfoRepository.FindByIdAsync(parameter.Id);
             if (entity == null)
                 throw new Warning("用户不存在");
             entity.Name = parameter.Nickname;

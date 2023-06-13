@@ -3,7 +3,7 @@
     <!-- All Microsoft packages -->
     <MicrosoftPackageVersion>6.0.*</MicrosoftPackageVersion>
     <!-- Bing packages -->
-    <BingUtilsPackageVersion>1.5.0-preview-20230516-1</BingUtilsPackageVersion>
+    <BingUtilsPackageVersion>1.5.0-preview-20230613-1</BingUtilsPackageVersion>
     <!-- EFCore packages -->
     <EfCore7Version>7.0.*</EfCore7Version>
     <EfCore6Version>6.0.*</EfCore6Version>

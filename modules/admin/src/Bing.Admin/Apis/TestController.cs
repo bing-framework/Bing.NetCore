@@ -187,10 +187,19 @@ namespace Bing.Admin.Apis
             return Success(request.TestId);
         }
 
+        /// <summary>
+        /// 测试空GUID请求
+        /// </summary>
         public class TestNullableGuidRequest
         {
+            /// <summary>
+            /// 测试ID1
+            /// </summary>
             public Guid? TestId { get; set; }
 
+            /// <summary>
+            /// 测试ID2
+            /// </summary>
             public Guid? TestId2 { get; set; }
         }
     }

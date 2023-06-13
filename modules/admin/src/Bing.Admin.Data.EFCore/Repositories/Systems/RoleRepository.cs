@@ -70,7 +70,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         public async Task<IdentityResult> UpdateAsync(Role role, CancellationToken cancellationToken)
         {
             ValidateRole(role, cancellationToken);
-            await UpdateAsync(role);
+            await base.UpdateAsync(role, cancellationToken);
             return IdentityResult.Success;
         }
 
@@ -181,7 +181,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         public async Task<Role> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return await FindAsync(roleId.ToGuid(), cancellationToken);
+            return await FindByIdAsync(roleId.ToGuid(), cancellationToken);
         }
 
         #endregion FindByIdAsync(通过编号获取角色)

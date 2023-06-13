@@ -10,7 +10,7 @@ public class FilterManager : IFilterManager
     /// <summary>
     /// 同步锁
     /// </summary>
-    private static readonly object Sync = new();
+    private static readonly object _sync = new();
 
     /// <summary>
     /// 过滤器类型列表
@@ -115,7 +115,7 @@ public class FilterManager : IFilterManager
     public static void AddFilterType<TFilterType>()
     {
         var type = typeof(TFilterType);
-        lock (Sync)
+        lock (_sync)
         {
             if(_filterTypes.Contains(type))
                 return;
@@ -130,7 +130,7 @@ public class FilterManager : IFilterManager
     public static void RemoveFilterType<TFilterType>()
     {
         var type = typeof(TFilterType);
-        lock (Sync)
+        lock (_sync)
         {
             if (_filterTypes.Contains(type))
                 _filterTypes.Remove(type);

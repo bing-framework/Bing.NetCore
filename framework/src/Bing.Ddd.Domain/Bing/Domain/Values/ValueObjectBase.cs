@@ -6,8 +6,8 @@ namespace Bing.Domain.Values;
 
 /// <summary>
 /// 值对象
-/// 参考地址：https://docs.microsoft.com/zh-cn/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects
 /// </summary>
+/// <remarks>参考地址：https://docs.microsoft.com/zh-cn/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects</remarks>
 /// <typeparam name="TValueObject">值对象类型</typeparam>
 public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObject>, IEquatable<TValueObject> where TValueObject : ValueObjectBase<TValueObject>
 {

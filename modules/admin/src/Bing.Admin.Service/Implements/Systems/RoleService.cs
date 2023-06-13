@@ -104,7 +104,7 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="request">修改角色请求</param>
         public async Task UpdateAsync(UpdateRoleRequest request)
         {
-            var entity = await RoleRepository.FindAsync(request.Id.ToGuid());
+            var entity = await RoleRepository.FindByIdAsync(request.Id.ToGuid());
             request.MapTo(entity);
             await RoleManager.UpdateAsync(entity);
             await UnitOfWork.CommitAsync();

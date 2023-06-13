@@ -81,7 +81,7 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="roleId">角色标识</param>
         public async Task<List<SelectModuleResponse>> GetRoleMenusAsync(Guid applicationId, Guid roleId)
         {
-            var role = await RoleRepository.FindAsync(roleId);
+            var role = await RoleRepository.FindByIdAsync(roleId);
             var roleIds = new List<Guid>() { roleId, role.ParentId.SafeValue() };
             var modules = await ModuleRepository.GetModulesAsync(applicationId, roleIds);
             var operations = await OperationRepository.GetOperationsAsync(applicationId, roleIds);
