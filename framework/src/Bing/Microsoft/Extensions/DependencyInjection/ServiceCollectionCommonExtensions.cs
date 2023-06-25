@@ -1,4 +1,5 @@
 ﻿using Bing.Reflection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,14 +23,27 @@ public static class ServiceCollectionCommonExtensions
     public static bool IsAdded(this IServiceCollection services, Type type) => services.Any(x => x.ServiceType == type);
 
     /// <summary>
+    /// 替换服务
+    /// </summary>
+    /// <typeparam name="TService">服务定义类型</typeparam>
+    /// <typeparam name="TImplement">服务实现类型</typeparam>
+    /// <param name="services">服务集合</param>
+    /// <param name="lifetime">生命周期</param>
+    public static IServiceCollection Replace<TService, TImplement>(this IServiceCollection services, ServiceLifetime lifetime)
+    {
+        var descriptor = new ServiceDescriptor(typeof(TService), typeof(TImplement), lifetime);
+        services.Replace(descriptor);
+        return services;
+    }
+
+    /// <summary>
     /// 获取单例注册服务对象
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="services">服务集合</param>
     public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services)
     {
-        var descriptor =
-            services.FirstOrDefault(x => x.ServiceType == typeof(T) && x.Lifetime == ServiceLifetime.Singleton);
+        var descriptor = services.FirstOrDefault(x => x.ServiceType == typeof(T) && x.Lifetime == ServiceLifetime.Singleton);
         if (descriptor?.ImplementationInstance != null)
             return (T)descriptor.ImplementationInstance;
         if (descriptor?.ImplementationFactory != null)
