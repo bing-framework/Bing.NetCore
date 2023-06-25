@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Bing.Core.Modularity;
+using Bing.Helpers;
 using Bing.Reflection;
 using Microsoft.Extensions.Logging;
 
@@ -81,9 +82,10 @@ public static partial class BingServiceProviderExtensions
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="serviceProvider">服务提供程序</param>
+    /// <returns>日志对象</returns>
     public static ILogger<T> GetLogger<T>(this IServiceProvider serviceProvider)
     {
-        var factory = serviceProvider.GetService<ILoggerFactory>();
+        var factory = serviceProvider.GetRequiredService<ILoggerFactory>();
         return factory.CreateLogger<T>();
     }
 
@@ -92,10 +94,25 @@ public static partial class BingServiceProviderExtensions
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="type">类型</param>
+    /// <returns>日志对象</returns>
     public static ILogger GetLogger(this IServiceProvider serviceProvider, Type type)
     {
-        var factory = serviceProvider.GetService<ILoggerFactory>();
+        Check.NotNull(type, nameof(type));
+        var factory = serviceProvider.GetRequiredService<ILoggerFactory>();
         return factory.CreateLogger(type);
+    }
+
+    /// <summary>
+    /// 获取指定对象给类型的日志对象
+    /// </summary>
+    /// <param name="serviceProvider">服务提供程序</param>
+    /// <param name="instance">要获取日志的类型对象，一般指当前类，即this</param>
+    /// <returns>日志对象</returns>
+    public static ILogger GetLogger(this IServiceProvider serviceProvider, object instance)
+    {
+        Check.NotNull(instance, nameof(instance));
+        var factory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        return factory.CreateLogger(instance.GetType());
     }
 
     /// <summary>
@@ -103,9 +120,10 @@ public static partial class BingServiceProviderExtensions
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="name">名称</param>
+    /// <returns>日志对象</returns>
     public static ILogger GetLogger(this IServiceProvider serviceProvider, string name)
     {
-        var factory = serviceProvider.GetService<ILoggerFactory>();
+        var factory = serviceProvider.GetRequiredService<ILoggerFactory>();
         return factory.CreateLogger(name);
     }
 }

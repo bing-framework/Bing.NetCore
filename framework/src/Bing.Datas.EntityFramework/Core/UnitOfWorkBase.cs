@@ -22,6 +22,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Datas.EntityFramework.Core;
 
@@ -68,10 +70,12 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>
-    protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) : base(options)
+    protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) 
+        : base(options)
     {
         TraceId = Guid.NewGuid().ToString();
         _serviceProvider = serviceProvider ?? ServiceLocator.Instance.GetService<IServiceProvider>();
+        Logger = serviceProvider.GetLogger(GetType());
         RegisterToManager();
     }
 
@@ -131,6 +135,11 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// </summary>
     protected virtual bool IsSoftDeleteFilterEnabled => FilterManager?.IsEnabled<ISoftDelete>() ?? false;
 
+    /// <summary>
+    /// 日志对象
+    /// </summary>
+    protected ILogger Logger { get; }
+
     #endregion
 
     #region 辅助操作
@@ -157,6 +166,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// 配置
     /// </summary>
     /// <param name="builder">配置生成器</param>
+    /// <remarks>每次新 DbContext 对象都会调用</remarks>
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         ConfiguringLog(builder);
@@ -212,6 +222,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 配置模型
     /// </summary>
+    /// <remarks>只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置</remarks>
     /// <param name="modelBuilder">映射生成器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -408,8 +419,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="cancellationToken">取消令牌</param>
-    private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager,
-        CancellationToken cancellationToken)
+    private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
     {
         using var connection = Database.GetDbConnection();
         if (connection.State == ConnectionState.Closed)
@@ -652,7 +662,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <summary>
     /// 发布事件
     /// </summary>
-    /// <returns></returns>
     protected virtual Task PublishEventsAsync()
     {
         return Task.CompletedTask;
