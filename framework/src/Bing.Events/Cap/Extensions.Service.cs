@@ -13,17 +13,19 @@ namespace Bing.Events.Cap;
 public static class Extensions
 {
     /// <summary>
-    /// 注册Cap事件总线服务
+    /// 注册CAP事件总线服务
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="action">配置操作</param>
-    public static IServiceCollection AddCapEventBus(this IServiceCollection services, Action<CapOptions> action)
+    /// <param name="builderSetup">CAP构建器配置操作</param>
+    public static IServiceCollection AddCapEventBus(this IServiceCollection services, Action<CapOptions> action, Action<CapBuilder> builderSetup = null)
     {
         services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();
         services.TryAddSingleton<ISimpleEventBus, Default.EventBus>();
         services.TryAddScoped<IMessageEventBus, MessageEventBus>();
         services.TryAddScoped<IEventBus, EventBus>();
-        services.AddCap(action);
+        var builder = services.AddCap(action);
+        builderSetup?.Invoke(builder);
         return services;
     }
 }
