@@ -5,7 +5,7 @@ namespace Bing.Domain.ChangeTracking;
 /// <summary>
 /// 变更跟踪
 /// </summary>
-/// <typeparam name="TObject"></typeparam>
+/// <typeparam name="TObject">领域对象类型</typeparam>
 public interface IChangeTrackable<in TObject> where TObject : IDomainObject
 {
     /// <summary>
