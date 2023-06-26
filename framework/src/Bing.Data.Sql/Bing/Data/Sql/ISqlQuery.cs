@@ -1,13 +1,13 @@
 ﻿using System.Data;
-using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Configs;
 
 namespace Bing.Data.Sql;
 
 /// <summary>
 /// Sql查询对象
 /// </summary>
-public interface ISqlQuery : ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte, ISqlParameter, IDisposable
+public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposable
 {
     /// <summary>
     /// 上下文标识

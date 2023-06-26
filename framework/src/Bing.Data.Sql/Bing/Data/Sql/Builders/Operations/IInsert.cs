@@ -1,8 +1,8 @@
 ﻿namespace Bing.Data.Sql.Builders.Operations;
 
 /// <summary>
-/// Sql操作
+/// 插入子句操作
 /// </summary>
-public interface ISqlOperation : ISqlQueryOperation, IInsert
+public interface IInsert
 {
 }

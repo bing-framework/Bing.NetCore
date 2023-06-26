@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Bing\Data\Sql\Builders\Operations\" />
+    <Folder Include="Bing\Data\Sql\Configs\" />
   </ItemGroup>
 
   <Import Project="..\..\..\framework.props" />
