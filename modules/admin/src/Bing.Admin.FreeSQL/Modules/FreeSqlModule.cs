@@ -63,7 +63,7 @@ namespace Bing.Admin.Modules
             //    //options.LogLevel = DataLogLevel.Off;
             //});
             // 注册SqlExecutor
-            services.AddSqlExecutor();
+            //services.AddSqlExecutor();
             return services;
         }
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using Bing.Exceptions;
-using Xunit;
+﻿using Bing.Exceptions;
 
 namespace Bing.Tests.Exceptions;
 
@@ -10,40 +8,40 @@ namespace Bing.Tests.Exceptions;
 public class WarningTest
 {
     /// <summary>
-    /// 测试设置消息
+    /// 测试 - 设置消息
     /// </summary>
     [Fact]
-    public void TestMessage()
+    public void Test_Message()
     {
         var warning = new Warning("A");
         Assert.Equal("A", warning.Message);
     }
 
     /// <summary>
-    /// 测试消息为空
+    /// 测试 - 消息为空
     /// </summary>
     [Fact]
-    public void TestMessage_Null()
+    public void Test_Message_Null()
     {
         var warning = new Warning(null, "A");
         Assert.Equal(string.Empty, warning.Message);
     }
 
     /// <summary>
-    /// 测试设置错误码
+    /// 测试 - 设置错误码
     /// </summary>
     [Fact]
-    public void TestCode()
+    public void Test_Code()
     {
         var warning = new Warning("", "B");
         Assert.Equal("B", warning.Code);
     }
 
     /// <summary>
-    /// 测试设置异常
+    /// 测试 - 设置异常
     /// </summary>
     [Fact]
-    public void TestException()
+    public void Test_Exception()
     {
         var warning = new Warning(new Exception("A"));
         Assert.Empty(warning.Message);
@@ -51,10 +49,10 @@ public class WarningTest
     }
 
     /// <summary>
-    /// 测试设置错误消息和异常
+    /// 测试 - 设置错误消息和异常
     /// </summary>
     [Fact]
-    public void TestMessageAndException()
+    public void Test_MessageAndException()
     {
         var warning = new Warning("A", "", new Exception("C"));
         Assert.Equal("A", warning.Message);
@@ -62,10 +60,10 @@ public class WarningTest
     }
 
     /// <summary>
-    /// 测试设置2层异常
+    /// 测试 - 设置2层异常
     /// </summary>
     [Fact]
-    public void TestException_2Layer()
+    public void Test_Exception_2Layer()
     {
         var warning = new Warning("A", "", new Exception("C", new NotImplementedException("D")));
         Assert.Equal(3, warning.GetExceptions().Count);
@@ -79,10 +77,10 @@ public class WarningTest
     }
 
     /// <summary>
-    /// 测试获取异常列表
+    /// 测试 - 获取异常列表
     /// </summary>
     [Fact]
-    public void TestGetExceptions_1()
+    public void Test_GetExceptions_1()
     {
         var exception = new Exception("A");
         var list = Warning.GetExceptions(exception);
@@ -91,10 +89,10 @@ public class WarningTest
     }
 
     /// <summary>
-    /// 测试获取异常列表
+    /// 测试 - 获取异常列表
     /// </summary>
     [Fact]
-    public void TestGetExceptions_2()
+    public void Test_GetExceptions_2()
     {
         var exceptionB = new Exception("B");
         var exceptionA = new Exception("A", exceptionB);

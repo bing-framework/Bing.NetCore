@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Bing.Data.Transaction;
+﻿using Dapper;
 
 namespace Bing.Data.Sql;
 
@@ -23,64 +22,71 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #endregion
 
-    /// <summary>
-    /// 数据库连接
-    /// </summary>
-    protected IDbConnection Connection { get; private set; }
+    #region ExecuteSql(执行Sql增删改操作)
 
     /// <summary>
-    /// 事务操作管理器
+    /// 执行Sql增删改操作
     /// </summary>
-    protected ITransactionActionManager TransactionActionManager { get; private set; }
-
-    ///// <summary>
-    ///// 初始化一个<see cref="SqlExecutorBase"/>类型的实例
-    ///// </summary>
-    ///// <param name="transactionActionManager">事务操作管理器</param>
-    ///// <param name="database">数据库</param>
-    //protected SqlExecutorBase(ITransactionActionManager transactionActionManager, IDatabase database = null)
-    //{
-    //    TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
-    //    Database = database;
-    //    Connection = database?.GetConnection();
-    //}
-
-    /// <summary>
-    /// 设置数据库连接
-    /// </summary>
-    /// <param name="connection">数据库连接</param>
-    public ISqlExecutor SetConnection(IDbConnection connection)
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <returns>受影响行数</returns>
+    public virtual int ExecuteSql(int? timeout = null)
     {
-        Connection = connection;
-        return this;
+        var result = 0;
+        try
+        {
+            if (ExecuteBefore() == false)
+                return 0;
+            var connection = GetConnection();
+            var sql = GetSql();
+            result = connection.Execute(sql, Params, GetTransaction(), timeout);
+            return result;
+        }
+        catch (Exception)
+        {
+            RollbackTransaction();
+            throw;
+        }
+        finally
+        {
+            ExecuteAfter(result);
+        }
     }
 
+    #endregion
+
+    #region ExecuteSqlAsync(执行Sql增删改操作)
+
     /// <summary>
-    /// 获取数据库连接
+    /// 执行Sql增删改操作
     /// </summary>
-    /// <param name="connection">数据库连接</param>
-    protected IDbConnection GetConnection(IDbConnection connection)
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <returns>受影响行数</returns>
+    public virtual async Task<int> ExecuteSqlAsync(int? timeout = null)
     {
-        if (connection != null)
-            return connection;
-        if (Connection == null)
-            throw new ArgumentNullException(nameof(Connection));
-        return Connection;
+        var result = 0;
+        try
+        {
+            if (ExecuteBefore() == false)
+                return 0;
+            var connection = GetConnection();
+            var sql = GetSql();
+            result = await connection.ExecuteAsync(sql, Params, GetTransaction(), timeout);
+            return result;
+        }
+        catch (Exception)
+        {
+            RollbackTransaction();
+            throw;
+        }
+        finally
+        {
+            ExecuteAfter(result);
+        }
     }
 
-    /// <summary>
-    /// 执行Sql语句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
-    /// <param name="param">参数</param>
-    public abstract int ExecuteSql(string sql, object param = null);
+    #endregion
 
-    /// <summary>
-    /// 执行Sql语句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
-    /// <param name="param">参数</param>
-    public abstract Task<int> ExecuteSqlAsync(string sql, object param = null);
+    #region ExecuteProcedure(执行存储过程增删改操作)
 
     /// <summary>
     /// 执行存储过程增删改操作
@@ -88,10 +94,25 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间，单位：秒</param>
     /// <returns>受影响行数</returns>
-    public Task<int> ExecuteProcedureAsync(string procedure, int? timeout = null)
+    public virtual int ExecuteProcedure(string procedure, int? timeout = null)
     {
         throw new NotImplementedException();
     }
 
-    
+    #endregion
+
+    #region ExecuteProcedureAsync(执行存储过程增删改操作)
+
+    /// <summary>
+    /// 执行存储过程增删改操作
+    /// </summary>
+    /// <param name="procedure">存储过程</param>
+    /// <param name="timeout">执行超时时间，单位：秒</param>
+    /// <returns>受影响行数</returns>
+    public virtual Task<int> ExecuteProcedureAsync(string procedure, int? timeout = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
 }
