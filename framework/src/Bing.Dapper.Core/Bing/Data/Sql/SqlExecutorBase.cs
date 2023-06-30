@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using Bing.Data.Sql.Diagnostics;
+using Dapper;
 
 namespace Bing.Data.Sql;
 
@@ -32,18 +33,23 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     public virtual int ExecuteSql(int? timeout = null)
     {
         var result = 0;
+        DiagnosticsMessage message = default;
         try
         {
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
             var sql = GetSql();
+            message = ExecuteBefore(sql, Params, connection);
+            WriteTraceLog(sql, Params, GetDebugSql());
             result = connection.Execute(sql, Params, GetTransaction(), timeout);
+            ExecuteAfter(message);
             return result;
         }
-        catch (Exception)
+        catch (Exception e)
         {
             RollbackTransaction();
+            ExecuteError(message, e);
             throw;
         }
         finally
@@ -64,18 +70,23 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     public virtual async Task<int> ExecuteSqlAsync(int? timeout = null)
     {
         var result = 0;
+        DiagnosticsMessage message = default;
         try
         {
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
             var sql = GetSql();
+            message = ExecuteBefore(sql, Params, connection);
+            WriteTraceLog(sql, Params, GetDebugSql());
             result = await connection.ExecuteAsync(sql, Params, GetTransaction(), timeout);
+            ExecuteAfter(message);
             return result;
         }
-        catch (Exception)
+        catch (Exception e)
         {
             RollbackTransaction();
+            ExecuteError(message, e);
             throw;
         }
         finally

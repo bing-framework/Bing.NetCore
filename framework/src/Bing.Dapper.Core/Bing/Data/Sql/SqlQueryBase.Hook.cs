@@ -14,6 +14,6 @@ public partial class SqlQueryBase
     /// <param name="result">结果</param>
     protected virtual void ExecuteAfter(object result)
     {
-
+        Clear();
     }
 }

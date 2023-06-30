@@ -1,30 +1,89 @@
-﻿using System.Data;
-using Bing.Data.Sql.Diagnostics;
-using Dapper;
+﻿using System;
+using Bing.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Bing.Data.Sql;
 
-// Sql查询对象 - 执行查询
-public abstract partial class SqlQueryBase
+// SqlQuery - Query
+public static partial class SqlQueryExtensions
 {
-    #region ExecuteQuery(获取实体集合)
+    #region ToEntity(获取单个实体)
 
     /// <summary>
-    /// 获取实体集合
+    /// 获取单个实体
     /// </summary>
+    /// <typeparam name="TEntity">返回结果类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    public static TEntity ToEntity<TEntity>(this ISqlQuery source, int? timeout = null)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteSingle<TEntity>(timeout);
+    }
+
+    #endregion
+
+    #region ToEntityAsync(获取单个实体)
+
+    /// <summary>
+    /// 获取单个实体
+    /// </summary>
+    /// <typeparam name="TEntity">返回结果类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    public static async Task<TEntity> ToEntityAsync<TEntity>(this ISqlQuery source, int? timeout = null)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteSingleAsync<TEntity>(timeout);
+    }
+
+    #endregion
+
+    #region ToDynamicList(获取动态列表集合)
+
+    /// <summary>
+    /// 获取动态列表集合
+    /// </summary>
+    /// <param name="source">源</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<dynamic> ExecuteQuery(int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, param, transaction, buffered, timeout).ToList());
+    public static List<dynamic> ToDynamicList(this ISqlQuery source, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(timeout, buffered);
+    }
+
+    #endregion
+
+    #region ToDynamicListAsync(获取动态列表集合)
+
+    /// <summary>
+    /// 获取动态列表集合
+    /// </summary>
+    /// <param name="source">源</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    public static async Task<List<dynamic>> ToDynamicListAsync(this ISqlQuery source, int? timeout = null)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(timeout);
+    }
+
+    #endregion
+
+    #region ToList(获取实体集合)
 
     /// <summary>
     /// 获取实体集合
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<TEntity>(int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query<TEntity>(sql, param, transaction, buffered, timeout).ToList());
+    public static List<TEntity> ToList<TEntity>(this ISqlQuery source, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery<TEntity>(timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -32,11 +91,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T1">实体类型1</typeparam>
     /// <typeparam name="T2">实体类型2</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<T1, T2, TEntity>(Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, map, param, transaction, buffered, "Id", timeout).ToList());
+    public static List<TEntity> ToList<T1, T2, TEntity>(this ISqlQuery source, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -45,11 +108,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T2">实体类型2</typeparam>
     /// <typeparam name="T3">实体类型3</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<T1, T2, T3, TEntity>(Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, map, param, transaction, buffered, "Id", timeout).ToList());
+    public static List<TEntity> ToList<T1, T2, T3, TEntity>(this ISqlQuery source, Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -59,11 +126,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T3">实体类型3</typeparam>
     /// <typeparam name="T4">实体类型4</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<T1, T2, T3, T4, TEntity>(Func<T1, T2, T3, T4, TEntity> map, int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, map, param, transaction, buffered, "Id", timeout).ToList());
+    public static List<TEntity> ToList<T1, T2, T3, T4, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -74,11 +145,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T4">实体类型4</typeparam>
     /// <typeparam name="T5">实体类型5</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<T1, T2, T3, T4, T5, TEntity>(Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, map, param, transaction, buffered, "Id", timeout).ToList());
+    public static List<TEntity> ToList<T1, T2, T3, T4, T5, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -90,11 +165,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T5">实体类型5</typeparam>
     /// <typeparam name="T6">实体类型6</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<T1, T2, T3, T4, T5, T6, TEntity>(Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, map, param, transaction, buffered, "Id", timeout).ToList());
+    public static List<TEntity> ToList<T1, T2, T3, T4, T5, T6, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -107,30 +186,31 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T6">实体类型6</typeparam>
     /// <typeparam name="T7">实体类型7</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public List<TEntity> ExecuteQuery<T1, T2, T3, T4, T5, T6, T7, TEntity>(Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null, bool buffered = true) =>
-        InternalQuery((conn, sql, param, transaction) => conn.Query(sql, map, param, transaction, buffered, "Id", timeout).ToList());
+    public static List<TEntity> ToList<T1, T2, T3, T4, T5, T6, T7, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return source.ExecuteQuery(map, timeout, buffered);
+    }
 
     #endregion
 
-    #region ExecuteQueryAsync(获取实体集合)
-
-    /// <summary>
-    /// 获取实体集合
-    /// </summary>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, param, transaction, timeout)).ToList());
+    #region ToListAsync(获取实体集合)
 
     /// <summary>
     /// 获取实体集合
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync<TEntity>(sql, param, transaction, timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<TEntity>(this ISqlQuery source, int? timeout = null)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync<TEntity>(timeout);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -138,11 +218,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T1">实体类型1</typeparam>
     /// <typeparam name="T2">实体类型2</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, TEntity>(Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, TEntity>(this ISqlQuery source, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -151,11 +235,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T2">实体类型2</typeparam>
     /// <typeparam name="T3">实体类型3</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, TEntity>(Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, TEntity>(this ISqlQuery source, Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -165,11 +253,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T3">实体类型3</typeparam>
     /// <typeparam name="T4">实体类型4</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, TEntity>(Func<T1, T2, T3, T4, TEntity> map, int? timeout = null, bool buffered = true) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -180,11 +272,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T4">实体类型4</typeparam>
     /// <typeparam name="T5">实体类型5</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, TEntity>(Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null, bool buffered = true) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -196,11 +292,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T5">实体类型5</typeparam>
     /// <typeparam name="T6">实体类型6</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null, bool buffered = true) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, T6, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(map, timeout, buffered);
+    }
 
     /// <summary>
     /// 获取实体集合
@@ -213,75 +313,15 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T6">实体类型6</typeparam>
     /// <typeparam name="T7">实体类型7</typeparam>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null, bool buffered = true) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null, bool buffered = true)
+    {
+        source.CheckNull(nameof(source));
+        return await source.ExecuteQueryAsync(map, timeout, buffered);
+    }
 
     #endregion
-
-    /// <summary>
-    /// 内部查询
-    /// </summary>
-    /// <typeparam name="TResult">结果类型</typeparam>
-    /// <param name="func">查询操作</param>
-    protected TResult InternalQuery<TResult>(Func<IDbConnection, string, object, IDbTransaction, TResult> func)
-    {
-        TResult result = default;
-        DiagnosticsMessage message = default;
-        try
-        {
-            if (ExecuteBefore() == false)
-                return default;
-            var connection = GetConnection();
-            var sql = GetSql();
-            message = ExecuteBefore(sql, Params, connection);
-            WriteTraceLog(sql, Params, GetDebugSql());
-            result = func(connection, sql, Params, GetTransaction());
-            ExecuteAfter(message);
-            return result;
-        }
-        catch (Exception e)
-        {
-            ExecuteError(message, e);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
-    }
-
-    /// <summary>
-    /// 内部查询
-    /// </summary>
-    /// <typeparam name="TResult">结果类型</typeparam>
-    /// <param name="func">查询操作</param>
-    protected async Task<TResult> InternalQueryAsync<TResult>(Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> func)
-    {
-        TResult result = default;
-        DiagnosticsMessage message = default;
-        try
-        {
-            if (ExecuteBefore() == false)
-                return default;
-            var connection = GetConnection();
-            var sql = GetSql();
-            message = ExecuteBefore(sql, Params, connection);
-            WriteTraceLog(sql, Params, GetDebugSql());
-            result = await func(connection, sql, Params, GetTransaction());
-            ExecuteAfter(message);
-            return result;
-        }
-        catch (Exception e)
-        {
-            ExecuteError(message, e);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
-    }
 }

@@ -295,38 +295,13 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         await QueryAsync(async (con, sql, sqlParams) => await con.QueryFirstOrDefaultAsync<TResult>(sql, sqlParams), connection);
 
     /// <summary>
-    /// 获取列表
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="connection">数据库连接</param>
-    public virtual List<TResult> ToList<TResult>(IDbConnection connection = null) =>
-        Query((con, sql, sqlParams) => con.Query<TResult>(sql, sqlParams).ToList(), connection);
-
-    /// <summary>
-    /// 获取列表
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="connection">数据库连接</param>
-    public virtual async Task<List<TResult>> ToListAsync<TResult>(IDbConnection connection = null) =>
-        await QueryAsync(async (con, sql, sqlParams) => (await con.QueryAsync<TResult>(sql, sqlParams)).ToList(), connection);
-
-    /// <summary>
-    /// 获取列表
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="sql">Sql语句</param>
-    /// <param name="connection">数据库连接</param>
-    public virtual async Task<List<TResult>> ToListAsync<TResult>(string sql, IDbConnection connection = null) =>
-        (await GetConnection().QueryAsync<TResult>(sql, Params)).ToList();
-
-    /// <summary>
     /// 获取分页列表
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>
     /// <param name="parameter">分页参数</param>
     /// <param name="connection">数据库连接</param>
     public virtual PagerList<TResult> ToPagerList<TResult>(IPager parameter = null, IDbConnection connection = null) =>
-        PagerQuery(() => ToList<TResult>(connection), parameter, connection);
+        PagerQuery(() => this.ToList<TResult>(), parameter, connection);
 
     /// <summary>
     /// 获取分页列表
@@ -335,7 +310,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <param name="parameter">分页参数</param>
     /// <param name="connection">数据库连接</param>
     public virtual async Task<PagerList<TResult>> ToPagerListAsync<TResult>(IPager parameter = null, IDbConnection connection = null) =>
-        await PagerQueryAsync(async () => await ToListAsync<TResult>(connection), parameter, connection);
+        await PagerQueryAsync(async () => await this.ToListAsync<TResult>(), parameter, connection);
 
     /// <summary>
     /// 获取分页列表
@@ -463,7 +438,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <param name="connection">数据库连接</param>
     public virtual async Task<PagerList<TResult>> ToPagerListAsync<TResult>(string sql, int page, int pageSize, IDbConnection connection = null)
     {
-        var result = await ToListAsync<TResult>(sql, connection);
+        var result = await this.ToListAsync<TResult>();
         return new PagerList<TResult>(new Pager(page, pageSize), result);
     }
 
@@ -668,4 +643,24 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     {
         ParameterManager?.Clear();
     }
+
+    /// <summary>
+    /// 清理
+    /// </summary>
+    protected void Clear()
+    {
+        ClearAfterExecution();
+        ClearParams();
+    }
+
+    /// <summary>
+    /// 获取存储过程名城管
+    /// </summary>
+    /// <param name="procedure">存储过程</param>
+    protected virtual string GetProcedure(string procedure) => string.Empty;
+
+    /// <summary>
+    /// 获取存储过程命令类型
+    /// </summary>
+    protected virtual CommandType GetProcedureCommandType() => CommandType.StoredProcedure;
 }
