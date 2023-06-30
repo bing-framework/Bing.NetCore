@@ -7,6 +7,31 @@ namespace Bing.Data.Sql;
 // SqlQuery - Scalar
 public static partial class SqlQueryExtensions
 {
+    #region ToScalar(获取单值)
+
+    /// <summary>
+    /// 获取单值
+    /// </summary>
+    /// <param name="sqlQuery">Sql查询对象</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    [Obsolete("请使用 ExecuteScalar()")]
+    public static object ToScalar(this ISqlQuery sqlQuery, int? timeout = null) => sqlQuery.ExecuteScalar(timeout);
+
+    #endregion
+
+    #region ToScalarAsync(获取单值)
+
+    /// <summary>
+    /// 获取单值
+    /// </summary>
+    /// <param name="sqlQuery">Sql查询对象</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    [Obsolete("请使用 ExecuteScalarAsync()")]
+    public static Task<object> ToScalarAsync(this ISqlQuery sqlQuery, int? timeout = null) =>
+        sqlQuery.ExecuteScalarAsync(timeout);
+
+    #endregion
+
     #region ToString(获取字符串值)
 
     /// <summary>

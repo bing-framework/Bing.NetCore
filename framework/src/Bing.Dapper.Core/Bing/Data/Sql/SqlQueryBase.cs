@@ -264,37 +264,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     public ISqlBuilder GetBuilder() => SqlBuilder;
 
     /// <summary>
-    /// 获取单值
-    /// </summary>
-    /// <param name="connection">数据库连接</param>
-    public virtual object ToScalar(IDbConnection connection = null) =>
-        Query((con, sql, sqlParams) => con.ExecuteScalar(sql, sqlParams), connection);
-
-    /// <summary>
-    /// 获取单值
-    /// </summary>
-    /// <param name="connection">数据库连接</param>
-    public virtual async Task<object> ToScalarAsync(IDbConnection connection = null) =>
-        await QueryAsync(async (con, sql, sqlParams) => await con.ExecuteScalarAsync(sql, sqlParams),
-            connection);
-
-    /// <summary>
-    /// 获取单个实体
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="connection">数据库连接</param>
-    public virtual TResult To<TResult>(IDbConnection connection = null) =>
-        Query((con, sql, sqlParams) => con.QueryFirstOrDefault<TResult>(sql, sqlParams), connection);
-
-    /// <summary>
-    /// 获取单个实体
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="connection">数据库连接</param>
-    public virtual async Task<TResult> ToAsync<TResult>(IDbConnection connection = null) =>
-        await QueryAsync(async (con, sql, sqlParams) => await con.QueryFirstOrDefaultAsync<TResult>(sql, sqlParams), connection);
-
-    /// <summary>
     /// 获取分页列表
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>

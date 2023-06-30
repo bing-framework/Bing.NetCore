@@ -69,32 +69,6 @@ public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposabl
         IDbConnection connection = null);
 
     /// <summary>
-    /// 获取单值
-    /// </summary>
-    /// <param name="connection">数据库连接</param>
-    object ToScalar(IDbConnection connection);
-
-    /// <summary>
-    /// 获取单值
-    /// </summary>
-    /// <param name="connection">数据库连接</param>
-    Task<object> ToScalarAsync(IDbConnection connection);
-
-    /// <summary>
-    /// 获取单个实体
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="connection">数据库连接</param>
-    TResult To<TResult>(IDbConnection connection = null);
-
-    /// <summary>
-    /// 获取单个实体
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="connection">数据库连接</param>
-    Task<TResult> ToAsync<TResult>(IDbConnection connection = null);
-
-    /// <summary>
     /// 获取分页列表
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>
