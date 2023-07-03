@@ -26,11 +26,13 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     #region ExecuteSql(执行Sql增删改操作)
 
     /// <summary>
-    /// 执行Sql增删改操作
+    /// 执行指定的SQL语句
     /// </summary>
+    /// <param name="sql">执行的SQL语句</param>
+    /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <returns>受影响行数</returns>
-    public virtual int ExecuteSql(int? timeout = null)
+    /// <returns>操作影响的行数</returns>
+    public virtual int ExecuteSql(string sql, object param = null, int? timeout = null)
     {
         var result = 0;
         DiagnosticsMessage message = default;
@@ -39,10 +41,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
-            var sql = GetSql();
-            message = ExecuteBefore(sql, Params, connection);
-            WriteTraceLog(sql, Params, GetDebugSql());
-            result = connection.Execute(sql, Params, GetTransaction(), timeout);
+            message = ExecuteBefore(sql, param, connection);
+            result = connection.Execute(sql, param, GetTransaction(), timeout);
             ExecuteAfter(message);
             return result;
         }
@@ -63,11 +63,13 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     #region ExecuteSqlAsync(执行Sql增删改操作)
 
     /// <summary>
-    /// 执行Sql增删改操作
+    /// 执行指定的SQL语句
     /// </summary>
+    /// <param name="sql">执行的SQL语句</param>
+    /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <returns>受影响行数</returns>
-    public virtual async Task<int> ExecuteSqlAsync(int? timeout = null)
+    /// <returns>操作影响的行数</returns>
+    public virtual async Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null)
     {
         var result = 0;
         DiagnosticsMessage message = default;
@@ -76,10 +78,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
-            var sql = GetSql();
-            message = ExecuteBefore(sql, Params, connection);
-            WriteTraceLog(sql, Params, GetDebugSql());
-            result = await connection.ExecuteAsync(sql, Params, GetTransaction(), timeout);
+            message = ExecuteBefore(sql, param, connection);
+            result = await connection.ExecuteAsync(sql, param, GetTransaction(), timeout);
             ExecuteAfter(message);
             return result;
         }
@@ -103,11 +103,33 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// 执行存储过程增删改操作
     /// </summary>
     /// <param name="procedure">存储过程</param>
+    /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间，单位：秒</param>
     /// <returns>受影响行数</returns>
-    public virtual int ExecuteProcedure(string procedure, int? timeout = null)
+    public virtual int ExecuteProcedure(string procedure, object param = null, int? timeout = null)
     {
-        throw new NotImplementedException();
+        var result = 0;
+        DiagnosticsMessage message = default;
+        try
+        {
+            if (ExecuteBefore() == false)
+                return 0;
+            var connection = GetConnection();
+            message = ExecuteBefore(procedure, param, connection);
+            result = connection.Execute(procedure, param, GetTransaction(), timeout, GetProcedureCommandType());
+            ExecuteAfter(message);
+            return result;
+        }
+        catch (Exception e)
+        {
+            RollbackTransaction();
+            ExecuteError(message, e);
+            throw;
+        }
+        finally
+        {
+            ExecuteAfter(result);
+        }
     }
 
     #endregion
@@ -118,11 +140,33 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// 执行存储过程增删改操作
     /// </summary>
     /// <param name="procedure">存储过程</param>
+    /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间，单位：秒</param>
     /// <returns>受影响行数</returns>
-    public virtual Task<int> ExecuteProcedureAsync(string procedure, int? timeout = null)
+    public virtual async Task<int> ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null)
     {
-        throw new NotImplementedException();
+        var result = 0;
+        DiagnosticsMessage message = default;
+        try
+        {
+            if (ExecuteBefore() == false)
+                return 0;
+            var connection = GetConnection();
+            message = ExecuteBefore(procedure, param, connection);
+            result = await connection.ExecuteAsync(procedure, param, GetTransaction(), timeout, GetProcedureCommandType());
+            ExecuteAfter(message);
+            return result;
+        }
+        catch (Exception e)
+        {
+            RollbackTransaction();
+            ExecuteError(message, e);
+            throw;
+        }
+        finally
+        {
+            ExecuteAfter(result);
+        }
     }
 
     #endregion
