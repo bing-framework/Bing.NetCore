@@ -13,7 +13,7 @@ public class OracleSqlExecutor: OracleSqlExecutorBase
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>
     /// <param name="database">数据库</param>
-    public OracleSqlExecutor(IServiceProvider serviceProvider, SqlOptions options, IDatabase database) 
+    public OracleSqlExecutor(IServiceProvider serviceProvider, SqlOptions<OracleSqlExecutor> options, IDatabase database) 
         : base(serviceProvider, options, database)
     {
     }

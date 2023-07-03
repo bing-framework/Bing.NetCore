@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
     <TargetFrameworks>net6.0;</TargetFrameworks>
@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.1" />
+    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
@@ -22,19 +23,29 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.14" />
-    <PackageReference Include="Xunit.DependencyInjection" Version="8.7.0" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.7.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.03" />
-    <PackageReference Include="Xunit.DependencyInjection" Version="8.7.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="SqlQuery\" />
+    <Content Include="appsettings.*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>appsettings.json</DependentUpon>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

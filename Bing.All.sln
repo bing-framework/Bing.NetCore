@@ -319,7 +319,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "09-Domain", "09-Domain", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{793DF696-AA3D-4D44-9657-B66000DCEFFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Core.Tests", "framework\tests\Bing.Core.Tests\Bing.Core.Tests.csproj", "{BAB01FD0-18A8-4132-B488-254A73176D75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Core.Tests", "framework\tests\Bing.Core.Tests\Bing.Core.Tests.csproj", "{BAB01FD0-18A8-4132-B488-254A73176D75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.TestShare", "framework\tests\Bing.TestShare\Bing.TestShare.csproj", "{F341C10D-76CE-497E-8A0B-48D203ADE466}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.TestShare.MySql", "framework\tests\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj", "{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -707,6 +711,14 @@ Global
 		{BAB01FD0-18A8-4132-B488-254A73176D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAB01FD0-18A8-4132-B488-254A73176D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAB01FD0-18A8-4132-B488-254A73176D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F341C10D-76CE-497E-8A0B-48D203ADE466}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F341C10D-76CE-497E-8A0B-48D203ADE466}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F341C10D-76CE-497E-8A0B-48D203ADE466}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F341C10D-76CE-497E-8A0B-48D203ADE466}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -851,6 +863,8 @@ Global
 		{B61B75B3-77BB-4C5A-8262-E360206A4BD9} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{793DF696-AA3D-4D44-9657-B66000DCEFFA} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{BAB01FD0-18A8-4132-B488-254A73176D75} = {793DF696-AA3D-4D44-9657-B66000DCEFFA}
+		{F341C10D-76CE-497E-8A0B-48D203ADE466} = {3D99820D-63A7-4635-B660-0D04D535229E}
+		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC} = {3D99820D-63A7-4635-B660-0D04D535229E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

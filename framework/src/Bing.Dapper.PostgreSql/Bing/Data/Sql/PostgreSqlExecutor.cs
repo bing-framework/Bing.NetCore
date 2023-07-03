@@ -11,7 +11,7 @@ public class PostgreSqlExecutor : PostgreSqlExecutorBase
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>
     /// <param name="database">数据库</param>
-    public PostgreSqlExecutor(IServiceProvider serviceProvider, SqlOptions options, IDatabase database) 
+    public PostgreSqlExecutor(IServiceProvider serviceProvider, SqlOptions<PostgreSqlExecutor> options, IDatabase database) 
         : base(serviceProvider, options, database)
     {
     }
