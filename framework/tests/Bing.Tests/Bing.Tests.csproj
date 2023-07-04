@@ -22,17 +22,19 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="EasyCaching.InMemory" Version="1.1.0" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="EasyCaching.InMemory" Version="1.1.0" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="EasyCaching.InMemory" Version="1.1.0" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
   </ItemGroup>
 
 </Project>

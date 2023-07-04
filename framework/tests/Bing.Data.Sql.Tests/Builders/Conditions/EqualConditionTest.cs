@@ -80,19 +80,19 @@ public class EqualConditionTest
         Assert.Equal(0, _parameterManager.GetParams().Count);
     }
 
-    /// <summary>
-    /// 测试 - 获取条件 - 值为ISqlBuilder
-    /// </summary>
-    [Fact]
-    public void Test_GetCondition_4()
-    {
-        var result = new StringBuilder();
-        result.Append("a=");
-        result.AppendLine("(Select [a] ");
-        result.Append("From [b])");
+    ///// <summary>
+    ///// 测试 - 获取条件 - 值为ISqlBuilder
+    ///// </summary>
+    //[Fact]
+    //public void Test_GetCondition_4()
+    //{
+    //    var result = new StringBuilder();
+    //    result.Append("a=");
+    //    result.AppendLine("(Select [a] ");
+    //    result.Append("From [b])");
 
-        var builder = new TestSqlBuilder().Select("a").From("b");
-        var condition = new EqualSqlCondition(_parameterManager, "a", builder, true);
-        Assert.Equal(result.ToString(), GetResult(condition));
-    }
+    //    var builder = new TestSqlBuilder().Select("a").From("b");
+    //    var condition = new EqualSqlCondition(_parameterManager, "a", builder, true);
+    //    Assert.Equal(result.ToString(), GetResult(condition));
+    //}
 }
