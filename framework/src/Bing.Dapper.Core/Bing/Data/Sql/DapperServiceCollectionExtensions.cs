@@ -1,4 +1,4 @@
-﻿using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -41,9 +41,9 @@ public static partial class DapperServiceCollectionExtensions
     /// <typeparam name="TEntityMetadata">实体元数据类型</typeparam>
     /// <param name="services">服务集合</param>
     public static IServiceCollection AddEntityMetadata<TEntityMetadata>(this IServiceCollection services)
-        where TEntityMetadata : class, IEntityMatedata
+        where TEntityMetadata : class, IEntityMetadata
     {
-        return services.AddEntityMetadata<IEntityMatedata, TEntityMetadata>();
+        return services.AddEntityMetadata<IEntityMetadata, TEntityMetadata>();
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public static partial class DapperServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     public static IServiceCollection AddEntityMetadata<TInterface, TImplementation>(this IServiceCollection services)
-        where TInterface : IEntityMatedata
+        where TInterface : IEntityMetadata
         where TImplementation : class, TInterface
     {
         services.TryAddScoped(typeof(TInterface), typeof(TImplementation));

@@ -2,7 +2,7 @@
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Datas.Dapper.PgSql;
 
@@ -17,7 +17,7 @@ public class PgSqlBuilder : SqlBuilderBase
     /// <param name="metadata">实体元数据解析器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
-    public PgSqlBuilder(IEntityMatedata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(metadata, tableDatabase, parameterManager) { }
+    public PgSqlBuilder(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) : base(metadata, tableDatabase, parameterManager) { }
 
     /// <summary>
     /// 克隆

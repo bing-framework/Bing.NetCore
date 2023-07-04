@@ -1,7 +1,7 @@
 ﻿using Bing.Datas.Dapper.Oracle;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Test.Integration.Sql.Builders.Samples;
 using Xunit;
 using Xunit.Abstractions;

@@ -1,9 +1,9 @@
-﻿namespace Bing.Data.Sql.Matedatas;
+﻿namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
 /// 实体元数据
 /// </summary>
-public class DefaultEntityMatedata : IEntityMatedata
+public class DefaultEntityMetadata : IEntityMetadata
 {
     /// <summary>
     /// 获取表名

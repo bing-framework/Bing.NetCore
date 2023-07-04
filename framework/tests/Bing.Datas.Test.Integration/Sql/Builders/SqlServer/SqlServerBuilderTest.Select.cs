@@ -1,6 +1,6 @@
 ﻿using Bing.Datas.Dapper.SqlServer;
 using Bing.Data.Sql;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Test.Integration.Samples;
 using Xunit;
 using Str = Bing.Helpers.Str;
@@ -581,7 +581,7 @@ public partial class SqlServerBuilderTest
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new SqlServerBuilder(new DefaultEntityMatedata());
+        _builder = new SqlServerBuilder(new DefaultEntityMetadata());
         _builder.Select<Sample3>().From<Sample3>("s");
 
         //验证
@@ -600,7 +600,7 @@ public partial class SqlServerBuilderTest
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new SqlServerBuilder(new DefaultEntityMatedata());
+        _builder = new SqlServerBuilder(new DefaultEntityMetadata());
         _builder.Select<Sample3>()
             .Select<Sample3>(t => t.StringValue, "a")
             .From<Sample3>("s");
@@ -621,7 +621,7 @@ public partial class SqlServerBuilderTest
         result.Append("From [Sample2] As [s]");
 
         //执行
-        _builder = new SqlServerBuilder(new DefaultEntityMatedata());
+        _builder = new SqlServerBuilder(new DefaultEntityMetadata());
         _builder.Select<Sample2>()
             .RemoveSelect<Sample2>(x => x.Display)
             .From<Sample2>("s");

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Params;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Text;
@@ -79,7 +79,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 实体元数据解析器
     /// </summary>
-    protected IEntityMatedata EntityMetadata { get; private set; }
+    protected IEntityMetadata EntityMetadata { get; private set; }
 
     /// <summary>
     /// 表数据库
@@ -191,7 +191,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="metadata">实体元数据解析器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
-    protected SqlBuilderBase(IEntityMatedata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null)
+    protected SqlBuilderBase(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null)
     {
         EntityMetadata = metadata;
         TableDatabase = tableDatabase;

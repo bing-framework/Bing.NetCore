@@ -1,5 +1,5 @@
 ﻿using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Filters;
 
@@ -28,7 +28,7 @@ public class IsDeletedFilter : ISqlFilter
     /// <param name="where">Where子句</param>
     /// <param name="type">类型</param>
     /// <param name="alias">表别名</param>
-    private void Filter(IDialect dialect, IEntityMatedata matedata, IEntityAliasRegister register, IJoinClause join,
+    private void Filter(IDialect dialect, IEntityMetadata matedata, IEntityAliasRegister register, IJoinClause join,
         IWhereClause where, Type type, string alias)
     {
         if (type == null)

@@ -1,4 +1,4 @@
-﻿namespace Bing.Data.Sql.Matedatas;
+﻿namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
 /// 表数据库

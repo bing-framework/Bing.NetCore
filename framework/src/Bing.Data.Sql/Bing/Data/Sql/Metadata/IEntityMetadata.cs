@@ -1,12 +1,12 @@
 ﻿using Bing.Aspects;
 
-namespace Bing.Data.Sql.Matedatas;
+namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
 /// 实体元数据
 /// </summary>
 [IgnoreAspect]
-public interface IEntityMatedata
+public interface IEntityMetadata
 {
     /// <summary>
     /// 获取表名

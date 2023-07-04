@@ -3,7 +3,7 @@ using System.Data;
 using System.Reflection;
 using Bing.Aspects;
 using Bing.Data;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
 using Bing.Exceptions;
@@ -17,7 +17,7 @@ namespace Bing.Uow;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityMatedata
+public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityMetadata
 {
     #region 字段
 

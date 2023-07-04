@@ -1,5 +1,5 @@
 ﻿using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Data.Sql;
@@ -17,7 +17,7 @@ public abstract class SqliteSqlQueryBase : SqlQueryBase
 
     /// <inheritdoc />
     protected override ISqlBuilder CreateSqlBuilder() => new SqliteBuilder(
-        ServiceProvider.GetService<IEntityMatedata>(),
+        ServiceProvider.GetService<IEntityMetadata>(),
         ServiceProvider.GetService<ITableDatabase>());
 
     /// <inheritdoc />
