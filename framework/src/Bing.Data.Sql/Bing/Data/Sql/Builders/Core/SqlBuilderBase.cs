@@ -628,7 +628,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     public ISqlBuilder Skip(int count)
     {
         var param = GetOffsetParam();
-        ParameterManager.Add(param, count);
+        ParameterManager.AddSqlParam(param, count);
         return this;
     }
 
@@ -640,7 +640,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         if (string.IsNullOrWhiteSpace(OffsetParam) == false)
             return OffsetParam;
         OffsetParam = ParameterManager.GenerateName();
-        ParameterManager.Add(OffsetParam, 0);
+        ParameterManager.AddSqlParam(OffsetParam, 0);
         return OffsetParam;
     }
 
@@ -651,7 +651,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     public ISqlBuilder Take(int count)
     {
         var param = GetLimitParam();
-        ParameterManager.Add(param, count);
+        ParameterManager.AddSqlParam(param, count);
         Pager.PageSize = count;
         return this;
     }

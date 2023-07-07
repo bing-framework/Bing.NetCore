@@ -367,8 +367,11 @@ public class JoinClause : IJoinClause
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    public void On(string column, object value, Operator @operator = Operator.Equal) =>
+    /// <param name="isParameterization">是否参数化</param>
+    public void On(string column, object value, Operator @operator = Operator.Equal, bool isParameterization = false) =>
         _params.LastOrDefault()?.On(column, value, @operator);
+
+
 
     /// <summary>
     /// 设置连接条件
@@ -437,7 +440,7 @@ public class JoinClause : IJoinClause
         if (string.IsNullOrWhiteSpace(column))
         {
             var name = _parameterManager.GenerateName();
-            _parameterManager.Add(name, Lambdas.GetValue(expression));
+            _parameterManager.AddSqlParam(name, Lambdas.GetValue(expression));
             return new SqlItem(name, raw: true);
         }
 

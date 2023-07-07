@@ -42,6 +42,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     private IDbTransaction _transaction;
 
+    /// <summary>
+    /// 动态参数列表
+    /// </summary>
+    private DynamicParameters _parameters;
+
     #endregion
 
     #region 构造函数
@@ -151,6 +156,20 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// 参数列表
     /// </summary>
     protected IReadOnlyDictionary<string, object> Params => SqlBuilder.GetParams();
+
+    /// <summary>
+    /// 动态参数列表
+    /// </summary>
+    protected DynamicParameters SqlParams
+    {
+        get
+        {
+            _parameters = new DynamicParameters();
+            ParameterManager.GetSqlParams().ToList().ForEach(t => _parameters.Add(t.Name, t.Value, t.DbType, t.Direction, t.Size, t.Precision, t.Scale));
+            ParameterManager.GetDynamicParams().ToList().ForEach(p => _parameters.AddDynamicParams(p));
+            return _parameters;
+        }
+    }
 
     /// <summary>
     /// 是否包含联合操作
@@ -294,7 +313,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             message = ExecuteBefore(sql, Params, conn);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = conn.ExecuteScalar(sql, builder.GetParams(), GetTransaction(), timeout);
+            var result = conn.ExecuteScalar(sql, builder.GetSqlParams(), GetTransaction(), timeout);
 
             ExecuteAfter(message);
             return Conv.ToInt(result);
@@ -347,7 +366,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             message = ExecuteBefore(sql, Params, conn);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = await conn.ExecuteScalarAsync(sql, builder.GetParams(), GetTransaction(), timeout);
+            var result = await conn.ExecuteScalarAsync(sql, builder.GetSqlParams(), GetTransaction(), timeout);
 
             ExecuteAfter(message);
             return Conv.ToInt(result);

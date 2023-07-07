@@ -6,6 +6,7 @@ using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
 using Bing.Events.Messages;
 using Bing.ExceptionHandling;
+using Bing.Exceptions;
 using Bing.Logging;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
@@ -163,6 +164,20 @@ namespace Bing.Admin.Apis
                 .Tags(nameof(TestController), "OtherLog", "LogWarning")
                 .LogWarning();
             return Task.FromResult(Success());
+        }
+
+        /// <summary>
+        /// 测试异常自定义数据
+        /// </summary>
+        [AllowAnonymous]
+        [HttpPost("testWarningWithData")]
+        public Task<IActionResult> TestWarningWithDataAsync()
+        {
+            var ex = new BingFrameworkException("TestWarningWithData");
+            ex.ExtraData.Add("TestA","A");
+            ex.ExtraData.Add("TestB", "ABC");
+            ex.ExtraData.Add("TestC", new { A = 1, B = 2, C = 3 });
+            throw ex;
         }
 
         /// <summary>

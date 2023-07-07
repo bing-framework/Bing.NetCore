@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using Bing.Data.Sql;
+using System.Text;
 using Bing.Data.Sql.Builders.Conditions;
-using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Sql.Tests.Samples;
 using Microsoft.Extensions.Logging;
 using Xunit;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器测试 - Where子句
+/// Sql生成器测试 - Where 子句
 /// </summary>
-public partial class SqlServerBuilderTest : TestBase
+public partial class SqlBuilderTest
 {
-
     #region And
 
     /// <summary>
@@ -24,7 +22,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestAnd_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where [Age]=@_p_0 And a<@a");
@@ -46,7 +44,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestAnd_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.Append("Where [Age]=@_p_2 And [Name]=@_p_0 And [Code]=@_p_1");
@@ -58,10 +56,10 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(3, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
-        Assert.Equal(1, _builder.GetParam("@_p_2"));
+        Assert.Equal(3, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_2"));
     }
 
     #endregion
@@ -75,7 +73,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestOr_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where ([Age]=@_p_0 Or a<@a)");
@@ -97,7 +95,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestOr_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where ([s].[Email]=@_p_0 Or [s].[Url]<>@_p_1)");
@@ -107,8 +105,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -118,7 +116,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestOr_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.Append("Where (([Age]=@_p_2 Or [Name]=@_p_0) Or [Code]=@_p_1)");
@@ -130,10 +128,10 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(3, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
-        Assert.Equal(1, _builder.GetParam("@_p_2"));
+        Assert.Equal(3, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_2"));
     }
 
     /// <summary>
@@ -143,7 +141,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestOrIf_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where ([Age]=@_p_0 Or a<@a)");
@@ -166,7 +164,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestOrIfNotEmpty()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where ([s].[Email]=@_p_0 Or [s].[Url]<>@_p_1)");
@@ -176,8 +174,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     #endregion
@@ -191,7 +189,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where [Age]=@_p_0 And a<@a");
@@ -213,7 +211,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where [b].[Name]<>@_p_0");
@@ -225,8 +223,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -236,7 +234,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -248,8 +246,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -259,7 +257,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -271,8 +269,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -282,7 +280,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [abc].[Test] ");
         result.Append("Where [b2]<>");
@@ -294,13 +292,13 @@ public partial class SqlServerBuilderTest : TestBase
         //执行
         var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
         _builder.From("abc.Test").Where("b2", builder2, Operator.NotEqual).Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -310,7 +308,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[Email]<>");
@@ -322,13 +320,13 @@ public partial class SqlServerBuilderTest : TestBase
         //执行
         var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
         _builder.From<Sample>("s").Where<Sample>(t => t.Email, builder2, Operator.NotEqual).Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -338,7 +336,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_7()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [abc].[Test] ");
         result.Append("Where [b2]<>");
@@ -351,13 +349,13 @@ public partial class SqlServerBuilderTest : TestBase
         _builder.From("abc.Test").Where("b2", builder => {
             builder.Count().From("Test2").Where("Name", "a");
         }, Operator.NotEqual).Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -367,7 +365,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_8()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[Email]<>");
@@ -380,13 +378,13 @@ public partial class SqlServerBuilderTest : TestBase
         _builder.From<Sample>("s").Where<Sample>(t => t.Email, builder => {
             builder.Count().From("Test2").Where("Name", "a");
         }, Operator.NotEqual).Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -396,7 +394,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_9()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [k] ");
         result.Append("Where [k].[Email]=@_p_0 And [k].[StringValue] Like @_p_1");
@@ -406,9 +404,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("%b%", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("%b%", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -418,7 +416,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_10()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [k] ");
         result.Append("Where ([k].[Email]=@_p_0 And [k].[StringValue] Like @_p_1 Or [k].[IntValue]=@_p_2) ");
@@ -440,7 +438,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_11()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] In (@_p_0,@_p_1)");
@@ -453,9 +451,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -465,7 +463,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_12()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[LogLevel]=@_p_0");
@@ -475,7 +473,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParam("@_p_0"));
+        Assert.Equal(4, _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -485,7 +483,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_13()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[NullableLogLevel]=@_p_0");
@@ -495,7 +493,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParam("@_p_0"));
+        Assert.Equal(4, _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -505,7 +503,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_14()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[LogLevel]=@_p_0");
@@ -516,7 +514,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParam("@_p_0"));
+        Assert.Equal(4, _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -526,7 +524,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_15()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[NullableLogLevel]=@_p_0");
@@ -537,7 +535,7 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(4, _builder.GetParam("@_p_0"));
+        Assert.Equal(4, _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -547,7 +545,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_16()
     {
         // 结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[GuidValue]=@_p_0");
@@ -557,9 +555,9 @@ public partial class SqlServerBuilderTest : TestBase
         _builder.From<Sample>("s").Where<Sample>(t => t.GuidValue == sample.GuidValue);
 
         // 验证
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(Guid.Empty, _builder.GetParam("@_p_0"));
+        Assert.Equal(Guid.Empty, _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -569,7 +567,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_17()
     {
         // 结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[NullableGuidValue]=@_p_0");
@@ -579,9 +577,9 @@ public partial class SqlServerBuilderTest : TestBase
         _builder.From<Sample>("s").Where<Sample>(t => t.NullableGuidValue == sample.GuidValue);
 
         // 验证
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(Guid.Empty, _builder.GetParam("@_p_0"));
+        Assert.Equal(Guid.Empty, _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -591,20 +589,20 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhere_18()
     {
         // 结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [s].[GuidValue] ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[GuidValue]=@_p_0");
 
         // 执行
         var guid = new Guid("03453704-45f3-47b8-ac1c-aecbdcb6b42b");
-           
+
         GetSql(guid);
 
         // 验证
-        Output.WriteLine(_builder.ToDebugSql());
+        _output.WriteLine(_builder.ToDebugSql());
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(guid, _builder.GetParam("@_p_0"));
+        Assert.Equal(guid, _builder.GetParamValue("@_p_0"));
     }
 
     private void GetSql(Guid id)
@@ -624,7 +622,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where [b].[Name]<>@_p_0");
@@ -637,8 +635,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -648,7 +646,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -661,8 +659,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -672,7 +670,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -685,8 +683,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -696,7 +694,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [abc].[Test] ");
         result.Append("Where [b2]<>");
@@ -708,13 +706,13 @@ public partial class SqlServerBuilderTest : TestBase
         //执行
         var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
         _builder.From("abc.Test").WhereIf("a", builder2, false).WhereIf("b2", builder2, true, Operator.NotEqual).Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -724,7 +722,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[Email]<>");
@@ -739,13 +737,13 @@ public partial class SqlServerBuilderTest : TestBase
             .WhereIf<Sample>(t => t.Url, builder2, false)
             .WhereIf<Sample>(t => t.Email, builder2, true, Operator.NotEqual)
             .Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -755,7 +753,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [abc].[Test] ");
         result.Append("Where [b2]<>");
@@ -773,13 +771,13 @@ public partial class SqlServerBuilderTest : TestBase
                 builder.Count().From("Test2").Where("Name", "a");
             }, true, Operator.NotEqual)
             .Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -789,7 +787,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_7()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[Email]<>");
@@ -807,13 +805,13 @@ public partial class SqlServerBuilderTest : TestBase
                 builder.Count().From("Test2").Where("Name", "a");
             }, true, Operator.NotEqual)
             .Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -823,7 +821,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIf_8()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Where [s].[Email]<>");
@@ -842,13 +840,13 @@ public partial class SqlServerBuilderTest : TestBase
                 builder.Count().From<Test2>().Where<Test2>(x => x.Name, "a");
             }, true, Operator.NotEqual)
             .Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     #endregion
@@ -862,7 +860,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIfNotEmpty_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Where [b].[Name]<>@_p_0");
@@ -875,8 +873,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -886,21 +884,21 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIfNotEmpty_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
 
         //执行
-        _builder.Select<Sample>(t => new object[] {t.Email})
+        _builder.Select<Sample>(t => new object[] { t.Email })
             .From<Sample>("a")
             .WhereIfNotEmpty<Sample>(t => t.Url, "")
             .WhereIfNotEmpty<Sample>(t => t.Email, "abc", Operator.NotEqual);
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -910,7 +908,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestWhereIfNotEmpty_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -923,8 +921,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -938,7 +936,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestEqual_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]=@_p_0");
@@ -950,8 +948,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -961,7 +959,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestEqual_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email],[a].[BoolValue] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]=@_p_0");
@@ -973,8 +971,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -988,7 +986,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestNotEqual_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -1000,8 +998,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1011,7 +1009,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestNotEqual_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<>@_p_0");
@@ -1023,8 +1021,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1038,7 +1036,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestGreater_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]>@_p_0");
@@ -1050,8 +1048,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1061,7 +1059,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestGreater_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]>@_p_0");
@@ -1073,8 +1071,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1088,7 +1086,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestLess_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<@_p_0");
@@ -1100,8 +1098,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1111,7 +1109,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestLess_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<@_p_0");
@@ -1123,8 +1121,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1138,7 +1136,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestGreaterEqual_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]>=@_p_0");
@@ -1150,8 +1148,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1161,7 +1159,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestGreaterEqual_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]>=@_p_0");
@@ -1173,8 +1171,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1188,7 +1186,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestLessEqual_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<=@_p_0");
@@ -1200,8 +1198,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1211,7 +1209,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestLessEqual_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email]<=@_p_0");
@@ -1223,8 +1221,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1238,7 +1236,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestContains_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Like @_p_0");
@@ -1250,8 +1248,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc%", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("%abc%", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1261,7 +1259,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestContains_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Like @_p_0");
@@ -1273,8 +1271,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc%", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("%abc%", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1288,7 +1286,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestStarts_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Like @_p_0");
@@ -1300,8 +1298,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc%", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc%", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1311,7 +1309,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestStarts_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Like @_p_0");
@@ -1323,8 +1321,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc%", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc%", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1338,7 +1336,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestEnds_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Like @_p_0");
@@ -1350,8 +1348,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("%abc", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -1361,7 +1359,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestEnds_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Like @_p_0");
@@ -1373,8 +1371,8 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("%abc", _builder.GetParam("@_p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("%abc", _builder.GetParamValue("@_p_0"));
     }
 
     #endregion
@@ -1388,7 +1386,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsNull_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Is Null");
@@ -1409,7 +1407,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsNull_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Is Null");
@@ -1434,7 +1432,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsNotNull_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Is Not Null");
@@ -1455,7 +1453,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsNotNull_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Is Not Null");
@@ -1480,7 +1478,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsEmpty_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where ([a].[Email] Is Null Or [a].[Email]='')");
@@ -1501,7 +1499,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsEmpty_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where ([a].[Email] Is Null Or [a].[Email]='')");
@@ -1526,7 +1524,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsNotEmpty_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Is Not Null And [a].[Email]<>''");
@@ -1547,7 +1545,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIsNotEmpty_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Is Not Null And [a].[Email]<>''");
@@ -1572,7 +1570,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIn_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] In (@_p_0,@_p_1)");
@@ -1585,9 +1583,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -1597,7 +1595,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIn_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] In (@_p_0,@_p_1)");
@@ -1610,9 +1608,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -1622,7 +1620,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIn_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Name]=@_p_1 And ");
@@ -1641,9 +1639,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("u", _builder.GetParam("@_p_0"));
-        Assert.Equal("n", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("u", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("n", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -1653,7 +1651,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIn_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Name]=@_p_1 And ");
@@ -1672,9 +1670,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("u", _builder.GetParam("@_p_0"));
-        Assert.Equal("n", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("u", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("n", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -1684,7 +1682,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIn_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Name]=@_p_0 And ");
@@ -1702,9 +1700,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("n", _builder.GetParam("@_p_0"));
-        Assert.Equal("u", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("n", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("u", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -1714,7 +1712,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestIn_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Name]=@_p_0 And ");
@@ -1732,9 +1730,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("n", _builder.GetParam("@_p_0"));
-        Assert.Equal("u", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("n", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("u", _builder.GetParamValue("@_p_1"));
     }
 
     #endregion
@@ -1748,7 +1746,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestNotIn_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Not In (@_p_0,@_p_1)");
@@ -1761,9 +1759,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -1773,7 +1771,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestNotIn_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[Email] Not In (@_p_0,@_p_1)");
@@ -1786,9 +1784,9 @@ public partial class SqlServerBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal("b", _builder.GetParamValue("@_p_1"));
     }
 
     #endregion
@@ -1802,7 +1800,7 @@ public partial class SqlServerBuilderTest : TestBase
     public void TestBetween_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Where [a].[B]>=@_p_0 And [a].[B]<=@_p_1");
@@ -1813,8 +1811,8 @@ public partial class SqlServerBuilderTest : TestBase
             .Between("a.B", 1, 2);
 
         //验证
-        Assert.Equal(1, _builder.GetParam("@_p_0"));
-        Assert.Equal(2, _builder.GetParam("@_p_1"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_0"));
+        Assert.Equal(2, _builder.GetParamValue("@_p_1"));
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 

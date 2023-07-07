@@ -80,7 +80,7 @@ public abstract class SqlConditionBase : ISqlCondition
     {
         var paramName = GenerateParamName();
         var value = GetValue();
-        ParameterManager.Add(paramName, value);
+        ParameterManager.AddSqlParam(paramName, value);
         AppendCondition(builder, Column, paramName);
     }
 

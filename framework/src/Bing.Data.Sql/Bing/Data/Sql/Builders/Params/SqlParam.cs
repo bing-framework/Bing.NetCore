@@ -32,26 +32,32 @@ public class SqlParam
     /// 参数名
     /// </summary>
     public string Name { get; }
+
     /// <summary>
     /// 参数值
     /// </summary>
     public object Value { get; }
+
     /// <summary>
     /// 参数方向
     /// </summary>
     public ParameterDirection? Direction { get; }
+
     /// <summary>
     /// 参数类型
     /// </summary>
     public DbType? DbType { get; }
+
     /// <summary>
     /// 字段长度
     /// </summary>
     public int? Size { get; }
+
     /// <summary>
     /// 数值有效位数
     /// </summary>
     public byte? Precision { get; }
+
     /// <summary>
     /// 数值小数位数
     /// </summary>

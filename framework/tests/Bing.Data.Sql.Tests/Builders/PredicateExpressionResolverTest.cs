@@ -1,28 +1,25 @@
-﻿using System;
+﻿using Bing.Data.Sql.Builders.Conditions;
 using System.Linq.Expressions;
-using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Builders.Conditions;
+using System;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
-using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Sql.Tests.Samples;
 using Xunit;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Resolvers;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
 /// 谓词表达式解析器测试
 /// </summary>
 public class PredicateExpressionResolverTest
 {
-    /// <summary>
-    /// 方言
-    /// </summary>
-    private readonly IDialect _dialect;
+    #region 测试初始化
+
     /// <summary>
     /// 参数管理器
     /// </summary>
-    private readonly ParameterManager _parameterManager;
+    private readonly IParameterManager _parameterManager;
+
     /// <summary>
     /// 谓词表达式解析器
     /// </summary>
@@ -33,10 +30,11 @@ public class PredicateExpressionResolverTest
     /// </summary>
     public PredicateExpressionResolverTest()
     {
-        _dialect = new SqlServerDialect();
-        _parameterManager = new ParameterManager(_dialect);
-        _resolver = new PredicateExpressionResolver(_dialect, new EntityResolver(), new EntityAliasRegister(), _parameterManager);
+        _parameterManager = new ParameterManager(TestDialect.Instance);
+        _resolver = new PredicateExpressionResolver(TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), _parameterManager);
     }
+
+    #endregion
 
     /// <summary>
     /// 验证空表达式
@@ -56,7 +54,7 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => t.Email == "a";
         Assert.Equal("[Email]=@_p_0", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -67,8 +65,8 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => t.Email == "a" && t.IntValue == 1;
         Assert.Equal("[Email]=@_p_0 And [IntValue]=@_p_1", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -79,8 +77,8 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => t.Email == "a" || t.IntValue == 1;
         Assert.Equal("([Email]=@_p_0 Or [IntValue]=@_p_1)", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -91,9 +89,9 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => t.Email == "a" && t.IntValue == 1 || t.DisplayValue == "b";
         Assert.Equal("([Email]=@_p_0 And [IntValue]=@_p_1 Or [DisplayValue]=@_p_2)", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
-        Assert.Equal("b", _parameterManager.GetParams()["@_p_2"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
+        Assert.Equal("b", _parameterManager.GetParamValue("@_p_2"));
     }
 
     /// <summary>
@@ -104,9 +102,9 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => t.Email == "a" || t.IntValue == 1 && t.DisplayValue == "b";
         Assert.Equal("([Email]=@_p_0 Or [IntValue]=@_p_1 And [DisplayValue]=@_p_2)", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
-        Assert.Equal("b", _parameterManager.GetParams()["@_p_2"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
+        Assert.Equal("b", _parameterManager.GetParamValue("@_p_2"));
     }
 
     /// <summary>
@@ -117,9 +115,9 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => (t.Email == "a" || t.IntValue == 1) && t.DisplayValue == "b";
         Assert.Equal("([Email]=@_p_0 Or [IntValue]=@_p_1) And [DisplayValue]=@_p_2", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
-        Assert.Equal("b", _parameterManager.GetParams()["@_p_2"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
+        Assert.Equal("b", _parameterManager.GetParamValue("@_p_2"));
     }
 
     /// <summary>
@@ -130,9 +128,9 @@ public class PredicateExpressionResolverTest
     {
         Expression<Func<Sample, bool>> expression = t => (t.Email == "a" || t.IntValue == 1) || (t.Email == "b" || t.IntValue == 2);
         Assert.Equal("(([Email]=@_p_0 Or [IntValue]=@_p_1) Or ([Email]=@_p_2 Or [IntValue]=@_p_3))", _resolver.Resolve(expression).GetCondition());
-        Assert.Equal("a", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
-        Assert.Equal("b", _parameterManager.GetParams()["@_p_2"]);
-        Assert.Equal(2, _parameterManager.GetParams()["@_p_3"]);
+        Assert.Equal("a", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
+        Assert.Equal("b", _parameterManager.GetParamValue("@_p_2"));
+        Assert.Equal(2, _parameterManager.GetParamValue("@_p_3"));
     }
 }

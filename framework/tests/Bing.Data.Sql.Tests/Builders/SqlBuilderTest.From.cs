@@ -1,14 +1,13 @@
-﻿using Bing.Data.Sql;
-using Bing.Data.Test.Integration.Samples;
+﻿using System.Text;
+using Bing.Data.Sql.Tests.Samples;
 using Xunit;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器测试 - From子句
+/// Sql生成器测试 - From 子句
 /// </summary>
-public partial class SqlServerBuilderTest
+public partial class SqlBuilderTest
 {
     /// <summary>
     /// 设置表
@@ -17,7 +16,7 @@ public partial class SqlServerBuilderTest
     public void Test_From_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [c] ");
         result.Append("From [a] As [b]");
 
@@ -36,7 +35,7 @@ public partial class SqlServerBuilderTest
     public void Test_From_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [c] ");
         result.Append("From [b].[Sample] As [a]");
 
@@ -55,7 +54,7 @@ public partial class SqlServerBuilderTest
     public void Test_From_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.Append("From ");
         result.AppendLine("(Select Count(*) ");
@@ -66,13 +65,13 @@ public partial class SqlServerBuilderTest
         //执行
         var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
         _builder.From(builder2, "test").Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -82,7 +81,7 @@ public partial class SqlServerBuilderTest
     public void Test_From_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.Append("From ");
         result.AppendLine("(Select Count(*) ");
@@ -92,13 +91,13 @@ public partial class SqlServerBuilderTest
 
         //执行
         _builder.From(builder => builder.Count().From("Test2").Where("Name", "a"), "test").Where("Age", 1);
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -108,7 +107,7 @@ public partial class SqlServerBuilderTest
     public void Test_From_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [c] ");
         result.Append("From a");
 
@@ -127,7 +126,7 @@ public partial class SqlServerBuilderTest
     public void Test_From_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [c] ");
         result.Append("From b");
 

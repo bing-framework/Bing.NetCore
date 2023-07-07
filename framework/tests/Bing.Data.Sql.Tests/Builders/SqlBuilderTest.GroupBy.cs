@@ -1,14 +1,13 @@
-﻿using Bing.Data.Sql;
-using Bing.Data.Test.Integration.Samples;
+﻿using System.Text;
+using Bing.Data.Sql.Tests.Samples;
 using Xunit;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器测试 - GroupBy子句
+/// Sql生成器测试 - GroupBy 子句
 /// </summary>
-public partial class SqlServerBuilderTest
+public partial class SqlBuilderTest
 {
     /// <summary>
     /// 测试分组
@@ -17,7 +16,7 @@ public partial class SqlServerBuilderTest
     public void Test_GroupBy_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Group By [b] Having c");
@@ -38,7 +37,7 @@ public partial class SqlServerBuilderTest
     public void Test_GroupBy_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Group By [a].[Email] Having b");
@@ -59,7 +58,7 @@ public partial class SqlServerBuilderTest
     public void Test_GroupBy_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Group By [a].[Email],[a].[Url]");
@@ -80,7 +79,7 @@ public partial class SqlServerBuilderTest
     public void Test_AppendGroupBy_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Group By b");
@@ -101,7 +100,7 @@ public partial class SqlServerBuilderTest
     public void Test_AppendGroupBy_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Group By b");

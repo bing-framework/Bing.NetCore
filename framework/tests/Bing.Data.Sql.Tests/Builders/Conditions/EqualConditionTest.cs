@@ -55,7 +55,7 @@ public class EqualConditionTest
     {
         var condition = new EqualSqlCondition(_parameterManager, "a", 1, true);
         Assert.Equal("a=@_p_0", GetResult(condition));
-        Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_0"));
     }
 
     /// <summary>

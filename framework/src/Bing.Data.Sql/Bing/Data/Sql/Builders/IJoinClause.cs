@@ -139,7 +139,8 @@ public interface IJoinClause
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    void On(string column, object value, Operator @operator = Operator.Equal);
+    /// <param name="isParameterization">是否参数化</param>
+    void On(string column, object value, Operator @operator = Operator.Equal, bool isParameterization = false);
 
     /// <summary>
     /// 设置连接条件

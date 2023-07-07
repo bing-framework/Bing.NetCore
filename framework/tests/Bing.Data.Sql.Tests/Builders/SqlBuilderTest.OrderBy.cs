@@ -1,14 +1,13 @@
-﻿using Bing.Data.Sql;
-using Bing.Data.Test.Integration.Samples;
+﻿using System.Text;
+using Bing.Data.Sql.Tests.Samples;
 using Xunit;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器测试 - OrderBy子句
+/// Sql生成器测试 - OrderBy 子句
 /// </summary>
-public partial class SqlServerBuilderTest
+public partial class SqlBuilderTest
 {
     /// <summary>
     /// 测试排序
@@ -17,7 +16,7 @@ public partial class SqlServerBuilderTest
     public void Test_OrderBy_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Order By [c].[b] Desc");
@@ -38,7 +37,7 @@ public partial class SqlServerBuilderTest
     public void Test_OrderBy_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Order By [a].[Email] Desc");
@@ -59,7 +58,7 @@ public partial class SqlServerBuilderTest
     public void Test_AppendOrderBy_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Order By b");
@@ -80,7 +79,7 @@ public partial class SqlServerBuilderTest
     public void Test_AppendOrderBy_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Order By b");

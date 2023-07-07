@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Data;
 using Bing.Extensions;
 
 namespace Bing.Data.Sql.Builders.Params;
@@ -11,6 +12,11 @@ public class ParameterManager : IParameterManager
     #region 字段
 
     /// <summary>
+    /// Sql方言
+    /// </summary>
+    protected readonly IDialect Dialect;
+
+    /// <summary>
     /// 参数集合
     /// </summary>
     private readonly IDictionary<string, object> _params;
@@ -19,6 +25,16 @@ public class ParameterManager : IParameterManager
     /// 参数索引
     /// </summary>
     private int _paramIndex;
+
+    /// <summary>
+    /// 参数集合
+    /// </summary>
+    private readonly IDictionary<string, SqlParam> _sqlParams;
+
+    /// <summary>
+    /// 动态参数集合
+    /// </summary>
+    private readonly List<object> _dynamicParams;
 
     #endregion
 
@@ -33,27 +49,22 @@ public class ParameterManager : IParameterManager
         Dialect = dialect;
         _paramIndex = 0;
         _params = new Dictionary<string, object>();
+        _sqlParams = new Dictionary<string, SqlParam>();
+        _dynamicParams = new List<object>();
     }
 
     /// <summary>
     /// 初始化一个<see cref="ParameterManager"/>类型的实例
     /// </summary>
-    /// <param name="parameterManager">参数管理器</param>
-    protected ParameterManager(ParameterManager parameterManager)
+    /// <param name="manager">参数管理器</param>
+    protected ParameterManager(ParameterManager manager)
     {
-        Dialect = parameterManager.Dialect;
-        _paramIndex = parameterManager._paramIndex;
-        _params = new Dictionary<string, object>(parameterManager._params);
+        Dialect = manager.Dialect;
+        _paramIndex = manager._paramIndex;
+        _params = new Dictionary<string, object>(manager._params);
+        _sqlParams = new Dictionary<string, SqlParam>(manager._sqlParams);
+        _dynamicParams = new List<object>(manager._dynamicParams);
     }
-
-    #endregion
-
-    #region 属性
-
-    /// <summary>
-    /// Sql方言
-    /// </summary>
-    protected IDialect Dialect { get; }
 
     #endregion
 
@@ -82,7 +93,16 @@ public class ParameterManager : IParameterManager
         return $"{Dialect.GetPrefix()}{name}";
     }
 
-    
+    /// <summary>
+    /// 添加动态参数
+    /// </summary>
+    /// <param name="param">动态参数</param>
+    public virtual void AddDynamicParams(object param)
+    {
+        if (param == null)
+            return;
+        _dynamicParams.Add(param);
+    }
 
     #endregion
 
@@ -99,6 +119,33 @@ public class ParameterManager : IParameterManager
             _params.Remove(name);
         _params.Add(name, GetValue(value, @operator));
     }
+
+    /// <summary>
+    /// 添加参数，如果参数已存在则替换
+    /// </summary>
+    /// <param name="name">参数名</param>
+    /// <param name="value">参数值</param>
+    /// <param name="dbType">参数类型</param>
+    /// <param name="direction">参数方向</param>
+    /// <param name="size">字段长度</param>
+    /// <param name="precision">数值有效位数</param>
+    /// <param name="scale">数值小数位数</param>
+    public void AddSqlParam(string name, object value = null, DbType? dbType = null, ParameterDirection? direction = null,
+        int? size = null, byte? precision = null, byte? scale = null)
+    {
+        if(string.IsNullOrWhiteSpace(name))
+            return;
+        name = NormalizeName(name);
+        if (_sqlParams.ContainsKey(name))
+            _sqlParams.Remove(name);
+        var param = new SqlParam(name, value, dbType, direction, size, precision, scale);
+        _sqlParams.Add(name, param);
+    }
+
+    /// <summary>
+    /// 获取动态参数列表
+    /// </summary>
+    public IReadOnlyList<object> GetDynamicParams() => _dynamicParams;
 
     /// <summary>
     /// 获取值
@@ -134,6 +181,11 @@ public class ParameterManager : IParameterManager
     /// </summary>
     public IReadOnlyDictionary<string, object> GetParams() => new ReadOnlyDictionary<string, object>(_params);
 
+    /// <summary>
+    /// 获取参数列表
+    /// </summary>
+    public IReadOnlyList<SqlParam> GetSqlParams() => _sqlParams.Values.ToList();
+
     #endregion
 
     #region Contains(是否包含参数)
@@ -143,6 +195,26 @@ public class ParameterManager : IParameterManager
     {
         name = NormalizeName(name);
         return _params.ContainsKey(name);
+    }
+
+    /// <summary>
+    /// 是否包含参数
+    /// </summary>
+    /// <param name="name">参数名</param>
+    public virtual bool ContainsSqlParam(string name)
+    {
+        name = NormalizeName(name);
+        return _sqlParams.ContainsKey(name);
+    }
+
+    /// <summary>
+    /// 获取参数
+    /// </summary>
+    /// <param name="name">参数名</param>
+    public virtual SqlParam GetParam(string name)
+    {
+        name = NormalizeName(name);
+        return _sqlParams.ContainsKey(name) ? _sqlParams[name] : null;
     }
 
     #endregion
@@ -156,6 +228,16 @@ public class ParameterManager : IParameterManager
         return _params.ContainsKey(name) ? _params[name] : null;
     }
 
+    /// <summary>
+    /// 获取参数值
+    /// </summary>
+    /// <param name="name">参数名</param>
+    public object GetParamValue(string name)
+    {
+        name = NormalizeName(name);
+        return _sqlParams.ContainsKey(name) ? _sqlParams[name].Value : null;
+    }
+
     #endregion
 
     #region Clear(清空参数)
@@ -167,6 +249,7 @@ public class ParameterManager : IParameterManager
     {
         _paramIndex = 0;
         _params.Clear();
+        _sqlParams.Clear();
     }
 
     #endregion

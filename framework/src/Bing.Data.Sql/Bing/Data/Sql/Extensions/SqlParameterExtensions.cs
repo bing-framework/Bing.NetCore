@@ -25,7 +25,7 @@ public static class SqlParameterExtensions
     {
         source.CheckNull(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.ParameterManager.Add(name, value);
+            accessor.ParameterManager.AddSqlParam(name, value);
         return source;
     }
 
@@ -42,6 +42,18 @@ public static class SqlParameterExtensions
         source.CheckNull(nameof(source));
         if (source is ISqlPartAccessor accessor)
             return accessor.ParameterManager.GetParams();
+        return default;
+    }
+
+    /// <summary>
+    /// 获取参数列表
+    /// </summary>
+    /// <param name="source">源</param>
+    public static IReadOnlyList<SqlParam> GetSqlParams(this ISqlParameter source)
+    {
+        source.CheckNull(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            return accessor.ParameterManager.GetSqlParams();
         return default;
     }
 
@@ -75,6 +87,35 @@ public static class SqlParameterExtensions
         source.CheckNull(nameof(source));
         if (source is ISqlPartAccessor accessor)
             return accessor.ParameterManager.GetValue(name);
+        return default;
+    }
+
+    /// <summary>
+    /// 获取参数值
+    /// </summary>
+    /// <typeparam name="T">值类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="name">参数名</param>
+    public static T GetParamValue<T>(this ISqlParameter source, string name)
+    {
+        source.CheckNull(nameof(source));
+        if (source is IGetParameter target)
+            return target.GetParam<T>(name);
+        if (source is ISqlPartAccessor accessor)
+            return (T)accessor.ParameterManager.GetParamValue(name);
+        return default;
+    }
+
+    /// <summary>
+    /// 获取参数值
+    /// </summary>
+    /// <param name="source">源</param>
+    /// <param name="name">参数名</param>
+    public static object GetParamValue(this ISqlParameter source, string name)
+    {
+        source.CheckNull(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            return accessor.ParameterManager.GetParamValue(name);
         return default;
     }
 

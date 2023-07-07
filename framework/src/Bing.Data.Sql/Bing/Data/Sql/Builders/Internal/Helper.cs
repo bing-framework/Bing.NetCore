@@ -128,7 +128,8 @@ public class Helper
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    public ICondition CreateCondition(string column, object value, Operator @operator)
+    /// <param name="isParameterization">是否参数化</param>
+    public ICondition CreateCondition(string column, object value, Operator @operator, bool isParameterization = true)
     {
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentNullException(nameof(column));
@@ -140,8 +141,50 @@ public class Helper
         if (IsNotInCondition(@operator, value))
             return CreateInCondition(column, value as IEnumerable, true);
         var paramName = GenerateParamName(value, @operator);
-        _parameterManager.Add(paramName, value, @operator);
+        _parameterManager.AddSqlParam(paramName, IsLikeOperator(@operator) ? GetValue(value, @operator) : value);
         return SqlConditionFactory.Create(column, paramName, @operator);
+    }
+
+    /// <summary>
+    /// 是否模糊查询条件
+    /// </summary>
+    /// <param name="operator">操作符</param>
+    private bool IsLikeOperator(Operator @operator)
+    {
+        switch (@operator)
+        {
+            case Operator.Contains:
+            case Operator.Starts:
+            case Operator.Ends:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// 获取值
+    /// </summary>
+    /// <param name="value">参数值</param>
+    /// <param name="operator">运算符</param>
+    private object GetValue(object value, Operator @operator)
+    {
+        if (string.IsNullOrWhiteSpace(value.SafeString()))
+            return value;
+        switch (@operator)
+        {
+            case Operator.Contains:
+                return $"%{value}%";
+
+            case Operator.Starts:
+                return $"{value}%";
+
+            case Operator.Ends:
+                return $"%{value}";
+
+            default:
+                return value;
+        }
     }
 
     /// <summary>
@@ -185,7 +228,7 @@ public class Helper
         {
             var name = _parameterManager.GenerateName();
             paramNames.Add(name);
-            _parameterManager.Add(name, value);
+            _parameterManager.AddSqlParam(name, value);
         }
         if (notIn)
             return new NotInCondition(column, paramNames);
@@ -224,12 +267,12 @@ public class Helper
         if (string.IsNullOrWhiteSpace(min.SafeString()) == false)
         {
             minParamName = _parameterManager.GenerateName();
-            _parameterManager.Add(minParamName, min);
+            _parameterManager.AddSqlParam(minParamName, min);
         }
         if (string.IsNullOrWhiteSpace(max.SafeString()) == false)
         {
             maxParamName = _parameterManager.GenerateName();
-            _parameterManager.Add(maxParamName, max);
+            _parameterManager.AddSqlParam(maxParamName, max);
         }
         return new SegmentCondition(column, minParamName, maxParamName, boundary);
     }

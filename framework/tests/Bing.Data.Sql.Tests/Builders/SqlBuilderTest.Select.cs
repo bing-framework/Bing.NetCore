@@ -1,17 +1,17 @@
-﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql;
+﻿using System.Text;
 using Bing.Data.Sql.Metadata;
-using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Sql.Tests.Samples;
 using Xunit;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器测试 - Select子句
+/// Sql生成器测试 - Select 子句
 /// </summary>
-public partial class SqlServerBuilderTest
+public partial class SqlBuilderTest
 {
+    #region Distinct
+
     /// <summary>
     /// 设置Distinct
     /// </summary>
@@ -19,7 +19,7 @@ public partial class SqlServerBuilderTest
     public void Test_Distinct()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Distinct [a] ");
         result.Append("From [b]");
 
@@ -31,6 +31,10 @@ public partial class SqlServerBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    #endregion
+
+    #region Count
+
     /// <summary>
     /// 求总行数
     /// </summary>
@@ -38,7 +42,7 @@ public partial class SqlServerBuilderTest
     public void Test_Count_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Count(*) ");
         result.Append("From [b]");
 
@@ -57,7 +61,7 @@ public partial class SqlServerBuilderTest
     public void Test_Count_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Count([DoubleValue]) As [a] ");
         result.Append("From [b]");
 
@@ -76,7 +80,7 @@ public partial class SqlServerBuilderTest
     public void Test_Count_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Count([DoubleValue]) As [DoubleValue] ");
         result.Append("From [b]");
 
@@ -95,7 +99,7 @@ public partial class SqlServerBuilderTest
     public void Test_Count_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Count([b].[DoubleValue]) As [a] ");
         result.Append("From [Sample] As [b]");
 
@@ -107,6 +111,10 @@ public partial class SqlServerBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    #endregion
+
+    #region Sum
+
     /// <summary>
     /// 求和
     /// </summary>
@@ -114,7 +122,7 @@ public partial class SqlServerBuilderTest
     public void Test_Sum_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Sum([a]) As [b] ");
         result.Append("From [c]");
 
@@ -133,7 +141,7 @@ public partial class SqlServerBuilderTest
     public void Test_Sum_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Sum([DoubleValue]) As [a] ");
         result.Append("From [b]");
 
@@ -152,7 +160,7 @@ public partial class SqlServerBuilderTest
     public void Test_Sum_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Sum([DoubleValue]) As [DoubleValue] ");
         result.Append("From [b]");
 
@@ -171,7 +179,7 @@ public partial class SqlServerBuilderTest
     public void Test_Sum_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Sum([b].[DoubleValue]) As [a] ");
         result.Append("From [Sample] As [b]");
 
@@ -183,6 +191,10 @@ public partial class SqlServerBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    #endregion
+
+    #region Avg
+
     /// <summary>
     /// 求平均值
     /// </summary>
@@ -190,7 +202,7 @@ public partial class SqlServerBuilderTest
     public void Test_Avg_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Avg([a]) As [b] ");
         result.Append("From [c]");
 
@@ -209,7 +221,7 @@ public partial class SqlServerBuilderTest
     public void Test_Avg_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Avg([DoubleValue]) As [a] ");
         result.Append("From [b]");
 
@@ -228,7 +240,7 @@ public partial class SqlServerBuilderTest
     public void Test_Avg_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Avg([DoubleValue]) As [DoubleValue] ");
         result.Append("From [b]");
 
@@ -247,7 +259,7 @@ public partial class SqlServerBuilderTest
     public void Test_Avg_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Avg([b].[DoubleValue]) As [a] ");
         result.Append("From [Sample] As [b]");
 
@@ -259,6 +271,10 @@ public partial class SqlServerBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    #endregion
+
+    #region Max
+
     /// <summary>
     /// 求最大值
     /// </summary>
@@ -266,7 +282,7 @@ public partial class SqlServerBuilderTest
     public void Test_Max_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Max([a]) As [b] ");
         result.Append("From [c]");
 
@@ -285,7 +301,7 @@ public partial class SqlServerBuilderTest
     public void Test_Max_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Max([DoubleValue]) As [a] ");
         result.Append("From [b]");
 
@@ -304,7 +320,7 @@ public partial class SqlServerBuilderTest
     public void Test_Max_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Max([DoubleValue]) As [DoubleValue] ");
         result.Append("From [b]");
 
@@ -323,7 +339,7 @@ public partial class SqlServerBuilderTest
     public void Test_Max_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Max([b].[DoubleValue]) As [a] ");
         result.Append("From [Sample] As [b]");
 
@@ -335,6 +351,10 @@ public partial class SqlServerBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    #endregion
+
+    #region Min
+
     /// <summary>
     /// 求最小值
     /// </summary>
@@ -342,7 +362,7 @@ public partial class SqlServerBuilderTest
     public void Test_Min_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Min([a]) As [b] ");
         result.Append("From [c]");
 
@@ -361,7 +381,7 @@ public partial class SqlServerBuilderTest
     public void Test_Min_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Min([DoubleValue]) As [a] ");
         result.Append("From [b]");
 
@@ -380,7 +400,7 @@ public partial class SqlServerBuilderTest
     public void Test_Min_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Min([DoubleValue]) As [DoubleValue] ");
         result.Append("From [b]");
 
@@ -399,7 +419,7 @@ public partial class SqlServerBuilderTest
     public void Test_Min_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select Min([b].[DoubleValue]) As [a] ");
         result.Append("From [Sample] As [b]");
 
@@ -411,6 +431,10 @@ public partial class SqlServerBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    #endregion
+
+    #region Select
+
     /// <summary>
     /// 设置列
     /// </summary>
@@ -418,7 +442,7 @@ public partial class SqlServerBuilderTest
     public void Test_Select_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [b].[a] ");
         result.Append("From [c]");
 
@@ -437,12 +461,12 @@ public partial class SqlServerBuilderTest
     public void Test_Select_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [Email],[IntValue] ");
         result.Append("From [c]");
 
         //执行
-        _builder.Select<Sample>(t => new object[] {t.Email, t.IntValue})
+        _builder.Select<Sample>(t => new object[] { t.Email, t.IntValue })
             .From("c");
 
         //验证
@@ -456,7 +480,7 @@ public partial class SqlServerBuilderTest
     public void Test_Select_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [Email] As [e] ");
         result.Append("From [c]");
 
@@ -475,7 +499,7 @@ public partial class SqlServerBuilderTest
     public void Test_Select_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Select *,");
         result.AppendLine("(Select Count(*) ");
         result.AppendLine("From [Test2] ");
@@ -489,9 +513,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -501,7 +525,7 @@ public partial class SqlServerBuilderTest
     public void Test_Select_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Select *,");
         result.AppendLine("(Select Count(*) ");
         result.AppendLine("From [Test2] ");
@@ -511,16 +535,16 @@ public partial class SqlServerBuilderTest
 
         //执行
         _builder.Select("*").Select(builder =>
-            {
-                builder.Count().From("Test2").Where("Name", "a");
-            }, "TestCount")
+        {
+            builder.Count().From("Test2").Where("Name", "a");
+        }, "TestCount")
             .From("Test").Where("Age", 1);
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -530,7 +554,7 @@ public partial class SqlServerBuilderTest
     public void Test_Select_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select a ");
         result.Append("From [c]");
 
@@ -549,7 +573,7 @@ public partial class SqlServerBuilderTest
     public void Test_Select_7()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Select *,");
         result.AppendLine("(Select Count(*) ");
         result.AppendLine("From [Test2] ");
@@ -564,9 +588,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -576,12 +600,12 @@ public partial class SqlServerBuilderTest
     public void Test_Select_8()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [s].[StringValue],[s].[IsDeleted] ");
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new SqlServerBuilder(new DefaultEntityMetadata());
+        _builder = new TestSqlBuilder(metadata: new DefaultEntityMetadata());
         _builder.Select<Sample3>().From<Sample3>("s");
 
         //验证
@@ -595,12 +619,12 @@ public partial class SqlServerBuilderTest
     public void Test_Select_9()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [s].[IsDeleted],[s].[StringValue] As [a] ");
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new SqlServerBuilder(new DefaultEntityMetadata());
+        _builder = new TestSqlBuilder(metadata: new DefaultEntityMetadata());
         _builder.Select<Sample3>()
             .Select<Sample3>(t => t.StringValue, "a")
             .From<Sample3>("s");
@@ -616,12 +640,12 @@ public partial class SqlServerBuilderTest
     public void Test_RemoveSelect_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [s].[Description],[s].[DisplayName],[s].[StringValue],[s].[IntValue] ");
         result.Append("From [Sample2] As [s]");
 
         //执行
-        _builder = new SqlServerBuilder(new DefaultEntityMetadata());
+        _builder = new TestSqlBuilder(metadata: new DefaultEntityMetadata());
         _builder.Select<Sample2>()
             .RemoveSelect<Sample2>(x => x.Display)
             .From<Sample2>("s");
@@ -629,4 +653,6 @@ public partial class SqlServerBuilderTest
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
+
+    #endregion
 }

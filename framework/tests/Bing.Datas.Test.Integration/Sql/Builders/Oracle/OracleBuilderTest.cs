@@ -44,7 +44,7 @@ public class OracleBuilderTest : TestBase
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Single(_builder.GetParams());
-        Assert.Equal("abc", _builder.GetParam("p_0"));
+        Assert.Single(_builder.GetSqlParams());
+        Assert.Equal("abc", _builder.GetParamValue("p_0"));
     }
 }

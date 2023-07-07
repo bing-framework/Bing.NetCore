@@ -1,5 +1,7 @@
 ﻿using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Tests.Samples;
 
@@ -16,7 +18,8 @@ public class TestSqlBuilder : SqlBuilderBase
     /// <summary>
     /// 初始化Sql生成器
     /// </summary>
-    public TestSqlBuilder(IDialect dialect = null)
+    public TestSqlBuilder(IDialect dialect = null, IEntityMetadata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) 
+        : base(metadata, tableDatabase, parameterManager)
     {
         _dialect = dialect;
     }
@@ -40,12 +43,9 @@ public class TestSqlBuilder : SqlBuilderBase
     /// <inheritdoc />
     public override ISqlBuilder New()
     {
-        return new TestSqlBuilder(Dialect);
+        return new TestSqlBuilder(Dialect, EntityMetadata, TableDatabase, ParameterManager);
     }
 
     /// <inheritdoc />
-    protected override string CreateLimitSql()
-    {
-        throw new System.NotImplementedException();
-    }
+    protected override string CreateLimitSql() => $"Offset {GetOffsetParam()} Rows Fetch Next {GetLimitParam()} Rows Only";
 }

@@ -53,4 +53,10 @@ public interface IDialect
     /// </summary>
     /// <param name="paramValue">参数值</param>
     object GetParamValue(object paramValue);
+
+    /// <summary>
+    /// 替换Sql，将[]替换为特定Sql转义符
+    /// </summary>
+    /// <param name="sql">原始Sql</param>
+    string ReplaceSql(string sql);
 }

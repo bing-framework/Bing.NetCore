@@ -1,4 +1,6 @@
-﻿namespace Bing.Data.Sql.Builders.Core;
+﻿using Bing.Text;
+
+namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
 /// Sql方言基类
@@ -72,4 +74,19 @@ public abstract class DialectBase : IDialect
     /// </summary>
     /// <param name="paramValue">参数值</param>
     public virtual object GetParamValue(object paramValue) => paramValue;
+
+    /// <summary>
+    /// 替换Sql，将[]替换为特定Sql转义符
+    /// </summary>
+    /// <param name="sql">原始Sql</param>
+    public virtual string ReplaceSql(string sql)
+    {
+        return sql?
+            .Replace("[[", "|&<&|", StringComparison.Ordinal)
+            .Replace("]]", "|&>&|", StringComparison.Ordinal)
+            .Replace('[', OpeningIdentifier)
+            .Replace(']', ClosingIdentifier)
+            .Replace("|&<&|", "[", StringComparison.Ordinal)
+            .Replace("|&>&|", "]", StringComparison.Ordinal);
+    }
 }

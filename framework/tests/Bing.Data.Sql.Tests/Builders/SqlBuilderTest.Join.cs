@@ -1,14 +1,13 @@
-﻿using Bing.Data.Sql;
-using Bing.Data.Test.Integration.Samples;
+﻿using System.Text;
+using Bing.Data.Sql.Tests.Samples;
 using Xunit;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer;
+namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器测试 - Join子句
+/// Sql生成器测试 - Join 子句
 /// </summary>
-public partial class SqlServerBuilderTest
+public partial class SqlBuilderTest
 {
     /// <summary>
     /// 内连接
@@ -17,7 +16,7 @@ public partial class SqlServerBuilderTest
     public void Test_Join_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Join [c] As [d]");
@@ -38,7 +37,7 @@ public partial class SqlServerBuilderTest
     public void Test_Join_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Join [d].[Sample] As [c]");
@@ -59,7 +58,7 @@ public partial class SqlServerBuilderTest
     public void Test_Join_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.AppendLine("Join (Select * ");
@@ -73,9 +72,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -85,7 +84,7 @@ public partial class SqlServerBuilderTest
     public void Test_Join_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.AppendLine("Join (Select * ");
@@ -98,9 +97,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -110,7 +109,7 @@ public partial class SqlServerBuilderTest
     public void Test_Join_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Join c");
@@ -131,7 +130,7 @@ public partial class SqlServerBuilderTest
     public void Test_Join_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Join c");
@@ -153,7 +152,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Left Join [c] As [d]");
@@ -174,7 +173,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Left Join [d].[Sample] As [c]");
@@ -195,7 +194,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.AppendLine("Left Join (Select * ");
@@ -209,9 +208,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -221,7 +220,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.AppendLine("Left Join (Select * ");
@@ -234,9 +233,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -246,7 +245,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Left Join c");
@@ -267,7 +266,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Left Join c");
@@ -289,7 +288,7 @@ public partial class SqlServerBuilderTest
     public void Test_LeftJoin_7()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a].[Email],[a].[BoolValue],[b].[Description],[b].[IntValue] ");
         result.AppendLine("From [Sample] As [a] ");
         result.Append("Left Join [Sample2] As [b] On [a].[Email]=[b].[StringValue] And [a].[IntValue]<>[b].[IntValue]");
@@ -311,7 +310,7 @@ public partial class SqlServerBuilderTest
     public void Test_RightJoin_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Right Join [c] As [d]");
@@ -332,7 +331,7 @@ public partial class SqlServerBuilderTest
     public void Test_RightJoin_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Right Join [d].[Sample] As [c]");
@@ -353,7 +352,7 @@ public partial class SqlServerBuilderTest
     public void Test_RightJoin_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.AppendLine("Right Join (Select * ");
@@ -367,9 +366,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -379,7 +378,7 @@ public partial class SqlServerBuilderTest
     public void Test_RightJoin_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
         result.AppendLine("Right Join (Select * ");
@@ -392,9 +391,9 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal(1, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetSqlParams().Count);
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
+        Assert.Equal(1, _builder.GetParamValue("@_p_1"));
     }
 
     /// <summary>
@@ -404,7 +403,7 @@ public partial class SqlServerBuilderTest
     public void Test_RightJoin_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Right Join c");
@@ -425,7 +424,7 @@ public partial class SqlServerBuilderTest
     public void Test_RightJoin_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Right Join c");
@@ -447,7 +446,7 @@ public partial class SqlServerBuilderTest
     public void Test_On_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
         result.Append("Join [c] As [d] On [b].[Id]<>@_p_0");
@@ -468,7 +467,7 @@ public partial class SqlServerBuilderTest
     public void Test_On_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [Sample] As [b] ");
         result.Append("Join [Sample2] As [c] On [b].[IntValue]<>[c].[IntValue]");
@@ -489,7 +488,7 @@ public partial class SqlServerBuilderTest
     public void Test_On_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a] ");
         result.AppendLine("From [Sample] As [b] ");
         result.Append("Join [Sample2] As [c] On [b].[IntValue]<>[c].[IntValue]");
@@ -510,7 +509,7 @@ public partial class SqlServerBuilderTest
     public void Test_On_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a],[b] ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Left Join [Sample2] As [s2] On [s].[IntValue]=[s2].[IntValue] And [s].[StringValue]=@_p_0");
@@ -522,8 +521,8 @@ public partial class SqlServerBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Output.WriteLine(_builder.ToSql());
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        _output.WriteLine(_builder.ToSql());
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
     }
 
     /// <summary>
@@ -533,7 +532,7 @@ public partial class SqlServerBuilderTest
     public void Test_On_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select [a],[b] ");
         result.AppendLine("From [Sample] As [s] ");
         result.Append("Left Join [Sample2] As [s2] On [s].[IntValue]=[s2].[IntValue] And [s].[StringValue]=@_p_0");
@@ -544,12 +543,12 @@ public partial class SqlServerBuilderTest
         _builder.Select("a,b")
             .From<Sample>("s")
             .LeftJoin<Sample2>("s2").On<Sample, Sample2>((l, r) => l.IntValue == r.IntValue && l.StringValue == a);
-        Output.WriteLine(result.ToString());
-        Output.WriteLine(_builder.ToSql());
+        _output.WriteLine(result.ToString());
+        _output.WriteLine(_builder.ToSql());
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Output.WriteLine(_builder.ToSql());
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
+        _output.WriteLine(_builder.ToSql());
+        Assert.Equal("a", _builder.GetParamValue("@_p_0"));
     }
 }

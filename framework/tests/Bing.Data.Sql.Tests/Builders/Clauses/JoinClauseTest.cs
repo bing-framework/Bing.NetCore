@@ -1,23 +1,24 @@
-﻿using Bing.Datas.Dapper.SqlServer;
+﻿using System.Text;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
-using Bing.Data.Test.Integration.Samples;
+using Bing.Data.Sql.Tests.Samples;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Xunit;
-using Xunit.Abstractions;
-using Str = Bing.Helpers.Str;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses;
+namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
 /// <summary>
-/// 表连接子句测试
+/// Join子句测试
 /// </summary>
-public class JoinClauseTest:TestBase
+public class JoinClauseTest
 {
+    #region 测试初始化
+
     /// <summary>
     /// 参数管理器
     /// </summary>
-    private readonly ParameterManager _parameterManager;
+    private readonly IParameterManager _parameterManager;
 
     /// <summary>
     /// Join子句
@@ -27,11 +28,11 @@ public class JoinClauseTest:TestBase
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public JoinClauseTest(ITestOutputHelper output) : base(output)
+    public JoinClauseTest()
     {
-        _parameterManager = new ParameterManager(new SqlServerDialect());
-        _clause = new JoinClause(new SqlServerBuilder(), new SqlServerDialect(), new EntityResolver(),
-            new EntityAliasRegister(), _parameterManager, null);
+        _parameterManager = new ParameterManager(TestDialect.Instance);
+        var builder = new TestSqlBuilder(TestDialect.Instance);
+        _clause = new JoinClause(builder, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), _parameterManager, null);
     }
 
     /// <summary>
@@ -42,155 +43,25 @@ public class JoinClauseTest:TestBase
         return _clause.ToSql();
     }
 
+    #endregion
+
+    #region Default(默认输出)
+
     /// <summary>
-    /// 克隆
+    /// 默认 - 输出
     /// </summary>
     [Fact]
-    public void Test_Clone()
+    public void Test_Default()
     {
-        _clause.Join("b");
-        _clause.On("a.A", "c");
-
-        //复制副本
-        var copy = _clause.Clone(null, null, _parameterManager.Clone());
-        Assert.Equal("Join [b] On [a].[A]=@_p_0", GetSql());
-        Assert.Equal("Join [b] On [a].[A]=@_p_0", copy.ToSql());
-
-        //修改副本
-        copy.On("a.C", "d");
-        Assert.Equal("Join [b] On [a].[A]=@_p_0", GetSql());
-        Assert.Equal("Join [b] On [a].[A]=@_p_0 And [a].[C]=@_p_1", copy.ToSql());
+        Assert.Empty(GetSql());
     }
 
-    /// <summary>
-    /// 表连接
-    /// </summary>
-    [Fact]
-    public void Test_Join_1()
-    {
-        _clause.Join("a");
-        Assert.Equal("Join [a]", GetSql());
-    }
+    #endregion
+
+    #region On
 
     /// <summary>
-    /// 表连接 - 架构
-    /// </summary>
-    [Fact]
-    public void Test_Join_2()
-    {
-        _clause.Join("a.b");
-        Assert.Equal("Join [a].[b]", GetSql());
-    }
-
-    /// <summary>
-    /// 表连接 - 架构 - 别名
-    /// </summary>
-    [Fact]
-    public void Test_Join_3()
-    {
-        _clause.Join("a.b as c");
-        Assert.Equal("Join [a].[b] As [c]", GetSql());
-    }
-
-    /// <summary>
-    /// 表连接 - 架构 - 别名
-    /// </summary>
-    [Fact]
-    public void Test_Join_4()
-    {
-        _clause.Join("a.b", "c");
-        Assert.Equal("Join [a].[b] As [c]", GetSql());
-    }
-
-    /// <summary>
-    /// 表连接 - 泛型实体
-    /// </summary>
-    [Fact]
-    public void Test_Join_5()
-    {
-        _clause.Join<Sample>();
-        Assert.Equal("Join [Sample]", GetSql());
-    }
-
-    /// <summary>
-    /// 表连接 - 泛型实体 - 别名
-    /// </summary>
-    [Fact]
-    public void Test_Join_6()
-    {
-        _clause.Join<Sample>("a");
-        Assert.Equal("Join [Sample] As [a]", GetSql());
-    }
-
-    /// <summary>
-    /// 表连接 - 泛型实体 - 别名 - 架构
-    /// </summary>
-    [Fact]
-    public void Test_Join_7()
-    {
-        _clause.Join<Sample>("a", "b");
-        Assert.Equal("Join [b].[Sample] As [a]", GetSql());
-    }
-
-    /// <summary>
-    /// 表连接 - 设置两个Join
-    /// </summary>
-    [Fact]
-    public void Test_Join_8()
-    {
-        //结果
-        var result = new Str();
-        result.AppendLine("Join [a] ");
-        result.Append("Join [b]");
-
-        //操作
-        _clause.Join("a");
-        _clause.Join("b");
-
-        //验证
-        Assert.Equal(result.ToString(), GetSql());
-    }
-
-    /// <summary>
-    /// 表连接
-    /// </summary>
-    [Fact]
-    public void Test_Join_9()
-    {
-        //结果
-        var result = new Str();
-        result.AppendLine("Join a ");
-        result.Append("Join b");
-
-        //操作
-        _clause.AppendJoin("a");
-        _clause.AppendJoin("b");
-
-        //验证
-        Assert.Equal(result.ToString(), GetSql());
-    }
-
-    /// <summary>
-    /// 表连接
-    /// </summary>
-    [Fact]
-    public void Test_Join_10()
-    {
-        //结果
-        var result = new Str();
-        result.AppendLine("Join [a] ");
-        result.Append("Join b");
-
-        //操作
-        _clause.Join("a");
-        _clause.AppendJoin("b");
-
-        //验证
-        Assert.Equal(result.ToString(), GetSql());
-    }
-
-    /// <summary>
-    /// 表连接条件 - 未设置join返回空
+    /// 测试 - 表连接条件 - 未设置join返回空
     /// </summary>
     [Fact]
     public void Test_On_1()
@@ -200,13 +71,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件
+    /// 测试 - 表连接条件
     /// </summary>
     [Fact]
     public void Test_On_2()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [t] ");
         result.Append("On [a].[id]=@_p_0");
 
@@ -219,13 +90,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 多个On
+    /// 测试 - 表连接条件 - 多个On
     /// </summary>
     [Fact]
     public void Test_On_3()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [t] ");
         result.Append("On [a].[id]=@_p_0 And [c].[Aid]=@_p_1");
 
@@ -239,13 +110,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 多个Join和On
+    /// 测试 - 表连接条件 - 多个Join和On
     /// </summary>
     [Fact]
     public void Test_On_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [t] ");
         result.AppendLine("On [a].[id]=@_p_0 And [c].[Aid]=@_p_1 ");
         result.Append("Join [n] ");
@@ -264,13 +135,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 设置运算符
+    /// 测试 - 表连接条件 - 设置运算符
     /// </summary>
     [Fact]
     public void Test_On_5()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [t] ");
         result.Append("On [a].[id]<@_p_0");
 
@@ -283,13 +154,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 实体
+    /// 测试 - 表连接条件 - 实体
     /// </summary>
     [Fact]
     public void Test_On_6()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] ");
@@ -306,13 +177,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 实体
+    /// 测试 - 表连接条件 - 实体
     /// </summary>
     [Fact]
     public void Test_On_7()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -329,13 +200,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 谓词表达式
+    /// 测试 - 表连接条件 - 谓词表达式
     /// </summary>
     [Fact]
     public void Test_On_8()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] ");
@@ -352,13 +223,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 谓词表达式 - 别名
+    /// 测试 - 表连接条件 - 谓词表达式 - 别名
     /// </summary>
     [Fact]
     public void Test_On_9()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -375,13 +246,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 谓词表达式 - 与运算
+    /// 测试 - 表连接条件 - 谓词表达式 - 与运算
     /// </summary>
     [Fact]
     public void Test_On_10()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -398,13 +269,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 谓词表达式 - 或运算
+    /// 测试 - 表连接条件 - 谓词表达式 - 或运算
     /// </summary>
     [Fact]
     public void Test_On_11()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -421,13 +292,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 值为数字
+    /// 测试 - 表连接条件 - 值为数字
     /// </summary>
     [Fact]
     public void Test_On_12()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [t].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -448,13 +319,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 值为数字 - 数字在左边
+    /// 测试 - 表连接条件 - 值为数字 - 数字在左边
     /// </summary>
     [Fact]
     public void Test_On_13()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -468,18 +339,18 @@ public class JoinClauseTest:TestBase
 
         //验证
         Assert.Equal(result.ToString(), GetSql());
-        Assert.Equal("b", _parameterManager.GetParams()["@_p_0"]);
-        Assert.Equal(1, _parameterManager.GetParams()["@_p_1"]);
+        Assert.Equal("b", _parameterManager.GetParamValue("@_p_0"));
+        Assert.Equal(1, _parameterManager.GetParamValue("@_p_1"));
     }
 
     /// <summary>
-    /// 表连接条件 - 交换左右操作数
+    /// 测试 - 表连接条件 - 交换左右操作数
     /// </summary>
     [Fact]
     public void Test_On_14()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -496,13 +367,13 @@ public class JoinClauseTest:TestBase
     }
 
     /// <summary>
-    /// 表连接条件 - 交换左右操作数
+    /// 测试 - 表连接条件 - 交换左右操作数
     /// </summary>
     [Fact]
     public void Test_On_15()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.Append("Join [Sample] As [t] ");
         result.AppendLine("On [a].[id]=@_p_0 ");
         result.Append("Join [Sample2] As [t2] ");
@@ -518,50 +389,179 @@ public class JoinClauseTest:TestBase
         Assert.Equal(result.ToString(), GetSql());
     }
 
+    #endregion
+
+    #region Join
+
     /// <summary>
-    /// 添加到表连接条件
+    /// 测试 - 内连接
     /// </summary>
     [Fact]
-    public void Test_AppendOn_1()
+    public void Test_Join_1()
+    {
+        _clause.Join("a");
+        Assert.Equal("Join [a]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 架构
+    /// </summary>
+    [Fact]
+    public void Test_Join_2()
+    {
+        _clause.Join("a.b");
+        Assert.Equal("Join [a].[b]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 架构 - 别名
+    /// </summary>
+    [Fact]
+    public void Test_Join_3()
+    {
+        _clause.Join("a.b as c");
+        Assert.Equal("Join [a].[b] As [c]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 架构 - 别名
+    /// </summary>
+    [Fact]
+    public void Test_Join_4()
+    {
+        _clause.Join("a.b", "c");
+        Assert.Equal("Join [a].[b] As [c]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 泛型实体
+    /// </summary>
+    [Fact]
+    public void Test_Join_5()
+    {
+        _clause.Join<Sample>();
+        Assert.Equal("Join [Sample]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 泛型实体 - 别名
+    /// </summary>
+    [Fact]
+    public void Test_Join_6()
+    {
+        _clause.Join<Sample>("a");
+        Assert.Equal("Join [Sample] As [a]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 泛型实体 - 别名 - 架构
+    /// </summary>
+    [Fact]
+    public void Test_Join_7()
+    {
+        _clause.Join<Sample>("a", "b");
+        Assert.Equal("Join [b].[Sample] As [a]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 设置两个Join
+    /// </summary>
+    [Fact]
+    public void Test_Join_8()
     {
         //结果
-        var result = new Str();
-        result.Append("Join [t] ");
-        result.Append("On a.id=b.id");
+        var result = new StringBuilder();
+        result.AppendLine("Join [a] ");
+        result.Append("Join [b]");
 
         //操作
-        _clause.Join("t");
-        _clause.AppendOn("a.id=b.id");
-
+        _clause.Join("a");
+        _clause.Join("b");
 
         //验证
         Assert.Equal(result.ToString(), GetSql());
     }
 
     /// <summary>
-    /// 添加到表连接条件 - 多条件
+    /// 测试 - 内连接
     /// </summary>
     [Fact]
-    public void Test_AppendOn_2()
+    public void Test_Join_9()
     {
         //结果
-        var result = new Str();
-        result.Append("Join [t] ");
-        result.AppendLine("On [a].[id]=@_p_0 And a.id=b.id ");
-        result.Append("Join [v] ");
-        result.Append("On [v].[id]=@_p_1 And v.id=b.id");
+        var result = new StringBuilder();
+        result.AppendLine("Join a ");
+        result.Append("Join b");
 
         //操作
-        _clause.Join("t");
-        _clause.On("a.id", "b");
-        _clause.AppendOn("a.id=b.id");
-        _clause.Join("v");
-        _clause.On("v.id", "c");
-        _clause.AppendOn("v.id=b.id");
+        _clause.AppendJoin("a");
+        _clause.AppendJoin("b");
 
         //验证
         Assert.Equal(result.ToString(), GetSql());
     }
+
+    /// <summary>
+    /// 测试 - 内连接
+    /// </summary>
+    [Fact]
+    public void Test_Join_10()
+    {
+        //结果
+        var result = new StringBuilder();
+        result.AppendLine("Join [a] ");
+        result.Append("Join b");
+
+        //操作
+        _clause.Join("a");
+        _clause.AppendJoin("b");
+
+        //验证
+        Assert.Equal(result.ToString(), GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 子查询
+    /// </summary>
+    [Fact]
+    public void Test_Join__SubQuery_1()
+    {
+        var result = new StringBuilder();
+        result.Append("Join [t] ");
+        result.AppendLine("On [t].[id]=[a].[id] ");
+        result.AppendLine("Join (Select [a] ");
+        result.Append("From [b]) As [c]");
+
+        var builder = new TestSqlBuilder().Select("a").From("b");
+        _clause.Join("t");
+        _clause.AppendOn("[t].[id]=[a].[id]");
+        //_clause.On("t.id", "a.id");
+        _clause.Join(builder, "c");
+        Assert.Equal(result.ToString(), GetSql());
+    }
+
+    /// <summary>
+    /// 测试 - 内连接 - 子查询 - 内嵌表达式
+    /// </summary>
+    [Fact]
+    public void Test_Join__SubQuery_2()
+    {
+        var result = new StringBuilder();
+        result.Append("Join [t] ");
+        result.AppendLine("On [t].[id]=[a].[id] ");
+        result.AppendLine("Join (Select [a] ");
+        result.Append("From [b]) As [c]");
+
+        _clause.Join("t");
+        _clause.AppendOn("[t].[id]=[a].[id]");
+        //_clause.On("t.id", "a.id");
+        _clause.Join(t => t.Select("a").From("b"), "c");
+        Assert.Equal(result.ToString(), GetSql());
+    }
+
+    #endregion
+
+    #region LeftJoin
 
     /// <summary>
     /// 左外连接
@@ -581,7 +581,6 @@ public class JoinClauseTest:TestBase
     {
         _clause.Join("a");
         _clause.LeftJoin("b");
-        Output.WriteLine(GetSql());
         Assert.Equal("Join [a] \r\nLeft Join [b]", GetSql());
     }
 
@@ -602,7 +601,7 @@ public class JoinClauseTest:TestBase
     public void Test_LeftJoin_4()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Join a ");
         result.Append("Left Join b");
 
@@ -613,6 +612,10 @@ public class JoinClauseTest:TestBase
         //验证
         Assert.Equal(result.ToString(), GetSql());
     }
+
+    #endregion
+
+    #region RightJoin
 
     /// <summary>
     /// 右外连接
@@ -652,7 +655,7 @@ public class JoinClauseTest:TestBase
     public void Test_RightJoin_4()
     {
         //结果
-        var result = new Str();            
+        var result = new StringBuilder();
         result.AppendLine("Join a ");
         result.Append("Right Join b");
 
@@ -662,5 +665,80 @@ public class JoinClauseTest:TestBase
 
         //验证
         Assert.Equal(result.ToString(), GetSql());
-    }        
+    }
+
+    #endregion
+
+    #region AppendOn
+
+    /// <summary>
+    /// 添加到表连接条件
+    /// </summary>
+    [Fact]
+    public void Test_AppendOn_1()
+    {
+        //结果
+        var result = new StringBuilder();
+        result.Append("Join [t] ");
+        result.Append("On a.id=b.id");
+
+        //操作
+        _clause.Join("t");
+        _clause.AppendOn("a.id=b.id");
+
+
+        //验证
+        Assert.Equal(result.ToString(), GetSql());
+    }
+
+    /// <summary>
+    /// 添加到表连接条件 - 多条件
+    /// </summary>
+    [Fact]
+    public void Test_AppendOn_2()
+    {
+        //结果
+        var result = new StringBuilder();
+        result.Append("Join [t] ");
+        result.AppendLine("On [a].[id]=@_p_0 And a.id=b.id ");
+        result.Append("Join [v] ");
+        result.Append("On [v].[id]=@_p_1 And v.id=b.id");
+
+        //操作
+        _clause.Join("t");
+        _clause.On("a.id", "b");
+        _clause.AppendOn("a.id=b.id");
+        _clause.Join("v");
+        _clause.On("v.id", "c");
+        _clause.AppendOn("v.id=b.id");
+
+        //验证
+        Assert.Equal(result.ToString(), GetSql());
+    }
+
+    #endregion
+
+    #region Clone
+
+    /// <summary>
+    /// 克隆
+    /// </summary>
+    [Fact]
+    public void Test_Clone()
+    {
+        _clause.Join("b");
+        _clause.On("a.A", "c");
+
+        //复制副本
+        var copy = _clause.Clone(null, null, _parameterManager.Clone());
+        Assert.Equal("Join [b] On [a].[A]=@_p_0", GetSql());
+        Assert.Equal("Join [b] On [a].[A]=@_p_0", copy.ToSql());
+
+        //修改副本
+        copy.On("a.C", "d");
+        Assert.Equal("Join [b] On [a].[A]=@_p_0", GetSql());
+        Assert.Equal("Join [b] On [a].[A]=@_p_0 And [a].[C]=@_p_1", copy.ToSql());
+    }
+
+    #endregion
 }
