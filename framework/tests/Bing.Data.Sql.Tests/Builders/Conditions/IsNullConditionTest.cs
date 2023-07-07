@@ -1,6 +1,4 @@
-﻿using System.Text;
-using Bing.Data.Sql.Builders.Conditions;
-using Xunit;
+﻿using Bing.Data.Sql.Builders.Conditions;
 
 namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
