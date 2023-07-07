@@ -521,6 +521,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     public void ClearParams()
     {
         ParameterManager?.Clear();
+        _parameters = null;
     }
 
     /// <summary>
