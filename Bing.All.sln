@@ -321,9 +321,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{793D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Core.Tests", "framework\tests\Bing.Core.Tests\Bing.Core.Tests.csproj", "{BAB01FD0-18A8-4132-B488-254A73176D75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.TestShare", "framework\tests\Bing.TestShare\Bing.TestShare.csproj", "{F341C10D-76CE-497E-8A0B-48D203ADE466}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TestShare", "framework\tests\Bing.TestShare\Bing.TestShare.csproj", "{F341C10D-76CE-497E-8A0B-48D203ADE466}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.TestShare.MySql", "framework\tests\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj", "{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TestShare.MySql", "framework\tests\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj", "{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.MySql.Tests", "framework\tests\Bing.Dapper.MySql.Tests\Bing.Dapper.MySql.Tests.csproj", "{AC118996-0420-4030-9F7E-C35F2D5FB9BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -719,6 +721,10 @@ Global
 		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -865,6 +871,7 @@ Global
 		{BAB01FD0-18A8-4132-B488-254A73176D75} = {793DF696-AA3D-4D44-9657-B66000DCEFFA}
 		{F341C10D-76CE-497E-8A0B-48D203ADE466} = {3D99820D-63A7-4635-B660-0D04D535229E}
 		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC} = {3D99820D-63A7-4635-B660-0D04D535229E}
+		{AC118996-0420-4030-9F7E-C35F2D5FB9BE} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
