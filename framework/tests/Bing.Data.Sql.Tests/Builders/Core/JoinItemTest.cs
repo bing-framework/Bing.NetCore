@@ -1,19 +1,17 @@
 ﻿using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.Base;
+namespace Bing.Data.Sql.Tests.Builders.Core;
 
 /// <summary>
 /// 表连接项测试
 /// </summary>
-public class JoinItemTest : TestBase
+public class JoinItemTest
 {
     /// <summary>
-    /// 初始化一个<see cref="JoinItemTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public JoinItemTest(ITestOutputHelper output) : base(output)
+    public JoinItemTest()
     {
     }
 

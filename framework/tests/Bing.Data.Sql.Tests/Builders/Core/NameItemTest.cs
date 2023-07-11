@@ -1,16 +1,13 @@
-﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql.Builders.Core;
+﻿using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Metadata;
-using Bing.Data.Test.Integration.Sql.Builders.Samples;
-using Xunit;
-using Xunit.Abstractions;
+using Bing.Data.Sql.Tests.Samples;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.Base;
+namespace Bing.Data.Sql.Tests.Builders.Core;
 
 /// <summary>
 /// 名称项测试
 /// </summary>
-public class NameItemTest : TestBase
+public class NameItemTest
 {
     /// <summary>
     /// 表数据库
@@ -18,9 +15,9 @@ public class NameItemTest : TestBase
     private readonly ITableDatabase _database;
 
     /// <summary>
-    /// 初始化一个<see cref="NameItemTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public NameItemTest(ITestOutputHelper output) : base(output)
+    public NameItemTest()
     {
         _database = new TestTableDatabase();
     }
@@ -34,8 +31,8 @@ public class NameItemTest : TestBase
         var item = new NameItem("a");
         Assert.Equal("a", item.Name);
         Assert.Empty(item.Prefix);
-        Assert.Equal("[b].[a]", item.ToSql(new SqlServerDialect(), "b"));
-        Assert.Equal("[test].[b].[a]", item.ToSql(new SqlServerDialect(), "b", _database));
+        Assert.Equal("[b].[a]", item.ToSql(TestDialect.Instance, "b"));
+        Assert.Equal("[test].[b].[a]", item.ToSql(TestDialect.Instance, "b", _database));
     }
 
     /// <summary>
@@ -91,7 +88,7 @@ public class NameItemTest : TestBase
         var item = new NameItem("a.b");
         Assert.Equal("b", item.Name);
         Assert.Equal("a", item.Prefix);
-        Assert.Equal("[test].[a].[b]", item.ToSql(new SqlServerDialect(), "f", _database));
+        Assert.Equal("[test].[a].[b]", item.ToSql(TestDialect.Instance, "f", _database));
     }
 
     /// <summary>
@@ -181,7 +178,7 @@ public class NameItemTest : TestBase
         Assert.Equal("c", item.Name);
         Assert.Equal("b", item.Prefix);
         Assert.Equal("a", item.DatabaseName);
-        Assert.Equal("[a].[b].[c]", item.ToSql(new SqlServerDialect(), "f", _database));
+        Assert.Equal("[a].[b].[c]", item.ToSql(TestDialect.Instance, "f", _database));
     }
 
     /// <summary>

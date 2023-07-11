@@ -1,13 +1,11 @@
 ﻿using Bing.Data.Sql.Builders.Core;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.Base;
+namespace Bing.Data.Sql.Tests.Builders.Core;
 
 /// <summary>
 /// 列集合测试
 /// </summary>
-public class ColumnCollectionTest : TestBase
+public class ColumnCollectionTest
 {
     /// <summary>
     /// 列集合
@@ -15,9 +13,9 @@ public class ColumnCollectionTest : TestBase
     private readonly ColumnCollection _columns;
 
     /// <summary>
-    /// 初始化一个<see cref="ColumnCollectionTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public ColumnCollectionTest(ITestOutputHelper output) : base(output)
+    public ColumnCollectionTest()
     {
         _columns = new ColumnCollection();
     }

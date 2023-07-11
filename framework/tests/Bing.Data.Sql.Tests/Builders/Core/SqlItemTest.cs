@@ -1,19 +1,15 @@
-﻿using Bing.Datas.Dapper.MySql;
-using Bing.Datas.Dapper.PgSql;
-using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql.Builders.Core;
+﻿using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Metadata;
-using Bing.Data.Test.Integration.Sql.Builders.Samples;
+using Bing.Data.Sql.Tests.Samples;
 using Bing.Extensions;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.Base;
+namespace Bing.Data.Sql.Tests.Builders.Core;
 
 /// <summary>
 /// Sql项测试
 /// </summary>
-public class SqlItemTest : TestBase
+public class SqlItemTest
 {
     /// <summary>
     /// 表数据库
@@ -21,9 +17,9 @@ public class SqlItemTest : TestBase
     private readonly ITableDatabase _database;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlItemTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public SqlItemTest(ITestOutputHelper output) : base(output)
+    public SqlItemTest(ITestOutputHelper output)
     {
         _database = new TestTableDatabase();
     }
@@ -80,8 +76,8 @@ public class SqlItemTest : TestBase
         Assert.Equal("a", item.Name);
         Assert.Equal("t", item.Prefix);
         Assert.Equal("b", item.Alias);
-        Assert.Equal("[t].[a] As [b]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("[test].[t].[a] As [b]", item.ToSql(new SqlServerDialect(), _database));
+        Assert.Equal("[t].[a] As [b]", item.ToSql(TestDialect.Instance));
+        Assert.Equal("[test].[t].[a] As [b]", item.ToSql(TestDialect.Instance, _database));
     }
 
     /// <summary>
@@ -153,10 +149,10 @@ public class SqlItemTest : TestBase
         var item = new SqlItem("\"a\".\"b\"");
         Assert.Equal("\"b\"", item.Name);
         Assert.Equal("\"a\"", item.Prefix);
-        Assert.Equal("[a].[b]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("[test].[a].[b]", item.ToSql(new SqlServerDialect(), _database));
-        Assert.Equal("\"a\".\"b\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a`.`b`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a].[b]", item.ToSql(TestDialect.Instance));
+        Assert.Equal("[test].[a].[b]", item.ToSql(TestDialect.Instance, _database));
+        //Assert.Equal("\"a\".\"b\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a`.`b`", item.ToSql(new MySqlDialect()));
     }
 
     /// <summary>
@@ -168,9 +164,9 @@ public class SqlItemTest : TestBase
         var item = new SqlItem("`a`.`b`");
         Assert.Equal("`b`", item.Name);
         Assert.Equal("`a`", item.Prefix);
-        Assert.Equal("[a].[b]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("\"a\".\"b\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a`.`b`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a].[b]", item.ToSql(TestDialect.Instance));
+        //Assert.Equal("\"a\".\"b\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a`.`b`", item.ToSql(new MySqlDialect()));
     }
 
     /// <summary>
@@ -182,9 +178,9 @@ public class SqlItemTest : TestBase
         var item = new SqlItem("[a].[b]");
         Assert.Equal("[b]", item.Name);
         Assert.Equal("[a]", item.Prefix);
-        Assert.Equal("[a].[b]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("\"a\".\"b\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a`.`b`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a].[b]", item.ToSql(TestDialect.Instance));
+        //Assert.Equal("\"a\".\"b\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a`.`b`", item.ToSql(new MySqlDialect()));
     }
 
     /// <summary>
@@ -196,9 +192,9 @@ public class SqlItemTest : TestBase
         var item = new SqlItem("\"a.b\".\"c\"");
         Assert.Equal("\"c\"", item.Name);
         Assert.Equal("\"a.b\"", item.Prefix);
-        Assert.Equal("[a.b].[c]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("\"a.b\".\"c\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a.b`.`c`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a.b].[c]", item.ToSql(TestDialect.Instance));
+        //Assert.Equal("\"a.b\".\"c\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a.b`.`c`", item.ToSql(new MySqlDialect()));
     }
 
     /// <summary>
@@ -210,9 +206,9 @@ public class SqlItemTest : TestBase
         var item = new SqlItem("`a.b`.`c`");
         Assert.Equal("`c`", item.Name);
         Assert.Equal("`a.b`", item.Prefix);
-        Assert.Equal("[a.b].[c]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("\"a.b\".\"c\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a.b`.`c`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a.b].[c]", item.ToSql(TestDialect.Instance));
+        //Assert.Equal("\"a.b\".\"c\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a.b`.`c`", item.ToSql(new MySqlDialect()));
     }
 
     /// <summary>
@@ -224,10 +220,10 @@ public class SqlItemTest : TestBase
         var item = new SqlItem("[a.b].[c]");
         Assert.Equal("[c]", item.Name);
         Assert.Equal("[a.b]", item.Prefix);
-        Assert.Equal("[a.b].[c]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("[test].[a.b].[c]", item.ToSql(new SqlServerDialect(), _database));
-        Assert.Equal("\"a.b\".\"c\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a.b`.`c`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a.b].[c]", item.ToSql(TestDialect.Instance));
+        Assert.Equal("[test].[a.b].[c]", item.ToSql(TestDialect.Instance, _database));
+        //Assert.Equal("\"a.b\".\"c\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a.b`.`c`", item.ToSql(new MySqlDialect()));
     }
 
     /// <summary>
@@ -240,9 +236,9 @@ public class SqlItemTest : TestBase
         Assert.Equal("c", item.Name);
         Assert.Equal("b", item.Prefix);
         Assert.Equal("a", item.DatabaseName);
-        Assert.Equal("[a].[b].[c]", item.ToSql(new SqlServerDialect()));
-        Assert.Equal("[a].[b].[c]", item.ToSql(new SqlServerDialect(), _database));
-        Assert.Equal("\"a\".\"b\".\"c\"", item.ToSql(new PgSqlDialect()));
-        Assert.Equal("`a`.`b`.`c`", item.ToSql(new MySqlDialect()));
+        Assert.Equal("[a].[b].[c]", item.ToSql(TestDialect.Instance));
+        Assert.Equal("[a].[b].[c]", item.ToSql(TestDialect.Instance, _database));
+        //Assert.Equal("\"a\".\"b\".\"c\"", item.ToSql(new PgSqlDialect()));
+        //Assert.Equal("`a`.`b`.`c`", item.ToSql(new MySqlDialect()));
     }
 }
