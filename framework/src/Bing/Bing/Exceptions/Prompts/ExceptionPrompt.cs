@@ -11,8 +11,7 @@ public static class ExceptionPrompt
     /// <summary>
     /// 异常提示组件集合
     /// </summary>
-    // ReSharper disable once InconsistentNaming
-    private static readonly List<IExceptionPrompt> Prompts = new List<IExceptionPrompt>();
+    private static readonly List<IExceptionPrompt> _prompts = new List<IExceptionPrompt>();
 
     /// <summary>
     /// 添加异常提示
@@ -22,9 +21,9 @@ public static class ExceptionPrompt
     {
         if (prompt == null)
             throw new ArgumentNullException(nameof(prompt));
-        if (Prompts.Contains(prompt))
+        if (_prompts.Contains(prompt))
             return;
-        Prompts.Add(prompt);
+        _prompts.Add(prompt);
     }
 
     /// <summary>
@@ -51,7 +50,7 @@ public static class ExceptionPrompt
     /// <param name="exception">异常</param>
     private static string GetExceptionPrompt(Exception exception)
     {
-        foreach (var prompt in Prompts)
+        foreach (var prompt in _prompts)
         {
             var result = prompt.GetPrompt(exception);
             if (result.IsEmpty() == false)
@@ -68,7 +67,7 @@ public static class ExceptionPrompt
     {
         if (exception is null)
             return null;
-        foreach (var prompt in Prompts)
+        foreach (var prompt in _prompts)
         {
             var result = prompt.GetRawException(exception);
             if (result != null)

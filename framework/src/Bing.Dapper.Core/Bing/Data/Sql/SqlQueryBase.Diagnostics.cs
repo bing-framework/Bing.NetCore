@@ -11,7 +11,7 @@ public abstract partial class SqlQueryBase
     /// 诊断日志
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    private static readonly DiagnosticListener _diagnosticListener = new DiagnosticListener(SqlQueryDiagnosticListenerNames.DiagnosticListenerName);
+    private static readonly DiagnosticListener _diagnosticListener = new(SqlQueryDiagnosticListenerNames.DiagnosticListenerName);
 
     /// <summary>
     /// 执行前诊断

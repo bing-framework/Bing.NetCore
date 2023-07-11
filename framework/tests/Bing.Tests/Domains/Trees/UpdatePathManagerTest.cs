@@ -70,7 +70,7 @@ public class UpdatePathManagerTest
     {
         //设置
         string path = $"{_id},";
-        _mockRepository.FindAsync(_id).ReturnsNull();
+        _mockRepository.FindByIdAsync(_id).ReturnsNull();
 
         //执行
         var role = new Role(_id, path, 0) { ParentId = _id2 };
@@ -89,7 +89,7 @@ public class UpdatePathManagerTest
     {
         //设置
         string path = $"{_id2},{_id},";
-        _mockRepository.FindAsync(_id).Returns(new Role(_id, path, 2) { ParentId = _id2 });
+        _mockRepository.FindByIdAsync(_id).Returns(new Role(_id, path, 2) { ParentId = _id2 });
 
         //执行
         var role = new Role(_id, path, 2) { ParentId = _id2 };
@@ -107,10 +107,10 @@ public class UpdatePathManagerTest
     public async Task Test_UpdatePathAsync_3()
     {
         //设置
-        string path = $"{_id2},{_id},";
+        var path = $"{_id2},{_id},";
         var old = new Role(_id, path, 2) { ParentId = _id2 };
         _mockRepository.FindByIdNoTrackingAsync(_id).Returns(old);
-        _mockRepository.FindAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
+        _mockRepository.FindByIdAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
         var list = new List<Role> { };
         _mockRepository.GetAllChildrenAsync(old).Returns(list);
 
@@ -130,11 +130,11 @@ public class UpdatePathManagerTest
     public async Task Test_UpdatePathAsync_4()
     {
         //设置
-        string path = $"{_id2},{_id},";
+        var path = $"{_id2},{_id},";
         var old = new Role(_id, path, 2) { ParentId = _id2 };
         var child = new Role(_id4, $"{path},{_id4}", 3) { ParentId = _id };
         _mockRepository.FindByIdNoTrackingAsync(_id).Returns(old);
-        _mockRepository.FindAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
+        _mockRepository.FindByIdAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
         var list = new List<Role> { child };
         _mockRepository.GetAllChildrenAsync(old).Returns(list);
 
@@ -154,12 +154,12 @@ public class UpdatePathManagerTest
     public async Task Test_UpdatePathAsync_5()
     {
         //设置
-        string path = $"{_id2},{_id},";
+        var path = $"{_id2},{_id},";
         var old = new Role(_id, path, 2) { ParentId = _id2 };
         var child1 = new Role(_id4, $"{path},{_id4}", 3) { ParentId = _id };
         var child2 = new Role(_id5, $"{path},{_id5}", 3) { ParentId = _id };
         _mockRepository.FindByIdNoTrackingAsync(_id).Returns(old);
-        _mockRepository.FindAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
+        _mockRepository.FindByIdAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
         var list = new List<Role> { child1, child2 };
         _mockRepository.GetAllChildrenAsync(old).Returns(list);
 
@@ -180,12 +180,12 @@ public class UpdatePathManagerTest
     public async Task Test_UpdatePathAsync_6()
     {
         //设置
-        string path = $"{_id2},{_id},";
+        var path = $"{_id2},{_id},";
         var old = new Role(_id, path, 2) { ParentId = _id2 };
         var child1 = new Role(_id4, $"{path},{_id4}", 3) { ParentId = _id };
         var child2 = new Role(_id5, $"{path},{_id4},{_id5}", 4) { ParentId = _id4 };
         _mockRepository.FindByIdNoTrackingAsync(_id).Returns(old);
-        _mockRepository.FindAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
+        _mockRepository.FindByIdAsync(_id3).Returns(new Role(_id3, $"{_id3},", 1));
         var list = new List<Role> { child1, child2 };
         _mockRepository.GetAllChildrenAsync(old).Returns(list);
 

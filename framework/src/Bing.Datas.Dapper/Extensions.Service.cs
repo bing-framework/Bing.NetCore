@@ -1,7 +1,7 @@
 ﻿using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Datas.Dapper.Handlers;
 using Bing.Datas.Dapper.MySql;
 using Bing.Datas.Dapper.Oracle;
@@ -49,7 +49,7 @@ public static partial class Extensions
     public static IServiceCollection AddSqlQuery<TDatabase, TEntityMatedata>(this IServiceCollection services,
         Action<SqlOptions> configAction = null)
         where TDatabase : class, IDatabase
-        where TEntityMatedata : class, IEntityMatedata =>
+        where TEntityMatedata : class, IEntityMetadata =>
         AddSqlQuery(services, configAction, typeof(TDatabase), typeof(TEntityMatedata));
 
     /// <summary>
@@ -69,7 +69,7 @@ public static partial class Extensions
             services.Configure(configAction);
         }
         if (entityMatedata != null)
-            services.TryAddScoped(typeof(IEntityMatedata), t => t.GetService(entityMatedata));
+            services.TryAddScoped(typeof(IEntityMetadata), t => t.GetService(entityMatedata));
         if (database != null)
         {
             services.TryAddScoped(database);
@@ -124,15 +124,5 @@ public static partial class Extensions
         SqlMapper.AddTypeHandler(typeof(string), new StringTypeHandler());
         if (config.DatabaseType == DatabaseType.Oracle)
             SqlMapper.AddTypeHandler(new GuidTypeHandler());
-    }
-
-    /// <summary>
-    /// 注册Sql执行服务
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    public static IServiceCollection AddSqlExecutor(this IServiceCollection services)
-    {
-        services.TryAddScoped<ISqlExecutor, SqlExecutor>();
-        return services;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 using Bing.Helpers;
 

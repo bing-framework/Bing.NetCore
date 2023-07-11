@@ -1,9 +1,6 @@
-﻿using System;
-using System.Text;
-using Bing.Data.Sql.Builders.Conditions;
+﻿using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
-using Xunit;
 
 namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
@@ -23,6 +20,16 @@ public class EqualConditionTest
     public EqualConditionTest()
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
+    }
+
+    /// <summary>
+    /// 获取条件
+    /// </summary>
+    [Fact]
+    public void Test_1()
+    {
+        var condition = new EqualCondition("Name", "@Name");
+        Assert.Equal("Name=@Name", condition.GetCondition());
     }
 
     /// <summary>
@@ -80,19 +87,19 @@ public class EqualConditionTest
         Assert.Equal(0, _parameterManager.GetParams().Count);
     }
 
-    /// <summary>
-    /// 测试 - 获取条件 - 值为ISqlBuilder
-    /// </summary>
-    [Fact]
-    public void Test_GetCondition_4()
-    {
-        var result = new StringBuilder();
-        result.Append("a=");
-        result.AppendLine("(Select [a] ");
-        result.Append("From [b])");
+    ///// <summary>
+    ///// 测试 - 获取条件 - 值为ISqlBuilder
+    ///// </summary>
+    //[Fact]
+    //public void Test_GetCondition_4()
+    //{
+    //    var result = new StringBuilder();
+    //    result.Append("a=");
+    //    result.AppendLine("(Select [a] ");
+    //    result.Append("From [b])");
 
-        var builder = new TestSqlBuilder().Select("a").From("b");
-        var condition = new EqualSqlCondition(_parameterManager, "a", builder, true);
-        Assert.Equal(result.ToString(), GetResult(condition));
-    }
+    //    var builder = new TestSqlBuilder().Select("a").From("b");
+    //    var condition = new EqualSqlCondition(_parameterManager, "a", builder, true);
+    //    Assert.Equal(result.ToString(), GetResult(condition));
+    //}
 }

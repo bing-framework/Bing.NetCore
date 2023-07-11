@@ -64,7 +64,7 @@ public partial class CrudServiceTest
     [Fact]
     public async Task Test_Save_Update_Repeat()
     {
-        _repository.FindAsync(_id).Returns(t => new EntitySample(_id));
+        _repository.FindByIdAsync(_id).Returns(t => new EntitySample(_id));
         var input = new List<DtoSample> {
             new DtoSample{Id = _id.ToString()},
             new DtoSample{Id = _id.ToString()}
@@ -124,7 +124,7 @@ public partial class CrudServiceTest
     public async Task Test_SaveAsync_Update_1()
     {
         var entity = new EntitySample(_id);
-        _repository.FindAsync(_id).Returns(t => entity);
+        _repository.FindByIdAsync(_id).Returns(t => entity);
         var input = new List<DtoSample> {
             new DtoSample{Id = _id.ToString(),Name = "b"}
         };
@@ -139,8 +139,8 @@ public partial class CrudServiceTest
     [Fact]
     public async Task Test_SaveAsync_Update_2()
     {
-        _repository.FindAsync(_id).Returns(t => new EntitySample(_id));
-        _repository.FindAsync(_id2).Returns(t => new EntitySample(_id2));
+        _repository.FindByIdAsync(_id).Returns(t => new EntitySample(_id));
+        _repository.FindByIdAsync(_id2).Returns(t => new EntitySample(_id2));
         var input = new List<DtoSample> {
             new DtoSample{Id = _id.ToString(),Name = "b"},
             new DtoSample{Id = _id2.ToString(),Name = "b"}
@@ -188,9 +188,9 @@ public partial class CrudServiceTest
         var deleteList = new List<DtoSample> {
             new DtoSample{Id = id3.ToString()}
         };
-        _repository.FindAsync(id3).Returns(t => new EntitySample(id3));
-        _repository.FindAsync(id4).Returns(t => new EntitySample(id4));
-        _repository.FindAsync(id5).Returns(t => new EntitySample(id5));
+        _repository.FindByIdAsync(id3).Returns(t => new EntitySample(id3));
+        _repository.FindByIdAsync(id4).Returns(t => new EntitySample(id4));
+        _repository.FindByIdAsync(id5).Returns(t => new EntitySample(id5));
         var result = await _service.SaveAsync(addList, updateList, deleteList);
         await _repository.Received(2).AddAsync(Arg.Any<EntitySample>());
         await _repository.Received(2).UpdateAsync(Arg.Any<EntitySample>());

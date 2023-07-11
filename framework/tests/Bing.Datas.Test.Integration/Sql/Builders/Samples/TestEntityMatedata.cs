@@ -1,12 +1,12 @@
 ﻿using System;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Test.Integration.Sql.Builders.Samples;
 
 /// <summary>
 /// 测试实体元数据
 /// </summary>
-public class TestEntityMatedata : IEntityMatedata
+public class TestEntityMatedata : IEntityMetadata
 {
     /// <summary>
     /// 获取表名

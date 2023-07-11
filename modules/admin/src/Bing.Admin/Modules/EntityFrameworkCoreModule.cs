@@ -3,7 +3,6 @@ using Bing.Admin.Data;
 using Bing.Core.Modularity;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
-using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,13 +39,6 @@ namespace Bing.Admin.Modules
                 connectionStr);
             //services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr, DataLogLevel.All);
             // 注册SqlQuery
-            //services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
-            //    {
-            //        options.DatabaseType = DatabaseType.MySql;
-            //        options.IsClearAfterExecution = true;
-            //        //options.LogLevel = DataLogLevel.Off;
-            //    });
-
             services.AddMySqlQuery(t =>
                 {
                     t.DatabaseType = DatabaseType.MySql;
@@ -54,14 +46,8 @@ namespace Bing.Admin.Modules
                 })
                 .AddDatabase<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>()
                 .AddEntityMetadata<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>();
-            //services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
-            //{
-            //    options.DatabaseType = DatabaseType.MySql;
-            //    options.IsClearAfterExecution = true;
-            //    //options.LogLevel = DataLogLevel.Off;
-            //});
             // 注册SqlExecutor
-            services.AddSqlExecutor();
+            services.AddMySqlExecutor();
             return services;
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Internal;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Core;
 

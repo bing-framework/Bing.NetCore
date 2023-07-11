@@ -7,7 +7,7 @@ using Bing.Aspects;
 using Bing.Auditing;
 using Bing.Data;
 using Bing.Data.Filters;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
@@ -30,7 +30,7 @@ namespace Bing.Datas.EntityFramework.Core;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntityMatedata
+public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntityMetadata
 {
     #region 字段
 

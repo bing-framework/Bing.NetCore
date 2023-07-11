@@ -3,6 +3,6 @@
 /// <summary>
 /// Sql操作
 /// </summary>
-public interface ISqlOperation : ISqlQueryOperation
+public interface ISqlOperation : ISqlQueryOperation, IInsert
 {
 }
