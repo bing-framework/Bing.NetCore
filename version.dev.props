@@ -1,7 +1,14 @@
 <Project>
   <PropertyGroup>
     <!-- All Microsoft packages -->
-    <MicrosoftPackageVersion>6.0.*</MicrosoftPackageVersion>
+    <MicrosoftPackageVersion>6.0.0</MicrosoftPackageVersion>
+
+    <!-- All Microsoft AspNetCore packages -->
+    <MicrosoftAspNetCorePackageVersion>6.0.5</MicrosoftAspNetCorePackageVersion>
+
+    <!-- All Microsoft EntityFrameworkCore packages -->
+    <MicrosoftEntityFrameworkCorePackageVersion>6.0.5</MicrosoftEntityFrameworkCorePackageVersion>
+
     <!-- Bing packages -->
     <BingUtilsPackageVersion>1.5.0-preview-20230613-1</BingUtilsPackageVersion>
     <!-- EFCore packages -->
