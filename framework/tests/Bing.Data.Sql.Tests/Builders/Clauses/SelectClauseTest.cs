@@ -1,18 +1,13 @@
-﻿using System.Collections.Generic;
-using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql.Builders.Clauses;
+﻿using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Test.Integration.Samples;
-using Bing.Data.Test.Integration.Sql.Builders.Samples;
-using Xunit;
-using Xunit.Abstractions;
+using Bing.Data.Sql.Tests.Samples;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses;
+namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
 /// <summary>
 /// Select子句
 /// </summary>
-public class SelectClauseTest:TestBase
+public class SelectClauseTest
 {
     /// <summary>
     /// Select子句
@@ -22,10 +17,9 @@ public class SelectClauseTest:TestBase
     /// <summary>
     /// 测试初始化
     /// </summary>
-    /// <param name="output"></param>
-    public SelectClauseTest(ITestOutputHelper output) : base(output)
+    public SelectClauseTest()
     {
-        _clause = new SelectClause(new SqlServerBuilder(), new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister());
+        _clause = new SelectClause(null, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister());
     }
 
     /// <summary>
@@ -219,7 +213,7 @@ public class SelectClauseTest:TestBase
     [Fact]
     public void Test_Select_18()
     {
-        _clause = new SelectClause(new SqlServerBuilder(), new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
+        _clause = new SelectClause(new TestSqlBuilder(), TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister());
         _clause.Select<Sample>(t => new object[] { t.Email, t.IntValue });
         Assert.Equal("Select [t_Email],[t_IntValue]", GetSql());
     }
@@ -230,7 +224,7 @@ public class SelectClauseTest:TestBase
     [Fact]
     public void Test_Select_19()
     {
-        _clause = new SelectClause(new SqlServerBuilder(), new SqlServerDialect(), new TestEntityResolver(), new TestEntityAliasRegister());
+        _clause = new SelectClause(new TestSqlBuilder(), TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister());
         _clause.Select<Sample>(t => new object[] { t.Email, t.IntValue });
         var result = _clause.ToSql();
         Assert.Equal("Select [as_Sample].[t_Email],[as_Sample].[t_IntValue]", result);
@@ -282,7 +276,7 @@ public class SelectClauseTest:TestBase
     [Fact]
     public void Test_Select_24()
     {
-        _clause = new SelectClause(new SqlServerBuilder(), new SqlServerDialect(), new EntityResolver(new TestEntityMatedata()), new TestEntityAliasRegister());
+        _clause = new SelectClause(new TestSqlBuilder(), TestDialect.Instance, new EntityResolver(new TestEntityMetadata()), new TestEntityAliasRegister());
         _clause.Select<Sample>(t => new Dictionary<object, string> { { t.Email, "e" }, { t.Url, "u" } });
         var result = _clause.ToSql();
         Assert.Equal("Select [as_Sample].[Sample_Email] As [e],[as_Sample].[Sample_Url] As [u]", result);
@@ -294,7 +288,7 @@ public class SelectClauseTest:TestBase
     [Fact]
     public void Test_Select_25()
     {
-        _clause = new SelectClause(new SqlServerBuilder(), new SqlServerDialect(), new EntityResolver(new TestEntityMatedata()), new TestEntityAliasRegister());
+        _clause = new SelectClause(new TestSqlBuilder(), TestDialect.Instance, new EntityResolver(new TestEntityMetadata()), new TestEntityAliasRegister());
         _clause.Select<Sample>(t => new object[] { t.Email, t.IntValue }, true);
         var result = _clause.ToSql();
         Assert.Equal("Select [as_Sample].[Sample_Email] As [Email],[as_Sample].[Sample_IntValue] As [IntValue]", result);
@@ -306,7 +300,7 @@ public class SelectClauseTest:TestBase
     [Fact]
     public void Test_Select_26()
     {
-        _clause = new SelectClause(new SqlServerBuilder(), new SqlServerDialect(), new EntityResolver(new TestEntityMatedata()), new TestEntityAliasRegister());
+        _clause = new SelectClause(new TestSqlBuilder(), TestDialect.Instance, new EntityResolver(new TestEntityMetadata()), new TestEntityAliasRegister());
         _clause.Select<Sample>(t => new object[] { t.Email, t.DecimalValue }, true);
         var result = _clause.ToSql();
         Assert.Equal("Select [as_Sample].[Sample_Email] As [Email],[as_Sample].[DecimalValue]", result);

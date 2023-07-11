@@ -1,17 +1,13 @@
-﻿using Bing.Datas.Dapper.Oracle;
+﻿using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Metadata;
-using Bing.Data.Test.Integration.Sql.Builders.Samples;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.Oracle.Clauses;
+namespace Bing.Dapper.Tests.Builders.Clauses;
 
 /// <summary>
 /// From子句测试
 /// </summary>
-public class FromClauseTest:TestBase
+public class FromClauseTest
 {
     /// <summary>
     /// From子句
@@ -19,17 +15,11 @@ public class FromClauseTest:TestBase
     private readonly FromClause _clause;
 
     /// <summary>
-    /// 表数据库
+    /// 测试初始化
     /// </summary>
-    private readonly ITableDatabase _database;
-
-    /// <summary>
-    /// 初始化一个<see cref="FromClauseTest"/>类型的实例
-    /// </summary>
-    public FromClauseTest(ITestOutputHelper output) : base(output)
+    public FromClauseTest()
     {
-        _database = new TestTableDatabase();
-        _clause = new OracleFromClause(null, new OracleDialect(), new EntityResolver(), new EntityAliasRegister(), null);
+        _clause = new OracleFromClause(null, OracleDialect.Instance, new EntityResolver(), new EntityAliasRegister(), null);
     }
 
     /// <summary>

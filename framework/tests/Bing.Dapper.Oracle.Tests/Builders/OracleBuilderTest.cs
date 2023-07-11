@@ -1,26 +1,23 @@
-﻿using Bing.Datas.Dapper.Oracle;
+﻿using Bing.Dapper.Tests.Samples;
 using Bing.Data.Sql;
-using Bing.Data.Test.Integration.Samples;
-using Xunit;
-using Xunit.Abstractions;
-using Str = Bing.Helpers.Str;
+using Bing.Data.Sql.Builders;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.Oracle;
+namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
 /// Oracle Sql生成器测试
 /// </summary>
-public class OracleBuilderTest : TestBase
+public class OracleBuilderTest
 {
     /// <summary>
     /// Oracle Sql生成器s
     /// </summary>
-    private OracleBuilder _builder;
+    private readonly OracleBuilder _builder;
 
     /// <summary>
-    /// 初始化一个<see cref="OracleBuilderTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public OracleBuilderTest(ITestOutputHelper output) : base(output)
+    public OracleBuilderTest() 
     {
         _builder = new OracleBuilder();
     }
@@ -32,7 +29,7 @@ public class OracleBuilderTest : TestBase
     public void TestWhere()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select \"a\".\"Email\" ");
         result.AppendLine("From \"Sample\" \"a\" ");
         result.Append("Where \"a\".\"Email\"<>:p_0");

@@ -327,6 +327,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TestShare.MySql", "fra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.MySql.Tests", "framework\tests\Bing.Dapper.MySql.Tests\Bing.Dapper.MySql.Tests.csproj", "{AC118996-0420-4030-9F7E-C35F2D5FB9BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.PostgreSql.Tests", "framework\tests\Bing.Dapper.PostgreSql.Tests\Bing.Dapper.PostgreSql.Tests.csproj", "{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.PostgreSql.Tests.Integration", "framework\tests\Bing.Dapper.PostgreSql.Tests.Integration\Bing.Dapper.PostgreSql.Tests.Integration.csproj", "{13183A7C-470C-4E91-B6AB-F49FB2897B30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.SqlServer.Tests.Integration", "framework\tests\Bing.Dapper.SqlServer.Tests.Integration\Bing.Dapper.SqlServer.Tests.Integration.csproj", "{AF2C8041-3B77-4912-8BC3-A19A18864215}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.Oracle.Tests", "framework\tests\Bing.Dapper.Oracle.Tests\Bing.Dapper.Oracle.Tests.csproj", "{12F822A5-1353-4C27-922C-02F2655E9443}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -725,6 +733,22 @@ Global
 		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC118996-0420-4030-9F7E-C35F2D5FB9BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13183A7C-470C-4E91-B6AB-F49FB2897B30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13183A7C-470C-4E91-B6AB-F49FB2897B30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13183A7C-470C-4E91-B6AB-F49FB2897B30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13183A7C-470C-4E91-B6AB-F49FB2897B30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F822A5-1353-4C27-922C-02F2655E9443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F822A5-1353-4C27-922C-02F2655E9443}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F822A5-1353-4C27-922C-02F2655E9443}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F822A5-1353-4C27-922C-02F2655E9443}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -872,6 +896,10 @@ Global
 		{F341C10D-76CE-497E-8A0B-48D203ADE466} = {3D99820D-63A7-4635-B660-0D04D535229E}
 		{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC} = {3D99820D-63A7-4635-B660-0D04D535229E}
 		{AC118996-0420-4030-9F7E-C35F2D5FB9BE} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
+		{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
+		{13183A7C-470C-4E91-B6AB-F49FB2897B30} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
+		{AF2C8041-3B77-4912-8BC3-A19A18864215} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
+		{12F822A5-1353-4C27-922C-02F2655E9443} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

@@ -1,17 +1,13 @@
-﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql.Builders.Clauses;
+﻿using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Test.Integration.Samples;
-using Bing.Data.Test.Integration.Sql.Builders.Samples;
-using Xunit;
-using Xunit.Abstractions;
+using Bing.Data.Sql.Tests.Samples;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses;
+namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
 /// <summary>
 /// Group By子句测试
 /// </summary>
-public class GroupByClauseTest:TestBase
+public class GroupByClauseTest
 {
     /// <summary>
     /// 分组子句
@@ -21,9 +17,9 @@ public class GroupByClauseTest:TestBase
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public GroupByClauseTest(ITestOutputHelper output) : base(output)
+    public GroupByClauseTest()
     {
-        _clause = new GroupByClause(new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister());
+        _clause = new GroupByClause(TestDialect.Instance, new EntityResolver(), new EntityAliasRegister());
     }
 
     /// <summary>
@@ -99,7 +95,7 @@ public class GroupByClauseTest:TestBase
     [Fact]
     public void Test_GroupBy_6()
     {
-        _clause = new GroupByClause(new SqlServerDialect(), new TestEntityResolver(), new TestEntityAliasRegister());
+        _clause = new GroupByClause(TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister());
         _clause.GroupBy<Sample>(t => t.Email, "b");
         Assert.Equal("Group By [as_Sample].[t_Email] Having b", GetSql());
     }

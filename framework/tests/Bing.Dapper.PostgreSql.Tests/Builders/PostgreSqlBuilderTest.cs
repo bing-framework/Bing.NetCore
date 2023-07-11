@@ -1,27 +1,24 @@
-﻿using Bing.Datas.Dapper.PgSql;
-using Bing.Data.Sql;
-using Xunit;
-using Xunit.Abstractions;
-using Str = Bing.Helpers.Str;
+﻿using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.PgSql;
+namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
 /// PgSql Sql生成器测试
 /// </summary>
-public class PgSqlBuilderTest : TestBase
+public class PostgreSqlBuilderTest
 {
     /// <summary>
     /// PgSql Sql生成器
     /// </summary>
-    private readonly PgSqlBuilder _builder;
+    private readonly PostgreSqlBuilder _builder;
 
     /// <summary>
-    /// 初始化一个<see cref="PgSqlBuilderTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public PgSqlBuilderTest(ITestOutputHelper output) : base(output)
+    public PostgreSqlBuilderTest()
     {
-        _builder = new PgSqlBuilder();
+        _builder = new PostgreSqlBuilder();
     }
 
     /// <summary>
@@ -31,7 +28,7 @@ public class PgSqlBuilderTest : TestBase
     public void Test_1()
     {
         //结果
-        var result = new Str();
+        var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From \"Test\" ");
         result.Append("Where \"A\"=1 And \"B\"=2 And \"C\"=false And \"D\"=true And \"E\"=5 And \"F\"=6 And ");

@@ -23,6 +23,16 @@ public class EqualConditionTest
     }
 
     /// <summary>
+    /// 获取条件
+    /// </summary>
+    [Fact]
+    public void Test_1()
+    {
+        var condition = new EqualCondition("Name", "@Name");
+        Assert.Equal("Name=@Name", condition.GetCondition());
+    }
+
+    /// <summary>
     /// 获取结果
     /// </summary>
     private string GetResult(ISqlCondition condition)

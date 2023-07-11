@@ -1,17 +1,13 @@
-﻿using Bing.Datas.Dapper.SqlServer;
-using Bing.Data.Sql.Builders.Clauses;
+﻿using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Test.Integration.Samples;
-using Bing.Data.Test.Integration.Sql.Builders.Samples;
-using Xunit;
-using Xunit.Abstractions;
+using Bing.Data.Sql.Tests.Samples;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.SqlServer.Clauses;
+namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
 /// <summary>
 /// 排序子句测试
 /// </summary>
-public class OrderByClauseTest:TestBase
+public class OrderByClauseTest
 {
     /// <summary>
     /// 排序子句
@@ -21,10 +17,9 @@ public class OrderByClauseTest:TestBase
     /// <summary>
     /// 测试初始化
     /// </summary>
-    /// <param name="output"></param>
-    public OrderByClauseTest(ITestOutputHelper output) : base(output)
+    public OrderByClauseTest()
     {
-        _clause = new OrderByClause(new SqlServerDialect(), new EntityResolver(), new EntityAliasRegister());
+        _clause = new OrderByClause(TestDialect.Instance, new EntityResolver(), new EntityAliasRegister());
     }
 
     /// <summary>
@@ -130,7 +125,7 @@ public class OrderByClauseTest:TestBase
     [Fact]
     public void Test_OrderBy_9()
     {
-        _clause = new OrderByClause(new SqlServerDialect(), new TestEntityResolver(), new EntityAliasRegister());
+        _clause = new OrderByClause(TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister());
         _clause.OrderBy<Sample>(t => t.Email, true);
         Assert.Equal("Order By [t_Email] Desc", GetSql());
     }
@@ -141,7 +136,7 @@ public class OrderByClauseTest:TestBase
     [Fact]
     public void Test_OrderBy_10()
     {
-        _clause = new OrderByClause(new SqlServerDialect(), new TestEntityResolver(), new TestEntityAliasRegister());
+        _clause = new OrderByClause(TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister());
         _clause.OrderBy<Sample>(t => t.Email, true);
         Assert.Equal("Order By [as_Sample].[t_Email] Desc", GetSql());
     }

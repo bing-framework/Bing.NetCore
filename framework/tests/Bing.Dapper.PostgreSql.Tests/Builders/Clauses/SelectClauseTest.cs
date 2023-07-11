@@ -1,27 +1,26 @@
-﻿using Bing.Datas.Dapper.PgSql;
+﻿using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Bing.Data.Test.Integration.Sql.Builders.PgSql.Clauses;
+namespace Bing.Dapper.Tests.Builders.Clauses;
 
 /// <summary>
 /// Select子句测试
 /// </summary>
-public class SelectClauseTest : TestBase
+public class SelectClauseTest
 {
     /// <summary>
     /// Select子句
     /// </summary>
-    private SelectClause _clause;
+    private readonly SelectClause _clause;
 
     /// <summary>
-    /// 初始化一个<see cref="SelectClauseTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
-    public SelectClauseTest(ITestOutputHelper output) : base(output)
+    public SelectClauseTest(ITestOutputHelper output)
     {
-        _clause = new SelectClause(new PgSqlBuilder(), new PgSqlDialect(), new EntityResolver(), new EntityAliasRegister());
+        _clause = new SelectClause(null, PostgreSqlDialect.Instance, new EntityResolver(), new EntityAliasRegister());
     }
 
     /// <summary>
