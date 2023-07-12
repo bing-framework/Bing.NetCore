@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj" />
     <ProjectReference Include="..\Bing.TestShare\Bing.TestShare.csproj" />
   </ItemGroup>
 

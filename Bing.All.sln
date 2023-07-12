@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-framework", "01-framewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-src", "01-src", "{472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Core", "framework\src\Bing\Bing.Core.csproj", "{F573919A-D73A-4186-9E9D-9A514A5D7244}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Core", "framework\src\Bing.Core\Bing.Core.csproj", "{F573919A-D73A-4186-9E9D-9A514A5D7244}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore", "framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj", "{7884D11A-8935-4BB0-B027-64EE9CC2CE33}"
 EndProject
@@ -23,17 +23,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.Serilog", "framew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Dapper", "framework\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj", "{513512D1-39CF-4F50-AFFA-40C5558C3F8A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework", "framework\src\Bing.Datas.EntityFramework\Bing.Datas.EntityFramework.csproj", "{4C99DD4C-F671-45C3-B696-E9C3BDEE667F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore", "framework\src\Bing.EntityFrameworkCore\Bing.EntityFrameworkCore.csproj", "{4C99DD4C-F671-45C3-B696-E9C3BDEE667F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.MySql", "framework\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj", "{A5BE8634-522D-4CEC-B60C-EECCD2D0F946}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore.MySql", "framework\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj", "{A5BE8634-522D-4CEC-B60C-EECCD2D0F946}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.Oracle", "framework\src\Bing.Datas.EntityFramework.Oracle\Bing.Datas.EntityFramework.Oracle.csproj", "{C9E70A76-90AA-445B-963B-CE3B07FA8AE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore.Oracle", "framework\src\Bing.EntityFrameworkCore.Oracle\Bing.EntityFrameworkCore.Oracle.csproj", "{C9E70A76-90AA-445B-963B-CE3B07FA8AE2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.PgSql", "framework\src\Bing.Datas.EntityFramework.PgSql\Bing.Datas.EntityFramework.PgSql.csproj", "{D92EA2DD-FD45-4B27-90DE-EEE5FAA87452}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore.PostgreSql", "framework\src\Bing.EntityFrameworkCore.PostgreSql\Bing.EntityFrameworkCore.PostgreSql.csproj", "{D92EA2DD-FD45-4B27-90DE-EEE5FAA87452}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.Sqlite", "framework\src\Bing.Datas.EntityFramework.Sqlite\Bing.Datas.EntityFramework.Sqlite.csproj", "{35179009-D18F-45BF-AFF6-68934C727507}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore.Sqlite", "framework\src\Bing.EntityFrameworkCore.Sqlite\Bing.EntityFrameworkCore.Sqlite.csproj", "{35179009-D18F-45BF-AFF6-68934C727507}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.EntityFramework.SqlServer", "framework\src\Bing.Datas.EntityFramework.SqlServer\Bing.Datas.EntityFramework.SqlServer.csproj", "{EA770A35-5114-45F5-9BEB-DE2BA949903F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore.SqlServer", "framework\src\Bing.EntityFrameworkCore.SqlServer\Bing.EntityFrameworkCore.SqlServer.csproj", "{EA770A35-5114-45F5-9BEB-DE2BA949903F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Caching.CSRedis", "framework\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj", "{3EB6A053-396B-429E-AB06-C24BA66E488F}"
 EndProject

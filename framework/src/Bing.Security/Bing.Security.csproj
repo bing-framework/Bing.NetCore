@@ -10,7 +10,7 @@
   <Import Project="dependency.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.Core.csproj" />
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

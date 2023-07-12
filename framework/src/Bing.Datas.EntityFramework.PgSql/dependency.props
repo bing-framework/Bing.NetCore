@@ -1,5 +1,0 @@
-﻿<Project>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(EfCore6Version)" />
-  </ItemGroup>
-</Project>

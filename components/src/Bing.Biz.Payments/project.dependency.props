@@ -7,6 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\framework\src\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
     <ProjectReference Include="..\..\..\framework\src\Bing.Validation\Bing.Validation.csproj" />
-    <ProjectReference Include="..\..\..\framework\src\Bing\Bing.Core.csproj" />
+    <ProjectReference Include="..\..\..\framework\src\Bing.Core\Bing.Core.csproj" />
   </ItemGroup>
 </Project>

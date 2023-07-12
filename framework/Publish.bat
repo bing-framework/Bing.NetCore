@@ -11,7 +11,7 @@ for /R "nuget_pub" %%s in (*) do (
 )
 
 ::Core
-dotnet pack src/Bing -c Release -o nuget_pub
+dotnet pack src/Bing.Core -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore -c Release -o nuget_pub
 
 ::AOP
@@ -64,11 +64,11 @@ dotnet pack src/Bing.AspNetCore.Authentication.JwtBearer -c Release -o nuget_pub
 dotnet pack src/Bing.Events -c Release -o nuget_pub
 
 ::Datas
-dotnet pack src/Bing.Datas.EntityFramework -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.MySql -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.PgSql -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.SqlServer -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.Oracle -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.MySql -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.PostgreSql -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.SqlServer -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.Oracle -c Release -o nuget_pub
 dotnet pack src/Bing.FreeSQL -c Release -o nuget_pub
 dotnet pack src/Bing.FreeSQL.MySql -c Release -o nuget_pub
 dotnet pack src/Bing.Dapper.Core -c Release -o nuget_pub

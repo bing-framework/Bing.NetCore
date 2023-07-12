@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.EntityFrameworkCore.MySql</AssemblyName>
+    <PackageId>Bing.EntityFrameworkCore.MySql</PackageId>
+    <Description>Bing.EntityFrameworkCore.MySql 是Bing应用框架的EntityFrameworkCore.MySql数据访问类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="$(EfCore6Version)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.EntityFrameworkCore\Bing.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

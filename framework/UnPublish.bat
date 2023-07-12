@@ -55,11 +55,11 @@ dotnet nuget delete Bing.Events %version% -s %source% -k %key% --non-interactive
 
 ::Datas
 dotnet nuget delete Bing.Datas.Dapper %version% -s %source% -k %key% --non-interactive
-dotnet nuget delete Bing.Datas.EntityFramework %version% -s %source% -k %key% --non-interactive
-dotnet nuget delete Bing.Datas.EntityFramework.MySql %version% -s %source% -k %key% --non-interactive
-dotnet nuget delete Bing.Datas.EntityFramework.PgSql %version% -s %source% -k %key% --non-interactive
-dotnet nuget delete Bing.Datas.EntityFramework.SqlServer %version% -s %source% -k %key% --non-interactive
-dotnet nuget delete Bing.Datas.EntityFramework.Oracle %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.EntityFrameworkCore %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.EntityFrameworkCore.MySql %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.EntityFrameworkCore.PostgreSql %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.EntityFrameworkCore.SqlServer %version% -s %source% -k %key% --non-interactive
+dotnet nuget delete Bing.EntityFrameworkCore.Oracle %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete BingNS.FreeSQL %version% -s %source% -k %key% --non-interactive
 dotnet nuget delete BingNS.FreeSQL.MySql %version% -s %source% -k %key% --non-interactive
 
