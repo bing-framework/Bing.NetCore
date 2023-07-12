@@ -39,7 +39,7 @@ public class DependencyModule : BingModule
         // 查找所有自动注册的服务实现类型
         var dependencyTypeFinder = services.GetOrAddTypeFinder<IDependencyTypeFinder>(assemblyFinder => new DependencyTypeFinder(assemblyFinder));
 
-        var dependencyTypes = dependencyTypeFinder.FindAll();
+        var dependencyTypes = dependencyTypeFinder.FindAll(true);
         foreach (var dependencyType in dependencyTypes)
             AddToServices(services, dependencyType);
 

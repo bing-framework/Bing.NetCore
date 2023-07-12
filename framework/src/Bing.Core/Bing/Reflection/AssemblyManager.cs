@@ -12,7 +12,13 @@ public static class AssemblyManager
     /// <summary>
     /// 过滤程序集数组
     /// </summary>
-    private static readonly string[] _filters = { "dotnet-", "Microsoft.", "mscorlib", "netstandard", "System", "Windows" };
+    private static readonly string[] _filters =
+    {
+        "dotnet-", "Microsoft.", "mscorlib", "netstandard", "System", "Windows", "AutoMapper", "AspectCore",
+        "Dapper", "Pomelo", "MySqlConnector", "MongoDB", "DotNetCore.CAP", "RabbitMQ", "Exceptionless", "Serilog",
+        "NLog", "Google.Protobuf", "Grpc", "EasyCaching", "CSRedisCore", "Consul", "SkyAPM", "SkyApm",
+        "Swashbuckle", "Newtonsoft", "IdentityModel", "ReSharper", "JetBrains", "NuGet"
+    };
 
     /// <summary>
     /// 全部程序集
@@ -75,16 +81,67 @@ public static class AssemblyManager
         if (AssemblyFilterFunc == null)
             throw new BingFrameworkException("AssemblyManager.AssemblyFilterFunc 不能为空");
         Debug.WriteLine("AssemblyManager: 初始化程序集");
-        _allAssemblies = DependencyContext.Default.GetDefaultAssemblyNames()
-            .Where(AssemblyFilterFunc)
-            .Select(Assembly.Load)
-            .ToArray();
+
+        var defaultAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        foreach (var assemblyName in DependencyContext.Default.GetDefaultAssemblyNames())
+            LoadAssembly(assemblyName, defaultAssemblies);
+        var allAssemblies = new List<Assembly>();
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if(IsSkip(assembly))
+                continue;
+            allAssemblies.Add(assembly);
+        }
+
+        _allAssemblies = allAssemblies.ToArray();
         _allTypes = _allAssemblies.SelectMany(m => m.GetTypes()).ToArray();
         foreach (var assembly in _allAssemblies)
         {
             Debug.WriteLine($"【AssemblyManager】程序集: {assembly.FullName}");
         }
     }
+
+    /// <summary>
+    /// 加载程序集到当前应用程序域
+    /// </summary>
+    /// <param name="assemblyName">文件路径</param>
+    /// <param name="currentDomainAssemblies">当前已经加载的应用程序域</param>
+    private static void LoadAssembly(AssemblyName assemblyName, Assembly[] currentDomainAssemblies)
+    {
+        try
+        {
+            if(IsSkip(assemblyName))
+                return;
+            if (currentDomainAssemblies.Any(t => t.FullName == assemblyName.FullName))
+                return;
+            Debug.WriteLine($"加载程序集：{assemblyName}");
+            AppDomain.CurrentDomain.Load(assemblyName);
+        }
+        catch (BadImageFormatException e)
+        {
+            Debug.WriteLine($"[{nameof(AssemblyManager)}-{nameof(LoadAssembly)}]: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 是否过滤程序集
+    /// </summary>
+    /// <param name="assemblyName">程序集名称</param>
+    private static bool IsSkip(AssemblyName assemblyName)
+    {
+        var applicationName = Assembly.GetEntryAssembly()?.GetName().Name;
+        if (assemblyName.Name.StartsWith($"{applicationName}.Views"))
+            return false;
+        if (assemblyName.Name.StartsWith($"{applicationName}.PrecompiledViews"))
+            return false;
+        return !AssemblyFilterFunc(assemblyName);
+    }
+
+    /// <summary>
+    /// 是否过滤程序集
+    /// </summary>
+    /// <param name="assembly">程序集</param>
+    private static bool IsSkip(Assembly assembly) => IsSkip(assembly.GetName());
 
     /// <summary>
     /// 查找指定条件的类型

@@ -44,7 +44,7 @@ public class BingBuilder : IBingBuilder
     private static List<BingModule> GetAllModules(IServiceCollection services)
     {
         var moduleTypeFinder = services.GetOrAddTypeFinder<IBingModuleTypeFinder>(assemblyFinder => new BingModuleTypeFinder(assemblyFinder));
-        var moduleTypes = moduleTypeFinder.FindAll();
+        var moduleTypes = moduleTypeFinder.FindAll(true);
         return moduleTypes.Select(m => (BingModule)Activator.CreateInstance(m))
             .OrderBy(m => m.Level)
             .ThenBy(m => m.Order)

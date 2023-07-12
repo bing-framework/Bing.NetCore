@@ -33,56 +33,57 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
     /// </summary>
     protected override Assembly[] FindAllItems()
     {
-        var context = DependencyContext.Default;
-        var names = new List<string>();
-        if (context != null)
-        {
-            var dllNames = context.CompileLibraries.SelectMany(m => m.Assemblies)
-                .Distinct()
-                .Select(m => m.Replace(".dll", ""))
-                .OrderBy(m => m).ToArray();
-            if (dllNames.Length > 0)
-            {
-                names =
-                    (from name in dllNames
-                     let i = name.LastIndexOf('/') + 1
-                     select name.Substring(i, name.Length - i))
-                    .Distinct()
-                    .WhereIf(Match, _filterNetAssembly)
-                    .OrderBy(m => m)
-                    .ToList();
-            }
-            else
-            {
-                foreach (var library in context.CompileLibraries)
-                {
-                    var name = library.Name;
-                    if (_filterNetAssembly && !Match(name))
-                        continue;
-                    if (!names.Contains(name))
-                        names.Add(name);
-                }
-            }
-        }
-        else
-        {
-            var path = AppContext.BaseDirectory;
-            var dllNames = Directory.GetFiles(path, "*.dll", SearchOption.TopDirectoryOnly)
-                .Concat(Directory.GetFiles(path, "*.exe", SearchOption.TopDirectoryOnly))
-                .Select(m => m.Replace(".dll", "").Replace(".exe", ""))
-                .Distinct()
-                .OrderBy(m => m)
-                .ToArray();
-            if (dllNames.Length > 0)
-                names = (from name in dllNames
-                         let i = name.LastIndexOf('\\') + 1
-                         select name.Substring(i, name.Length - i))
-                    .Distinct()
-                    .WhereIf(Match, _filterNetAssembly)
-                    .OrderBy(m => m)
-                    .ToList();
-        }
-        return LoadAssemblies(names);
+        return AssemblyManager.AllAssemblies;
+        //var context = DependencyContext.Default;
+        //var names = new List<string>();
+        //if (context != null)
+        //{
+        //    var dllNames = context.CompileLibraries.SelectMany(m => m.Assemblies)
+        //        .Distinct()
+        //        .Select(m => m.Replace(".dll", ""))
+        //        .OrderBy(m => m).ToArray();
+        //    if (dllNames.Length > 0)
+        //    {
+        //        names =
+        //            (from name in dllNames
+        //             let i = name.LastIndexOf('/') + 1
+        //             select name.Substring(i, name.Length - i))
+        //            .Distinct()
+        //            .WhereIf(Match, _filterNetAssembly)
+        //            .OrderBy(m => m)
+        //            .ToList();
+        //    }
+        //    else
+        //    {
+        //        foreach (var library in context.CompileLibraries)
+        //        {
+        //            var name = library.Name;
+        //            if (_filterNetAssembly && !Match(name))
+        //                continue;
+        //            if (!names.Contains(name))
+        //                names.Add(name);
+        //        }
+        //    }
+        //}
+        //else
+        //{
+        //    var path = AppContext.BaseDirectory;
+        //    var dllNames = Directory.GetFiles(path, "*.dll", SearchOption.TopDirectoryOnly)
+        //        .Concat(Directory.GetFiles(path, "*.exe", SearchOption.TopDirectoryOnly))
+        //        .Select(m => m.Replace(".dll", "").Replace(".exe", ""))
+        //        .Distinct()
+        //        .OrderBy(m => m)
+        //        .ToArray();
+        //    if (dllNames.Length > 0)
+        //        names = (from name in dllNames
+        //                 let i = name.LastIndexOf('\\') + 1
+        //                 select name.Substring(i, name.Length - i))
+        //            .Distinct()
+        //            .WhereIf(Match, _filterNetAssembly)
+        //            .OrderBy(m => m)
+        //            .ToList();
+        //}
+        //return LoadAssemblies(names);
     }
 
     /// <summary>

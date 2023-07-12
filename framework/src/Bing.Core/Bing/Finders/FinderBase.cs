@@ -1,4 +1,6 @@
-﻿namespace Bing.Finders;
+﻿using System.Diagnostics;
+
+namespace Bing.Finders;
 
 /// <summary>
 /// 查找器基类
@@ -44,6 +46,7 @@ public abstract class FinderBase<TItem> : IFinder<TItem>
             Found = true;
             ItemsCache.Clear();
             ItemsCache.AddRange(items);
+            Debug.WriteLine($"[{GetType()}-{nameof(FindAll)}]已缓存: {fromCache}");
             return items;
         }
     }

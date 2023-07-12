@@ -21,7 +21,7 @@ public static partial class Extensions
     {
         var mapperProfileTypeFinder = services.GetOrAddTypeFinder<IMapperProfileTypeFinder>(assemblyFinder => new MapperProfileTypeFinder(assemblyFinder));
         var instances = mapperProfileTypeFinder
-            .FindAll()
+            .FindAll(true)
             .Select(type => Reflections.CreateInstance<IObjectMapperProfile>(type))
             .ToList();
         // 创建 AutoMapper 配置
