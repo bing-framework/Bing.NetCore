@@ -1,5 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP" Version="6.2.1" />
-  </ItemGroup>
-</Project>

@@ -7,8 +7,12 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <PackageReference Include="EasyCaching.Core" Version="1.9.0" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing\Bing.Core.csproj" />
+  </ItemGroup>
 
 </Project>

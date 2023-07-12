@@ -86,6 +86,7 @@ public static partial class BingLoggerExtensions
     public static void LogException(this ILogger logger, Exception ex, LogLevel? level = null)
     {
         var selectedLevel = level ?? ex.GetLogLevel();
+
         logger.LogWithLevel(selectedLevel, ex.Message, ex);
         LogKnownProperties(logger, ex, selectedLevel);
         LogSelfLogging(logger, ex);
@@ -114,7 +115,7 @@ public static partial class BingLoggerExtensions
     /// <param name="logLevel">日志级别</param>
     private static void LogData(ILogger logger, Exception exception, LogLevel logLevel)
     {
-        if (exception.Data == null || exception.Data.Count <= 0)
+        if (exception.Data.Count <= 0)
             return;
         var sb = new StringBuilder();
         sb.AppendLine("---------- Exception Data ----------");
@@ -131,17 +132,16 @@ public static partial class BingLoggerExtensions
     private static void LogSelfLogging(ILogger logger, Exception exception)
     {
         var loggingExceptions = new List<IExceptionWithSelfLogging>();
-        if (exception is IExceptionWithSelfLogging)
-            loggingExceptions.Add(exception as IExceptionWithSelfLogging);
-        else if (exception is AggregateException && exception.InnerException != null)
+        if (exception is IExceptionWithSelfLogging logging)
+            loggingExceptions.Add(logging);
+        else if (exception is AggregateException aggregateException && aggregateException.InnerException != null)
         {
-            var aggregateException = exception as AggregateException;
-            if (aggregateException.InnerException is IExceptionWithSelfLogging)
-                loggingExceptions.Add(aggregateException.InnerExceptions as IExceptionWithSelfLogging);
+            if (aggregateException.InnerException is IExceptionWithSelfLogging selfLogging)
+                loggingExceptions.Add(selfLogging);
             foreach (var innerException in aggregateException.InnerExceptions)
             {
-                if (innerException is IExceptionWithSelfLogging)
-                    loggingExceptions.AddIfNotContains(innerException as IExceptionWithSelfLogging);
+                if (innerException is IExceptionWithSelfLogging withSelfLogging)
+                    loggingExceptions.AddIfNotContains(withSelfLogging);
             }
         }
 

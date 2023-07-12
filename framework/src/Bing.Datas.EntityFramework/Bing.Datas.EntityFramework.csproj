@@ -11,9 +11,20 @@
 
   <Import Project="..\..\..\common.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="$(EfCore6Version)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Bing\Data\Stores\EntityFrameworkCore\" />

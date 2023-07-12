@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.2.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
     <PackageReference Include="DotNetCore.CAP.Dashboard" Version="3.1.2" />
     <PackageReference Include="Serilog.Enrichers.Span" Version="2.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
   </ItemGroup>
 
   <ItemGroup>

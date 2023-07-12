@@ -1,6 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
-    <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
-  </ItemGroup>
-</Project>

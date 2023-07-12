@@ -1,5 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing\Bing.Core.csproj" />
-  </ItemGroup>
-</Project>
