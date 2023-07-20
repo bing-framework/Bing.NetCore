@@ -39,11 +39,14 @@ namespace Bing.Admin.Modules
             //services.AddNLog();
             services.AddBingLogging(x => { });
             // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
-            Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
-            {
-                o.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
-                o.ServerUrl = "http://10.186.135.147:5100";
-            });
+            //Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
+            //{
+            //    o.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+            //    o.ServerUrl = "http://10.186.135.147:5100";
+            //});
+            ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+            ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
+            ExceptionlessClient.Default.Startup();
             services.AddLogging(loggingBuilder =>
             {
                 var configuration = services.GetConfiguration();

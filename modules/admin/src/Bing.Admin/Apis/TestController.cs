@@ -167,6 +167,23 @@ namespace Bing.Admin.Apis
         }
 
         /// <summary>
+        /// 测试日志属性
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("testLoggerWithProperties")]
+        public Task<IActionResult> TestLoggerWithPropertiesAsync(string text)
+        {
+            var request = new TestNullableGuidRequest();
+            request.TestId = Guid.NewGuid();
+            request.TestId2 = Guid.NewGuid();
+            OtherLog.Message("测试消息: {TestId}, {TestId2}, {text}", request.TestId, request.TestId2, text)
+                .LogInformation();
+            Logger.LogInformation("原生日志测试消息: {TestId}, {TestId2}, {text}", request.TestId, request.TestId2, text);
+
+            return Task.FromResult(Success());
+        }
+
+        /// <summary>
         /// 测试异常自定义数据
         /// </summary>
         [AllowAnonymous]
