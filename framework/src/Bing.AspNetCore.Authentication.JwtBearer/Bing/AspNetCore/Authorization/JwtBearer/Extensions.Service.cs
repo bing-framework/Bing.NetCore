@@ -78,7 +78,7 @@ public static partial class Extensions
     /// <param name="options">Jwt选项配置</param>
     private static TokenValidationParameters GetValidationParameters(JwtOptions options)
     {
-        return new TokenValidationParameters()
+        return new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true, // 是否验证发行者签名密钥
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Secret)),

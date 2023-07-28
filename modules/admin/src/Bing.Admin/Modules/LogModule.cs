@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging;
@@ -36,19 +37,15 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            //services.AddNLog();
             services.AddBingLogging(x => { });
             // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
-            //Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
-            //{
-            //    o.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
-            //    o.ServerUrl = "http://10.186.135.147:5100";
-            //});
+            
             ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
             ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
             ExceptionlessClient.Default.Startup();
             services.AddLogging(loggingBuilder =>
             {
+                var logFilePath = $"{AppContext.BaseDirectory}logs\\log-.log";
                 var configuration = services.GetConfiguration();
                 serilog.Log.Logger = new serilog.LoggerConfiguration()
                     .Enrich.FromLogContext()
@@ -61,6 +58,16 @@ namespace Bing.Admin.Modules
                             builder.Target.AddTags(traceId.ToString() ?? string.Empty);
                         builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
                         return builder;
+                    })
+                    .WriteTo.Async(o =>
+                    {
+                        o.File(logFilePath,
+                            rollingInterval: RollingInterval.Day,
+                            rollOnFileSizeLimit: true,
+                            fileSizeLimitBytes: 102400,
+                            retainedFileCountLimit: 10,
+                            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}][{LogLevel}][{TraceId}][{SourceContext}] {Message}{NewLine}{Exception}"
+                        );
                     })
                     .ReadFrom.Configuration(configuration)
                     .ConfigLogLevel(configuration)
