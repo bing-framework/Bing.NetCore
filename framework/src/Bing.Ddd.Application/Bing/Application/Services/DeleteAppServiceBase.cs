@@ -13,7 +13,7 @@ namespace Bing.Application.Services;
 /// <typeparam name="TDto">数据传输对象类型</typeparam>
 /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
 public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter> : DeleteAppServiceBase<TEntity, TDto, TQueryParameter, Guid>
-    where TEntity : class, IKey<Guid>, IVersion, new()
+    where TEntity : class, IKey<Guid>, new()
     where TDto : IDto, new()
     where TQueryParameter : IQueryParameter
 {
@@ -37,7 +37,7 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter> : Del
 public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey> :
     QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey>,
     IDeleteAppService<TDto, TQueryParameter>
-    where TEntity : class, IKey<TKey>, IVersion, new()
+    where TEntity : class, IKey<TKey>, new()
     where TDto : new()
     where TQueryParameter : IQueryParameter
 {

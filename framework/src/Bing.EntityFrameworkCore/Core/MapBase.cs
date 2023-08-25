@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bing.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Bing.Datas.EntityFramework.Core;
@@ -40,6 +41,11 @@ public abstract class MapBase<TEntity> : IMap where TEntity : class
     /// <param name="builder">实体类型生成器</param>
     protected virtual void MapVersion(EntityTypeBuilder<TEntity> builder)
     {
+        if (typeof(IVersion).IsAssignableFrom(typeof(TEntity)) == false)
+            return;
+        builder.Property(nameof(IVersion.Version))
+            .HasColumnName(nameof(IVersion.Version))
+            .IsConcurrencyToken();
     }
 
     /// <summary>

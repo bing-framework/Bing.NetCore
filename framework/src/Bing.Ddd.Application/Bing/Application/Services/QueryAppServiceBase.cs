@@ -14,7 +14,7 @@ namespace Bing.Application.Services;
 /// <typeparam name="TDto">数据传输对象类型</typeparam>
 /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
 public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter> : QueryAppServiceBase<TEntity, TDto, TQueryParameter, Guid>
-    where TEntity : class, IKey<Guid>, IVersion
+    where TEntity : class, IKey<Guid>
     where TDto : new()
     where TQueryParameter : IQueryParameter
 {
@@ -35,7 +35,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter> : Quer
 /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
 /// <typeparam name="TKey">实体标识类型</typeparam>
 public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> : AppServiceBase, IQueryAppService<TDto, TQueryParameter>
-    where TEntity : class, IKey<TKey>, IVersion
+    where TEntity : class, IKey<TKey>
     where TDto : new()
     where TQueryParameter : IQueryParameter
 {

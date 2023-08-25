@@ -43,7 +43,7 @@ namespace Bing.Admin.Modules
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             // 替换CAP消费者服务选择器
-            services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
+            //services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
             // 替换CAP订阅执行者
             services.AddSingleton<ISubscribeInvoker, CapSubscribeInvoker>();
             LoadEvent(services);

@@ -1,4 +1,5 @@
-﻿using FreeSql;
+﻿using Bing.Domain.Entities;
+using FreeSql;
 using FreeSql.Extensions.EfCoreFluentApi;
 
 namespace Bing.FreeSQL;
@@ -42,6 +43,11 @@ public abstract class MapBase<TEntity> : IMap where TEntity : class
     /// <param name="builder">实体类型生成器</param>
     protected virtual void MapVersion(EfCoreTableFluent<TEntity> builder)
     {
+        if (typeof(IVersion).IsAssignableFrom(typeof(TEntity)) == false)
+            return;
+        builder.Property(nameof(IVersion.Version))
+            .HasColumnName(nameof(IVersion.Version))
+            .IsRowVersion();
     }
 
     /// <summary>

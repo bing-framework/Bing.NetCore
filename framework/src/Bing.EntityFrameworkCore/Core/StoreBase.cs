@@ -18,7 +18,7 @@ namespace Bing.Datas.EntityFramework.Core;
 /// </summary>
 /// <typeparam name="TEntity">对象类型</typeparam>
 public abstract class StoreBase<TEntity> : StoreBase<TEntity, Guid>, IStore<TEntity>
-    where TEntity : class, IKey<Guid>, IVersion
+    where TEntity : class, IKey<Guid>
 {
     /// <summary>
     /// 初始化一个<see cref="StoreBase{TEntity}"/>类型的实例
@@ -475,8 +475,6 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <param name="entity">实体</param>
     protected void ValidateVersion(EntityEntry<TEntity> entry, TEntity entity)
     {
-        //if (entry.State == EntityState.Detached)
-        //    return;
         if (entity is not IVersion current)
             return;
         if (current.Version == null || current.Version.Length == 0)

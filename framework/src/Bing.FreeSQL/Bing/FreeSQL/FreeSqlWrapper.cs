@@ -10,3 +10,15 @@ public class FreeSqlWrapper
     /// </summary>
     public IFreeSql Orm { get; set; }
 }
+
+/// <summary>
+/// FreeSQL包装器
+/// </summary>
+/// <typeparam name="TMark">标记类型</typeparam>
+public class FreeSqlWrapper<TMark>
+{
+    /// <summary>
+    /// ORM
+    /// </summary>
+    public IFreeSql<TMark> Orm { get; set; }
+}

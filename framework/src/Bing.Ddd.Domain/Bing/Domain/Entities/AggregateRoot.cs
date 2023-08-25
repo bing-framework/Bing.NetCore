@@ -1,5 +1,4 @@
 ﻿using Bing.Auditing;
-using Bing.Domain.Entities.Events;
 using Bing.Validation;
 
 namespace Bing.Domain.Entities;
@@ -8,7 +7,7 @@ namespace Bing.Domain.Entities;
 /// 聚合根
 /// </summary>
 /// <typeparam name="TEntity">实体类型</typeparam>
-public abstract class AggregateRoot<TEntity> : AggregateRoot<TEntity, Guid>
+public abstract class AggregateRoot<TEntity> : BasicAggregateRoot<TEntity>, IVersion
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
@@ -25,6 +24,12 @@ public abstract class AggregateRoot<TEntity> : AggregateRoot<TEntity, Guid>
     protected AggregateRoot(Guid id) : base(id)
     {
     }
+
+    /// <summary>
+    /// 版本号（乐观锁）
+    /// </summary>
+    [DisableAuditing]
+    public virtual byte[] Version { get; set; }
 }
 
 /// <summary>
@@ -32,14 +37,9 @@ public abstract class AggregateRoot<TEntity> : AggregateRoot<TEntity, Guid>
 /// </summary>
 /// <typeparam name="TEntity">实体类型</typeparam>
 /// <typeparam name="TKey">标识类型</typeparam>
-public abstract class AggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, IAggregateRoot<TEntity, TKey>
+public abstract class AggregateRoot<TEntity, TKey> : BasicAggregateRoot<TEntity, TKey>, IVersion
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
-    /// 领域事件列表
-    /// </summary>
-    private List<DomainEvent> _domainEvents;
-
     /// <summary>
     /// 初始化一个<see cref="AggregateRoot{TEntity,TKey}"/>类型的实例
     /// </summary>
@@ -57,31 +57,5 @@ public abstract class AggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, 
     /// 版本号（乐观锁）
     /// </summary>
     [DisableAuditing]
-    public byte[] Version { get; set; }
-
-    /// <summary>
-    /// 获取领域事件集合
-    /// </summary>
-    public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents?.AsReadOnly();
-
-    /// <summary>
-    /// 添加领域事件
-    /// </summary>
-    /// <param name="event">领域事件</param>
-    public void AddDomainEvent(DomainEvent @event)
-    {
-        _domainEvents ??= new List<DomainEvent>();
-        _domainEvents.Add(@event);
-    }
-
-    /// <summary>
-    /// 移除领域事件
-    /// </summary>
-    /// <param name="event">领域事件</param>
-    public void RemoveDomainEvent(DomainEvent @event) => _domainEvents?.Remove(@event);
-
-    /// <summary>
-    /// 清空领域事件
-    /// </summary>
-    public void ClearDomainEvents() => _domainEvents?.Clear();
+    public virtual byte[] Version { get; set; }
 }

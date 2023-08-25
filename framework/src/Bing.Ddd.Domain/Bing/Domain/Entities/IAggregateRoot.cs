@@ -5,7 +5,7 @@ namespace Bing.Domain.Entities;
 /// <summary>
 /// 聚合根
 /// </summary>
-public interface IAggregateRoot : IEntity, IVersion
+public interface IAggregateRoot : IEntity
 {
     /// <summary>
     /// 获取领域事件集合
