@@ -70,48 +70,30 @@ public interface ILog
     /// <summary>
     /// 写跟踪日志
     /// </summary>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+    ILog LogTrace();
 
     /// <summary>
     /// 写调试日志
     /// </summary>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+    ILog LogDebug();
 
     /// <summary>
     /// 写信息日志
     /// </summary>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+    ILog LogInformation();
 
     /// <summary>
     /// 写警告日志
     /// </summary>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+    ILog LogWarning();
 
     /// <summary>
     /// 写错误日志
     /// </summary>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+    ILog LogError();
 
     /// <summary>
     /// 写致命日志
     /// </summary>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0);
+    ILog LogCritical();
 }

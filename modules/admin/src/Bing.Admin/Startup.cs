@@ -41,7 +41,8 @@ namespace Bing.Admin
                 .AddModule<CapModule>()
                 .AddModule<SkyApmModule>()
                 //.AddModule<MySqlAdminUnitOfWorkMigrationModule>()
-                .AddModule<SwaggerModule>();
+                .AddModule<SwaggerModule>()
+                .AddModule<HangfireModule>();
             //return services.BuildServiceContextProvider();
         }
 

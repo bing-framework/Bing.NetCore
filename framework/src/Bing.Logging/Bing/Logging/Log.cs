@@ -198,42 +198,42 @@ public class Log : ILog
     #region LogTrace(写跟踪日志)
 
     /// <inheritdoc />
-    public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Trace, memberName, sourceFilePath, sourceLineNumber);
+    public virtual ILog LogTrace() => WriteLog(LogLevel.Trace);
 
     #endregion
 
     #region LogDebug(写调试日志)
 
     /// <inheritdoc />
-    public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
+    public virtual ILog LogDebug() => WriteLog(LogLevel.Debug);
 
     #endregion
 
     #region LogInformation(写信息日志)
 
     /// <inheritdoc />
-    public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Information, memberName, sourceFilePath, sourceLineNumber);
+    public virtual ILog LogInformation() => WriteLog(LogLevel.Information);
 
     #endregion
 
     #region LogWarning(写警告日志)
 
     /// <inheritdoc />
-    public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
+    public virtual ILog LogWarning() => WriteLog(LogLevel.Warning);
 
     #endregion
 
     #region LogError(写错误日志)
 
     /// <inheritdoc />
-    public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Error, memberName, sourceFilePath, sourceLineNumber);
+    public virtual ILog LogError() => WriteLog(LogLevel.Error);
 
     #endregion
 
     #region LogCritical(写致命日志)
 
     /// <inheritdoc />
-    public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => WriteLog(LogLevel.Critical, memberName, sourceFilePath, sourceLineNumber);
+    public virtual ILog LogCritical() => WriteLog(LogLevel.Critical);
 
     #endregion
 
@@ -319,15 +319,11 @@ public class Log : ILog
     /// 写日志
     /// </summary>
     /// <param name="level">日志级别</param>
-    /// <param name="memberName">方法名</param>
-    /// <param name="sourceFilePath">文件路径</param>
-    /// <param name="sourceLineNumber">行号</param>
-    protected virtual ILog WriteLog(LogLevel level, string memberName, string sourceFilePath, int sourceLineNumber)
+    protected virtual ILog WriteLog(LogLevel level)
     {
         try
         {
             LogLevel = level;
-            CurrentDescriptor.Context.SetCallerInfo(memberName, sourceFilePath, sourceLineNumber);
             var scopeDict = CurrentDescriptor.Context.ExposeScopeState();
             using (Logger.BeginScope(scopeDict))
             {
@@ -344,7 +340,7 @@ public class Log : ILog
         }
         catch (Exception e)
         {
-            Logger.LogCritical(LogErrorEventId, e, $"未知异常错误信息: {e.Message}. MemberName={memberName},FilePath={sourceFilePath},LineNumber={sourceLineNumber}.");
+            Logger.LogCritical(LogErrorEventId, e, $"未知异常错误信息: {e.Message}.");
             return this;
         }
         finally

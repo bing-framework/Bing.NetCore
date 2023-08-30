@@ -147,7 +147,7 @@ public abstract partial class SqlQueryBase
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<dynamic>> ExecuteProcedureQueryAsync(string procedure, int? timeout = null, bool buffered = true)
+    public Task<List<dynamic>> ExecuteProcedureQueryAsync(string procedure, int? timeout = null, bool buffered = true)
     {
         throw new NotImplementedException();
     }
@@ -159,7 +159,7 @@ public abstract partial class SqlQueryBase
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<TEntity>(string procedure, int? timeout = null, bool buffered = true)
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<TEntity>(string procedure, int? timeout = null, bool buffered = true)
     {
         throw new NotImplementedException();
     }
@@ -174,7 +174,7 @@ public abstract partial class SqlQueryBase
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, TEntity>(string procedure, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, TEntity>(string procedure, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
     {
         throw new NotImplementedException();
     }
@@ -190,7 +190,7 @@ public abstract partial class SqlQueryBase
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, TEntity>(string procedure, Func<T1, T2, T3, TEntity> map, int? timeout = null,
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, TEntity>(string procedure, Func<T1, T2, T3, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
         throw new NotImplementedException();
@@ -208,7 +208,7 @@ public abstract partial class SqlQueryBase
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, TEntity>(string procedure, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null,
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, TEntity>(string procedure, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
         throw new NotImplementedException();
@@ -227,7 +227,7 @@ public abstract partial class SqlQueryBase
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null,
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
         throw new NotImplementedException();
@@ -247,7 +247,7 @@ public abstract partial class SqlQueryBase
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null,
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
         throw new NotImplementedException();
@@ -268,7 +268,7 @@ public abstract partial class SqlQueryBase
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public async Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null,
+    public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
         throw new NotImplementedException();

@@ -1,0 +1,206 @@
+﻿using System;
+using AspectCore.DependencyInjection;
+using System.Diagnostics;
+using Bing.Admin.Jobs;
+using Bing.AspNetCore;
+using Bing.Core.Modularity;
+using Bing.Tracing;
+using Hangfire;
+using Hangfire.Client;
+using Hangfire.Common;
+using Hangfire.MemoryStorage;
+using Hangfire.Server;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Bing.Admin.Modules;
+
+/// <summary>
+/// Hangfire 后台任务模块
+/// </summary>
+[DependsOnModule(typeof(AspNetCoreModule))]
+public class HangfireModule : AspNetCoreBingModule
+{
+    /// <summary>
+    /// 模块级别。级别越小越先启动
+    /// </summary>
+    public override ModuleLevel Level => ModuleLevel.Framework;
+
+    /// <summary>
+    /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
+    /// 级别默认为0，表示无依赖，需要在同级别有依赖顺序的时候，再重写为>0的顺序值
+    /// </summary>
+    public override int Order => 0;
+
+    /// <summary>
+    /// 添加服务。将模块服务添加到依赖注入服务容器中
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    public override IServiceCollection AddServices(IServiceCollection services)
+    {
+        services.AddHangfire(o =>
+        {
+            o.UseMemoryStorage();
+            o.UseFilter(new CorrelateFilterAttribute());
+        });
+        return services;
+    }
+
+    /// <summary>
+    /// 应用AspNetCore的服务业务
+    /// </summary>
+    /// <param name="app">应用程序构建器</param>
+    public override void UseModule(IApplicationBuilder app)
+    {
+        Enabled = true;
+        GlobalConfiguration.Configuration.UseActivator(new HangfireDIActivator(app.ApplicationServices));
+        app.UseHangfireDashboard();
+        app.UseHangfireServer();
+        RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0/5 * * * * ? ", TimeZoneInfo.Local);
+    }
+}
+
+/// <summary>
+/// Hangfire DI 激活器
+/// </summary>
+// ReSharper disable once InconsistentNaming
+internal class HangfireDIActivator : JobActivator
+{
+    /// <summary>
+    /// 服务提供程序
+    /// </summary>
+    private readonly IServiceProvider _serviceProvider;
+
+    /// <summary>
+    /// 服务解析器
+    /// </summary>
+    private readonly IServiceResolver _serviceResolver;
+
+    /// <summary>
+    /// 初始化一个<see cref="HangfireDIActivator"/>类型的实例
+    /// </summary>
+    /// <param name="serviceProvider">服务提供程序</param>
+    public HangfireDIActivator(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+        if (serviceProvider is IServiceResolver serviceResolver)
+            _serviceResolver = serviceResolver;
+    }
+
+    /// <summary>
+    /// 激活任务
+    /// </summary>
+    /// <param name="jobType">任务类型</param>
+    public override object ActivateJob(Type jobType) => _serviceResolver == null
+        ? _serviceProvider.GetService(jobType)
+        : _serviceResolver.Resolve(jobType);
+
+    /// <summary>
+    /// 开始作用域
+    /// </summary>
+    /// <param name="context">上下文</param>
+    public override JobActivatorScope BeginScope(JobActivatorContext context)
+    {
+        if (_serviceResolver == null)
+            return new MsdiScope(_serviceProvider.CreateScope());
+        return new AspectCoreScope(_serviceResolver.CreateScope());
+    }
+
+    /// <summary>
+    /// AspectCore 作用域
+    /// </summary>
+    class AspectCoreScope : JobActivatorScope
+    {
+        /// <summary>
+        /// 服务解析器
+        /// </summary>
+        private readonly IServiceResolver _resolver;
+
+        /// <summary>
+        /// 初始化一个<see cref="AspectCoreScope"/>类型的实例
+        /// </summary>
+        /// <param name="resolver">服务解析器</param>
+        public AspectCoreScope(IServiceResolver resolver) => _resolver = resolver;
+
+        /// <summary>
+        /// 解析
+        /// </summary>
+        /// <param name="type">类型</param>
+        public override object Resolve(Type type) => _resolver.Resolve(type);
+
+        /// <summary>
+        /// 释放作用域
+        /// </summary>
+        public override void DisposeScope() => _resolver.Dispose();
+    }
+
+    /// <summary>
+    /// MSDI 作用域
+    /// </summary>
+    class MsdiScope : JobActivatorScope
+    {
+        /// <summary>
+        /// 作用域
+        /// </summary>
+        private readonly IServiceScope _scope;
+
+        /// <summary>
+        /// 初始化一个<see cref="MsdiScope"/>类型的实例
+        /// </summary>
+        /// <param name="scope">作用域</param>
+        public MsdiScope(IServiceScope scope) => _scope = scope;
+
+        /// <summary>
+        /// 解析
+        /// </summary>
+        /// <param name="type">类型</param>
+        public override object Resolve(Type type) => _scope?.ServiceProvider?.GetService(type);
+
+        /// <summary>
+        /// 释放作用域
+        /// </summary>
+        public override void DisposeScope() => _scope?.Dispose();
+    }
+}
+
+/// <summary>
+/// 关联ID 过滤器
+/// </summary>
+internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, IServerFilter
+{
+    private const string CorrelationIdKey = "CorrelationId";
+    private const string CorrelateActivityKey = "Correlate-Activity";
+
+    /// <summary>Called before the creation of the job.</summary>
+    /// <param name="filterContext">The filter context.</param>
+    public void OnCreating(CreatingContext filterContext)
+    {
+        // 如果作业在相关上下文中启动，则将跟踪ID分配给作业
+        TraceIdContext.Current ??= new TraceIdContext(string.Empty);
+        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnCreating]TraceId: {TraceIdContext.Current.TraceId}");
+        filterContext.SetJobParameter(CorrelationIdKey, TraceIdContext.Current.TraceId);
+    }
+
+    /// <summary>Called after the creation of the job.</summary>
+    /// <param name="filterContext">The filter context.</param>
+    public void OnCreated(CreatedContext filterContext)
+    {
+        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnCreated]TraceId: {TraceIdContext.Current.TraceId}");
+    }
+
+    /// <summary>Called before the performance of the job.</summary>
+    /// <param name="filterContext">The filter context.</param>
+    public void OnPerforming(PerformingContext filterContext)
+    {
+        var correlationId = filterContext.GetJobParameter<string>(CorrelationIdKey) ?? filterContext.BackgroundJob.Id;
+        TraceIdContext.Current = new TraceIdContext(correlationId);
+        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnPerforming]TraceId: {TraceIdContext.Current.TraceId}");
+    }
+
+    /// <summary>Called after the performance of the job.</summary>
+    /// <param name="filterContext">The filter context.</param>
+    public void OnPerformed(PerformedContext filterContext)
+    {
+        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnPerformed]TraceId: {TraceIdContext.Current.TraceId}");
+    }
+}

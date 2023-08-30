@@ -75,7 +75,7 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null)
+    public Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null)
     {
         throw new NotImplementedException();
     }
@@ -86,7 +86,7 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null)
+    public Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null)
     {
         throw new NotImplementedException();
     }
@@ -140,7 +140,7 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null)
+    public Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null)
     {
         throw new NotImplementedException();
     }
