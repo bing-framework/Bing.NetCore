@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging;
@@ -55,8 +56,17 @@ namespace Bing.Admin.Modules
                     .WriteTo.Exceptionless(additionalOperation: (builder) =>
                     {
                         if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
+                        {
                             builder.Target.AddTags(traceId.ToString() ?? string.Empty);
-                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
+                            Debug.WriteLine($"Exceptionless[TraceId:{traceId}]");
+                        }
+                        else
+                        {
+                            var id = (TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId;
+                            builder.Target.AddTags(id);
+                            Debug.WriteLine($"Exceptionless-Id[TraceId:{id}]");
+                        }
+                        
                         return builder;
                     })
                     .WriteTo.Async(o =>

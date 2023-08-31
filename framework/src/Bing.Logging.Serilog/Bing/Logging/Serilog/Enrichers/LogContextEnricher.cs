@@ -1,4 +1,5 @@
-﻿using Bing.DependencyInjection;
+﻿using System.Diagnostics;
+using Bing.DependencyInjection;
 using Bing.Tracing;
 
 namespace Bing.Logging.Serilog.Enrichers;
@@ -59,6 +60,7 @@ internal class LogContextEnricher : ILogEventEnricher
             traceId = TraceIdContext.Current?.TraceId;
         if (string.IsNullOrWhiteSpace(traceId))
             return;
+        Debug.WriteLine($"【{nameof(LogContextEnricher)}】TraceId: {traceId}");
         var property = propertyFactory.CreateProperty("TraceId", traceId);
         logEvent.AddOrUpdateProperty(property);
     }

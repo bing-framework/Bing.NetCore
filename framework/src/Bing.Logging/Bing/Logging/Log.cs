@@ -1,4 +1,5 @@
-﻿using Bing.Extensions;
+﻿using System.Diagnostics;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logging.Core;
 using Bing.Text;
@@ -255,8 +256,11 @@ public class Log : ILog
     {
         if (LogContext == null)
             return;
-        if (!string.IsNullOrWhiteSpace(LogContext.TraceId))
-            Property("TraceId", LogContext.TraceId);
+        //if (!string.IsNullOrWhiteSpace(LogContext.TraceId))
+        //{
+        //    Debug.WriteLine($"【{nameof(Log)}】TraceId: {LogContext.TraceId}");
+        //    Property("TraceId", LogContext.TraceId);
+        //}
     }
 
     /// <summary>

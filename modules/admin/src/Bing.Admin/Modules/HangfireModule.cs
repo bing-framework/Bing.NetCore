@@ -56,7 +56,7 @@ public class HangfireModule : AspNetCoreBingModule
         GlobalConfiguration.Configuration.UseActivator(new HangfireDIActivator(app.ApplicationServices));
         app.UseHangfireDashboard();
         app.UseHangfireServer();
-        RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0/5 * * * * ? ", TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0 0/1 * * * ? ", TimeZoneInfo.Local);
     }
 }
 
@@ -177,7 +177,7 @@ internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, ISe
     {
         // 如果作业在相关上下文中启动，则将跟踪ID分配给作业
         TraceIdContext.Current ??= new TraceIdContext(string.Empty);
-        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnCreating]TraceId: {TraceIdContext.Current.TraceId}");
+        Debug.WriteLine($"【{nameof(CorrelateFilterAttribute)}-OnCreating】TraceId: {TraceIdContext.Current.TraceId}");
         filterContext.SetJobParameter(CorrelationIdKey, TraceIdContext.Current.TraceId);
     }
 
@@ -185,7 +185,7 @@ internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, ISe
     /// <param name="filterContext">The filter context.</param>
     public void OnCreated(CreatedContext filterContext)
     {
-        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnCreated]TraceId: {TraceIdContext.Current.TraceId}");
+        Debug.WriteLine($"【{nameof(CorrelateFilterAttribute)}-OnCreated】TraceId: {TraceIdContext.Current.TraceId}");
     }
 
     /// <summary>Called before the performance of the job.</summary>
@@ -194,13 +194,13 @@ internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, ISe
     {
         var correlationId = filterContext.GetJobParameter<string>(CorrelationIdKey) ?? filterContext.BackgroundJob.Id;
         TraceIdContext.Current = new TraceIdContext(correlationId);
-        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnPerforming]TraceId: {TraceIdContext.Current.TraceId}");
+        Debug.WriteLine($"【{nameof(CorrelateFilterAttribute)}-OnPerforming】TraceId: {TraceIdContext.Current.TraceId}");
     }
 
     /// <summary>Called after the performance of the job.</summary>
     /// <param name="filterContext">The filter context.</param>
     public void OnPerformed(PerformedContext filterContext)
     {
-        Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnPerformed]TraceId: {TraceIdContext.Current.TraceId}");
+        Debug.WriteLine($"【{nameof(CorrelateFilterAttribute)}-OnPerformed】TraceId: {TraceIdContext.Current.TraceId}");
     }
 }
