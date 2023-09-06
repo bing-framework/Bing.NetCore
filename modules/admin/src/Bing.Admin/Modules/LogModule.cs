@@ -7,6 +7,7 @@ using Bing.Logging;
 using Bing.Logging.Serilog;
 using Bing.Tracing;
 using Exceptionless;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -41,9 +42,14 @@ namespace Bing.Admin.Modules
             services.AddBingLogging(x => { });
             // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
             
-            ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
-            ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
-            ExceptionlessClient.Default.Startup();
+            //ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+            //ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
+            //ExceptionlessClient.Default.Startup();
+            services.AddExceptionless(x =>
+            {
+                x.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+                x.ServerUrl = "http://10.186.135.147:5100";
+            });
             services.AddLogging(loggingBuilder =>
             {
                 var logFilePath = $"{AppContext.BaseDirectory}logs\\log-.log";
@@ -85,6 +91,15 @@ namespace Bing.Admin.Modules
                 loggingBuilder.AddSerilog();
             });
             return services;
+        }
+
+        /// <summary>
+        /// 应用AspNetCore的服务业务
+        /// </summary>
+        /// <param name="app">应用程序构建器</param>
+        public override void UseModule(IApplicationBuilder app)
+        {
+            app.UseExceptionless();
         }
     }
 }

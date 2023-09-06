@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Bing.Helpers;
 using Bing.Logging.Tests.Samples;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Bing.Logging.Tests;
@@ -17,13 +18,16 @@ public class LogTest
     /// </summary>
     private readonly ILog<LogTest> _log;
 
+    private readonly ILogger<LogTest> _logger;
+
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public LogTest(IServiceProvider serviceProvider, ILog<LogTest> log, ILogContextAccessor accessor)
+    public LogTest(IServiceProvider serviceProvider, ILog<LogTest> log, ILogContextAccessor accessor, ILogger<LogTest> logger)
     {
         serviceProvider.UseBing();
         _log = log;
+        _logger = logger;
     }
 
     /// <summary>
@@ -142,5 +146,12 @@ public class LogTest
             .Property("Description", "hello")
             .State(new Product { Code = "a", Name = "b", Price = 123 })
             .LogTrace();
+    }
+
+    [Fact]
+    public void Test_Log()
+    {
+        var product = new Product() { Code = "007", Name = "隔壁老王", Price = 996 };
+        _logger.LogInformation("Test Log: {@Product}", product);
     }
 }
