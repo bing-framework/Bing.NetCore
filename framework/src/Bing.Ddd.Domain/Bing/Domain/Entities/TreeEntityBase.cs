@@ -28,7 +28,7 @@ public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid, Gu
 /// <typeparam name="TEntity">树型实体类型</typeparam>
 /// <typeparam name="TKey">标识类型</typeparam>
 /// <typeparam name="TParentId">父编号类型</typeparam>
-public abstract class TreeEntityBase<TEntity, TKey, TParentId> : AggregateRoot<TEntity, TKey>,
+public abstract class TreeEntityBase<TEntity, TKey, TParentId> : BasicAggregateRoot<TEntity, TKey>,
     ITreeEntity<TEntity, TKey, TParentId>
     where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>, IVerifyModel<TEntity>
 {
