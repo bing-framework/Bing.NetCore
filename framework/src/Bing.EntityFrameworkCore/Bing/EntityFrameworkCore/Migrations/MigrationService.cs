@@ -1,4 +1,7 @@
-﻿namespace Bing.EntityFrameworkCore.Migrations;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Bing.EntityFrameworkCore.Migrations;
 
 /// <summary>
 /// 迁移服务
@@ -6,11 +9,34 @@
 public class MigrationService : IMigrationService
 {
     /// <summary>
+    /// 日志
+    /// </summary>
+    private readonly ILogger<MigrationService> _logger;
+
+    /// <summary>
+    /// 迁移文件服务
+    /// </summary>
+    private readonly IMigrationFileService _migrationFileService;
+
+    /// <summary>
+    /// 初始化一个<see cref="MigrationService"/>类型的实例
+    /// </summary>
+    /// <param name="logger">日志</param>
+    /// <param name="migrationFileService">迁移文件服务</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public MigrationService(ILogger<MigrationService> logger, IMigrationFileService migrationFileService)
+    {
+        _logger = logger ?? NullLogger<MigrationService>.Instance;
+        _migrationFileService = migrationFileService ?? throw new ArgumentNullException(nameof(migrationFileService));
+    }
+
+    /// <summary>
     /// 安装 dotnet-ef 全局工具，执行命令: dotnet tool install -g dotnet-ef
     /// </summary>
     public IMigrationService InstallEfTool()
     {
-        throw new NotImplementedException();
+        _logger.LogTrace("准备安装 dotnet-ef 全局工具.");
+        return this;
     }
 
     /// <summary>

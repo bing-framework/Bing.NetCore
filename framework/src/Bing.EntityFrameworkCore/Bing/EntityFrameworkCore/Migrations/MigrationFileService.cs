@@ -1,4 +1,9 @@
-﻿namespace Bing.EntityFrameworkCore.Migrations;
+﻿using Bing.Helpers;
+using Bing.IO;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Bing.EntityFrameworkCore.Migrations;
 
 /// <summary>
 /// 迁移文件服务
@@ -6,12 +11,42 @@
 public class MigrationFileService : IMigrationFileService
 {
     /// <summary>
+    /// 日志
+    /// </summary>
+    private readonly ILogger<MigrationFileService> _logger;
+
+    /// <summary>
+    /// 迁移目录绝对路径
+    /// </summary>
+    private string _migrationsPath;
+
+    /// <summary>
+    /// 迁移名称
+    /// </summary>
+    private string _migrationName;
+
+    /// <summary>
+    /// 是否移除所有外键
+    /// </summary>
+    private bool _isRemoveForeignKeys;
+
+    /// <summary>
+    /// 初始化一个<see cref="MigrationFileService"/>类型的实例
+    /// </summary>
+    /// <param name="logger">日志</param>
+    public MigrationFileService(ILogger<MigrationFileService> logger)
+    {
+        _logger = logger ?? NullLogger<MigrationFileService>.Instance;
+    }
+
+    /// <summary>
     /// 设置迁移目录绝对路径。即：Migrations目录的绝对路径
     /// </summary>
     /// <param name="path">迁移目录绝对路径</param>
     public IMigrationFileService MigrationsPath(string path)
     {
-        throw new NotImplementedException();
+        _migrationsPath = path;
+        return this;
     }
 
     /// <summary>
@@ -20,7 +55,8 @@ public class MigrationFileService : IMigrationFileService
     /// <param name="name">迁移名称。范例：init</param>
     public IMigrationFileService MigrationName(string name)
     {
-        throw new NotImplementedException();
+        _migrationName = name;
+        return this;
     }
 
     /// <summary>
@@ -28,7 +64,8 @@ public class MigrationFileService : IMigrationFileService
     /// </summary>
     public IMigrationFileService RemoveForeignKeys()
     {
-        throw new NotImplementedException();
+        _isRemoveForeignKeys = true;
+        return this;
     }
 
     /// <summary>
@@ -36,7 +73,27 @@ public class MigrationFileService : IMigrationFileService
     /// </summary>
     public string GetFilePath()
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrWhiteSpace(_migrationsPath))
+            return null;
+        if (string.IsNullOrWhiteSpace(_migrationName))
+            return null;
+        var files = GetAllFiles(_migrationsPath, "*.cs");
+        var file = files.FirstOrDefault(t => t.Name.EndsWith($"{_migrationName}.cs"));
+        if (file == null)
+            return null;
+        return file.FullName;
+    }
+
+    /// <summary>
+    /// 获取全部文件，包括所有子目录
+    /// </summary>
+    /// <param name="path">目录路径</param>
+    /// <param name="searchPattern">搜索模式</param>
+    private static List<FileInfo> GetAllFiles(string path, string searchPattern)
+    {
+        return Directory.GetFiles(path, searchPattern, SearchOption.AllDirectories)
+            .Select(filePath => new FileInfo(filePath))
+            .ToList();
     }
 
     /// <summary>
@@ -44,7 +101,10 @@ public class MigrationFileService : IMigrationFileService
     /// </summary>
     public string GetContent()
     {
-        throw new NotImplementedException();
+        var filePath = GetFilePath();
+        if (string.IsNullOrWhiteSpace(filePath))
+            return null;
+        return FileHelper.ReadToString(filePath);
     }
 
     /// <summary>
@@ -53,6 +113,16 @@ public class MigrationFileService : IMigrationFileService
     /// <param name="filePath">文件绝对路径，传入null则覆盖原文件</param>
     public void Save(string filePath = null)
     {
-        throw new NotImplementedException();
+        if (_isRemoveForeignKeys == false)
+            return;
+        if (string.IsNullOrWhiteSpace(filePath))
+            filePath = GetFilePath();
+        var content = GetContent();
+        var pattern = @"table.ForeignKey\([\s\S]+?\);";
+        var result = Regexs.Replace(content, pattern, "");
+        pattern = @$"\s+{Common.Line}\s+{Common.Line}";
+        result = Regexs.Replace(result, pattern, Common.Line);
+        FileHelper.Write(filePath, result);
+        _logger.LogTrace($"修改迁移文件并保存成功，路径：{filePath}");
     }
 }
