@@ -46,4 +46,9 @@ public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposabl
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter, int? timeout = null);
+
+    /// <summary>
+    /// 临时禁用调试日志
+    /// </summary>
+    ISqlQuery DisableDebugLog();
 }

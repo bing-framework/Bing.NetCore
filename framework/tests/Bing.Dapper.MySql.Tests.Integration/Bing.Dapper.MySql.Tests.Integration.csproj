@@ -23,12 +23,12 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.14" />
-    <PackageReference Include="Xunit.DependencyInjection" Version="8.7.1" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
-    <PackageReference Include="Xunit.DependencyInjection" Version="8.7.1" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
   </ItemGroup>
 
   <ItemGroup>

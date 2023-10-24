@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using AspectCore.Extensions.DependencyInjection;
+﻿using AspectCore.Extensions.DependencyInjection;
 using AspectCore.Extensions.Hosting;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Data.Sql;
@@ -25,10 +24,8 @@ public class Startup
     /// </summary>
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
-        hostBuilder.ConfigureAppConfiguration((context, builder) =>
-        {
-            builder.AddJsonFile($"appsettings.json", false, true);
-        }).UseServiceContext();
+        hostBuilder.ConfigureDefaults(null)
+            .UseServiceContext();
     }
 
     /// <summary>
@@ -40,6 +37,7 @@ public class Startup
         services.AddMySqlUnitOfWork<ITestUnitOfWork, MySqlUnitOfWork>(connectionString);
         services.AddMySqlQuery(connectionString);
         services.AddMySqlExecutor(connectionString);
+        services.AddEntityMetadata<MySqlUnitOfWork>();
         // 日志
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
         services.EnableAop();

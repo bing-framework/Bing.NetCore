@@ -103,6 +103,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     protected SqlOptions Options { get; set; }
 
     /// <summary>
+    /// 是否启用调试SQL
+    /// </summary>
+    protected bool EnabledDebugSql { get; set; } = true;
+
+    /// <summary>
     /// Sql生成器
     /// </summary>
     public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
@@ -243,6 +248,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     protected void ClearAfterExecution()
     {
+        EnabledDebugSql = true;
         if (Options.IsClearAfterExecution == false)
             return;
         SqlBuilder.Clear();
@@ -333,6 +339,15 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     }
 
     /// <summary>
+    /// 临时禁用调试日志
+    /// </summary>
+    public ISqlQuery DisableDebugLog()
+    {
+        EnabledDebugSql = false;
+        return this;
+    }
+
+    /// <summary>
     /// 获取行数
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
@@ -368,6 +383,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     protected virtual void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
     {
         if (Logger.IsEnabled(LogLevel.Trace) == false)
+            return;
+        if (EnabledDebugSql == false)
             return;
         var message = new StringBuilder();
         foreach (var param in parameters)
