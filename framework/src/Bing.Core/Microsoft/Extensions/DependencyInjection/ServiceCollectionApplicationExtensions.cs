@@ -1,6 +1,7 @@
 ﻿using Bing;
 using Bing.Core.Builders;
 using Bing.Helpers;
+using Bing.Internal;
 using Bing.Options;
 using Bing.Reflection;
 using Microsoft.Extensions.Configuration;
@@ -26,8 +27,10 @@ public static class ServiceCollectionApplicationExtensions
         setupAction?.Invoke(options);
 
         Singleton<IConfiguration>.Instance = configuration;
-        // 初始化所有程序集查找器
-        services.TryAddSingleton<IAllAssemblyFinder>(new AppDomainAllAssemblyFinder());
+        // 注册核心服务（Options、Logging、Localization）
+        services.AddCoreServices();
+        // 注册核心 Bing 服务
+        services.AddCoreBingServices();
 
         var builder = services.GetOrAddSingletonInstance<IBingBuilder>(() => new BingBuilder(services));
 

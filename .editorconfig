@@ -65,7 +65,7 @@ dotnet_naming_style.pascal_case_style.capitalization                      = pasc
 ## 私有字段示例: _camelCase
 dotnet_naming_rule.private_field_rule.symbols                             = private_field_symbol
 dotnet_naming_rule.private_field_rule.style                               = private_field_style
-dotnet_naming_rule.private_field_rule.severity                            = error
+dotnet_naming_rule.private_field_rule.severity                            = suggestion
 dotnet_naming_symbols.private_field_symbol.applicable_kinds               = field
 dotnet_naming_symbols.private_field_symbol.applicable_accessibilities     = private
 dotnet_naming_style.private_field_style.required_prefix                   = _
