@@ -1,5 +1,4 @@
-﻿using Bing.Helpers;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Bing.ExceptionHandling;
 
@@ -31,7 +30,7 @@ public class ExceptionNotificationContext
     /// <param name="handled">是否已处理异常</param>
     public ExceptionNotificationContext(Exception exception, LogLevel? logLevel = null, bool handled = true)
     {
-        Exception = Check.NotNull(exception, nameof(exception));
+        Exception = exception ?? throw new ArgumentNullException(nameof(exception));
         LogLevel = logLevel ?? exception.GetLogLevel();
         Handled = handled;
     }

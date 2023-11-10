@@ -325,15 +325,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TestShare", "framework
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TestShare.MySql", "framework\tests\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj", "{C1A2220C-2BA4-4CAD-BA7B-BEF67034D4CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.MySql.Tests", "framework\tests\Bing.Dapper.MySql.Tests\Bing.Dapper.MySql.Tests.csproj", "{AC118996-0420-4030-9F7E-C35F2D5FB9BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.MySql.Tests", "framework\tests\Bing.Dapper.MySql.Tests\Bing.Dapper.MySql.Tests.csproj", "{AC118996-0420-4030-9F7E-C35F2D5FB9BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.PostgreSql.Tests", "framework\tests\Bing.Dapper.PostgreSql.Tests\Bing.Dapper.PostgreSql.Tests.csproj", "{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.PostgreSql.Tests", "framework\tests\Bing.Dapper.PostgreSql.Tests\Bing.Dapper.PostgreSql.Tests.csproj", "{94B4CDE4-2A94-45F0-AACC-1A02D7CF45B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.PostgreSql.Tests.Integration", "framework\tests\Bing.Dapper.PostgreSql.Tests.Integration\Bing.Dapper.PostgreSql.Tests.Integration.csproj", "{13183A7C-470C-4E91-B6AB-F49FB2897B30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.PostgreSql.Tests.Integration", "framework\tests\Bing.Dapper.PostgreSql.Tests.Integration\Bing.Dapper.PostgreSql.Tests.Integration.csproj", "{13183A7C-470C-4E91-B6AB-F49FB2897B30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.SqlServer.Tests.Integration", "framework\tests\Bing.Dapper.SqlServer.Tests.Integration\Bing.Dapper.SqlServer.Tests.Integration.csproj", "{AF2C8041-3B77-4912-8BC3-A19A18864215}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.SqlServer.Tests.Integration", "framework\tests\Bing.Dapper.SqlServer.Tests.Integration\Bing.Dapper.SqlServer.Tests.Integration.csproj", "{AF2C8041-3B77-4912-8BC3-A19A18864215}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Dapper.Oracle.Tests", "framework\tests\Bing.Dapper.Oracle.Tests\Bing.Dapper.Oracle.Tests.csproj", "{12F822A5-1353-4C27-922C-02F2655E9443}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.Oracle.Tests", "framework\tests\Bing.Dapper.Oracle.Tests\Bing.Dapper.Oracle.Tests.csproj", "{12F822A5-1353-4C27-922C-02F2655E9443}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Localization.Abstractions", "framework\src\Bing.Localization.Abstractions\Bing.Localization.Abstractions.csproj", "{15207D1B-721C-4F32-A3B8-A24B912B6043}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.ExceptionHandling", "framework\src\Bing.ExceptionHandling\Bing.ExceptionHandling.csproj", "{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -749,6 +753,14 @@ Global
 		{12F822A5-1353-4C27-922C-02F2655E9443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12F822A5-1353-4C27-922C-02F2655E9443}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12F822A5-1353-4C27-922C-02F2655E9443}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15207D1B-721C-4F32-A3B8-A24B912B6043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15207D1B-721C-4F32-A3B8-A24B912B6043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15207D1B-721C-4F32-A3B8-A24B912B6043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15207D1B-721C-4F32-A3B8-A24B912B6043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -900,6 +912,8 @@ Global
 		{13183A7C-470C-4E91-B6AB-F49FB2897B30} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
 		{AF2C8041-3B77-4912-8BC3-A19A18864215} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
 		{12F822A5-1353-4C27-922C-02F2655E9443} = {1D7AFFEB-BA34-4B25-B9E0-1AFD950D06CE}
+		{15207D1B-721C-4F32-A3B8-A24B912B6043} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
+		{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

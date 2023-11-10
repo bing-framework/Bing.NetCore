@@ -31,4 +31,26 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
 
         return new RemoteServiceErrorInfo {Code = StatusCode.Fail.ToString(), Message = exception.GetPrompt()};
     }
+
+    /// <summary>
+    /// 转换
+    /// </summary>
+    /// <param name="exception">异常</param>
+    /// <param name="options">配置操作</param>
+    public RemoteServiceErrorInfo Convert(Exception exception, Action<BingExceptionHandlingOptions> options = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 创建默认的异常处理选项配置
+    /// </summary>
+    protected virtual BingExceptionHandlingOptions CreateDefaultOptions()
+    {
+        return new BingExceptionHandlingOptions
+        {
+            SendExceptionDetailsToClients = false, 
+            SendStackTraceToClients = true,
+        };
+    }
 }

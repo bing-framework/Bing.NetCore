@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.ExceptionHandling</AssemblyName>
+    <PackageId>Bing.ExceptionHandling</PackageId>
+    <Description>Bing.ExceptionHandling是Bing应用框架的异常处理库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\Domain\Entities\" />
+  </ItemGroup>
+
+</Project>

@@ -13,4 +13,11 @@ public interface IExceptionToErrorInfoConverter
     /// <param name="exception">异常</param>
     /// <param name="includeSensitiveDetails">是否包含敏感信息</param>
     RemoteServiceErrorInfo Convert(Exception exception, bool includeSensitiveDetails);
+
+    /// <summary>
+    /// 转换
+    /// </summary>
+    /// <param name="exception">异常</param>
+    /// <param name="options">配置操作</param>
+    RemoteServiceErrorInfo Convert(Exception exception, Action<BingExceptionHandlingOptions> options = null);
 }
