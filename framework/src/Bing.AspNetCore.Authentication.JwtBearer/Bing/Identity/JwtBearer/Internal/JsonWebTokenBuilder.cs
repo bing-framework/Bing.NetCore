@@ -1,11 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Bing.Collections;
+using Bing.Date;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Identity.JwtBearer.Abstractions;
-using Bing.Utils.Timing;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -49,8 +49,7 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
         _tokenStore = tokenStore;
         _tokenPayloadStore = tokenPayloadStore;
         _options = options.Value;
-        if (_tokenHandler == null)
-            _tokenHandler = new JwtSecurityTokenHandler();
+        _tokenHandler = new JwtSecurityTokenHandler();
     }
 
     /// <summary>
@@ -80,7 +79,7 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
         var (refreshToken, refreshExpires) =
             Helper.CreateToken(_tokenHandler, claims, options, JsonWebTokenType.RefreshToken);
         var refreshTokenStr = refreshToken;
-        await _tokenStore.SaveRefreshTokenAsync(new RefreshToken()
+        await _tokenStore.SaveRefreshTokenAsync(new RefreshToken
         {
             ClientId = clientId,
             EndUtcTime = refreshExpires,
@@ -100,7 +99,7 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
         await _tokenStore.SaveTokenAsync(accessToken, accessExpires);
 
         // 绑定用户设备令牌
-        await _tokenStore.BindUserDeviceTokenAsync(userId, clientType, new DeviceTokenBindInfo()
+        await _tokenStore.BindUserDeviceTokenAsync(userId, clientType, new DeviceTokenBindInfo
         {
             UserId = userId,
             DeviceId = clientId,
