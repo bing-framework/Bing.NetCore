@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\common.tests.props" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Localization\Bing.Localization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 将指定路径下的所有 JSON 文件及其子文件夹中的 JSON 文件复制到输出目录 -->
+    <Content Include="Resources2\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <!-- 设置 ExcludeFromSingleFile 为 true，排除该文件在生成单文件应用程序时 -->
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+</Project>

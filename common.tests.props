@@ -7,11 +7,13 @@
 
   <!--单元测试基础配置-->
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <Version Condition=" '$(TargetFramework)' != 'net452' ">2.4.5</Version>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.6.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Condition="'$(TargetFramework)'!= 'netstandard2.0' And '$(TargetFramework)'!= 'netstandard2.1'">
+      <Version Condition=" '$(TargetFramework)' != 'net452' ">2.5.4</Version>
       <Version Condition=" '$(TargetFramework)' == 'net452' ">2.4.3</Version>
+      <Version Condition=" '$(TargetFramework)' == 'net5.0' ">2.4.5</Version>
+      <Version Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">2.4.5</Version>
       <Version Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">2.4.3</Version>
       <Version Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">2.4.3</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
