@@ -11,22 +11,29 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// <summary>
     /// 缓存
     /// </summary>
-    private readonly IMemoryCache _cache;
+    protected readonly IMemoryCache Cache;
 
     /// <summary>
     /// 资源类型
     /// </summary>
-    private readonly string _type;
+    protected readonly string Type;
+
+    /// <summary>
+    /// 本地化配置
+    /// </summary>
+    protected LocalizationOptions Options;
 
     /// <summary>
     /// 初始化一个<see cref="StringLocalizerBase"/>类型的实例
     /// </summary>
     /// <param name="cache">内存缓存</param>
     /// <param name="type">资源类型</param>
-    protected StringLocalizerBase(IMemoryCache cache, string type)
+    /// <param name="options">本地化配置</param>
+    protected StringLocalizerBase(IMemoryCache cache, string type,  IOptions<LocalizationOptions> options)
     {
-        _cache = cache;
-        _type = type;
+        Cache = cache;
+        Type = type;
+        Options = options?.Value ?? new LocalizationOptions();
     }
 
     /// <inheritdoc />
@@ -76,10 +83,14 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// <param name="name">资源名称</param>
     protected virtual LocalizedString GetLocalizedStringByCache(CultureInfo culture, string name)
     {
-        var key = CacheKeyHelper.GetCacheKey(culture.Name, _type, name);
-        return _cache == null
+        var key = CacheHelper.GetCacheKey(culture.Name, Type, name);
+        return Cache == null
             ? GetLocalizedString(culture, name)
-            : _cache.GetOrCreate(key, _ => GetLocalizedString(culture, name));
+            : Cache.GetOrCreate(key, entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(CacheHelper.GetExpiration(Options));
+                return GetLocalizedString(culture, name);
+            });
     }
 
     /// <summary>
@@ -89,7 +100,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// <param name="name">资源名称</param>
     protected virtual LocalizedString GetLocalizedString(CultureInfo culture, string name)
     {
-        var value = GetValue(culture, name, _type);
+        var value = GetValue(culture, name, Type);
         if (string.IsNullOrWhiteSpace(value))
             return new LocalizedString(name, string.Empty, true, null);
         return new LocalizedString(name, value, false, null);

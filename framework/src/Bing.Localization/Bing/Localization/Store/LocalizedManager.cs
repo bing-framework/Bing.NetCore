@@ -19,14 +19,21 @@ public class LocalizedManager : ILocalizedManager
     private readonly IMemoryCache _cache;
 
     /// <summary>
+    /// 本地化配置
+    /// </summary>
+    private readonly LocalizationOptions _options;
+
+    /// <summary>
     /// 初始化一个<see cref="LocalizedManager"/>类型的实例
     /// </summary>
     /// <param name="store">本地化资源存储器</param>
     /// <param name="cache">缓存</param>
-    public LocalizedManager(ILocalizedStore store, IMemoryCache cache)
+    /// <param name="options">本地化配置</param>
+    public LocalizedManager(ILocalizedStore store, IMemoryCache cache, IOptions<LocalizationOptions> options)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _options = options.Value ?? new LocalizationOptions();
     }
 
     /// <summary>
@@ -94,9 +101,9 @@ public class LocalizedManager : ILocalizedManager
     /// <param name="value">资源值</param>
     protected virtual void LoadResourceCache(string culture, string type, string name, string value)
     {
-        var cacheKey = CacheKeyHelper.GetCacheKey(culture, type, name);
+        var cacheKey = CacheHelper.GetCacheKey(culture, type, name);
         var localizedString = new LocalizedString(name, value, false, null);
-        _cache.Set(cacheKey, localizedString);
+        _cache.Set(cacheKey, localizedString, TimeSpan.FromSeconds(CacheHelper.GetExpiration(_options)));
     }
 
     /// <summary>
