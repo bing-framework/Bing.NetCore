@@ -1,9 +1,6 @@
-﻿using System.Globalization;
-using System.Reflection;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using Bing.Text;
 using Bing.Helpers;
-using Microsoft.Extensions.Localization;
 
 namespace Bing.Localization;
 

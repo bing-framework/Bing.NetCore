@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Globalization;
-
-namespace Bing.Localization.Store;
+﻿namespace Bing.Localization.Store;
 
 /// <summary>
 /// 数据存储本地化日志扩展

@@ -1,7 +1,5 @@
 ﻿using Bing.Helpers;
 using Bing.Localization.Caching;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Localization;
 
 namespace Bing.Localization.Store;
 

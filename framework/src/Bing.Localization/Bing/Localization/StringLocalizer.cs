@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.Localization;
-
-namespace Bing.Localization;
+﻿namespace Bing.Localization;
 
 /// <summary>
 /// 本地化资源查找器

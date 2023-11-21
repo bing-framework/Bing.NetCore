@@ -1,9 +1,4 @@
-﻿using System.Reflection;
-using Bing.Extensions;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Bing.Extensions;
 
 namespace Bing.Localization.Json;
 

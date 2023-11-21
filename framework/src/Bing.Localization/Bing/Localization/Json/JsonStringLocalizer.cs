@@ -1,11 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Bing.Helpers;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.Localization.Json;
 

@@ -1,7 +1,4 @@
 ﻿using Bing.Extensions;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 
 namespace Bing.Localization.Store;
 

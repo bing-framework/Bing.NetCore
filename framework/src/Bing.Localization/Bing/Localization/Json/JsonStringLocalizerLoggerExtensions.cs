@@ -1,7 +1,4 @@
-﻿using System.Globalization;
-using Microsoft.Extensions.Logging;
-
-namespace Bing.Localization.Json;
+﻿namespace Bing.Localization.Json;
 
 /// <summary>
 /// Json本地化日志扩展

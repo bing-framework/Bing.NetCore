@@ -1,7 +1,6 @@
 ﻿using Bing.Localization.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Localization;
 
 namespace Bing.Localization;
 

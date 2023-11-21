@@ -1,9 +1,4 @@
-﻿using System.Globalization;
-using Bing.Helpers;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Bing.Helpers;
 
 namespace Bing.Localization.Store;
 
