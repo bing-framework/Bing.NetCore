@@ -6,7 +6,7 @@
 public class TenantResolverConst
 {
     /// <summary>
-    /// 默认的租户键名
+    /// 默认租户键名。默认值：x-tenant-id
     /// </summary>
-    public const string DefaultTenantKey = "__tenant";
+    public const string DefaultTenantKey = "x-tenant-id";
 }

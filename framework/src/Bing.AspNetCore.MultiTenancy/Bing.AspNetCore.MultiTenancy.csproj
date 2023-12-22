@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.AspNetCore.MultiTenancy</AssemblyName>
+    <PackageId>Bing.AspNetCore.MultiTenancy</PackageId>
+    <Description>Bing.AspNetCore.MultiTenancy 组件，提供AspNetCore的多租户功能的封装</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.AspNetCore\Bing.AspNetCore.csproj" />
+    <ProjectReference Include="..\Bing.MultiTenancy\Bing.MultiTenancy.csproj" />
+  </ItemGroup>
+
+</Project>

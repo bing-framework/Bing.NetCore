@@ -10,4 +10,8 @@
   <Import Project="dependency.props" />
 
   <Import Project="references.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.MultiTenancy.Abstractions\Bing.MultiTenancy.Abstractions.csproj" />
+  </ItemGroup>
 </Project>
