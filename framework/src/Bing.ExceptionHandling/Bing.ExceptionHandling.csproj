@@ -11,8 +11,4 @@
     <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Bing\Domain\Entities\" />
-  </ItemGroup>
-
 </Project>

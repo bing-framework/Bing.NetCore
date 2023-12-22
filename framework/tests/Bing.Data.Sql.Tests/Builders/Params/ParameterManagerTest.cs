@@ -66,7 +66,7 @@ public class ParameterManagerTest
     public void Test_GetParams()
     {
         var parameters = _manager.GetParams();
-        Assert.Equal(0, parameters.Count);
+        Assert.Empty(parameters);
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ public class ParameterManagerTest
     {
         _manager.Add("a", 1);
         var parameters = _manager.GetParams();
-        Assert.Equal(1, parameters.Count);
+        Assert.Single(parameters);
         Assert.Equal(1, _manager.GetValue("a"));
     }
 
@@ -104,7 +104,7 @@ public class ParameterManagerTest
         _manager.Add("a", 1);
         _manager.Add("a", 2);
         var parameters = _manager.GetParams();
-        Assert.Equal(1, parameters.Count);
+        Assert.Single(parameters);
         Assert.Equal(2, _manager.GetValue("a"));
     }
 
@@ -116,7 +116,7 @@ public class ParameterManagerTest
     {
         _manager.Add("", 1);
         var parameters = _manager.GetParams();
-        Assert.Equal(0, parameters.Count);
+        Assert.Empty(parameters);
     }
 
     /// <summary>
@@ -129,7 +129,7 @@ public class ParameterManagerTest
         _manager.Add(paramName, 1);
         _manager.Clear();
         var parameters = _manager.GetParams();
-        Assert.Equal(0, parameters.Count);
+        Assert.Empty(parameters);
         Assert.Equal("@_p_0", _manager.GenerateName());
     }
 

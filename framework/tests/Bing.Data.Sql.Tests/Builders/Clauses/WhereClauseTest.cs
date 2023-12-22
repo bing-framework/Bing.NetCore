@@ -307,7 +307,7 @@ public class WhereClauseTest
     {
         _clause.Where<Sample>(t => t.Email == null);
         Assert.Equal("Where [Email] Is Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -329,7 +329,7 @@ public class WhereClauseTest
     {
         _clause.Where<Sample>(t => t.Email != null);
         Assert.Equal("Where [Email] Is Not Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -386,7 +386,7 @@ public class WhereClauseTest
     {
         _clause.WhereIfNotEmpty("Name", "");
         Assert.Null(GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -408,7 +408,7 @@ public class WhereClauseTest
     {
         _clause.WhereIfNotEmpty<Sample>(t => t.Email, "");
         Assert.Null(GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -430,7 +430,7 @@ public class WhereClauseTest
     {
         _clause.WhereIfNotEmpty<Sample>(t => t.Email == "");
         Assert.Null(GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -458,7 +458,7 @@ public class WhereClauseTest
     {
         _clause.IsNull("Name");
         Assert.Equal("Where [Name] Is Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -469,7 +469,7 @@ public class WhereClauseTest
     {
         _clause.IsNull<Sample>(t => t.Email);
         Assert.Equal("Where [Email] Is Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -480,7 +480,7 @@ public class WhereClauseTest
     {
         _clause.IsNull("f.Name");
         Assert.Equal("Where [f].[Name] Is Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     #endregion
@@ -495,7 +495,7 @@ public class WhereClauseTest
     {
         _clause.IsNotNull("Name");
         Assert.Equal("Where [Name] Is Not Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -506,7 +506,7 @@ public class WhereClauseTest
     {
         _clause.IsNotNull<Sample>(t => t.Email);
         Assert.Equal("Where [Email] Is Not Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -517,7 +517,7 @@ public class WhereClauseTest
     {
         _clause.IsNotNull("f.Name");
         Assert.Equal("Where [f].[Name] Is Not Null", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     #endregion
@@ -532,7 +532,7 @@ public class WhereClauseTest
     {
         _clause.IsEmpty("Name");
         Assert.Equal("Where ([Name] Is Null Or [Name]='')", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -543,7 +543,7 @@ public class WhereClauseTest
     {
         _clause.IsEmpty<Sample>(t => t.Email);
         Assert.Equal("Where ([Email] Is Null Or [Email]='')", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -554,7 +554,7 @@ public class WhereClauseTest
     {
         _clause.IsEmpty("f.Name");
         Assert.Equal("Where ([f].[Name] Is Null Or [f].[Name]='')", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     #endregion
@@ -569,7 +569,7 @@ public class WhereClauseTest
     {
         _clause.IsNotEmpty("Name");
         Assert.Equal("Where [Name] Is Not Null And [Name]<>''", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -580,7 +580,7 @@ public class WhereClauseTest
     {
         _clause.IsNotEmpty<Sample>(t => t.Email);
         Assert.Equal("Where [Email] Is Not Null And [Email]<>''", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -591,7 +591,7 @@ public class WhereClauseTest
     {
         _clause.IsNotEmpty("f.Name");
         Assert.Equal("Where [f].[Name] Is Not Null And [f].[Name]<>''", GetSql());
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     #endregion

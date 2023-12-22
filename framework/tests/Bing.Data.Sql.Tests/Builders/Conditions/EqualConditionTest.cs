@@ -73,7 +73,7 @@ public class EqualConditionTest
     {
         var condition = new EqualSqlCondition(_parameterManager, "a", "b", false);
         Assert.Equal("a=b", GetResult(condition));
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ public class EqualConditionTest
     {
         var condition = new EqualSqlCondition(_parameterManager, "a", null, true);
         Assert.Equal("a Is Null", GetResult(condition));
-        Assert.Equal(0, _parameterManager.GetParams().Count);
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     ///// <summary>
