@@ -101,8 +101,8 @@ dotnet_naming_rule.const_rule.style                                       = cons
 dotnet_naming_rule.const_rule.severity                                    = suggestion
 dotnet_naming_symbols.const_symbol.required_modifiers                     = const
 dotnet_naming_symbols.const_symbol.applicable_kinds                       = field
-dotnet_naming_style.const_style.capitalization                            = all_upper
-dotnet_naming_style.const_style.word_separator                            = _
+dotnet_naming_style.const_style.capitalization                            = pascal_case # all_upper
+# dotnet_naming_style.const_style.word_separator                            = _
 
 ## 异步方法示例: xxxAsync
 dotnet_naming_rule.async_method_rule.symbols                              = async_method_symbol
