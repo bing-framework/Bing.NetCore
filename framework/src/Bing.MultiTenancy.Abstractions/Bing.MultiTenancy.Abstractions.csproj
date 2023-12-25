@@ -9,6 +9,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\MultiTenancy\ConfigurationStore\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Bing\MultiTenancy\Localization\BingMultiTenancyResource.zh-Hans.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

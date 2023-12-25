@@ -23,11 +23,6 @@ public class CurrentTenant : ICurrentTenant, ITransientDependency
     public virtual string Id => _currentTenantAccessor.Current?.TenantId;
 
     /// <summary>
-    /// 租户编码
-    /// </summary>
-    public virtual string Code => _currentTenantAccessor.Current?.Code;
-
-    /// <summary>
     /// 租户名称
     /// </summary>
     public string Name => _currentTenantAccessor.Current?.Name;
@@ -41,21 +36,19 @@ public class CurrentTenant : ICurrentTenant, ITransientDependency
     /// <summary>
     /// 变更
     /// </summary>
-    /// <param name="tenantId">租户标识</param>
-    /// <param name="code">租户编码</param>
+    /// <param name="id">租户标识</param>
     /// <param name="name">租户名称</param>
-    public IDisposable Change(string tenantId, string code = null, string name = null) => SetCurrent(Id, code, name);
+    public IDisposable Change(string id, string name = null) => SetCurrent(id, name);
 
     /// <summary>
     /// 设置当前租户信息
     /// </summary>
     /// <param name="tenantId">租户标识</param>
-    /// <param name="code">租户编码</param>
     /// <param name="name">租户名称</param>
-    private IDisposable SetCurrent(string tenantId, string code = null, string name = null)
+    private IDisposable SetCurrent(string tenantId, string name = null)
     {
         var parentScope = _currentTenantAccessor.Current;
-        _currentTenantAccessor.Current = new BasicTenantInfo(tenantId, code, name);
+        _currentTenantAccessor.Current = new BasicTenantInfo(tenantId, name);
         return new DisposeAction(() =>
         {
             _currentTenantAccessor.Current = parentScope;

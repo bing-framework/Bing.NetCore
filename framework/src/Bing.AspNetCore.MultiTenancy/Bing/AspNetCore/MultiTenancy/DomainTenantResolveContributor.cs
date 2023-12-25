@@ -1,4 +1,6 @@
 ﻿using Bing.MultiTenancy;
+using Bing.Text;
+using Bing.Text.Formatting;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.AspNetCore.MultiTenancy;
@@ -40,6 +42,11 @@ public class DomainTenantResolveContributor : HttpTenantResolveContributorBase
     /// <returns>租户标识、租户名称、null</returns>
     protected override Task<string> GetTenantIdOrNameFromHttpContextOrNullAsync(ITenantResolveContext context, HttpContext httpContext)
     {
-        throw new NotImplementedException();
+        if (!httpContext.Request.Host.HasValue)
+            return Task.FromResult<string>(null);
+        var hostName = DomainTenantResolverHelper.RemoveDomainPrefix(httpContext.Request.Host.Value);
+        var extractResult = FormattedStringValueExtractor.Extract(hostName, DomainFormat, ignoreCase: true);
+        context.Handled = true;
+        return Task.FromResult(extractResult.IsMatch ? extractResult.Matches[0].Value : null);
     }
 }
