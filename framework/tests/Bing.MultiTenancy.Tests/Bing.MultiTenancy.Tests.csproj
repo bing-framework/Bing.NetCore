@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.20.69" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
   </ItemGroup>
 
   <ItemGroup>
