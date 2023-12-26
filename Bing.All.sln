@@ -315,7 +315,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Dapper", "02-Dapper", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10-Share", "10-Share", "{3D99820D-63A7-4635-B660-0D04D535229E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "09-Domain", "09-Domain", "{B61B75B3-77BB-4C5A-8262-E360206A4BD9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "09-Tenant", "09-Tenant", "{B61B75B3-77BB-4C5A-8262-E360206A4BD9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Core", "01-Core", "{793DF696-AA3D-4D44-9657-B66000DCEFFA}"
 EndProject
@@ -339,21 +339,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Localization.Abstracti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ExceptionHandling", "framework\src\Bing.ExceptionHandling\Bing.ExceptionHandling.csproj", "{ED91422B-F8C8-4D89-8D2F-1FE874B03AC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Localization", "framework\src\Bing.Localization\Bing.Localization.csproj", "{13B47C25-6797-4238-B4AE-E5309AB60DC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Localization", "framework\src\Bing.Localization\Bing.Localization.csproj", "{13B47C25-6797-4238-B4AE-E5309AB60DC0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06-Localization", "06-Localization", "{F29D6845-CCB8-4A09-A0E8-31F568A9D53B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Localization.Tests", "framework\tests\Bing.Localization.Tests\Bing.Localization.Tests.csproj", "{DA3A7B05-345B-4BDA-8C42-B03A05A7CA3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Localization.Tests", "framework\tests\Bing.Localization.Tests\Bing.Localization.Tests.csproj", "{DA3A7B05-345B-4BDA-8C42-B03A05A7CA3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Localization.Resources", "framework\tests\Bing.Localization.Resources\Bing.Localization.Resources.csproj", "{8C4E2508-6268-41F6-924B-5176D420A5AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Localization.Resources", "framework\tests\Bing.Localization.Resources\Bing.Localization.Resources.csproj", "{8C4E2508-6268-41F6-924B-5176D420A5AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Localization.Tests.Integration", "framework\tests\Bing.Localization.Tests.Integration\Bing.Localization.Tests.Integration.csproj", "{5024B508-BBE6-46B1-8CA5-AB4E221ADF93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Localization.Tests.Integration", "framework\tests\Bing.Localization.Tests.Integration\Bing.Localization.Tests.Integration.csproj", "{5024B508-BBE6-46B1-8CA5-AB4E221ADF93}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "09-Tenant", "09-Tenant", "{3DCB5CD1-E327-43F5-9E5D-9B303CAF04DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.MultiTenancy.Abstractions", "framework\src\Bing.MultiTenancy.Abstractions\Bing.MultiTenancy.Abstractions.csproj", "{4FC1AE58-E092-47AA-B5D1-47E48563155E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.MultiTenancy.Abstractions", "framework\src\Bing.MultiTenancy.Abstractions\Bing.MultiTenancy.Abstractions.csproj", "{4FC1AE58-E092-47AA-B5D1-47E48563155E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.MultiTenancy", "framework\src\Bing.AspNetCore.MultiTenancy\Bing.AspNetCore.MultiTenancy.csproj", "{03B9FCFF-EBFB-4E81-ADD0-CD258CF93133}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore.MultiTenancy", "framework\src\Bing.AspNetCore.MultiTenancy\Bing.AspNetCore.MultiTenancy.csproj", "{03B9FCFF-EBFB-4E81-ADD0-CD258CF93133}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.MultiTenancy.Tests", "framework\tests\Bing.MultiTenancy.Tests\Bing.MultiTenancy.Tests.csproj", "{65BFE1AC-DBC8-4C18-9FF8-C7D25652E1BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -801,6 +803,10 @@ Global
 		{03B9FCFF-EBFB-4E81-ADD0-CD258CF93133}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03B9FCFF-EBFB-4E81-ADD0-CD258CF93133}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03B9FCFF-EBFB-4E81-ADD0-CD258CF93133}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65BFE1AC-DBC8-4C18-9FF8-C7D25652E1BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65BFE1AC-DBC8-4C18-9FF8-C7D25652E1BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65BFE1AC-DBC8-4C18-9FF8-C7D25652E1BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65BFE1AC-DBC8-4C18-9FF8-C7D25652E1BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -962,6 +968,7 @@ Global
 		{3DCB5CD1-E327-43F5-9E5D-9B303CAF04DC} = {472FFE79-B8B1-41A1-91F2-CFA0F8406BC9}
 		{4FC1AE58-E092-47AA-B5D1-47E48563155E} = {3DCB5CD1-E327-43F5-9E5D-9B303CAF04DC}
 		{03B9FCFF-EBFB-4E81-ADD0-CD258CF93133} = {3DCB5CD1-E327-43F5-9E5D-9B303CAF04DC}
+		{65BFE1AC-DBC8-4C18-9FF8-C7D25652E1BF} = {B61B75B3-77BB-4C5A-8262-E360206A4BD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

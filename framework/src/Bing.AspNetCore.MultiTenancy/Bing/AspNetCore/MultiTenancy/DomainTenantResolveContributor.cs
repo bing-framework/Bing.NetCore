@@ -1,5 +1,4 @@
 ﻿using Bing.MultiTenancy;
-using Bing.Text;
 using Bing.Text.Formatting;
 using Microsoft.AspNetCore.Http;
 
