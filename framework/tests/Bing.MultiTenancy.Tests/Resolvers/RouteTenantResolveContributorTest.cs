@@ -5,19 +5,21 @@ using Moq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Bing.MultiTenancy.Resolvers;
 
 /// <summary>
-/// 查询字符串租户解析构造器测试
+/// 路由租户解析构造器测试
 /// </summary>
-public class QueryStringTenantResolveContributorTest
+public class RouteTenantResolveContributorTest
 {
     /// <summary>
     /// 请求头租户解析构造器
     /// </summary>
-    private readonly QueryStringTenantResolveContributor _resolver;
+    private readonly RouteTenantResolveContributor _resolver;
 
     /// <summary>
     /// 模拟服务提供程序访问器
@@ -32,9 +34,9 @@ public class QueryStringTenantResolveContributorTest
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public QueryStringTenantResolveContributorTest()
+    public RouteTenantResolveContributorTest()
     {
-        _resolver = new QueryStringTenantResolveContributor();
+        _resolver = new RouteTenantResolveContributor();
         _mockServiceProvider = new Mock<IServiceProvider>();
         _mockHttpContext = new Mock<HttpContext>();
     }
@@ -51,10 +53,12 @@ public class QueryStringTenantResolveContributorTest
             .Setup(x => x.GetService(typeof(IOptions<MultiTenancyOptions>)))
             .Returns(Microsoft.Extensions.Options.Options.Create(options));
 
-        // 设置查询字符串
-        var query = new Dictionary<string, StringValues> { { options.TenantKey, "a" } };
-        _mockHttpContext.Setup(t => t.Request.QueryString).Returns(QueryString.FromUriComponent($"?{options.TenantKey}=a"));
-        _mockHttpContext.Setup(t => t.Request.Query).Returns(new QueryCollection(query));
+        // 设置路由
+        var routeValues = new Dictionary<string, object> { { options.TenantKey, "a" } };
+        var mockRouteValuesFeature = new Mock<IRouteValuesFeature>();
+        mockRouteValuesFeature.Setup(t => t.RouteValues).Returns(new RouteValueDictionary(routeValues));
+        var routeValuesFeature = mockRouteValuesFeature.Object;
+        _mockHttpContext.Setup(t => t.Features.Get<IRouteValuesFeature>()).Returns(routeValuesFeature);
         _mockServiceProvider
             .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
             .Returns(new HttpContextAccessor { HttpContext = _mockHttpContext.Object });
@@ -79,10 +83,12 @@ public class QueryStringTenantResolveContributorTest
             .Setup(x => x.GetService(typeof(IOptions<MultiTenancyOptions>)))
             .Returns(Microsoft.Extensions.Options.Options.Create(options));
 
-        // 设置查询字符串
-        var query = new Dictionary<string, StringValues> { { options.TenantKey, "a" } };
-        _mockHttpContext.Setup(t => t.Request.QueryString).Returns(QueryString.FromUriComponent($"?{options.TenantKey}=a"));
-        _mockHttpContext.Setup(t => t.Request.Query).Returns(new QueryCollection(query));
+        // 设置路由
+        var routeValues = new Dictionary<string, object> { { options.TenantKey, "a" } };
+        var mockRouteValuesFeature = new Mock<IRouteValuesFeature>();
+        mockRouteValuesFeature.Setup(t => t.RouteValues).Returns(new RouteValueDictionary(routeValues));
+        var routeValuesFeature = mockRouteValuesFeature.Object;
+        _mockHttpContext.Setup(t => t.Features.Get<IRouteValuesFeature>()).Returns(routeValuesFeature);
         _mockServiceProvider
             .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
             .Returns(new HttpContextAccessor { HttpContext = _mockHttpContext.Object });
