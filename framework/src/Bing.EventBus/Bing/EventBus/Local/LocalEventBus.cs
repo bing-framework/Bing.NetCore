@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Bing.Helpers;
-using Bing.Reflection;
+using Bing.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;

@@ -67,7 +67,7 @@ public class WechatpayJsApiPayService : WechatpayPayServiceBase, IWechatpayJsApi
         return new WechatpayParameterBuilder(result.Config)
             .Add("appId", result.Config.AppId)
             .Add("timeStamp", Time.GetUnixTimestamp().SafeString())
-            .Add("nonceStr", Id.Guid())
+            .Add("nonceStr", Guid.NewGuid().ToString("N"))
             .Package($"prepay_id{result.GetPrepayId()}")
             .Add("signType", result.Config.SignType.Description())
             .Add("paySign", result.GetSign())

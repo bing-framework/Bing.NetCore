@@ -25,6 +25,7 @@ public class LogTest
     /// </summary>
     public LogTest(IServiceProvider serviceProvider, ILog<LogTest> log, ILogContextAccessor accessor, ILogger<LogTest> logger)
     {
+        Id.StringGenerateFunc = () => Guid.NewGuid().ToString("N");
         serviceProvider.UseBing();
         _log = log;
         _logger = logger;
@@ -36,7 +37,7 @@ public class LogTest
     [Fact]
     public void Test_LogTrace_Message_1()
     {
-        _log.Message($"Test_LogTrace_Message_1_{Id.NewString()}").LogTrace();
+        _log.Message($"Test_LogTrace_Message_1_{Id.CreateString()}").LogTrace();
     }
 
     /// <summary>
@@ -45,7 +46,7 @@ public class LogTest
     [Fact]
     public void Test_LogTrace_Message_2()
     {
-        _log.Message("Test_LogTrace_Message_2_{ProductCode}", Id.NewString()).LogTrace();
+        _log.Message("Test_LogTrace_Message_2_{ProductCode}", Id.CreateString()).LogTrace();
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public class LogTest
     [Fact]
     public void Test_LogTrace_Message_3()
     {
-        _log.Message("Test_LogTrace_Message_3_{id}_{code}", $"id_{Id.NewString()}",$"code_{Id.NewString()}").LogTrace();
+        _log.Message("Test_LogTrace_Message_3_{id}_{code}", $"id_{Id.CreateString()}",$"code_{Id.CreateString()}").LogTrace();
     }
 
     /// <summary>
@@ -63,8 +64,8 @@ public class LogTest
     [Fact]
     public void Test_LogTrace_Message_4()
     {
-        _log.Message("Test_LogTrace_Message_4_{id}_{code}_", $"id_{Id.NewString()}", $"code_{Id.NewString()}")
-            .Message("{name}_{note}", $"name_{Id.NewString()}", $"note_{Id.NewString()}")
+        _log.Message("Test_LogTrace_Message_4_{id}_{code}_", $"id_{Id.CreateString()}", $"code_{Id.CreateString()}")
+            .Message("{name}_{note}", $"name_{Id.CreateString()}", $"note_{Id.CreateString()}")
             .LogTrace();
     }
 
@@ -115,7 +116,7 @@ public class LogTest
     public void Test_LogTrace_Message_9()
     {
         _log.EventId(119)
-            .Message("Test_LogTrace_Message_9_{id}", $"id_{Id.NewString()}")
+            .Message("Test_LogTrace_Message_9_{id}", $"id_{Id.CreateString()}")
             .State(new Product { Code = "a", Name = "b", Price = 123 })
             .Property("Code", "a")
             .Property("Age", "18")

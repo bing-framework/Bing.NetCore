@@ -1,6 +1,4 @@
-﻿using Bing.Helpers;
-
-namespace Bing.Tracing;
+﻿namespace Bing.Tracing;
 
 /// <summary>
 /// 跟踪ID上下文
@@ -34,7 +32,7 @@ public class TraceIdContext
     public TraceIdContext(string traceId)
     {
         if (string.IsNullOrEmpty(traceId))
-            traceId = Id.NewGuid().ToString();
+            traceId = Guid.NewGuid().ToString();
         TraceId = traceId;
     }
 

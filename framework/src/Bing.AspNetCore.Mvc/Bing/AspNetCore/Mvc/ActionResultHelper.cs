@@ -18,7 +18,7 @@ public static class ActionResultHelper
     /// </summary>
     static ActionResultHelper()
     {
-        ObjectResultTypes=new List<Type>
+        ObjectResultTypes = new List<Type>
         {
             typeof(JsonResult),
             typeof(ObjectResult),

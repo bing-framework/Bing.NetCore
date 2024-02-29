@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Bing.Utils.Reflection" Version="1.5.0-preview-20240229-1" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />

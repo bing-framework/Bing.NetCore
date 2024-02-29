@@ -13,7 +13,7 @@ public class MessageEvent : IMessageEvent
     /// </summary>
     public MessageEvent()
     {
-        Id = Helpers.Id.Guid();
+        Id = Guid.NewGuid().ToString();
         Time = DateTime.Now;
     }
 

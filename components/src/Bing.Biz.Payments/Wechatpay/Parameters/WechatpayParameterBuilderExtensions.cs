@@ -52,7 +52,7 @@ public static class WechatpayParameterBuilderExtensions
     public static TParameterBuilder NonceStr<TParameterBuilder>(this TParameterBuilder builder)
         where TParameterBuilder : IWechatpayParameterBuilder<TParameterBuilder>
     {
-        builder.Add(WechatpayConst.NonceStr, Id.Guid());
+        builder.Add(WechatpayConst.NonceStr, Guid.NewGuid().ToString("N"));
         return builder;
     }
 

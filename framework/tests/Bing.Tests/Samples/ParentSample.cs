@@ -23,10 +23,10 @@ public class ParentSample
         this._name = sample._name;
     }
 
-    public ParentSample Clone()
-    {
-        return this.DeepClone();
-    }
+    //public ParentSample Clone()
+    //{
+    //    return this.DeepClone();
+    //}
 
     public void SetName(string name)
     {

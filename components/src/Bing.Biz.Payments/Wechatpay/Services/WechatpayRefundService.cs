@@ -48,7 +48,7 @@ public class WechatpayRefundService : WechatpayServiceBase<WechatRefundRequest, 
         builder.Init(param);
         builder.Add(WechatpayConst.AppId, builder.Config.AppId)
             .Add(WechatpayConst.MerchantId, builder.Config.MerchantId)
-            .Add(WechatpayConst.NonceStr, Id.Guid());
+            .Add(WechatpayConst.NonceStr, Guid.NewGuid().ToString("N"));
     }
 
     /// <summary>

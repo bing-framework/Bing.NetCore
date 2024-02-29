@@ -86,7 +86,7 @@ public static class ValidationExceptionExtensions
     /// <param name="result">验证结果</param>
     private static TException CreateBasicException<TException>(IValidationResult result) where TException : BingException, new()
     {
-        var exception = Types.CreateInstance<TException>(result.ErrorCode, result.ToMessage(), result.Flag);
+        var exception = Reflections.CreateInstance<TException>(typeof(TException), result.ErrorCode, result.ToMessage(), result.Flag);
         exception.ExtraData.Add("ValidationResultCollection", result);
         return exception;
     }

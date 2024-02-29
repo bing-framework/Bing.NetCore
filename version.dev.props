@@ -10,7 +10,7 @@
     <MicrosoftEntityFrameworkCorePackageVersion>6.0.5</MicrosoftEntityFrameworkCorePackageVersion>
 
     <!-- Bing packages -->
-    <BingUtilsPackageVersion>1.5.0-preview-20231222-1</BingUtilsPackageVersion>
+    <BingUtilsPackageVersion>1.5.0-preview-20240229-1</BingUtilsPackageVersion>
     <!-- EFCore packages -->
     <EfCore7Version>7.0.*</EfCore7Version>
     <EfCore6Version>6.0.*</EfCore6Version>

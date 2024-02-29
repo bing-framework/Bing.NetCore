@@ -18,7 +18,7 @@ public class Event : IEvent
     /// </summary>
     public Event(string eventName = default)
     {
-        Id = Helpers.Id.Guid();
+        Id =  Guid.NewGuid().ToString();
         Time = DateTime.Now;
         _eventName = eventName;
     }
