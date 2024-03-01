@@ -11,7 +11,6 @@ using Bing.Data.Sql.Metadata;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
-using Bing.Domain.Entities.Events;
 using Bing.EntityFrameworkCore.Modeling;
 using Bing.Exceptions;
 using Bing.Expressions;
@@ -406,7 +405,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// <param name="cancellationToken">取消令牌</param>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await DomainEventHandleAsync();
         SaveChangesBefore();
         var transactionActionManager = Create<ITransactionActionManager>();
         if (transactionActionManager.Count == 0)
@@ -438,38 +436,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
             transaction.Rollback();
             throw;
         }
-    }
-
-    /// <summary>
-    /// 领域事件处理
-    /// </summary>
-    protected virtual async Task DomainEventHandleAsync()
-    {
-        var dispatcher = Create<IDomainEventDispatcher>();
-        if (dispatcher != null)
-        {
-            var domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents) 
-                await dispatcher.DispatchAsync(@event);
-        }
-    }
-
-    /// <summary>
-    /// 获取领域事件集合
-    /// </summary>
-    private IEnumerable<DomainEvent> GetDomainEvents()
-    {
-        var domainEvents = new List<DomainEvent>();
-        foreach (var aggregateRoot in ChangeTracker.Entries<IAggregateRoot>())
-        {
-            var events = aggregateRoot.Entity.GetDomainEvents();
-            if (events != null && events.Any())
-            {
-                domainEvents.AddRange(events);
-                aggregateRoot.Entity.ClearDomainEvents();
-            }
-        }
-        return domainEvents;
     }
 
     #endregion

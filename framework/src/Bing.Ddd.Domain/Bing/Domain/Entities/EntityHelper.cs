@@ -17,7 +17,6 @@ public static class EntityHelper
     /// 是否有默认值
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <returns></returns>
     public static bool HasDefaultKeys(IEntity entity)
     {
         Check.NotNull(entity, nameof(entity));
