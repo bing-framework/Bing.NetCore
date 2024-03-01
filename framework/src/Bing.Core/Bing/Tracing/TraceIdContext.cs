@@ -3,7 +3,7 @@
 /// <summary>
 /// 跟踪ID上下文
 /// </summary>
-public class TraceIdContext
+public class TraceIdContext : IHasTraceId
 {
     /// <summary>
     /// 跟踪标识
@@ -18,12 +18,12 @@ public class TraceIdContext
     /// <summary>
     /// 父标识
     /// </summary>
-    public string ParentId{ get; set; }
+    public string ParentId { get; set; }
 
     /// <summary>
     /// 当前标识
     /// </summary>
-    public string ChildId{ get; set; }
+    public string ChildId { get; set; }
 
     /// <summary>
     /// 初始化一个<see cref="TraceIdContext"/>类型的实例
@@ -55,7 +55,7 @@ public class TraceIdContext
     /// 当前跟踪标识上下文
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    private static readonly AsyncLocal<TraceIdContext> _currentTraceIdContext = new AsyncLocal<TraceIdContext>();
+    private static readonly AsyncLocal<TraceIdContext> _currentTraceIdContext = new();
 
     /// <summary>
     /// 当前跟踪标识上下文

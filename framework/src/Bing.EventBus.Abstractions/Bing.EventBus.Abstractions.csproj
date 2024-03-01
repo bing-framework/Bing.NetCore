@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.EventBus.Abstractions</AssemblyName>
+    <PackageId>Bing.EventBus.Abstractions</PackageId>
+    <Description>Bing.EventBus.Abstractions是Bing应用框架的事件总线操作接口定义类库。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Bing\EventBus\Distributed\" />
+    <Folder Include="Bing\EventBus\Local\" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+</Project>
