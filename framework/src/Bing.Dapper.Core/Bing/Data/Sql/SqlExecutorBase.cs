@@ -1,5 +1,4 @@
 ﻿using Bing.Data.Sql.Diagnostics;
-using Dapper;
 
 namespace Bing.Data.Sql;
 

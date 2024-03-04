@@ -1,6 +1,4 @@
-﻿using Dapper;
-
-namespace Bing.Data.Sql;
+﻿namespace Bing.Data.Sql;
 
 // Sql查询对象 - 执行
 public abstract partial class SqlQueryBase

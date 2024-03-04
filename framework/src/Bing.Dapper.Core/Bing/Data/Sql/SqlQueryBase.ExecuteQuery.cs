@@ -1,6 +1,4 @@
-﻿using System.Data;
-using Bing.Data.Sql.Diagnostics;
-using Dapper;
+﻿using Bing.Data.Sql.Diagnostics;
 
 namespace Bing.Data.Sql;
 

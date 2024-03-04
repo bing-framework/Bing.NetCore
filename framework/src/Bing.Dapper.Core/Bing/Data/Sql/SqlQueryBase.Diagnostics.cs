@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Bing.Data.Sql.Diagnostics;
 
 namespace Bing.Data.Sql;

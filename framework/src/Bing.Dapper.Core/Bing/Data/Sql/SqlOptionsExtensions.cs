@@ -1,5 +1,4 @@
 ﻿using Bing.Data.Enums;
-using Dapper;
 using Dapper.Handlers;
 
 namespace Bing.Data.Sql;

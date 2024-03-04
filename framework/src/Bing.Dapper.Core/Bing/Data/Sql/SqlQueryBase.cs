@@ -1,6 +1,4 @@
-﻿using System.Data;
-using System.Text;
-using Bing.Data.Sql.Builders;
+﻿using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Database;
@@ -8,7 +6,6 @@ using Bing.Data.Sql.Diagnostics;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Text;
-using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
