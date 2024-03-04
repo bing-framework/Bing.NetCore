@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="7.1.4" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
     <PackageReference Include="IdentityModel" Version="6.0.0" />
   </ItemGroup>
 

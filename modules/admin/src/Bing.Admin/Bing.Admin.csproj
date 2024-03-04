@@ -22,7 +22,7 @@
     <PackageReference Include="SkyAPM.Diagnostics.CAP" Version="2.1.0" />
     <PackageReference Include="SkyAPM.Agent.AspNetCore" Version="2.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
-    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.1.4" />
+    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="8.0.1" />
     <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;</TargetFrameworks>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,7 +12,7 @@
   <Import Project="..\..\..\common.props" />
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP" Version="6.2.1" />
+    <PackageReference Include="DotNetCore.CAP" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
