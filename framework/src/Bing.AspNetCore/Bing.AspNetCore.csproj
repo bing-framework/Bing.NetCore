@@ -13,7 +13,12 @@
 
   <Import Project="dependency.props" />
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
+    <ProjectReference Include="..\Bing.ExceptionHandling\Bing.ExceptionHandling.csproj" />
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
+    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Microsoft\AspNetCore\Mvc\ModelBinding\Metadata\MvcModelBindingResource.Designer.cs">

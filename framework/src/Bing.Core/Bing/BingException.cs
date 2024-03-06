@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using Bing.ExceptionHandling;
 using Bing.Exceptions;
 
 namespace Bing;
@@ -7,7 +8,7 @@ namespace Bing;
 /// Bing异常
 /// </summary>
 [Serializable]
-public abstract class BingException : Exception
+public abstract class BingException : Exception, IHasErrorCode
 {
     /// <summary>
     /// 空标识
@@ -65,7 +66,7 @@ public abstract class BingException : Exception
     protected BingException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
         ExtraData = new Dictionary<string, object>();
-        Code = DefaultExtendErrorCode;
+        Code = DefaultExtendErrorCode.ToString();
         Flag = EmptyFlag;
     }
 
@@ -81,7 +82,7 @@ public abstract class BingException : Exception
         if (string.IsNullOrWhiteSpace(flag))
             flag = EmptyFlag;
         ExtraData = new Dictionary<string, object>();
-        Code = errorCode;
+        Code = errorCode.ToString();
         Flag = flag;
     }
 
@@ -92,14 +93,14 @@ public abstract class BingException : Exception
     protected BingException(BingExceptionOptions options) : base(options.Message, options.InnerException)
     {
         ExtraData = options.ExtraErrors;
-        Code = options.ErrorCode;
+        Code = options.ErrorCode.ToString();
         Flag = options.Flag;
     }
 
     /// <summary>
     /// 错误码
     /// </summary>
-    public long Code { get; protected set; }
+    public virtual string Code { get; protected set; }
 
     /// <summary>
     /// 错误标识

@@ -1,7 +1,7 @@
 ﻿namespace Bing.Domain.Entities;
 
 /// <summary>
-/// 找不到实体异常
+/// 实体未找到异常
 /// </summary>
 public class EntityNotFoundException : BingException
 {

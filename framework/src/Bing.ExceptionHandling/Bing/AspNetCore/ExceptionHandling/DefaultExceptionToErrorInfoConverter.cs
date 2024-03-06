@@ -1,7 +1,9 @@
-﻿using System.Text;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
+using Bing.Domain.Entities;
 using Bing.ExceptionHandling;
+using Bing.Exceptions;
 using Bing.Http;
+using Bing.Http.Clients;
 
 namespace Bing.AspNetCore.ExceptionHandling;
 
@@ -40,7 +42,59 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
             return CreateDetailedErrorInfoFromException(exception, options.SendStackTraceToClients);
         }
 
-        return default;
+        exception = TryToGetActualException(exception);
+
+        // 远程调用异常
+        if (exception is BingRemoteCallException remoteCallException && remoteCallException.Error != null)
+            return remoteCallException.Error;
+
+        // 并发异常
+        if (exception is ConcurrencyException)
+            return new RemoteServiceErrorInfo { Code = "400001", Message = exception.GetPrompt() };
+
+        // 错误异常
+        if (exception is Warning warning)
+            return new RemoteServiceErrorInfo { Code = warning.Code, Message = warning.GetPrompt() };
+
+        // 实体未找到异常
+        if (exception is EntityNotFoundException entityNotFoundException)
+            return CreateEntityNotFoundError(entityNotFoundException);
+
+        var errorInfo = new RemoteServiceErrorInfo();
+
+        // 用户友好提示异常
+        if (exception is IUserFriendlyException || exception is BingRemoteCallException)
+        {
+            errorInfo.Message = exception.Message;
+            errorInfo.Details = (exception as IHasErrorDetails)?.Details;
+        }
+        else
+        {
+            errorInfo.Message = exception.GetPrompt();
+        }
+
+        // 验证错误
+
+        errorInfo.Data = exception.Data;
+
+        return errorInfo;
+    }
+
+    /// <summary>
+    /// 尝试从异常中获取实际的异常对象。
+    /// </summary>
+    /// <param name="exception">异常</param>
+    protected virtual Exception TryToGetActualException(Exception exception)
+    {
+        if (exception is AggregateException aggException && aggException.InnerException != null)
+        {
+            if (aggException.InnerException is EntityNotFoundException ||
+                aggException.InnerException is IBusinessException)
+            {
+                return aggException.InnerException;
+            }
+        }
+        return exception;
     }
 
     /// <summary>
@@ -57,6 +111,17 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
         var errorInfo = new RemoteServiceErrorInfo(exception.Message, detailBuilder.ToString(), data: exception.Data);
 
         return errorInfo;
+    }
+
+    /// <summary>
+    /// 创建实体未找到的错误信息
+    /// </summary>
+    /// <param name="exception">实体未找到异常</param>
+    protected virtual RemoteServiceErrorInfo CreateEntityNotFoundError(EntityNotFoundException exception)
+    {
+        if (exception.EntityType != null)
+            return new RemoteServiceErrorInfo(string.Format("不存在 id = {1} 的实体 {0}！", exception.EntityType.Name, exception.Id));
+        return new RemoteServiceErrorInfo(exception.Message);
     }
 
     /// <summary>
@@ -97,7 +162,6 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
                 AddExceptionToDetails(innerException, detailBuilder, sendStackTraceToClients);
         }
     }
-
 
     /// <summary>
     /// 创建默认的异常处理选项配置
