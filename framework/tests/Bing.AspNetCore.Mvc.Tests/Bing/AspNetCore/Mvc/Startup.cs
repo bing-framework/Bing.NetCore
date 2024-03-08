@@ -1,12 +1,9 @@
-﻿using Bing.Serialization.SystemTextJson;
-using System;
+﻿using System;
 using AspectCore.Extensions.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection.Logging;
@@ -28,7 +25,8 @@ public class Startup
             .UseServiceContext()
             .ConfigureWebHostDefaults(webHostBuilder =>
             {
-                webHostBuilder.UseTestServer()
+                webHostBuilder
+                    .UseTestServer()
                     .Configure(ConfigureApp);
             });
     }
