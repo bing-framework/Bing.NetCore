@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Bing.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.AspNetCore.Mvc.ExceptionHandling;
@@ -25,5 +26,14 @@ public class ExceptionTestController : ApiControllerBase
     public ActionResult UserFriendlyException2()
     {
         throw new UserFriendlyException("This is a sample exception!");
+    }
+
+    /// <summary>
+    /// 测试 - 授权异常
+    /// </summary>
+    [HttpGet("BingAuthorizationException")]
+    public void BingAuthorizationException()
+    {
+        throw new BingAuthorizationException("This is a sample exception!");
     }
 }
