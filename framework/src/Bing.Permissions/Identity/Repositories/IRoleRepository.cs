@@ -1,5 +1,5 @@
-﻿using Bing.Domain.Repositories;
-using Bing.Permissions.Identity.Models;
+﻿using Bing.Permissions.Identity.Models;
+using Bing.Trees;
 
 namespace Bing.Permissions.Identity.Repositories;
 

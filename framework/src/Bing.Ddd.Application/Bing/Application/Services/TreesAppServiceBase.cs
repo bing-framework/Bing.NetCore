@@ -1,6 +1,4 @@
-﻿using Bing.Application.Dtos;
-using Bing.Data;
-using Bing.Data.Queries;
+﻿using Bing.Data;
 using Bing.Data.Queries.Conditions;
 using Bing.Domain.Entities;
 using Bing.Helpers;

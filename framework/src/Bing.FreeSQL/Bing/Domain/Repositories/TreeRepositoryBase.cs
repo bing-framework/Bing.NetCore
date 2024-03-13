@@ -1,5 +1,5 @@
-﻿using Bing.Domain.Entities;
-using Bing.Extensions;
+﻿using Bing.Extensions;
+using Bing.Trees;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 
 namespace Bing.Domain.Repositories;

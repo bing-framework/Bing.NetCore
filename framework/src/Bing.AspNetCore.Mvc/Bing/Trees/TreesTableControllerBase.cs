@@ -1,11 +1,7 @@
-﻿using Bing.Application.Dtos;
-using Bing.Application.Services;
-using Bing.Data;
-using Bing.Data.Queries;
-using Bing.Trees;
+﻿using Bing.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Bing.AspNetCore.Mvc;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型表格控制器
@@ -113,7 +109,7 @@ public abstract class TreesTableControllerBase<TDto, TQuery, TParentId> : TreesC
         var parent = await _service.GetByIdAsync(query.ParentId);
         query.Path = parent.Path;
         query.Level = null;
-        query.ParentId = default(TParentId);
+        query.ParentId = default;
         return query;
     }
 }

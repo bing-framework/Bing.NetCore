@@ -1,9 +1,8 @@
-﻿using Bing.Domain.Repositories;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Properties;
 
-namespace Bing.Domain.Entities;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型路径更新服务

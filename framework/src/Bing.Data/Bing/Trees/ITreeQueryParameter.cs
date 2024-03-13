@@ -1,4 +1,6 @@
-﻿namespace Bing.Data.Queries;
+﻿using Bing.Data.Queries;
+
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型查询参数

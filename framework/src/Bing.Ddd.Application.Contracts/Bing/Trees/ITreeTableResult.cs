@@ -1,7 +1,5 @@
-﻿
-
-// ReSharper disable once CheckNamespace
-namespace Bing.Application.Dtos;
+﻿// ReSharper disable once CheckNamespace
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型表格结果

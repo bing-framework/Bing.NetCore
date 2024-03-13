@@ -7,8 +7,8 @@ using Bing.Admin.Data.Pos.Systems.Extensions;
 using Bing.Admin.Data.Stores.Abstractions.Systems;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
-using Bing.Datas.EntityFramework.Core;
 using Bing.Extensions;
+using Bing.Trees;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Admin.Data.Repositories.Systems

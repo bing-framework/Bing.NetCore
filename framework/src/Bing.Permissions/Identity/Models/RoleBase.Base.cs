@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Bing.Auditing;
 using Bing.Data;
-using Bing.Domain.Entities;
+using Bing.Trees;
 
 namespace Bing.Permissions.Identity.Models;
 

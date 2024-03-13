@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Bing.Application.Dtos;
+
 
 // ReSharper disable once CheckNamespace
-namespace Bing.Application.Dtos;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型数据传输对象基类

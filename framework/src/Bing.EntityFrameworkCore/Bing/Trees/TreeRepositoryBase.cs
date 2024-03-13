@@ -1,10 +1,9 @@
-﻿using Bing.Domain.Entities;
-using Bing.Domain.Repositories;
+﻿using Bing.Datas.EntityFramework.Core;
 using Bing.Extensions;
 using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bing.Datas.EntityFramework.Core;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型仓储

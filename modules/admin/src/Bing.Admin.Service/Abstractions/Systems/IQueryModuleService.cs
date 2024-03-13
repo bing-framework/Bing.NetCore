@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Bing.Admin.Service.Shared.Dtos.Systems;
 using Bing.Admin.Service.Shared.Queries.Systems;
 using Bing.Admin.Service.Shared.Responses.Systems;
-using Bing.Application.Services;
+using Bing.Trees;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {

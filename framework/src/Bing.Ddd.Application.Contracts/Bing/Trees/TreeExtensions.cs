@@ -1,7 +1,8 @@
-﻿using Bing.Extensions;
+﻿using Bing;
+using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace Bing.Application.Dtos;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型扩展

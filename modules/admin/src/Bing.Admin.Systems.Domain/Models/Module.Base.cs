@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Bing.Domain.Entities;
+using Bing.Trees;
 
 namespace Bing.Admin.Systems.Domain.Models
 {

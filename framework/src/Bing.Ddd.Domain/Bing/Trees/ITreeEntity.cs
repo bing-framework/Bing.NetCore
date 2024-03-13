@@ -1,6 +1,6 @@
-﻿using Bing.Trees;
+﻿using Bing.Domain.Entities;
 
-namespace Bing.Domain.Entities;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型实体

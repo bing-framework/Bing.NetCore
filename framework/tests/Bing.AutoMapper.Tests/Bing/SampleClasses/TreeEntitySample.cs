@@ -1,6 +1,5 @@
 ﻿using System;
-using Bing.Application.Dtos;
-using Bing.Domain.Entities;
+using Bing.Trees;
 
 namespace Bing.SampleClasses;
 

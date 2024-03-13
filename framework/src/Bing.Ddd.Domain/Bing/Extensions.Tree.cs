@@ -1,5 +1,4 @@
 ﻿using Bing.Domain.Entities;
-using Bing.Domain.Repositories;
 using Bing.Extensions;
 using Bing.Trees;
 

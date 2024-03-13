@@ -1,8 +1,9 @@
-﻿using Bing.Extensions;
+﻿using Bing.Domain.Entities;
+using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Validation;
 
-namespace Bing.Domain.Entities;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型实体
@@ -17,7 +18,8 @@ public abstract class TreeEntityBase<TEntity> : TreeEntityBase<TEntity, Guid, Gu
     /// <param name="id">标识</param>
     /// <param name="path">路径</param>
     /// <param name="level">级数</param>
-    protected TreeEntityBase(Guid id, string path, int level) : base(id, path, level)
+    protected TreeEntityBase(Guid id, string path, int level)
+        : base(id, path, level)
     {
     }
 }
@@ -72,7 +74,7 @@ public abstract class TreeEntityBase<TEntity, TKey, TParentId> : BasicAggregateR
     /// <summary>
     /// 初始化路径
     /// </summary>
-    public virtual void InitPath() => InitPath(default(TEntity));
+    public virtual void InitPath() => InitPath(default);
 
     /// <summary>
     /// 初始化路径

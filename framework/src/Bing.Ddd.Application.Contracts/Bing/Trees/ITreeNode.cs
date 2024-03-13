@@ -1,5 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
-namespace Bing.Application.Dtos;
+﻿using Bing.Application.Dtos;
+
+namespace Bing.Trees;
 
 /// <summary>
 /// 树节点

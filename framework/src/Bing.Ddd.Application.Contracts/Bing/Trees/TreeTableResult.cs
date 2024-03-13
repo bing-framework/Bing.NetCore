@@ -1,7 +1,8 @@
-﻿using Bing.Extensions;
+﻿using Bing;
+using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace Bing.Application.Dtos;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型表格结果
@@ -43,7 +44,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
     {
         if (_data == null)
             return _result;
-        foreach (var root in _data.Where(IsRoot).OrderBy(t => t.SortId)) 
+        foreach (var root in _data.Where(IsRoot).OrderBy(t => t.SortId))
             AddNode(root);
         return _result;
     }
@@ -94,7 +95,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
             node.Expanded = false;
             return;
         }
-        if (node.Level == 1) 
+        if (node.Level == 1)
             node.Expanded = true;
     }
 
@@ -107,7 +108,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
         node.Leaf = false;
         if (_async)
             return;
-        if (IsLeaf(node)) 
+        if (IsLeaf(node))
             node.Leaf = true;
     }
 

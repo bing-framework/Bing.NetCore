@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Bing.Data.Queries;
 using Bing.Extensions;
 
-namespace Bing.Data.Queries;
+namespace Bing.Trees;
 
 /// <summary>
 /// 树型查询参数
@@ -77,4 +78,4 @@ public class TreeQueryParameter<TParentId> : QueryParameter, ITreeQueryParameter
 /// <summary>
 /// 树型查询参数
 /// </summary>
-public class TreeQueryParameter : TreeQueryParameter<Guid?>, Data.Queries.ITreeQueryParameter { }
+public class TreeQueryParameter : TreeQueryParameter<Guid?>, ITreeQueryParameter { }

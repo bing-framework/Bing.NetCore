@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Properties;
 using Bing.Tests.Samples;
 using Bing.Tests.XUnitHelpers;
+using Bing.Trees;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Xunit;

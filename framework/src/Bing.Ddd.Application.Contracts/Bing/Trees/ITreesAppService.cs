@@ -1,7 +1,4 @@
-﻿using Bing.Application.Dtos;
-using Bing.Data.Queries;
-
-namespace Bing.Application.Services;
+﻿namespace Bing.Trees;
 
 /// <summary>
 /// 树型服务
@@ -20,16 +17,15 @@ public interface ITreesAppService<TDto, in TQueryParameter> : ITreesAppService<T
 /// <typeparam name="TDto">数据传输对象类型</typeparam>
 /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
 /// <typeparam name="TParentId">父标识类型</typeparam>
-public interface ITreesAppService<TDto, in TQueryParameter, TParentId> :
-    IDeleteAppService<TDto, TQueryParameter>
+public interface ITreesAppService<TDto, in TQueryParameter, TParentId> : ITreesQueryAppService<TDto, TQueryParameter, TParentId>
     where TDto : class, ITreeNode, new()
     where TQueryParameter : class, ITreeQueryParameter<TParentId>
 {
     /// <summary>
-    /// 通过标识查找列表
+    /// 删除
     /// </summary>
-    /// <param name="ids">标识列表</param>
-    Task<List<TDto>> FindByIdsAsync(string ids);
+    /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
+    Task DeleteAsync(string ids);
 
     /// <summary>
     /// 启用
@@ -38,7 +34,7 @@ public interface ITreesAppService<TDto, in TQueryParameter, TParentId> :
     Task EnableAsync(string ids);
 
     /// <summary>
-    /// 冻结
+    /// 禁用
     /// </summary>
     /// <param name="ids">标识列表</param>
     Task DisableAsync(string ids);
