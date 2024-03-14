@@ -1,11 +1,10 @@
 ﻿using Bing.Authorization;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.AspNetCore.Mvc.ExceptionHandling;
 
 /// <summary>
-/// 异常测试 控制器
+/// 异常 - 测试 控制器
 /// </summary>
 [Route("api/exception-test")]
 public class ExceptionTestController : ApiControllerBase
