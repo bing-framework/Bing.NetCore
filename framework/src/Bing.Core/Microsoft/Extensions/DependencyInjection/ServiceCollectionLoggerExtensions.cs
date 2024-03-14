@@ -1,4 +1,5 @@
 ﻿using Bing.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -7,6 +8,14 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class ServiceCollectionLoggerExtensions
 {
+    /// <summary>
+    /// 获取一个初始化日志器的实例。
+    /// </summary>
+    /// <typeparam name="T">日志记录器类型</typeparam>
+    /// <param name="services">服务集合</param>
+    /// <returns>返回一个 <see cref="IInitLogger{T}"/> 实例，可用于记录日志。</returns>
+    public static ILogger<T> GetInitLogger<T>(this IServiceCollection services) => services.GetSingletonInstance<IInitLoggerFactory>().Create<T>();
+
     /// <summary>
     /// 添加服务调试日志
     /// </summary>

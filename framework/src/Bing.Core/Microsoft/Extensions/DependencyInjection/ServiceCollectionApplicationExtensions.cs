@@ -3,9 +3,7 @@ using Bing.Core.Builders;
 using Bing.Helpers;
 using Bing.Internal;
 using Bing.Options;
-using Bing.Reflection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -24,13 +22,14 @@ public static class ServiceCollectionApplicationExtensions
         Check.NotNull(services, nameof(services));
         var configuration = services.GetConfiguration();
         var options = new BingOptions();
-        setupAction?.Invoke(options);
-
+        
         Singleton<IConfiguration>.Instance = configuration;
         // 注册核心服务（Options、Logging、Localization）
         services.AddCoreServices();
         // 注册核心 Bing 服务
         services.AddCoreBingServices();
+        // 注册自定义扩展
+        setupAction?.Invoke(options);
 
         var builder = services.GetOrAddSingletonInstance<IBingBuilder>(() => new BingBuilder(services));
 
