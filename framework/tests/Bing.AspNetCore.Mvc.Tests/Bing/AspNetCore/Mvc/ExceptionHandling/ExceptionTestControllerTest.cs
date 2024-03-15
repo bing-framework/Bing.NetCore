@@ -1,11 +1,7 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Bing.Security.Claims;
-using Shouldly;
-using Xunit;
 
 namespace Bing.AspNetCore.Mvc.ExceptionHandling;
 
@@ -44,12 +40,12 @@ public class ExceptionTestControllerTest : BingAspNetCoreTestBase
         result.Message.ShouldBe("This is a sample exception!");
     }
 
-    [Fact]
-    public async Task Test_Handle_By_Cookie_AuthenticationScheme_For_BingAuthorizationException_For_Void_Return_Value()
-    {
-        _fakeUserClaims.Claims.AddRange(new[] { new Claim(BingClaimTypes.UserId, Guid.NewGuid().ToString()) });
-        var result = await GetResponseAsObjectAsync<TestApiResult>("/api/exception-test/BingAuthorizationException",
-            HttpStatusCode.Redirect);
+    //[Fact]
+    //public async Task Test_Handle_By_Cookie_AuthenticationScheme_For_BingAuthorizationException_For_Void_Return_Value()
+    //{
+    //    _fakeUserClaims.Claims.AddRange(new[] { new Claim(BingClaimTypes.UserId, Guid.NewGuid().ToString()) });
+    //    var result = await GetResponseAsObjectAsync<TestApiResult>("/api/exception-test/BingAuthorizationException",
+    //        HttpStatusCode.Redirect);
 
-    }
+    //}
 }

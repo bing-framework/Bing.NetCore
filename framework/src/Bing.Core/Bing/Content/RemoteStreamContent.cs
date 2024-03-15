@@ -38,7 +38,6 @@ public class RemoteStreamContent : IRemoteStreamContent
         _disposeStream = disposeStream;
     }
 
-
     /// <inheritdoc />
     public virtual string FileName { get; }
 

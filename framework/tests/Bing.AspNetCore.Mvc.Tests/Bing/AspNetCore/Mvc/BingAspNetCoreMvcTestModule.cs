@@ -27,6 +27,7 @@ public class BingAspNetCoreMvcTestModule : AspNetCoreBingModule
         services.AddControllers(o =>
             {
                 o.Filters.Add<BingExceptionFilter>();
+                o.AddBing(services);
             })
             // Use DI to create controllers
             .AddControllersAsServices()
