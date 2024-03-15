@@ -96,7 +96,7 @@ public class BingAspNetCoreMvcTestModule : AspNetCoreBingModule
     /// <inheritdoc />
     public override void UseModule(IApplicationBuilder app)
     {
-        //app.UseCorrelationId();
+        app.UseCorrelationId();
         app.UseBingExceptionHandling();
         app.UseRouting();
         app.UseAuthentication(); // 认证中间件
