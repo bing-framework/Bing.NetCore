@@ -17,15 +17,15 @@ public class ExceptionNotifier : IExceptionNotifier, ITransientDependency
     public ILogger<ExceptionNotifier> Logger { get; set; }
 
     /// <summary>
-    /// 混合服务作用域工厂
+    /// 服务作用域工厂
     /// </summary>
-    protected IHybridServiceScopeFactory ServiceScopeFactory { get; }
+    protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
     /// 初始化一个<see cref="ExceptionNotifier"/>类型的实例
     /// </summary>
     /// <param name="serviceScopeFactory">混合服务作用域工厂</param>
-    public ExceptionNotifier(IHybridServiceScopeFactory serviceScopeFactory)
+    public ExceptionNotifier(IServiceScopeFactory serviceScopeFactory)
     {
         ServiceScopeFactory = serviceScopeFactory;
         Logger = NullLogger<ExceptionNotifier>.Instance;

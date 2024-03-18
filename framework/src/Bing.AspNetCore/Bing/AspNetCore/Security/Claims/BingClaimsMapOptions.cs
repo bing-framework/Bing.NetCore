@@ -23,6 +23,8 @@ public class BingClaimsMapOptions
             {"role", () => BingClaimTypes.Role},
             {"email", () => BingClaimTypes.Email},
             {"name", () => BingClaimTypes.UserName},
+            {"family_name", () => BingClaimTypes.SurName},
+            {"given_name", () => BingClaimTypes.Name},
         };
     }
 }
