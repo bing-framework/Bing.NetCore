@@ -1,5 +1,5 @@
 ﻿<Project>
   <ItemGroup>
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.61" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.90" />
   </ItemGroup>
 </Project>

@@ -11,8 +11,5 @@ public static class BingAspNetCoreSerilogApplicationBuilderExtensions
     /// 注册Serilog Enricher的日志信息中间件
     /// </summary>
     /// <param name="app">应用程序构建器</param>
-    public static IApplicationBuilder UseBingSerilogEnrichers(this IApplicationBuilder app)
-    {
-        return app.UseMiddleware<BingSerilogMiddleware>();
-    }
+    public static IApplicationBuilder UseBingSerilogEnrichers(this IApplicationBuilder app) => app.UseMiddleware<BingSerilogMiddleware>();
 }

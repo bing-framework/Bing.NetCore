@@ -1,5 +1,5 @@
 ﻿<Project>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.7" />
   </ItemGroup>
 </Project>
