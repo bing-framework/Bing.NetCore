@@ -15,7 +15,7 @@ public class IsDeletedFilter : ISqlFilter
     public void Filter(SqlContext context)
     {
         foreach (var item in context.EntityAliasRegister.Data)
-            Filter(context.Dialect, context.Matedata, context.EntityAliasRegister, context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
+            Filter(context.Dialect, context.Metadata, context.EntityAliasRegister, context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
     }
 
     /// <summary>

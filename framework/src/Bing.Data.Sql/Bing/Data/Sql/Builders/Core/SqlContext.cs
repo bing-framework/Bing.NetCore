@@ -21,7 +21,7 @@ public class SqlContext
     /// <summary>
     /// 实体元数据解析器
     /// </summary>
-    public IEntityMetadata Matedata { get; }
+    public IEntityMetadata Metadata { get; }
 
     /// <summary>
     /// 参数管理器
@@ -38,13 +38,13 @@ public class SqlContext
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="entityAliasRegister">实体别名注册器</param>
-    /// <param name="matedata">实体原始数据解析器</param>
+    /// <param name="metadata">实体原始数据解析器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="clause">Sql子句访问器</param>
-    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMetadata matedata, IParameterManager parameterManager, ISqlPartAccessor clause)
+    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMetadata metadata, IParameterManager parameterManager, ISqlPartAccessor clause)
     {
         EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
-        Matedata = matedata ?? new DefaultEntityMetadata();
+        Metadata = metadata ?? new DefaultEntityMetadata();
         Dialect = dialect;
         ParameterManager = parameterManager;
         ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));
