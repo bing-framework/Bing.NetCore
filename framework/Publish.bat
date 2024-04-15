@@ -13,6 +13,7 @@ for /R "nuget_pub" %%s in (*) do (
 ::Core
 dotnet pack src/Bing.Core -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore -c Release -o nuget_pub
+dotnet pack src/Bing.ExceptionHandling -c Release -o nuget_pub
 
 ::AOP
 dotnet pack src/Bing.Aop.AspectCore -c Release -o nuget_pub
@@ -35,6 +36,10 @@ dotnet pack src/Bing.Logs.Serilog -c Release -o nuget_pub
 dotnet pack src/Bing.Logging -c Release -o nuget_pub
 dotnet pack src/Bing.Logging.Serilog -c Release -o nuget_pub
 dotnet pack src/Bing.Logging.Sinks.Exceptionless -c Release -o nuget_pub
+
+::Localization
+dotnet pack src/Bing.Localization.Abstractions-c Release -o nuget_pub
+dotnet pack src/Bing.Localization -c Release -o nuget_pub
 
 ::Data
 dotnet pack src/Bing.Data -c Release -o nuget_pub
