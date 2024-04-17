@@ -216,10 +216,10 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
 
     #endregion
 
-    #region OnModelCreating(配置模型)
+    #region OnModelCreating(配置实体模型)
 
     /// <summary>
-    /// 配置模型
+    /// 配置实体模型
     /// </summary>
     /// <remarks>只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置</remarks>
     /// <param name="modelBuilder">映射生成器</param>
@@ -429,7 +429,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         var transactionActionManager = Create<ITransactionActionManager>();
         if (transactionActionManager.Count == 0)
             return await base.SaveChangesAsync(cancellationToken);
-        return await TransactionCommit(transactionActionManager, cancellationToken);
+        return await TransactionCommitAsync(transactionActionManager, cancellationToken);
     }
 
     /// <summary>
@@ -437,23 +437,23 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="cancellationToken">取消令牌</param>
-    private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
+    private async Task<int> TransactionCommitAsync(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
     {
-        using var connection = Database.GetDbConnection();
+        await using var connection = Database.GetDbConnection();
         if (connection.State == ConnectionState.Closed)
             await connection.OpenAsync(cancellationToken);
-        using var transaction = connection.BeginTransaction();
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         try
         {
             await transactionActionManager.CommitAsync(transaction);
             await Database.UseTransactionAsync(transaction, cancellationToken);
             var result = await base.SaveChangesAsync(cancellationToken);
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken);
             return result;
         }
         catch (Exception)
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }
