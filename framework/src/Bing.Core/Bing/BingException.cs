@@ -13,34 +13,34 @@ public abstract class BingException : Exception, IHasErrorCode
     /// <summary>
     /// 空标识
     /// </summary>
-    protected const string EmptyFlag = "__EMPTY_FLG";
+    protected const string EMPTY_FLAG = "__EMPTY_FLG";
 
     /// <summary>
     /// 默认错误消息
     /// </summary>
-    protected const string DefaultErrorMessage = "_DEFAULT_ERROR";
+    protected const string DEFAULT_ERROR_MESSAGE = "_DEFAULT_ERROR";
 
     /// <summary>
     /// 默认错误编码
     /// </summary>
-    protected const long DefaultErrorCode = 1001;
+    protected const long DEFAULT_ERROR_CODE = 1001;
 
     /// <summary>
     /// 默认扩展错误编码
     /// </summary>
-    protected const long DefaultExtendErrorCode = 1002;
+    protected const long DEFAULT_EXTEND_ERROR_CODE = 1002;
 
     /// <summary>
     /// 初始化一个<see cref="BingException"/>类型的实例
     /// </summary>
-    protected BingException() : this(DefaultErrorCode, DefaultErrorMessage, EmptyFlag) { }
+    protected BingException() : this(DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE, EMPTY_FLAG) { }
 
     /// <summary>
     /// 初始化一个<see cref="BingException"/>类型的实例
     /// </summary>
     /// <param name="errorMessage">错误消息</param>
     /// <param name="innerException">内部异常</param>
-    protected BingException(string errorMessage, Exception innerException = null) : this(errorMessage, EmptyFlag, innerException) { }
+    protected BingException(string errorMessage, Exception innerException = null) : this(errorMessage, EMPTY_FLAG, innerException) { }
 
     /// <summary>
     /// 初始化一个<see cref="BingException"/>类型的实例
@@ -48,7 +48,7 @@ public abstract class BingException : Exception, IHasErrorCode
     /// <param name="errorMessage">错误消息</param>
     /// <param name="flag">错误标识</param>
     /// <param name="innerException">内部异常</param>
-    protected BingException(string errorMessage, string flag, Exception innerException = null) : this(DefaultExtendErrorCode, errorMessage, flag, innerException) { }
+    protected BingException(string errorMessage, string flag, Exception innerException = null) : this(DEFAULT_EXTEND_ERROR_CODE, errorMessage, flag, innerException) { }
 
     /// <summary>
     /// 初始化一个<see cref="BingException"/>类型的实例
@@ -56,7 +56,7 @@ public abstract class BingException : Exception, IHasErrorCode
     /// <param name="errorCode">错误码</param>
     /// <param name="errorMessage">错误消息</param>
     /// <param name="innerException">内部异常</param>
-    protected BingException(long errorCode, string errorMessage, Exception innerException = null) : this(errorCode, errorMessage, EmptyFlag, innerException) { }
+    protected BingException(long errorCode, string errorMessage, Exception innerException = null) : this(errorCode, errorMessage, EMPTY_FLAG, innerException) { }
 
     /// <summary>
     /// 初始化一个<see cref="BingException"/>类型的实例
@@ -66,8 +66,8 @@ public abstract class BingException : Exception, IHasErrorCode
     protected BingException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
         ExtraData = new Dictionary<string, object>();
-        Code = DefaultExtendErrorCode.ToString();
-        Flag = EmptyFlag;
+        Code = DEFAULT_EXTEND_ERROR_CODE.ToString();
+        Flag = EMPTY_FLAG;
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public abstract class BingException : Exception, IHasErrorCode
     protected BingException(long errorCode, string errorMessage, string flag, Exception innerException = null) : base(errorMessage, innerException)
     {
         if (string.IsNullOrWhiteSpace(flag))
-            flag = EmptyFlag;
+            flag = EMPTY_FLAG;
         ExtraData = new Dictionary<string, object>();
         Code = errorCode.ToString();
         Flag = flag;

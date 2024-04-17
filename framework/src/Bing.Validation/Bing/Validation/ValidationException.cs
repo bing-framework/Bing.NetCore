@@ -13,7 +13,7 @@ public class ValidationException : BingException
     /// <summary>
     /// 验证标识
     /// </summary>
-    private const string ValidationFlag = "__VALID_FLG";
+    private const string FLAG = "__VALID_FLG";
 
     /// <summary>
     /// 验证消息键
@@ -28,13 +28,13 @@ public class ValidationException : BingException
     /// <summary>
     /// 初始化一个<see cref="ValidationException"/>类型的实例
     /// </summary>
-    public ValidationException() => Flag = ValidationFlag;
+    public ValidationException() => Flag = FLAG;
 
     /// <summary>
     /// 初始化一个<see cref="ValidationException"/>类型的实例
     /// </summary>
     /// <param name="message">错误消息</param>
-    public ValidationException(string message) : base(message, ValidationFlag) { }
+    public ValidationException(string message) : base(message, FLAG) { }
 
     /// <summary>
     /// 初始化一个<see cref="ValidationException"/>类型的实例
@@ -48,7 +48,7 @@ public class ValidationException : BingException
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="innerException">内部异常</param>
-    public ValidationException(string message, Exception innerException) : base(message, ValidationFlag, innerException) { }
+    public ValidationException(string message, Exception innerException) : base(message, FLAG, innerException) { }
 
     /// <summary>
     /// 初始化一个<see cref="ValidationException"/>类型的实例
@@ -62,7 +62,7 @@ public class ValidationException : BingException
     /// 初始化一个<see cref="ValidationException"/>类型的实例
     /// </summary>
     /// <param name="validationMessage">验证消息集合</param>
-    public ValidationException(IEnumerable<string> validationMessage) : base(string.Empty, ValidationFlag) =>
+    public ValidationException(IEnumerable<string> validationMessage) : base(string.Empty, FLAG) =>
         _validationMessage = validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
@@ -78,7 +78,7 @@ public class ValidationException : BingException
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="validationMessage">验证消息集合</param>
-    public ValidationException(string message, IEnumerable<string> validationMessage) : base(message, ValidationFlag) => _validationMessage =
+    public ValidationException(string message, IEnumerable<string> validationMessage) : base(message, FLAG) => _validationMessage =
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
@@ -95,7 +95,7 @@ public class ValidationException : BingException
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
-    public ValidationException(long errorCode, string message) : base(errorCode, message, ValidationFlag) { }
+    public ValidationException(long errorCode, string message) : base(errorCode, message, FLAG) { }
 
     /// <summary>
     /// 初始化一个<see cref="ValidationException"/>类型的实例
@@ -111,7 +111,7 @@ public class ValidationException : BingException
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
     /// <param name="innerException">内部异常</param>
-    public ValidationException(long errorCode, string message, Exception innerException) : base(errorCode, message, ValidationFlag, innerException) { }
+    public ValidationException(long errorCode, string message, Exception innerException) : base(errorCode, message, FLAG, innerException) { }
 
     /// <summary>
     /// 初始化一个<see cref="ValidationException"/>类型的实例
@@ -127,7 +127,7 @@ public class ValidationException : BingException
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="validationMessage">验证消息集合</param>
-    public ValidationException(long errorCode, IEnumerable<string> validationMessage) : base(errorCode, string.Empty, ValidationFlag) => _validationMessage =
+    public ValidationException(long errorCode, IEnumerable<string> validationMessage) : base(errorCode, string.Empty, FLAG) => _validationMessage =
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
@@ -145,7 +145,7 @@ public class ValidationException : BingException
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
     /// <param name="validationMessage">验证消息集合</param>
-    public ValidationException(long errorCode, string message, IEnumerable<string> validationMessage) : base(errorCode, message, ValidationFlag) => _validationMessage =
+    public ValidationException(long errorCode, string message, IEnumerable<string> validationMessage) : base(errorCode, message, FLAG) => _validationMessage =
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
@@ -168,7 +168,7 @@ public class ValidationException : BingException
     {
         _validationMessage =
             (IEnumerable<string>)info.GetValue(ValidationMessageInfoKey, typeof(IEnumerable<string>));
-        Flag = ValidationFlag;
+        Flag = FLAG;
     }
 
     /// <summary>

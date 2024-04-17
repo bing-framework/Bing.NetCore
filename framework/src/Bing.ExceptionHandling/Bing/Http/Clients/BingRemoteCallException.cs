@@ -9,6 +9,21 @@ namespace Bing.Http.Clients;
 [Serializable]
 public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttpStatusCode
 {
+    /// <summary>
+    /// 标识
+    /// </summary>
+    private const string FLAG = "__REMOTE_CALL_FLG";
+
+    /// <summary>
+    /// 默认错误消息
+    /// </summary>
+    private const string DEFAULT_ERROR_MSG = "远程调用异常";
+
+    /// <summary>
+    /// 默认错误码
+    /// </summary>
+    private const long ERROR_CODE = 1020;
+
     /// <inheritdoc />
     public override string Code => Error?.Code;
 
@@ -29,7 +44,7 @@ public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttp
     /// <param name="message">错误消息</param>
     /// <param name="innerException">内部异常</param>
     public BingRemoteCallException(string message, Exception innerException = null)
-        : base(message, innerException)
+        : base(ERROR_CODE, message, FLAG, innerException)
     {
     }
 
@@ -49,7 +64,7 @@ public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttp
     /// <param name="error">远程服务错误信息</param>
     /// <param name="innerException">内部异常</param>
     public BingRemoteCallException(RemoteServiceErrorInfo error, Exception innerException = null)
-        : base(error.Message, innerException)
+        : base(ERROR_CODE, error.Message, FLAG, innerException)
     {
         Error = error;
         if (error.Data == null)

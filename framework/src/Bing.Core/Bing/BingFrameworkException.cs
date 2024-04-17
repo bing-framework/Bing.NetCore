@@ -6,25 +6,31 @@
 public class BingFrameworkException : BingException
 {
     /// <summary>
-    /// 框架标识
+    /// 标识
     /// </summary>
-    private const string BingFrameworkFlag = "BING_FRM_FLG";
+    private const string FLAG = "__BING_FRM_FLG";
 
     /// <summary>
-    /// 框架内部消息
+    /// 默认错误消息
     /// </summary>
-    private const string FrameworkInnerMessage = "Bing框架内部异常";
+    private const string DEFAULT_ERROR_MSG = "Bing框架内部异常";
+
+    /// <summary>
+    /// 默认错误码
+    /// </summary>
+    private const long ERROR_CODE = 1003;
 
     /// <summary>
     /// 初始化一个<see cref="BingFrameworkException"/>类型的实例
     /// </summary>
-    public BingFrameworkException() : this(FrameworkInnerMessage) { }
+    public BingFrameworkException() : this(DEFAULT_ERROR_MSG) { }
 
     /// <summary>
     /// 初始化一个<see cref="BingFrameworkException"/>类型的实例
     /// </summary>
     /// <param name="errorMessage">错误消息</param>
-    public BingFrameworkException(string errorMessage) : this(DefaultErrorCode, errorMessage)
+    public BingFrameworkException(string errorMessage) 
+        : this(ERROR_CODE, errorMessage)
     {
     }
 
@@ -34,7 +40,8 @@ public class BingFrameworkException : BingException
     /// <param name="errorCode">错误码</param>
     /// <param name="errorMessage">错误消息</param>
     /// <param name="innerException">内部异常</param>
-    public BingFrameworkException(long errorCode, string errorMessage, Exception innerException = null) : base(errorCode, errorMessage, BingFrameworkFlag, innerException)
+    public BingFrameworkException(long errorCode, string errorMessage, Exception innerException = null) 
+        : base(errorCode, errorMessage, FLAG, innerException)
     {
     }
 }
