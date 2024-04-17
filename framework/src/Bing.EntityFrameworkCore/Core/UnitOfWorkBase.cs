@@ -358,7 +358,17 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            throw new ConcurrencyException(ex);
+            if (ex.Entries.Count > 0)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine(ex.Entries.Count > 1
+                    ? "There are some entries which are not saved due to concurrency exception:"
+                    : "There is an entry which is not saved due to concurrency exception:");
+                foreach (var entry in ex.Entries) 
+                    sb.AppendLine(entry.ToString());
+                Logger.LogWarning(sb.ToString());
+            }
+            throw new ConcurrencyException(ex.Message, ex);
         }
     }
 
@@ -378,7 +388,17 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            throw new ConcurrencyException(ex);
+            if (ex.Entries.Count > 0)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine(ex.Entries.Count > 1
+                    ? "There are some entries which are not saved due to concurrency exception:"
+                    : "There is an entry which is not saved due to concurrency exception:");
+                foreach (var entry in ex.Entries) 
+                    sb.AppendLine(entry.ToString());
+                Logger.LogWarning(sb.ToString());
+            }
+            throw new ConcurrencyException(ex.Message, ex);
         }
     }
 
