@@ -363,6 +363,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "13-Web", "13-Web", "{309ECA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore.Mvc.Tests", "framework\tests\Bing.AspNetCore.Mvc.Tests\Bing.AspNetCore.Mvc.Tests.csproj", "{906404A3-5AD0-4064-9FD8-0D07D82A678F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Winform", "samples\Bing.Samples.Winform\Bing.Samples.Winform.csproj", "{1538FB31-03B7-4D1F-9570-58909BDABE3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -821,6 +823,10 @@ Global
 		{906404A3-5AD0-4064-9FD8-0D07D82A678F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{906404A3-5AD0-4064-9FD8-0D07D82A678F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{906404A3-5AD0-4064-9FD8-0D07D82A678F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1538FB31-03B7-4D1F-9570-58909BDABE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1538FB31-03B7-4D1F-9570-58909BDABE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1538FB31-03B7-4D1F-9570-58909BDABE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1538FB31-03B7-4D1F-9570-58909BDABE3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -986,6 +992,7 @@ Global
 		{785F9184-194C-44D5-8C9C-47A082E1806C} = {B5285F1C-479F-43F5-B3DE-3E930516AF6D}
 		{309ECAC5-12AB-4F12-BC20-2392FFAB94C8} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{906404A3-5AD0-4064-9FD8-0D07D82A678F} = {309ECAC5-12AB-4F12-BC20-2392FFAB94C8}
+		{1538FB31-03B7-4D1F-9570-58909BDABE3C} = {3F07E19F-C285-47B5-9441-46F375ECD5C9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}
