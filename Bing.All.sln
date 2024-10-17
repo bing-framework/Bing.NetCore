@@ -21,8 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.Log4Net", "framew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logs.Serilog", "framework\src\Bing.Logs.Serilog\Bing.Logs.Serilog.csproj", "{8B4E37FC-19DA-47B4-BE06-00E50EA354B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Datas.Dapper", "framework\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj", "{513512D1-39CF-4F50-AFFA-40C5558C3F8A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore", "framework\src\Bing.EntityFrameworkCore\Bing.EntityFrameworkCore.csproj", "{4C99DD4C-F671-45C3-B696-E9C3BDEE667F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EntityFrameworkCore.MySql", "framework\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj", "{A5BE8634-522D-4CEC-B60C-EECCD2D0F946}"
@@ -363,7 +361,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "13-Web", "13-Web", "{309ECA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.AspNetCore.Mvc.Tests", "framework\tests\Bing.AspNetCore.Mvc.Tests\Bing.AspNetCore.Mvc.Tests.csproj", "{906404A3-5AD0-4064-9FD8-0D07D82A678F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Samples.Winform", "samples\Bing.Samples.Winform\Bing.Samples.Winform.csproj", "{1538FB31-03B7-4D1F-9570-58909BDABE3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Winform", "samples\Bing.Samples.Winform\Bing.Samples.Winform.csproj", "{1538FB31-03B7-4D1F-9570-58909BDABE3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -399,10 +397,6 @@ Global
 		{8B4E37FC-19DA-47B4-BE06-00E50EA354B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B4E37FC-19DA-47B4-BE06-00E50EA354B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B4E37FC-19DA-47B4-BE06-00E50EA354B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{513512D1-39CF-4F50-AFFA-40C5558C3F8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{513512D1-39CF-4F50-AFFA-40C5558C3F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{513512D1-39CF-4F50-AFFA-40C5558C3F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{513512D1-39CF-4F50-AFFA-40C5558C3F8A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4C99DD4C-F671-45C3-B696-E9C3BDEE667F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4C99DD4C-F671-45C3-B696-E9C3BDEE667F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C99DD4C-F671-45C3-B696-E9C3BDEE667F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -840,7 +834,6 @@ Global
 		{4A5960C8-3EBC-4725-8751-BF96CEEE2686} = {FB4CF257-BC99-4D38-AD74-061307A2C3F3}
 		{CE41595A-0FA0-4B22-9507-511C957571D8} = {FB4CF257-BC99-4D38-AD74-061307A2C3F3}
 		{8B4E37FC-19DA-47B4-BE06-00E50EA354B7} = {FB4CF257-BC99-4D38-AD74-061307A2C3F3}
-		{513512D1-39CF-4F50-AFFA-40C5558C3F8A} = {0F5FB131-FFA5-434F-9B01-F4A067EA2CD9}
 		{4C99DD4C-F671-45C3-B696-E9C3BDEE667F} = {A385B905-7A2B-43DC-819F-D9C0FFB5FDF7}
 		{A5BE8634-522D-4CEC-B60C-EECCD2D0F946} = {A385B905-7A2B-43DC-819F-D9C0FFB5FDF7}
 		{C9E70A76-90AA-445B-963B-CE3B07FA8AE2} = {A385B905-7A2B-43DC-819F-D9C0FFB5FDF7}
