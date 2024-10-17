@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Bing.CommandLine;
+using Bing.Helpers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.EntityFrameworkCore.Migrations;
@@ -30,40 +32,88 @@ public class MigrationService : IMigrationService
         _migrationFileService = migrationFileService ?? throw new ArgumentNullException(nameof(migrationFileService));
     }
 
-    /// <summary>
-    /// 安装 dotnet-ef 全局工具，执行命令: dotnet tool install -g dotnet-ef
-    /// </summary>
-    public IMigrationService InstallEfTool()
+    /// <inheritdoc />
+    public IMigrationService InstallEfTool(string version = null)
     {
         _logger.LogTrace("准备安装 dotnet-ef 全局工具.");
+        var versionArgs = string.IsNullOrWhiteSpace(version) ? null : $" --version {version}";
+        CommandLineExecutor.Create("dotnet", $"tool install -g dotnet-ef{versionArgs}")
+            .OutputToMatch("dotnet-ef")
+            .Log(_logger)
+            .Execute();
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IMigrationService UninstallEfTool()
+    {
+        _logger.LogTrace("准备卸载 dotnet-ef 全局工具");
+        CommandLineExecutor.Create("dotnet", "tool uninstall -g dotnet-ef")
+            .OutputToMatch("dotnet-ef")
+            .Log(_logger)
+            .Execute();
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IMigrationService UpdateEfTool(string version = null)
+    {
+        _logger.LogTrace("准备更新 dotnet-ef 全局工具");
+        var versionArgs = string.IsNullOrWhiteSpace(version) ? null : $" --version {version}";
+        CommandLineExecutor.Create("dotnet", $"tool update -g dotnet-ef{versionArgs}")
+            .OutputToMatch("dotnet-ef")
+            .Log(_logger)
+            .Execute();
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IMigrationService AddMigration(string migrationName, string dbContextRootPath, bool isRemoveForeignKeys = false)
+    {
+        if (string.IsNullOrWhiteSpace(migrationName))
+            throw new ArgumentException("必须设置迁移名称");
+        if (string.IsNullOrWhiteSpace(dbContextRootPath))
+            throw new ArgumentException("必须设置数据上下文项目根目录绝对路径");
+        _logger.LogTrace("准备添加 ef 迁移.");
+        CommandLineExecutor.Create("dotnet", $"ef migrations add {migrationName}")
+            .WorkingDirectory(dbContextRootPath)
+            .OutputToMatch("Done")
+            .OutputToMatch("used by an existing migration")
+            .Log(_logger)
+            .Execute();
+        if (isRemoveForeignKeys)
+            RemoveMigrationFileForeignKeys(migrationName, dbContextRootPath);
         return this;
     }
 
     /// <summary>
-    /// 更新 dotnet-ef 全局工具，执行命令: dotnet tool update -g dotnet-ef
-    /// </summary>
-    public IMigrationService UpdateEfTool()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 添加迁移，执行命令：dotnet ef migrations add migrationName
+    /// 删除迁移文件中的外键设置
     /// </summary>
     /// <param name="migrationName">迁移名称</param>
     /// <param name="dbContextRootPath">数据上下文项目根目录绝对路径。范例：D:\\Test\\src\\Test.Data.SqlServer</param>
-    /// <param name="isRemoveForeignKeys">是否移除迁移文件中的所有外键</param>
-    public IMigrationService AddMigration(string migrationName, string dbContextRootPath, bool isRemoveForeignKeys = false)
+    private void RemoveMigrationFileForeignKeys(string migrationName, string dbContextRootPath)
     {
-        throw new NotImplementedException();
+        _logger.LogTrace("准备移除迁移文件中的外键设置.");
+        var migrationsPath = Common.JoinPath(dbContextRootPath, "Migrations");
+        _migrationFileService
+            .MigrationsPath(migrationsPath)
+            .MigrationName(migrationName)
+            .RemoveForeignKeys()
+            .Save();
     }
 
-    /// <summary>
-    /// 执行迁移，执行命令: dotnet ef database update
-    /// </summary>
-    /// <param name="dbContextRootPath">数据上下文项目根目录绝对路径。范例：D:\\Test\\src\\Test.Data.SqlServer</param>
+    /// <inheritdoc />
     public void Migrate(string dbContextRootPath)
     {
-        throw new NotImplementedException();
+        _logger.LogTrace("准备执行 ef 迁移更新数据库.");
+        CommandLineExecutor.Create("dotnet", "ef database update")
+            .WorkingDirectory(dbContextRootPath)
+            .OutputToMatch("The ConnectionString property has not been initialized")
+            .OutputToMatch("The server was not found or was not accessible")
+            .OutputToMatch("There is already an object named")
+            .OutputToMatch("Applying migration")
+            .OutputToMatch("Done")
+            .Log(_logger)
+            .Execute();
     }
 }
