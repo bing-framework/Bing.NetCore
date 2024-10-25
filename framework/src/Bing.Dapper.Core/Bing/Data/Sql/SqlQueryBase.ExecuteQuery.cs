@@ -119,16 +119,19 @@ public abstract partial class SqlQueryBase
     /// 获取实体集合
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, param, transaction, timeout)).ToList());
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken))).ToList());
 
     /// <summary>
     /// 获取实体集合
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync<TEntity>(sql, param, transaction, timeout)).ToList());
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null,
+        CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync<TEntity>(new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken))).ToList());
 
     /// <summary>
     /// 获取实体集合
