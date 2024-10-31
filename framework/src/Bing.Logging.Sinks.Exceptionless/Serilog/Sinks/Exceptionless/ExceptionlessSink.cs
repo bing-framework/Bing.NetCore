@@ -107,7 +107,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
             .CreateFromLogEvent(logEvent)
             .AddTags(_defaultTags);
 
-        if (_includeProperties && logEvent.Properties != null)
+        if (_includeProperties)
         {
             foreach (var property in logEvent.Properties)
             {
@@ -136,21 +136,11 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
                         if (!string.IsNullOrWhiteSpace(emailAddress) || !string.IsNullOrWhiteSpace(description))
                             builder.SetUserDescription(emailAddress, description);
                         break;
-                    case "Tags" when  property.Value is SequenceValue tags:
-                        {
-                            var tagList = tags.FlattenProperties() as List<object>;
-                            if (tagList is null)
-                                continue;
-                            builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
-                        }
+                    case "Tags":
+                        builder.AddTags(property.Value.GetTags());
                         break;
-                    case ContextDataTypes.Tags when property.Value is SequenceValue tags:
-                        {
-                            var tagList = tags.FlattenProperties() as List<object>;
-                            if (tagList is null)
-                                continue;
-                            builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
-                        }
+                    case ContextDataTypes.Tags:
+                        builder.AddTags(property.Value.GetTags());
                         break;
                     case ContextDataTypes.CallerInfo when property.Value is ScalarValue callerInfo:
                         {
@@ -182,8 +172,5 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <summary>
     /// 释放资源
     /// </summary>
-    public void Dispose()
-    {
-        _client?.ProcessQueueAsync().GetAwaiter().GetResult();
-    }
+    void IDisposable.Dispose() => _client?.ProcessQueueAsync().GetAwaiter().GetResult();
 }
