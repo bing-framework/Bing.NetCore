@@ -6,7 +6,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Builders\Params\" />
-  </ItemGroup>
 </Project>

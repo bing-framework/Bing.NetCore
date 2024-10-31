@@ -16,17 +16,19 @@ public class ParamLiteralsResolver : IParamLiteralsResolver
     {
         if (value == null)
             return "''";
-        switch (value.GetType().Name.ToLower())
+        switch (Type.GetTypeCode(value.GetType()))
         {
-            case "boolean":
+            case TypeCode.Boolean:
                 return Conv.ToBool(value) ? "1" : "0";
-            case "int16":
-            case "int32":
-            case "int64":
-            case "single":
-            case "double":
-            case "decimal":
+            case TypeCode.Int16:
+            case TypeCode.Int32:
+            case TypeCode.Int64:
+            case TypeCode.Single:
+            case TypeCode.Double:
+            case TypeCode.Decimal:
                 return value.SafeString();
+            case TypeCode.DateTime:
+                return $"'{value:yyyy-MM-dd HH:mm:ss}'";
             default:
                 return $"'{value}'";
         }

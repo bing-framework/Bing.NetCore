@@ -39,6 +39,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     private IDbTransaction _transaction;
 
+    /// <summary>
+    /// 参数字面值解析器
+    /// </summary>
+    private IParamLiteralsResolver _paramLiteralsResolver;
+
     #endregion
 
     #region 构造函数
@@ -120,6 +125,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     public IParameterManager ParameterManager => ((ISqlPartAccessor)SqlBuilder).ParameterManager;
 
     /// <summary>
+    /// 参数字面值解析器
+    /// </summary>
+    protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ??= CreateParamLiteralsResolver();
+
+    /// <summary>
     /// Select子句
     /// </summary>
     public ISelectClause SelectClause => ((ISqlPartAccessor)SqlBuilder).SelectClause;
@@ -195,6 +205,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// 创建数据库工厂
     /// </summary>
     protected abstract IDatabaseFactory CreateDatabaseFactory();
+
+    /// <summary>
+    /// 创建参数字面值解析器
+    /// </summary>
+    protected virtual IParamLiteralsResolver CreateParamLiteralsResolver() => new ParamLiteralsResolver();
 
     #endregion
 
@@ -385,33 +400,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             return;
         var message = new StringBuilder();
         foreach (var param in parameters)
-            message.AppendLine($"    {param.Key} : {GetParamLiterals(param.Value)} : {param.Value?.GetType()},");
+            message.AppendLine($"    {param.Key} : {ParamLiteralsResolver.GetParamLiterals(param.Value)} : {param.Value?.GetType()},");
         var result = message.ToString().RemoveEnd($",{Common.Line}");
         Logger.LogTrace("原始Sql:\r\n{Sql}\r\n调试Sql:\r\n{DebugSql}\r\nSql参数:\r\n{SqlParam}\r\n", sql, debugSql, result);
-    }
-
-    /// <summary>
-    /// 获取参数字面值
-    /// </summary>
-    /// <param name="value">参数值</param>
-    private static string GetParamLiterals(object value)
-    {
-        if (value == null)
-            return "''";
-        switch (value.GetType().Name.ToLower())
-        {
-            case "boolean":
-                return Conv.ToBool(value) ? "1" : "0";
-            case "int16":
-            case "int32":
-            case "int64":
-            case "single":
-            case "double":
-            case "decimal":
-                return value.SafeString();
-            default:
-                return $"'{value}'";
-        }
     }
 
     /// <summary>
