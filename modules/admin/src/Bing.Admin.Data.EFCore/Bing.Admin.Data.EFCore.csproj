@@ -7,11 +7,14 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetCore.CAP.MySql" Version="8.0.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.36" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.36" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.36" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\framework\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj" />
-    <!--<ProjectReference Include="..\..\..\..\framework\src\Bing.Events.Cap.MySql\Bing.Events.Cap.MySql.csproj" />-->
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
   </ItemGroup>
 

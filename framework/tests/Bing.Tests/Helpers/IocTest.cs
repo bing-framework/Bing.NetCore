@@ -3,6 +3,7 @@ using System.Linq;
 using AspectCore.Extensions.DependencyInjection;
 using Bing.DependencyInjection;
 using Bing.Tests.Samples;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -19,6 +20,8 @@ public class IocTest
     public IocTest()
     {
         var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+        services.AddSingleton<IConfiguration>(configuration);
         services.AddScoped<ISample, Sample>();
         services.AddBing();
         services.AddLogging();

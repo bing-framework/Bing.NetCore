@@ -1,5 +1,6 @@
 ﻿using System;
 using Bing.MultiTenancy.ConfigurationStore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
@@ -31,6 +32,8 @@ public class CurrentTenantTest
     public CurrentTenantTest()
     {
         var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+        services.AddSingleton<IConfiguration>(configuration);
         services.AddBing();
         services.AddSingleton<ICurrentTenantAccessor>(AsyncLocalCurrentTenantAccessor.Instance);
         services.Configure<BingDefaultTenantStoreOptions>(options =>
