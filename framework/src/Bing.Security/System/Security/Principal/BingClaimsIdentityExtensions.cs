@@ -23,8 +23,8 @@ public static class BingClaimsIdentityExtensions
         var userIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.UserId);
         if (userIdOrNull == null || userIdOrNull.Value.IsNullOrWhiteSpace())
             return null;
-        if (Guid.TryParse(userIdOrNull.Value, out var result))
-            return result;
+        if (Guid.TryParse(userIdOrNull.Value, out var guid))
+            return guid;
         return null;
     }
 
@@ -39,7 +39,9 @@ public static class BingClaimsIdentityExtensions
         var userIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.UserId);
         if (userIdOrNull == null || userIdOrNull.Value.IsNullOrWhiteSpace())
             return null;
-        return Guid.Parse(userIdOrNull.Value);
+        if (Guid.TryParse(userIdOrNull.Value, out var guid))
+            return guid;
+        return null;
     }
 
     #endregion
@@ -56,8 +58,8 @@ public static class BingClaimsIdentityExtensions
         var tenantIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.TenantId);
         if (tenantIdOrNull == null || tenantIdOrNull.Value.IsNullOrWhiteSpace())
             return null;
-        if (Guid.TryParse(tenantIdOrNull.Value, out var result))
-            return result;
+        if (Guid.TryParse(tenantIdOrNull.Value, out var guid))
+            return guid;
         return null;
     }
 
@@ -72,7 +74,9 @@ public static class BingClaimsIdentityExtensions
         var tenantIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.TenantId);
         if (tenantIdOrNull == null || tenantIdOrNull.Value.IsNullOrWhiteSpace())
             return null;
-        return Guid.Parse(tenantIdOrNull.Value);
+        if (Guid.TryParse(tenantIdOrNull.Value, out var guid))
+            return guid;
+        return null;
     }
 
     #endregion
@@ -120,8 +124,8 @@ public static class BingClaimsIdentityExtensions
         var editionIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.EditionId);
         if (editionIdOrNull == null || editionIdOrNull.Value.IsNullOrWhiteSpace())
             return null;
-        if (Guid.TryParse(editionIdOrNull.Value, out var result))
-            return result;
+        if (Guid.TryParse(editionIdOrNull.Value, out var guid))
+            return guid;
         return null;
     }
 
@@ -136,7 +140,79 @@ public static class BingClaimsIdentityExtensions
         var editionIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.EditionId);
         if (editionIdOrNull == null || editionIdOrNull.Value.IsNullOrWhiteSpace())
             return null;
-        return Guid.Parse(editionIdOrNull.Value);
+        if (Guid.TryParse(editionIdOrNull.Value, out var guid))
+            return guid;
+        return null;
+    }
+
+    #endregion
+
+    #region FindImpersonatorTenantId(查找模拟租户标识)
+
+    /// <summary>
+    /// 查找模拟租户标识
+    /// </summary>
+    /// <param name="principal">声明主体</param>
+    public static Guid? FindImpersonatorTenantId(this ClaimsPrincipal principal)
+    {
+        Check.NotNull(principal, nameof(principal));
+        var impersonatorTenantIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ImpersonatorTenantId);
+        if (impersonatorTenantIdOrNull == null || impersonatorTenantIdOrNull.Value.IsNullOrWhiteSpace())
+            return null;
+        if (Guid.TryParse(impersonatorTenantIdOrNull.Value, out var guid))
+            return guid;
+        return null;
+    }
+
+    /// <summary>
+    /// 查找模拟租户标识
+    /// </summary>
+    /// <param name="identity">标识</param>
+    public static Guid? FindImpersonatorTenantId(this IIdentity identity)
+    {
+        Check.NotNull(identity, nameof(identity));
+        var claimsIdentity = identity as ClaimsIdentity;
+        var impersonatorTenantIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ImpersonatorTenantId);
+        if (impersonatorTenantIdOrNull == null || impersonatorTenantIdOrNull.Value.IsNullOrWhiteSpace())
+            return null;
+        if (Guid.TryParse(impersonatorTenantIdOrNull.Value, out var guid))
+            return guid;
+        return null;
+    }
+
+    #endregion
+
+    #region FindImpersonatorUserId(查找模拟用户标识)
+
+    /// <summary>
+    /// 查找模拟用户标识
+    /// </summary>
+    /// <param name="principal">声明主体</param>
+    public static Guid? FindImpersonatorUserId(this ClaimsPrincipal principal)
+    {
+        Check.NotNull(principal, nameof(principal));
+        var impersonatorUserIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ImpersonatorUserId);
+        if (impersonatorUserIdOrNull == null || impersonatorUserIdOrNull.Value.IsNullOrWhiteSpace())
+            return null;
+        if (Guid.TryParse(impersonatorUserIdOrNull.Value, out var guid))
+            return guid;
+        return null;
+    }
+
+    /// <summary>
+    /// 查找模拟用户标识
+    /// </summary>
+    /// <param name="identity">标识</param>
+    public static Guid? FindImpersonatorUserId(this IIdentity identity)
+    {
+        Check.NotNull(identity, nameof(identity));
+        var claimsIdentity = identity as ClaimsIdentity;
+        var impersonatorUserIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ImpersonatorUserId);
+        if (impersonatorUserIdOrNull == null || impersonatorUserIdOrNull.Value.IsNullOrWhiteSpace())
+            return null;
+        if (Guid.TryParse(impersonatorUserIdOrNull.Value, out var guid))
+            return guid;
+        return null;
     }
 
     #endregion
@@ -181,6 +257,37 @@ public static class BingClaimsIdentityExtensions
         if (!principal.Identities.Any(x => string.Equals(x.AuthenticationType, identity.AuthenticationType, StringComparison.OrdinalIgnoreCase)))
             principal.AddIdentity(identity);
         return principal;
+    }
+
+    #endregion
+
+    #region FindSessionId(查找会话标识)
+
+    /// <summary>
+    /// 查找会话标识
+    /// </summary>
+    /// <param name="principal">声明主体</param>
+    public static string FindSessionId(this ClaimsPrincipal principal)
+    {
+        Check.NotNull(principal, nameof(principal));
+        var sessionIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ClientId);
+        if (sessionIdOrNull == null || sessionIdOrNull.Value.IsEmpty())
+            return null;
+        return sessionIdOrNull.Value;
+    }
+
+    /// <summary>
+    /// 查找会话标识
+    /// </summary>
+    /// <param name="identity">标识</param>
+    public static string FindSessionId(this IIdentity identity)
+    {
+        Check.NotNull(identity, nameof(identity));
+        var claimsIdentity = identity as ClaimsIdentity;
+        var sessionIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ClientId);
+        if (sessionIdOrNull == null || sessionIdOrNull.Value.IsEmpty())
+            return null;
+        return sessionIdOrNull.Value;
     }
 
     #endregion
