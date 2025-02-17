@@ -37,13 +37,13 @@ public class ValidationFailedResult : ObjectResult
 public class ValidationError
 {
     /// <summary>
-    /// 名称
+    /// 参数名称
     /// </summary>
     [DataMember(EmitDefaultValue = false)]
     public string Name { get; set; }
 
     /// <summary>
-    /// 错误消息
+    /// 错误信息
     /// </summary>
     [DataMember]
     public string Message { get; set; }
