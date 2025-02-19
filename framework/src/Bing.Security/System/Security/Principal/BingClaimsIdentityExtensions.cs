@@ -217,6 +217,37 @@ public static class BingClaimsIdentityExtensions
 
     #endregion
 
+    #region FindSessionId(查找会话标识)
+
+    /// <summary>
+    /// 查找会话标识
+    /// </summary>
+    /// <param name="principal">声明主体</param>
+    public static string FindSessionId(this ClaimsPrincipal principal)
+    {
+        Check.NotNull(principal, nameof(principal));
+        var sessionIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ClientId);
+        if (sessionIdOrNull == null || sessionIdOrNull.Value.IsEmpty())
+            return null;
+        return sessionIdOrNull.Value;
+    }
+
+    /// <summary>
+    /// 查找会话标识
+    /// </summary>
+    /// <param name="identity">标识</param>
+    public static string FindSessionId(this IIdentity identity)
+    {
+        Check.NotNull(identity, nameof(identity));
+        var claimsIdentity = identity as ClaimsIdentity;
+        var sessionIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ClientId);
+        if (sessionIdOrNull == null || sessionIdOrNull.Value.IsEmpty())
+            return null;
+        return sessionIdOrNull.Value;
+    }
+
+    #endregion
+
     #region Add(添加)
 
     /// <summary>
@@ -261,33 +292,23 @@ public static class BingClaimsIdentityExtensions
 
     #endregion
 
-    #region FindSessionId(查找会话标识)
+    #region RemoveAll(移除全部)
 
     /// <summary>
-    /// 查找会话标识
+    /// 移除全部，从 <see cref="ClaimsIdentity"/> 中移除所有指定类型的声明（Claims）。
     /// </summary>
-    /// <param name="principal">声明主体</param>
-    public static string FindSessionId(this ClaimsPrincipal principal)
+    /// <param name="claimsIdentity">声明标识</param>
+    /// <param name="claimType">声明类型</param>
+    /// <returns>返回移除指定类型的声明后的 <see cref="ClaimsIdentity"/> 对象。</returns>
+    /// <exception cref="ArgumentNullException">
+    /// 如果 <paramref name="claimsIdentity"/> 为 <c>null</c>，则抛出异常。
+    /// </exception>
+    public static ClaimsIdentity RemoveAll(this ClaimsIdentity claimsIdentity, string claimType)
     {
-        Check.NotNull(principal, nameof(principal));
-        var sessionIdOrNull = principal.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ClientId);
-        if (sessionIdOrNull == null || sessionIdOrNull.Value.IsEmpty())
-            return null;
-        return sessionIdOrNull.Value;
-    }
-
-    /// <summary>
-    /// 查找会话标识
-    /// </summary>
-    /// <param name="identity">标识</param>
-    public static string FindSessionId(this IIdentity identity)
-    {
-        Check.NotNull(identity, nameof(identity));
-        var claimsIdentity = identity as ClaimsIdentity;
-        var sessionIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == BingClaimTypes.ClientId);
-        if (sessionIdOrNull == null || sessionIdOrNull.Value.IsEmpty())
-            return null;
-        return sessionIdOrNull.Value;
+        Check.NotNull(claimsIdentity, nameof(claimsIdentity));
+        foreach (var x in claimsIdentity.FindAll(claimType).ToList())
+            claimsIdentity.RemoveClaim(x);
+        return claimsIdentity;
     }
 
     #endregion
