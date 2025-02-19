@@ -89,7 +89,7 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
         // 生成访问令牌
         var (token, accessExpires) =
             Helper.CreateToken(_tokenHandler, claims, _options, JsonWebTokenType.AccessToken);
-        var accessToken = new JsonWebToken()
+        var accessToken = new JsonWebToken
         {
             AccessToken = token,
             AccessTokenUtcExpires = Conv.To<long>(accessExpires.ToJsGetTime()),
@@ -132,7 +132,7 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
             throw new ArgumentNullException(nameof(refreshToken));
-        var parameters = new TokenValidationParameters()
+        var parameters = new TokenValidationParameters
         {
             ValidIssuer = _options.Issuer,
             ValidAudience = _options.Audience,

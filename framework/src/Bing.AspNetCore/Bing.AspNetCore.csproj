@@ -14,6 +14,7 @@
   <Import Project="dependency.props" />
 
   <ItemGroup>
+    <ProjectReference Include="..\Bing.AspNetCore.Abstractions\Bing.AspNetCore.Abstractions.csproj" />
     <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
     <ProjectReference Include="..\Bing.ExceptionHandling\Bing.ExceptionHandling.csproj" />
     <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />

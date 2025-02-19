@@ -31,15 +31,14 @@ public class HttpContextWebClientInfoProvider : IWebClientInfoProvider, ITransie
         HttpContextAccessor = httpContextAccessor;
     }
 
-    /// <summary>
-    /// 浏览器信息
-    /// </summary>
+    /// <inheritdoc />
     public string BrowserInfo => GetBrowserInfo();
 
-    /// <summary>
-    /// 客户端IP地址
-    /// </summary>
+    /// <inheritdoc />
     public string ClientIpAddress => GetClientIpAddress();
+
+    /// <inheritdoc />
+    public string DeviceInfo => string.Empty;
 
     /// <summary>
     /// 获取浏览器信息

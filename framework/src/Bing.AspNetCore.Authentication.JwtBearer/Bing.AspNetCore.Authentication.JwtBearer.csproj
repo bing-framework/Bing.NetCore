@@ -9,6 +9,14 @@
     <Description>Bing.AspNetCore.Authentication.JwtBearer 是Bing应用框架的基于Jwt授权类库。</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Microsoft\Extensions\DependencyInjection\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.AspNetCore.Abstractions\Bing.AspNetCore.Abstractions.csproj" />
+  </ItemGroup>
+
   <Import Project="..\..\..\common.props" />
 
   <Import Project="dependency.props" />

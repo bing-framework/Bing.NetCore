@@ -8,25 +8,25 @@ public class PermissionOptions
     /// <summary>
     /// 密码配置
     /// </summary>
-    public PasswordOptions Password { get; set; } = new PasswordOptions();
+    public PasswordOptions Password { get; set; } = new();
 
     /// <summary>
     /// 用户配置
     /// </summary>
-    public UserOptions User { get; set; } = new UserOptions();
+    public UserOptions User { get; set; } = new();
 
     /// <summary>
     /// 存储配置
     /// </summary>
-    public StoreOptions Store { get; set; } = new StoreOptions();
+    public StoreOptions Store { get; set; } = new();
 
     /// <summary>
     /// 登录配置
     /// </summary>
-    public SignInOptions SignIn { get; set; } = new SignInOptions();
+    public SignInOptions SignIn { get; set; } = new();
 
     /// <summary>
     /// 登录锁定配置
     /// </summary>
-    public LockoutOptions Lockout { get; set; } = new LockoutOptions();
+    public LockoutOptions Lockout { get; set; } = new();
 }
