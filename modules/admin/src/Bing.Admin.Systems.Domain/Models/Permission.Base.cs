@@ -112,22 +112,22 @@ namespace Bing.Admin.Systems.Domain.Models
             AddDescription( t => t.LastModifier );
         }
 
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        protected override void AddChanges( Permission other )
-        {
-            AddChange( t => t.Id, other.Id );
-            AddChange( t => t.RoleId, other.RoleId );
-            AddChange( t => t.ResourceId, other.ResourceId );
-            AddChange( t => t.IsDeny, other.IsDeny );
-            AddChange( t => t.Sign, other.Sign );
-            AddChange( t => t.CreationTime, other.CreationTime );
-            AddChange( t => t.CreatorId, other.CreatorId );
-            AddChange( t => t.Creator, other.Creator );
-            AddChange( t => t.LastModificationTime, other.LastModificationTime );
-            AddChange( t => t.LastModifierId, other.LastModifierId );
-            AddChange( t => t.LastModifier, other.LastModifier );
-        }
+        ///// <summary>
+        ///// 添加变更列表
+        ///// </summary>
+        //protected override void AddChanges( Permission other )
+        //{
+        //    AddChange( t => t.Id, other.Id );
+        //    AddChange( t => t.RoleId, other.RoleId );
+        //    AddChange( t => t.ResourceId, other.ResourceId );
+        //    AddChange( t => t.IsDeny, other.IsDeny );
+        //    AddChange( t => t.Sign, other.Sign );
+        //    AddChange( t => t.CreationTime, other.CreationTime );
+        //    AddChange( t => t.CreatorId, other.CreatorId );
+        //    AddChange( t => t.Creator, other.Creator );
+        //    AddChange( t => t.LastModificationTime, other.LastModificationTime );
+        //    AddChange( t => t.LastModifierId, other.LastModifierId );
+        //    AddChange( t => t.LastModifier, other.LastModifier );
+        //}
     }
 }

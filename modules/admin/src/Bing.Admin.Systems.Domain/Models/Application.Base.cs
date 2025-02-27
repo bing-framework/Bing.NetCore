@@ -63,23 +63,23 @@ namespace Bing.Admin.Systems.Domain.Models
             AddDescription(t => t.LastModifier);
         }
 
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        protected override void AddChanges(Application other)
-        {
-            AddChange(t => t.Id, other.Id);
-            AddChange(t => t.Code, other.Code);
-            AddChange(t => t.Name, other.Name);
-            AddChange(t => t.RegisterEnabled, other.RegisterEnabled);
-            AddChange(t => t.Enabled, other.Enabled);
-            AddChange(t => t.Remark, other.Remark);
-            AddChange(t => t.CreationTime, other.CreationTime);
-            AddChange(t => t.CreatorId, other.CreatorId);
-            AddChange(t => t.Creator, other.Creator);
-            AddChange(t => t.LastModificationTime, other.LastModificationTime);
-            AddChange(t => t.LastModifierId, other.LastModifierId);
-            AddChange(t => t.LastModifier, other.LastModifier);
-        }
+        ///// <summary>
+        ///// 添加变更列表
+        ///// </summary>
+        //protected override void AddChanges(Application other)
+        //{
+        //    AddChange(t => t.Id, other.Id);
+        //    AddChange(t => t.Code, other.Code);
+        //    AddChange(t => t.Name, other.Name);
+        //    AddChange(t => t.RegisterEnabled, other.RegisterEnabled);
+        //    AddChange(t => t.Enabled, other.Enabled);
+        //    AddChange(t => t.Remark, other.Remark);
+        //    AddChange(t => t.CreationTime, other.CreationTime);
+        //    AddChange(t => t.CreatorId, other.CreatorId);
+        //    AddChange(t => t.Creator, other.Creator);
+        //    AddChange(t => t.LastModificationTime, other.LastModificationTime);
+        //    AddChange(t => t.LastModifierId, other.LastModifierId);
+        //    AddChange(t => t.LastModifier, other.LastModifier);
+        //}
     }
 }

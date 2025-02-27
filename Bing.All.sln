@@ -365,6 +365,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Samples.Winform", "sam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.AspNetCore.Abstractions", "framework\src\Bing.AspNetCore.Abstractions\Bing.AspNetCore.Abstractions.csproj", "{0359A38B-4080-41A1-BB75-6B2EA48D8E2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Ddd.Domain.Extensions.Analyzers", "framework\src\Bing.Ddd.Domain.Extensions.Analyzers\Bing.Ddd.Domain.Extensions.Analyzers.csproj", "{BE5E6E82-3CB6-4C1B-8E2D-1B7A2483B41B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -827,6 +829,10 @@ Global
 		{0359A38B-4080-41A1-BB75-6B2EA48D8E2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0359A38B-4080-41A1-BB75-6B2EA48D8E2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0359A38B-4080-41A1-BB75-6B2EA48D8E2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE5E6E82-3CB6-4C1B-8E2D-1B7A2483B41B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE5E6E82-3CB6-4C1B-8E2D-1B7A2483B41B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE5E6E82-3CB6-4C1B-8E2D-1B7A2483B41B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE5E6E82-3CB6-4C1B-8E2D-1B7A2483B41B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -993,6 +999,7 @@ Global
 		{906404A3-5AD0-4064-9FD8-0D07D82A678F} = {309ECAC5-12AB-4F12-BC20-2392FFAB94C8}
 		{1538FB31-03B7-4D1F-9570-58909BDABE3C} = {3F07E19F-C285-47B5-9441-46F375ECD5C9}
 		{0359A38B-4080-41A1-BB75-6B2EA48D8E2D} = {C6B2743E-B7EE-418C-9F9B-79976B71C46B}
+		{BE5E6E82-3CB6-4C1B-8E2D-1B7A2483B41B} = {96F03C7E-0959-4BE4-BE87-E987E1C4BEDA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

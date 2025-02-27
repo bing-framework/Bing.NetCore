@@ -145,30 +145,30 @@ namespace Bing.Admin.Systems.Domain.Models
             AddDescription( t => t.Extend );
         }
 
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        protected override void AddChanges( Resource other )
-        {
-            AddChange( t => t.Id, other.Id );
-            AddChange( t => t.ApplicationId, other.ApplicationId );
-            AddChange( t => t.Uri, other.Uri );
-            AddChange( t => t.Name, other.Name );
-            AddChange( t => t.Type, other.Type );
-            AddChange( t => t.ParentId, other.ParentId );
-            AddChange( t => t.Path, other.Path );
-            AddChange( t => t.Level, other.Level );
-            AddChange( t => t.Enabled, other.Enabled );
-            AddChange( t => t.SortId, other.SortId );
-            AddChange( t => t.Remark, other.Remark );
-            AddChange( t => t.PinYin, other.PinYin );
-            AddChange( t => t.CreationTime, other.CreationTime );
-            AddChange( t => t.CreatorId, other.CreatorId );
-            AddChange( t => t.Creator, other.Creator );
-            AddChange( t => t.LastModificationTime, other.LastModificationTime );
-            AddChange( t => t.LastModifierId, other.LastModifierId );
-            AddChange( t => t.LastModifier, other.LastModifier );
-            AddChange( t => t.Extend, other.Extend );
-        }
+        ///// <summary>
+        ///// 添加变更列表
+        ///// </summary>
+        //protected override void AddChanges( Resource other )
+        //{
+        //    AddChange( t => t.Id, other.Id );
+        //    AddChange( t => t.ApplicationId, other.ApplicationId );
+        //    AddChange( t => t.Uri, other.Uri );
+        //    AddChange( t => t.Name, other.Name );
+        //    AddChange( t => t.Type, other.Type );
+        //    AddChange( t => t.ParentId, other.ParentId );
+        //    AddChange( t => t.Path, other.Path );
+        //    AddChange( t => t.Level, other.Level );
+        //    AddChange( t => t.Enabled, other.Enabled );
+        //    AddChange( t => t.SortId, other.SortId );
+        //    AddChange( t => t.Remark, other.Remark );
+        //    AddChange( t => t.PinYin, other.PinYin );
+        //    AddChange( t => t.CreationTime, other.CreationTime );
+        //    AddChange( t => t.CreatorId, other.CreatorId );
+        //    AddChange( t => t.Creator, other.Creator );
+        //    AddChange( t => t.LastModificationTime, other.LastModificationTime );
+        //    AddChange( t => t.LastModifierId, other.LastModifierId );
+        //    AddChange( t => t.LastModifier, other.LastModifier );
+        //    AddChange( t => t.Extend, other.Extend );
+        //}
     }
 }

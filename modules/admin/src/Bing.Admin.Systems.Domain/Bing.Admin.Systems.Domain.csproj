@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Domain.Extensions.Analyzers\Bing.Ddd.Domain.Extensions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj" />
     <ProjectReference Include="..\Bing.Admin.Domain.Shared\Bing.Admin.Domain.Shared.csproj" />
     <ProjectReference Include="..\Bing.Admin.Infrastructure\Bing.Admin.Infrastructure.csproj" />

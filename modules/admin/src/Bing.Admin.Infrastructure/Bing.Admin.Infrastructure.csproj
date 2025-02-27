@@ -14,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Http" Version="1.5.0-preview-20230613-1" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.5.0" />
+    <PackageReference Include="IP2Region.Net" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>

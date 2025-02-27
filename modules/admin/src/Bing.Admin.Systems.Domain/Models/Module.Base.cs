@@ -111,26 +111,26 @@ namespace Bing.Admin.Systems.Domain.Models
             AddDescription(t => t.LastModifierId);
         }
 
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        protected override void AddChanges(Module other)
-        {
-            AddChange(t => t.Id, other.Id);
-            AddChange(t => t.ApplicationId, other.ApplicationId);
-            AddChange(t => t.Url, other.Url);
-            AddChange(t => t.Name, other.Name);
-            AddChange(t => t.ParentId, other.ParentId);
-            AddChange(t => t.Path, other.Path);
-            AddChange(t => t.Level, other.Level);
-            AddChange(t => t.Remark, other.Remark);
-            AddChange(t => t.PinYin, other.PinYin);
-            AddChange(t => t.Enabled, other.Enabled);
-            AddChange(t => t.SortId, other.SortId);
-            AddChange(t => t.CreationTime, other.CreationTime);
-            AddChange(t => t.CreatorId, other.CreatorId);
-            AddChange(t => t.LastModificationTime, other.LastModificationTime);
-            AddChange(t => t.LastModifierId, other.LastModifierId);
-        }
+        ///// <summary>
+        ///// 添加变更列表
+        ///// </summary>
+        //protected override void AddChanges(Module other)
+        //{
+        //    AddChange(t => t.Id, other.Id);
+        //    AddChange(t => t.ApplicationId, other.ApplicationId);
+        //    AddChange(t => t.Url, other.Url);
+        //    AddChange(t => t.Name, other.Name);
+        //    AddChange(t => t.ParentId, other.ParentId);
+        //    AddChange(t => t.Path, other.Path);
+        //    AddChange(t => t.Level, other.Level);
+        //    AddChange(t => t.Remark, other.Remark);
+        //    AddChange(t => t.PinYin, other.PinYin);
+        //    AddChange(t => t.Enabled, other.Enabled);
+        //    AddChange(t => t.SortId, other.SortId);
+        //    AddChange(t => t.CreationTime, other.CreationTime);
+        //    AddChange(t => t.CreatorId, other.CreatorId);
+        //    AddChange(t => t.LastModificationTime, other.LastModificationTime);
+        //    AddChange(t => t.LastModifierId, other.LastModifierId);
+        //}
     }
 }

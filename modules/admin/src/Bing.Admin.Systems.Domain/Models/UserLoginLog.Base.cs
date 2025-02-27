@@ -75,18 +75,18 @@ namespace Bing.Admin.Systems.Domain.Models
             AddDescription( t => t.CreationTime );
         }
 
-        /// <summary>
-        /// 添加变更列表
-        /// </summary>
-        protected override void AddChanges( UserLoginLog other )
-        {
-            AddChange( t => t.Id, other.Id );
-            AddChange( t => t.UserId, other.UserId );
-            AddChange( t => t.Name, other.Name );
-            AddChange( t => t.Ip, other.Ip );
-            AddChange( t => t.UserAgent, other.UserAgent );
-            AddChange( t => t.LogoutTime, other.LogoutTime );
-            AddChange( t => t.CreationTime, other.CreationTime );
-        }
+        ///// <summary>
+        ///// 添加变更列表
+        ///// </summary>
+        //protected override void AddChanges( UserLoginLog other )
+        //{
+        //    AddChange( t => t.Id, other.Id );
+        //    AddChange( t => t.UserId, other.UserId );
+        //    AddChange( t => t.Name, other.Name );
+        //    AddChange( t => t.Ip, other.Ip );
+        //    AddChange( t => t.UserAgent, other.UserAgent );
+        //    AddChange( t => t.LogoutTime, other.LogoutTime );
+        //    AddChange( t => t.CreationTime, other.CreationTime );
+        //}
     }
 }
