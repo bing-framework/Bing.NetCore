@@ -42,9 +42,6 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
                 var semanticModel = context.Compilation.GetSemanticModel(classDecl.SyntaxTree);
                 if (ModelExtensions.GetDeclaredSymbol(semanticModel, classDecl) is not INamedTypeSymbol classSymbol)
                     continue;
-                log.AppendLine($"// Processing class: {classSymbol.Name}");
-
-
                 if (!IsDomainObjectBase(classSymbol, domainBaseSymbol))
                     continue;
                 if (!ShouldGenerateChangeTracking(classDecl, classSymbol))
@@ -172,7 +169,7 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
                 .Select(p => new BuilderPropertyInfo(p)));
             classSymbol = classSymbol.BaseType;
         }
-        return properties;
+        return properties.OrderBy(x => x.Name).ToList();
     }
 }
 
