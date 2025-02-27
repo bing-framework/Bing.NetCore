@@ -103,21 +103,21 @@ namespace Bing.Admin.Systems.Domain.Models
             AddDescription( t => t.Extend );
         }
 
-        ///// <summary>
-        ///// 添加变更列表
-        ///// </summary>
-        //protected override void AddChanges( Administrator other )
-        //{
-        //    AddChange( t => t.Id, other.Id );
-        //    AddChange( t => t.Name, other.Name );
-        //    AddChange( t => t.Enabled, other.Enabled );
-        //    AddChange( t => t.CreationTime, other.CreationTime );
-        //    AddChange( t => t.CreatorId, other.CreatorId );
-        //    AddChange( t => t.Creator, other.Creator );
-        //    AddChange( t => t.LastModificationTime, other.LastModificationTime );
-        //    AddChange( t => t.LastModifierId, other.LastModifierId );
-        //    AddChange( t => t.LastModifier, other.LastModifier );
-        //    AddChange( t => t.Extend, other.Extend );
-        //}
+        /// <summary>
+        /// 添加变更列表
+        /// </summary>
+        protected override void AddChanges(Administrator other)
+        {
+            AddChange(t => t.Id, other.Id);
+            AddChange(t => t.Name, other.Name);
+            AddChange(t => t.Enabled, other.Enabled);
+            AddChange(t => t.CreationTime, other.CreationTime);
+            AddChange(t => t.CreatorId, other.CreatorId);
+            AddChange(t => t.Creator, other.Creator);
+            AddChange(t => t.LastModificationTime, other.LastModificationTime);
+            AddChange(t => t.LastModifierId, other.LastModifierId);
+            AddChange(t => t.LastModifier, other.LastModifier);
+            AddChange(t => t.Extend, other.Extend);
+        }
     }
 }
