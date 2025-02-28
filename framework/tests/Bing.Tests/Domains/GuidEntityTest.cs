@@ -90,7 +90,7 @@ public class GuidEntityTest
     public void Test_ToString()
     {
         _sample = new AggregateRootSample { Name = "a" };
-        Assert.Equal($"Id:{_sample.Id},姓名:a", _sample.ToString());
+        Assert.Equal($"Id:{_sample.Id},姓名:{_sample.Name}", _sample.ToString());
     }
 
     /// <summary>
