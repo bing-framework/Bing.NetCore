@@ -162,3 +162,8 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 > 这意味着你可以在任意场景下使用 Bing 应用框架而不会有人找你要钱。
 
 > Bing 会尽量引入开源免费的第三方技术框架，如有意外，还请自行了解。
+
+## 致谢
+
+- [JetBrains Open Source](https://www.jetbrains.com/zh-cn/opensource/?from=bing-framework) 为项目提供免费的 IDE 授权
+  [<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" width="200"/>](https://www.jetbrains.com/opensource/)
