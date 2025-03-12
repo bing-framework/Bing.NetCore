@@ -32,8 +32,8 @@ public class BingBuilder : IBingBuilder
     /// <param name="services">服务集合</param>
     public BingBuilder(IServiceCollection services)
     {
-        Services = services;
-        _sourceModules = GetAllModules(services);
+        Services = services ?? throw new ArgumentNullException(nameof(services));
+        _sourceModules = GetAllModules(services) ?? new List<BingModule>();
         _modules = new List<BingModule>();
     }
 
@@ -45,7 +45,9 @@ public class BingBuilder : IBingBuilder
     {
         var moduleTypeFinder = services.GetOrAddTypeFinder<IBingModuleTypeFinder>(assemblyFinder => new BingModuleTypeFinder(assemblyFinder));
         var moduleTypes = moduleTypeFinder.FindAll(true);
-        return moduleTypes.Select(m => (BingModule)Activator.CreateInstance(m))
+        return moduleTypes
+            .Select(m => Activator.CreateInstance(m) as BingModule)
+            .Where(m => m != null)
             .OrderBy(m => m.Level)
             .ThenBy(m => m.Order)
             .ThenBy(m => m.GetType().FullName)
@@ -84,23 +86,23 @@ public class BingBuilder : IBingBuilder
     {
         if (!type.IsBaseOn(typeof(BingModule)))
             throw new BingFrameworkException($"要加载的模块类型“{type}”不派生于基类 {nameof(BingModule)}");
+
         if (_modules.Any(m => m.GetType() == type))
             return this;
 
         var tmpModules = new BingModule[_modules.Count];
         _modules.CopyTo(tmpModules);
-        var module = _sourceModules.FirstOrDefault(x => x.GetType() == type);
-        if (module == null)
-            throw new BingFrameworkException($"类型为“{type.FullName}”的模块实例无法找到");
+
+        var module = _sourceModules.FirstOrDefault(x => x.GetType() == type)
+                     ?? throw new BingFrameworkException($"无法找到类型为 {type.FullName} 的模块实例");
         _modules.AddIfNotContains(module);
 
         // 添加依赖模块
         var dependTypes = module.GetDependModuleTypes();
         foreach (var dependType in dependTypes)
         {
-            var dependModule = _sourceModules.Find(m => m.GetType() == dependType);
-            if (dependModule == null)
-                throw new BingFrameworkException($"加载模块{module.GetType().FullName}时无法找到依赖模块{dependType.FullName}");
+            var dependModule = _sourceModules.FirstOrDefault(m => m.GetType() == dependType)
+                               ?? throw new BingFrameworkException($"加载模块 {module.GetType().FullName} 时无法找到依赖模块 {dependType.FullName}");
             _modules.AddIfNotContains(dependModule);
         }
 
@@ -112,12 +114,12 @@ public class BingBuilder : IBingBuilder
         foreach (var tmpModule in tmpModules)
         {
             var moduleType = tmpModule.GetType();
-            var moduleName = Reflections.GetDescription(moduleType);
-            Services.LogInformation($"添加模块 “{moduleName} ({moduleType.Name})” 的服务", logName);
+            var moduleName = Reflections.GetDescription(moduleType) ?? moduleType.Name;
+            Services.LogInformation($"添加模块 \"{moduleName} ({moduleType.Name})\" 的服务", logName);
             var tmp = Services.ToArray();
             AddModule(Services, tmpModule);
             Services.ServiceLogDebug(tmp, moduleType.FullName);
-            Services.LogInformation($"模块 “{moduleName} ({moduleType.Name})” 的服务添加完毕，添加了 {Services.Count - tmp.Length} 个服务\n", logName);
+            Services.LogInformation($"模块 \"{moduleName} ({moduleType.Name})\" 的服务添加完毕，新增 {Services.Count - tmp.Length} 个服务", logName);
         }
         return this;
     }

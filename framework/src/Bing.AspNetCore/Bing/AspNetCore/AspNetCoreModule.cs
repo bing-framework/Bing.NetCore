@@ -27,18 +27,22 @@ public class AspNetCoreModule : Bing.Core.Modularity.BingModule
     /// <param name="services">服务集合</param>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
+        // 注册 HttpContextAccessor，提供 HttpContext 访问
         services.AddHttpContextAccessor();
-        // 注入当前用户，替换Thread.CurrentPrincipal的作用
+
+        // 注入当前用户信息，替换 Thread.CurrentPrincipal
         services.AddTransient<System.Security.Principal.IPrincipal>(provider =>
         {
             var accessor = provider.GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
             return accessor?.HttpContext?.User;
         });
 
-        // 注入用户会话
+        // 注入用户会话管理
         services.AddSingleton<ICurrentPrincipalAccessor, HttpContextCurrentPrincipalAccessor>();
-        // 注册代码页
+
+        // 注册编码支持
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
         return services;
     }
 

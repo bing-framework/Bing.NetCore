@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Core.Modularity;
 
 /// <summary>
-/// Bing 模块基类
+/// Bing 模块基类，所有模块应继承此类。
 /// </summary>
 public abstract class BingModule : IBingModule
 {
@@ -46,27 +46,34 @@ public abstract class BingModule : IBingModule
         var dependAttrs = moduleType.GetAttributes<DependsOnModuleAttribute>(true).ToList();
         if (dependAttrs.Count == 0)
             return Type.EmptyTypes;
-        var dependTypes = new List<Type>();
+        
+        var dependTypes = new HashSet<Type>();
         foreach (var dependAttr in dependAttrs)
         {
-            var moduleTypes = dependAttr.DependedModuleTypes;
-            if (moduleTypes.Length == 0)
-                continue;
-            dependTypes.AddRange(moduleTypes);
-            foreach (var type in moduleTypes)
-                dependTypes.AddRange(GetDependModuleTypes(type));
+            if (dependAttr.DependedModuleTypes?.Length > 0)
+            {
+                foreach (var type in dependAttr.DependedModuleTypes)
+                {
+                    dependTypes.Add(type);
+                    foreach (var subType in GetDependModuleTypes(type)) 
+                        dependTypes.Add(subType);
+                }
+            }
         }
-        return dependTypes.Distinct().ToArray();
+        return dependTypes.ToArray();
     }
 
     #region 辅助方法
 
     /// <summary>
-    /// 判断指定类型是否<see cref="IBingModule"/>类型
+    /// 判断给定类型是否是 <see cref="IBingModule"/> 模块类型。
     /// </summary>
-    /// <param name="type">类型</param>
+    /// <param name="type">待验证的类型</param>
+    /// <returns>如果是有效的 Bing 模块类型，则返回 <c>true</c>，否则返回 <c>false</c></returns>
     public static bool IsBingModule(Type type)
     {
+        if (type == null)
+            return false;
         var typeInfo = type.GetTypeInfo();
         return typeInfo.IsClass &&
                !typeInfo.IsAbstract &&
