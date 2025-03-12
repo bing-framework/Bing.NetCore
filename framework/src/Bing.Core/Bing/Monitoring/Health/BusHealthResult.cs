@@ -1,9 +1,9 @@
 ﻿namespace Bing.Monitoring.Health;
 
 /// <summary>
-/// 业务健康
+/// 业务健康结果
 /// </summary>
-public readonly struct HealthResult
+public readonly struct BusHealthResult
 {
     /// <summary>
     /// 空只读字典
@@ -12,13 +12,13 @@ public readonly struct HealthResult
     private static readonly IReadOnlyDictionary<string, object> _emptyReadOnlyDictionary = new Dictionary<string, object>();
 
     /// <summary>
-    /// 初始化一个<see cref="HealthResult"/>类型的实例
+    /// 初始化一个<see cref="BusHealthResult"/>类型的实例
     /// </summary>
     /// <param name="status">业务健康状态</param>
     /// <param name="description">描述</param>
     /// <param name="exception">异常</param>
     /// <param name="data">数据</param>
-    private HealthResult(BusHealthStatus status, string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null)
+    private BusHealthResult(BusHealthStatus status, string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null)
     {
         Status = status;
         Description = description;
@@ -51,7 +51,7 @@ public readonly struct HealthResult
     /// </summary>
     /// <param name="description">描述</param>
     /// <param name="data">数据</param>
-    public static HealthResult Healthy(string description = null, IReadOnlyDictionary<string, object> data = null) => new HealthResult(BusHealthStatus.Healthy, description, null, data);
+    public static BusHealthResult Healthy(string description = null, IReadOnlyDictionary<string, object> data = null) => new(BusHealthStatus.Healthy, description, null, data);
 
     /// <summary>
     /// 降级的
@@ -59,8 +59,8 @@ public readonly struct HealthResult
     /// <param name="description">描述</param>
     /// <param name="exception">异常</param>
     /// <param name="data">数据</param>
-    public static HealthResult Degraded(string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null) =>
-        new HealthResult(BusHealthStatus.Degraded, description, exception, data);
+    public static BusHealthResult Degraded(string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null) =>
+        new(BusHealthStatus.Degraded, description, exception, data);
 
     /// <summary>
     /// 不良的
@@ -68,6 +68,6 @@ public readonly struct HealthResult
     /// <param name="description">描述</param>
     /// <param name="exception">异常</param>
     /// <param name="data">数据</param>
-    public static HealthResult Unhealthy(string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null) =>
-        new HealthResult(BusHealthStatus.Unhealthy, description, exception, data);
+    public static BusHealthResult Unhealthy(string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null) =>
+        new(BusHealthStatus.Unhealthy, description, exception, data);
 }

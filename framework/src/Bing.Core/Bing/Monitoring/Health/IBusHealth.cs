@@ -9,6 +9,4 @@ public interface IBusHealth
     /// 业务名称
     /// </summary>
     string Name { get; }
-
-
 }

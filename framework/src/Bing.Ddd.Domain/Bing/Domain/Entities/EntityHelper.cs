@@ -17,6 +17,69 @@ public static class EntityHelper
     public static Func<Guid> GuidGenerateFunc { get; set; } = Guid.NewGuid;
 
     /// <summary>
+    /// 判断两个 <see cref="IEntity"/> 实例是否相等。
+    /// </summary>
+    /// <param name="entity1">第一个实体对象。</param>
+    /// <param name="entity2">第二个实体对象。</param>
+    /// <returns>
+    /// 如果两个实体对象相等，则返回 <c>true</c>；否则返回 <c>false</c>。
+    /// </returns>
+    public static bool EntityEquals(IEntity entity1, IEntity entity2)
+    {
+        if (entity1 == null || entity2 == null)
+            return false;
+
+        // 如果引用相同，则直接返回 true
+        if (ReferenceEquals(entity1, entity2))
+            return true;
+
+        // 如果两个实体类型不兼容，则返回 false
+        var typeOfEntity1 = entity1.GetType();
+        var typeOfEntity2 = entity2.GetType();
+        if (!typeOfEntity1.IsAssignableFrom(typeOfEntity2) && !typeOfEntity2.IsAssignableFrom(typeOfEntity1))
+            return false;
+
+        // 多租户委托检查
+
+        // 瞬时对象不视为相等
+        if (HasDefaultKeys(entity1) && HasDefaultKeys(entity2))
+            return false;
+
+        // 如果键数量不匹配，则不相等
+        var entity1Keys = entity1.GetKeys();
+        var entity2Keys = entity2.GetKeys();
+        if(entity1Keys.Length!=entity2Keys.Length)
+            return false;
+
+        // 逐个比较主键值
+        for (var i = 0; i < entity1Keys.Length; i++)
+        {
+            // 如果 `entity1Key` 为 null，`entity2Key` 也必须为 null，否则不相等
+            var entity1Key = entity1Keys[i];
+            var entity2Key = entity2Keys[i];
+            if (entity1Key == null)
+            {
+                if (entity2Key == null)
+                    continue;
+                return false;
+            }
+
+            // 如果 `entity2Key` 为 null，则不相等
+            if (entity2Key == null)
+                return false;
+
+            // 如果两个键值都是默认值（如 0、null、Guid.Empty），则继续比较
+            if (Types.IsDefaultValue(entity1Key) && Types.IsDefaultValue(entity2Key))
+                return false;
+
+            // 进行键值比较，如果不同，则返回 false
+            if (!entity1Key.Equals(entity2Key))
+                return false;
+        }
+        return true;
+    }
+
+    /// <summary>
     /// 判断指定的类型是否实现了 <see cref="IEntity"/> 接口。
     /// </summary>
     /// <param name="type">要检查的类型。</param>
