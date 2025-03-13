@@ -10,12 +10,17 @@ namespace Bing.AspNetCore.MultiTenancy;
 public class DomainTenantResolveContributor : HttpTenantResolveContributorBase
 {
     /// <summary>
+    /// 域名格式字符串
+    /// </summary>
+    private readonly string _domainFormat;
+
+    /// <summary>
     /// 初始化一个<see cref="DomainTenantResolveContributor"/>类型的实例
     /// </summary>
     /// <param name="domainFormat">域名格式字符串。范例：{0}.a.com</param>
     public DomainTenantResolveContributor(string domainFormat)
     {
-        DomainFormat = domainFormat;
+        _domainFormat = DomainTenantResolverHelper.RemoveDomainPrefix(domainFormat);
     }
 
     /// <summary>
@@ -31,7 +36,7 @@ public class DomainTenantResolveContributor : HttpTenantResolveContributorBase
     /// <summary>
     /// 域名格式字符串
     /// </summary>
-    public string DomainFormat { get; }
+    public string DomainFormat => _domainFormat;
 
     /// <summary>
     /// 从 <see cref="HttpContext"/> 中获取租户标识、租户名称、null

@@ -20,12 +20,12 @@ public class CurrentTenant : ICurrentTenant, ITransientDependency
     /// <summary>
     /// 租户标识
     /// </summary>
-    public virtual string Id => _currentTenantAccessor.Current?.TenantId;
+    public virtual string? Id => _currentTenantAccessor.Current?.TenantId;
 
     /// <summary>
     /// 租户名称
     /// </summary>
-    public string Name => _currentTenantAccessor.Current?.Name;
+    public string? Name => _currentTenantAccessor.Current?.Name;
 
     /// <summary>
     /// 初始化一个<see cref="CurrentTenant"/>类型的实例
@@ -38,20 +38,21 @@ public class CurrentTenant : ICurrentTenant, ITransientDependency
     /// </summary>
     /// <param name="id">租户标识</param>
     /// <param name="name">租户名称</param>
-    public IDisposable Change(string id, string name = null) => SetCurrent(id, name);
+    public IDisposable Change(string? id, string? name = null) => SetCurrent(id, name);
 
     /// <summary>
     /// 设置当前租户信息
     /// </summary>
     /// <param name="tenantId">租户标识</param>
     /// <param name="name">租户名称</param>
-    private IDisposable SetCurrent(string tenantId, string name = null)
+    private IDisposable SetCurrent(string? tenantId, string? name = null)
     {
         var parentScope = _currentTenantAccessor.Current;
         _currentTenantAccessor.Current = new BasicTenantInfo(tenantId, name);
-        return new DisposeAction(() =>
+        return new DisposeAction<ValueTuple<ICurrentTenantAccessor, BasicTenantInfo?>>(static (state) =>
         {
-            _currentTenantAccessor.Current = parentScope;
-        });
+            var (currentTenantAccessor, parentScope) = state;
+            currentTenantAccessor.Current = parentScope;
+        }, (_currentTenantAccessor, parentScope));
     }
 }

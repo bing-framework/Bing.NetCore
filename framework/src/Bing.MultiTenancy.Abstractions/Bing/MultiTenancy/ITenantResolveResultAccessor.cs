@@ -8,5 +8,5 @@ public interface ITenantResolveResultAccessor
     /// <summary>
     /// 租户解析结果
     /// </summary>
-    TenantResolveResult Result { get; set; }
+    TenantResolveResult? Result { get; set; }
 }

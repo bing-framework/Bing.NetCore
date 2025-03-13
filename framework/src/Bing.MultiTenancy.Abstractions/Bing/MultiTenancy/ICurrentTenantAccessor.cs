@@ -8,5 +8,5 @@ public interface ICurrentTenantAccessor
     /// <summary>
     /// 当前基本租户信息
     /// </summary>
-    BasicTenantInfo Current { get; set; }
+    BasicTenantInfo? Current { get; set; }
 }

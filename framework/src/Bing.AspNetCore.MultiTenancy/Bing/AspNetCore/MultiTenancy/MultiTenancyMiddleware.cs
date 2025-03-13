@@ -82,7 +82,7 @@ public class MultiTenancyMiddleware : Microsoft.AspNetCore.Http.IMiddleware, ITr
                 {
                     BingMultiTenancyCookieHelper.SetTenantCookie(context, _currentTenant.Id, _options.TenantKey);
                 }
-
+                // TODO: 设置国际化
                 await next(context);
             }
         }

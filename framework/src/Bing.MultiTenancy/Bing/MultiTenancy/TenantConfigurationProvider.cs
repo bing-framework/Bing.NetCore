@@ -14,16 +14,19 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     /// </summary>
     /// <param name="tenantResolver">租户解析器</param>
     /// <param name="tenantStore">租户存储器</param>
+    /// <param name="tenantNormalizer">租户规范化器</param>
     /// <param name="tenantResolveResultAccessor">租户解析结果访问器</param>
     /// <param name="stringLocalizer">国际化</param>
     public TenantConfigurationProvider(
         ITenantResolver tenantResolver,
         ITenantStore tenantStore,
+        ITenantNormalizer tenantNormalizer,
         ITenantResolveResultAccessor tenantResolveResultAccessor,
         IStringLocalizer<BingMultiTenancyResource> stringLocalizer)
     {
         TenantResolver = tenantResolver;
         TenantStore = tenantStore;
+        TenantNormalizer = tenantNormalizer;
         TenantResolveResultAccessor = tenantResolveResultAccessor;
         StringLocalizer = stringLocalizer;
     }
@@ -39,6 +42,11 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     protected virtual ITenantStore TenantStore { get; }
 
     /// <summary>
+    /// 租户规范化器
+    /// </summary>
+    protected virtual ITenantNormalizer TenantNormalizer { get; }
+
+    /// <summary>
     /// 租户解析结果访问器
     /// </summary>
     protected virtual ITenantResolveResultAccessor TenantResolveResultAccessor { get; }
@@ -52,13 +60,13 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     /// 获取租户配置
     /// </summary>
     /// <param name="saveResolveResult">是否保存解析结果。默认：false</param>
-    public virtual async Task<TenantConfiguration> GetAsync(bool saveResolveResult = false)
+    public virtual async Task<TenantConfiguration?> GetAsync(bool saveResolveResult = false)
     {
         var resolveResult = await TenantResolver.ResolveTenantIdOrNameAsync();
         if (saveResolveResult)
             TenantResolveResultAccessor.Result = resolveResult;
 
-        TenantConfiguration tenant = null;
+        TenantConfiguration? tenant = null;
         if (resolveResult.TenantIdOrName != null)
         {
             tenant = await FindTenantAsync(resolveResult.TenantIdOrName);
@@ -81,7 +89,7 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     /// 查找租户
     /// </summary>
     /// <param name="tenantIdOrName">租户标识、租户名称</param>
-    protected virtual async Task<TenantConfiguration> FindTenantAsync(string tenantIdOrName)
+    protected virtual async Task<TenantConfiguration?> FindTenantAsync(string tenantIdOrName)
     {
         if (Guid.TryParse(tenantIdOrName, out var parsedTenantId))
             return await TenantStore.FindByIdAsync(parsedTenantId.ToString());

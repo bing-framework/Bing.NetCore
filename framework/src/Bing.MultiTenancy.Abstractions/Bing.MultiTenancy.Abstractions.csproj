@@ -7,6 +7,10 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
     <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />

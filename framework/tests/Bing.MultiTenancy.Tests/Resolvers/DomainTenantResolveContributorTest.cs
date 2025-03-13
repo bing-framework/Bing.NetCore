@@ -142,4 +142,31 @@ public class DomainTenantResolveContributorTest
         // 验证
         Assert.Equal("a", context.TenantIdOrName);
     }
+
+    /// <summary>
+    /// 测试 - 解析租户标识 - 指定域名格式 - http前缀
+    /// </summary>
+    [Fact]
+    public async Task Test_ResolveAsync_5()
+    {
+        _resolver = new DomainTenantResolveContributor("http://b.{0}.test.com");
+        // 设置租户配置
+        var options = new MultiTenancyOptions { IsEnabled = true };
+        _mockServiceProvider
+            .Setup(x => x.GetService(typeof(IOptions<MultiTenancyOptions>)))
+            .Returns(Microsoft.Extensions.Options.Options.Create(options));
+
+        // 设置域名
+        _mockHttpContext.Setup(t => t.Request.Host).Returns(new HostString("https://b.a.test.com"));
+        _mockServiceProvider
+            .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
+            .Returns(new HttpContextAccessor { HttpContext = _mockHttpContext.Object });
+
+        // 执行
+        var context = new TenantResolveContext(_mockServiceProvider.Object);
+        await _resolver.ResolveAsync(context);
+
+        // 验证
+        Assert.Equal("a", context.TenantIdOrName);
+    }
 }

@@ -10,7 +10,7 @@ public interface ITenantResolveContext : IServiceProviderAccessor
     /// <summary>
     /// 租户ID或者租户名称
     /// </summary>
-    string TenantIdOrName { get; set; }
+    string? TenantIdOrName { get; set; }
 
     /// <summary>
     /// 是否已处理

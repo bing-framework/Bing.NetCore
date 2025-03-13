@@ -13,17 +13,17 @@ public interface ICurrentTenant
     /// <summary>
     /// 租户标识
     /// </summary>
-    string Id { get; }
+    string? Id { get; }
 
     /// <summary>
     /// 租户名称
     /// </summary>
-    string Name { get; }
+    string? Name { get; }
 
     /// <summary>
     /// 变更
     /// </summary>
     /// <param name="id">租户标识</param>
     /// <param name="name">租户名称</param>
-    IDisposable Change(string id, string name = null);
+    IDisposable Change(string id, string? name = null);
 }

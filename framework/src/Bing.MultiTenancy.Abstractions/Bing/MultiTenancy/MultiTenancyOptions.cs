@@ -31,7 +31,7 @@ public class MultiTenancyOptions
     /// <summary>
     /// 默认租户标识
     /// </summary>
-    public string DefaultTenantId { get; set; }
+    public string DefaultTenantId { get; set; } = default!;
 
     /// <summary>
     /// 租户键名。默认值：<see cref="TenantResolverConst.DefaultTenantKey"/>

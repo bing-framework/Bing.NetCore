@@ -1,7 +1,7 @@
 ﻿namespace Bing.MultiTenancy;
 
 /// <summary>
-/// 租户解析器选项配置
+/// 租户解析选项
 /// </summary>
 public class BingTenantResolveOptions
 {

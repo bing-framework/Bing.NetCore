@@ -8,7 +8,7 @@ public class TenantResolveResult
     /// <summary>
     /// 租户ID或租户名称
     /// </summary>
-    public string TenantIdOrName { get; set; }
+    public string? TenantIdOrName { get; set; }
 
     /// <summary>
     /// 应用解析器列表

@@ -7,11 +7,12 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
-
-  <Import Project="references.props" />
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
     <ProjectReference Include="..\Bing.MultiTenancy.Abstractions\Bing.MultiTenancy.Abstractions.csproj" />
   </ItemGroup>
 

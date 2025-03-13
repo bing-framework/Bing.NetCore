@@ -22,7 +22,7 @@ public class TenantResolveContext : ITenantResolveContext
     /// <summary>
     /// 租户ID或者租户名称
     /// </summary>
-    public string TenantIdOrName { get; set; }
+    public string? TenantIdOrName { get; set; }
 
     /// <summary>
     /// 是否已处理
