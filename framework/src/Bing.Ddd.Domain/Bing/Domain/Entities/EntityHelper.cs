@@ -12,9 +12,57 @@ namespace Bing.Domain.Entities;
 public static class EntityHelper
 {
     /// <summary>
-    /// Guid 生成函数
+    /// ID生成器字典
+    /// </summary>
+    private static readonly IDictionary<Type, Func<object>> _idGenerators = new Dictionary<Type, Func<object>>
+    {
+        { typeof(Guid), () => GuidGenerateFunc() },
+        { typeof(string), () => StringGenerateFunc() },
+        { typeof(long), () => LongGenerateFunc() },
+        { typeof(int), () => IntGenerateFunc() }
+    };
+
+    /// <summary>
+    /// Guid 生成函数，允许外部自定义生成方式。
     /// </summary>
     public static Func<Guid> GuidGenerateFunc { get; set; } = Guid.NewGuid;
+
+    /// <summary>
+    /// String ID 生成函数（默认为 Guid 字符串）。
+    /// </summary>
+    public static Func<string> StringGenerateFunc { get; set; } = () => GuidGenerateFunc().ToString();
+
+    /// <summary>
+    /// Long ID 生成函数（默认为雪花 ID）。
+    /// </summary>
+    public static Func<long> LongGenerateFunc { get; set; }
+
+    /// <summary>
+    /// Int ID 生成函数（默认不支持）。
+    /// </summary>
+    public static Func<int> IntGenerateFunc { get; set; } = () => throw new InvalidOperationException("不支持 Int 作为 ID，请使用 Guid, string 或 long。");
+
+    /// <summary>
+    /// 生成唯一标识 ID，支持 Guid、string、long 类型。
+    /// </summary>
+    /// <typeparam name="TKey">ID 类型</typeparam>
+    /// <returns>生成的 ID 值</returns>
+    public static TKey CreateKey<TKey>()
+    {
+        if (_idGenerators.TryGetValue(typeof(TKey), out var generator))
+            return (TKey)generator();
+        throw new InvalidOperationException($"不支持的 ID 类型: {typeof(TKey)}，请使用 Guid, string, long。");
+    }
+
+    /// <summary>
+    /// 判断实体类型是否为多租户实体。
+    /// </summary>
+    public static Func<IEntity, IEntity, bool> IsMultiTenantEntity { get; set; } = (_, _) => false;
+
+    /// <summary>
+    /// 在不同租户下是否允许相同 ID 作为相等的规则（默认：不允许）。
+    /// </summary>
+    public static Func<IEntity, IEntity, bool> AllowSameIdAcrossTenants { get; set; } = (_, _) => false;
 
     /// <summary>
     /// 判断两个 <see cref="IEntity"/> 实例是否相等。
@@ -39,7 +87,9 @@ public static class EntityHelper
         if (!typeOfEntity1.IsAssignableFrom(typeOfEntity2) && !typeOfEntity2.IsAssignableFrom(typeOfEntity1))
             return false;
 
-        // 多租户委托检查
+        // 多租户检查
+        if (IsMultiTenantEntity(entity1, entity2))
+            return AllowSameIdAcrossTenants(entity1, entity2);
 
         // 瞬时对象不视为相等
         if (HasDefaultKeys(entity1) && HasDefaultKeys(entity2))
@@ -48,7 +98,7 @@ public static class EntityHelper
         // 如果键数量不匹配，则不相等
         var entity1Keys = entity1.GetKeys();
         var entity2Keys = entity2.GetKeys();
-        if(entity1Keys.Length!=entity2Keys.Length)
+        if (entity1Keys.Length != entity2Keys.Length)
             return false;
 
         // 逐个比较主键值
@@ -97,7 +147,7 @@ public static class EntityHelper
     /// <remarks>
     /// 用于判断一个类型是否为值对象类型。默认实现为检查是否继承自<see cref="ValueObjectBase{T}"/>。
     /// </remarks>
-    public static Func<Type, bool> IsValueObjectPredicate = type => typeof(ValueObjectBase<>).IsAssignableFrom(type);
+    public static Func<Type, bool> IsValueObjectPredicate { get; set; } = type => typeof(ValueObjectBase<>).IsAssignableFrom(type);
 
     /// <summary>
     /// 是否值对象类型
