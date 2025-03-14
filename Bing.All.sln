@@ -242,6 +242,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{B6
 		common.props = common.props
 		common.tests.props = common.tests.props
 		framework.props = framework.props
+		framework.tests.props = framework.tests.props
 		LICENSE = LICENSE
 		version.dev.props = version.dev.props
 		version.props = version.props

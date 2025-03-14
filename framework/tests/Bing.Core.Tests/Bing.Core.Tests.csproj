@@ -1,16 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\common.tests.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <RootNamespace>Bing.Tests</RootNamespace>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AspectCore.Core" Version="2.4.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Samples\" />
-  </ItemGroup>
+
 </Project>

@@ -1,9 +1,9 @@
 ﻿namespace Bing.Domain.ChangeTracking;
 
 /// <summary>
-/// 变更值
+/// 变更值描述符
 /// </summary>
-public class ChangedValueDescriptor
+public record ChangedValueDescriptor
 {
     /// <summary>
     /// 初始化一个<see cref="ChangedValueDescriptor"/>类型的实例

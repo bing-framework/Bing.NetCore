@@ -101,10 +101,10 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     {
         if (descriptors == null || !descriptors.Any())
             return;
-        var filtedDiscriptors = descriptors.Where(x => !_changedNameList.Contains(x.PropertyName)).ToList();
-        if (!filtedDiscriptors.Any())
+        var filteredDescriptors = descriptors.Where(x => !_changedNameList.Contains(x.PropertyName)).ToList();
+        if (!filteredDescriptors.Any())
             return;
-        foreach (var item in filtedDiscriptors)
+        foreach (var item in filteredDescriptors)
             Add(item);
     }
 
