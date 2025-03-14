@@ -9,13 +9,8 @@ namespace Bing.Domain.Entities;
 /// 领域实体
 /// </summary>
 [Serializable]
-public abstract class EntityBase : IEntity
+public abstract class EntityBase : DomainObjectBase, IEntity
 {
-    /// <summary>
-    /// 验证
-    /// </summary>
-    public abstract IValidationResult Validate();
-
     /// <summary>
     /// 初始化
     /// </summary>
@@ -73,7 +68,7 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     /// <summary>
     /// 标识
     /// </summary>
-    [Key, Required]
+    [Key, Required(ErrorMessageResourceType = typeof(R), ErrorMessageResourceName = "IdIsEmpty")]
     public virtual TKey Id { get; protected set; }
 
     /// <summary>

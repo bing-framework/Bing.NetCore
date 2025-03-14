@@ -1,10 +1,7 @@
-﻿using Bing.Tests.Samples;
-using Xunit;
-
-namespace Bing.Tests.Domains;
+﻿namespace Bing.Domain.Values;
 
 /// <summary>
-/// 测试值对象
+/// 值对象 测试
 /// </summary>
 public class ValueObjectBaseTest
 {
@@ -49,7 +46,7 @@ public class ValueObjectBaseTest
     private AggregateRootSample _aggregateRootSample;
 
     /// <summary>
-    /// 初始化一个<see cref="ValueObjectBaseTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
     public ValueObjectBaseTest()
     {
@@ -61,6 +58,23 @@ public class ValueObjectBaseTest
         _sample5 = new ValueObjectSample("a", "b", _aggregateRootSample);
         _sample6 = new ValueObjectSample("a", "b", _aggregateRootSample, new ValueObjectSample("a", "b"));
         _sample7 = new ValueObjectSample("a", "b", _aggregateRootSample, new ValueObjectSample("a", "b"));
+    }
+
+    /// <summary>
+    /// 测试 - 对象相等性
+    /// </summary>
+    [Fact]
+    public void Test_Equals()
+    {
+        Assert.False(_sample.Equals(new AggregateRootSample()));
+        Assert.True(_sample.Equals(_sample2), "1");
+        Assert.True(_sample == _sample2, "2");
+        Assert.False(_sample != _sample2, "3");
+        Assert.False(_sample == _sample3, "4");
+        Assert.True(_sample4 == _sample5, "5");
+        Assert.True(_sample4.Equals(_sample5), "6");
+        Assert.False(_sample6 == _sample7, "7");
+        Assert.False(_sample6.Equals(_sample7), "8");
     }
 
     /// <summary>

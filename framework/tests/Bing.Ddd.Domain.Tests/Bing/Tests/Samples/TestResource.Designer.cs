@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Bing.Properties {
+namespace Bing.Tests.Samples {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Bing.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class R {
+    public class TestResource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal R() {
+        internal TestResource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Bing.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Properties.R", typeof(R).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Bing.Tests.Samples.TestResource", typeof(TestResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,65 +61,11 @@ namespace Bing.Properties {
         }
         
         /// <summary>
-        ///   查找类似 删除成功 的本地化字符串。
+        ///   查找类似 英文名不能为空 的本地化字符串。
         /// </summary>
-        public static string DeleteSuccess {
+        public static string EnglishNameIsEmpty {
             get {
-                return ResourceManager.GetString("DeleteSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 其他用户正在执行该操作,请稍后再试 的本地化字符串。
-        /// </summary>
-        public static string GlobalDuplicateRequest {
-            get {
-                return ResourceManager.GetString("GlobalDuplicateRequest", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 标识不能为空 的本地化字符串。
-        /// </summary>
-        public static string IdIsEmpty {
-            get {
-                return ResourceManager.GetString("IdIsEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 MapperExtensions.Mapper不能为空，请先设置值 的本地化字符串。
-        /// </summary>
-        public static string Map_MapperIsNull {
-            get {
-                return ResourceManager.GetString("Map_MapperIsNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 操作成功 的本地化字符串。
-        /// </summary>
-        public static string Success {
-            get {
-                return ResourceManager.GetString("Success", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 系统忙，请稍后再试 的本地化字符串。
-        /// </summary>
-        public static string SystemError {
-            get {
-                return ResourceManager.GetString("SystemError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 请不要重复提交 的本地化字符串。
-        /// </summary>
-        public static string UserDuplicateRequest {
-            get {
-                return ResourceManager.GetString("UserDuplicateRequest", resourceCulture);
+                return ResourceManager.GetString("EnglishNameIsEmpty", resourceCulture);
             }
         }
     }

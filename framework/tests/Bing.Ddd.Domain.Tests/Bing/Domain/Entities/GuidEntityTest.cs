@@ -1,10 +1,8 @@
-﻿using System;
-using Bing.Exceptions;
+﻿using Bing.Exceptions;
+using Bing.Test.Shared;
 using Bing.Tests.Samples;
-using Bing.Tests.XUnitHelpers;
-using Xunit;
 
-namespace Bing.Tests.Domains;
+namespace Bing.Domain.Entities;
 
 /// <summary>
 /// Guid标识实体测试
@@ -22,7 +20,7 @@ public class GuidEntityTest
     private AggregateRootSample _sample2;
 
     /// <summary>
-    /// 初始化一个<see cref="GuidEntityTest"/>类型的实例
+    /// 测试初始化
     /// </summary>
     public GuidEntityTest()
     {
@@ -34,7 +32,7 @@ public class GuidEntityTest
     /// 测试 - 实体相等性 - 是否为空
     /// </summary>
     [Fact]
-    public void Test_Equals_Null()
+    public void Equals_Null()
     {
         Assert.False(_sample.Equals(_sample2));
         Assert.False(_sample.Equals(null));
@@ -59,7 +57,7 @@ public class GuidEntityTest
     /// 测试 - 实体相等性 - 类型无效
     /// </summary>
     [Fact]
-    public void Test_Equals_InvalidType()
+    public void Equals_InvalidType()
     {
         var id = Guid.NewGuid();
         _sample = new AggregateRootSample(id);
@@ -73,7 +71,7 @@ public class GuidEntityTest
     /// 测试 - 实体相等性 - 当两个实体的标识相同，则实体相同
     /// </summary>
     [Fact]
-    public void Test_Equals_IdEquals()
+    public void Equals_Id_Equals()
     {
         var id = Guid.NewGuid();
         _sample = new AggregateRootSample(id);
@@ -84,10 +82,10 @@ public class GuidEntityTest
     }
 
     /// <summary>
-    /// 测试 - 状态输出
+    /// 测试 - 输出字符串 - 重写方法
     /// </summary>
     [Fact]
-    public void Test_ToString()
+    public void ToString_Override()
     {
         _sample = new AggregateRootSample { Name = "a" };
         Assert.Equal($"Id:{_sample.Id},姓名:{_sample.Name}", _sample.ToString());
@@ -97,20 +95,20 @@ public class GuidEntityTest
     /// 测试 - 验证 - Id为空，无法通过
     /// </summary>
     [Fact]
-    public void Test_Validate_IdIsEmpty()
+    public void Validate_Id_IsEmpty()
     {
         AssertHelper.Throws<Warning>(() =>
         {
             _sample = AggregateRootSample.CreateSample(Guid.Empty);
             _sample.Validate();
-        }, "Id");
+        }, "标识");
     }
 
     /// <summary>
-    /// 测试 - 验证 -必填项，通过字符串设置错误消息
+    /// 测试 - 验证 - 必填项，通过字符串设置错误消息
     /// </summary>
     [Fact]
-    public void Test_Validate_Required()
+    public void Validate_Required()
     {
         AssertHelper.Throws<Warning>(() =>
         {
@@ -120,10 +118,10 @@ public class GuidEntityTest
     }
 
     /// <summary>
-    /// 测试 -添加验证策略
+    /// 测试 - 添加验证策略
     /// </summary>
     [Fact]
-    public void Test_AddValidateStrategy()
+    public void Validate_AddValidateStrategy()
     {
         _sample = AggregateRootSample.CreateSample();
         AssertHelper.Throws<Warning>(() =>
@@ -138,7 +136,7 @@ public class GuidEntityTest
     /// 测试 - 设置验证处理器 - 不进行任何操作，所以不会抛出异常
     /// </summary>
     [Fact]
-    public void Test_SetValidationHandler()
+    public void Validate_SetValidationHandler()
     {
         _sample = AggregateRootSample.CreateSample();
         _sample.Name = "abcd";
