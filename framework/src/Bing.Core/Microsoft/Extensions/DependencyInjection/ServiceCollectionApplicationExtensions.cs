@@ -20,7 +20,7 @@ public static class ServiceCollectionApplicationExtensions
     public static IBingBuilder AddBing(this IServiceCollection services, Action<BingOptions> setupAction = null)
     {
         Check.NotNull(services, nameof(services));
-        var configuration = services.GetConfiguration();
+        var configuration = services.GetConfigurationOrNull();
         var options = new BingOptions();
         
         Singleton<IConfiguration>.Instance = configuration;
