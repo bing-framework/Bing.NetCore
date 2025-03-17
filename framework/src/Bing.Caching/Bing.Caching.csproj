@@ -7,8 +7,12 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.3" />
+  </ItemGroup>
 
 </Project>
