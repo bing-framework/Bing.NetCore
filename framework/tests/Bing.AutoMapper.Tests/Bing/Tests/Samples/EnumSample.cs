@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Bing.SampleClasses;
+namespace Bing.Tests.Samples;
 
 /// <summary>
 /// 枚举测试样例

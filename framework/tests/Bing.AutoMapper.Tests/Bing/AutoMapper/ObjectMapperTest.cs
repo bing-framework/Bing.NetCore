@@ -1,10 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Linq;
 using AutoMapper;
 using Bing.ObjectMapping;
 using Bing.Reflection;
-using Bing.SampleClasses;
-using Xunit;
 
 namespace Bing.AutoMapper;
 

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using AutoMapper;
+using AutoMapper.Configuration;
 using AutoMapper.QueryableExtensions;
 using Bing.ObjectMapping;
 
@@ -10,6 +11,11 @@ namespace Bing.AutoMapper;
 /// </summary>
 public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
 {
+    /// <summary>
+    /// 最大递归获取结果次数
+    /// </summary>
+    private const int MaxGetResultCount = 16;
+
     /// <summary>
     /// 同步锁
     /// </summary>
@@ -63,20 +69,11 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <param name="destination">目标对象</param>
     public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)
     {
-        try
-        {
-            if (source == null)
-                return default;
-            var sourceType = GetType(source);
-            var destinationType = GetType(destination);
-            return GetResult(sourceType, destinationType, source, destination);
-        }
-        catch (AutoMapperMappingException e)
-        {
-            if (e.InnerException != null && e.InnerException.Message.StartsWith("Missing type map configuration"))
-                return GetResult(GetType(e.MemberMap.SourceType), GetType(e.MemberMap.DestinationType), source, destination);
-            throw;
-        }
+        if (source == null)
+            return default;
+        var sourceType = GetType(source);
+        var destinationType = GetType(destination);
+        return GetResult(sourceType, destinationType, source, destination, 0);
     }
 
     /// <summary>
@@ -100,17 +97,31 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <param name="destinationType">目标类型</param>
     /// <param name="source">源对象</param>
     /// <param name="destination">目标对象</param>
-    private TDestination GetResult<TDestination>(Type sourceType, Type destinationType, object source, TDestination destination)
+    /// <param name="i">迭代次数</param>
+    private TDestination GetResult<TDestination>(Type sourceType, Type destinationType, object source, TDestination destination, int i)
     {
-        if (Exists(sourceType, destinationType))
-            return GetResult(source, destination);
-        lock (Sync)
+        try
         {
+            if (i >= MaxGetResultCount)
+                return default;
+            i += 1;
             if (Exists(sourceType, destinationType))
                 return GetResult(source, destination);
-            ConfigMap(sourceType, destinationType);
+            lock (Sync)
+            {
+                if (Exists(sourceType, destinationType))
+                    return GetResult(source, destination);
+                ConfigMap(sourceType, destinationType);
+            }
+            return GetResult(source, destination);
         }
-        return GetResult(source, destination);
+        catch (AutoMapperMappingException ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.StartsWith("Missing type map configuration"))
+                return GetResult(GetType(ex.MemberMap.SourceType), GetType(ex.MemberMap.DestinationType), source, destination, i);
+            throw;
+        }
+        
     }
 
     /// <summary>

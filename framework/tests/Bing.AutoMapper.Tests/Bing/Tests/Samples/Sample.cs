@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Bing.SampleClasses;
+namespace Bing.Tests.Samples;
 
 /// <summary>
 /// 样例
@@ -108,11 +106,11 @@ public class Sample : ISample
     /// <summary>
     /// Enum值
     /// </summary>
-    public Tests.Samples.EnumSample EnumValue { get; set; }
+    public EnumSample EnumValue { get; set; }
     /// <summary>
     /// 可空Enum值
     /// </summary>
-    public Tests.Samples.EnumSample? NullableEnumValue { get; set; }
+    public EnumSample? NullableEnumValue { get; set; }
     /// <summary>
     /// DateTime值
     /// </summary>

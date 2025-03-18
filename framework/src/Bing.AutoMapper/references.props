@@ -1,5 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <ProjectReference Include="..\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
-  </ItemGroup>
-</Project>

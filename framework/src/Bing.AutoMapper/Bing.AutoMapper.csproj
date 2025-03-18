@@ -7,7 +7,12 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.ObjectMapping\Bing.ObjectMapping.csproj" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
 </Project>

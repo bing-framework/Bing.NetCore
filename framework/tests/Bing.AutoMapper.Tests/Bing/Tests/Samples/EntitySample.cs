@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Bing.Application.Dtos;
 using Bing.Auditing;
 using Bing.Domain.Entities;
 
-namespace Bing.SampleClasses;
+namespace Bing.Tests.Samples;
 
 /// <summary>
 /// 实体样例

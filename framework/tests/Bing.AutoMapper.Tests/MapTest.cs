@@ -7,9 +7,7 @@ using Bing.ObjectMapping;
 using Bing.Reflection;
 using Bing.Tests.Samples;
 using Xunit;
-using Sample = Bing.SampleClasses.Sample;
-using Sample2 = Bing.SampleClasses.Sample2;
-using Sample3Copy = Bing.SampleClasses.Sample3Copy;
+using Thread = Bing.Helpers.Thread;
 
 namespace Bing.AutoMapper.Tests;
 

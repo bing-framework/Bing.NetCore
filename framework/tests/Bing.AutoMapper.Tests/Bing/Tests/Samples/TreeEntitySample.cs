@@ -1,7 +1,6 @@
-﻿using System;
-using Bing.Trees;
+﻿using Bing.Trees;
 
-namespace Bing.SampleClasses;
+namespace Bing.Tests.Samples;
 
 /// <summary>
 /// 树型实体测试样例
@@ -19,7 +18,8 @@ public class TreeEntitySample : TreeEntityBase<TreeEntitySample>
     /// 初始化一个<see cref="TreeEntitySample"/>类型的实例
     /// </summary>
     /// <param name="id">标识</param>
-    public TreeEntitySample(Guid id) : base(id, "", 0)
+    public TreeEntitySample(Guid id)
+        : base(id, "", 0)
     {
     }
 
@@ -28,7 +28,8 @@ public class TreeEntitySample : TreeEntityBase<TreeEntitySample>
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="path">路径</param>
-    public TreeEntitySample(Guid id, string path) : base(id, path, 0)
+    public TreeEntitySample(Guid id, string path)
+        : base(id, path, 0)
     {
     }
 
@@ -47,4 +48,5 @@ public class TreeEntityDto : TreeDtoBase
     /// 名称
     /// </summary>
     public string Name { get; set; }
+
 }
