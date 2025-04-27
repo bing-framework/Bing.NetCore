@@ -11,6 +11,8 @@ namespace Bing.Domain.Entities;
 /// </summary>
 public static class EntityHelper
 {
+    #region ID生成相关
+
     /// <summary>
     /// ID生成器字典
     /// </summary>
@@ -43,6 +45,12 @@ public static class EntityHelper
     public static Func<int> IntGenerateFunc { get; set; } = () => throw new InvalidOperationException("不支持 Int 作为 ID，请使用 Guid, string 或 long。");
 
     /// <summary>
+    /// 生成唯一标识 ID，默认使用 Guid 类型。
+    /// </summary>
+    /// <returns>生成的 Guid 值</returns>
+    public static Guid CreateGuid() => CreateKey<Guid>();
+
+    /// <summary>
     /// 生成唯一标识 ID，支持 Guid、string、long 类型。
     /// </summary>
     /// <typeparam name="TKey">ID 类型</typeparam>
@@ -53,6 +61,22 @@ public static class EntityHelper
             return (TKey)generator();
         throw new InvalidOperationException($"不支持的 ID 类型: {typeof(TKey)}，请使用 Guid, string, long。");
     }
+
+    /// <summary>
+    /// 注册自定义 ID 生成器
+    /// </summary>
+    /// <typeparam name="TKey">ID 类型</typeparam>
+    /// <param name="generator">生成器函数</param>
+    /// <exception cref="ArgumentNullException">当<paramref name="generator"/>为null时抛出</exception>
+    public static void RegisterIdGenerator<TKey>(Func<TKey> generator)
+    {
+        Check.NotNull(generator, nameof(generator));
+        _idGenerators[typeof(TKey)] = () => generator();
+    }
+
+    #endregion
+
+    #region 实体相等性比较
 
     /// <summary>
     /// 判断实体类型是否为多租户实体。
@@ -74,14 +98,13 @@ public static class EntityHelper
     /// </returns>
     public static bool EntityEquals(IEntity entity1, IEntity entity2)
     {
+        // 基本检查
         if (entity1 == null || entity2 == null)
             return false;
-
-        // 如果引用相同，则直接返回 true
         if (ReferenceEquals(entity1, entity2))
             return true;
 
-        // 如果两个实体类型不兼容，则返回 false
+        // 类型兼容性检查
         var typeOfEntity1 = entity1.GetType();
         var typeOfEntity2 = entity2.GetType();
         if (!typeOfEntity1.IsAssignableFrom(typeOfEntity2) && !typeOfEntity2.IsAssignableFrom(typeOfEntity1))
@@ -91,43 +114,53 @@ public static class EntityHelper
         if (IsMultiTenantEntity(entity1, entity2))
             return AllowSameIdAcrossTenants(entity1, entity2);
 
-        // 瞬时对象不视为相等
+        // 瞬时对象检查 - 瞬时对象不视为相等
         if (HasDefaultKeys(entity1) && HasDefaultKeys(entity2))
             return false;
 
-        // 如果键数量不匹配，则不相等
+        // 键数量检查
         var entity1Keys = entity1.GetKeys();
         var entity2Keys = entity2.GetKeys();
         if (entity1Keys.Length != entity2Keys.Length)
             return false;
 
-        // 逐个比较主键值
-        for (var i = 0; i < entity1Keys.Length; i++)
+        // 键值比较
+        return KeysEqual(entity1Keys, entity2Keys);
+    }
+
+    /// <summary>
+    /// 比较两个键数组是否相等
+    /// </summary>
+    /// <param name="keys1">第一个键数组</param>
+    /// <param name="keys2">第二个键数组</param>
+    /// <returns>如果键数组相等返回true，否则返回false</returns>
+    private static bool KeysEqual(object[] keys1, object[] keys2)
+    {
+        for (var i = 0; i < keys1.Length; i++)
         {
-            // 如果 `entity1Key` 为 null，`entity2Key` 也必须为 null，否则不相等
-            var entity1Key = entity1Keys[i];
-            var entity2Key = entity2Keys[i];
-            if (entity1Key == null)
-            {
-                if (entity2Key == null)
-                    continue;
-                return false;
-            }
-
-            // 如果 `entity2Key` 为 null，则不相等
-            if (entity2Key == null)
+            var key1 = keys1[i];
+            var key2 = keys2[i];
+            
+            // 空值检查
+            if (key1 == null)
+                return key2 == null;
+            if (key2 == null)
                 return false;
 
-            // 如果两个键值都是默认值（如 0、null、Guid.Empty），则继续比较
-            if (Types.IsDefaultValue(entity1Key) && Types.IsDefaultValue(entity2Key))
+            // 默认值检查 - 如果两个键值都是默认值，则视为不相等
+            if (Types.IsDefaultValue(key1) && Types.IsDefaultValue(key2))
                 return false;
 
-            // 进行键值比较，如果不同，则返回 false
-            if (!entity1Key.Equals(entity2Key))
+            // 值比较
+            if (!key1.Equals(key2))
                 return false;
         }
         return true;
     }
+
+    #endregion
+
+    #region 实体和值对象类型检查
 
     /// <summary>
     /// 判断指定的类型是否实现了 <see cref="IEntity"/> 接口。
@@ -142,6 +175,38 @@ public static class EntityHelper
     }
 
     /// <summary>
+    /// 判断指定的类型是否实现了 <see cref="IEntity{TKey}"/> 接口
+    /// </summary>
+    /// <param name="type">要检查的类型</param>
+    /// <param name="keyType">如果找到，则输出键类型；否则为null</param>
+    /// <returns>是否为带主键的实体类型</returns>
+    /// <exception cref="ArgumentNullException">当<paramref name="type"/>为null时抛出</exception>
+    public static bool IsEntityWithId(Type type, out Type keyType)
+    {
+        Check.NotNull(type, nameof(type));
+        keyType = null;
+        
+        foreach (var interfaceType in type.GetInterfaces())
+        {
+            if (interfaceType.GetTypeInfo().IsGenericType && 
+                interfaceType.GetGenericTypeDefinition() == typeof(IEntity<>))
+            {
+                keyType = interfaceType.GenericTypeArguments[0];
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 判断指定的类型是否实现了 <see cref="IEntity{TKey}"/> 泛型接口。
+    /// </summary>
+    /// <param name="type">要检查的类型。</param>
+    /// <returns>如果该类型实现了 <see cref="IEntity{TKey}"/> 泛型接口，则返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    public static bool IsEntityWithId(Type type) => IsEntityWithId(type, out _);
+
+    /// <summary>
     /// 值对象判断谓词
     /// </summary>
     /// <remarks>
@@ -153,7 +218,7 @@ public static class EntityHelper
     /// 是否值对象类型
     /// </summary>
     /// <param name="type">类型</param>
-    /// <returns>是否为值对象类型。如果类型符合值对象判断条件，则返回true；否则返回false</returns>
+    /// <returns>是否为值对象</returns>
     /// <exception cref="ArgumentNullException">当<paramref name="type"/>为null时抛出</exception>
     public static bool IsValueObject(Type type)
     {
@@ -165,11 +230,8 @@ public static class EntityHelper
     /// 是否值对象
     /// </summary>
     /// <param name="obj">对象实例</param>
-    /// <returns>是否为值对象。如果对象不为null且其类型符合值对象判断条件，则返回true；否则返回false</returns>
-    public static bool IsValueObject(object obj)
-    {
-        return obj != null && IsValueObject(obj.GetType());
-    }
+    /// <returns>是否为值对象</returns>
+    public static bool IsValueObject(object obj) => obj != null && IsValueObject(obj.GetType());
 
     /// <summary>
     /// 检查指定的类型是否为实体
@@ -184,25 +246,12 @@ public static class EntityHelper
             throw new ArgumentException($"参数 '{type.FullName}' 不是有效的实体类型。必须实现 {typeof(IEntity).FullName} 接口。", nameof(type));
     }
 
-    /// <summary>
-    /// 判断指定的类型是否实现了 <see cref="IEntity{TKey}"/> 泛型接口。
-    /// </summary>
-    /// <param name="type">要检查的类型。</param>
-    /// <returns>如果该类型实现了 <see cref="IEntity{TKey}"/> 泛型接口，则返回 <c>true</c>；否则返回 <c>false</c>。</returns>
-    public static bool IsEntityWithId(Type type)
-    {
-        Check.NotNull(type, nameof(type));
-        foreach (var interfaceType in type.GetInterfaces())
-        {
-            if (interfaceType.GetTypeInfo().IsGenericType &&
-               interfaceType.GetGenericTypeDefinition() == typeof(IEntity<>))
-                return true;
-        }
-        return false;
-    }
+    #endregion
+
+    #region 主键检查
 
     /// <summary>
-    /// 是否有默认标识值
+    /// 判断实体是否有默认标识值
     /// </summary>
     /// <typeparam name="TKey">标识类型</typeparam>
     /// <param name="entity">实体</param>
@@ -215,18 +264,29 @@ public static class EntityHelper
     {
         if (EqualityComparer<TKey>.Default.Equals(entity.Id, default!))
             return true;
+        return IsDefaultNumericKey(entity.Id);
+    }
+
+    /// <summary>
+    /// 判断是否为默认的数值类型键值
+    /// </summary>
+    /// <typeparam name="TKey">键类型</typeparam>
+    /// <param name="id">ID值</param>
+    /// <returns>如果是默认值返回true，否则返回false</returns>
+    private static bool IsDefaultNumericKey<TKey>(TKey id)
+    {
         if (typeof(TKey) == typeof(int))
-            return Convert.ToInt32(entity.Id) <= 0;
+            return Convert.ToInt32(id) <= 0;
         if (typeof(TKey) == typeof(long))
-            return Convert.ToInt64(entity.Id) <= 0;
+            return Convert.ToInt64(id) <= 0;
         return false;
     }
 
     /// <summary>
-    /// 是否有默认值
+    /// 判断实体是否有默认键值
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <returns>是否为默认值。如果所有键都是默认值，则返回true；否则返回false</returns>
+    /// <returns>是否为默认值</returns>
     /// <exception cref="ArgumentNullException">当<paramref name="entity"/>为null时抛出</exception>
     public static bool HasDefaultKeys(IEntity entity)
     {
@@ -256,17 +316,17 @@ public static class EntityHelper
         return Types.IsDefaultValue(value);
     }
 
+    #endregion
+
+    #region 主键类型查找
+
     /// <summary>
     /// 获取指定实体类型的主键类型。
     /// </summary>
     /// <typeparam name="TEntity">要获取主键类型的实体类型，必须实现 <see cref="IEntity"/> 接口。</typeparam>
     /// <returns>主键的类型。</returns>
     /// <exception cref="ArgumentException">如果 <typeparamref name="TEntity"/> 不是实体类型，则抛出异常。</exception>
-    public static Type FindPrimaryKeyType<TEntity>()
-        where TEntity : IEntity
-    {
-        return FindPrimaryKeyType(typeof(TEntity));
-    }
+    public static Type FindPrimaryKeyType<TEntity>() where TEntity : IEntity => FindPrimaryKeyType(typeof(TEntity));
 
     /// <summary>
     /// 获取指定实体类型的主键类型。
@@ -278,17 +338,17 @@ public static class EntityHelper
     public static Type FindPrimaryKeyType(Type entityType)
     {
         Check.NotNull(entityType, nameof(entityType));
-        if (!typeof(IEntity).IsAssignableFrom(entityType))
-            throw new ArgumentException($"参数 '{entityType.FullName}' 不是有效的实体类型。必须实现 {typeof(IEntity).FullName} 接口。", nameof(entityType));
+        CheckEntity(entityType);
 
-        foreach (var interfaceType in entityType.GetTypeInfo().GetInterfaces())
-        {
-            if (interfaceType.GetTypeInfo().IsGenericType &&
-               interfaceType.GetGenericTypeDefinition() == typeof(IEntity<>))
-                return interfaceType.GenericTypeArguments[0];
-        }
+        if (IsEntityWithId(entityType, out var keyType))
+            return keyType;
+
         return null;
     }
+
+    #endregion
+
+    #region 表达式构建
 
     /// <summary>
     /// 创建一个用于比较实体 ID 是否相等的 Lambda 表达式。
@@ -314,4 +374,6 @@ public static class EntityHelper
         var lambdaBody = Expression.Equal(leftExpression, rightExpression); // 生成 entity.Id == id 的比较表达式
         return Expression.Lambda<Func<TEntity, bool>>(lambdaBody, lambdaParam);
     }
+
+    #endregion
 }
