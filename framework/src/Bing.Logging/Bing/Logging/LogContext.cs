@@ -21,6 +21,11 @@ public class LogContext
     public string UserId { get; set; }
 
     /// <summary>
+    /// 租户标识
+    /// </summary>
+    public string TenantId { get; set; }
+
+    /// <summary>
     /// 应用程序
     /// </summary>
     public string Application { get; set; }
@@ -49,6 +54,11 @@ public class LogContext
     /// 请求地址
     /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// 会话标识
+    /// </summary>
+    public string SessionId { get; set; }
 
     /// <summary>
     /// 是否Web环境

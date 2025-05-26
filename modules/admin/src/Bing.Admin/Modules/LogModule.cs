@@ -47,7 +47,7 @@ namespace Bing.Admin.Modules
             //ExceptionlessClient.Default.Startup();
             services.AddExceptionless(x =>
             {
-                x.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+                x.ApiKey = "aUBmHcfhK8VvPLqsTYvVOeXJYY4jN5QghOY68FZe";
                 x.ServerUrl = "http://10.186.135.147:5100";
             });
             services.AddLogging(loggingBuilder =>
