@@ -20,8 +20,8 @@ public enum StatusCode
     Fail = 2,
 
     /// <summary>
-    /// 尚未登录
+    /// 未授权的请求
     /// </summary>
-    [Description("尚未登录")]
-    NotLogin = 401
+    [Description("未授权的请求")]
+    Unauthorized = 401
 }
