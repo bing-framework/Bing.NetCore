@@ -6,7 +6,7 @@
         {
           "src": "../framework/src/",
           "files": [
-            "**/*.csproj"
+            "src/**/*.csproj"
           ],
           "exclude": [
             "**/obj/**",
