@@ -102,7 +102,6 @@ namespace Bing.Admin.Modules
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseRealIp();
             app.UseCorrelationId();
-            app.UseBingSerilogEnrichers();
             // 内置日志
             app.UseHttpLogging();
             // 自定义日志
@@ -111,6 +110,7 @@ namespace Bing.Admin.Modules
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
+            app.UseBingSerilogEnrichers();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
