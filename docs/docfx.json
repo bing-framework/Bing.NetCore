@@ -17,6 +17,8 @@
             "**/templates/**",
             "framework/tests/**",
             "**/Bing.Caching.csproj",
+            "**/Bing.FreeSQL.csproj",
+            "**/Bing.FreeSQL.MySql.csproj",
             "**/Bing.EventBus.csproj",
             "**/Bing.EventBus.Abstractions.csproj",
             "**/Bing.MultiTenancy.csproj",
