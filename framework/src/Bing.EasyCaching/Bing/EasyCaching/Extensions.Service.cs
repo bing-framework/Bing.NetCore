@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Caching;
+﻿using Bing.Caching;
 using EasyCaching.Core.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

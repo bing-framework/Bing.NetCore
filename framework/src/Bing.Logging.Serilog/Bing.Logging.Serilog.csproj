@@ -7,8 +7,14 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
+  </ItemGroup>
 
 </Project>

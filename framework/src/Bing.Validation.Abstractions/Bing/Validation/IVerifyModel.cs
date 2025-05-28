@@ -17,7 +17,8 @@ public interface IVerifyModel
 /// 可验证模型
 /// </summary>
 /// <typeparam name="TObject">对象类型</typeparam>
-public interface IVerifyModel<out TObject> : IVerifyModel where TObject : class, IVerifyModel
+public interface IVerifyModel<out TObject> : IVerifyModel 
+    where TObject : class, IVerifyModel
 {
     /// <summary>
     /// 设置验证处理器

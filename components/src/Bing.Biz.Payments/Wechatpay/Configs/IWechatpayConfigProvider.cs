@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.Biz.Payments.Wechatpay.Configs;
+﻿namespace Bing.Biz.Payments.Wechatpay.Configs;
 
 /// <summary>
 /// 微信支付配置提供程序

@@ -19,7 +19,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.Join(table, alias);
         return source;
     }
@@ -35,7 +35,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.Join(builder, alias);
         return source;
     }
@@ -51,7 +51,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.Join(action, alias);
         return source;
     }
@@ -66,7 +66,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.AppendJoin(sql);
         return source;
     }
@@ -91,7 +91,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.LeftJoin(table, alias);
         return source;
     }
@@ -107,7 +107,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.LeftJoin(builder, alias);
         return source;
     }
@@ -123,7 +123,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.LeftJoin(action, alias);
         return source;
     }
@@ -138,7 +138,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.AppendLeftJoin(sql);
         return source;
     }
@@ -163,7 +163,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.RightJoin(table, alias);
         return source;
     }
@@ -179,7 +179,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.RightJoin(builder, alias);
         return source;
     }
@@ -195,7 +195,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.RightJoin(action, alias);
         return source;
     }
@@ -210,7 +210,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.AppendRightJoin(sql);
         return source;
     }
@@ -234,7 +234,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.On(condition);
         return source;
     }
@@ -252,7 +252,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.On(left, value, @operator);
         return source;
     }
@@ -267,7 +267,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is IClauseAccessor accessor)
+        if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.AppendOn(sql);
         return source;
     }

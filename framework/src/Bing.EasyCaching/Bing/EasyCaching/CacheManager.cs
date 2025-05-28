@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Caching;
+﻿using Bing.Caching;
 using Bing.Extensions;
 using EasyCaching.Core;
 

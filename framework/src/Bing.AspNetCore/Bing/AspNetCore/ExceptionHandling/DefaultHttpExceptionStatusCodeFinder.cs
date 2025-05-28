@@ -1,5 +1,5 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
+using Bing.Authorization;
 using Bing.DependencyInjection;
 using Bing.ExceptionHandling;
 using Bing.Exceptions;
@@ -45,6 +45,10 @@ public class DefaultHttpExceptionStatusCodeFinder : IHttpExceptionStatusCodeFind
             if (Options.ErrorCodeToHttpStatusCodeMappings.TryGetValue(exceptionWithErrorCode.Code, out var status))
                 return status;
         }
+
+        // 处理授权异常
+        if (exception is BingAuthorizationException)
+            return httpContext.User.Identity!.IsAuthenticated ? HttpStatusCode.Forbidden : HttpStatusCode.Unauthorized;
 
         if (Options.GlobalHttpStatusCode200)
             return HttpStatusCode.OK;

@@ -64,7 +64,7 @@ namespace Bing.Admin.Modules
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
             });
-            services.EnableAspectScoped();
+            services.RegisterAspectScoped();
             services.AddDomainEventDispatcher();
             services.AddLocalLock();
             services.AddRedisDistributedLock();

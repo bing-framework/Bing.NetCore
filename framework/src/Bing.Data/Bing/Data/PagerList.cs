@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Bing.Data;
+﻿namespace Bing.Data;
 
 /// <summary>
 /// 分页集合
@@ -144,17 +140,12 @@ public class PagerList<T> : IPagerBase
     /// </summary>
     /// <typeparam name="TResult">目标元素类型</typeparam>
     /// <param name="converter">转换方法</param>
-    public PagerList<TResult> Convert<TResult>(Func<T, TResult> converter)
-    {
-        var result = new PagerList<TResult>(Page, PageSize, TotalCount, Order);
-        result.AddRange(this.Data.Select(converter));
-        return result;
-    }
+    public PagerList<TResult> Convert<TResult>(Func<T, TResult> converter) => Convert(Data.Select(converter));
 
     /// <summary>
     /// 转换为分页集合
     /// </summary>
     /// <typeparam name="TResult">目标元素类型</typeparam>
     /// <param name="data">数据</param>
-    public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data) => new PagerList<TResult>(Page, PageSize, TotalCount, Order, data);
+    public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data) => new(Page, PageSize, TotalCount, Order, data);
 }

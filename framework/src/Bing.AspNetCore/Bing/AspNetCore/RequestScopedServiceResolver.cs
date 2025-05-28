@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 

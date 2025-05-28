@@ -1,11 +1,12 @@
 ﻿using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Operations;
 
 namespace Bing.Data.Sql;
 
 /// <summary>
 /// Sql生成器
 /// </summary>
-public interface ISqlBuilder : ICondition, ISelect, IFrom, IJoin, IWhere, IGroupBy, IOrderBy, IUnion, ICte
+public interface ISqlBuilder : ICondition, ISqlContent, ISqlOperation
 {
     /// <summary>
     /// 分页参数
@@ -86,18 +87,6 @@ public interface ISqlBuilder : ICondition, ISelect, IFrom, IJoin, IWhere, IGroup
     /// 清空公用表表达式
     /// </summary>
     ISqlBuilder ClearCte();
-
-    /// <summary>
-    /// 添加Sql参数
-    /// </summary>
-    /// <param name="name">参数名</param>
-    /// <param name="value">参数值</param>
-    ISqlBuilder AddParam(string name, object value);
-
-    /// <summary>
-    /// 获取参数列表
-    /// </summary>
-    IReadOnlyDictionary<string, object> GetParams();
 
     /// <summary>
     /// 设置分页

@@ -6,7 +6,7 @@
 public interface IVersion
 {
     /// <summary>
-    /// 版本号
+    /// 版本号（乐观锁）
     /// </summary>
     byte[] Version { get; set; }
 }

@@ -1,5 +1,4 @@
 ﻿using Bing.Reflection;
-using Bing.Collections;
 using Xunit;
 using Xunit.Abstractions;
 using System.Linq;

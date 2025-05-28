@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Bing.Data.Queries.Conditions;
 using Bing.Data.Queries.Internal;
 using Bing.Expressions;

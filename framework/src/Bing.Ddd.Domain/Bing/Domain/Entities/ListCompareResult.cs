@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.Domain.Entities;
+﻿namespace Bing.Domain.Entities;
 
 /// <summary>
 /// 列表比较结果

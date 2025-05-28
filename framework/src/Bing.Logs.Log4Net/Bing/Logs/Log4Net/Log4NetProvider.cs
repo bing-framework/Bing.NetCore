@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using Bing.Logs.Abstractions;
+﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
 
 namespace Bing.Logs.Log4Net;

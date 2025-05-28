@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Logs.Abstractions;
+﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Formats;
 using Bing.Logs.NLog.Internal;
 using NLogs = NLog;

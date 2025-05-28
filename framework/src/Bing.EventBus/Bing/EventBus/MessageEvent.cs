@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Bing.Utils.Json;
 
 namespace Bing.EventBus;
@@ -14,7 +13,7 @@ public class MessageEvent : IMessageEvent
     /// </summary>
     public MessageEvent()
     {
-        Id = Helpers.Id.Guid();
+        Id = Guid.NewGuid().ToString();
         Time = DateTime.Now;
     }
 

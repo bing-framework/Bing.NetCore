@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Dapper.MySql</AssemblyName>
+    <PackageId>Bing.Dapper.MySql</PackageId>
+    <Description>Bing.Dapper.MySql 是Bing应用框架基于Dapper的数据访问封装类库，用于处理MySql数据库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+</Project>

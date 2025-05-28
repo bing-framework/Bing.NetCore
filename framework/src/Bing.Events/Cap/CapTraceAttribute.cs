@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using AspectCore.DynamicProxy;
+﻿using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects;
 using Bing.Tracing;

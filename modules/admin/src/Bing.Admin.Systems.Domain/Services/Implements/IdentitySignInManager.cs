@@ -22,13 +22,15 @@ namespace Bing.Admin.Systems.Domain.Services.Implements
         /// <param name="optionsAccessor">Identity配置</param>
         /// <param name="logger">日志</param>
         /// <param name="schemes">认证架构提供程序</param>
+        /// <param name="confirmation">用户确认</param>
         public IdentitySignInManager(UserManager<User> userManager
             , IHttpContextAccessor contextAccessor
             , IUserClaimsPrincipalFactory<User> claimsFactory
             , IOptions<IdentityOptions> optionsAccessor
             , ILogger<SignInManager<User>> logger
-            , IAuthenticationSchemeProvider schemes)
-            : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes)
+            , IAuthenticationSchemeProvider schemes
+            , IUserConfirmation<User> confirmation)
+            : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation)
         {
         }
     }

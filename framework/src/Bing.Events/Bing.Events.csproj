@@ -1,14 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AssemblyName>Bing.Events</AssemblyName>
     <PackageId>Bing.Events</PackageId>
     <Description>Bing.Events是Bing应用框架的事件总线操作类库。</Description>
   </PropertyGroup>
 
-  <Import Project="..\..\..\framework.props" />
+  <Import Project="..\..\..\common.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP" Version="8.0.1" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
+  </ItemGroup>
 
 </Project>

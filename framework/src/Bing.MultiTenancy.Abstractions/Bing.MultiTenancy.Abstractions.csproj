@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.MultiTenancy.Abstractions</AssemblyName>
+    <PackageId>Bing.MultiTenancy.Abstractions</PackageId>
+    <Description>Bing.MultiTenancy.Abstractions 是Bing应用框架的多租户接口定义类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\MultiTenancy\ConfigurationStore\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Bing\MultiTenancy\Localization\BingMultiTenancyResource.zh-Hans.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

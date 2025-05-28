@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Expressions;
 using Bing.Extensions;
 
@@ -15,13 +15,13 @@ public class EntityResolver : IEntityResolver
     /// <summary>
     /// 实体元数据
     /// </summary>
-    private readonly IEntityMatedata _matedata;
+    private readonly IEntityMetadata _matedata;
 
     /// <summary>
     /// 初始化一个<see cref="EntityResolver"/>类型的实例
     /// </summary>
     /// <param name="matedata">实体元数据</param>
-    public EntityResolver(IEntityMatedata matedata = null) => _matedata = matedata;
+    public EntityResolver(IEntityMetadata matedata = null) => _matedata = matedata;
 
     /// <summary>
     /// 获取表

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data;
+﻿namespace Bing.Data;
 
 /// <summary>
 /// 数据配置

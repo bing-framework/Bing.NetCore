@@ -150,19 +150,6 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加Sql参数
-    /// </summary>
-    /// <param name="sqlQuery">Sql查询对象</param>
-    /// <param name="name">参数名</param>
-    /// <param name="value">参数值</param>
-    public static ISqlQuery AddParam(this ISqlQuery sqlQuery, string name, object value)
-    {
-        var builder = sqlQuery.GetBuilder();
-        builder.AddParam(name, value);
-        return sqlQuery;
-    }
-
-    /// <summary>
     /// 忽略过滤器
     /// </summary>
     /// <typeparam name="TSqlFilter">Sql过滤器类型</typeparam>

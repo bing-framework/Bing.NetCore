@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Bing.Extensions;
 
 namespace Bing.Tests.Samples;
@@ -25,10 +23,10 @@ public class ParentSample
         this._name = sample._name;
     }
 
-    public ParentSample Clone()
-    {
-        return this.DeepClone();
-    }
+    //public ParentSample Clone()
+    //{
+    //    return this.DeepClone();
+    //}
 
     public void SetName(string name)
     {

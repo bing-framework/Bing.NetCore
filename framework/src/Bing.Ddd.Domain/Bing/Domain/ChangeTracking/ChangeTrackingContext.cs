@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Bing.Domain.Entities;
 using Bing.Expressions;
 using Bing.Extensions;
@@ -41,8 +38,7 @@ public sealed class ChangeTrackingContext
     /// <param name="description">描述</param>
     /// <param name="valueBeforeChange">变更前的值。范例：this.Name</param>
     /// <param name="valueAfterChange">变更后的值。范例：newEntity.Name</param>
-    public void Add<TValue>(string propertyName, string description, TValue valueBeforeChange,
-        TValue valueAfterChange)
+    public void Add<TValue>(string propertyName, string description, TValue valueBeforeChange, TValue valueAfterChange)
     {
         if (Equals(valueBeforeChange, valueAfterChange))
             return;
@@ -56,16 +52,45 @@ public sealed class ChangeTrackingContext
     /// <summary>
     /// 添加
     /// </summary>
-    /// <typeparam name="TObject">领域对象类型</typeparam>
     /// <param name="leftObj">左对象</param>
     /// <param name="rightObj">右对象</param>
-    public void Add<TObject>(IChangeTrackable<TObject> leftObj, TObject rightObj) where TObject : IDomainObject
+    public void Add(IChangeTrackable leftObj, object rightObj)
     {
         if (Equals(leftObj, null))
             return;
         if (Equals(rightObj, null))
             return;
-        _changedValueCollection.AddRange(leftObj.GetChanges(rightObj));
+        if (leftObj.GetType() != rightObj.GetType())
+            throw new InvalidOperationException($"无法进行对象比较，类型不匹配: {leftObj.GetType().FullName} ≠ {rightObj.GetType().FullName}");
+
+        // 执行变更比较，并将变更结果添加到集合中
+        var changes = leftObj.GetChanges(rightObj);
+        _changedValueCollection.AddRange(changes);
+    }
+
+    /// <summary>
+    /// 添加
+    /// </summary>
+    /// <typeparam name="TObject">领域对象类型</typeparam>
+    /// <param name="leftObjs">左对象列表</param>
+    /// <param name="rightObjs">右对象列表</param>
+    public void Add<TObject>(IEnumerable<IChangeTrackable> leftObjs, IEnumerable<TObject> rightObjs)
+        where TObject : IDomainObject
+    {
+        if (Equals(leftObjs, null))
+            return;
+        if (Equals(rightObjs, null))
+            return;
+
+        // 转换为列表，避免重复遍历
+        var leftObjList = leftObjs.ToList();
+        var rightObjList = rightObjs.ToList();
+
+        // 确保列表长度一致
+        var length = Math.Min(leftObjList.Count, rightObjList.Count);
+
+        for (var i = 0; i < length; i++)
+            Add(leftObjList[i], rightObjList[i]);
     }
 
     /// <summary>
@@ -77,36 +102,14 @@ public sealed class ChangeTrackingContext
     /// <param name="expression">属性表达式。范例：t => t.Name</param>
     /// <param name="obj">领域对象</param>
     /// <param name="newValue">新值。范例：newEntity.Name</param>
-    public void Add<TObject, TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TObject obj, TValue newValue) where TObject : IDomainObject
+    public void Add<TObject, TProperty, TValue>(Expression<Func<TObject, TProperty>> expression, TObject obj, TValue newValue) 
+        where TObject : IDomainObject
     {
         var member = Lambdas.GetMemberExpression(expression);
         var name = Lambdas.GetMemberName(member);
         var desc = Reflection.Reflections.GetDisplayNameOrDescription(member.Member);
         var value = member.Member.GetPropertyValue(obj);
         Add(name, desc, Conv.To<TValue>(value), newValue);
-    }
-
-    /// <summary>
-    /// 添加
-    /// </summary>
-    /// <typeparam name="TObject">领域对象类型</typeparam>
-    /// <param name="leftObjs">左对象列表</param>
-    /// <param name="rightObjs">右对象列表</param>
-    public void Add<TObject>(IEnumerable<IChangeTrackable<TObject>> leftObjs, IEnumerable<TObject> rightObjs)
-        where TObject : IDomainObject
-    {
-        if (Equals(leftObjs, null))
-            return;
-        if (Equals(rightObjs, null))
-            return;
-        var leftObjList = leftObjs.ToList();
-        var rightObjList = rightObjs.ToList();
-
-        var length = leftObjList.Capacity > rightObjList.Count
-            ? rightObjList.Count
-            : leftObjList.Count;
-        for (var i = 0; i < length; i++)
-            Add(leftObjList[i], rightObjList[i]);
     }
 
     /// <summary>

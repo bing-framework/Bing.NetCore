@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -14,7 +12,7 @@ public static class Extensions
     /// <summary>
     /// 领域事件处理器基础类型
     /// </summary>
-    private static readonly Type EventHandlerBaseType = typeof(IDomainEventHandler<>);
+    private static readonly Type _eventHandlerBaseType = typeof(IDomainEventHandler<>);
 
     /// <summary>
     /// 注册领域事件调度器
@@ -65,7 +63,7 @@ public static class Extensions
         {
             var interfaces = type.GetInterfaces();
             var handlerTypes = interfaces.Where(@interface => @interface.IsGenericType)
-                .Where(@interface => EventHandlerBaseType == @interface.GetGenericTypeDefinition())
+                .Where(@interface => _eventHandlerBaseType == @interface.GetGenericTypeDefinition())
                 .ToList();
             if (handlerTypes.Count == 0)
                 continue;

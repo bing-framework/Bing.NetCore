@@ -21,6 +21,5 @@ internal static class BingActionContextExtensions
     /// <typeparam name="T">服务类型</typeparam>
     /// <param name="context">过滤器上下文</param>
     /// <param name="defaultValue"></param>
-    /// <returns></returns>
     public static T GetService<T>(this FilterContext context, T defaultValue = default) where T : class => context.HttpContext.RequestServices.GetService<T>() ?? defaultValue;
 }

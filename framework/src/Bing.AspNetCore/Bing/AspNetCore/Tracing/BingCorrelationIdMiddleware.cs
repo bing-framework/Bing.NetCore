@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Tracing;
+﻿using Bing.Tracing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -44,18 +43,29 @@ public class BingCorrelationIdMiddleware : IMiddleware
     /// <param name="context">Http上下文</param>
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = _correlationIdProvider.Get();
+        var correlationId = GetCorrelationIdFromRequest(context);
         TraceIdContext.Current ??= new TraceIdContext(correlationId);
-        try
+        using (_correlationIdProvider.Change(correlationId))
         {
-            // TODO: 由于可能存在某个中间件设置了Response导致当前中间件无法设置
             CheckAndSetCorrelationIdOnResponse(context, _options, correlationId);
             await _next(context);
         }
-        finally
+    }
+
+    /// <summary>
+    /// 从HTTP请求中获取关联ID。
+    /// </summary>
+    /// <param name="context">当前HTTP请求的上下文</param>
+    /// <returns>返回一个字符串表示的关联ID。如果请求中没有找到关联ID，将生成一个新的GUID作为关联ID，并添加到请求头中。</returns>
+    protected virtual string GetCorrelationIdFromRequest(HttpContext context)
+    {
+        var correlationId = context.Request.Headers[_options.HttpHeaderName];
+        if (string.IsNullOrEmpty(correlationId))
         {
-            CheckAndSetCorrelationIdOnResponse(context, _options, correlationId);
+            correlationId = Guid.NewGuid().ToString("N");
+            context.Request.Headers[_options.HttpHeaderName] = correlationId;
         }
+        return correlationId;
     }
 
     /// <summary>
@@ -64,15 +74,13 @@ public class BingCorrelationIdMiddleware : IMiddleware
     /// <param name="httpContext">Http上下文</param>
     /// <param name="options">跟踪关联ID配置选项信息</param>
     /// <param name="correlationId">跟踪关联ID</param>
-    protected virtual void CheckAndSetCorrelationIdOnResponse(HttpContext httpContext, CorrelationIdOptions options,
-        string correlationId)
+    protected virtual void CheckAndSetCorrelationIdOnResponse(HttpContext httpContext, CorrelationIdOptions options, string correlationId)
     {
-        if (httpContext.Response.HasStarted)
-            return;
-        if (!options.SetResponseHeader)
-            return;
-        if (httpContext.Response.Headers.ContainsKey(options.HttpHeaderName))
-            return;
-        httpContext.Response.Headers[options.HttpHeaderName] = correlationId;
+        httpContext.Response.OnStarting(() =>
+        {
+            if (options.SetResponseHeader && !httpContext.Response.Headers.ContainsKey(options.HttpHeaderName) && !string.IsNullOrWhiteSpace(correlationId))
+                httpContext.Response.Headers[options.HttpHeaderName] = correlationId;
+            return Task.CompletedTask;
+        });
     }
 }

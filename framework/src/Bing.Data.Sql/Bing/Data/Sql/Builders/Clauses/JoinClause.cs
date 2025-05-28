@@ -4,7 +4,8 @@ using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Builders.Internal;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 using Bing.Expressions;
 using Bing.Extensions;
 

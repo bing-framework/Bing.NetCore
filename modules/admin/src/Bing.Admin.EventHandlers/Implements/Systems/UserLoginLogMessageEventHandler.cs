@@ -10,7 +10,6 @@ using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
 using Bing.Events;
 using Bing.Extensions;
-using Bing.Logs.Aspects;
 using Bing.ObjectMapping;
 using Bing.Security.Claims;
 using Bing.Users;
@@ -60,7 +59,6 @@ namespace Bing.Admin.EventHandlers.Implements.Systems
         /// 用户登录
         /// </summary>
         /// <param name="message">消息</param>
-        [DebugLog]
         [EventHandler(MessageEventConst.UserLogin, Group = QueueGroupConst.UserLoginLog)]
         public async Task UserLoginAsync(UserLoginMessage message)
         {

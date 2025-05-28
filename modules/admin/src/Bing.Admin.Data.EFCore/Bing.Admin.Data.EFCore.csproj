@@ -1,13 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Bing.Admin.Data</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Datas.EntityFramework.MySql\Bing.Datas.EntityFramework.MySql.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Events.Cap.MySql\Bing.Events.Cap.MySql.csproj" />
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="8.0.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.36" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.36" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.36" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
   </ItemGroup>
 

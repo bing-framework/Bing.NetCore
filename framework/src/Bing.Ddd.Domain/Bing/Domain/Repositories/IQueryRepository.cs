@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Domain.Entities;
 
 namespace Bing.Domain.Repositories;

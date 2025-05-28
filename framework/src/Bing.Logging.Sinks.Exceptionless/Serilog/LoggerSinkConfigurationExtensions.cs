@@ -1,5 +1,4 @@
-﻿using System;
-using Exceptionless;
+﻿using Exceptionless;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Exceptionless;
@@ -22,8 +21,8 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <exception cref="ArgumentNullException"></exception>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
-        string apiKey, 
-        Func<EventBuilder, EventBuilder> additionalOperation = null, 
+        string apiKey,
+        Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
@@ -31,7 +30,7 @@ public static partial class LoggerSinkConfigurationExtensions
             throw new ArgumentNullException(nameof(loggerSinkConfiguration));
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
-        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, null, null, additionalOperation, includeProperties), restrictedToMinimumLevel);
+        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, null, null, additionalOperation, includeProperties, restrictedToMinimumLevel), restrictedToMinimumLevel);
     }
 
     /// <summary>
@@ -58,7 +57,7 @@ public static partial class LoggerSinkConfigurationExtensions
             throw new ArgumentNullException(nameof(loggerSinkConfiguration));
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
-        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, serverUrl, defaultTags, additionalOperation, includeProperties), restrictedToMinimumLevel);
+        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, serverUrl, defaultTags, additionalOperation, includeProperties, restrictedToMinimumLevel), restrictedToMinimumLevel);
     }
 
     /// <summary>
@@ -78,6 +77,6 @@ public static partial class LoggerSinkConfigurationExtensions
     {
         if (loggerSinkConfiguration == null)
             throw new ArgumentNullException(nameof(loggerSinkConfiguration));
-        return loggerSinkConfiguration.Sink(new ExceptionlessSink(additionalOperation, includeProperties, client));
+        return loggerSinkConfiguration.Sink(new ExceptionlessSink(additionalOperation, includeProperties, client, restrictedToMinimumLevel), restrictedToMinimumLevel);
     }
 }

@@ -179,6 +179,11 @@ public class AggregateRootSample : AggregateRoot<AggregateRootSample>
     }
 
     /// <summary>
+    /// 获取名称
+    /// </summary>
+    public string GetName() => "c";
+
+    /// <summary>
     /// 创建测试样例
     /// </summary>
     public static AggregateRootSample CreateSample() => CreateSample(Guid.NewGuid());

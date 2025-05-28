@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Bing.Data.Queries;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
@@ -70,7 +65,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     protected virtual ISqlQuery CreateSqlQuery()
     {
         var result = ServiceLocator.Instance.GetService<ISqlQuery>();
-        result.SetConnection(Connection);
+        //result.SetConnection(Connection);
         return result;
     }
 
@@ -120,11 +115,29 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     public virtual TEntity Find(object id) => id.SafeString().IsEmpty() ? null : Set.Select.WhereDynamic(id).ToOne();
 
     /// <summary>
+    /// 通过标识查找实体
+    /// </summary>
+    /// <param name="id">标识</param>
+    public virtual TEntity FindById(object id) => id.SafeString().IsEmpty() ? null : Set.Select.WhereDynamic(id).ToOne();
+
+    /// <summary>
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
+    {
+        if (id.SafeString().IsEmpty())
+            return null;
+        return await Set.Select.WhereDynamic(id).ToOneAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// 通过标识查找实体
+    /// </summary>
+    /// <param name="id">标识</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
     {
         if (id.SafeString().IsEmpty())
             return null;
@@ -177,13 +190,14 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     }
 
     /// <summary>
-    /// 查找实体列表
+    /// 通过标识列表查找实体列表
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-    public virtual async Task<List<TEntity>> FindByIdsAsync(string ids)
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
         var idList = Conv.ToList<TKey>(ids);
-        return await FindByIdsAsync(idList);
+        return await FindByIdsAsync(idList, cancellationToken);
     }
 
     /// <summary>
@@ -255,13 +269,14 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     }
 
     /// <summary>
-    /// 查找实体列表，不跟踪
+    /// 通过标识列表查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-    public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids)
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
     {
         var idList = Conv.ToList<TKey>(ids);
-        return await FindByIdsNoTrackingAsync(idList);
+        return await FindByIdsNoTrackingAsync(idList, cancellationToken);
     }
 
     /// <summary>
@@ -274,8 +289,29 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 查找单个实体
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    public TEntity Single(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找单个实体
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await Set.Select.Where(predicate).ToOneAsync(cancellationToken);
+
+    /// <summary>
+    /// 查找单个实体
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// 查找实体列表
@@ -292,11 +328,12 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 查找实体列表
     /// </summary>
     /// <param name="predicate">查询条件</param>
-    public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
-            return await Set.Select.ToListAsync();
-        return await Set.Select.Where(predicate).ToListAsync();
+            return await Set.Select.ToListAsync(cancellationToken);
+        return await Set.Select.Where(predicate).ToListAsync(cancellationToken);
     }
 
     /// <summary>
@@ -314,12 +351,14 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 查找实体列表，不跟踪
     /// </summary>
     /// <param name="predicate">查询条件</param>
-    public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
-            return await Set.Select.NoTracking().ToListAsync();
-        return await Set.Select.NoTracking().Where(predicate).ToListAsync();
+            return await Set.Select.NoTracking().ToListAsync(cancellationToken);
+        return await Set.Select.NoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
+
 
     /// <summary>
     /// 判断是否存在
@@ -380,11 +419,12 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 判断是否存在
     /// </summary>
     /// <param name="predicate">查询条件</param>
-    public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
             return false;
-        return await Set.Select.AnyAsync(predicate);
+        return await Set.Select.AnyAsync(predicate, cancellationToken);
     }
 
     /// <summary>
@@ -402,11 +442,12 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 查找数量
     /// </summary>
     /// <param name="predicate">查询条件</param>
-    public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
-            return (int)await Set.Select.CountAsync();
-        return (int)await Set.Select.Where(predicate).CountAsync();
+            return (int)await Set.Select.CountAsync(cancellationToken);
+        return (int)await Set.Select.Where(predicate).CountAsync(cancellationToken);
     }
 
     /// <summary>
@@ -471,4 +512,10 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="query">查询对象</param>
     public virtual async Task<PagerList<TEntity>> PagerQueryAsNoTrackingAsync(IQueryBase<TEntity> query) => await FindAsNoTracking().Where(query).ToPagerListAsync(query.GetPager());
+
+    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 }

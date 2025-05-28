@@ -2,16 +2,18 @@
 using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Filters;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Text;
 
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
 /// Sql生成器基类
 /// </summary>
-public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAccessor, ICteAccessor
+public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAccessor, ICteAccessor
 {
     #region 字段
 
@@ -77,7 +79,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     /// <summary>
     /// 实体元数据解析器
     /// </summary>
-    protected IEntityMatedata EntityMatedata { get; private set; }
+    protected IEntityMetadata EntityMetadata { get; private set; }
 
     /// <summary>
     /// 表数据库
@@ -97,47 +99,47 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     /// <summary>
     /// 参数管理器
     /// </summary>
-    protected IParameterManager ParameterManager => _parameterManager ?? (_parameterManager = CreateParameterManager());
+    public IParameterManager ParameterManager => _parameterManager ??= CreateParameterManager();
 
     /// <summary>
     /// Sql方言
     /// </summary>
-    protected IDialect Dialect => _dialect ?? (_dialect = GetDialect());
+    public IDialect Dialect => _dialect ??= GetDialect();
 
     /// <summary>
     /// Select子句
     /// </summary>
-    public ISelectClause SelectClause => _selectClause ?? (_selectClause = CreateSelectClause());
+    public ISelectClause SelectClause => _selectClause ??= CreateSelectClause();
 
     /// <summary>
     /// From子句
     /// </summary>
-    public IFromClause FromClause => _fromClause ?? (_fromClause = CreateFromClause());
+    public IFromClause FromClause => _fromClause ??= CreateFromClause();
 
     /// <summary>
     /// Join子句
     /// </summary>
-    public IJoinClause JoinClause => _joinClause ?? (_joinClause = CreateJoinClause());
+    public IJoinClause JoinClause => _joinClause ??= CreateJoinClause();
 
     /// <summary>
     /// Where子句
     /// </summary>
-    public IWhereClause WhereClause => _whereClause ?? (_whereClause = CreateWhereClause());
+    public IWhereClause WhereClause => _whereClause ??= CreateWhereClause();
 
     /// <summary>
     /// 分组子句
     /// </summary>
-    public IGroupByClause GroupByClause => _groupByClause ?? (_groupByClause = CreateGroupByClause());
+    public IGroupByClause GroupByClause => _groupByClause ??= CreateGroupByClause();
 
     /// <summary>
     /// 排序子句
     /// </summary>
-    public IOrderByClause OrderByClause => _orderByClause ?? (_orderByClause = CreateOrderByClause());
+    public IOrderByClause OrderByClause => _orderByClause ??= CreateOrderByClause();
 
     /// <summary>
     /// 参数字面值解析器
     /// </summary>
-    protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ?? (_paramLiteralsResolver = GetParamLiteralsResolver());
+    protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ??= GetParamLiteralsResolver();
 
     /// <summary>
     /// 跳过行数参数名
@@ -186,15 +188,15 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     /// <summary>
     /// 初始化一个<see cref="SqlBuilderBase"/>类型的实例
     /// </summary>
-    /// <param name="matedata">实体元数据解析器</param>
+    /// <param name="metadata">实体元数据解析器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
-    protected SqlBuilderBase(IEntityMatedata matedata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null)
+    protected SqlBuilderBase(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null)
     {
-        EntityMatedata = matedata;
+        EntityMetadata = metadata;
         TableDatabase = tableDatabase;
         _parameterManager = parameterManager;
-        EntityResolver = new EntityResolver(matedata);
+        EntityResolver = new EntityResolver(metadata);
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
@@ -266,9 +268,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     /// <param name="sqlBuilder">源生成器</param>
     protected void Clone(SqlBuilderBase sqlBuilder)
     {
-        EntityMatedata = sqlBuilder.EntityMatedata;
+        EntityMetadata = sqlBuilder.EntityMetadata;
         _parameterManager = sqlBuilder._parameterManager?.Clone();
-        EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMatedata);
+        EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMetadata);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
         _selectClause = sqlBuilder._selectClause?.Clone(this, AliasRegister);
         _fromClause = sqlBuilder._fromClause?.Clone(this, AliasRegister);
@@ -424,7 +426,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     /// <param name="sql">Sql语句</param>
     private string GetDebugSql(string sql)
     {
-        var parameters = GetParams();
+        var parameters = ParameterManager.GetParams();
         foreach (var parameter in parameters)
             sql = Regex.Replace(sql, $@"{parameter.Key}\b", ParamLiteralsResolver.GetParamLiterals(parameter.Value));
         return sql;
@@ -582,7 +584,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     protected void AddFilters()
     {
         _isAddFilters = true;
-        var context = new SqlContext(Dialect, AliasRegister, EntityMatedata, ParameterManager, this);
+        var context = new SqlContext(Dialect, AliasRegister, EntityMetadata, ParameterManager, this);
         SqlFilterCollection.Filters.ForEach(filter =>
         {
             if (_excludedFilters.Count > 0 && _excludedFilters.Exists(x => x == filter.GetType()))
@@ -605,30 +607,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
     /// 创建分页Sql
     /// </summary>
     protected abstract string CreateLimitSql();
-
-    #endregion
-
-    #region AddParam(添加参数)
-
-    /// <summary>
-    /// 添加Sql参数
-    /// </summary>
-    /// <param name="name">参数名</param>
-    /// <param name="value">参数值</param>
-    public ISqlBuilder AddParam(string name, object value)
-    {
-        ParameterManager.Add(name, value);
-        return this;
-    }
-
-    #endregion
-
-    #region GetParams(获取参数)
-
-    /// <summary>
-    /// 获取参数
-    /// </summary>
-    public IReadOnlyDictionary<string, object> GetParams() => ParameterManager.GetParams();
 
     #endregion
 
@@ -714,5 +692,26 @@ public abstract class SqlBuilderBase : ISqlBuilder, IClauseAccessor, IUnionAcces
             return this;
         _excludedFilters.Add(typeof(TSqlFilter));
         return this;
+    }
+
+    /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        builder.CheckNull(nameof(builder));
+    }
+
+    /// <summary>
+    /// 添加Sql
+    /// </summary>
+    /// <param name="builder">字符串生成器</param>
+    /// <param name="content">Sql子句</param>
+    protected void AppendSql(StringBuilder builder, ISqlClause content)
+    {
+        if (content == null)
+            return;
+        if (content.Validate() == false)
+            return;
+        content.AppendTo(builder);
+        builder.AppendLine(" ");
     }
 }

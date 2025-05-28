@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Validation;
 
@@ -13,7 +9,7 @@ namespace Bing.Domain.Repositories;
 /// </summary>
 /// <typeparam name="TEntity">实体类型</typeparam>
 public interface ICompactRepository<TEntity> : ICompactRepository<TEntity, Guid>
-    where TEntity : class, IAggregateRoot, IKey<Guid>, IVersion
+    where TEntity : class, IAggregateRoot, IKey<Guid>
 {
 }
 
@@ -24,7 +20,7 @@ public interface ICompactRepository<TEntity> : ICompactRepository<TEntity, Guid>
 /// <typeparam name="TKey">实体标识类型</typeparam>
 [IgnoreDependency]
 public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
-    where TEntity : class, IAggregateRoot, IKey<TKey>, IVersion
+    where TEntity : class, IAggregateRoot, IKey<TKey>
 {
     #region FindById(通过标识查找)
 

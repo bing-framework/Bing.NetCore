@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 
 namespace Bing.Data;
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Data.Attributes;
+﻿namespace Bing.Data.Attributes;
 
 /// <summary>
 /// 最大长度

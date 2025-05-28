@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 using Bing.Admin.Data;
 using Bing.Admin.EventHandlers.Abstractions;
 using Bing.Admin.Infrastructure;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.Events;
-using Bing.Events.Cap;
 using Bing.Events.Messages;
 using DotNetCore.CAP;
 using Microsoft.Extensions.Logging;
@@ -54,10 +51,8 @@ namespace Bing.Admin.EventHandlers.Implements
         {
             if (message.ThrowException)
                 throw new NotImplementedException("主动触发，暂未生效");
-            Log.Info($"测试一波CAP消息 - 0: {message.Id}");
+            Log.Message($"测试一波CAP消息 - 0: {message.Id}").LogInformation();
             Logger.LogDebug($"测试一波CAP消息 - 1: {message.Id}");
-            var log = Bing.Logs.Log.GetLog(nameof(TestMessageEventHandler));
-            log.Debug($"测试一波CAP消息 - 1 - 1: {message.Id}");
             Debug.WriteLine(message.Id);
             await MessageEventBus.PublishAsync(new TestMessageEvent2(message, message.Send));
             if (message.NeedCommit)
@@ -73,8 +68,6 @@ namespace Bing.Admin.EventHandlers.Implements
         {
             Debug.WriteLine(message.Id);
             Logger.LogDebug($"测试一波CAP消息 - 2: {message.Id}");
-            var log = Bing.Logs.Log.GetLog(nameof(TestMessageEventHandler));
-            log.Debug($"测试一波CAP消息 - 2 - 1: {message.Id}");
             return Task.CompletedTask;
         }
     }

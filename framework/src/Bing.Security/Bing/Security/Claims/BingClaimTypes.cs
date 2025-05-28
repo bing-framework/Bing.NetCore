@@ -60,6 +60,21 @@ public static class BingClaimTypes
     /// </summary>
     public static string ClientId { get; set; } = "client_id";
 
+    /// <summary>
+    /// 用户头像。默认："picture"
+    /// </summary>
+    public static string Picture { get; set; } = "picture";
+
+    /// <summary>
+    /// 记住我。默认："remember_me"
+    /// </summary>
+    public static string RememberMe { get; set; } = "remember_me";
+
+    /// <summary>
+    /// 会话标识。默认："session_id"
+    /// </summary>
+    public static string SessionId { get; set; }= "session_id";
+
     #region Application(应用程序)
 
     /// <summary>
@@ -95,6 +110,35 @@ public static class BingClaimTypes
     /// 租户名称。默认："tenant_name"
     /// </summary>
     public static string TenantName { get; set; } = "tenant_name";
+
+    #endregion
+
+    #region Impersonator(模拟租户用户)
+
+    /// <summary>
+    /// 模拟租户标识。默认："impersonator_tenant_id"
+    /// </summary>
+    public static string ImpersonatorTenantId { get; set; } = "impersonator_tenant_id";
+
+    /// <summary>
+    /// 模拟租户编码。默认："impersonator_tenant_code"
+    /// </summary>
+    public static string ImpersonatorTenantCode { get; set; } = "impersonator_tenant_code";
+
+    /// <summary>
+    /// 模拟租户名称。默认："impersonator_tenant_name"
+    /// </summary>
+    public static string ImpersonatorTenantName { get; set; } = "impersonator_tenant_name";
+
+    /// <summary>
+    /// 模拟用户标识。默认："impersonator_userid"
+    /// </summary>
+    public static string ImpersonatorUserId { get; set; } = "impersonator_userid";
+
+    /// <summary>
+    /// 模拟用户名称。默认："impersonator_username"
+    /// </summary>
+    public static string ImpersonatorUserName { get; set; } = "impersonator_username";
 
     #endregion
 

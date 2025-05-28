@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace Bing.Emailing;
+﻿namespace Bing.Emailing;
 
 /// <summary>
 /// 附件

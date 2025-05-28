@@ -1,8 +1,4 @@
-﻿using Bing.Reflection;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace Bing.Tests.Reflections;
+﻿namespace Bing.Tests.Reflections;
 ///// <summary>
 ///// 类型查找器测试
 ///// </summary>

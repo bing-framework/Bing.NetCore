@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Biz.Payments.Alipay.Abstractions;
+﻿using Bing.Biz.Payments.Alipay.Abstractions;
 using Bing.Biz.Payments.Alipay.Configs;
 using Bing.Biz.Payments.Alipay.Services;
 using Bing.Biz.Payments.Factories;

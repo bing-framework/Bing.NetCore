@@ -1,8 +1,21 @@
 <Project>
   <PropertyGroup>
     <!-- All Microsoft packages -->
-    <MicrosoftPackageVersion>3.1.*</MicrosoftPackageVersion>
-    <BingUtilsPackageVersion>1.4.0</BingUtilsPackageVersion>
-    <FreeSQLPackageVersion>3.2.610</FreeSQLPackageVersion>
+    <MicrosoftPackageVersion>6.0.0</MicrosoftPackageVersion>
+
+    <!-- All Microsoft AspNetCore packages -->
+    <MicrosoftAspNetCorePackageVersion>6.0.5</MicrosoftAspNetCorePackageVersion>
+
+    <!-- All Microsoft EntityFrameworkCore packages -->
+    <MicrosoftEntityFrameworkCorePackageVersion>6.0.5</MicrosoftEntityFrameworkCorePackageVersion>
+
+    <!-- Bing packages -->
+    <BingUtilsPackageVersion>1.5.0</BingUtilsPackageVersion>
+    <!-- EFCore packages -->
+    <EfCore7Version>7.0.*</EfCore7Version>
+    <EfCore6Version>6.0.*</EfCore6Version>
+    <EfCore5Version>5.0.*</EfCore5Version>
+    <!-- FreeSQL packages -->
+    <FreeSQLPackageVersion>3.2.*</FreeSQLPackageVersion>
   </PropertyGroup>
 </Project>

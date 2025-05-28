@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <RootNamespace>Bing.Aop.AspectCore</RootNamespace>
+    <XunitStartupFullName>Bing.Aop.AspectCore.Startup</XunitStartupFullName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.32" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.17" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.14" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.14" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="9.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.14" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="9.9.0" />
+  </ItemGroup>
+
+</Project>

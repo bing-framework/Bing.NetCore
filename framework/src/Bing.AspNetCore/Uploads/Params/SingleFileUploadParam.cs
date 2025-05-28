@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Bing.AspNetCore.Uploads.Params;
 

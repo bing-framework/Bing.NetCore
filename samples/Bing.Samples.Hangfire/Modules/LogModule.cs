@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Threading;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging;
@@ -7,7 +6,6 @@ using Bing.Logging.Serilog;
 using Bing.Tracing;
 using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Enrichers.Span;
 using serilog = Serilog;

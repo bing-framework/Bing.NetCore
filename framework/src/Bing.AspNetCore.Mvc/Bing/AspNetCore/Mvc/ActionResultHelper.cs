@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Bing.Threading;
+﻿using Bing.Threading;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bing.AspNetCore.Mvc;
@@ -21,7 +18,7 @@ public static class ActionResultHelper
     /// </summary>
     static ActionResultHelper()
     {
-        ObjectResultTypes=new List<Type>
+        ObjectResultTypes = new List<Type>
         {
             typeof(JsonResult),
             typeof(ObjectResult),

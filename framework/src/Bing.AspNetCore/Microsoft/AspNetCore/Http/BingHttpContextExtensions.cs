@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using Bing.Extensions;
-
-namespace Microsoft.AspNetCore.Http;
+﻿namespace Microsoft.AspNetCore.Http;
 
 /// <summary>
 /// Http上下文(<see cref="HttpContext"/>) 扩展

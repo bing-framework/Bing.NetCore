@@ -1,7 +1,11 @@
 ﻿<Project>
+  <PropertyGroup>
+    <Exceptionless-RefVersion>6.0.3</Exceptionless-RefVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Exceptionless.Extensions.Hosting" Version="4.6.2" />
-    <PackageReference Include="Exceptionless.Extensions.Logging" Version="4.6.2" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Exceptionless.Extensions.Hosting" Version="$(Exceptionless-RefVersion)" />
+    <PackageReference Include="Exceptionless.Extensions.Logging" Version="$(Exceptionless-RefVersion)" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
   </ItemGroup>
 </Project>

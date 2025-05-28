@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Biz.Payments.Alipay.Parameters.Requests;
+﻿using Bing.Biz.Payments.Alipay.Parameters.Requests;
 using Bing.Biz.Payments.Core;
 
 namespace Bing.Biz.Payments.Alipay.Abstractions;

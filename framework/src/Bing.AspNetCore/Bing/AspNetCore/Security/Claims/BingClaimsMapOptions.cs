@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Security.Claims;
+﻿using Bing.Security.Claims;
 
 namespace Bing.AspNetCore.Security.Claims;
 
@@ -25,6 +23,8 @@ public class BingClaimsMapOptions
             {"role", () => BingClaimTypes.Role},
             {"email", () => BingClaimTypes.Email},
             {"name", () => BingClaimTypes.UserName},
+            {"family_name", () => BingClaimTypes.SurName},
+            {"given_name", () => BingClaimTypes.Name},
         };
     }
 }

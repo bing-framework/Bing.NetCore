@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Authorization;
+﻿using Bing.Authorization;
 using Microsoft.AspNetCore.Http;
 
 namespace Bing.AspNetCore.ExceptionHandling;

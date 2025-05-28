@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace Bing.EventBus.Distributed;
+﻿namespace Bing.EventBus.Distributed;
 
 /// <summary>
 /// 分布式事件总线

@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Properties;
 using Bing.Validation;
 
@@ -11,13 +9,8 @@ namespace Bing.Domain.Entities;
 /// 领域实体
 /// </summary>
 [Serializable]
-public abstract class EntityBase : IEntity
+public abstract class EntityBase : DomainObjectBase, IEntity
 {
-    /// <summary>
-    /// 验证
-    /// </summary>
-    public abstract IValidationResult Validate();
-
     /// <summary>
     /// 初始化
     /// </summary>
@@ -32,6 +25,15 @@ public abstract class EntityBase : IEntity
     /// 输出字符串
     /// </summary>
     public override string ToString() => $"[Entity: {GetType().Name}] Keys = {GetKeys().Join(", ")}";
+
+    /// <summary>
+    /// 确定当前实体是否等于另一个实体。
+    /// </summary>
+    /// <param name="other">要比较的实体对象。</param>
+    /// <returns>
+    /// 如果两个实体相等，则返回 <c>true</c>；否则返回 <c>false</c>。
+    /// </returns>
+    public bool EntityEquals(IEntity other) => EntityHelper.EntityEquals(this, other);
 }
 
 /// <summary>
@@ -39,7 +41,8 @@ public abstract class EntityBase : IEntity
 /// </summary>
 /// <typeparam name="TEntity">实体类型</typeparam>
 [Serializable]
-public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid> where TEntity : class, IEntity, IVerifyModel<TEntity>
+public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid>
+    where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
     /// <summary>
     /// 初始化一个<see cref="EntityBase{TEntity}"/>类型的实例
@@ -65,7 +68,7 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     /// <summary>
     /// 标识
     /// </summary>
-    [Key, Required]
+    [Key, Required(ErrorMessageResourceType = typeof(R), ErrorMessageResourceName = "IdIsEmpty")]
     public virtual TKey Id { get; protected set; }
 
     /// <summary>
@@ -130,6 +133,7 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     /// </summary>
     protected virtual void InitId()
     {
+        // TODO: 考虑跳过该判断方法
         if (typeof(TKey) == typeof(int) || typeof(TKey) == typeof(long))
             return;
         if (string.IsNullOrWhiteSpace(Id.SafeString()) || Id.Equals(default(TKey)))
@@ -139,7 +143,7 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     /// <summary>
     /// 创建标识
     /// </summary>
-    protected virtual TKey CreateId() => Conv.To<TKey>(EntityHelper.GuidGenerateFunc());
+    protected virtual TKey CreateId() => EntityHelper.CreateKey<TKey>();
 
     /// <summary>
     /// 验证

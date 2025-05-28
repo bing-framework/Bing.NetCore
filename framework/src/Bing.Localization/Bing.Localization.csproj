@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Localization</AssemblyName>
+    <PackageId>Bing.Localization</PackageId>
+    <Description>Bing.Localization是Bing应用框架的本地化操作类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Localization.Abstractions\Bing.Localization.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.3" />
+  </ItemGroup>
+</Project>

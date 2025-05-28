@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 using Bing.Validation;
 
 namespace Bing.Data;
@@ -11,7 +7,7 @@ namespace Bing.Data;
 /// 存储器
 /// </summary>
 /// <typeparam name="TEntity">对象类型</typeparam>
-public interface IStore<TEntity> : IStore<TEntity, Guid> where TEntity : class, IKey<Guid>, IVersion { }
+public interface IStore<TEntity> : IStore<TEntity, Guid> where TEntity : class, IKey<Guid> { }
 
 /// <summary>
 /// 存储器
@@ -69,13 +65,15 @@ public interface IStore<TEntity, in TKey> : IQueryStore<TEntity, TKey>
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
-    Task UpdateAsync([Valid] TEntity entity);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task UpdateAsync([Valid] TEntity entity, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 修改实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
-    Task UpdateAsync([Valid] IEnumerable<TEntity> entities);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task UpdateAsync([Valid] IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
 
     #endregion
 

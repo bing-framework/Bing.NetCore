@@ -54,20 +54,20 @@ public class Log<TCategoryName> : ILog<TCategoryName>
     public virtual IDisposable BeginScope<TState>(TState state) => _log.BeginScope(state);
 
     /// <inheritdoc />
-    public virtual ILog LogTrace([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogTrace();
+    public virtual ILog LogTrace() => _log.LogTrace();
 
     /// <inheritdoc />
-    public virtual ILog LogDebug([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogDebug();
+    public virtual ILog LogDebug() => _log.LogDebug();
 
     /// <inheritdoc />
-    public virtual ILog LogInformation([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogInformation();
+    public virtual ILog LogInformation() => _log.LogInformation();
 
     /// <inheritdoc />
-    public virtual ILog LogWarning([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogWarning();
+    public virtual ILog LogWarning() => _log.LogWarning();
 
     /// <inheritdoc />
-    public virtual ILog LogError([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogError();
+    public virtual ILog LogError() => _log.LogError();
 
     /// <inheritdoc />
-    public virtual ILog LogCritical([CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => _log.LogCritical();
+    public virtual ILog LogCritical() => _log.LogCritical();
 }

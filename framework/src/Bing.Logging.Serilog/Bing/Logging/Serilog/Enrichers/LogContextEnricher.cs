@@ -1,4 +1,5 @@
-﻿using Bing.DependencyInjection;
+﻿using System.Diagnostics;
+using Bing.DependencyInjection;
 using Bing.Tracing;
 
 namespace Bing.Logging.Serilog.Enrichers;
@@ -30,7 +31,9 @@ internal class LogContextEnricher : ILogEventEnricher
             return;
         //RemoveProperties(logEvent);
         AddTraceId(logEvent, propertyFactory);
+        AddSessionId(logEvent, propertyFactory);
         AddUserId(logEvent, propertyFactory);
+        AddTenantId(logEvent, propertyFactory);
         AddApplication(logEvent, propertyFactory);
         AddEnvironment(logEvent, propertyFactory);
         AddExtraData(logEvent, propertyFactory);
@@ -55,11 +58,23 @@ internal class LogContextEnricher : ILogEventEnricher
     private void AddTraceId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         var traceId = _context.TraceId;
-        if (!_context.IsWebEnv) 
+        if (!_context.IsWebEnv)
             traceId = TraceIdContext.Current?.TraceId;
         if (string.IsNullOrWhiteSpace(traceId))
             return;
+        Debug.WriteLine($"【{nameof(LogContextEnricher)}】TraceId: {traceId}");
         var property = propertyFactory.CreateProperty("TraceId", traceId);
+        logEvent.AddOrUpdateProperty(property);
+    }
+
+    /// <summary>
+    /// 添加会话标识
+    /// </summary>
+    private void AddSessionId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    {
+        if (string.IsNullOrWhiteSpace(_context.SessionId))
+            return;
+        var property = propertyFactory.CreateProperty("SessionId", _context.SessionId);
         logEvent.AddOrUpdateProperty(property);
     }
 
@@ -71,6 +86,17 @@ internal class LogContextEnricher : ILogEventEnricher
         if (string.IsNullOrWhiteSpace(_context.UserId))
             return;
         var property = propertyFactory.CreateProperty("UserId", _context.UserId);
+        logEvent.AddOrUpdateProperty(property);
+    }
+
+    /// <summary>
+    /// 添加租户标识
+    /// </summary>
+    private void AddTenantId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    {
+        if (string.IsNullOrWhiteSpace(_context.TenantId))
+            return;
+        var property = propertyFactory.CreateProperty("TenantId", _context.UserId);
         logEvent.AddOrUpdateProperty(property);
     }
 
@@ -105,6 +131,8 @@ internal class LogContextEnricher : ILogEventEnricher
             return;
         foreach (var item in _context.Data)
         {
+            if (item.Value == null)
+                continue;
             var property = propertyFactory.CreateProperty(item.Key, item.Value);
             logEvent.AddOrUpdateProperty(property);
         }

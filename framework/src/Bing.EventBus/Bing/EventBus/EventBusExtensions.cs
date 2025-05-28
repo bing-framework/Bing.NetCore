@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace Bing.EventBus;
+﻿namespace Bing.EventBus;
 
 /// <summary>
 /// 事件总线(<see cref="IEventBus"/>) 扩展

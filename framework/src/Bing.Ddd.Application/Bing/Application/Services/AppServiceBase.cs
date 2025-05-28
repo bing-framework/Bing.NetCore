@@ -15,7 +15,7 @@ public abstract class AppServiceBase : IAppService
     /// Lazy延迟加载服务提供程序
     /// </summary>
     [Autowired]
-    public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
+    public virtual ILazyServiceProvider LazyServiceProvider { get; set; } = default!;
 
     /// <summary>
     /// 当前用户

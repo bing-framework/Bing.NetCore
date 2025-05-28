@@ -109,7 +109,7 @@ public class QueryServiceTest
     [Fact]
     public async Task Test_GetByIdAsync()
     {
-        _repository.FindAsync(_id).Returns(_entity);
+        _repository.FindByIdAsync(_id).Returns(_entity);
         var dto = await _service.GetByIdAsync(_id.ToString());
         Assert.Equal("A", dto.Name);
     }

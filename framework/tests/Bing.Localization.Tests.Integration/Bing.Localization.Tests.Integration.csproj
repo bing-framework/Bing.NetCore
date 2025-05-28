@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\common.tests.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RootNamespace>Bing.Localization</RootNamespace>
+    <XunitStartupFullName>Bing.Localization.Startup</XunitStartupFullName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.32" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.17" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.14" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Localization\Bing.Localization.csproj" />
+    <ProjectReference Include="..\Bing.Localization.Resources\Bing.Localization.Resources.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 将指定路径下的所有 JSON 文件及其子文件夹中的 JSON 文件复制到输出目录 -->
+    <Content Include="Resources\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <!-- 设置 ExcludeFromSingleFile 为 true，排除该文件在生成单文件应用程序时 -->
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+
+</Project>

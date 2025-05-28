@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.TextTemplating;
+﻿namespace Bing.TextTemplating;
 
 /// <summary>
 /// 模板内容构造者

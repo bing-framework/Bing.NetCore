@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.EntityFrameworkCore</AssemblyName>
+    <PackageId>Bing.EntityFrameworkCore</PackageId>
+    <Description>Bing.EntityFrameworkCore 是Bing应用框架的EntityFrameworkCore数据访问核心类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EfCore6Version)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="$(EfCore6Version)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\Data\Stores\EntityFrameworkCore\" />
+    <Folder Include="Bing\EntityFrameworkCore\Internal\" />
+    <Folder Include="Bing\EntityFrameworkCore\Modeling\" />
+  </ItemGroup>
+
+</Project>

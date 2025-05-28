@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Biz.Payments.Wechatpay.Enums;
+﻿using Bing.Biz.Payments.Wechatpay.Enums;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Validation;

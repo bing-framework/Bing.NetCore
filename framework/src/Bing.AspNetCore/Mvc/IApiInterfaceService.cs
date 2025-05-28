@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Bing.AspNetCore.Mvc.Models;
+﻿using Bing.AspNetCore.Mvc.Models;
 
 namespace Bing.AspNetCore.Mvc;
 

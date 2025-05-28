@@ -6,7 +6,7 @@ namespace Bing.Data;
 /// <summary>
 /// 数据库
 /// </summary>
-[Ignore]
+[IgnoreAspect]
 public interface IDatabase
 {
     /// <summary>

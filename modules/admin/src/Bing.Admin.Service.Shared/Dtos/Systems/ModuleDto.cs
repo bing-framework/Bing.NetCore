@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Bing.Application.Dtos;
+using Bing.Trees;
 
 namespace Bing.Admin.Service.Shared.Dtos.Systems
 {

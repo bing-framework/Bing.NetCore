@@ -11,8 +11,10 @@ for /R "nuget_pub" %%s in (*) do (
 )
 
 ::Core
-dotnet pack src/Bing -c Release -o nuget_pub
+dotnet pack src/Bing.Core -c Release -o nuget_pub
+dotnet pack src/Bing.AspNetCore.Abstractions -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore -c Release -o nuget_pub
+dotnet pack src/Bing.ExceptionHandling -c Release -o nuget_pub
 
 ::AOP
 dotnet pack src/Bing.Aop.AspectCore -c Release -o nuget_pub
@@ -36,6 +38,10 @@ dotnet pack src/Bing.Logging -c Release -o nuget_pub
 dotnet pack src/Bing.Logging.Serilog -c Release -o nuget_pub
 dotnet pack src/Bing.Logging.Sinks.Exceptionless -c Release -o nuget_pub
 
+::Localization
+dotnet pack src/Bing.Localization.Abstractions-c Release -o nuget_pub
+dotnet pack src/Bing.Localization -c Release -o nuget_pub
+
 ::Data
 dotnet pack src/Bing.Data -c Release -o nuget_pub
 dotnet pack src/Bing.Data.Sql -c Release -o nuget_pub
@@ -58,19 +64,25 @@ dotnet pack src/Bing.AspNetCore.Mvc.Contracts -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore.Mvc -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore.Mvc.UI -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore.Serilog -c Release -o nuget_pub
+dotnet pack src/Bing.AspNetCore.Authentication.JwtBearer -c Release -o nuget_pub
 
 ::Events
 dotnet pack src/Bing.Events -c Release -o nuget_pub
 
 ::Datas
-dotnet pack src/Bing.Datas.Dapper -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.MySql -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.PgSql -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.SqlServer -c Release -o nuget_pub
-dotnet pack src/Bing.Datas.EntityFramework.Oracle -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.MySql -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.PostgreSql -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.SqlServer -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.Oracle -c Release -o nuget_pub
 dotnet pack src/Bing.FreeSQL -c Release -o nuget_pub
 dotnet pack src/Bing.FreeSQL.MySql -c Release -o nuget_pub
+dotnet pack src/Bing.Dapper.Core -c Release -o nuget_pub
+dotnet pack src/Bing.Dapper.MySql -c Release -o nuget_pub
+dotnet pack src/Bing.Dapper.Oracle -c Release -o nuget_pub
+dotnet pack src/Bing.Dapper.PostgreSql -c Release -o nuget_pub
+dotnet pack src/Bing.Dapper.Sqlite -c Release -o nuget_pub
+dotnet pack src/Bing.Dapper.SqlServer -c Release -o nuget_pub
 
 ::Caching
 dotnet pack src/Bing.EasyCaching -c Release -o nuget_pub
@@ -84,6 +96,7 @@ dotnet pack src/Bing.ObjectMapping -c Release -o nuget_pub
 dotnet pack src/Bing.AutoMapper -c Release -o nuget_pub
 dotnet pack src/Bing.MiniProfiler -c Release -o nuget_pub
 dotnet pack src/Bing.Locks.CSRedis -c Release -o nuget_pub
+dotnet pack src/Bing.Extensions.SkyApm.Diagnostics.Sql -c Release -o nuget_pub
 
 dotnet pack src/Bing.Events.Cap.MySql -c Release -o nuget_pub
 

@@ -1,0 +1,8 @@
+- name: 主页
+  href: index.md
+- name: API 文档
+  href: api/
+- name: 发行说明
+  href: ReleaseNotes.md
+- name: Github
+  href: https://github.com/bing-framework/Bing.NetCore

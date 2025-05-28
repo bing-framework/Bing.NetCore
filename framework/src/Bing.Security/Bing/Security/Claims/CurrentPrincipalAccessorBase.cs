@@ -10,7 +10,7 @@ public abstract class CurrentPrincipalAccessorBase : ICurrentPrincipalAccessor
     /// <summary>
     /// 当前安全主体
     /// </summary>
-    private readonly AsyncLocal<ClaimsPrincipal> _currentPrincipal = new AsyncLocal<ClaimsPrincipal>();
+    private readonly AsyncLocal<ClaimsPrincipal> _currentPrincipal = new();
 
     /// <summary>
     /// 安全主体
@@ -36,9 +36,11 @@ public abstract class CurrentPrincipalAccessorBase : ICurrentPrincipalAccessor
     {
         var parent = Principal;
         _currentPrincipal.Value = principal;
-        return new DisposeAction(() =>
+
+        return new DisposeAction<ValueTuple<AsyncLocal<ClaimsPrincipal>, ClaimsPrincipal>>(static (state) =>
         {
-            _currentPrincipal.Value = parent;
-        });
+            var (currentPrincipal, parent) = state;
+            currentPrincipal.Value = parent;
+        }, (_currentPrincipal, parent));
     }
 }

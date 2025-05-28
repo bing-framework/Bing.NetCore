@@ -59,7 +59,7 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="request">请求</param>
         public async Task ResetPasswordAsync(ResetPasswordRequest request)
         {
-            var user = await UserRepository.FindAsync(request.UserId);
+            var user = await UserRepository.FindByIdAsync(request.UserId);
             await UserManager.ChangePasswordAsync(user, request.Password);
             await UnitOfWork.CommitAsync();
         }
@@ -74,7 +74,7 @@ namespace Bing.Admin.Service.Implements.Systems
         {
             if (userId == null)
                 userId = CurrentUser.UserId.ToGuidOrNull();
-            var user = await UserRepository.FindAsync(userId);
+            var user = await UserRepository.FindByIdAsync(userId);
             await UserManager.ChangePasswordAsync(user, currentPassword, newPassword);
             await UnitOfWork.CommitAsync();
         }

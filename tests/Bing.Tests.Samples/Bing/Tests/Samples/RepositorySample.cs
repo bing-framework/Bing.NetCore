@@ -147,11 +147,30 @@ public class RepositorySample : IRepositorySample
     }
 
     /// <summary>
+    /// 通过标识查找实体
+    /// </summary>
+    /// <param name="id">标识</param>
+    public EntitySample FindById(object id)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
     public Task<EntitySample> FindAsync(object id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 通过标识查找实体
+    /// </summary>
+    /// <param name="id">标识</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<EntitySample> FindByIdAsync(object id, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -198,6 +217,16 @@ public class RepositorySample : IRepositorySample
     /// <param name="ids">标识列表</param>
     /// <param name="cancellationToken">取消令牌</param>
     public Task<List<EntitySample>> FindByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 通过标识列表查找实体列表
+    /// </summary>
+    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<EntitySample>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -277,6 +306,16 @@ public class RepositorySample : IRepositorySample
     }
 
     /// <summary>
+    /// 通过标识列表查找实体列表，不跟踪
+    /// </summary>
+    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<EntitySample>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
@@ -297,9 +336,30 @@ public class RepositorySample : IRepositorySample
     /// <summary>
     /// 查找单个实体
     /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    public EntitySample Single(Expression<Func<EntitySample, bool>> predicate, Func<IQueryable<EntitySample>, IQueryable<EntitySample>> action)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找单个实体
+    /// </summary>
     /// <param name="condition">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
     public Task<EntitySample> SingleAsync(Expression<Func<EntitySample, bool>> condition, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找单个实体
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<EntitySample> SingleAsync(Expression<Func<EntitySample, bool>> predicate, Func<IQueryable<EntitySample>, IQueryable<EntitySample>> action, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -309,6 +369,16 @@ public class RepositorySample : IRepositorySample
     /// </summary>
     /// <param name="condition">查询条件</param>
     public List<EntitySample> FindAll(Expression<Func<EntitySample, bool>> condition = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找实体列表
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<EntitySample>> FindAllAsync(Expression<Func<EntitySample, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -327,6 +397,16 @@ public class RepositorySample : IRepositorySample
     /// </summary>
     /// <param name="condition">查询条件</param>
     public List<EntitySample> FindAllNoTracking(Expression<Func<EntitySample, bool>> condition = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找实体列表，不跟踪
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<List<EntitySample>> FindAllNoTrackingAsync(Expression<Func<EntitySample, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -388,6 +468,16 @@ public class RepositorySample : IRepositorySample
     /// <summary>
     /// 判断是否存在
     /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<bool> ExistsAsync(Expression<Func<EntitySample, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 判断是否存在
+    /// </summary>
     /// <param name="condition">查询条件</param>
     public Task<bool> ExistsAsync(Expression<Func<EntitySample, bool>> condition)
     {
@@ -399,6 +489,16 @@ public class RepositorySample : IRepositorySample
     /// </summary>
     /// <param name="condition">查询条件</param>
     public int Count(Expression<Func<EntitySample, bool>> condition = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 查找数量
+    /// </summary>
+    /// <param name="predicate">查询条件</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<int> CountAsync(Expression<Func<EntitySample, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -543,6 +643,26 @@ public class RepositorySample : IRepositorySample
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task UpdateAsync(EntitySample entity, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 修改实体集合
+    /// </summary>
+    /// <param name="entities">实体集合</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task UpdateAsync(IEnumerable<EntitySample> entities, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// 修改实体
+    /// </summary>
+    /// <param name="entity">实体</param>
     public Task UpdateAsync(EntitySample entity)
     {
         throw new NotImplementedException();
@@ -629,6 +749,12 @@ public class RepositorySample : IRepositorySample
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>
     public Task RemoveAsync(IEnumerable<EntitySample> entities, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    public void Dispose()
     {
         throw new NotImplementedException();
     }

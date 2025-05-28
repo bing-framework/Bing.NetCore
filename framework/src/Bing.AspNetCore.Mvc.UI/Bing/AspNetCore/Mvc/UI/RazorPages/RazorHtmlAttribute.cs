@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.AspNetCore.Mvc.UI.RazorPages;
+﻿namespace Bing.AspNetCore.Mvc.UI.RazorPages;
 
 /// <summary>
 /// Razor生成Html静态文件

@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace Bing.TextTemplating;
+﻿namespace Bing.TextTemplating;
 
 /// <summary>
-/// 模板内容构造者上下文
+/// 模板内容贡献者上下文
 /// </summary>
 public class TemplateContentContributorContext
 {

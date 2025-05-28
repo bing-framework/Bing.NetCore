@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.AspNetCore.Abstractions</AssemblyName>
+    <PackageId>Bing.AspNetCore.Abstractions</PackageId>
+    <Description>Bing.AspNetCore.Abstractions 组件，提供AspNetCore的服务端功能的抽象服务</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>Nullable</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+  </ItemGroup>
+
+</Project>

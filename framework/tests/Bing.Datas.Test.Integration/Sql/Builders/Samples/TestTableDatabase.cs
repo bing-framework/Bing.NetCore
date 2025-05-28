@@ -1,4 +1,4 @@
-﻿using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Test.Integration.Sql.Builders.Samples;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using Bing.Data.Stores;
+﻿using Bing.Data.Stores;
 using Bing.Domain.Entities;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 

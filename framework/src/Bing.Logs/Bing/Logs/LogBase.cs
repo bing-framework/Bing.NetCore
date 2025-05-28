@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using Bing.Logs.Abstractions;
 using Bing.Users;
 using Enum = Bing.Helpers.Enum;

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\common.tests.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+    <RootNamespace>Bing.MultiTenancy</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.20.69" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.AspNetCore.MultiTenancy\Bing.AspNetCore.MultiTenancy.csproj" />
+  </ItemGroup>
+
+</Project>

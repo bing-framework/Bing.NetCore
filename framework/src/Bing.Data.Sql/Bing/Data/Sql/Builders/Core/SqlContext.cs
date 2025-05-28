@@ -1,4 +1,5 @@
-﻿using Bing.Data.Sql.Matedatas;
+﻿using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -20,7 +21,7 @@ public class SqlContext
     /// <summary>
     /// 实体元数据解析器
     /// </summary>
-    public IEntityMatedata Matedata { get; }
+    public IEntityMetadata Metadata { get; }
 
     /// <summary>
     /// 参数管理器
@@ -30,20 +31,20 @@ public class SqlContext
     /// <summary>
     /// Sql子句访问器
     /// </summary>
-    public IClauseAccessor ClauseAccessor { get; }
+    public ISqlPartAccessor ClauseAccessor { get; }
 
     /// <summary>
     /// 初始化一个<see cref="SqlContext"/>类型的实例
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="entityAliasRegister">实体别名注册器</param>
-    /// <param name="matedata">实体原始数据解析器</param>
+    /// <param name="metadata">实体原始数据解析器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="clause">Sql子句访问器</param>
-    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMatedata matedata, IParameterManager parameterManager, IClauseAccessor clause)
+    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMetadata metadata, IParameterManager parameterManager, ISqlPartAccessor clause)
     {
         EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
-        Matedata = matedata ?? new DefaultEntityMatedata();
+        Metadata = metadata ?? new DefaultEntityMetadata();
         Dialect = dialect;
         ParameterManager = parameterManager;
         ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));

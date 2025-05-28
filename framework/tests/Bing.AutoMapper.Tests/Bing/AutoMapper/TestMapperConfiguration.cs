@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Bing.ObjectMapping;
-using Bing.SampleClasses;
 
 namespace Bing.AutoMapper;
 
@@ -16,7 +15,10 @@ public class TestMapperConfiguration : Profile, IObjectMapperProfile
     {
         CreateMap<Sample, Sample4>()
             .ForMember(o => o.StringValue, o => o.MapFrom((s, d) => s.StringValue + "-1"));
-        //CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
-        //    .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue + "-001"));
+        CreateMap<AutoMapperSourceSample, AutoMapperTargetSample>()
+            .ForMember(x => x.TargetSampleValue, x => x.MapFrom(p => p.SourceStringValue + "-001"));
+
+        // 忽略 Castle 代理类
+        RecognizeDestinationPrefixes("Castle.Proxies.");
     }
 }

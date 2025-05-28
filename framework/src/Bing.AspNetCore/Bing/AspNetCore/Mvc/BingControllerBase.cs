@@ -40,10 +40,10 @@ public abstract class BingControllerBase : ControllerBase
     /// <param name="data">数据</param>
     /// <param name="message">消息</param>
     /// <param name="statusCode">Http状态码</param>
-    protected virtual IActionResult Success(dynamic data = null, string message = null, int? statusCode = 200)
+    protected virtual IActionResult Success(object data = null, string message = null, int? statusCode = 200)
     {
         message ??= Bing.Properties.R.Success;
-        return GetResult(Mvc.StatusCode.Ok.ToString("d"), message, data, statusCode);
+        return CreateResult(Mvc.StatusCode.Ok.ToString("d"), message, data, statusCode);
     }
 
     /// <summary>
@@ -53,17 +53,18 @@ public abstract class BingControllerBase : ControllerBase
     /// <param name="statusCode">Http状态码</param>
     protected virtual IActionResult Fail(string message, int? statusCode = 200)
     {
-        return GetResult(Bing.AspNetCore.Mvc.StatusCode.Fail.ToString("d"), message, null, statusCode);
+        return CreateResult(Bing.AspNetCore.Mvc.StatusCode.Fail.ToString("d"), message, null, statusCode);
     }
 
     /// <summary>
-    /// 获取结果
+    /// 创建结果
     /// </summary>
     /// <param name="code">业务状态码</param>
     /// <param name="message">消息</param>
     /// <param name="data">数据</param>
     /// <param name="httpStatusCode">Http状态码</param>
-    private IActionResult GetResult(string code, string message, dynamic data, int? httpStatusCode)
+    /// <returns>操作结果</returns>
+    private IActionResult CreateResult(string code, string message, object data, int? httpStatusCode)
     {
         var factory = HttpContext.RequestServices.GetService<IResultFactory>();
         if (factory == null)

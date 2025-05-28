@@ -1,5 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <PackageReference Include="FreeRedis" Version="1.0.8" />
-  </ItemGroup>
-</Project>

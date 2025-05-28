@@ -1,22 +1,36 @@
 ﻿<Project>
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
-    <NoWarn>$(NoWarn);CS1591;NETSDK1138</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;NETSDK1138;xUnit1041</NoWarn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <!--单元测试基础配置-->
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <Version Condition=" '$(TargetFramework)' != 'net452' ">2.4.5</Version>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <!--Xunit核心框架包，提供了编写单元测试所需的基本功能和属性-->
+    <PackageReference Include="xunit" Version="2.7.0" />
+    <!--允许在Visual Studio的测试资源管理器中运行Xunit测试-->
+    <PackageReference Include="xunit.runner.visualstudio" Condition="'$(TargetFramework)'!= 'netstandard2.0' And '$(TargetFramework)'!= 'netstandard2.1'">
+      <Version Condition=" '$(TargetFramework)' != 'net452' ">2.5.7</Version>
       <Version Condition=" '$(TargetFramework)' == 'net452' ">2.4.3</Version>
+      <Version Condition=" '$(TargetFramework)' == 'net5.0' ">2.4.5</Version>
+      <Version Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">2.4.5</Version>
       <Version Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">2.4.3</Version>
       <Version Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">2.4.3</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!--一个跨平台的代码覆盖率工具，用于收集测试覆盖率数据，特别是与CI/CD集成时非常有用-->
+    <PackageReference Include="coverlet.collector" Version="6.0.1" />
+  </ItemGroup>
+
+  <!--单元测试扩展包配置-->
+  <ItemGroup>
+    <!--.NET单元测试断言库，它提供了一种更自然、更易读的方式来编写测试断言-->
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+    <!--.NET模拟框架，用于创建对象的模拟实例，帮助测试那些依赖于复杂外部资源的代码-->
+    <PackageReference Include="Moq" Version="4.20.70" />
   </ItemGroup>
 
   <Import Project="asset/props/sourcelink.env.props"/>

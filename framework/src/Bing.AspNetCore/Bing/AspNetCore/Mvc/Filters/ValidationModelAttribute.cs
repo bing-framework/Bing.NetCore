@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Bing.AspNetCore.Mvc.Filters;
@@ -9,57 +9,70 @@ namespace Bing.AspNetCore.Mvc.Filters;
 public class ValidationModelAttribute : IActionFilter
 {
     /// <summary>
-    /// 允许空值
+    /// 是否允许参数为空，默认为 false。
     /// </summary>
-    public bool AllowNulls { get; set; }
+    public bool AllowNulls { get; set; } = false;
 
     /// <summary>
-    /// 允许多个结果
+    /// 是否允许多个错误结果，默认为 true
     /// </summary>
     public bool AllowMultipleResult { get; set; } = true;
 
     /// <summary>
-    /// 操作执行
+    /// 操作执行前进行参数验证
     /// </summary>
     /// <param name="context">操作执行上下文</param>
     public void OnActionExecuting(ActionExecutingContext context)
     {
+        // 检查是否允许参数为空
         if (!AllowNulls)
         {
             var nullArguments = context.ActionArguments
                 .Where(arg => arg.Value == null)
-                .Select(arg => new ValidationError()
+                .Select(arg => new ValidationError
                 {
                     Name = arg.Key,
-                    Message = "值不能为空"
+                    Message = "参数不能为空"
                 }).ToList();
 
             if (nullArguments.Any())
             {
-                context.Result = new ValidationFailedResult(nullArguments) { AllowMultipleResult = AllowMultipleResult };
+                context.Result = CreateValidationFailedResult(nullArguments);
                 return;
             }
         }
 
+        // 如果 ModelState 不是有效的，则收集所有错误信息
         if (!context.ModelState.IsValid)
         {
             var errors = context.ModelState
                 .Where(e => e.Value.Errors.Count > 0)
-                .Select(e => new ValidationError
+                .SelectMany(e => e.Value.Errors.Select(err => new ValidationError
                 {
                     Name = e.Key,
-                    Message = e.Value.Errors.FirstOrDefault()?.ErrorMessage
-                }).ToList();
+                    Message = err.ErrorMessage
+                }))
+                .ToList();
 
-            context.Result = new ValidationFailedResult(errors) { AllowMultipleResult = AllowMultipleResult };
+            context.Result = CreateValidationFailedResult(errors);
         }
     }
 
     /// <summary>
-    /// 操作执行完毕
+    /// 操作执行后，当前实现不执行任何操作
     /// </summary>
-    /// <param name="context">操作执行完毕上下文</param>
+    /// <param name="context">操作执行完成的上下文</param>
     public void OnActionExecuted(ActionExecutedContext context)
     {
+    }
+
+    /// <summary>
+    /// 创建验证失败的响应结果
+    /// </summary>
+    /// <param name="errors">错误信息列表</param>
+    /// <returns>封装后的 <see cref="ValidationFailedResult"/> 响应结果</returns>
+    private IActionResult CreateValidationFailedResult(List<ValidationError> errors)
+    {
+        return new ValidationFailedResult(errors) { AllowMultipleResult = AllowMultipleResult };
     }
 }

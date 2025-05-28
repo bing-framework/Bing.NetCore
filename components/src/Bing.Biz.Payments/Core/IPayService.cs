@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Bing.Biz.Payments.Core;
+﻿namespace Bing.Biz.Payments.Core;
 
 /// <summary>
 /// 支付服务

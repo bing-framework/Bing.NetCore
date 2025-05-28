@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\common.tests.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+    <RootNamespace>Bing.Dapper.Tests</RootNamespace>
+    <XunitStartupFullName>Bing.Dapper.Tests.Startup</XunitStartupFullName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.32" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.17" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.14" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>appsettings.json</DependentUpon>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

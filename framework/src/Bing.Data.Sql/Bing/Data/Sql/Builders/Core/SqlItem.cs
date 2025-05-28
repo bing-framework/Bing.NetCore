@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Extensions;
-using Bing.Data.Sql.Matedatas;
+using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 
 namespace Bing.Data.Sql.Builders.Core;

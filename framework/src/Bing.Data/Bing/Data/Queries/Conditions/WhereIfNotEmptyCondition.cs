@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Bing.Expressions;
 using Bing.Extensions;
 using Bing.Properties;

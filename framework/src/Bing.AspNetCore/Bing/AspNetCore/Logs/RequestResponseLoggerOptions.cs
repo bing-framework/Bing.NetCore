@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.AspNetCore.Logs;
+﻿namespace Bing.AspNetCore.Logs;
 
 /// <summary>
 /// 请求响应记录器选项

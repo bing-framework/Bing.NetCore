@@ -266,3 +266,4 @@ __pycache__/
 /bus
 /output/netstandard2.0
 Bing*.xml
+/global.json

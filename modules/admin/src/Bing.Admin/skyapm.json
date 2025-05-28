@@ -1,0 +1,59 @@
+{
+  "SkyWalking": {
+    "ServiceName": "bing.admin",
+    "Namespace": "bing.admin",
+    "HeaderVersions": [
+      "sw8"
+    ],
+    "Sampling": {
+      "SamplePer3Secs": -1,
+      "Percentage": -1.0,
+      "LogSqlParameterValue": true,
+      "IgnorePaths": [
+        "http://*/swagger/**",
+        "http://*/cap/**",
+        "http://*/cap",
+        "/cap/**",
+        "/cap",
+        "**/api/v2/events",
+        "http://*/api/v2/events",
+        "http://*/nacos/v1/auth/users/login",
+        "http://*/api/v2/projects/config",
+        "http://*/v1/catalog/service/*",
+        "http://*/v1/catalog/services",
+        "http://*/v1/agent/service/*",
+        "http://*/hangfire/stats",
+        "/health"
+      ]
+    },
+    "Logging": {
+      "Level": "Information",
+      "FilePath": "logs\\skyapm-{Date}.log"
+    },
+    "Transport": {
+      "Interval": 3000,
+      "ProtocolVersion": "v8",
+      "QueueSize": 30000,
+      "BatchSize": 3000,
+      "gRPC": {
+        "Servers": "10.186.135.41:11800",
+        "Timeout": 10000,
+        "ConnectTimeout": 10000,
+        "ReportTimeout": 600000,
+        "Authentication": ""
+      }
+    },
+    "Component": {
+      "HttpClient": {
+        "CollectRequestHeaders": [
+          "x-correlation-id"
+        ]
+      },
+      "AspNetCore": {
+        "CollectHeaders": [
+          "x-correlation-id"
+        ]
+      }
+    }
+  }
+}

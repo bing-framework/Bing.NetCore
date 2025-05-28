@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.Domain.Entities.Events;
+﻿namespace Bing.Domain.Entities.Events;
 
 /// <summary>
 /// 领域事件处理器工厂

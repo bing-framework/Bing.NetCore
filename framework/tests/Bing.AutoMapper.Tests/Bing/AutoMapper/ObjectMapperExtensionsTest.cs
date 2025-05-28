@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using AutoMapper;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.ObjectMapping;
 using Bing.Reflection;
-using Bing.SampleClasses;
-using Xunit;
+using Thread = Bing.Helpers.Thread;
 
 namespace Bing.AutoMapper;
 
@@ -32,7 +27,6 @@ public class ObjectMapperExtensionsTest
         {
             foreach (var instance in instances)
             {
-
                 Debug.WriteLine($"初始化AutoMapper配置：{instance.GetType().FullName}");
                 instance.CreateMap();
                 // ReSharper disable once SuspiciousTypeConversion.Global

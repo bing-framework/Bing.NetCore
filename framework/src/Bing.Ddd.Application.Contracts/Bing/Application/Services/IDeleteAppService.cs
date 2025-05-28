@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Data.Queries;
+﻿using Bing.Data.Queries;
 
 namespace Bing.Application.Services;
 

@@ -46,7 +46,7 @@ public class WechatpayAppPayService : WechatpayPayServiceBase, IWechatpayAppPayS
             .AppId(result.Config.AppId)
             .PartnerId(result.Config.MerchantId)
             .Add("prepayid", result.GetPrepayId())
-            .Add("noncestr", Id.Guid())
+            .Add("noncestr", Guid.NewGuid().ToString("N"))
             .Timestamp()
             .Package()
             .ToJson();

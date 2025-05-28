@@ -1,4 +1,5 @@
 ﻿using Bing.Extensions;
+using Bing.Text;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -53,11 +54,11 @@ public class OrderByItem
         Raw = raw;
         if (raw)
             return;
-        Order = Order.RemoveEnd("asc");
+        Order = Order.TrimPhraseEnd("asc");
         if (Order.ToLower().EndsWith("desc"))
         {
             Desc = true;
-            Order = Order.RemoveEnd("desc");
+            Order = Order.TrimPhraseEnd("desc");
         }
 
         var item = new NameItem(Order);

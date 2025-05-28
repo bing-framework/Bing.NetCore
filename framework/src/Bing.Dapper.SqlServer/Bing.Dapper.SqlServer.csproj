@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Dapper.SqlServer</AssemblyName>
+    <PackageId>Bing.Dapper.SqlServer</PackageId>
+    <Description>Bing.Dapper.SqlServer 是Bing应用框架基于Dapper的数据访问封装类库，用于处理SqlServer数据库。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Bing\Data\Metadata\" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+</Project>

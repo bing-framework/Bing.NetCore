@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Bing.AspNetCore.Mvc.UI.RazorPages;
+﻿namespace Bing.AspNetCore.Mvc.UI.RazorPages;
 
 /// <summary>
 /// 路由分析器

@@ -43,7 +43,7 @@ namespace Bing.Admin.Modules
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             // 替换CAP消费者服务选择器
-            services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
+            //services.AddSingleton<IConsumerServiceSelector, CapConsumerServiceSelector>();
             // 替换CAP订阅执行者
             services.AddSingleton<ISubscribeInvoker, CapSubscribeInvoker>();
             LoadEvent(services);
@@ -64,6 +64,8 @@ namespace Bing.Admin.Modules
                     x.Password = "bing2019.00";
                     x.HostName = "10.186.132.60";
                 });
+                o.ConsumerThreadCount = 1;
+                o.UseDispatchingPerGroup = true;
             });
             return services;
         }
@@ -93,7 +95,7 @@ namespace Bing.Admin.Modules
         /// 初始化一个<see cref="CapSubscribeInvoker"/>类型的实例
         /// </summary>
         public CapSubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, ISerializer serializer)
-            : base(loggerFactory, serviceProvider, serializer)
+            : base(serviceProvider, serializer)
         {
             _logger = loggerFactory.CreateLogger<CapSubscribeInvoker>();
         }

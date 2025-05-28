@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Bing.DependencyInjection;
+﻿using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Contents;
 using Bing.Logs.Core;

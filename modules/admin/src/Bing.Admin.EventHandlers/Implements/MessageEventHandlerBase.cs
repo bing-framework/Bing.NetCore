@@ -1,7 +1,6 @@
 ﻿using Bing.Aspects;
 using Bing.DependencyInjection;
-using Bing.Logs;
-using Bing.Logs.Core;
+using Bing.Logging;
 
 namespace Bing.Admin.EventHandlers.Implements
 {
@@ -17,8 +16,13 @@ namespace Bing.Admin.EventHandlers.Implements
         public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
 
         /// <summary>
+        /// 日志工厂
+        /// </summary>
+        protected ILogFactory LogFactory => LazyServiceProvider.LazyGetRequiredService<ILogFactory>();
+
+        /// <summary>
         /// 日志
         /// </summary>
-        protected ILog Log => LazyServiceProvider.LazyGetService<ILog>() ?? NullLog.Instance;
+        protected ILog Log => LazyServiceProvider.LazyGetService<ILog>(provider => LogFactory?.CreateLog(GetType().FullName) ?? NullLog.Instance);
     }
 }

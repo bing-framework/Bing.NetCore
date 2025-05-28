@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Dapper.Core</AssemblyName>
+    <PackageId>Bing.Dapper.Core</PackageId>
+    <Description>Bing.Dapper.Core 是Bing应用框架基于Dapper的数据访问封装基础类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.28" />
+  </ItemGroup>
+
+</Project>

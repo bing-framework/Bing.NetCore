@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Bing.AspNetCore.Mvc.Tests": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:7405;http://localhost:7406"
+    }
+  }
+}

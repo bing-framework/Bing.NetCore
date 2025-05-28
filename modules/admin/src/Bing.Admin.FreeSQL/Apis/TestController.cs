@@ -5,7 +5,6 @@ using Bing.Admin.Systems.Domain.Events;
 using Bing.AspNetCore.Mvc;
 using Bing.AspNetCore.Mvc.Filters;
 using Bing.Events.Messages;
-using Bing.Helpers;
 using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,11 +82,9 @@ namespace Bing.Admin.Apis
         //[AntiDuplicateRequest]
         public async Task<IActionResult> TestMessageAsync([FromBody] TestMessage request)
         {
-            Log.LogInformation("测试日志消息Begin");
             await MessageEventBus.PublishAsync(new TestMessageEvent1(request, request.Send));
             if (request.NeedCommit)
                 await UnitOfWork.CommitAsync();
-            Log.LogInformation("测试日志消息End");
             return Success();
         }
 

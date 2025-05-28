@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace Bing.Domain.Entities.Events;
+﻿namespace Bing.Domain.Entities.Events;
 
 /// <summary>
 /// 领域事件调度器

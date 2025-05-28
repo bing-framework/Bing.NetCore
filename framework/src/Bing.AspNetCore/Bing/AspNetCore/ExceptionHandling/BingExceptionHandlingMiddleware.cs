@@ -1,4 +1,5 @@
-﻿using Bing.ExceptionHandling;
+﻿using Bing.Authorization;
+using Bing.ExceptionHandling;
 using Bing.Helpers;
 using Bing.Http;
 using Bing.Utils.Json;
@@ -55,7 +56,7 @@ public class BingExceptionHandlingMiddleware : IMiddleware
         catch (Exception e)
         {
             // 如果响应已经开始，我们什么也不能做，只能中止
-            if(context.Response.HasStarted)
+            if (context.Response.HasStarted)
             {
                 _logger.LogWarning("An exception occurred, but response has already started!");
                 throw;
@@ -73,19 +74,33 @@ public class BingExceptionHandlingMiddleware : IMiddleware
     {
         _logger.LogException(exception);
 
-        var errorInfoConverter = httpContext.RequestServices.GetRequiredService<IExceptionToErrorInfoConverter>();
-        var statusCodeFinder = httpContext.RequestServices.GetRequiredService<IHttpExceptionStatusCodeFinder>();
-        var options = httpContext.RequestServices.GetRequiredService<IOptions<BingExceptionHandlingOptions>>().Value;
-
-        httpContext.Response.Clear();
-        httpContext.Response.StatusCode = (int)statusCodeFinder.GetStatusCode(httpContext, exception);
-        httpContext.Response.OnStarting(_clearCacheHeaderDelegate, httpContext.Response);
-        httpContext.Response.Headers.Add(BingHttpConst.BingErrorFormat, "true");
-
-        var remoteServiceErrorInfo = errorInfoConverter.Convert(exception, options.SendExceptionDetailsToClients);
-        await WriteJsonAsync(httpContext.Response, new {code = Conv.ToInt(remoteServiceErrorInfo.Code), message = remoteServiceErrorInfo.Message});
-
         await httpContext.RequestServices.GetRequiredService<IExceptionNotifier>().NotifyAsync(new ExceptionNotificationContext(exception));
+
+        if (exception is BingAuthorizationException)
+        {
+            await httpContext.RequestServices.GetRequiredService<IBingAuthorizationExceptionHandler>()
+                .HandleAsync(exception.As<BingAuthorizationException>(), httpContext);
+        }
+        else
+        {
+            var errorInfoConverter = httpContext.RequestServices.GetRequiredService<IExceptionToErrorInfoConverter>();
+            var statusCodeFinder = httpContext.RequestServices.GetRequiredService<IHttpExceptionStatusCodeFinder>();
+            var exceptionHandlingOptions = httpContext.RequestServices.GetRequiredService<IOptions<BingExceptionHandlingOptions>>().Value;
+
+            httpContext.Response.Clear();
+            httpContext.Response.StatusCode = (int)statusCodeFinder.GetStatusCode(httpContext, exception);
+            httpContext.Response.OnStarting(_clearCacheHeaderDelegate, httpContext.Response);
+            httpContext.Response.Headers.Add(BingHttpConst.BingErrorFormat, "true");
+
+            var remoteServiceErrorInfo = errorInfoConverter.Convert(exception, options =>
+            {
+                options.SendExceptionDetailsToClients = exceptionHandlingOptions.SendExceptionDetailsToClients;
+                options.SendStackTraceToClients = exceptionHandlingOptions.SendStackTraceToClients;
+            });
+
+            await WriteJsonAsync(httpContext.Response, new { code = Conv.ToInt(remoteServiceErrorInfo.Code), message = remoteServiceErrorInfo.Message });
+        }
+
     }
 
     /// <summary>

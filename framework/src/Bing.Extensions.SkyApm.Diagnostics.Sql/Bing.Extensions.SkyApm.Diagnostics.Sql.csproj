@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.Extensions.SkyApm.Diagnostics.Sql</AssemblyName>
+    <PackageId>Bing.Extensions.SkyApm.Diagnostics.Sql</PackageId>
+    <Description>Bing.Extensions.SkyApm.Diagnostics.Sql 是Bing应用框架的Sql查询封装的SkyAPM类库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+
+</Project>

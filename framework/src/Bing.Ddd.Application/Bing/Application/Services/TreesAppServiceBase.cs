@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bing.Application.Dtos;
-using Bing.Data;
-using Bing.Data.Queries;
+﻿using Bing.Data;
 using Bing.Data.Queries.Conditions;
 using Bing.Domain.Entities;
 using Bing.Helpers;
@@ -171,8 +165,8 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     /// <param name="swapId">目标标识</param>
     public virtual async Task SwapSortAsync(Guid id, Guid swapId)
     {
-        var entity = await _store.FindAsync(id);
-        var swapEntity = await _store.FindAsync(swapId);
+        var entity = await _store.FindByIdAsync(id);
+        var swapEntity = await _store.FindByIdAsync(swapId);
         if (entity == null || swapEntity == null)
             return;
         entity.SwapSort(swapEntity);

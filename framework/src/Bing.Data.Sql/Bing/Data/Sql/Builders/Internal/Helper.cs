@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Expressions;
 using Bing.Extensions;
 using Enum = Bing.Helpers.Enum;

@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class BingAspNetCoreServiceCollectionExtensions
 {
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || NET5_0
+#if NETCOREAPP3_0_OR_GREATER
     /// <summary>
     /// 获取<see cref="IWebHostEnvironment"/>环境信息
     /// </summary>

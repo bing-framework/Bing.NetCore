@@ -133,7 +133,7 @@ public class ValidationResultCollection : IValidationResult
     /// <summary>
     /// 成功验证结果集合
     /// </summary>
-    public static ValidationResultCollection Success { get; } = new ValidationResultCollection();
+    public static ValidationResultCollection Success { get; } = new();
 
     /// <summary>
     /// 添加

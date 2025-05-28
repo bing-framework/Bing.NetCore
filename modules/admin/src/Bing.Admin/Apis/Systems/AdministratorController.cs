@@ -108,11 +108,11 @@ namespace Bing.Admin.Apis.Systems
         /// </remarks>
         /// <param name="id">标识</param>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(AdministratorResponse), 200)]
-        public async Task<IActionResult> GetAsync(Guid id)
+        //[ProducesResponseType(typeof(AdministratorResponse), 200)]
+        public async Task<AdministratorResponse> GetAsync(Guid id)
         {
             var result = await QueryAdministratorService.GetById(id);
-            return Success(result);
+            return result;
         }
     }
 }

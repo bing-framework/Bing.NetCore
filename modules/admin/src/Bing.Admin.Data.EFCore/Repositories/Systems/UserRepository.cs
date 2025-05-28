@@ -173,10 +173,10 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// </summary>
         /// <param name="userId">用户编号</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return FindAsync(userId.ToGuid(), cancellationToken);
+            return FindByIdAsync(userId.ToGuid(), cancellationToken);
         }
 
         #endregion

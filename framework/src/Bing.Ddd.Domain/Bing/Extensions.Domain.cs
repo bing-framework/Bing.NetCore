@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 
 // ReSharper disable once CheckNamespace
 namespace Bing;

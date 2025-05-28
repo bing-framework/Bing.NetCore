@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace Bing.Application.Queries;
+﻿namespace Bing.Application.Queries;
 
 /// <summary>
 /// 定义查询处理程序

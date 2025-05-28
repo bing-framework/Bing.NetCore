@@ -1,7 +1,6 @@
 ﻿using Bing.Caching;
 using Bing.EasyCaching;
 using Bing.Helpers;
-using EasyCaching.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

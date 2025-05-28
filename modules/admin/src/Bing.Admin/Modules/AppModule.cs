@@ -14,6 +14,7 @@ using Bing.Security.Claims;
 using Bing.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -68,6 +69,7 @@ namespace Bing.Admin.Modules
                 o.ThrowAspectException = true;
                 o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
                 o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
+                //o.NonAspectPredicates.Add(m => m.DeclaringType == typeof(IUnitOfWork));
             });
             services.AddDomainEventDispatcher();
             //services.AddAudit();
@@ -77,6 +79,9 @@ namespace Bing.Admin.Modules
                 x.HttpHeaderName = "X-Correlation-Id";
                 x.SetResponseHeader = true;
             });
+            // 内置日志
+            services.AddHttpLogging(o => o.LoggingFields = HttpLoggingFields.All);
+            // 自定义日志
             services.AddRequestResponseLog(o =>
             {
                 o.IsEnabled = true;
@@ -97,12 +102,15 @@ namespace Bing.Admin.Modules
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseRealIp();
             app.UseCorrelationId();
-            app.UseBingSerilogEnrichers();
+            // 内置日志
+            app.UseHttpLogging();
+            // 自定义日志
             app.UseRequestResponseLog();
             app.UseBingExceptionHandling();
             // 初始化Http上下文访问器
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
+            app.UseBingSerilogEnrichers();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {

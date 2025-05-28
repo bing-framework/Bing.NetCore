@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace Bing.TextTemplating;
+﻿namespace Bing.TextTemplating;
 
 /// <summary>
 /// 模板渲染引擎

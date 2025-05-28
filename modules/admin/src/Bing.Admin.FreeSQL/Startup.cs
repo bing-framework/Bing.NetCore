@@ -1,5 +1,4 @@
 ﻿using Bing.Admin.Modules;
-using Bing.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -49,7 +48,6 @@ namespace Bing.Admin
         /// </summary>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            Web.Environment = env;
             app.UseBing();
         }
     }

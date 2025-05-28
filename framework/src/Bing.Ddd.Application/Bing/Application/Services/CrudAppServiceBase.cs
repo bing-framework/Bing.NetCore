@@ -496,13 +496,13 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 查找旧实体
     /// </summary>
     /// <param name="id">标识</param>
-    protected virtual TEntity FindOldEntity(TKey id) => _repository.Find(id);
+    protected virtual TEntity FindOldEntity(TKey id) => _repository.FindById(id);
 
     /// <summary>
     /// 查找旧实体
     /// </summary>
     /// <param name="id">标识</param>
-    protected virtual async Task<TEntity> FindOldEntityAsync(TKey id) => await _repository.FindAsync(id);
+    protected virtual async Task<TEntity> FindOldEntityAsync(TKey id) => await _repository.FindByIdAsync(id);
 
     /// <summary>
     /// 修改前操作

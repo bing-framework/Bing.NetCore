@@ -1,0 +1,5 @@
+﻿<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
+  </ItemGroup>
+</Project>

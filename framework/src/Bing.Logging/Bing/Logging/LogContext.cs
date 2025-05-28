@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Bing.Logging;
+﻿namespace Bing.Logging;
 
 /// <summary>
 /// 日志上下文
@@ -21,6 +19,11 @@ public class LogContext
     /// 用户标识
     /// </summary>
     public string UserId { get; set; }
+
+    /// <summary>
+    /// 租户标识
+    /// </summary>
+    public string TenantId { get; set; }
 
     /// <summary>
     /// 应用程序
@@ -51,6 +54,11 @@ public class LogContext
     /// 请求地址
     /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// 会话标识
+    /// </summary>
+    public string SessionId { get; set; }
 
     /// <summary>
     /// 是否Web环境

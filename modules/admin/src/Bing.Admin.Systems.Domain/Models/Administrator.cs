@@ -1,20 +1,19 @@
 ﻿using Bing.Admin.Systems.Domain.Parameters;
 
-namespace Bing.Admin.Systems.Domain.Models
+namespace Bing.Admin.Systems.Domain.Models;
+
+/// <summary>
+/// 管理员
+/// </summary>
+public partial class Administrator
 {
     /// <summary>
-    /// 管理员
+    /// 更新
     /// </summary>
-    public partial class Administrator
+    /// <param name="parameter">参数</param>
+    public void Update(UserParameter parameter)
     {
-        /// <summary>
-        /// 更新
-        /// </summary>
-        /// <param name="parameter">参数</param>
-        public void Update(UserParameter parameter)
-        {
-            Name = parameter.Nickname;
-            Enabled = parameter.Enabled;
-        }
+        Name = parameter.Nickname;
+        Enabled = parameter.Enabled;
     }
 }

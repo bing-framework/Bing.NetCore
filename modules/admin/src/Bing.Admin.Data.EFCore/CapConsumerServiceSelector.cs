@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 
 namespace Bing.Admin.Data

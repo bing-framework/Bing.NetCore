@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Bing.Dapper.Oracle</AssemblyName>
+    <PackageId>Bing.Dapper.Oracle</PackageId>
+    <Description>Bing.Dapper.Oracle 是Bing应用框架基于Dapper的数据访问封装类库，用于处理Oracle数据库。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Bing\Data\Metadata\" />
+    <Folder Include="Bing\Data\Sql\Builders\Clauses\" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <Import Project="dependency.props" />
+
+  <Import Project="references.props" />
+  
+</Project>

@@ -14,7 +14,7 @@ public class CurrentUser : ICurrentUser, ITransientDependency
     /// 空声明数组
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    private static readonly Claim[] EmptyClaimsArray = new Claim[0];
+    private static readonly Claim[] EmptyClaimsArray = Array.Empty<Claim>();
 
     /// <summary>
     /// 安全主体访问器

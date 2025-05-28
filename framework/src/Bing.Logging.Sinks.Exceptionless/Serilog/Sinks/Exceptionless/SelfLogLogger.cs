@@ -1,5 +1,4 @@
-﻿using System;
-using Exceptionless.Logging;
+﻿using Exceptionless.Logging;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.Exceptionless;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Bing.Domain.Entities;
+﻿using Bing.Domain.Entities;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 
 namespace Bing.Data.Stores;
@@ -117,7 +112,8 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
-    public virtual Task UpdateAsync(TEntity entity)
+    /// <param name="cancellationToken">取消令牌</param>
+    public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         Update(entity);
         return Task.CompletedTask;
@@ -127,12 +123,13 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// 修改实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
+    /// <param name="cancellationToken">取消令牌</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public virtual async Task UpdateAsync(IEnumerable<TEntity> entities)
+    public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        await Set.UpdateRangeAsync(entities);
+        await Set.UpdateRangeAsync(entities, cancellationToken);
     }
 
     /// <summary>

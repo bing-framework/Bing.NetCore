@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -9,24 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="3.1.2" />
-    <PackageReference Include="IdentityModel" Version="3.10.10" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
+    <PackageReference Include="IdentityModel" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Http" Version="1.4.0-preview-20220831-2" />
+    <PackageReference Include="Bing.Utils.Http" Version="1.5.0" />
+    <PackageReference Include="IP2Region.Net" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\components\src\Bing.Biz\Bing.Biz.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Authentication.JwtBearer\Bing.AspNetCore.Authentication.JwtBearer.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging\Bing.Logging.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Permissions\Bing.Permissions.csproj" />
   </ItemGroup>
 

@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Datas.Dapper\Bing.Datas.Dapper.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
     <ProjectReference Include="..\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj" />
     <ProjectReference Include="..\Bing.Admin.Systems.Domain\Bing.Admin.Systems.Domain.csproj" />
   </ItemGroup>

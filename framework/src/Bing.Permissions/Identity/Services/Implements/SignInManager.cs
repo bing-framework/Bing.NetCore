@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Extensions;
+﻿using Bing.Extensions;
 using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Results;
 using Bing.Permissions.Identity.Services.Abstractions;

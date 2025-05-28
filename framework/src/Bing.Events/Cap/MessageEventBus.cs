@@ -1,10 +1,10 @@
-﻿using System.Text;
-using Bing.Data.Transaction;
+﻿using Bing.Data.Transaction;
 using Bing.Events.Messages;
 using Bing.Tracing;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.Events.Cap;
 
@@ -40,7 +40,7 @@ public class MessageEventBus : IMessageEventBus
     {
         Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
-        Logger = logger;
+        Logger = logger ?? NullLogger<MessageEventBus>.Instance;
     }
 
     /// <summary>

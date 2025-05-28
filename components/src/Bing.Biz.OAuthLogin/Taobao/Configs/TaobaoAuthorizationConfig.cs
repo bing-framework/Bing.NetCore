@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Bing.Biz.OAuthLogin.Core;
+﻿using Bing.Biz.OAuthLogin.Core;
 
 namespace Bing.Biz.OAuthLogin.Taobao.Configs
 {

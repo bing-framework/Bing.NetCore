@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Localization.Abstractions</AssemblyName>
+    <PackageId>Bing.Localization.Abstractions</PackageId>
+    <Description>Bing.Localization.Abstractions是Bing应用框架的本地化模块的抽象库。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,17 +1,14 @@
-﻿using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
-using Bing.Helpers;
 using Bing.Logging;
 using Bing.Logging.Serilog;
-using Bing.Logs.NLog;
 using Bing.Tracing;
 using Exceptionless;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Enrichers.Span;
 using serilog = Serilog;
@@ -42,16 +39,20 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            //services.AddNLog();
             services.AddBingLogging(x => { });
             // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
-            Logs.Exceptionless.Extensions.AddExceptionless(services, o =>
+            
+            //ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
+            //ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
+            //ExceptionlessClient.Default.Startup();
+            services.AddExceptionless(x =>
             {
-                o.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
-                o.ServerUrl = "http://10.186.135.147:5100";
+                x.ApiKey = "aUBmHcfhK8VvPLqsTYvVOeXJYY4jN5QghOY68FZe";
+                x.ServerUrl = "http://10.186.135.147:5100";
             });
             services.AddLogging(loggingBuilder =>
             {
+                var logFilePath = $"{AppContext.BaseDirectory}logs\\log-.log";
                 var configuration = services.GetConfiguration();
                 serilog.Log.Logger = new serilog.LoggerConfiguration()
                     .Enrich.FromLogContext()
@@ -61,9 +62,28 @@ namespace Bing.Admin.Modules
                     .WriteTo.Exceptionless(additionalOperation: (builder) =>
                     {
                         if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
+                        {
                             builder.Target.AddTags(traceId.ToString() ?? string.Empty);
-                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
+                            Debug.WriteLine($"Exceptionless[TraceId:{traceId}]");
+                        }
+                        else
+                        {
+                            var id = (TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId;
+                            builder.Target.AddTags(id);
+                            Debug.WriteLine($"Exceptionless-Id[TraceId:{id}]");
+                        }
+                        
                         return builder;
+                    })
+                    .WriteTo.Async(o =>
+                    {
+                        o.File(logFilePath,
+                            rollingInterval: RollingInterval.Day,
+                            rollOnFileSizeLimit: true,
+                            fileSizeLimitBytes: 102400,
+                            retainedFileCountLimit: 10,
+                            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}][{LogLevel}][{TraceId}][{SourceContext}] {Message}{NewLine}{Exception}"
+                        );
                     })
                     .ReadFrom.Configuration(configuration)
                     .ConfigLogLevel(configuration)
@@ -71,6 +91,15 @@ namespace Bing.Admin.Modules
                 loggingBuilder.AddSerilog();
             });
             return services;
+        }
+
+        /// <summary>
+        /// 应用AspNetCore的服务业务
+        /// </summary>
+        /// <param name="app">应用程序构建器</param>
+        public override void UseModule(IApplicationBuilder app)
+        {
+            app.UseExceptionless();
         }
     }
 }

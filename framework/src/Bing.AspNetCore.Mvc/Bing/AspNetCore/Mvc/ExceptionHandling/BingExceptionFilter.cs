@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Bing.AspNetCore.ExceptionHandling;
+using Bing.Authorization;
 using Bing.DependencyInjection;
 using Bing.ExceptionHandling;
 using Bing.Helpers;
@@ -8,6 +9,7 @@ using Bing.Utils.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -26,7 +28,10 @@ public class BingExceptionFilter : IAsyncExceptionFilter, ITransientDependency
     public async Task OnExceptionAsync(ExceptionContext context)
     {
         if (!ShouldHandleException(context))
+        {
+            LogException(context, out _);
             return;
+        }
         await HandleAndWrapException(context);
     }
 
@@ -51,29 +56,50 @@ public class BingExceptionFilter : IAsyncExceptionFilter, ITransientDependency
     /// <param name="context">异常上下文</param>
     protected virtual async Task HandleAndWrapException(ExceptionContext context)
     {
-        context.HttpContext.Response.Headers.Add(BingHttpConst.BingErrorFormat, "true");
-        context.HttpContext.Response.StatusCode = (int)context
-            .GetRequiredService<IHttpExceptionStatusCodeFinder>()
-            .GetStatusCode(context.HttpContext, context.Exception);
+        LogException(context, out var remoteServiceErrorInfo);
 
+        await context.GetRequiredService<IExceptionNotifier>().NotifyAsync(new ExceptionNotificationContext(context.Exception));
+
+        if (context.Exception is BingAuthorizationException)
+        {
+            await context.HttpContext.RequestServices.GetRequiredService<IBingAuthorizationExceptionHandler>()
+                .HandleAsync(context.Exception.As<BingAuthorizationException>(), context.HttpContext);
+        }
+        else
+        {
+            context.HttpContext.Response.Headers.Add(BingHttpConst.BingErrorFormat, "true");
+            context.HttpContext.Response.StatusCode = (int)context
+                .GetRequiredService<IHttpExceptionStatusCodeFinder>()
+                .GetStatusCode(context.HttpContext, context.Exception);
+
+            context.Result = new ApiResult(Conv.ToInt(remoteServiceErrorInfo.Code), remoteServiceErrorInfo.Message);
+        }
+
+        context.Exception = null!; // Handled!
+    }
+
+    /// <summary>
+    /// 记录异常信息并输出转换后的远程服务信息。
+    /// </summary>
+    /// <param name="context">异常上下文</param>
+    /// <param name="remoteServiceErrorInfo">输出参数，转换后的远程服务错误信息。</param>
+    protected virtual void LogException(ExceptionContext context, out RemoteServiceErrorInfo remoteServiceErrorInfo)
+    {
         var exceptionHandlingOptions = context.GetRequiredService<IOptions<BingExceptionHandlingOptions>>().Value;
         var exceptionToErrorInfoConverter = context.GetRequiredService<IExceptionToErrorInfoConverter>();
-        var remoteServiceErrorInfo = exceptionToErrorInfoConverter.Convert(context.Exception, exceptionHandlingOptions.SendExceptionDetailsToClients);
-
-        // TODO: 此处考虑是否还要抽象个对象存放信息
-        context.Result = new ApiResult(Conv.ToInt(remoteServiceErrorInfo.Code), remoteServiceErrorInfo.Message);
-
-        var logLevel = context.Exception.GetLogLevel();
+        remoteServiceErrorInfo = exceptionToErrorInfoConverter.Convert(context.Exception, options =>
+        {
+            options.SendExceptionDetailsToClients = exceptionHandlingOptions.SendExceptionDetailsToClients;
+            options.SendStackTraceToClients = exceptionHandlingOptions.SendStackTraceToClients;
+        });
 
         var remoteServiceErrorInfoBuilder = new StringBuilder();
         remoteServiceErrorInfoBuilder.AppendLine($"---------- {nameof(RemoteServiceErrorInfo)} ----------");
         remoteServiceErrorInfoBuilder.AppendLine(JsonHelper.ToJson(remoteServiceErrorInfo, indented: true));
 
         var logger = context.GetService<ILogger<BingExceptionFilter>>(NullLogger<BingExceptionFilter>.Instance);
-        logger.LogWithLevel(logLevel,remoteServiceErrorInfoBuilder.ToString());
-        logger.LogException(context.Exception,logLevel);
-
-        await context.GetRequiredService<IExceptionNotifier>().NotifyAsync(new ExceptionNotificationContext(context.Exception));
-        context.Exception = null;
+        var logLevel = context.Exception.GetLogLevel();
+        logger.LogWithLevel(logLevel, remoteServiceErrorInfoBuilder.ToString());
+        logger.LogException(context.Exception, logLevel);
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Bing.Data;
+﻿using Bing.Data;
 using Bing.Data.Queries;
 
 namespace Bing.Application.Services;

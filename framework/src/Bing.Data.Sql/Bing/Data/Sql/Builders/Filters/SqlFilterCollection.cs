@@ -13,7 +13,7 @@ public static class SqlFilterCollection
     /// <summary>
     /// 初始化一个<see cref="SqlFilterCollection"/>类型的静态实例
     /// </summary>
-    static SqlFilterCollection() => Filters = new List<ISqlFilter>() { new IsDeletedFilter() };
+    static SqlFilterCollection() => Filters = new List<ISqlFilter> { new IsDeletedFilter() };
 
     /// <summary>
     /// 添加Sql过滤器

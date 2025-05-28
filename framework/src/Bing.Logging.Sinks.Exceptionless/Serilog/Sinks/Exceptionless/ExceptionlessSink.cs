@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Bing.Logging.ExtraSupports;
+﻿using Bing.Logging.ExtraSupports;
 using Bing.Logging.Sinks.Exceptionless.Internals;
 using Bing.Text;
 using Exceptionless;
@@ -47,12 +44,14 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <param name="defaultTags">默认标签数组</param>
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
+    /// <param name="restrictedToMinimumLevel">将事件写入接收器所需的最低日志事件级别</param>
     public ExceptionlessSink(
         string apiKey, 
         string serverUrl = null, 
         string[] defaultTags = null, 
         Func<EventBuilder, EventBuilder> additionalOperation = null, 
-        bool includeProperties = true)
+        bool includeProperties = true,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
@@ -64,6 +63,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
                 config.ServerUrl = serverUrl;
             config.UseInMemoryStorage();
             config.UseLogger(new SelfLogLogger());
+            config.SetDefaultMinLogLevel(LogLevelSwitcher.Switch(restrictedToMinimumLevel));
         });
         _defaultTags = defaultTags;
         _additionalOperation = additionalOperation;
@@ -76,19 +76,24 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="client">Exceptionless客户端</param>
+    /// <param name="restrictedToMinimumLevel">将事件写入接收器所需的最低日志事件级别</param>
     public ExceptionlessSink(
         Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
-        ExceptionlessClient client = null)
+        ExceptionlessClient client = null,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
         _additionalOperation = additionalOperation;
         _includeProperties = includeProperties;
         _client = client ?? ExceptionlessClient.Default;
         if (_client.Configuration.Resolver.HasDefaultRegistration<IExceptionlessLog, NullExceptionlessLog>())
             _client.Configuration.UseLogger(new SelfLogLogger());
+        _client.Configuration.SetDefaultMinLogLevel(LogLevelSwitcher.Switch(restrictedToMinimumLevel));
     }
 
-    /// <summary>提交.</summary>
+    /// <summary>
+    /// 提交
+    /// </summary>
     /// <param name="logEvent">日志事件</param>
     public void Emit(LogEvent logEvent)
     {
@@ -102,7 +107,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
             .CreateFromLogEvent(logEvent)
             .AddTags(_defaultTags);
 
-        if (_includeProperties && logEvent.Properties != null)
+        if (_includeProperties)
         {
             foreach (var property in logEvent.Properties)
             {
@@ -131,21 +136,11 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
                         if (!string.IsNullOrWhiteSpace(emailAddress) || !string.IsNullOrWhiteSpace(description))
                             builder.SetUserDescription(emailAddress, description);
                         break;
-                    case "Tags" when  property.Value is SequenceValue tags:
-                        {
-                            var tagList = tags.FlattenProperties() as List<object>;
-                            if (tagList is null)
-                                continue;
-                            builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
-                        }
+                    case "Tags":
+                        builder.AddTags(property.Value.GetTags());
                         break;
-                    case ContextDataTypes.Tags when property.Value is SequenceValue tags:
-                        {
-                            var tagList = tags.FlattenProperties() as List<object>;
-                            if (tagList is null)
-                                continue;
-                            builder.AddTags(tagList.Select(x => x.ToString()).ToArray());
-                        }
+                    case ContextDataTypes.Tags:
+                        builder.AddTags(property.Value.GetTags());
                         break;
                     case ContextDataTypes.CallerInfo when property.Value is ScalarValue callerInfo:
                         {
@@ -177,5 +172,5 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <summary>
     /// 释放资源
     /// </summary>
-    public void Dispose() => _client?.ProcessQueue();
+    void IDisposable.Dispose() => _client?.ProcessQueueAsync().GetAwaiter().GetResult();
 }

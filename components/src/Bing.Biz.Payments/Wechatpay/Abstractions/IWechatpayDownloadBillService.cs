@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
+﻿using Bing.Biz.Payments.Wechatpay.Parameters.Requests;
 using Bing.Biz.Payments.Wechatpay.Results;
 
 namespace Bing.Biz.Payments.Wechatpay.Abstractions;

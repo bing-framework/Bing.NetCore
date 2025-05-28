@@ -1,4 +1,5 @@
-﻿using Bing.Helpers;
+﻿using System.Diagnostics;
+using Bing.Helpers;
 using Bing.Security.Claims;
 
 namespace Bing.Users;
@@ -21,7 +22,8 @@ public static class CurrentUserExtensions
     /// <typeparam name="T">类型</typeparam>
     /// <param name="currentUser">当前用户</param>
     /// <param name="claimType">声明类型</param>
-    public static T FindClaimValue<T>(this ICurrentUser currentUser, string claimType) where T : struct
+    public static T FindClaimValue<T>(this ICurrentUser currentUser, string claimType)
+        where T : struct
     {
         var value = currentUser.FindClaimValue(claimType);
         if (value == null)
@@ -90,6 +92,42 @@ public static class CurrentUserExtensions
         return result;
     }
 
+    /// <summary>
+    /// 获取会话标识。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 返回当前用户的 <c>SessionId</c>（会话 ID）。
+    /// </returns>
+    public static string GetSessionId(this ICurrentUser currentUser)
+    {
+        var sessionId = currentUser.FindSessionId();
+        Debug.Assert(sessionId != null, "session != null");
+        return sessionId!;
+    }
+
+    /// <summary>
+    /// 查找会话标识。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 返回当前用户的 <c>SessionId</c>（会话 ID）；
+    /// 如果当前用户没有会话 ID，则返回 <c>null</c>。
+    /// </returns>
+    /// <remarks>
+    /// 该方法从用户 Claims 中查找 <c>SessionId</c>，用于唯一标识用户会话。
+    /// SessionId 可能由身份认证系统（如 JWT、OAuth2）生成，并存储在 Claims 中。<br />
+    ///
+    /// 典型应用场景：<br />
+    /// - **获取当前会话 ID** 以便跟踪用户请求。<br />
+    /// - **用于 API 鉴权**，确保每个请求都包含有效的会话标识符。<br />
+    /// - **日志分析和审计**，用于标识不同用户的请求行为。
+    /// </remarks>
+    public static string FindSessionId(this ICurrentUser currentUser)
+    {
+        return currentUser.FindClaimValue(BingClaimTypes.SessionId);
+    }
+
     #region Application(应用程序)
 
     /// <summary>
@@ -145,6 +183,95 @@ public static class CurrentUserExtensions
     /// </summary>
     /// <param name="currentUser">当前用户</param>
     public static string GetTenantName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantName)?.Value;
+
+    #endregion
+
+    #region Impersonator(模拟租户用户)
+
+    /// <summary>
+    /// 查找模拟租户标识。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 如果当前用户正在被模拟，则返回模拟租户的 <see cref="Guid"/> ID；
+    /// 如果当前用户未被模拟或未找到对应的 Claim，则返回 <c>null</c>。
+    /// </returns>
+    /// <remarks>
+    /// 在多租户系统中，超级管理员可以模拟租户管理员或其他用户的身份，
+    /// 此方法用于检查当前用户是否处于模拟模式，并获取发起模拟的租户 ID。
+    /// <br />
+    /// 该方法通常用于：<br />
+    /// - **日志记录**：记录模拟信息，防止越权行为。<br />
+    /// - **UI 显示**：在前端标识 "您当前正在模拟租户 X"。<br />
+    /// - **权限管理**：在某些 API 端点，阻止模拟用户执行某些敏感操作。
+    /// </remarks>
+    public static Guid? FindImpersonatorTenantId(this ICurrentUser currentUser)
+    {
+        var impersonatorTenantId = currentUser.FindClaimValue(BingClaimTypes.ImpersonatorTenantId);
+        if (string.IsNullOrWhiteSpace(impersonatorTenantId))
+            return null;
+        if (Guid.TryParse(impersonatorTenantId, out var guid))
+            return guid;
+        return null;
+    }
+
+    /// <summary>
+    /// 查找模拟用户标识。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 如果当前用户正在被模拟，则返回模拟用户的 <see cref="Guid"/> ID；
+    /// 如果当前用户未被模拟或未找到对应的 Claim，则返回 <c>null</c>。
+    /// </returns>
+    /// <remarks>
+    /// 身份模拟（Impersonation）允许某个用户模拟其他用户的身份并进行操作，
+    /// 此方法用于检查当前用户是否被模拟，并返回模拟的用户 ID。
+    /// </remarks>
+    public static Guid? FindImpersonatorUserId(this ICurrentUser currentUser)
+    {
+        var impersonatorUserId = currentUser.FindClaimValue(BingClaimTypes.ImpersonatorUserId);
+        if (string.IsNullOrWhiteSpace(impersonatorUserId))
+            return null;
+        if (Guid.TryParse(impersonatorUserId, out var guid))
+            return guid;
+        return null;
+    }
+
+    /// <summary>
+    /// 查找模拟租户编码。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 返回模拟租户的代码。如果没有模拟租户，则返回 <c>null</c>。
+    /// </returns>
+    /// <remarks>
+    /// 获取当前用户的模拟租户代码，通常用于标识用户当前操作的租户的代码。
+    /// </remarks>
+    public static string FindImpersonatorTenantCode(this ICurrentUser currentUser) => currentUser.FindClaimValue(BingClaimTypes.ImpersonatorTenantCode);
+
+    /// <summary>
+    /// 查找模拟租户名称。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 返回模拟租户的名称。如果没有模拟租户，则返回 <c>null</c>。
+    /// </returns>
+    /// <remarks>
+    /// 获取当前用户的模拟租户名称，通常用于显示当前正在模拟的租户信息。
+    /// </remarks>
+    public static string FindImpersonatorTenantName(this ICurrentUser currentUser) => currentUser.FindClaimValue(BingClaimTypes.ImpersonatorTenantName);
+
+    /// <summary>
+    /// 查找模拟用户名称。
+    /// </summary>
+    /// <param name="currentUser">当前用户</param>
+    /// <returns>
+    /// 返回模拟用户的用户名。如果没有模拟用户，则返回 <c>null</c>。
+    /// </returns>
+    /// <remarks>
+    /// 获取当前用户的模拟用户名，通常用于标识当前正在模拟的用户的名称。
+    /// </remarks>
+    public static string FindImpersonatorUserName(this ICurrentUser currentUser) => currentUser.FindClaimValue(BingClaimTypes.ImpersonatorUserName);
 
     #endregion
 

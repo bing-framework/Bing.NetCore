@@ -14,7 +14,8 @@ using Bing.Events.Messages;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Permissions.Identity.JwtBearer;
+using Bing.Identity.JwtBearer;
+using Bing.Identity.JwtBearer.Abstractions;
 using Bing.Permissions.Identity.Results;
 using Bing.Security.Claims;
 
@@ -91,13 +92,14 @@ namespace Bing.Admin.Service.Implements
             if (user == null)
                 return new SignInWithTokenResult {Message = "用户名不存在", State = SignInState.Failed};
             await AddClaimsToUserAsync(user, ApplicationCode.Admin);
+            var ip = Ip.GetIp();
             var result = await SignInManager.SignInAsync(user, request.Password);
-            user.AddLoginLog(Web.IP,Web.Browser);
+            user.AddLoginLog(ip, Web.Browser);
             await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
             {
                 UserId = user.Id,
                 Name = user.Nickname,
-                Ip = Web.IP,
+                Ip = ip,
                 UserAgent = Web.Browser
             },false));
             await UnitOfWork.CommitAsync();

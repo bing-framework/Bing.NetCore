@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using AspectCore.DynamicProxy;
+﻿using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects;
 

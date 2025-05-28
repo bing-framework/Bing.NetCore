@@ -2,6 +2,7 @@
 using Bing.DependencyInjection;
 using Bing.Logging;
 using Bing.Tracing;
+using Bing.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,16 +26,24 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
     protected IWebClientInfoProvider WebClientInfoProvider { get; }
 
     /// <summary>
+    /// 当前用户
+    /// </summary>
+    protected ICurrentUser CurrentUser { get; }
+
+    /// <summary>
     /// 初始化一个<see cref="AspNetCoreLogContextAccessor"/>类型的实例
     /// </summary>
     /// <param name="webClientInfoProvider">Web客户端信息提供程序</param>
     /// <param name="httpContextAccessor">Http上下文访问器</param>
+    /// <param name="currentUser">当前用户</param>
     public AspNetCoreLogContextAccessor(
         IHttpContextAccessor httpContextAccessor,
-        IWebClientInfoProvider webClientInfoProvider)
+        IWebClientInfoProvider webClientInfoProvider,
+        ICurrentUser currentUser)
     {
         HttpContextAccessor = httpContextAccessor;
         WebClientInfoProvider = webClientInfoProvider;
+        CurrentUser = currentUser;
     }
 
     /// <summary>
@@ -47,6 +56,13 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
         context.Browser = WebClientInfoProvider.ClientIpAddress;
         context.Url = HttpContextAccessor.HttpContext?.Request?.GetDisplayUrl();
         context.IsWebEnv = HttpContextAccessor.HttpContext?.Request != null;
+        context.UserId = CurrentUser.UserId;
+        context.TenantId = CurrentUser.TenantId;
+        context.Application = CurrentUser.GetApplicationName();
+        context.Data["UserName"] = CurrentUser.GetUserName();
+        context.Data["FullName"] = CurrentUser.GetFullName();
+        context.Data["TenantCode"] = CurrentUser.GetTenantCode();
+        context.Data["TenantName"] = CurrentUser.GetTenantName();
         if (!context.IsWebEnv)
             context.TraceId = base.GetTraceId();
         return context;

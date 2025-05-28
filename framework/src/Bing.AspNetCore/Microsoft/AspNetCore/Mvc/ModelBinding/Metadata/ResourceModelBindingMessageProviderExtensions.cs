@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+﻿namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
 /// <summary>
 /// 模型绑定消息提供程序(<see cref="ModelBindingMessageProvider"/>)扩展

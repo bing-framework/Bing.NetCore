@@ -10,5 +10,5 @@ public class NullTenantResolveResultAccessor : ITenantResolveResultAccessor, ISi
     /// <summary>
     /// 租户解析结果
     /// </summary>
-    public TenantResolveResult Result { get => null; set { } }
+    public TenantResolveResult? Result { get => null; set { } }
 }

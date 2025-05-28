@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Bing.AspNetCore.Mvc.Filters;
+﻿namespace Bing.AspNetCore.Mvc.Filters;
 
 /// <summary>
 /// 忽略响应结果处理
