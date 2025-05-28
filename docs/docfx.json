@@ -14,7 +14,8 @@
             "**/samples/**",
             "**/tests/**",
             "**/modules/**",
-            "**/templates/**"
+            "**/templates/**",
+            "framework/tests/**"
           ]
         }
       ],
