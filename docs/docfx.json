@@ -10,7 +10,11 @@
           ],
           "exclude": [
             "**/obj/**",
-            "**/bin/**"
+            "**/bin/**",
+            "**/samples/**",
+            "**/tests/**",
+            "**/modules/**",
+            "**/templates/**"
           ]
         }
       ],
