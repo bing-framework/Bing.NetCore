@@ -15,7 +15,15 @@
             "**/tests/**",
             "**/modules/**",
             "**/templates/**",
-            "framework/tests/**"
+            "framework/tests/**",
+            "**/Bing.Caching.csproj",
+            "**/Bing.EventBus.csproj",
+            "**/Bing.EventBus.Abstractions.csproj",
+            "**/Bing.Logs.csproj",
+            "**/Bing.Logs.Exceptionless.csproj",
+            "**/Bing.Logs.Log4Net.csproj",
+            "**/Bing.Logs.NLog.csproj",
+            "**/Bing.Logs.Serilog.csproj"
           ]
         }
       ],
