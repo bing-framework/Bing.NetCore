@@ -26,20 +26,13 @@ dotnet pack src/Bing.Validation -c Release -o nuget_pub
 ::Security
 dotnet pack src/Bing.Security -c Release -o nuget_pub
 
-::Logs
-dotnet pack src/Bing.Logs -c Release -o nuget_pub
-dotnet pack src/Bing.Logs.Exceptionless -c Release -o nuget_pub
-dotnet pack src/Bing.Logs.Log4Net -c Release -o nuget_pub
-dotnet pack src/Bing.Logs.NLog -c Release -o nuget_pub
-dotnet pack src/Bing.Logs.Serilog -c Release -o nuget_pub
-
 ::Logging
 dotnet pack src/Bing.Logging -c Release -o nuget_pub
 dotnet pack src/Bing.Logging.Serilog -c Release -o nuget_pub
 dotnet pack src/Bing.Logging.Sinks.Exceptionless -c Release -o nuget_pub
 
 ::Localization
-dotnet pack src/Bing.Localization.Abstractions-c Release -o nuget_pub
+dotnet pack src/Bing.Localization.Abstractions -c Release -o nuget_pub
 dotnet pack src/Bing.Localization -c Release -o nuget_pub
 
 ::Data

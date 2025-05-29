@@ -8,8 +8,4 @@
     <ProjectReference Include="..\..\src\Bing.Logging\Bing.Logging.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Moq" Version="4.16.1" />
-  </ItemGroup>
-
 </Project>

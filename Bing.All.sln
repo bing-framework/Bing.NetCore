@@ -372,6 +372,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Logging", "02-Logging", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Logging.Serilog.Tests.Integration", "framework\tests\Bing.Logging.Serilog.Tests.Integration\Bing.Logging.Serilog.Tests.Integration.csproj", "{8A06784C-1C60-C922-5B03-6A47057B5308}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bing.Caching.CSRedis.Tests.Integration", "framework\tests\Bing.Caching.CSRedis.Tests.Integration\Bing.Caching.CSRedis.Tests.Integration.csproj", "{67B838C5-A130-4384-A97C-A858A2A007F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -834,6 +836,10 @@ Global
 		{8A06784C-1C60-C922-5B03-6A47057B5308}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A06784C-1C60-C922-5B03-6A47057B5308}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A06784C-1C60-C922-5B03-6A47057B5308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67B838C5-A130-4384-A97C-A858A2A007F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67B838C5-A130-4384-A97C-A858A2A007F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67B838C5-A130-4384-A97C-A858A2A007F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67B838C5-A130-4384-A97C-A858A2A007F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1003,6 +1009,7 @@ Global
 		{F339B49B-E2F8-44CA-AD66-5E6CAA1B6E0F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{59928279-A0DE-4DCB-9032-1BADE8A1E00B} = {5C7976B4-C243-41B9-8303-8E8FAE099D31}
 		{8A06784C-1C60-C922-5B03-6A47057B5308} = {59928279-A0DE-4DCB-9032-1BADE8A1E00B}
+		{67B838C5-A130-4384-A97C-A858A2A007F2} = {52F64CF7-927F-4D55-A908-9E2239B4E5AB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1202A0F-83CC-4602-BCE5-20CB640BCAD4}

@@ -1,43 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Bing.Utils.Reflection" Version="1.5.0-preview-20240229-1" />
+    <PackageReference Include="Bing.Utils.Reflection" Version="1.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
-    <ProjectReference Include="..\..\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />
     <ProjectReference Include="..\..\src\Bing.Emailing\Bing.Emailing.csproj" />
     <!--<ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />-->
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
-    <PackageReference Include="EasyCaching.InMemory" Version="0.6.1" />
-    <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Net.Compilers" Version="3.3.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
   </ItemGroup>
 
 </Project>

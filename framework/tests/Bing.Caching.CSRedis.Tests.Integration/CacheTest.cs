@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Bing.Caching.FreeRedis.Tests;
+namespace Bing.Caching.CSRedis.Tests;
 
 /// <summary>
-/// FreeRedis 缓存测试
+/// CSRedis 缓存测试
 /// </summary>
 public class CacheTest
 {
@@ -101,7 +101,7 @@ public class CacheTest
     public void Test_TryAdd()
     {
         Assert.False(_cache.Exists("b"));
-        _cache.TrySetAsync("b", 1);
+        _cache.TrySet("b", 1);
         Assert.True(_cache.Exists("b"));
     }
 
@@ -135,8 +135,8 @@ public class CacheTest
         for (var i = 0; i < 100; i++)
         {
             data++;
-            var result = _cache.TrySetAsync($"test-prefix:{data}", data);
-            _logger.LogInformation($"TryAdd: {result}");
+            var result = _cache.TrySet($"test-prefix:{data}", data);
+            _logger.LogInformation($"TrySet: {result}");
         }
 
         _cache.RemoveByPrefix("test-prefix:");

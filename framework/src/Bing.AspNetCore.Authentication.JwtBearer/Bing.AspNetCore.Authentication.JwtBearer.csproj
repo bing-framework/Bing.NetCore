@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.AspNetCore.Abstractions\Bing.AspNetCore.Abstractions.csproj" />
+    <ProjectReference Include="..\Bing.Caching\Bing.Caching.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\..\common.props" />

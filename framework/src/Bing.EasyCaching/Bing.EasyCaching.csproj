@@ -7,12 +7,21 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <PropertyGroup>
+    <EasyCaching-RefVersion>1.9.2</EasyCaching-RefVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="EasyCaching.Core" Version="1.9.0" />
+    <PackageReference Include="EasyCaching.Core" Version="$(EasyCaching-RefVersion)" />
+    <PackageReference Include="EasyCaching.Bus.Redis" Version="$(EasyCaching-RefVersion)" />
+    <PackageReference Include="EasyCaching.HybridCache" Version="$(EasyCaching-RefVersion)" />
+    <PackageReference Include="EasyCaching.InMemory" Version="$(EasyCaching-RefVersion)" />
+    <PackageReference Include="EasyCaching.Redis" Version="$(EasyCaching-RefVersion)" />
+    <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="$(EasyCaching-RefVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+    <ProjectReference Include="..\Bing.Caching\Bing.Caching.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
     <TargetFrameworks>net6.0;</TargetFrameworks>
-    <RootNamespace>Bing.Caching.FreeRedis.Tests</RootNamespace>
-    <XunitStartupFullName>Bing.Caching.FreeRedis.Tests.Startup</XunitStartupFullName>
+    <RootNamespace>Bing.Caching.CSRedis.Tests</RootNamespace>
+    <XunitStartupFullName>Bing.Caching.CSRedis.Tests.Startup</XunitStartupFullName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
   </ItemGroup>
+
 </Project>
