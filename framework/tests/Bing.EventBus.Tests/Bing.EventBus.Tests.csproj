@@ -1,13 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\common.tests.props" />
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
-  </PropertyGroup>
+  <Import Project="..\..\..\framework.tests.props" />
 
-  <ItemGroup>
-    <PackageReference Include="Xunit.DependencyInjection" Version="8.3.0" />
-    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.0" />
-  </ItemGroup>
+  <PropertyGroup>
+    <XunitStartupFullName>Bing.EventBus.Tests.Startup</XunitStartupFullName>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.EventBus\Bing.EventBus.csproj" />

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AspectCore.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection;
@@ -16,6 +17,8 @@ public class Startup
     /// </summary>
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
+        hostBuilder.ConfigureDefaults(null)
+            .UseServiceContext();
     }
 
     /// <summary>

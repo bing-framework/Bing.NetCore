@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\common.tests.props" />
+  <Import Project="..\..\..\framework.tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>net6.0;</TargetFrameworks>
     <RootNamespace>Bing.MultiTenancy</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
   </PropertyGroup>
 
   <ItemGroup>

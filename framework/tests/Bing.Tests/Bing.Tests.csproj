@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\common.tests.props" />
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;</TargetFrameworks>
-  </PropertyGroup>
+  <Import Project="..\..\..\framework.tests.props" />
+
   <ItemGroup>
     <PackageReference Include="Bing.Utils.Reflection" Version="1.5.0" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
@@ -15,8 +17,16 @@
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+  </ItemGroup>-->
 
 </Project>

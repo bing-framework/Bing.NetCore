@@ -4,6 +4,10 @@
   <PropertyGroup>
     <RootNamespace />
   </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
