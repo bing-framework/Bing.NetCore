@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Bing.Extensions;
 using Bing.Helpers;
-using Bing.Logs;
 using Bing.Utils.Parameters.Parsers;
 
 namespace Bing.Biz.OAuthLogin.Core
@@ -324,21 +323,6 @@ namespace Bing.Biz.OAuthLogin.Core
         protected void WriteLog(TAuthorizationConfig config, AuthorizationParameterBuilder builder,
             AuthorizationResult result)
         {
-            var log = Log.GetLog(GetTraceLogName());
-            if (log.IsTraceEnabled == false)
-                return;
-
-            log.Class(GetType().FullName)
-                .Caption("OAuth授权登录")
-                .Content($"授权渠道 : {GetOAuthWay().Description()}")
-                .Content("请求参数")
-                .Content(builder.ToString())
-                .Content()
-                .Content("返回结果:")
-                .Content(result.GetDictionary())
-                .Content("原始响应：")
-                .Content(result.Raw)
-                .Trace();
         }
 
         #endregion

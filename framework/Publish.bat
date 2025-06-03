@@ -68,6 +68,7 @@ dotnet pack src/Bing.EntityFrameworkCore.MySql -c Release -o nuget_pub
 dotnet pack src/Bing.EntityFrameworkCore.PostgreSql -c Release -o nuget_pub
 dotnet pack src/Bing.EntityFrameworkCore.SqlServer -c Release -o nuget_pub
 dotnet pack src/Bing.EntityFrameworkCore.Oracle -c Release -o nuget_pub
+dotnet pack src/Bing.EntityFrameworkCore.Sqlite -c Release -o nuget_pub
 dotnet pack src/Bing.FreeSQL -c Release -o nuget_pub
 dotnet pack src/Bing.FreeSQL.MySql -c Release -o nuget_pub
 dotnet pack src/Bing.Dapper.Core -c Release -o nuget_pub
