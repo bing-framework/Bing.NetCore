@@ -28,6 +28,8 @@ public class Startup
     {
         services.AddBing()
             .AddModule<EventBusModule>();
+        // 日志
+        services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
     }
 
     /// <summary>
@@ -35,6 +37,5 @@ public class Startup
     /// </summary>
     public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor)
     {
-        loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(accessor, (s, logLevel) => logLevel >= LogLevel.Trace));
     }
 }

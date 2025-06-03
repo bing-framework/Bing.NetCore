@@ -39,6 +39,8 @@ public class Startup
             return redisClient;
         });
         services.AddScoped<ICache, FreeRedisCacheManager>();
+        // 日志
+        services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
     }
 
     /// <summary>
@@ -46,9 +48,6 @@ public class Startup
     /// </summary>
     public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor)
     {
-        // 添加单元测试日志提供程序，并配置日志过滤
-        loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(accessor, (s, logLevel) => logLevel >= LogLevel.Trace));
-
         var listener = new ActivityListener();
         listener.ShouldListenTo += _ => true;
         listener.Sample += delegate { return ActivitySamplingResult.AllDataAndRecorded; };

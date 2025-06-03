@@ -56,6 +56,7 @@ public class Startup
                 .ConfigLogLevel(configuration)
                 .CreateLogger();
             loggingBuilder.AddSerilog();
+            loggingBuilder.AddXunitOutput();
         });
         services.AddBing();
     }
@@ -65,6 +66,5 @@ public class Startup
     /// </summary>
     public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor)
     {
-        loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(accessor, (s, logLevel) => logLevel >= LogLevel.Trace));
     }
 }
