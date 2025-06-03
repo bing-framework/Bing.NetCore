@@ -11,7 +11,7 @@ for /R "nuget_pub" %%s in (*) do (
 )
 
 ::Core
-dotnet pack src/Bing.Core -c Release -o nuget_pub
+dotnet pack src/Bing.Core -c Release -o nuget_pub 
 dotnet pack src/Bing.AspNetCore.Abstractions -c Release -o nuget_pub
 dotnet pack src/Bing.AspNetCore -c Release -o nuget_pub
 dotnet pack src/Bing.ExceptionHandling -c Release -o nuget_pub
@@ -91,8 +91,6 @@ dotnet pack src/Bing.AutoMapper -c Release -o nuget_pub
 dotnet pack src/Bing.MiniProfiler -c Release -o nuget_pub
 dotnet pack src/Bing.Locks.CSRedis -c Release -o nuget_pub
 dotnet pack src/Bing.Extensions.SkyApm.Diagnostics.Sql -c Release -o nuget_pub
-
-dotnet pack src/Bing.Events.Cap.MySql -c Release -o nuget_pub
 
 for /R "nuget_pub" %%s in (*symbols.nupkg) do (
     del %%s
