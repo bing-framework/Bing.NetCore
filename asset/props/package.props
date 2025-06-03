@@ -11,4 +11,10 @@
     <PackageTags>bing;applicationframework;dotnetcore;aspnetcore;</PackageTags>
     <PackageReleaseNotes>Bing应用框架以MIT开源发布，可随意使用</PackageReleaseNotes>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <!--创建符号包-->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
 </Project>

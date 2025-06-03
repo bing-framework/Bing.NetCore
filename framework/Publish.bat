@@ -79,9 +79,10 @@ dotnet pack src/Bing.Dapper.Sqlite -c Release -o nuget_pub
 dotnet pack src/Bing.Dapper.SqlServer -c Release -o nuget_pub
 
 ::Caching
-dotnet pack src/Bing.EasyCaching -c Release -o nuget_pub
+dotnet pack src/Bing.Caching -c Release -o nuget_pub
 dotnet pack src/Bing.Caching.CSRedis -c Release -o nuget_pub
 dotnet pack src/Bing.Caching.FreeRedis -c Release -o nuget_pub
+dotnet pack src/Bing.EasyCaching -c Release -o nuget_pub
 
 ::Tools
 dotnet pack src/Bing.Emailing -c Release -o nuget_pub
