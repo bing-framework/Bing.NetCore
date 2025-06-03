@@ -91,6 +91,7 @@ dotnet pack src/Bing.AutoMapper -c Release -o nuget_pub
 dotnet pack src/Bing.MiniProfiler -c Release -o nuget_pub
 dotnet pack src/Bing.Locks.CSRedis -c Release -o nuget_pub
 dotnet pack src/Bing.Extensions.SkyApm.Diagnostics.Sql -c Release -o nuget_pub
+dotnet pack src/Bing.Ddd.Domain.Extensions.Analyzers -c Release -o nuget_pub
 
 for /R "nuget_pub" %%s in (*symbols.nupkg) do (
     del %%s
