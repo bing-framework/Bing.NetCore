@@ -7,7 +7,11 @@
 
   <Import Project="..\..\..\framework.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
+  </ItemGroup>
 </Project>

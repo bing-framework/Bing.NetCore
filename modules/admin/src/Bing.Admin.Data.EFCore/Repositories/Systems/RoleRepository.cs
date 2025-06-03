@@ -67,7 +67,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// </summary>
         /// <param name="role">角色</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public async Task<IdentityResult> UpdateAsync(Role role, CancellationToken cancellationToken)
+        public override async Task<IdentityResult> UpdateAsync(Role role, CancellationToken cancellationToken)
         {
             ValidateRole(role, cancellationToken);
             await base.UpdateAsync(role, cancellationToken);

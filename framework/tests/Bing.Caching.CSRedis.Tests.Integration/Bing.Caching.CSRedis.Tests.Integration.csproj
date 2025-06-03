@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+  <PropertyGroup>
+    <RootNamespace>Bing.Caching.CSRedis.Tests</RootNamespace>
+    <XunitStartupFullName>Bing.Caching.CSRedis.Tests.Startup</XunitStartupFullName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+  </ItemGroup>
+
+</Project>

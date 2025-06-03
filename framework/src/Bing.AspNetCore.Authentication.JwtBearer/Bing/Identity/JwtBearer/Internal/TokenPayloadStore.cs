@@ -26,7 +26,7 @@ internal sealed class TokenPayloadStore : ITokenPayloadStore
     /// <param name="payload">负载字典</param>
     /// <param name="expires">过期时间</param>
     public async Task SaveAsync(string token, IDictionary<string, string> payload, DateTime expires) =>
-        await _cache.AddAsync(GetPayloadKey(token), payload, expires.Subtract(DateTime.UtcNow));
+        await _cache.SetAsync(GetPayloadKey(token), payload, new CacheOptions() { Expiration = expires.Subtract(DateTime.UtcNow) });
 
     /// <summary>
     /// 移除

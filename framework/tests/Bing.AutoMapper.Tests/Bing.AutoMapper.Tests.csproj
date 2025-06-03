@@ -2,16 +2,16 @@
   <Import Project="..\..\..\framework.tests.props" />
   <PropertyGroup>
     <RootNamespace />
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">

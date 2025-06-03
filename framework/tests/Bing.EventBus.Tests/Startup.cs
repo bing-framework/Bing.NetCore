@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AspectCore.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection;
@@ -16,6 +17,8 @@ public class Startup
     /// </summary>
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
+        hostBuilder.ConfigureDefaults(null)
+            .UseServiceContext();
     }
 
     /// <summary>
@@ -25,6 +28,8 @@ public class Startup
     {
         services.AddBing()
             .AddModule<EventBusModule>();
+        // 日志
+        services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
     }
 
     /// <summary>
@@ -32,6 +37,5 @@ public class Startup
     /// </summary>
     public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor)
     {
-        loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(accessor, (s, logLevel) => logLevel >= LogLevel.Trace));
     }
 }

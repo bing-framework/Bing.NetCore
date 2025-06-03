@@ -1,13 +1,12 @@
-﻿using FreeRedis;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Xunit.DependencyInjection.Logging;
 using Xunit.DependencyInjection;
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
+using CSRedis;
 
-namespace Bing.Caching.FreeRedis.Tests;
+namespace Bing.Caching.CSRedis.Tests;
 
 /// <summary>
 /// 启动配置
@@ -29,16 +28,8 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        // 注入到IServiceCollection中
-        services.AddSingleton(x =>
-        {
-            var redisClient = new RedisClient("127.0.0.1:6379,database=0,idleTimeout=10000");
-            // 配置默认使用Newtonsoft.Json作为序列化工具
-            redisClient.Serialize = JsonConvert.SerializeObject;
-            redisClient.Deserialize = JsonConvert.DeserializeObject;
-            return redisClient;
-        });
-        services.AddScoped<ICache, FreeRedisCacheManager>();
+        RedisHelper.Initialization(new CSRedisClient("127.0.0.1:6379,database=0,idleTimeout=10000"));
+        services.AddScoped<ICache, CSRedisCacheManager>();
         // 日志
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
     }

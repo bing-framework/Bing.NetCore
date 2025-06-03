@@ -20,7 +20,7 @@ internal sealed class JsonWebTokenStore : JsonWebTokenStoreBase, IJsonWebTokenSt
     public JsonWebTokenStore(ICache cache) => _cache = cache;
 
     /// <inheritdoc />
-    protected override async Task AddAsync<T>(string key, T value, TimeSpan? expiration = null) => await _cache.AddAsync(key, value, expiration);
+    protected override async Task AddAsync<T>(string key, T value, TimeSpan? expiration = null) => await _cache.SetAsync(key, value, new CacheOptions { Expiration = expiration });
 
     /// <inheritdoc />
     protected override async Task RemoveAsync(string key) => await _cache.RemoveAsync(key);

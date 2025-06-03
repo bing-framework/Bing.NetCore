@@ -188,7 +188,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// </summary>
         /// <param name="normalizedUserName">标准化用户名</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return SingleAsync(t => t.NormalizedUserName == normalizedUserName, cancellationToken);
@@ -459,7 +459,7 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// </summary>
         /// <param name="normalizedEmail">标准化电子邮件</param>
         /// <param name="cancellationToken">取消令牌</param>
-        public async Task<User> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<User> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return await SingleAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
@@ -602,6 +602,6 @@ namespace Bing.Admin.Data.Repositories.Systems
         /// <summary>
         /// 用户
         /// </summary>
-        public IQueryable<User> Users => this.FindAsNoTracking();
+        public IQueryable<User> Users => FindAsNoTracking();
     }
 }

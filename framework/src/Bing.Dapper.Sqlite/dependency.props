@@ -1,5 +1,0 @@
-﻿<Project>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
-  </ItemGroup>
-</Project>

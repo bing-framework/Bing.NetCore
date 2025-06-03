@@ -97,7 +97,7 @@ namespace Bing.Admin.Service.Implements.Systems
                 .From<User>("a")
                 .Join<UserInfo>("b").On<User, UserInfo>((l, r) => l.Id == r.Id)
                 .Join<Administrator>("c").On<User, Administrator>((l, r) => l.Id == r.Id)
-                .ToAsync<AdministratorResponse>();
+                .ToEntityAsync<AdministratorResponse>();
             result.Roles = await GetUserRolesAsync(new List<Guid>() { id });
             return result;
         }

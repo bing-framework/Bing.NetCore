@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\common.tests.props" />
+  <Import Project="..\..\..\framework.tests.props" />
+
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
+    <EnableDITestPackages>false</EnableDITestPackages>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
   </ItemGroup>

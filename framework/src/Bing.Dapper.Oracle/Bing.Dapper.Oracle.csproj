@@ -16,8 +16,11 @@
 
   <Import Project="..\..\..\common.props" />
 
-  <Import Project="dependency.props" />
+  <ItemGroup>
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.90" />
+  </ItemGroup>
 
-  <Import Project="references.props" />
-  
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
+  </ItemGroup>
 </Project>

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bing.Core.Modularity;
 using Bing.EventBus.Local;
+using Bing.EventBus.Tests.Samples;
 using Bing.Extensions;
 using Bing.Finders;
 using Bing.Reflection;
@@ -23,14 +25,22 @@ public class EventBusModule : BingModule
         var finder = services.GetOrAddTypeFinder(assemblyFinder => new LocalEventHandlerTypeFinder(assemblyFinder));
         foreach (var handlerType in finder.FindAll())
         {
-            var serviceTypes =
-                handlerType.FindInterfaces(
-                    (filter, criteria) =>
-                        criteria != null &&
-                        filter.IsGenericType,
-                    handlerType);
-            serviceTypes.ToList().ForEach(serviceType => services.AddScoped(serviceType, handlerType));
+            //var serviceTypes =
+            //    handlerType.FindInterfaces(
+            //        (filter, criteria) =>
+            //            criteria != null &&
+            //            filter.IsGenericType,
+            //        handlerType);
+            //serviceTypes.ToList().ForEach(serviceType => services.AddScoped(serviceType, handlerType));
+            services.AddScoped(handlerType);
         }
+
+        //services.AddScoped<LocalEventHandlerSample>();
+        services.Configure<LocalEventBusOptions>(options =>
+        {
+            options.Handlers.AddIfNotContains(finder.FindAll());
+
+        });
         return services;
     }
 }

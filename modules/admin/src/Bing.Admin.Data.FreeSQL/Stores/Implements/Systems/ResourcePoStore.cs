@@ -122,6 +122,6 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 .From<ResourcePo>("a")
                 .Where<ResourcePo>(x => x.ApplicationId == applicationId)
                 .Where<ResourcePo>(x => x.ParentId == moduleId)
-                .ToAsync<int?>();
+                .ToEntityAsync<int?>();
     }
 }

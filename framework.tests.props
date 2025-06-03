@@ -1,8 +1,36 @@
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;net6.0;</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="./common.tests.props"/>
+
+  <PropertyGroup>
+    <!-- 如果没有DI的需求，则将EnableDITestPackages设置为false -->
+    <EnableDITestPackages>true</EnableDITestPackages>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(EnableDITestPackages)' == 'true' ">
+    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableDITestPackages)' == 'true' and '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.36" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(EnableDITestPackages)' == 'true' and '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.16" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="9.9.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(EnableDITestPackages)' == 'true' and '$(TargetFramework)' == 'net9.0' ">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
+    <PackageReference Include="Xunit.DependencyInjection" Version="9.9.0" />
+  </ItemGroup>
 
 </Project>
