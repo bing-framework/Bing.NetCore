@@ -18,6 +18,9 @@
     <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
     <ProjectReference Include="..\Bing.ExceptionHandling\Bing.ExceptionHandling.csproj" />
     <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
+    <!-- 架构债务（P1-1）：BingControllerBase 使用 [Autowired] 特性，仍需此引用。
+         TODO: 将 [Autowired] 替换为构造函数注入或 ILazyServiceProvider 直接解析，
+               移除此直接依赖，使 AspNetCore 层对 AOP 框架可替换。-->
     <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,8 @@
 ﻿<Project>
   <ItemGroup>
+    <!-- ValidAttribute 已迁移至 Bing.Aop.AspectCore，此处移除对 AOP 框架的直接依赖 -->
+    <!-- 直接引用 Bing.Core（之前由 Bing.Aop.AspectCore 传递），用于 BingException 等基础类型 -->
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
     <ProjectReference Include="..\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj" />
-    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
   </ItemGroup>
 </Project>

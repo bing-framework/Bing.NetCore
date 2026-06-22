@@ -1,6 +1,6 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net6.0;</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="./common.tests.props"/>

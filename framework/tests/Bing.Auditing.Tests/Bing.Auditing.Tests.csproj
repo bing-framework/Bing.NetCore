@@ -7,5 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Auditing\Bing.Auditing.csproj" />
+    <!-- FakeClock / FakeCurrentUser -->
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
   </ItemGroup>
 </Project>
