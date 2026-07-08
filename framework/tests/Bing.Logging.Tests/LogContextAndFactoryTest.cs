@@ -253,7 +253,7 @@ public class LogContextAndFactoryTest
         var mockLoggerFactory = new Mock<ILoggerFactory>();
         var mockLogger = new Mock<ILogger>();
         mockLoggerFactory
-            .Setup(f => f.CreateLogger(It.IsAny<Type>()))
+            .Setup(f => f.CreateLogger(It.IsAny<string>()))
             .Returns(mockLogger.Object);
         var mockAccessor = new Mock<ILogContextAccessor>();
         var factory = new LogFactory(mockLoggerFactory.Object, mockAccessor.Object);
@@ -321,7 +321,7 @@ public class LogContextAndFactoryTest
         info.MemberName.ShouldBeNull();
         info.FilePath.ShouldBeNull();
         info.LineNumber.ShouldBe(0);
-        info.ToParams().ShouldBeNull();
+        ((object)info.ToParams()).ShouldBeNull();
     }
 
     /// <summary>

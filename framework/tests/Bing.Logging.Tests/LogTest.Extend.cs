@@ -176,7 +176,7 @@ public partial class LogTest
         _log.Property("Key", "Value").LogError();
 
         // Assert - 两次均调用了底层 Logger
-        callCount.ShouldBe(0); // Property-only 走 state 路径，调用第一个重载
+        callCount.ShouldBe(1); // 仅第一条带 Message 的日志会走该重载
         _mockLogger.Verify(t => t.Log(
             LogLevel.Error, 0, It.IsAny<Exception>(), "第一条消息",
             It.IsAny<object[]>()), Times.Once);

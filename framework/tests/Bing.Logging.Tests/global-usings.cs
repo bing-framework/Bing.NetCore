@@ -1,5 +1,6 @@
 global using System;
 global using System.Collections.Generic;
-global using Bing.Logging.Serilog;
-global using Xunit;
+global using System.Threading.Tasks;
+global using Bing.Logging;
 global using Shouldly;
+global using Xunit;

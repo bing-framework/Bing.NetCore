@@ -53,12 +53,13 @@ public class LogCallerInfoTest
         var info = new LogCallerInfo("Execute", "/app/Service.cs", 99);
 
         // Act
-        dynamic p = info.ToParams();
+        object p = info.ToParams();
+        var type = p.GetType();
 
         // Assert
-        ((string)p.MemberName).ShouldBe("Execute");
-        ((string)p.FilePath).ShouldBe("/app/Service.cs");
-        ((int)p.LineNumber).ShouldBe(99);
+        ((string)type.GetProperty("MemberName")!.GetValue(p)!).ShouldBe("Execute");
+        ((string)type.GetProperty("FilePath")!.GetValue(p)!).ShouldBe("/app/Service.cs");
+        ((int)type.GetProperty("LineNumber")!.GetValue(p)!).ShouldBe(99);
     }
 
     // ═══════════════════════════════════════════════════════════

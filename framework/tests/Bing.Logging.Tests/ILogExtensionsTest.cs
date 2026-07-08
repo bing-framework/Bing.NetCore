@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Bing.Logging.Core;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -18,9 +19,9 @@ public class ILogExtensionsTest
         var mock = new Mock<ILog>();
         // 支持链式调用：方法返回 mock 自身
         mock.Setup(x => x.Message(It.IsAny<string>(), It.IsAny<object[]>())).Returns(mock.Object);
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
-            a(mock.Object);
+            a(new LogEventDescriptor());
             return mock.Object;
         });
         return (mock, mock.Object);
@@ -227,7 +228,7 @@ public class ILogExtensionsTest
         // Arrange
         var (mock, log) = BuildMockLog();
         var setCalled = false;
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
             setCalled = true;
             return mock.Object;
@@ -250,7 +251,7 @@ public class ILogExtensionsTest
         // Arrange
         var (mock, log) = BuildMockLog();
         var setCalled = false;
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
             setCalled = true;
             return mock.Object;
@@ -276,7 +277,7 @@ public class ILogExtensionsTest
         var returned = log.ExtraPropertyIf("key", "value", false);
 
         // Assert
-        mock.Verify(x => x.Set(It.IsAny<Action<ILog>>()), Times.Never);
+        mock.Verify(x => x.Set(It.IsAny<Action<LogEventDescriptor>>()), Times.Never);
         returned.ShouldBeSameAs(log);
     }
 
@@ -293,7 +294,7 @@ public class ILogExtensionsTest
         // Arrange
         var (mock, log) = BuildMockLog();
         var setCalled = false;
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
             setCalled = true;
             return mock.Object;
@@ -316,7 +317,7 @@ public class ILogExtensionsTest
         // Arrange
         var (mock, log) = BuildMockLog();
         var setCalled = false;
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
             setCalled = true;
             return mock.Object;
@@ -342,7 +343,7 @@ public class ILogExtensionsTest
         var returned = log.TagsIf(false, "t1");
 
         // Assert
-        mock.Verify(x => x.Set(It.IsAny<Action<ILog>>()), Times.Never);
+        mock.Verify(x => x.Set(It.IsAny<Action<LogEventDescriptor>>()), Times.Never);
         returned.ShouldBeSameAs(log);
     }
 
@@ -355,7 +356,7 @@ public class ILogExtensionsTest
         // Arrange
         var (mock, log) = BuildMockLog();
         var setCalled = false;
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
             setCalled = true;
             return mock.Object;
@@ -381,7 +382,7 @@ public class ILogExtensionsTest
         var returned = log.TagIf("t", false);
 
         // Assert
-        mock.Verify(x => x.Set(It.IsAny<Action<ILog>>()), Times.Never);
+        mock.Verify(x => x.Set(It.IsAny<Action<LogEventDescriptor>>()), Times.Never);
         returned.ShouldBeSameAs(log);
     }
 
@@ -394,7 +395,7 @@ public class ILogExtensionsTest
         // Arrange
         var (mock, log) = BuildMockLog();
         var setCalled = false;
-        mock.Setup(x => x.Set(It.IsAny<Action<ILog>>())).Returns((Action<ILog> a) =>
+        mock.Setup(x => x.Set(It.IsAny<Action<LogEventDescriptor>>())).Returns((Action<LogEventDescriptor> a) =>
         {
             setCalled = true;
             return mock.Object;
