@@ -157,17 +157,19 @@ public class AuditLogScopeContributorSimpleStoreTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：DisableAuditingAttribute 应可应用到类和方法上，不抛出异常。
+    /// 测试目的：兼容层 DisableAuditingAttribute 应声明 Class/Method/Property 三种应用目标。
     /// </summary>
     [Fact]
-    public void DisableAuditingAttribute_AppliedToClass_ShouldBeRetrievable()
+    public void DisableAuditingAttribute_AttributeUsage_ShouldAllowClassMethodProperty()
     {
-        // Arrange & Act
-        var attrs = typeof(SampleAuditDisabledClass).GetCustomAttributes(typeof(DisableAuditingAttribute), false);
+        // Arrange
+        var attributeType = typeof(AuditLogInfo).Assembly.GetType("Bing.Auditing.DisableAuditingAttribute", throwOnError: true)!;
 
         // Assert
-        attrs.ShouldNotBeNull();
-        attrs.Length.ShouldBe(1);
+        var usage = (AttributeUsageAttribute)attributeType.GetCustomAttributes(typeof(AttributeUsageAttribute), false)[0];
+        (usage.ValidOn & AttributeTargets.Class).ShouldBe(AttributeTargets.Class);
+        (usage.ValidOn & AttributeTargets.Method).ShouldBe(AttributeTargets.Method);
+        (usage.ValidOn & AttributeTargets.Property).ShouldBe(AttributeTargets.Property);
     }
 
     /// <summary>
@@ -176,8 +178,11 @@ public class AuditLogScopeContributorSimpleStoreTest
     [Fact]
     public void DisableAuditingAttribute_ShouldBeObsolete()
     {
-        // Arrange & Act
-        var obsolete = typeof(DisableAuditingAttribute).GetCustomAttributes(typeof(ObsoleteAttribute), false);
+        // Arrange
+        var attributeType = typeof(AuditLogInfo).Assembly.GetType("Bing.Auditing.DisableAuditingAttribute", throwOnError: true)!;
+
+        // Act
+        var obsolete = attributeType.GetCustomAttributes(typeof(ObsoleteAttribute), false);
 
         // Assert
         obsolete.ShouldNotBeEmpty();
@@ -262,8 +267,4 @@ public class AuditLogScopeContributorSimpleStoreTest
         public override void PostContribute(AuditLogContributionContext context) => PostContributeCallCount++;
     }
 
-#pragma warning disable CS0618
-    [DisableAuditing]
-    private class SampleAuditDisabledClass { }
-#pragma warning restore CS0618
 }

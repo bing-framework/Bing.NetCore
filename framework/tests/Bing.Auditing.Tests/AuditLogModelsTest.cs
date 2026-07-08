@@ -343,9 +343,8 @@ public class DisableAuditingAttributeTest
     [Fact]
     public void DisableAuditingAttribute_ShouldBeAttribute()
     {
-#pragma warning disable CS0618
-        var attr = new DisableAuditingAttribute();
-#pragma warning restore CS0618
+        var attributeType = typeof(AuditLogInfo).Assembly.GetType("Bing.Auditing.DisableAuditingAttribute", throwOnError: true)!;
+        var attr = Activator.CreateInstance(attributeType);
         attr.ShouldBeAssignableTo<Attribute>();
     }
 
@@ -355,7 +354,8 @@ public class DisableAuditingAttributeTest
     [Fact]
     public void DisableAuditingAttribute_ShouldBeMarkedObsolete()
     {
-        var obsolete = typeof(DisableAuditingAttribute)
+        var attributeType = typeof(AuditLogInfo).Assembly.GetType("Bing.Auditing.DisableAuditingAttribute", throwOnError: true)!;
+        var obsolete = attributeType
             .GetCustomAttributes(typeof(ObsoleteAttribute), false);
         obsolete.ShouldNotBeEmpty();
     }
@@ -366,7 +366,8 @@ public class DisableAuditingAttributeTest
     [Fact]
     public void DisableAuditingAttribute_AttributeUsage_ShouldAllowClassMethodProperty()
     {
-        var usage = (AttributeUsageAttribute)typeof(DisableAuditingAttribute)
+        var attributeType = typeof(AuditLogInfo).Assembly.GetType("Bing.Auditing.DisableAuditingAttribute", throwOnError: true)!;
+        var usage = (AttributeUsageAttribute)attributeType
             .GetCustomAttributes(typeof(AttributeUsageAttribute), false)[0];
 
         (usage.ValidOn & AttributeTargets.Class).ShouldBe(AttributeTargets.Class);
