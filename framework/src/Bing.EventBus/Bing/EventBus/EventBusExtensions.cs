@@ -13,7 +13,7 @@ public static class EventBusExtensions
     public static async Task PublishAsync(this IEventBus eventBus, IEnumerable<IEvent> events)
     {
         foreach (var @event in events)
-            await eventBus.PublishAsync(@event);
+            await eventBus.PublishAsync(@event.GetType(), @event);
     }
 
     /// <summary>

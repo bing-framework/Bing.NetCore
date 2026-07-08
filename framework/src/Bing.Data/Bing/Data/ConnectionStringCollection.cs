@@ -1,6 +1,4 @@
-﻿using Bing.Collections;
-
-namespace Bing.Data;
+﻿namespace Bing.Data;
 
 /// <summary>
 /// 连接字符串集合
@@ -18,7 +16,7 @@ public class ConnectionStringCollection : Dictionary<string, string>
     /// </summary>
     public string Default
     {
-        get => this.GetOrDefault(DefaultConnectionStringName);
+        get => TryGetValue(DefaultConnectionStringName, out var value) ? value : null;
         set => this[DefaultConnectionStringName] = value;
     }
 
@@ -26,5 +24,5 @@ public class ConnectionStringCollection : Dictionary<string, string>
     /// 获取连接字符串
     /// </summary>
     /// <param name="name">连接字符串名称</param>
-    public string GetConnectionString(string name) => ContainsKey(name) ? this.GetValueOrDefault(name) : Default;
+    public string GetConnectionString(string name) => TryGetValue(name, out var value) ? value : Default;
 }
