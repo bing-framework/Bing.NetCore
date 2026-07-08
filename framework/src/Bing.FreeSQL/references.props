@@ -2,5 +2,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
     <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
+    <ProjectReference Include="..\Bing.Security\Bing.Security.csproj" />
   </ItemGroup>
 </Project>

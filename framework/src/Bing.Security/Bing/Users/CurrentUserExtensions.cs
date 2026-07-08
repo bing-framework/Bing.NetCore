@@ -53,6 +53,8 @@ public static class CurrentUserExtensions
         var result = currentUser.FindClaim(BingClaimTypes.UserName)?.Value;
         if (string.IsNullOrWhiteSpace(result))
             result = currentUser.FindClaim("name")?.Value;
+        if (string.IsNullOrWhiteSpace(result))
+            result = currentUser.UserName;
         return result;
     }
 

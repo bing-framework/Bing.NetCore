@@ -1,5 +1,6 @@
 ﻿<Project>
   <ItemGroup>
     <ProjectReference Include="..\Bing.FreeSQL\Bing.FreeSQL.csproj" />
+    <ProjectReference Include="..\Bing.Auditing\Bing.Auditing.csproj" />
   </ItemGroup>
 </Project>
