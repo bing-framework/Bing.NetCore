@@ -19,7 +19,9 @@ public class TreeEntitySample : TreeEntityBase<TreeEntitySample>
     public string Name { get; set; }
 
     /// <summary>
-    /// 验证 — 空实现，仅供测试使用
+    /// 验证 - 空实现，仅供测试使用
     /// </summary>
-    public override IEnumerable<IVerifyResult> Verify() => Enumerable.Empty<IVerifyResult>();
+    protected override void Validate(ValidationResultCollection results)
+    {
+    }
 }

@@ -311,7 +311,7 @@ public class SqlOptionsTest
         // Act
         options.DatabaseType = DatabaseType.MySql;
         options.IsClearAfterExecution = false;
-        options.LogLevel = DataLogLevel.None;
+        options.LogLevel = DataLogLevel.Off;
         options.LogCategory = "custom";
         options.ConnectionString = "Server=localhost";
         options.Connection = mockConn;
@@ -319,7 +319,7 @@ public class SqlOptionsTest
         // Assert
         options.DatabaseType.ShouldBe(DatabaseType.MySql);
         options.IsClearAfterExecution.ShouldBeFalse();
-        options.LogLevel.ShouldBe(DataLogLevel.None);
+        options.LogLevel.ShouldBe(DataLogLevel.Off);
         options.LogCategory.ShouldBe("custom");
         options.ConnectionString.ShouldBe("Server=localhost");
         options.Connection.ShouldBeSameAs(mockConn);
