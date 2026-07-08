@@ -9,4 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Dapper.SqlServer\Bing.Dapper.SqlServer.csproj" />
   </ItemGroup>
+
+
 </Project>
