@@ -38,7 +38,7 @@ public interface IWhereClause : ICondition
     void Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
 
     /// <summary>
-    /// Or连接条件
+    /// Or连接条件（值为空时忽略条件）
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="conditions">查询条件</param>
@@ -112,7 +112,7 @@ public interface IWhereClause : ICondition
         Operator @operator = Operator.Equal) where TEntity : class;
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置查询条件（值为空时忽略条件）
     /// </summary>
     /// <param name="column">列名</param>
     /// <param name="value">值，如果该值为空，则忽略该查询条件</param>
@@ -120,7 +120,7 @@ public interface IWhereClause : ICondition
     void WhereIfNotEmpty(string column, object value, Operator @operator = Operator.Equal);
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置查询条件（值为空时忽略条件）
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -130,7 +130,7 @@ public interface IWhereClause : ICondition
         Operator @operator = Operator.Equal) where TEntity : class;
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置查询条件（值为空时忽略条件）
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">查询条件表达式，如果参数值为空，则忽略该查询条件</param>

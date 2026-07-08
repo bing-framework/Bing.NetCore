@@ -15,6 +15,8 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// </summary>
 public class WhereClause : IWhereClause
 {
+    #region 字段
+
     /// <summary>
     /// Sql生成器
     /// </summary>
@@ -45,6 +47,10 @@ public class WhereClause : IWhereClause
     /// </summary>
     private ICondition _condition;
 
+    #endregion
+
+    #region 构造函数
+
     /// <summary>
     /// 初始化一个<see cref="WhereClause"/>类型的实例
     /// </summary>
@@ -65,6 +71,10 @@ public class WhereClause : IWhereClause
         _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager);
     }
 
+    #endregion
+
+    #region 克隆
+
     /// <summary>
     /// 克隆
     /// </summary>
@@ -72,8 +82,11 @@ public class WhereClause : IWhereClause
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
     public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager) =>
-        new WhereClause(builder, _dialect, _resolver, register, parameterManager,
-            new SqlCondition(_condition?.GetCondition()));
+        new WhereClause(builder, _dialect, _resolver, register, parameterManager, new SqlCondition(_condition?.GetCondition()));
+
+    #endregion
+
+    #region 条件连接
 
     /// <summary>
     /// And连接条件
@@ -94,42 +107,51 @@ public class WhereClause : IWhereClause
     /// <param name="conditions">查询条件</param>
     public void Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
     {
-        if (conditions == null)
+        if (conditions == null || conditions.Length == 0)
             return;
-        foreach (var condition in conditions)
+        foreach (var condition in conditions.Where(x => x != null))
         {
-            if (condition == null)
-                continue;
             var predicate = _expressionResolver.Resolve(condition);
-            if (predicate == null)
-                continue;
-            Or(predicate);
+            if (predicate != null)
+                Or(predicate);
         }
     }
 
     /// <summary>
-    /// Or连接条件
+    /// Or连接条件（值为空时忽略条件）
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="conditions">查询条件</param>
     public void OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
     {
-        if (conditions == null)
+        if (conditions == null || conditions.Length == 0)
             return;
-        foreach (var condition in conditions)
+        foreach (var condition in conditions.Where(x => x != null))
         {
-            if (condition == null)
-                continue;
-            if (Lambdas.GetConditionCount(condition) > 1)
-                throw new InvalidOperationException(string.Format(LibraryResource.CanOnlyOneCondition, condition));
+            ValidateSingleCondition(condition);
+
             if (string.IsNullOrWhiteSpace(Lambdas.GetValue(condition).SafeString()))
                 continue;
+
             var predicate = _expressionResolver.Resolve(condition);
-            if (predicate == null)
-                continue;
-            Or(predicate);
+            if (predicate != null)
+                Or(predicate);
         }
     }
+
+    /// <summary>
+    /// 验证是否单一条件
+    /// </summary>
+    /// <param name="expression">条件表达式</param>
+    private void ValidateSingleCondition(LambdaExpression expression)
+    {
+        if (Lambdas.GetConditionCount(expression) > 1)
+            throw new InvalidOperationException(string.Format(LibraryResource.CanOnlyOneCondition, expression));
+    }
+
+    #endregion
+
+    #region Where基础方法
 
     /// <summary>
     /// 设置查询条件
@@ -152,7 +174,8 @@ public class WhereClause : IWhereClause
     /// <param name="expression">列名表达式</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), value, @operator);
+    public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal)
+        where TEntity : class => Where(_helper.GetColumn(expression), value, @operator);
 
     /// <summary>
     /// 设置查询条件
@@ -166,6 +189,10 @@ public class WhereClause : IWhereClause
         var condition = _expressionResolver.Resolve(expression);
         And(condition);
     }
+
+    #endregion
+
+    #region Where子查询
 
     /// <summary>
     /// 设置子查询条件
@@ -189,7 +216,8 @@ public class WhereClause : IWhereClause
     /// <param name="expression">列名表达式</param>
     /// <param name="builder">子查询Sql生成器</param>
     /// <param name="operator">运算符</param>
-    public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), builder, @operator);
+    public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) 
+        where TEntity : class => Where(_helper.GetColumn(expression), builder, @operator);
 
     /// <summary>
     /// 设置子查询条件
@@ -213,7 +241,12 @@ public class WhereClause : IWhereClause
     /// <param name="expression">列名表达式</param>
     /// <param name="action">子查询操作</param>
     /// <param name="operator">运算符</param>
-    public void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) where TEntity : class => Where(_helper.GetColumn(expression), action, @operator);
+    public void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) 
+        where TEntity : class => Where(_helper.GetColumn(expression), action, @operator);
+
+    #endregion
+
+    #region WhereIfNotEmpty
 
     /// <summary>
     /// 设置查询条件
@@ -253,12 +286,15 @@ public class WhereClause : IWhereClause
     {
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
-        if (Lambdas.GetConditionCount(expression) > 1)
-            throw new InvalidOperationException(string.Format(LibraryResource.CanOnlyOneCondition, expression));
+        ValidateSingleCondition(expression);
         if (string.IsNullOrWhiteSpace(Lambdas.GetValue(expression).SafeString()))
             return;
         Where(expression);
     }
+
+    #endregion
+
+    #region IsNull/IsNotNull
 
     /// <summary>
     /// 设置Is Null条件
@@ -293,6 +329,10 @@ public class WhereClause : IWhereClause
         var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
         IsNotNull(column);
     }
+
+    #endregion
+
+    #region IsEmpty/IsNotEmpty
 
     /// <summary>
     /// 设置空条件
@@ -336,6 +376,10 @@ public class WhereClause : IWhereClause
         IsNotEmpty(column);
     }
 
+    #endregion
+
+    #region In/NotIn
+
     /// <summary>
     /// 设置In条件
     /// </summary>
@@ -361,28 +405,13 @@ public class WhereClause : IWhereClause
     public void In(string column, ISqlBuilder builder) => AppendSqlBuilder("In", column, builder);
 
     /// <summary>
-    /// 添加子查询
-    /// </summary>
-    /// <param name="operation">操作符</param>
-    /// <param name="column">列名</param>
-    /// <param name="builder">Sql生成器</param>
-    private void AppendSqlBuilder(string operation, string column, ISqlBuilder builder)
-    {
-        if (string.IsNullOrWhiteSpace(column))
-            return;
-        if (builder == null)
-            return;
-        var result = $"{_helper.GetColumn(column)} {operation} ({builder.ToSql()})";
-        AppendSql(result);
-    }
-
-    /// <summary>
     /// 设置In条件
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="builder">Sql生成器</param>
-    public void In<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => In(_helper.GetColumn(expression), builder);
+    public void In<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => 
+        In(_helper.GetColumn(expression), builder);
 
     /// <summary>
     /// 设置In条件
@@ -404,7 +433,8 @@ public class WhereClause : IWhereClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="action">子查询操作</param>
-    public void In<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => In(_helper.GetColumn(expression), action);
+    public void In<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => 
+        In(_helper.GetColumn(expression), action);
 
     /// <summary>
     /// 设置Not In条件
@@ -419,7 +449,8 @@ public class WhereClause : IWhereClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="values">值集合</param>
-    public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class => Where(expression, values, Operator.NotIn);
+    public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class => 
+        Where(expression, values, Operator.NotIn);
 
     /// <summary>
     /// 设置Not In条件
@@ -434,7 +465,8 @@ public class WhereClause : IWhereClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="builder">Sql生成器</param>
-    public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => NotIn(_helper.GetColumn(expression), builder);
+    public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => 
+        NotIn(_helper.GetColumn(expression), builder);
 
     /// <summary>
     /// 设置Not In条件
@@ -457,6 +489,24 @@ public class WhereClause : IWhereClause
     /// <param name="expression">列名表达式</param>
     /// <param name="action">子查询操作</param>
     public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => NotIn(_helper.GetColumn(expression), action);
+
+    /// <summary>
+    /// 添加子查询
+    /// </summary>
+    /// <param name="operation">操作符</param>
+    /// <param name="column">列名</param>
+    /// <param name="builder">Sql生成器</param>
+    private void AppendSqlBuilder(string operation, string column, ISqlBuilder builder)
+    {
+        if (string.IsNullOrWhiteSpace(column) || builder == null)
+            return;
+        var result = $"{_helper.GetColumn(column)} {operation} ({builder.ToSql()})";
+        AppendSql(result);
+    }
+
+    #endregion
+
+    #region Exists/NotExists
 
     /// <summary>
     /// 设置Exists条件
@@ -507,6 +557,10 @@ public class WhereClause : IWhereClause
         action(builder);
         NotExists(builder);
     }
+
+    #endregion
+
+    #region Between
 
     /// <summary>
     /// 添加范围查询条件
@@ -600,15 +654,8 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public void Between(string column, int? min, int? max, Boundary boundary)
-    {
-        if (min > max)
-        {
-            Where(_helper.Between(column, max, min, boundary));
-            return;
-        }
-        Where(_helper.Between(column, min, max, boundary));
-    }
+    public void Between(string column, int? min, int? max, Boundary boundary) =>
+        HandleBetween(column, min, max, boundary);
 
     /// <summary>
     /// 添加范围查询条件
@@ -617,15 +664,8 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public void Between(string column, long? min, long? max, Boundary boundary)
-    {
-        if (min > max)
-        {
-            Where(_helper.Between(column, max, min, boundary));
-            return;
-        }
-        Where(_helper.Between(column, min, max, boundary));
-    }
+    public void Between(string column, long? min, long? max, Boundary boundary) =>
+        HandleBetween(column, min, max, boundary);
 
     /// <summary>
     /// 添加范围查询条件
@@ -634,15 +674,8 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public void Between(string column, float? min, float? max, Boundary boundary)
-    {
-        if (min > max)
-        {
-            Where(_helper.Between(column, max, min, boundary));
-            return;
-        }
-        Where(_helper.Between(column, min, max, boundary));
-    }
+    public void Between(string column, float? min, float? max, Boundary boundary) =>
+        HandleBetween(column, min, max, boundary);
 
     /// <summary>
     /// 添加范围查询条件
@@ -651,15 +684,8 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public void Between(string column, double? min, double? max, Boundary boundary)
-    {
-        if (min > max)
-        {
-            Where(_helper.Between(column, max, min, boundary));
-            return;
-        }
-        Where(_helper.Between(column, min, max, boundary));
-    }
+    public void Between(string column, double? min, double? max, Boundary boundary) =>
+        HandleBetween(column, min, max, boundary);
 
     /// <summary>
     /// 添加范围查询条件
@@ -668,15 +694,27 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public void Between(string column, decimal? min, decimal? max, Boundary boundary)
+    public void Between(string column, decimal? min, decimal? max, Boundary boundary) =>
+        HandleBetween(column, min, max, boundary);
+
+    /// <summary>
+    /// 处理范围查询条件
+    /// </summary>
+    /// <typeparam name="T">值类型</typeparam>
+    /// <param name="column">列名</param>
+    /// <param name="min">最小值</param>
+    /// <param name="max">最大值</param>
+    /// <param name="boundary">包含边界</param>
+    private void HandleBetween<T>(string column, T? min, T? max, Boundary boundary) where T : struct, IComparable<T>
     {
-        if (min > max)
+        if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
         {
             Where(_helper.Between(column, max, min, boundary));
             return;
         }
         Where(_helper.Between(column, min, max, boundary));
     }
+
 
     /// <summary>
     /// 添加范围查询条件
@@ -687,8 +725,7 @@ public class WhereClause : IWhereClause
     /// <param name="includeTime">是否包含时间</param>
     /// <param name="boundary">包含边界</param>
     public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) =>
-        Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime),
-            GetBoundary(boundary, includeTime)));
+        Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime), GetBoundary(boundary, includeTime)));
 
     /// <summary>
     /// 获取最小日期
@@ -696,17 +733,14 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="includeTime">是否包含时间</param>
-    /// <returns></returns>
     private DateTime? GetMin(DateTime? min, DateTime? max, bool includeTime)
     {
         if (min == null)
             return null;
         var result = min;
         if (min > max)
-            result = min;
-        if (includeTime)
-            return result;
-        return result.SafeValue().Date;
+            result = max;
+        return includeTime ? result : result.SafeValue().Date;
     }
 
     /// <summary>
@@ -723,9 +757,7 @@ public class WhereClause : IWhereClause
         var result = max;
         if (min > max)
             result = min;
-        if (includeTime)
-            return result;
-        return result.SafeValue().Date.AddDays(1);
+        return includeTime ? result : result.SafeValue().Date.AddDays(1);
     }
 
     /// <summary>
@@ -733,15 +765,16 @@ public class WhereClause : IWhereClause
     /// </summary>
     /// <param name="boundary">包含边界</param>
     /// <param name="includeTime">是否包含时间</param>
-    /// <returns></returns>
     private Boundary GetBoundary(Boundary? boundary, bool includeTime)
     {
         if (boundary != null)
             return boundary.SafeValue();
-        if (includeTime)
-            return Boundary.Both;
-        return Boundary.Left;
+        return includeTime ? Boundary.Both : Boundary.Left;
     }
+
+    #endregion
+
+    #region 其他操作
 
     /// <summary>
     /// 添加到Where子句
@@ -770,4 +803,7 @@ public class WhereClause : IWhereClause
     /// 获取查询条件
     /// </summary>
     public string GetCondition() => _condition?.GetCondition();
+
+    #endregion
+
 }

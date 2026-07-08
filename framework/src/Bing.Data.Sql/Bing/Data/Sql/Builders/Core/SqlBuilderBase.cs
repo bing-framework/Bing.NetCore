@@ -5,8 +5,6 @@ using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
-using Bing.Helpers;
-using Bing.Text;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -268,19 +266,28 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="sqlBuilder">源生成器</param>
     protected void Clone(SqlBuilderBase sqlBuilder)
     {
+        if (sqlBuilder == null)
+            throw new ArgumentNullException(nameof(sqlBuilder));
+
         EntityMetadata = sqlBuilder.EntityMetadata;
         _parameterManager = sqlBuilder._parameterManager?.Clone();
         EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMetadata);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
+
+        // 克隆各子句
         _selectClause = sqlBuilder._selectClause?.Clone(this, AliasRegister);
         _fromClause = sqlBuilder._fromClause?.Clone(this, AliasRegister);
         _joinClause = sqlBuilder._joinClause?.Clone(this, AliasRegister, _parameterManager);
         _whereClause = sqlBuilder._whereClause?.Clone(this, AliasRegister, _parameterManager);
         _groupByClause = sqlBuilder._groupByClause?.Clone(AliasRegister);
         _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
+
+        // 克隆分页信息
         Pager = sqlBuilder.Pager;
         OffsetParam = sqlBuilder.OffsetParam;
         LimitParam = sqlBuilder.LimitParam;
+
+        // 克隆集合
         UnionItems = sqlBuilder.UnionItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
         CteItems = sqlBuilder.CteItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
         _excludedFilters = sqlBuilder._excludedFilters;
@@ -468,9 +475,10 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="result">Sql拼接</param>
     protected virtual void CreateSql(StringBuilder result)
     {
+        // 创建CTE
         CreateCte(result);
         if (_isAddFilters == false)
-            AddFilters();
+            EnsureFiltersAdded();
         if (IsUnion)
         {
             CreateSqlByUnion(result);
@@ -487,15 +495,21 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     {
         if (CteItems.Count == 0)
             return;
-        var cte = new StringBuilder();
+
+        var cte = new StringBuilder(CteItems.Count * 100);
         cte.Append($"{GetCteKeyWord()} ");
-        foreach (var item in CteItems)
+
+        for (var i = 0; i < CteItems.Count; i++)
         {
+            var item = CteItems[i];
             cte.AppendLine($"{Dialect.SafeName(item.Name)} ");
-            cte.AppendLine($"As ({item.Builder.ToSql()}),");
+            cte.Append($"As ({item.Builder.ToSql()})");
+
+            if (i < CteItems.Count - 1)
+                cte.AppendLine(",");
         }
 
-        result.AppendLine(cte.ToString().RemoveEnd($",{Common.Line}"));
+        result.AppendLine(cte.ToString());
     }
 
     /// <summary>
@@ -579,18 +593,21 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     }
 
     /// <summary>
-    /// 添加过滤器列表
+    /// 确保过滤器已添加
     /// </summary>
-    protected void AddFilters()
+    protected void EnsureFiltersAdded()
     {
+        if (_isAddFilters)
+            return;
+
         _isAddFilters = true;
         var context = new SqlContext(Dialect, AliasRegister, EntityMetadata, ParameterManager, this);
-        SqlFilterCollection.Filters.ForEach(filter =>
+        foreach (var filter in SqlFilterCollection.Filters)
         {
-            if (_excludedFilters.Count > 0 && _excludedFilters.Exists(x => x == filter.GetType()))
-                return;
+            if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))
+                continue;
             filter.Filter(context);
-        });
+        }
     }
 
     /// <summary>
@@ -688,9 +705,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <typeparam name="TSqlFilter">Sql过滤器类型</typeparam>
     public virtual ISqlBuilder IgnoreFilter<TSqlFilter>() where TSqlFilter : ISqlFilter
     {
-        if (_excludedFilters.Exists(x => x == typeof(TSqlFilter)))
-            return this;
-        _excludedFilters.Add(typeof(TSqlFilter));
+        var filterType = typeof(TSqlFilter);
+        if (!_excludedFilters.Contains(filterType))
+            _excludedFilters.Add(filterType);
         return this;
     }
 

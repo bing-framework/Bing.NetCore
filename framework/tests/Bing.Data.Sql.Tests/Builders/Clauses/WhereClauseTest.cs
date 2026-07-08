@@ -6,6 +6,7 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
 using Bing.Data.Sql.Tests.XUnitHelpers;
+using Shouldly;
 
 namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
@@ -39,10 +40,7 @@ public class WhereClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
-    private string GetSql()
-    {
-        return _clause.ToSql();
-    }
+    private string GetSql() => _clause.ToSql();
 
     #endregion
 
@@ -62,38 +60,55 @@ public class WhereClauseTest
     #region Where(设置条件)
 
     /// <summary>
-    /// 测试 - 设置条件 - 1个条件
+    /// 测试 - Where基础功能 - 添加单个条件
     /// </summary>
     [Fact]
-    public void Test_Where_1()
+    public void Test_Where_Basic()
     {
-        _clause.Where("Name", "a", Operator.Equal);
-        Assert.Equal("Where [Name]=@_p_0", GetSql());
-        Assert.Equal("a", _parameterManager.GetValue("@_p_0"));
+        _clause.Where("Name", "test");
+
+        GetSql().ShouldBe("Where [Name]=@_p_0");
+        _parameterManager.GetValue("@_p_0").ShouldBe("test");
     }
 
     /// <summary>
-    /// 测试 - 设置条件 - 带表别名
+    /// 测试 - Where条件带表别名
     /// </summary>
     [Fact]
-    public void Test_Where_2()
+    public void Test_Where_WithTableAlias()
     {
-        _clause.Where("f.Name", "a", Operator.Equal);
-        Assert.Equal("Where [f].[Name]=@_p_0", GetSql());
-        Assert.Equal("a", _parameterManager.GetValue("@_p_0"));
+        _clause.Where("t.Name", "test");
+
+        GetSql().ShouldBe("Where [t].[Name]=@_p_0");
+        _parameterManager.GetValue("@_p_0").ShouldBe("test");
     }
 
     /// <summary>
-    /// 测试 - 设置条件 - 2个条件
+    /// 测试 - Where多个条件通过And连接
     /// </summary>
     [Fact]
-    public void Test_Where_3()
+    public void Test_Where_MultipleConditions_WithAnd()
     {
-        _clause.Where("f.Name", "a", Operator.Equal);
-        _clause.Where("s.Age", "b", Operator.Equal);
-        Assert.Equal("Where [f].[Name]=@_p_0 And [s].[Age]=@_p_1", GetSql());
-        Assert.Equal("a", _parameterManager.GetValue("@_p_0"));
-        Assert.Equal("b", _parameterManager.GetValue("@_p_1"));
+        _clause.Where("Name", "test");
+        _clause.Where("Age", 25);
+
+        GetSql().ShouldBe("Where [Name]=@_p_0 And [Age]=@_p_1");
+        _parameterManager.GetValue("@_p_0").ShouldBe("test");
+        _parameterManager.GetValue("@_p_1").ShouldBe(25);
+    }
+
+    /// <summary>
+    /// 测试 - Where多个条件 - 通过And连接 - 带表别名
+    /// </summary>
+    [Fact]
+    public void Test_Where_MultipleConditions_WithAnd_WithTableAlias()
+    {
+        _clause.Where("f.Name", "test");
+        _clause.Where("s.Age", 25);
+
+        GetSql().ShouldBe("Where [f].[Name]=@_p_0 And [s].[Age]=@_p_1");
+        _parameterManager.GetValue("@_p_0").ShouldBe("test");
+        _parameterManager.GetValue("@_p_1").ShouldBe(25);
     }
 
     /// <summary>
@@ -363,19 +378,44 @@ public class WhereClauseTest
         Assert.Equal("b", _parameterManager.GetValue("@_p_1"));
     }
 
-    #endregion        
+    #endregion
 
     #region WhereIfNotEmpty(设置条件)
 
     /// <summary>
-    /// 测试 - 设置条件 - 添加条件
+    /// 测试 - WhereIfNotEmpty - 值不为空时添加条件
     /// </summary>
     [Fact]
-    public void Test_WhereIfNotEmpty_1()
+    public void Test_WhereIfNotEmpty_WithNonEmptyValue()
     {
-        _clause.WhereIfNotEmpty("Name", "a");
-        Assert.Equal("Where [Name]=@_p_0", GetSql());
-        Assert.Equal("a", _parameterManager.GetValue("@_p_0"));
+        _clause.WhereIfNotEmpty("Name", "test");
+
+        GetSql().ShouldBe("Where [Name]=@_p_0");
+        _parameterManager.GetValue("@_p_0").ShouldBe("test");
+    }
+
+    /// <summary>
+    /// 测试 - WhereIfNotEmpty - 值为空时忽略条件
+    /// </summary>
+    [Fact]
+    public void Test_WhereIfNotEmpty_WithEmptyValue()
+    {
+        _clause.WhereIfNotEmpty("Name", "");
+
+        GetSql().ShouldBeNull();
+        _parameterManager.GetParams().Count.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试 - WhereIfNotEmpty - 值为空时忽略条件
+    /// </summary>
+    [Fact]
+    public void Test_WhereIfNotEmpty_WithNullValue()
+    {
+        _clause.WhereIfNotEmpty("Name", null);
+
+        GetSql().ShouldBeNull();
+        _parameterManager.GetParams().Count.ShouldBe(0);
     }
 
     /// <summary>
@@ -1215,6 +1255,19 @@ public class WhereClauseTest
     #endregion
 
     #region Or(连接查询条件)
+
+    /// <summary>
+    /// 测试 - 条件Or连接
+    /// </summary>
+    [Fact]
+    public void Test_Or_Conditions()
+    {
+        _clause.Where("Name", "test1");
+        _clause.Or(new SqlCondition("[Age]=25"));
+
+        GetSql().ShouldBe("Where ([Name]=@_p_0 Or [Age]=25)");
+        _parameterManager.GetValue("@_p_0").ShouldBe("test1");
+    }
 
     /// <summary>
     /// Or查询条件
