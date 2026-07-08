@@ -223,10 +223,10 @@ public class PathResolverTest
     }
 
     /// <summary>
-    /// 测试目的：typeFullName 与 rootNamespace 完全相同时，应返回空字符串。
+    /// 测试目的：仅会移除“rootNamespace.”前缀；当 typeFullName 与 rootNamespace 完全相同时，应原样返回。
     /// </summary>
     [Fact]
-    public void GetResourcesBaseName_WhenTypeIsRootNamespace_ShouldReturnEmpty()
+    public void GetResourcesBaseName_WhenTypeIsRootNamespace_ShouldReturnRootNamespace()
     {
         // Arrange
         var assembly = typeof(PathResolverTest).Assembly;
@@ -236,7 +236,7 @@ public class PathResolverTest
         var result = _resolver.GetResourcesBaseName(assembly, rootNamespace);
 
         // Assert
-        result.ShouldBe(string.Empty);
+        result.ShouldBe(rootNamespace);
     }
 
     // ═══════════════════════════════════════════════════════════
