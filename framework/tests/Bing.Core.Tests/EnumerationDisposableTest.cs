@@ -188,6 +188,7 @@ public class DisposableTest
     private class ConcreteDisposable : System.Disposable
     {
         public bool ManagedDisposeCalled { get; private set; }
+        public bool IsDisposed => Disposed;
 
         protected override void Dispose(bool disposing)
         {
@@ -205,7 +206,7 @@ public class DisposableTest
     {
         var obj = new ConcreteDisposable();
         obj.Dispose();
-        obj.Disposed.ShouldBeTrue();
+        obj.IsDisposed.ShouldBeTrue();
     }
 
     /// <summary>
@@ -228,9 +229,9 @@ public class DisposableTest
         ConcreteDisposable obj;
         using (obj = new ConcreteDisposable())
         {
-            obj.Disposed.ShouldBeFalse();
+            obj.IsDisposed.ShouldBeFalse();
         }
-        obj.Disposed.ShouldBeTrue();
+        obj.IsDisposed.ShouldBeTrue();
     }
 }
 
@@ -245,7 +246,7 @@ public class BingExceptionExtensionsTest
 {
     private class HasLogLevelException : Exception, IHasLogLevel
     {
-        public LogLevel LogLevel { get; }
+        public LogLevel LogLevel { get; set; }
         public HasLogLevelException(LogLevel level) : base("test") => LogLevel = level;
     }
 

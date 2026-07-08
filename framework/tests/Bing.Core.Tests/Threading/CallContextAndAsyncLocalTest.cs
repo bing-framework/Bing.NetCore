@@ -151,6 +151,14 @@ public class CallContextTest
 /// </summary>
 public class AsyncLocalExtensionsTest
 {
+    private static IDisposable InvokeSetScoped<T>(AsyncLocal<T> local, T value)
+    {
+        var method = typeof(CallContext).Assembly
+            .GetType("Bing.Threading.AsyncLocalExtensions", throwOnError: true)!
+            .GetMethod("SetScoped", BindingFlags.Public | BindingFlags.Static)!;
+        return (IDisposable)method.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { local, value })!;
+    }
+
     /// <summary>
     /// 测试目的：SetScoped 设置新值后，在范围内 AsyncLocal 值应为新值。
     /// </summary>
@@ -162,7 +170,7 @@ public class AsyncLocalExtensionsTest
         local.Value = "original";
 
         // Act & Assert
-        using (local.SetScoped("scoped"))
+        using (InvokeSetScoped(local, "scoped"))
         {
             local.Value.ShouldBe("scoped");
         }
@@ -179,7 +187,7 @@ public class AsyncLocalExtensionsTest
         local.Value = "original";
 
         // Act
-        var scope = local.SetScoped("new-value");
+        var scope = InvokeSetScoped(local, "new-value");
         scope.Dispose();
 
         // Assert
@@ -197,11 +205,11 @@ public class AsyncLocalExtensionsTest
         local.Value = 0;
 
         // Act & Assert
-        using (local.SetScoped(1))
+        using (InvokeSetScoped(local, 1))
         {
             local.Value.ShouldBe(1);
 
-            using (local.SetScoped(2))
+            using (InvokeSetScoped(local, 2))
             {
                 local.Value.ShouldBe(2);
             }
@@ -223,7 +231,7 @@ public class AsyncLocalExtensionsTest
         // local.Value == null by default
 
         // Act
-        using (local.SetScoped("temp"))
+        using (InvokeSetScoped(local, "temp"))
         {
             local.Value.ShouldBe("temp");
         }
@@ -239,7 +247,7 @@ public class AsyncLocalExtensionsTest
     public void SetScoped_ReturnsNonNullDisposable()
     {
         var local = new AsyncLocal<int>();
-        var scope = local.SetScoped(99);
+        var scope = InvokeSetScoped(local, 99);
         scope.ShouldNotBeNull();
         scope.Dispose(); // 不抛
     }

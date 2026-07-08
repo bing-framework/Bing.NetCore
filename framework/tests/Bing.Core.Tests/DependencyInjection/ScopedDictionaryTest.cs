@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Bing.DependencyInjection;
 using Shouldly;
 
 namespace Bing.Tests.DependencyInjection;

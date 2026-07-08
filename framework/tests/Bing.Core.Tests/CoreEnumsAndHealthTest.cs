@@ -215,7 +215,7 @@ public class CoreEnumsAndHealthTest
         var result = BusHealthResult.Healthy(data: data);
 
         // Assert
-        result.Data.ShouldContainKey("version");
+        result.Data.ContainsKey("version").ShouldBeTrue();
         result.Data["version"].ShouldBe("1.0.0");
     }
 
