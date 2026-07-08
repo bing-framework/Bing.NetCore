@@ -149,6 +149,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
         var maps = _configuration.GetAllTypeMaps();
         _configuration = new MapperConfiguration(t =>
         {
+            t.ShouldMapMethod = _ => false;
             t.CreateMap(sourceType, destinationType);
             foreach (var map in maps)
                 t.CreateMap(map.SourceType, map.DestinationType);

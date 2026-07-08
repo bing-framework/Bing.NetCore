@@ -69,6 +69,8 @@ public sealed class DeletionAuditedInitializer
     /// </summary>
     private void InitDeleter()
     {
+        if (string.IsNullOrWhiteSpace(_userName))
+            return;
         if (_entity is IHasDeleter result)
             result.Deleter = _userName;
     }

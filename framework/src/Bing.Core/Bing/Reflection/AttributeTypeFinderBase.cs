@@ -27,7 +27,8 @@ public class AttributeTypeFinderBase<TAttributeType> : FinderBase<Type>, ITypeFi
     protected override Type[] FindAllItems()
     {
         var assemblies = _allAssemblyFinder.FindAll(true);
-        return assemblies.SelectMany(assembly => assembly.GetTypes())
+        return assemblies.SelectMany(AssemblyHelper.GetAllTypes)
+            .OfType<Type>()
             .Where(type => type.IsClass && !type.IsAbstract && type.HasAttribute<TAttributeType>())
             .Distinct()
             .ToArray();

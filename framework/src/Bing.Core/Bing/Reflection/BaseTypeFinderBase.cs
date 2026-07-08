@@ -26,7 +26,8 @@ public abstract class BaseTypeFinderBase<TBaseType> : FinderBase<Type>, ITypeFin
     protected override Type[] FindAllItems()
     {
         var assemblies = _allAssemblyFinder.FindAll(true);
-        return assemblies.SelectMany(assembly => assembly.GetTypes())
+        return assemblies.SelectMany(AssemblyHelper.GetAllTypes)
+            .OfType<Type>()
             .Where(type => type.IsDeriveClassFrom<TBaseType>())
             .Distinct()
             .ToArray();

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing;
@@ -25,7 +26,7 @@ public static class BingLoader
         var assemblies = allAssemblyFinder.FindAll(true);
         foreach (var assembly in assemblies)
         {
-            var types = assembly.GetTypes();
+            var types = AssemblyHelper.GetAllTypes(assembly).OfType<Type>().ToArray();
             Debug.WriteLine($"Assembly: {assembly.FullName}, TypeLength: {types.Length}");
             foreach (var type in types)
                 RegisterType(type);

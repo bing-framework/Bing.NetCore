@@ -94,7 +94,7 @@ public static class AssemblyManager
         }
 
         _allAssemblies = allAssemblies.ToArray();
-        _allTypes = _allAssemblies.SelectMany(m => m.GetTypes()).ToArray();
+        _allTypes = _allAssemblies.SelectMany(AssemblyHelper.GetAllTypes).OfType<Type>().ToArray();
         foreach (var assembly in _allAssemblies)
         {
             Debug.WriteLine($"【AssemblyManager】程序集: {assembly.FullName}");
