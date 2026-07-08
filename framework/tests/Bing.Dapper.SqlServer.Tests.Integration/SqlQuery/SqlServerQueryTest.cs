@@ -34,8 +34,13 @@ public class SqlServerQueryTest
     [IntegrationFact]
     public async Task GetValue_SelectOne_ShouldReturnOne()
     {
-        // Arrange & Act
-        var result = await _sqlQuery.AppendLine("SELECT 1").ToIntAsync();
+        // Arrange
+        _sqlQuery.Clear()
+            .AppendSelect("1")
+            .AppendFrom("(Select 1 as Value) t");
+
+        // Act
+        var result = await _sqlQuery.ExecuteScalarAsync<int>();
 
         // Assert
         _output.WriteLine($"SELECT 1 = {result}");

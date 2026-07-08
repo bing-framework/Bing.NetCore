@@ -97,7 +97,7 @@ public class MySqlDialectTest
     [Fact]
     public void SafeName_AlreadyBacktickWrapped_ShouldBeIdempotent()
     {
-        _dialect.SafeName("`table_name`").ShouldBe("``table_name``");
+        _dialect.SafeName("`table_name`").ShouldBe("`table_name`");
     }
 
     // ═══════════════════════════════════════════════════════════

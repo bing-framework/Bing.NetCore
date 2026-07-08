@@ -7,4 +7,5 @@ global using System.Text;
 global using System.Threading.Tasks;
 global using System.Threading;
 global using System;
+global using Shouldly;
 global using Xunit;

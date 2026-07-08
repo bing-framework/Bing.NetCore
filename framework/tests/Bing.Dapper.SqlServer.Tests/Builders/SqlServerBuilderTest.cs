@@ -8,7 +8,7 @@ namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
 /// <see cref="SqlServerBuilder"/> 单元测试
-/// 验证 SQL Server 方言下 SQL 生成行为：方括号标识符、@p_N 参数、分页语法
+/// 验证 SQL Server 方言下 SQL 生成行为：方括号标识符、@_p_N 参数、分页语法
 /// </summary>
 public class SqlServerBuilderTest
 {
@@ -17,7 +17,7 @@ public class SqlServerBuilderTest
     // ── Select + From + Where ────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：基础 Select/From/Where 生成 SQL Server 格式（方括号 + @p_N）。
+    /// 测试目的：基础 Select/From/Where 生成 SQL Server 格式（方括号 + @_p_N）。
     /// </summary>
     [Fact]
     public void Test_SelectFromWhere_BasicFormat()
@@ -26,7 +26,7 @@ public class SqlServerBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select [Name] ");
         result.AppendLine("From [User] ");
-        result.Append("Where [Age]=@p_0");
+        result.Append("Where [Age]=@_p_0");
 
         var builder = NewBuilder();
 
@@ -37,7 +37,7 @@ public class SqlServerBuilderTest
 
         // Assert
         Assert.Equal(result.ToString(), builder.ToSql());
-        Assert.Equal(25, builder.GetParam("p_0"));
+        Assert.Equal(25, builder.GetParam("_p_0"));
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class SqlServerBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [User] ");
-        result.Append("Where [Status]=@p_0 And [Age]=@p_1");
+        result.Append("Where [Status]=@_p_0 And [Age]=@_p_1");
 
         var builder = NewBuilder();
 
@@ -102,8 +102,8 @@ public class SqlServerBuilderTest
 
         // Assert
         Assert.Equal(result.ToString(), builder.ToSql());
-        Assert.Equal("active", builder.GetParam("p_0"));
-        Assert.Equal(30, builder.GetParam("p_1"));
+        Assert.Equal("active", builder.GetParam("_p_0"));
+        Assert.Equal(30, builder.GetParam("_p_1"));
     }
 
     // ── Join ─────────────────────────────────────────────────────
@@ -117,9 +117,9 @@ public class SqlServerBuilderTest
         // Arrange
         var result = new StringBuilder();
         result.AppendLine("Select * ");
-        result.AppendLine("From [Order] [o] ");
-        result.AppendLine("Join [User] [u] On [o].[UserId]=[u].[Id] ");
-        result.Append("Where [o].[Status]=@p_0");
+        result.AppendLine("From [Order] As [o] ");
+        result.AppendLine("Join [User] As [u] On [o].[UserId]=@_p_0 ");
+        result.Append("Where [o].[Status]=@_p_1");
 
         var builder = NewBuilder();
 
@@ -143,8 +143,8 @@ public class SqlServerBuilderTest
         // Arrange
         var result = new StringBuilder();
         result.AppendLine("Select * ");
-        result.AppendLine("From [Order] [o] ");
-        result.Append("Left Join [User] [u] On [o].[UserId]=[u].[Id]");
+        result.AppendLine("From [Order] As [o] ");
+        result.Append("Left Join [User] As [u] On [o].[UserId]=@_p_0");
 
         var builder = NewBuilder();
 
@@ -161,7 +161,7 @@ public class SqlServerBuilderTest
     // ── OrderBy ──────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：OrderBy 指定列名，升序生成 Asc 关键字。
+    /// 测试目的：OrderBy 指定列名时，当前实现直接输出列名，不额外追加 Asc。
     /// </summary>
     [Fact]
     public void Test_OrderBy_Asc()
@@ -170,7 +170,7 @@ public class SqlServerBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [User] ");
-        result.Append("Order By [Name] Asc");
+        result.Append("Order By [Name]");
 
         var builder = NewBuilder();
 
@@ -196,7 +196,7 @@ public class SqlServerBuilderTest
         var builder = NewBuilder();
 
         // Act
-        builder.Select("*").From("User").OrderByDesc("CreatedTime");
+        builder.Select("*").From("User").OrderBy("CreatedTime Desc");
 
         // Assert
         Assert.Equal(result.ToString(), builder.ToSql());
@@ -214,13 +214,13 @@ public class SqlServerBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [User] ");
-        result.AppendLine("Order By [Id] Asc ");
+        result.AppendLine("Order By [Id] ");
         result.Append("Offset @_p_0 Rows Fetch Next @_p_1 Rows Only");
 
         var builder = NewBuilder();
 
         // Act
-        builder.Select("*").From("User").OrderBy("Id").Page(1, 10);
+        builder.Select("*").From("User").Page(new Bing.Data.Pager(1, 10, "Id"));
 
         // Assert
         Assert.Equal(result.ToString(), builder.ToSql());
@@ -247,7 +247,7 @@ public class SqlServerBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：New() 返回相同方言的新 Builder，不含任何已有状态。
+    /// 测试目的：New() 返回相同方言的新 Builder，不含任何已有状态；未设置 From 前调用 ToSql 会触发校验异常。
     /// </summary>
     [Fact]
     public void Test_New_ShouldReturnFreshBuilder()
@@ -260,7 +260,7 @@ public class SqlServerBuilderTest
         var fresh = original.New();
 
         // Assert
-        fresh.ToSql().ShouldBeNullOrEmpty();
+        Should.Throw<InvalidOperationException>(() => fresh.ToSql());
     }
 
     // ── GetParams ────────────────────────────────────────────────

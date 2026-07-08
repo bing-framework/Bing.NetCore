@@ -1,4 +1,5 @@
 using AspectCore.Extensions.Hosting;
+using Bing.Data.Sql;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +47,6 @@ public class Startup
         services.AddPostgreSqlQuery(connectionString ?? string.Empty);
         services.AddPostgreSqlExecutor(connectionString ?? string.Empty);
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
-        services.EnableAop();
         services.AddBing();
     }
 }

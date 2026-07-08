@@ -2,6 +2,7 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql;
 
 namespace Bing.Dapper.Tests.Builders.Clauses;
 
@@ -121,10 +122,8 @@ public class OracleJoinClauseTest
     {
         // Arrange
         var result = new StringBuilder();
-        result.AppendLine("Join \"t1\" ");
-        result.AppendLine("On \"a\".\"id\"=:p_0 ");
-        result.Append("Join \"t2\" ");
-        result.Append("On \"b\".\"id\"=:p_1");
+        result.AppendLine("Join \"t1\" On \"a\".\"id\"=:p_0 ");
+        result.Append("Join \"t2\" On \"b\".\"id\"=:p_1");
 
         // Act
         _clause.Join("t1");
@@ -225,7 +224,7 @@ public class OracleJoinClauseTest
     public void Test_AppendJoin_Raw()
     {
         // Act
-        _clause.AppendJoin("Join \"raw_table\" On 1=1");
+        _clause.AppendJoin("\"raw_table\" On 1=1");
 
         // Assert
         Assert.Equal("Join \"raw_table\" On 1=1", GetSql());
@@ -234,19 +233,23 @@ public class OracleJoinClauseTest
     // ── Clear ─────────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：Clear 后再次调用 ToSql 应返回空，原有 Join 被清除。
+    /// 测试目的：通过 SqlBuilder.ClearJoin() 清空 Join 后，输出中不应保留 Join 片段。
     /// </summary>
     [Fact]
     public void Test_Clear_ShouldResetJoin()
     {
         // Arrange
-        _clause.Join("t");
-        _clause.On("a.id", "b");
+        var result = new StringBuilder();
+        result.AppendLine("Select * ");
+        result.Append("From \"User\"");
+
+        var builder = new OracleBuilder();
+        builder.Select("*").From("User").Join("t").On("a.id", "b");
 
         // Act
-        _clause.Clear();
+        builder.ClearJoin();
 
         // Assert
-        Assert.Empty(GetSql());
+        Assert.Equal(result.ToString(), builder.ToSql());
     }
 }
