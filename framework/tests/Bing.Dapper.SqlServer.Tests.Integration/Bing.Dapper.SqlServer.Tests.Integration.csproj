@@ -7,6 +7,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Dapper.SqlServer\Bing.Dapper.SqlServer.csproj" />
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>appsettings.json</DependentUpon>
+    </Content>
   </ItemGroup>
 
 </Project>

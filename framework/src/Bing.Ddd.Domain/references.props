@@ -1,6 +1,10 @@
 ﻿<Project>
   <ItemGroup>
-    <ProjectReference Include="..\Bing.Auditing\Bing.Auditing.csproj" />
+    <!-- AOP 参数拦截（ValidAttribute 已从 Bing.Validation 迁移至此） -->
+    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <!-- 只依赖审计契约，不依赖审计实现（P0-2 修复）。Bing.Data 需显式引用，不再通过 Bing.Auditing 传递 -->
+    <ProjectReference Include="..\Bing.Auditing.Contracts\Bing.Auditing.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
     <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
     <ProjectReference Include="..\Bing.Uow\Bing.Uow.csproj" />
     <ProjectReference Include="..\Bing.Validation\Bing.Validation.csproj" />

@@ -1,5 +1,6 @@
 ﻿using Bing.DependencyInjection;
 using Bing.Extensions;
+using Bing.Timing;
 using Bing.Users;
 
 namespace Bing.Auditing;
@@ -13,15 +14,22 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     /// 初始化一个<see cref="AuditPropertySetter"/>类型的实例
     /// </summary>
     /// <param name="currentUser">当前用户</param>
-    public AuditPropertySetter(ICurrentUser currentUser)
+    /// <param name="clock">时钟（可在测试中替换为 FakeClock）</param>
+    public AuditPropertySetter(ICurrentUser currentUser, IClock clock)
     {
         CurrentUser = currentUser;
+        Clock = clock;
     }
 
     /// <summary>
     /// 当前用户
     /// </summary>
     protected ICurrentUser CurrentUser { get; }
+
+    /// <summary>
+    /// 时钟
+    /// </summary>
+    protected IClock Clock { get; }
 
     /// <summary>
     /// 设置创建属性
@@ -70,7 +78,7 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     {
         if (targetObject is not IHasCreationTime objectWithCreationTime)
             return;
-        objectWithCreationTime.CreationTime ??= DateTime.Now;
+        objectWithCreationTime.CreationTime ??= Clock.Now;
     }
 
     /// <summary>
@@ -151,7 +159,7 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     protected virtual void SetLastModificationTime(object targetObject)
     {
         if (targetObject is IHasModificationTime objectWithModificationTime)
-            objectWithModificationTime.LastModificationTime = DateTime.Now;
+            objectWithModificationTime.LastModificationTime = Clock.Now;
     }
 
     /// <summary>
@@ -214,7 +222,7 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     protected virtual void SetDeletionTime(object targetObject)
     {
         if (targetObject is IHasDeletionTime objectWithDeletionTime)
-            objectWithDeletionTime.DeletionTime = DateTime.Now;
+            objectWithDeletionTime.DeletionTime = Clock.Now;
     }
 
     /// <summary>

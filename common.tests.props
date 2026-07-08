@@ -34,4 +34,6 @@
   </ItemGroup>
 
   <Import Project="asset/props/sourcelink.env.props"/>
+
+  <Import Project="asset/props/target.feature.props"/>
 </Project>

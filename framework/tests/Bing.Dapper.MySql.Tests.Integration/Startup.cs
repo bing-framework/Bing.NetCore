@@ -25,7 +25,14 @@ public class Startup
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureDefaults(null)
-            .UseServiceContext();
+            .UseServiceContext()
+            .ConfigureAppConfiguration((_, builder) =>
+            {
+                // 支持通过 appsettings.Development.json 覆盖连接字符串（本地开发，不提交到 Git）
+                builder.AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: false);
+                // 支持通过环境变量 ConnectionStrings__DefaultConnection 覆盖（CI/CD 使用）
+                builder.AddEnvironmentVariables();
+            });
     }
 
     /// <summary>

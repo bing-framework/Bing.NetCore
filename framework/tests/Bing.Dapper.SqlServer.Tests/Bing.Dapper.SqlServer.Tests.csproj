@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Bing.Dapper.Tests</RootNamespace>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Dapper.SqlServer\Bing.Dapper.SqlServer.csproj" />
+  </ItemGroup>
+</Project>
