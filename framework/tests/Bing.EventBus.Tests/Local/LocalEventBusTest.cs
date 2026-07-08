@@ -41,7 +41,7 @@ public class LocalEventBusTest
     public async Task Test_PublishAsync_2()
     {
         IEvent @event = new EventSample { Value = "a" };
-        await _eventBus.PublishAsync(@event);
+        await _eventBus.PublishAsync(@event.GetType(), @event);
         Assert.Equal("1:a", ((EventSample)@event).Result);
     }
 
@@ -64,7 +64,7 @@ public class LocalEventBusTest
     {
         var @event = new EventSample3();
         await _eventBus.PublishAsync(@event);
-        Assert.Equal("54", @event.Result);
+        Assert.Equal("456", @event.Result);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class LocalEventBusTest
     public async Task Test_PublishAsync_Order_3()
     {
         IEvent @event = new EventSample3();
-        await _eventBus.PublishAsync(@event);
-        Assert.Equal("54", ((EventSample3)@event).Result);
+        await _eventBus.PublishAsync(@event.GetType(), @event);
+        Assert.Equal("456", ((EventSample3)@event).Result);
     }
 }

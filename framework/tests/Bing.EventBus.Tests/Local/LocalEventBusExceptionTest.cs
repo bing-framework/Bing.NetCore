@@ -16,7 +16,7 @@ public class LocalEventBusExceptionTest
     {
         var services = new ServiceCollection();
         var sp = services.BuildServiceProvider();
-        var options = Options.Create(new LocalEventBusOptions());
+        var options = Microsoft.Extensions.Options.Options.Create(new LocalEventBusOptions());
         return new LocalEventBus(options, sp.GetRequiredService<IServiceScopeFactory>());
     }
 

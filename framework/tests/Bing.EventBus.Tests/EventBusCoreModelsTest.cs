@@ -178,14 +178,14 @@ public class ActionEventHandlerTest
     {
         // Arrange
         var completed = false;
-        var sut = new ActionEventHandler<int>(async _ =>
+        var sut = new ActionEventHandler<string>(async _ =>
         {
             await Task.Yield();
             completed = true;
         });
 
         // Act
-        await sut.HandleAsync(42);
+        await sut.HandleAsync("42");
 
         // Assert
         completed.ShouldBeTrue();
@@ -198,10 +198,10 @@ public class ActionEventHandlerTest
     public async Task HandleAsync_WhenActionThrows_ShouldPropagateException()
     {
         // Arrange
-        var sut = new ActionEventHandler<int>(_ => throw new InvalidOperationException("boom"));
+        var sut = new ActionEventHandler<string>(_ => throw new InvalidOperationException("boom"));
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(() => sut.HandleAsync(0));
+        await Should.ThrowAsync<InvalidOperationException>(() => sut.HandleAsync(string.Empty));
     }
 }
 

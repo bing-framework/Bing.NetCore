@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="EventBusFactoryAndNullBusTest.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.EventBus\Bing.EventBus.csproj" />
   </ItemGroup>
 

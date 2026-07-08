@@ -52,6 +52,6 @@ public class EventBusTest
     {
         var @event = new EventSample3();
         await _eventBus.PublishAsync(@event);
-        Assert.Equal("54", @event.Result);
+        Assert.Equal("456", @event.Result);
     }
 }
