@@ -237,9 +237,10 @@ public abstract partial class SqlQueryBase
                 return default;
             var connection = GetConnection();
             var sql = GetSql();
+            var dbParameters = GetDbParameters();
             message = ExecuteBefore(sql, Params, connection);
             WriteTraceLog(sql, Params, GetDebugSql());
-            result = func(connection, sql, Params, GetTransaction());
+            result = func(connection, sql, dbParameters, GetTransaction());
             ExecuteAfter(message);
             return result;
         }
@@ -269,9 +270,10 @@ public abstract partial class SqlQueryBase
                 return default;
             var connection = GetConnection();
             var sql = GetSql();
+            var dbParameters = GetDbParameters();
             message = ExecuteBefore(sql, Params, connection);
             WriteTraceLog(sql, Params, GetDebugSql());
-            result = await func(connection, sql, Params, GetTransaction());
+            result = await func(connection, sql, dbParameters, GetTransaction());
             ExecuteAfter(message);
             return result;
         }

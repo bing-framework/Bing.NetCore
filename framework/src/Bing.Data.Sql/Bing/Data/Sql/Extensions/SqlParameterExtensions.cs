@@ -1,6 +1,10 @@
-﻿using Bing.Data.Sql.Builders;
+﻿using System.Collections.ObjectModel;
+using System.Linq.Expressions;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Operations;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Expressions;
 using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -29,6 +33,33 @@ public static class SqlParameterExtensions
         return source;
     }
 
+    /// <summary>
+    /// 添加Sql参数
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="name">参数名</param>
+    /// <param name="property">实体属性表达式</param>
+    /// <param name="value">参数值</param>
+    public static T AddParam<T, TEntity>(this T source, string name, Expression<Func<TEntity, object>> property,
+        object value = null)
+        where T : ISqlParameter
+        where TEntity : class
+    {
+        source.CheckNull(nameof(source));
+        property.CheckNull(nameof(property));
+        if (source is not ISqlPartAccessor accessor)
+            return source;
+        if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
+        {
+            advancedParameterManager.Add(CreateSqlParam(source, name, property, value));
+            return source;
+        }
+        accessor.ParameterManager.Add(name, value);
+        return source;
+    }
+
     #endregion
 
     #region GetParams(获取参数列表)
@@ -43,6 +74,28 @@ public static class SqlParameterExtensions
         if (source is ISqlPartAccessor accessor)
             return accessor.ParameterManager.GetParams();
         return default;
+    }
+
+    /// <summary>
+    /// 获取增强参数列表
+    /// </summary>
+    /// <param name="source">源</param>
+    public static IReadOnlyDictionary<string, SqlParam> GetSqlParams(this ISqlParameter source)
+    {
+        source.CheckNull(nameof(source));
+        if (source is not ISqlPartAccessor accessor)
+            return default;
+        if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
+            return advancedParameterManager.GetSqlParams();
+        var parameters = accessor.ParameterManager.GetParams().ToDictionary(
+            item => item.Key,
+            item => new SqlParam(item.Key, item.Value)
+            {
+                Source = SqlParameterSource.Legacy,
+                MetadataLevel = SqlParameterMetadataLevel.Weak
+            },
+            StringComparer.OrdinalIgnoreCase);
+        return new ReadOnlyDictionary<string, SqlParam>(parameters);
     }
 
     #endregion
@@ -99,6 +152,57 @@ public static class SqlParameterExtensions
         if (source is ISqlPartAccessor accessor)
             accessor.ParameterManager.Clear();
         return source;
+    }
+
+    /// <summary>
+    /// 创建增强 Sql 参数
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="name">参数名</param>
+    /// <param name="property">属性表达式</param>
+    /// <param name="value">参数值</param>
+    /// <returns>Sql 参数</returns>
+    private static SqlParam CreateSqlParam<T, TEntity>(T source, string name, Expression<Func<TEntity, object>> property,
+        object value)
+        where T : ISqlParameter
+        where TEntity : class
+    {
+        var propertyName = Lambdas.GetLastName(property);
+        var builder = GetSqlBuilder(source);
+        if (builder is SqlBuilderBase sqlBuilder)
+        {
+            var column = sqlBuilder.ResolveColumnMetadata(typeof(TEntity), propertyName);
+            var parameter = sqlBuilder.CreateSqlParam(name, value, column, typeof(TEntity), SqlParameterSource.Manual);
+            if (parameter != null)
+            {
+                parameter.EntityType ??= typeof(TEntity);
+                parameter.PropertyName ??= propertyName;
+                parameter.Source = SqlParameterSource.Manual;
+                return parameter;
+            }
+        }
+        return new SqlParam(name, value)
+        {
+            EntityType = typeof(TEntity),
+            PropertyName = propertyName,
+            Source = SqlParameterSource.Manual,
+            MetadataLevel = SqlParameterMetadataLevel.Weak
+        };
+    }
+
+    /// <summary>
+    /// 获取 Sql 生成器
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <param name="source">源</param>
+    /// <returns>Sql 生成器</returns>
+    private static ISqlBuilder GetSqlBuilder<T>(T source) where T : ISqlParameter
+    {
+        if (source is ISqlQuery sqlQuery)
+            return sqlQuery.GetBuilder();
+        return source as ISqlBuilder;
     }
 
     #endregion

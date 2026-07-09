@@ -1,8 +1,10 @@
 ﻿using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
+using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Text;
@@ -43,6 +45,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// 参数字面值解析器
     /// </summary>
     private IParamLiteralsResolver _paramLiteralsResolver;
+
+    /// <summary>
+    /// Sql 参数绑定器
+    /// </summary>
+    private ISqlParameterBinder _sqlParameterBinder;
 
     #endregion
 
@@ -130,6 +137,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ??= CreateParamLiteralsResolver();
 
     /// <summary>
+    /// Sql 参数绑定器
+    /// </summary>
+    protected ISqlParameterBinder SqlParameterBinder => _sqlParameterBinder ??= CreateSqlParameterBinder();
+
+    /// <summary>
     /// Select子句
     /// </summary>
     public ISelectClause SelectClause => ((ISqlPartAccessor)SqlBuilder).SelectClause;
@@ -211,6 +223,18 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     protected virtual IParamLiteralsResolver CreateParamLiteralsResolver() => new ParamLiteralsResolver();
 
+    /// <summary>
+    /// 创建 Sql 参数绑定器
+    /// </summary>
+    /// <returns>Sql 参数绑定器</returns>
+    protected virtual ISqlParameterBinder CreateSqlParameterBinder() =>
+        ServiceProvider.GetService<ISqlParameterBinder>() ?? new DefaultSqlParameterBinder(
+            ServiceProvider.GetService<IEntityMetadata>(),
+            ServiceProvider.GetService<IEntityMappingResolver>(),
+            ServiceProvider.GetService<IDatabaseContextAccessor>(),
+            ServiceProvider.GetService<ISqlParameterFactory>(),
+            ServiceProvider.GetService<SqlMetadataOptions>());
+
     #endregion
 
     #region SetConnection(设置数据库连接)
@@ -282,6 +306,26 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     public ISqlBuilder GetBuilder() => SqlBuilder;
 
     /// <summary>
+    /// 获取数据库参数
+    /// </summary>
+    /// <returns>数据库参数</returns>
+    protected object GetDbParameters() => GetDbParameters(SqlBuilder);
+
+    /// <summary>
+    /// 获取数据库参数
+    /// </summary>
+    /// <param name="builder">Sql 生成器</param>
+    /// <returns>数据库参数</returns>
+    protected object GetDbParameters(ISqlBuilder builder) => SqlParameterBinder.Bind(builder);
+
+    /// <summary>
+    /// 获取数据库参数
+    /// </summary>
+    /// <param name="parameter">原始参数对象</param>
+    /// <returns>数据库参数</returns>
+    protected object GetDbParameters(object parameter) => SqlParameterBinder.Bind(parameter);
+
+    /// <summary>
     /// 分页查询
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>
@@ -309,10 +353,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
             var conn = GetConnection();
-            message = ExecuteBefore(sql, Params, conn);
+            var dbParameters = GetDbParameters(builder);
+            message = ExecuteBefore(sql, builder.GetParams(), conn);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = conn.ExecuteScalar(sql, builder.GetParams(), GetTransaction(), timeout);
+            var result = conn.ExecuteScalar(sql, dbParameters, GetTransaction(), timeout);
 
             ExecuteAfter(message);
             return Conv.ToInt(result);

@@ -1,4 +1,6 @@
-﻿using Bing.Data.Sql.Metadata;
+﻿using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -32,6 +34,14 @@ public static partial class DapperServiceCollectionExtensions
     {
         services.TryAddScoped(typeof(TInterface), typeof(TImplementation));
         services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
+        services.TryAddSingleton<SqlMetadataOptions>();
+        services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
+        services.TryAddSingleton<IDatabaseScopeManager, DatabaseScopeManager>();
+        services.TryAddScoped<IEntityMappingResolver, DefaultEntityMappingResolver>();
+        services.TryAddScoped<IFieldValueConverter, DefaultFieldValueConverter>();
+        services.TryAddScoped<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
+        services.TryAddScoped<ISqlParameterFactory, DefaultSqlParameterFactory>();
+        services.TryAddScoped<ISqlParameterBinder, DefaultSqlParameterBinder>();
         return services;
     }
 

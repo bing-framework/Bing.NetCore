@@ -1,6 +1,7 @@
 ﻿using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders;
@@ -16,8 +17,16 @@ public class OracleBuilder : SqlBuilderBase
     /// <param name="metadata">实体元数据解析器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
-    public OracleBuilder(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null) 
-        : base(metadata, tableDatabase, parameterManager)
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
+    /// <param name="metadataOptions">Sql 元数据配置</param>
+    public OracleBuilder(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
+        IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
+        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
+        SqlMetadataOptions metadataOptions = null) 
+        : base(metadata, tableDatabase, parameterManager, entityMappingResolver, databaseContextAccessor,
+            sqlParameterFactory, metadataOptions)
     {
     }
 
@@ -33,7 +42,8 @@ public class OracleBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
-    public override ISqlBuilder New() => new OracleBuilder(EntityMetadata, TableDatabase, ParameterManager);
+    public override ISqlBuilder New() => new OracleBuilder(EntityMetadata, TableDatabase, ParameterManager,
+        EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions);
 
     /// <inheritdoc />
     protected override string CreateLimitSql() => $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";

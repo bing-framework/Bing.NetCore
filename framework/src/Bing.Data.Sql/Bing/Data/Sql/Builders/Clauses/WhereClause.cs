@@ -4,6 +4,8 @@ using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 using Bing.Expressions;
 using Bing.Extensions;
 using Bing.Properties;
@@ -47,6 +49,26 @@ public class WhereClause : IWhereClause
     /// </summary>
     private ICondition _condition;
 
+    /// <summary>
+    /// 实体映射解析器
+    /// </summary>
+    private readonly IEntityMappingResolver _entityMappingResolver;
+
+    /// <summary>
+    /// 数据库上下文访问器
+    /// </summary>
+    private readonly IDatabaseContextAccessor _databaseContextAccessor;
+
+    /// <summary>
+    /// Sql 参数工厂
+    /// </summary>
+    private readonly ISqlParameterFactory _sqlParameterFactory;
+
+    /// <summary>
+    /// Sql 元数据配置
+    /// </summary>
+    private readonly SqlMetadataOptions _metadataOptions;
+
     #endregion
 
     #region 构造函数
@@ -60,15 +82,27 @@ public class WhereClause : IWhereClause
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="condition">查询条件</param>
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
+    /// <param name="metadataOptions">Sql 元数据配置</param>
     public WhereClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        IParameterManager parameterManager, ICondition condition = null)
+        IParameterManager parameterManager, ICondition condition = null,
+        IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
+        ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions metadataOptions = null)
     {
         Builder = builder;
         _dialect = dialect;
         _resolver = resolver;
         _condition = condition;
-        _helper = new Helper(dialect, resolver, register, parameterManager);
-        _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager);
+        _entityMappingResolver = entityMappingResolver;
+        _databaseContextAccessor = databaseContextAccessor;
+        _sqlParameterFactory = sqlParameterFactory;
+        _metadataOptions = metadataOptions;
+        _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
+            databaseContextAccessor, sqlParameterFactory, metadataOptions);
+        _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager,
+            entityMappingResolver, databaseContextAccessor, sqlParameterFactory, metadataOptions);
     }
 
     #endregion
@@ -82,7 +116,9 @@ public class WhereClause : IWhereClause
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
     public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager) =>
-        new WhereClause(builder, _dialect, _resolver, register, parameterManager, new SqlCondition(_condition?.GetCondition()));
+        new WhereClause(builder, _dialect, _resolver, register, parameterManager,
+            new SqlCondition(_condition?.GetCondition()), _entityMappingResolver, _databaseContextAccessor,
+            _sqlParameterFactory, _metadataOptions);
 
     #endregion
 
@@ -175,7 +211,7 @@ public class WhereClause : IWhereClause
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
     public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal)
-        where TEntity : class => Where(_helper.GetColumn(expression), value, @operator);
+        where TEntity : class => And(_helper.CreateCondition(expression, typeof(TEntity), value, @operator));
 
     /// <summary>
     /// 设置查询条件
@@ -572,8 +608,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary) where TEntity : class
     {
-        var column = _helper.GetColumn(expression);
-        Between(column, min, max, boundary);
+        Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
     /// <summary>
@@ -586,8 +621,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary) where TEntity : class
     {
-        var column = _helper.GetColumn(expression);
-        Between(column, min, max, boundary);
+        Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
     /// <summary>
@@ -600,8 +634,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary) where TEntity : class
     {
-        var column = _helper.GetColumn(expression);
-        Between(column, min, max, boundary);
+        Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
     /// <summary>
@@ -614,8 +647,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary) where TEntity : class
     {
-        var column = _helper.GetColumn(expression);
-        Between(column, min, max, boundary);
+        Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
     /// <summary>
@@ -628,8 +660,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary) where TEntity : class
     {
-        var column = _helper.GetColumn(expression);
-        Between(column, min, max, boundary);
+        Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
     /// <summary>
@@ -643,8 +674,8 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) where TEntity : class
     {
-        var column = _helper.GetColumn(expression);
-        Between(column, min, max, includeTime, boundary);
+        Where(_helper.Between(expression, typeof(TEntity), GetMin(min, max, includeTime),
+            GetMax(min, max, includeTime), GetBoundary(boundary, includeTime)));
     }
 
     /// <summary>

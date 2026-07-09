@@ -2,6 +2,8 @@
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -22,9 +24,16 @@ public class PredicateExpressionResolver
     /// <param name="resolver">实体解析器</param>
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
+    /// <param name="options">Sql 元数据配置</param>
     public PredicateExpressionResolver(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        IParameterManager parameterManager) =>
-        _helper = new Helper(dialect, resolver, register, parameterManager);
+        IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
+        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
+        SqlMetadataOptions options = null) =>
+        _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
+            databaseContextAccessor, sqlParameterFactory, options);
 
     /// <summary>
     /// 解析谓词表达式

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 
@@ -83,6 +84,26 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 表数据库
     /// </summary>
     protected ITableDatabase TableDatabase { get; private set; }
+
+    /// <summary>
+    /// 实体映射解析器
+    /// </summary>
+    protected IEntityMappingResolver EntityMappingResolver { get; private set; }
+
+    /// <summary>
+    /// 数据库上下文访问器
+    /// </summary>
+    protected IDatabaseContextAccessor DatabaseContextAccessor { get; private set; }
+
+    /// <summary>
+    /// Sql 参数工厂
+    /// </summary>
+    protected ISqlParameterFactory SqlParameterFactory { get; private set; }
+
+    /// <summary>
+    /// Sql 元数据配置
+    /// </summary>
+    protected SqlMetadataOptions MetadataOptions { get; private set; }
 
     /// <summary>
     /// 实体解析器
@@ -189,11 +210,24 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="metadata">实体元数据解析器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
-    protected SqlBuilderBase(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null, IParameterManager parameterManager = null)
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
+    /// <param name="metadataOptions">Sql 元数据配置</param>
+    protected SqlBuilderBase(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
+        IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
+        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
+        SqlMetadataOptions metadataOptions = null)
     {
         EntityMetadata = metadata;
         TableDatabase = tableDatabase;
         _parameterManager = parameterManager;
+        MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
+        DatabaseContextAccessor = databaseContextAccessor;
+        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(metadata, databaseContextAccessor,
+            MetadataOptions);
+        SqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
+            new DefaultFieldValueConverterSelector(null, MetadataOptions), databaseContextAccessor, MetadataOptions);
         EntityResolver = new EntityResolver(metadata);
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
@@ -234,7 +268,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 创建Where子句
     /// </summary>
-    protected virtual IWhereClause CreateWhereClause() => new WhereClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager);
+    protected virtual IWhereClause CreateWhereClause() => new WhereClause(this, Dialect, EntityResolver, AliasRegister,
+        ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions);
 
     /// <summary>
     /// 创建分组子句
@@ -271,6 +306,10 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
 
         EntityMetadata = sqlBuilder.EntityMetadata;
         _parameterManager = sqlBuilder._parameterManager?.Clone();
+        MetadataOptions = sqlBuilder.MetadataOptions;
+        DatabaseContextAccessor = sqlBuilder.DatabaseContextAccessor;
+        EntityMappingResolver = sqlBuilder.EntityMappingResolver;
+        SqlParameterFactory = sqlBuilder.SqlParameterFactory;
         EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMetadata);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
 
@@ -291,6 +330,50 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         UnionItems = sqlBuilder.UnionItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
         CteItems = sqlBuilder.CteItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
         _excludedFilters = sqlBuilder._excludedFilters;
+    }
+
+    /// <summary>
+    /// 获取当前数据库上下文
+    /// </summary>
+    /// <returns>数据库上下文</returns>
+    internal virtual DatabaseContext GetDatabaseContext() =>
+        DatabaseContextAccessor?.Current ?? MetadataOptions?.DefaultDatabaseContext;
+
+    /// <summary>
+    /// 解析列映射元数据
+    /// </summary>
+    /// <param name="entityType">实体类型</param>
+    /// <param name="propertyOrColumnName">属性名或列名</param>
+    /// <returns>列映射元数据</returns>
+    internal virtual ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName)
+    {
+        if (entityType == null || string.IsNullOrWhiteSpace(propertyOrColumnName) || EntityMappingResolver == null)
+            return null;
+        var mapping = EntityMappingResolver.Resolve(entityType, GetDatabaseContext());
+        if (mapping?.Columns == null || mapping.Columns.Count == 0)
+            return null;
+        if (mapping.Columns.TryGetValue(propertyOrColumnName, out var column))
+            return column;
+        return mapping.Columns.Values.FirstOrDefault(t =>
+            string.Equals(t.PropertyName, propertyOrColumnName, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(t.ColumnName, propertyOrColumnName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// 创建增强 Sql 参数
+    /// </summary>
+    /// <param name="name">参数名</param>
+    /// <param name="value">参数值</param>
+    /// <param name="column">列映射元数据</param>
+    /// <param name="entityType">实体类型</param>
+    /// <param name="source">参数来源</param>
+    /// <returns>Sql 参数</returns>
+    internal virtual SqlParam CreateSqlParam(string name, object value, ColumnMappingMetadata column, Type entityType,
+        SqlParameterSource source)
+    {
+        if (SqlParameterFactory == null)
+            return null;
+        return SqlParameterFactory.Create(name, value, column, GetDatabaseContext(), entityType, source);
     }
 
     #endregion

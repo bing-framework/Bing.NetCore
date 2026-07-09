@@ -40,8 +40,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
+            var dbParameters = GetDbParameters(param);
             message = ExecuteBefore(sql, param, connection);
-            result = connection.Execute(sql, param, GetTransaction(), timeout);
+            result = connection.Execute(sql, dbParameters, GetTransaction(), timeout);
             ExecuteAfter(message);
             return result;
         }
@@ -77,8 +78,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
+            var dbParameters = GetDbParameters(param);
             message = ExecuteBefore(sql, param, connection);
-            result = await connection.ExecuteAsync(sql, param, GetTransaction(), timeout);
+            result = await connection.ExecuteAsync(sql, dbParameters, GetTransaction(), timeout);
             ExecuteAfter(message);
             return result;
         }
@@ -114,8 +116,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
+            var dbParameters = GetDbParameters(param);
             message = ExecuteBefore(procedure, param, connection);
-            result = connection.Execute(procedure, param, GetTransaction(), timeout, GetProcedureCommandType());
+            result = connection.Execute(procedure, dbParameters, GetTransaction(), timeout, GetProcedureCommandType());
             ExecuteAfter(message);
             return result;
         }
@@ -151,8 +154,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
+            var dbParameters = GetDbParameters(param);
             message = ExecuteBefore(procedure, param, connection);
-            result = await connection.ExecuteAsync(procedure, param, GetTransaction(), timeout, GetProcedureCommandType());
+            result = await connection.ExecuteAsync(procedure, dbParameters, GetTransaction(), timeout, GetProcedureCommandType());
             ExecuteAfter(message);
             return result;
         }
@@ -167,6 +171,28 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             ExecuteAfter(result);
         }
     }
+
+    /// <summary>
+    /// 执行指定的SQL语句
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="sql">执行的SQL语句</param>
+    /// <param name="param">Sql 参数映射</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <returns>操作影响的行数</returns>
+    public virtual int ExecuteSql<TEntity>(string sql, SqlParameterMap<TEntity> param, int? timeout = null)
+        where TEntity : class => ExecuteSql(sql, (object)param, timeout);
+
+    /// <summary>
+    /// 执行指定的SQL语句
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="sql">执行的SQL语句</param>
+    /// <param name="param">Sql 参数映射</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <returns>操作影响的行数</returns>
+    public virtual Task<int> ExecuteSqlAsync<TEntity>(string sql, SqlParameterMap<TEntity> param, int? timeout = null)
+        where TEntity : class => ExecuteSqlAsync(sql, (object)param, timeout);
 
     #endregion
 }

@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Params;
 /// <summary>
 /// 参数管理器
 /// </summary>
-public class ParameterManager : IParameterManager
+public class ParameterManager : IAdvancedParameterManager
 {
     #region 字段
 
@@ -14,6 +14,11 @@ public class ParameterManager : IParameterManager
     /// 参数集合
     /// </summary>
     private readonly IDictionary<string, object> _params;
+
+    /// <summary>
+    /// 增强参数集合
+    /// </summary>
+    private readonly IDictionary<string, SqlParam> _sqlParams;
 
     /// <summary>
     /// 参数索引
@@ -33,6 +38,7 @@ public class ParameterManager : IParameterManager
         Dialect = dialect;
         _paramIndex = 0;
         _params = new Dictionary<string, object>();
+        _sqlParams = new Dictionary<string, SqlParam>();
     }
 
     /// <summary>
@@ -44,6 +50,7 @@ public class ParameterManager : IParameterManager
         Dialect = parameterManager.Dialect;
         _paramIndex = parameterManager._paramIndex;
         _params = new Dictionary<string, object>(parameterManager._params);
+        _sqlParams = new Dictionary<string, SqlParam>(parameterManager._sqlParams);
     }
 
     #endregion
@@ -95,9 +102,81 @@ public class ParameterManager : IParameterManager
             return;
         name = NormalizeName(name);
         value = Dialect.GetParamValue(value);
+        value = GetValue(value, @operator);
         if (_params.ContainsKey(name))
             _params.Remove(name);
-        _params.Add(name, GetValue(value, @operator));
+        _params.Add(name, value);
+        AddSqlParam(CreateLegacySqlParam(name, value));
+    }
+
+    /// <summary>
+    /// 添加增强参数
+    /// </summary>
+    /// <param name="parameter">Sql 参数</param>
+    public void Add(SqlParam parameter)
+    {
+        if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
+            return;
+        var name = NormalizeName(parameter.Name);
+        var value = Dialect.GetParamValue(parameter.Value);
+        if (_params.ContainsKey(name))
+            _params.Remove(name);
+        _params.Add(name, value);
+        AddSqlParam(CloneSqlParam(parameter, name, value));
+    }
+
+    /// <summary>
+    /// 添加增强参数到内部字典
+    /// </summary>
+    /// <param name="parameter">Sql 参数</param>
+    private void AddSqlParam(SqlParam parameter)
+    {
+        if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
+            return;
+        if (_sqlParams.ContainsKey(parameter.Name))
+            _sqlParams.Remove(parameter.Name);
+        _sqlParams.Add(parameter.Name, parameter);
+    }
+
+    /// <summary>
+    /// 创建旧参数链路的增强参数
+    /// </summary>
+    /// <param name="name">参数名</param>
+    /// <param name="value">参数值</param>
+    /// <returns>Sql 参数</returns>
+    private SqlParam CreateLegacySqlParam(string name, object value)
+    {
+        return new SqlParam(name, value)
+        {
+            Source = SqlParameterSource.Legacy,
+            MetadataLevel = SqlParameterMetadataLevel.Weak
+        };
+    }
+
+    /// <summary>
+    /// 克隆增强参数并应用标准化后的名称和值
+    /// </summary>
+    /// <param name="parameter">源参数</param>
+    /// <param name="name">标准化参数名</param>
+    /// <param name="value">转换后的参数值</param>
+    /// <returns>Sql 参数</returns>
+    private SqlParam CloneSqlParam(SqlParam parameter, string name, object value)
+    {
+        return new SqlParam(name, value, parameter.DbType, parameter.Direction, parameter.Size, parameter.Precision,
+            parameter.Scale)
+        {
+            EntityType = parameter.EntityType,
+            PropertyName = parameter.PropertyName,
+            ColumnName = parameter.ColumnName,
+            DatabaseType = parameter.DatabaseType,
+            DatabaseRole = parameter.DatabaseRole,
+            ProviderTypeName = parameter.ProviderTypeName,
+            Source = parameter.Source,
+            MetadataLevel = parameter.MetadataLevel,
+            StorageKind = parameter.StorageKind,
+            ConverterKind = parameter.ConverterKind,
+            CustomConverterName = parameter.CustomConverterName
+        };
     }
 
     /// <summary>
@@ -134,6 +213,16 @@ public class ParameterManager : IParameterManager
     /// </summary>
     public IReadOnlyDictionary<string, object> GetParams() => new ReadOnlyDictionary<string, object>(_params);
 
+    /// <summary>
+    /// 获取增强参数列表
+    /// </summary>
+    public IReadOnlyDictionary<string, SqlParam> GetSqlParams() => new ReadOnlyDictionary<string, SqlParam>(_sqlParams);
+
+    /// <summary>
+    /// 导出参数值集合
+    /// </summary>
+    public IReadOnlyDictionary<string, object> ExportValues() => new ReadOnlyDictionary<string, object>(_params);
+
     #endregion
 
     #region Contains(是否包含参数)
@@ -167,6 +256,7 @@ public class ParameterManager : IParameterManager
     {
         _paramIndex = 0;
         _params.Clear();
+        _sqlParams.Clear();
     }
 
     #endregion

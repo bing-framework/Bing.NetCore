@@ -1,5 +1,7 @@
 ﻿using System;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +21,12 @@ public abstract class OracleSqlQueryBase : SqlQueryBase
     /// <inheritdoc />
     protected override ISqlBuilder CreateSqlBuilder() => new OracleBuilder(
         ServiceProvider.GetService<IEntityMetadata>(),
-        ServiceProvider.GetService<ITableDatabase>());
+        ServiceProvider.GetService<ITableDatabase>(),
+        null,
+        ServiceProvider.GetService<IEntityMappingResolver>(),
+        ServiceProvider.GetService<IDatabaseContextAccessor>(),
+        ServiceProvider.GetService<ISqlParameterFactory>(),
+        ServiceProvider.GetService<SqlMetadataOptions>());
 
     /// <inheritdoc />
     protected override IDatabaseFactory CreateDatabaseFactory() => new OracleDatabaseFactory();
