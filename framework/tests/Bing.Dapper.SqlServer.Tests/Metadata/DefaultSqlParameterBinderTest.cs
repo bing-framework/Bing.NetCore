@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using Bing.Data.Sql;
@@ -37,6 +38,29 @@ public class DefaultSqlParameterBinderTest
     }
 
     /// <summary>
+    /// 测试 - 绑定器应把 decimal 参数的精度与小数位写入数据库参数。
+    /// </summary>
+    [Fact]
+    public void DapperParameterBinder_ShouldApplyPrecisionAndScale()
+    {
+        // Arrange
+        var binder = new DefaultSqlParameterBinder();
+        var map = new SqlParameterMap<DecimalSample>().Add("amount", t => t.Amount, 12.34m);
+        var parameters = Assert.IsAssignableFrom<SqlMapper.IDynamicParameters>(binder.Bind(map));
+        var command = new FakeDbCommand();
+
+        // Act
+        parameters.AddParameters(command, null);
+        var parameter = Assert.Single(command.CreatedParameters);
+
+        // Assert
+        Assert.Equal("amount", parameter.ParameterName);
+        Assert.Equal(DbType.Decimal, parameter.DbType);
+        Assert.Equal((byte)10, parameter.Precision);
+        Assert.Equal((byte)2, parameter.Scale);
+    }
+
+    /// <summary>
     /// 测试样例
     /// </summary>
     private sealed class Sample
@@ -46,6 +70,18 @@ public class DefaultSqlParameterBinderTest
         /// </summary>
         [StringLength(20)]
         public string StringValue { get; set; }
+    }
+
+    /// <summary>
+    /// decimal 参数测试样例
+    /// </summary>
+    private sealed class DecimalSample
+    {
+        /// <summary>
+        /// 金额
+        /// </summary>
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal Amount { get; set; }
     }
 
     /// <summary>

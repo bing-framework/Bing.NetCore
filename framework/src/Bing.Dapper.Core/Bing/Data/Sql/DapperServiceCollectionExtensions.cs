@@ -36,12 +36,16 @@ public static partial class DapperServiceCollectionExtensions
         services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
         services.TryAddSingleton<SqlMetadataOptions>();
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
-        services.TryAddSingleton<IDatabaseScopeManager, DatabaseScopeManager>();
-        services.TryAddScoped<IEntityMappingResolver, DefaultEntityMappingResolver>();
-        services.TryAddScoped<IFieldValueConverter, DefaultFieldValueConverter>();
-        services.TryAddScoped<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
-        services.TryAddScoped<ISqlParameterFactory, DefaultSqlParameterFactory>();
-        services.TryAddScoped<ISqlParameterBinder, DefaultSqlParameterBinder>();
+        services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
+        services.TryAddSingleton<IDatabaseDescriptorResolver, DefaultDatabaseDescriptorResolver>();
+        services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
+        services.TryAddSingleton<IEntityMappingResolver, DefaultEntityMappingResolver>();
+        services.TryAddSingleton<IFieldValueConverter, DefaultFieldValueConverter>();
+        services.TryAddSingleton<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
+        services.TryAddSingleton<ISqlParameterFactory, DefaultSqlParameterFactory>();
+        services.TryAddSingleton<ISqlParameterBinder, DefaultSqlParameterBinder>();
+        services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
+        services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
         return services;
     }
 
@@ -66,7 +70,27 @@ public static partial class DapperServiceCollectionExtensions
         where TInterface : IEntityMetadata
         where TImplementation : class, TInterface
     {
-        services.TryAddScoped(typeof(TInterface), typeof(TImplementation));
+        services.TryAddSingleton(typeof(TInterface), typeof(TImplementation));
+        return services;
+    }
+
+    /// <summary>
+    /// 注册数据库类型转换器
+    /// </summary>
+    /// <typeparam name="TConverter">数据类型转换器类型</typeparam>
+    /// <param name="services">服务集合</param>
+    /// <param name="databaseType">数据库类型</param>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddDatabaseTypeConverter<TConverter>(this IServiceCollection services,
+        Bing.Data.Enums.DatabaseType databaseType)
+        where TConverter : class, Bing.Data.Metadata.ITypeConverter
+    {
+        services.TryAddSingleton<TConverter>();
+        services.AddSingleton<DatabaseTypeConverterRegistration>(provider => new DatabaseTypeConverterRegistration
+        {
+            DatabaseType = databaseType,
+            Converter = provider.GetRequiredService<TConverter>()
+        });
         return services;
     }
 

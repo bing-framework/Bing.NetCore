@@ -15,21 +15,16 @@ public class IsDeletedFilter : ISqlFilter
     public void Filter(SqlContext context)
     {
         foreach (var item in context.EntityAliasRegister.Data)
-            Filter(context.Dialect, context.Metadata, context.EntityAliasRegister, context.ClauseAccessor.JoinClause, context.ClauseAccessor.WhereClause, item.Key, item.Value);
+            Filter(context, item.Key, item.Value);
     }
 
     /// <summary>
     /// 过滤
     /// </summary>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="matedata">实体元数据解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="join">Join子句</param>
-    /// <param name="where">Where子句</param>
+    /// <param name="context">Sql查询执行上下文</param>
     /// <param name="type">类型</param>
     /// <param name="alias">表别名</param>
-    private void Filter(IDialect dialect, IEntityMetadata matedata, IEntityAliasRegister register, IJoinClause join,
-        IWhereClause where, Type type, string alias)
+    private void Filter(SqlContext context, Type type, string alias)
     {
         if (type == null)
             return;
@@ -37,12 +32,36 @@ public class IsDeletedFilter : ISqlFilter
             return;
         if (typeof(ISoftDelete).IsAssignableFrom(type) == false)
             return;
-        var isDeleted = $"{dialect.SafeName(alias)}.{dialect.SafeName(matedata.GetColumn(type, "IsDeleted"))}";
-        if (register.FromType == type)
+        var columnName = ResolveColumn(context, type, "IsDeleted");
+        var isDeleted = $"{context.Dialect.SafeName(alias)}.{context.Dialect.SafeName(columnName)}";
+        if (context.EntityAliasRegister.FromType == type)
         {
-            where.Where(isDeleted, false);
+            context.ClauseAccessor.WhereClause.Where(isDeleted, false);
             return;
         }
-        join.Find(type)?.On(isDeleted, false);
+        context.ClauseAccessor.JoinClause.Find(type)?.On(isDeleted, false);
+    }
+
+    /// <summary>
+    /// 解析列名
+    /// </summary>
+    /// <param name="context">Sql查询执行上下文</param>
+    /// <param name="type">实体类型</param>
+    /// <param name="propertyName">属性名</param>
+    /// <returns>列名</returns>
+    private static string ResolveColumn(SqlContext context, Type type, string propertyName)
+    {
+        var mapping = context.EntityMappingResolver?.Resolve(type, context.DatabaseContext);
+        if (mapping?.Columns != null)
+        {
+            if (mapping.Columns.TryGetValue(propertyName, out var column))
+                return column.ColumnName;
+            var mappedColumn = mapping.Columns.Values.FirstOrDefault(t =>
+                string.Equals(t.PropertyName, propertyName, StringComparison.OrdinalIgnoreCase));
+            if (mappedColumn != null)
+                return mappedColumn.ColumnName;
+        }
+
+        return context.Metadata.GetColumn(type, propertyName);
     }
 }

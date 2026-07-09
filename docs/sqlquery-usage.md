@@ -214,6 +214,168 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 
 ---
 
+## 多数据库上下文与运行时切库
+
+当前实现支持通过数据库上下文在运行期切换 `DbKey`、`DatabaseType`、`Role`，并让表名、列名、连接串与参数元数据同步切换。
+
+### 1. 注册数据库上下文能力
+
+`AddDatabase<TDatabase>()` 现在会一并注册：
+
+- `IDatabaseContextAccessor`
+- `IDatabaseScopeManager`
+- `IDatabaseDescriptorResolver`
+- `IEntityMappingResolver`
+- `ITypeConverterResolver`
+- `ISqlQueryFactory`
+- `ISqlExecutorFactory`
+
+如果需要显式配置多库连接描述与实体映射，建议在注册数据库服务前提供自定义 `SqlMetadataOptions`：
+
+```csharp
+services.AddSingleton(new SqlMetadataOptions
+{
+    DefaultDatabaseContext = new DatabaseContext
+    {
+        DbKey = "default",
+        DatabaseType = DatabaseType.MySql,
+        Role = DatabaseRole.Default
+    },
+    Databases =
+    {
+        [SqlMetadataOptions.GetDatabaseDescriptorKey("default", DatabaseType.MySql, DatabaseRole.Default)] =
+            new DatabaseDescriptor
+            {
+                DbKey = "default",
+                DatabaseType = DatabaseType.MySql,
+                Role = DatabaseRole.Default,
+                ConnectionString = "Server=127.0.0.1;Database=app;Uid=root;Pwd=123456;"
+            },
+        [SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.PgSql, DatabaseRole.Reporting)] =
+            new DatabaseDescriptor
+            {
+                DbKey = "reporting",
+                DatabaseType = DatabaseType.PgSql,
+                Role = DatabaseRole.Reporting,
+                ConnectionString = "Host=127.0.0.1;Database=reporting;Username=postgres;Password=123456;",
+                ReadOnly = true
+            }
+    }
+});
+
+services.AddDatabase<AppDatabase>();
+services.AddMySqlQuery();
+services.AddMySqlSqlExecutor();
+```
+
+### 2. 使用作用域切换当前数据库上下文
+
+```csharp
+public async Task<List<UserDto>> QueryReportingUsersAsync(
+    IDatabaseScopeManager scopeManager,
+    ISqlQueryFactory queryFactory)
+{
+    using (scopeManager.Use("reporting", DatabaseType.PgSql, DatabaseRole.Reporting))
+    {
+        var query = queryFactory.Create<ISqlQuery>();
+        query.From<User>("u").Where<User>(x => x.Enabled, true);
+        return await query.ToListAsync<UserDto>();
+    }
+}
+```
+
+要点：
+
+- `DatabaseScopeManager` 支持嵌套作用域，内层释放后会恢复父级上下文；
+- `ISqlQueryFactory` / `ISqlExecutorFactory` 会基于当前 `DatabaseContext` 解析连接串并创建对应实例；
+- 同一实体在不同上下文下，SQL 中输出的表名、列名和执行连接可以不同。
+
+### 3. 显式实体映射
+
+当同一实体需要映射到不同库、不同表或不同列时，可通过 `SqlMetadataOptions.EntityMappings` 显式配置：
+
+```csharp
+var options = new SqlMetadataOptions();
+options.EntityMappings.Add(new EntityMappingOptions
+{
+    EntityType = typeof(User),
+    DbKey = "default",
+    DatabaseType = DatabaseType.MySql,
+    Role = DatabaseRole.Default,
+    TableName = "users",
+    Columns =
+    {
+        [nameof(User.Status)] = new ColumnMappingOptions
+        {
+            PropertyName = nameof(User.Status),
+            ColumnName = "status"
+        }
+    }
+});
+
+options.EntityMappings.Add(new EntityMappingOptions
+{
+    EntityType = typeof(User),
+    DbKey = "reporting",
+    DatabaseType = DatabaseType.PgSql,
+    Role = DatabaseRole.Reporting,
+    TableName = "users_archive",
+    Columns =
+    {
+        [nameof(User.Status)] = new ColumnMappingOptions
+        {
+            PropertyName = nameof(User.Status),
+            ColumnName = "status_code"
+        }
+    }
+});
+```
+
+映射解析顺序为：显式 `EntityMappings` -> 现有 `IEntityMetadata` -> CLR 类型回退。
+
+---
+
+## 原生 SQL 参数元数据增强
+
+除了原有 `ExecuteSql(string sql, object param)` 用法外，现在还可以通过 `SqlParameterMap<TEntity>` 为原生 SQL 提供实体级参数元数据。
+
+### 1. 使用 `ExecuteSql<TEntity>()` 扩展方法
+
+```csharp
+await executor.ExecuteSqlAsync<User>(
+    "Update users set name=@name where id=@userId",
+    new { name = "Tom", userId = 1 },
+    map => map
+        .Map("name", x => x.Name)
+        .Map("userId", x => x.Id));
+```
+
+能力说明：
+
+- 支持“参数名”和“实体属性名”不一致；
+- 参数值可来自匿名对象、字典或普通 POCO；
+- 找不到值时会降级为弱元数据，不会破坏旧调用方式；
+- 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数。
+
+### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
+
+```csharp
+sqlQuery.From<User>("u")
+    .Where<User>(x => x.Name, "Tom");
+
+sqlQuery.GetBuilder().AddParam<User>("statusCode", x => x.Status, 1);
+```
+
+该方式适合：
+
+- 继续沿用现有 Builder / Query 代码；
+- 在不改 SQL 片段文本的前提下，补齐特定参数的数据库元数据；
+- 让 `GetCountAsync()`、原生 SQL 执行、分页等路径统一走增强参数绑定。
+
+注意：`GetBuilder().GetParams()` 仍然保留轻量参数列表语义，便于调试；真正执行时会自动绑定增强后的数据库参数。
+
+---
+
 ## 典型使用示例
 
 > 以下示例中的执行部分（`SomeExecutor.Execute*`）仅为示意，请根据实际项目中 `ISqlQueryOperation` 的实现替换为真实调用方式。

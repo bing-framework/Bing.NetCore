@@ -1,4 +1,6 @@
 ﻿using System;
+using Bing.Data.Enums;
+using Bing.Data.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -73,6 +75,7 @@ public static partial class DapperServiceCollectionExtensions
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         sqlOptions.RegisterGuidTypeHandler();
+        services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -143,6 +146,7 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;

@@ -205,12 +205,13 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     protected virtual IDatabase CreateDatabase()
     {
-        if (string.IsNullOrWhiteSpace(Options.ConnectionString))
+        var connectionString = ResolveConnectionString();
+        if (string.IsNullOrWhiteSpace(connectionString))
             throw new InvalidOperationException("数据库连接字符串不能为空");
         var factory = CreateDatabaseFactory();
         if (factory == null)
             throw new InvalidOperationException("数据库工厂不能为空");
-        return factory.Create(Options.ConnectionString);
+        return factory.Create(connectionString);
     }
 
     /// <summary>
@@ -234,6 +235,22 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             ServiceProvider.GetService<IDatabaseContextAccessor>(),
             ServiceProvider.GetService<ISqlParameterFactory>(),
             ServiceProvider.GetService<SqlMetadataOptions>());
+
+    /// <summary>
+    /// 解析连接字符串
+    /// </summary>
+    /// <returns>连接字符串</returns>
+    protected virtual string ResolveConnectionString()
+    {
+        var resolver = ServiceProvider.GetService<IDatabaseDescriptorResolver>();
+        var contextAccessor = ServiceProvider.GetService<IDatabaseContextAccessor>();
+        var metadataOptions = ServiceProvider.GetService<SqlMetadataOptions>();
+        var context = contextAccessor?.Current ?? metadataOptions?.DefaultDatabaseContext;
+        var descriptor = resolver?.Resolve(context);
+        if (string.IsNullOrWhiteSpace(descriptor?.ConnectionString) == false)
+            return descriptor.ConnectionString;
+        return Options.ConnectionString;
+    }
 
     #endregion
 
@@ -416,10 +433,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
             var conn = GetConnection();
-            message = ExecuteBefore(sql, Params, conn);
+            var dbParameters = GetDbParameters(builder);
+            message = ExecuteBefore(sql, builder.GetParams(), conn);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = await conn.ExecuteScalarAsync(sql, builder.GetParams(), GetTransaction(), timeout);
+            var result = await conn.ExecuteScalarAsync(sql, dbParameters, GetTransaction(), timeout);
 
             ExecuteAfter(message);
             return Conv.ToInt(result);

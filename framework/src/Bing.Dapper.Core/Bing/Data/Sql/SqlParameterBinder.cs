@@ -124,9 +124,19 @@ public class DefaultSqlParameterBinder : ISqlParameterBinder
     {
         if (item == null)
             return null;
+        if (item.ValueResolved == false && item.HasExplicitValue == false)
+        {
+            return new SqlParam(item.Name, item.Value)
+            {
+                EntityType = item.EntityType,
+                PropertyName = item.PropertyName,
+                Source = SqlParameterSource.RawSql,
+                MetadataLevel = SqlParameterMetadataLevel.Weak
+            };
+        }
         var column = ResolveColumnMetadata(item.EntityType, item.PropertyName);
         return _sqlParameterFactory.Create(item.Name, item.Value, column, GetDatabaseContext(), item.EntityType,
-            SqlParameterSource.Manual);
+            SqlParameterSource.RawSql);
     }
 
     /// <summary>

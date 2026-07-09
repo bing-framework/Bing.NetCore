@@ -44,7 +44,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 数据类型转换器
     /// </summary>
-    private readonly ITypeConverter _typeConverter;
+    private readonly ITypeConverterResolver _typeConverterResolver;
 
     /// <summary>
     /// 初始化一个<see cref="DefaultEntityMappingResolver"/>类型的实例
@@ -52,16 +52,16 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <param name="entityMetadata">实体元数据解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
-    /// <param name="typeConverter">数据类型转换器</param>
+    /// <param name="typeConverterResolver">数据类型转换器解析器</param>
     public DefaultEntityMappingResolver(IEntityMetadata entityMetadata = null,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions options = null,
-        ITypeConverter typeConverter = null)
+        ITypeConverterResolver typeConverterResolver = null)
     {
         _entityMetadata = entityMetadata ?? new DefaultEntityMetadata();
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
-        _typeConverter = typeConverter;
+        _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
     }
 
     /// <summary>
@@ -87,17 +87,19 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         if (entityType == null)
             throw new ArgumentNullException(nameof(entityType));
         var context = GetDatabaseContext(databaseContext);
-        var schema = _entityMetadata.GetSchema(entityType) ?? string.Empty;
-        var tableName = _entityMetadata.GetTable(entityType) ?? entityType.Name;
+        var mappingOptions = ResolveEntityMappingOptions(entityType, context);
+        var schema = GetSchema(entityType, mappingOptions);
+        var tableName = GetTableName(entityType, mappingOptions);
         var cacheKey = new EntityMappingCacheKey(
             entityType,
             context.DbKey,
             context.DatabaseType,
             context.Role,
             schema,
-            GetTableRouteKey(context),
-            context.MappingVersion);
-        return _mappingCache.GetOrAdd(cacheKey, _ => CreateMapping(entityType, context, schema, tableName));
+            GetTableRouteKey(context, mappingOptions),
+            GetMappingVersion(context, mappingOptions));
+        return _mappingCache.GetOrAdd(cacheKey,
+            _ => CreateMapping(entityType, context, schema, tableName, mappingOptions));
     }
 
     /// <summary>
@@ -125,8 +127,87 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 获取表路由键
     /// </summary>
     /// <param name="databaseContext">数据库上下文</param>
+    /// <param name="mappingOptions">实体映射配置</param>
     /// <returns>表路由键</returns>
-    protected virtual string GetTableRouteKey(DatabaseContext databaseContext) => databaseContext?.TenantId ?? string.Empty;
+    protected virtual string GetTableRouteKey(DatabaseContext databaseContext,
+        EntityMappingOptions mappingOptions = null) =>
+        string.IsNullOrWhiteSpace(mappingOptions?.TableRouteKey)
+            ? databaseContext?.TenantId ?? string.Empty
+            : mappingOptions.TableRouteKey;
+
+    /// <summary>
+    /// 获取映射版本
+    /// </summary>
+    /// <param name="databaseContext">数据库上下文</param>
+    /// <param name="mappingOptions">实体映射配置</param>
+    /// <returns>映射版本</returns>
+    protected virtual string GetMappingVersion(DatabaseContext databaseContext,
+        EntityMappingOptions mappingOptions = null) =>
+        string.IsNullOrWhiteSpace(databaseContext?.MappingVersion)
+            ? mappingOptions?.MappingVersion ?? string.Empty
+            : databaseContext.MappingVersion;
+
+    /// <summary>
+    /// 获取架构
+    /// </summary>
+    /// <param name="entityType">实体类型</param>
+    /// <param name="mappingOptions">实体映射配置</param>
+    /// <returns>架构</returns>
+    protected virtual string GetSchema(Type entityType, EntityMappingOptions mappingOptions) =>
+        string.IsNullOrWhiteSpace(mappingOptions?.Schema)
+            ? _entityMetadata.GetSchema(entityType) ?? string.Empty
+            : mappingOptions.Schema;
+
+    /// <summary>
+    /// 获取表名
+    /// </summary>
+    /// <param name="entityType">实体类型</param>
+    /// <param name="mappingOptions">实体映射配置</param>
+    /// <returns>表名</returns>
+    protected virtual string GetTableName(Type entityType, EntityMappingOptions mappingOptions) =>
+        string.IsNullOrWhiteSpace(mappingOptions?.TableName)
+            ? _entityMetadata.GetTable(entityType) ?? entityType.Name
+            : mappingOptions.TableName;
+
+    /// <summary>
+    /// 解析实体映射配置
+    /// </summary>
+    /// <param name="entityType">实体类型</param>
+    /// <param name="databaseContext">数据库上下文</param>
+    /// <returns>实体映射配置</returns>
+    protected virtual EntityMappingOptions ResolveEntityMappingOptions(Type entityType, DatabaseContext databaseContext)
+    {
+        var routeKey = GetTableRouteKey(databaseContext);
+        var mappingVersion = GetMappingVersion(databaseContext);
+        return _options.EntityMappings
+            .Where(t => t != null && t.EntityType == entityType)
+            .Where(t => string.IsNullOrWhiteSpace(t.DbKey) || string.Equals(t.DbKey, databaseContext?.DbKey, StringComparison.OrdinalIgnoreCase))
+            .Where(t => t.DatabaseType == databaseContext.DatabaseType)
+            .Where(t => t.Role == databaseContext.Role)
+            .Where(t => string.IsNullOrWhiteSpace(t.MappingVersion) || string.Equals(t.MappingVersion, mappingVersion, StringComparison.OrdinalIgnoreCase))
+            .Where(t => string.IsNullOrWhiteSpace(t.TableRouteKey) || string.Equals(t.TableRouteKey, routeKey, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(GetMappingSpecificity)
+            .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// 获取实体映射配置优先级
+    /// </summary>
+    /// <param name="mappingOptions">实体映射配置</param>
+    /// <returns>优先级</returns>
+    protected virtual int GetMappingSpecificity(EntityMappingOptions mappingOptions)
+    {
+        if (mappingOptions == null)
+            return 0;
+        var result = 0;
+        if (string.IsNullOrWhiteSpace(mappingOptions.DbKey) == false)
+            result += 4;
+        if (string.IsNullOrWhiteSpace(mappingOptions.MappingVersion) == false)
+            result += 2;
+        if (string.IsNullOrWhiteSpace(mappingOptions.TableRouteKey) == false)
+            result += 1;
+        return result;
+    }
 
     /// <summary>
     /// 创建实体描述信息
@@ -158,14 +239,15 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <param name="databaseContext">数据库上下文</param>
     /// <param name="schema">架构</param>
     /// <param name="tableName">表名</param>
+    /// <param name="mappingOptions">实体映射配置</param>
     /// <returns>实体映射元数据</returns>
     protected virtual EntityMappingMetadata CreateMapping(Type entityType, DatabaseContext databaseContext, string schema,
-        string tableName)
+        string tableName, EntityMappingOptions mappingOptions)
     {
         var descriptor = GetDescriptor(entityType);
         var columns = descriptor.Properties.ToDictionary(
             t => t.Name,
-            t => CreateColumnMetadata(entityType, t),
+            t => CreateColumnMetadata(entityType, t, GetColumnMappingOptions(mappingOptions, t), databaseContext),
             StringComparer.OrdinalIgnoreCase);
         return new EntityMappingMetadata
         {
@@ -176,10 +258,27 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             Schema = schema,
             TableName = tableName,
             FullTableName = string.IsNullOrWhiteSpace(schema) ? tableName : $"{schema}.{tableName}",
-            TableRouteKey = GetTableRouteKey(databaseContext),
-            MappingVersion = databaseContext.MappingVersion,
+            TableRouteKey = GetTableRouteKey(databaseContext, mappingOptions),
+            MappingVersion = GetMappingVersion(databaseContext, mappingOptions),
             Columns = columns
         };
+    }
+
+    /// <summary>
+    /// 获取列映射配置
+    /// </summary>
+    /// <param name="mappingOptions">实体映射配置</param>
+    /// <param name="property">属性信息</param>
+    /// <returns>列映射配置</returns>
+    protected virtual ColumnMappingOptions GetColumnMappingOptions(EntityMappingOptions mappingOptions,
+        PropertyInfo property)
+    {
+        if (mappingOptions?.Columns == null || property == null)
+            return null;
+        if (mappingOptions.Columns.TryGetValue(property.Name, out var result))
+            return result;
+        return mappingOptions.Columns.Values.FirstOrDefault(t =>
+            string.Equals(t?.PropertyName, property.Name, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -187,27 +286,41 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="property">属性信息</param>
+    /// <param name="mappingOptions">列映射配置</param>
+    /// <param name="databaseContext">数据库上下文</param>
     /// <returns>列映射元数据</returns>
-    protected virtual ColumnMappingMetadata CreateColumnMetadata(Type entityType, PropertyInfo property)
+    protected virtual ColumnMappingMetadata CreateColumnMetadata(Type entityType, PropertyInfo property,
+        ColumnMappingOptions mappingOptions, DatabaseContext databaseContext)
     {
         var propertyType = GetUnderlyingType(property.PropertyType);
         var columnAttribute = property.GetCustomAttribute<ColumnAttribute>();
-        var providerTypeName = columnAttribute?.TypeName;
-        var storageKind = GetStorageKind(propertyType, providerTypeName);
+        var providerTypeName = string.IsNullOrWhiteSpace(mappingOptions?.ProviderTypeName)
+            ? columnAttribute?.TypeName
+            : mappingOptions.ProviderTypeName;
+        var size = mappingOptions?.Size ?? GetSize(property);
+        var storageKind = mappingOptions == null || mappingOptions.StorageKind == ColumnStorageKind.Default
+            ? GetStorageKind(propertyType, providerTypeName)
+            : mappingOptions.StorageKind;
+        var converterKind = mappingOptions == null || mappingOptions.ConverterKind == FieldValueConverterKind.None
+            ? GetConverterKind(propertyType, storageKind)
+            : mappingOptions.ConverterKind;
         var column = new ColumnMappingMetadata
         {
-            PropertyName = property.Name,
-            ColumnName = _entityMetadata.GetColumn(entityType, property.Name) ?? property.Name,
+            PropertyName = string.IsNullOrWhiteSpace(mappingOptions?.PropertyName) ? property.Name : mappingOptions.PropertyName,
+            ColumnName = string.IsNullOrWhiteSpace(mappingOptions?.ColumnName)
+                ? _entityMetadata.GetColumn(entityType, property.Name) ?? property.Name
+                : mappingOptions.ColumnName,
             ClrType = property.PropertyType,
-            DbType = GetDbType(propertyType, providerTypeName, GetSize(property)),
-            Size = GetSize(property),
-            Precision = GetPrecision(providerTypeName),
-            Scale = GetScale(providerTypeName),
+            DbType = mappingOptions?.DbType ?? GetDbType(propertyType, providerTypeName, size,
+                databaseContext?.DatabaseType ?? DatabaseType.SqlServer),
+            Size = size,
+            Precision = mappingOptions?.Precision ?? GetPrecision(providerTypeName),
+            Scale = mappingOptions?.Scale ?? GetScale(providerTypeName),
             ProviderTypeName = providerTypeName,
             IsNullable = IsNullable(property.PropertyType),
             StorageKind = storageKind,
-            ConverterKind = GetConverterKind(propertyType, storageKind),
-            CustomConverterName = null
+            ConverterKind = converterKind,
+            CustomConverterName = mappingOptions?.CustomConverterName
         };
         return column;
     }
@@ -291,14 +404,15 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <param name="type">CLR 类型</param>
     /// <param name="providerTypeName">Provider 数据类型名称</param>
     /// <param name="length">长度</param>
+    /// <param name="databaseType">数据库类型</param>
     /// <returns>DbType</returns>
-    protected virtual DbType? GetDbType(Type type, string providerTypeName, int? length)
+    protected virtual DbType? GetDbType(Type type, string providerTypeName, int? length, DatabaseType databaseType)
     {
-        var dbType = _typeConverter?.ToDbType(providerTypeName, length);
+        var dbType = _typeConverterResolver.Resolve(databaseType)?.ToDbType(GetProviderDataTypeName(providerTypeName), length);
         if (dbType != null)
             return dbType;
         if (type.IsEnum)
-            return GetDbType(Enum.GetUnderlyingType(type), providerTypeName, length);
+            return GetDbType(Enum.GetUnderlyingType(type), providerTypeName, length, databaseType);
         if (type == typeof(string))
             return DbType.String;
         if (type == typeof(bool))
@@ -328,6 +442,19 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         if (type == typeof(char))
             return DbType.StringFixedLength;
         return null;
+    }
+
+    /// <summary>
+    /// 获取 Provider 数据类型名称
+    /// </summary>
+    /// <param name="providerTypeName">Provider 数据类型名称</param>
+    /// <returns>数据类型名称</returns>
+    protected virtual string GetProviderDataTypeName(string providerTypeName)
+    {
+        if (string.IsNullOrWhiteSpace(providerTypeName))
+            return providerTypeName;
+        var index = providerTypeName.IndexOf('(');
+        return index < 0 ? providerTypeName : providerTypeName.Substring(0, index).Trim();
     }
 
     /// <summary>

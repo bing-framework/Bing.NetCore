@@ -9,12 +9,12 @@ using Shouldly;
 namespace Bing.Data.Sql.Tests;
 
 /// <summary>
-/// 测试目的：验证元数据增强参数在 Builder 与 Where Lambda 链路中被正确生成。
+/// 元数据增强参数测试
 /// </summary>
 public class MetadataAwareParameterTest
 {
     /// <summary>
-    /// 测试目的：通过属性表达式手工添加参数时，应生成带完整列元数据的 SqlParam。
+    /// 测试 - 通过实体属性表达式手工添加参数时应生成完整元数据参数。
     /// </summary>
     [Fact]
     public void AddParam_WithEntityProperty_ShouldCreateFullMetadataParameter()
@@ -39,7 +39,7 @@ public class MetadataAwareParameterTest
     }
 
     /// <summary>
-    /// 测试目的：旧参数入口仍应可导出增强参数，但元数据等级应保持弱类型，避免误判为完整映射。
+    /// 测试 - 旧参数入口导出的增强参数应保持弱元数据等级。
     /// </summary>
     [Fact]
     public void GetSqlParams_WithLegacyParameter_ShouldReturnWeakMetadata()
@@ -60,7 +60,7 @@ public class MetadataAwareParameterTest
     }
 
     /// <summary>
-    /// 测试目的：Where 的实体 Lambda 链路应保留列元数据，并继续保持原有 SQL 与参数值行为。
+    /// 测试 - Where 的实体 Lambda 链路应保留列元数据并保持原有 SQL 行为。
     /// </summary>
     [Fact]
     public void Where_WithEntityLambda_ShouldCreateFullMetadataParameter()
@@ -93,5 +93,27 @@ public class MetadataAwareParameterTest
         parameter.MetadataLevel.ShouldBe(SqlParameterMetadataLevel.Full);
         parameter.Source.ShouldBe(SqlParameterSource.Lambda);
         parameter.Value.ShouldBe("abc");
+    }
+
+    /// <summary>
+    /// 测试 - SQL 拼接增强参数应允许参数名与实体属性名不同。
+    /// </summary>
+    [Fact]
+    public void SqlBuilder_AddParamWithEntityProperty_ShouldCreateFullMetadataParam()
+    {
+        // Arrange
+        var metadata = new TestEntityMetadata();
+        var builder = new TestSqlBuilder(TestDialect.Instance, metadata);
+
+        // Act
+        builder.AddParam("p_status", (Sample t) => t.StringValue, "abc");
+        var parameter = builder.GetSqlParams().Single().Value;
+
+        // Assert
+        parameter.Name.ShouldBe("@p_status");
+        parameter.PropertyName.ShouldBe(nameof(Sample.StringValue));
+        parameter.ColumnName.ShouldBe("Sample_StringValue");
+        parameter.MetadataLevel.ShouldBe(SqlParameterMetadataLevel.Full);
+        parameter.Source.ShouldBe(SqlParameterSource.Manual);
     }
 }

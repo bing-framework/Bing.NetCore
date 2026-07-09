@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Expressions;
 using Bing.Extensions;
@@ -18,10 +19,35 @@ public class EntityResolver : IEntityResolver
     private readonly IEntityMetadata _matedata;
 
     /// <summary>
+    /// 实体映射解析器
+    /// </summary>
+    private readonly IEntityMappingResolver _entityMappingResolver;
+
+    /// <summary>
+    /// 数据库上下文访问器
+    /// </summary>
+    private readonly IDatabaseContextAccessor _databaseContextAccessor;
+
+    /// <summary>
+    /// Sql 元数据配置
+    /// </summary>
+    private readonly SqlMetadataOptions _options;
+
+    /// <summary>
     /// 初始化一个<see cref="EntityResolver"/>类型的实例
     /// </summary>
     /// <param name="matedata">实体元数据</param>
-    public EntityResolver(IEntityMetadata matedata = null) => _matedata = matedata;
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="options">Sql 元数据配置</param>
+    public EntityResolver(IEntityMetadata matedata = null, IEntityMappingResolver entityMappingResolver = null,
+        IDatabaseContextAccessor databaseContextAccessor = null, SqlMetadataOptions options = null)
+    {
+        _matedata = matedata;
+        _entityMappingResolver = entityMappingResolver;
+        _databaseContextAccessor = databaseContextAccessor;
+        _options = options ?? new SqlMetadataOptions();
+    }
 
     /// <summary>
     /// 获取表
@@ -29,6 +55,9 @@ public class EntityResolver : IEntityResolver
     /// <param name="entity">实体类型</param>
     public string GetTable(Type entity)
     {
+        var mapping = GetMapping(entity);
+        if (string.IsNullOrWhiteSpace(mapping?.TableName) == false)
+            return mapping.TableName;
         if (_matedata == null)
             return entity.Name;
         var result = _matedata.GetTable(entity);
@@ -39,7 +68,13 @@ public class EntityResolver : IEntityResolver
     /// 获取架构
     /// </summary>
     /// <param name="entity">实体类型</param>
-    public string GetSchema(Type entity) => _matedata?.GetSchema(entity);
+    public string GetSchema(Type entity)
+    {
+        var mapping = GetMapping(entity);
+        if (string.IsNullOrWhiteSpace(mapping?.Schema) == false)
+            return mapping.Schema;
+        return _matedata?.GetSchema(entity);
+    }
 
     /// <summary>
     /// 获取列名
@@ -91,11 +126,12 @@ public class EntityResolver : IEntityResolver
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
     private string GetColumns<TEntity>(List<string> names, bool propertyAsAlias)
     {
+        var entityType = typeof(TEntity);
         if (propertyAsAlias == false)
-            return names.Select(name => _matedata.GetColumn(typeof(TEntity), name)).Join();
+            return names.Select(name => ResolveColumn(entityType, name)).Join();
         return names.Select(name =>
         {
-            var column = _matedata.GetColumn(typeof(TEntity), name);
+            var column = ResolveColumn(entityType, name);
             return column == name ? column : $"{column} As {name}";
         }).Join();
     }
@@ -141,9 +177,7 @@ public class EntityResolver : IEntityResolver
     private string GetSingleColumn<TEntity>(Expression expression)
     {
         var name = Lambdas.GetLastName(expression);
-        if (_matedata == null)
-            return name;
-        return _matedata.GetColumn(typeof(TEntity), name);
+        return ResolveColumn(typeof(TEntity), name);
     }
 
     /// <summary>
@@ -199,7 +233,7 @@ public class EntityResolver : IEntityResolver
     {
         string result = null;
         foreach (var item in dictionary)
-            result += $"{_matedata.GetColumn(typeof(TEntity), item.Key.SafeString())} As {item.Value},";
+            result += $"{ResolveColumn(typeof(TEntity), item.Key.SafeString())} As {item.Value},";
         return result?.TrimEnd(',');
     }
 
@@ -224,9 +258,47 @@ public class EntityResolver : IEntityResolver
     public string GetColumn(Expression expression, Type entity, bool right = false)
     {
         var column = Lambdas.GetLastName(expression, right);
-        return _matedata == null
-            ? column
-            : _matedata.GetColumn(entity, column);
+        return ResolveColumn(entity, column);
+    }
+
+    /// <summary>
+    /// 获取实体映射元数据
+    /// </summary>
+    /// <param name="entityType">实体类型</param>
+    /// <returns>实体映射元数据</returns>
+    private EntityMappingMetadata GetMapping(Type entityType)
+    {
+        if (entityType == null || _entityMappingResolver == null)
+            return null;
+        return _entityMappingResolver.Resolve(entityType,
+            _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext);
+    }
+
+    /// <summary>
+    /// 解析列名
+    /// </summary>
+    /// <param name="entityType">实体类型</param>
+    /// <param name="propertyOrColumnName">属性名或列名</param>
+    /// <returns>列名</returns>
+    private string ResolveColumn(Type entityType, string propertyOrColumnName)
+    {
+        if (string.IsNullOrWhiteSpace(propertyOrColumnName))
+            return propertyOrColumnName;
+        var mapping = GetMapping(entityType);
+        if (mapping?.Columns != null)
+        {
+            if (mapping.Columns.TryGetValue(propertyOrColumnName, out var column))
+                return column.ColumnName;
+            var mappedColumn = mapping.Columns.Values.FirstOrDefault(t =>
+                string.Equals(t.PropertyName, propertyOrColumnName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(t.ColumnName, propertyOrColumnName, StringComparison.OrdinalIgnoreCase));
+            if (mappedColumn != null)
+                return mappedColumn.ColumnName;
+        }
+
+        if (_matedata == null || entityType == null)
+            return propertyOrColumnName;
+        return _matedata.GetColumn(entityType, propertyOrColumnName) ?? propertyOrColumnName;
     }
 
     /// <summary>

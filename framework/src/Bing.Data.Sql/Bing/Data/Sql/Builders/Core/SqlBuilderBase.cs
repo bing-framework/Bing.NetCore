@@ -228,7 +228,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             MetadataOptions);
         SqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, MetadataOptions), databaseContextAccessor, MetadataOptions);
-        EntityResolver = new EntityResolver(metadata);
+        EntityResolver = new EntityResolver(metadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions);
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
@@ -310,7 +310,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         DatabaseContextAccessor = sqlBuilder.DatabaseContextAccessor;
         EntityMappingResolver = sqlBuilder.EntityMappingResolver;
         SqlParameterFactory = sqlBuilder.SqlParameterFactory;
-        EntityResolver = sqlBuilder.EntityResolver ?? new EntityResolver(EntityMetadata);
+        EntityResolver = sqlBuilder.EntityResolver ??
+            new EntityResolver(EntityMetadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
 
         // 克隆各子句
@@ -684,7 +685,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             return;
 
         _isAddFilters = true;
-        var context = new SqlContext(Dialect, AliasRegister, EntityMetadata, ParameterManager, this);
+        var context = new SqlContext(Dialect, AliasRegister, EntityMetadata, ParameterManager, this,
+            EntityMappingResolver, DatabaseContextAccessor, MetadataOptions);
         foreach (var filter in SqlFilterCollection.Filters)
         {
             if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))
