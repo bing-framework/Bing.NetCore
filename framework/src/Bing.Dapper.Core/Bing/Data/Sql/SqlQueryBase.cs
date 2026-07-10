@@ -37,9 +37,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     private IDbConnection _connection;
 
     /// <summary>
+    /// 数据库连接所有权
+    /// </summary>
+    private SqlResourceOwnership _connectionOwnership = SqlResourceOwnership.Owned;
+
+    /// <summary>
     /// 事务
     /// </summary>
     private IDbTransaction _transaction;
+
+    /// <summary>
+    /// 事务所有权
+    /// </summary>
+    private SqlResourceOwnership _transactionOwnership = SqlResourceOwnership.Owned;
 
     /// <summary>
     /// 参数字面值解析器
@@ -67,6 +77,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         Options = options ?? throw new ArgumentNullException(nameof(options));
         Logger = CreateLogger();
         _connection = options.Connection;
+        if (_connection != null)
+            _connectionOwnership = SqlResourceOwnership.External;
         _database = database;
         ContextId = Guid.NewGuid().ToString("N");
     }
@@ -268,6 +280,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         if (connection == null)
             return;
         _connection = connection;
+        _connectionOwnership = SqlResourceOwnership.External;
     }
 
     #endregion
@@ -282,6 +295,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         if (_connection != null)
             return _connection;
         _connection = Database.GetConnection();
+        _connectionOwnership = SqlResourceOwnership.Owned;
         if (_connection == null)
             throw new InvalidOperationException("数据库连接不能为空");
         return _connection;
@@ -558,9 +572,41 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     public void Dispose()
     {
-        if (_connection != null)
-            _connection.Dispose();
+        ReleaseTransaction();
+        ReleaseConnection();
+    }
+
+    /// <summary>
+    /// 释放事务
+    /// </summary>
+    private void ReleaseTransaction()
+    {
+        if (_transactionOwnership == SqlResourceOwnership.Owned)
+            _transaction?.Dispose();
         _transaction = null;
+        _transactionOwnership = SqlResourceOwnership.Owned;
+    }
+
+    /// <summary>
+    /// 释放连接
+    /// </summary>
+    private void ReleaseConnection()
+    {
+        if (_connectionOwnership == SqlResourceOwnership.Owned)
+            _connection?.Dispose();
+        _connection = null;
+        _connectionOwnership = SqlResourceOwnership.Owned;
+    }
+
+    /// <summary>
+    /// 关闭并释放内部拥有的连接
+    /// </summary>
+    private void CloseOwnedConnection()
+    {
+        if (_connectionOwnership != SqlResourceOwnership.Owned)
+            return;
+        if (_connection?.State == ConnectionState.Open)
+            _connection.Close();
     }
 
     #endregion

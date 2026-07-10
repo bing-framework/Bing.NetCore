@@ -73,14 +73,14 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         if (message == null || string.IsNullOrWhiteSpace(message.Sql))
             return;
-        var parameterJson = message.Parameters.ToJson();
+        var parameterJson = (message.ParameterSnapshot?.Items ?? message.SqlParametersMetadata)?.ToJson() ?? message.Parameters.ToJson();
         var newLine = Environment.NewLine;
         var context = CreateLocalSegmentContext(message.Sql);
-        context.Span.AddTag(Common.Tags.DB_INSTANCE, message.Database);
+        context.Span.AddTag(Common.Tags.DB_INSTANCE, message.Connection?.Database ?? message.Database);
         context.Span.AddTag(Common.Tags.DB_STATEMENT, message.Sql);
-        context.Span.AddTag(Common.Tags.DB_BIND_VARIABLES, BuildParameterVariables(message.Parameters));
+        context.Span.AddTag(Common.Tags.DB_BIND_VARIABLES, BuildParameterVariables(message));
         context.Span.AddLog(LogEvent.Event($"{SqlQueryDiagnosticListenerNames.BeforeExecute.Split(' ').Last()}: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}"));
-        context.Span.AddLog(LogEvent.Message($"sql: {message.Sql}{newLine}parameters: {parameterJson}{newLine}databaseType: {message.DatabaseType}{newLine}database: {message.Database}{newLine}timestamp: {message.Timestamp}"));
+        context.Span.AddLog(LogEvent.Message($"sql: {message.Sql}{newLine}parameters: {parameterJson}{newLine}databaseType: {message.DatabaseType}{newLine}database: {message.Connection?.Database ?? message.Database}{newLine}timestamp: {message.Timestamp}"));
     }
 
     /// <summary>
@@ -129,12 +129,34 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// <summary>
     /// 构建参数变量
     /// </summary>
+    /// <param name="message">诊断消息</param>
+    private string BuildParameterVariables(DiagnosticsMessage message)
+    {
+        if (message?.ParameterSnapshot?.Items != null && message.ParameterSnapshot.Items.Count > 0)
+            return FormatParameters(message.ParameterSnapshot.Items, _logParameterValue);
+        return BuildParameterVariables(message?.Parameters);
+    }
+
+    /// <summary>
+    /// 构建参数变量
+    /// </summary>
     /// <param name="parameters">参数</param>
     private string BuildParameterVariables(object parameters)
     {
         if (parameters is IReadOnlyDictionary<string, object> dict)
             return FormatParameters(dict, _logParameterValue);
         return string.Empty;
+    }
+
+    /// <summary>
+    /// 格式化参数
+    /// </summary>
+    /// <param name="parameters">参数诊断信息集合</param>
+    /// <param name="logParameterValues">是否记录参数值</param>
+    private static string FormatParameters(IEnumerable<SqlParameterDiagnosticInfo> parameters, bool logParameterValues)
+    {
+        return parameters.Select(x => FormatParameter(x.Name, logParameterValues && x.IsSensitive == false ? x.Value : "?"))
+            .Join();
     }
 
     /// <summary>

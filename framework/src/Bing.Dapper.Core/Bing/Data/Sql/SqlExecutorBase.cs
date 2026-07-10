@@ -49,7 +49,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
         catch (Exception e)
         {
-            RollbackTransaction();
+            RollbackOwnedTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -88,7 +88,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
         catch (Exception e)
         {
-            RollbackTransaction();
+            RollbackOwnedTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -127,7 +127,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
         catch (Exception e)
         {
-            RollbackTransaction();
+            RollbackOwnedTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -166,7 +166,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
         catch (Exception e)
         {
-            RollbackTransaction();
+            RollbackOwnedTransaction();
             ExecuteError(message, e);
             throw;
         }

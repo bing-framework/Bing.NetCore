@@ -214,9 +214,9 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 
 ---
 
-## 多数据库上下文与运行时切库
+## 多数据源上下文与运行时切库
 
-当前实现支持通过数据库上下文在运行期切换 `DbKey`、`DatabaseType`、`Role`，并让表名、列名、连接串与参数元数据同步切换。
+当前实现支持以 `dbKey` 作为业务入口在运行期切换数据源，并让连接串、实体映射、参数元数据和诊断上下文同步切换。新代码应优先只传 `dbKey`，`DatabaseType`、连接字符串、只读标识、映射配置和主库策略由数据源配置解析。旧的 `DatabaseRole` API 仍保留兼容，但不建议新代码继续依赖它。
 
 ### 1. 注册数据库上下文能力
 
@@ -224,13 +224,14 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 
 - `IDatabaseContextAccessor`
 - `IDatabaseScopeManager`
+- `ISqlDataSourceResolver`
 - `IDatabaseDescriptorResolver`
 - `IEntityMappingResolver`
 - `ITypeConverterResolver`
 - `ISqlQueryFactory`
 - `ISqlExecutorFactory`
 
-如果需要显式配置多库连接描述与实体映射，建议在注册数据库服务前提供自定义 `SqlMetadataOptions`：
+如果需要显式配置多库连接描述与实体映射，建议在注册数据库服务前提供自定义 `SqlMetadataOptions`。新数据源配置使用 `DataSources`：
 
 ```csharp
 services.AddSingleton(new SqlMetadataOptions
@@ -240,6 +241,32 @@ services.AddSingleton(new SqlMetadataOptions
         DbKey = "default",
         DatabaseType = DatabaseType.MySql,
         Role = DatabaseRole.Default
+    },
+    DataSources =
+    {
+        DefaultDataSourceKey = "default",
+        DataSources =
+        {
+            ["default"] = new SqlDataSourceDescriptor
+            {
+                Key = "default",
+                DbKey = "default",
+                DatabaseType = DatabaseType.MySql,
+                ConnectionString = "Server=127.0.0.1;Database=app;Uid=root;Pwd=123456;",
+                MappingProfile = "default"
+            },
+            ["reporting"] = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DbKey = "reporting",
+                DatabaseType = DatabaseType.PgSql,
+                ConnectionString = "Host=127.0.0.1;Database=reporting;Username=postgres;Password=123456;",
+                IsReadOnly = true,
+                MappingProfile = "reporting",
+                PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
+                PrimaryDataSourceKey = "default"
+            }
+        }
     },
     Databases =
     {
@@ -268,6 +295,8 @@ services.AddMySqlQuery();
 services.AddMySqlExecutor();
 ```
 
+`Databases` 会继续兼容旧配置，并自动适配为数据源描述。迁移期可以同时保留旧配置和新 `DataSources`，新解析器会优先使用 `DataSources`。
+
 ### 2. 使用作用域切换当前数据库上下文
 
 ```csharp
@@ -275,7 +304,7 @@ public async Task<List<UserDto>> QueryReportingUsersAsync(
     IDatabaseScopeManager _databaseScopeManager,
     ISqlQueryFactory _sqlQueryFactory)
 {
-    using (_databaseScopeManager.Use("reporting", DatabaseType.MySql, DatabaseRole.Reporting))
+    using (_databaseScopeManager.Use("reporting"))
     {
         var query = _sqlQueryFactory.Create<ISqlQuery>();
         var result = await query
@@ -290,24 +319,67 @@ public async Task<List<UserDto>> QueryReportingUsersAsync(
 要点：
 
 - `DatabaseScopeManager` 支持嵌套作用域，内层释放后会恢复父级上下文；
-- `ISqlQueryFactory` / `ISqlExecutorFactory` 会基于当前 `DatabaseContext` 解析连接串并创建对应实例；
+- `ISqlQueryFactory` / `ISqlExecutorFactory` 会基于当前 `DatabaseContext` 或显式 `dbKey` 解析连接串并创建对应实例；
 - 工厂创建出的 Query / Executor 会携带解析后的 `DatabaseContext`，后续 SQL 映射和参数元数据解析不会因外部作用域变化而漂移；
 - 同一实体在不同上下文下，SQL 中输出的表名、列名和执行连接可以不同。
+- `IsReadOnly` 只作为数据源描述和诊断标识，不会替代数据库权限控制，也不会自动改写 SQL。
 
 ### 3. 显式创建指定数据库上下文
 
 如果调用点不依赖当前作用域，也可以在工厂创建时直接指定数据库上下文：
 
 ```csharp
-var query = _sqlQueryFactory.Create<ISqlQuery>(
-    "reporting",
-    DatabaseType.MySql,
-    DatabaseRole.Reporting);
+var query = _sqlQueryFactory.Create<ISqlQuery>("reporting");
 ```
 
 该方式会同时影响连接解析、实体映射解析和增强参数元数据解析，避免出现“连接是 reporting，但 SQL 映射仍是 default”的情况。
 
-### 4. 显式实体映射
+旧重载仍可使用：
+
+```csharp
+var query = _sqlQueryFactory.Create<ISqlQuery>("reporting", DatabaseType.MySql, DatabaseRole.Reporting);
+```
+
+该重载用于兼容历史配置。新代码应迁移到只传 `dbKey` 的方式。
+
+### 4. EF Core Shared / Independent 查询
+
+EF Core Repository 中的 `Sql` 属性默认使用 Shared 模式：复用当前 `DbContext.Database.GetDbConnection()`，如果 EF 当前存在事务，则同步绑定 `CurrentTransaction.GetDbTransaction()`。该连接和事务都视为外部资源，SQL Query 不会关闭连接，也不会提交或回滚 EF 事务。
+
+当需要完全独立于 EF 工作单元执行 SQL 时，可在 Repository 内调用：
+
+```csharp
+var query = CreateIndependentSqlQuery();
+```
+
+Independent 模式创建独立 SQL Query，不绑定 EF 连接和事务。它适合报表、旁路查询、只读查询等不应参与当前 EF 事务的场景。Shared 模式保持 `Sql.From<T>()` 等既有写法不变。
+
+### 5. 连接和事务所有权
+
+- `SetConnection(connection)`：外部连接，Query/Executor 不负责关闭或释放。
+- `SetTransaction(transaction)`：外部事务，Query/Executor 不提交、不回滚、不释放，也不会关闭事务连接。
+- `BeginTransaction()`：内部事务，Query/Executor 负责提交、回滚和释放。
+- Dapper 执行器默认不会为单条 SQL 自动开启事务；异常时只回滚内部拥有的事务。
+
+需要让多个 Query / Executor 共享一个独立事务时，可使用 `ISqlTransactionScopeFactory`：
+
+```csharp
+using var scope = transactionScopeFactory.Create("reporting");
+
+var executor = scope.CreateExecutor();
+executor.ExecuteSql("update users set name=@name where id=@id", new { name = "Tom", id = 1 });
+
+var query = scope.CreateQuery();
+var user = query.From<User>().Where<User>(x => x.Id, 1).ToEntity<User>();
+
+scope.Commit();
+```
+
+作用域拥有连接和事务。作用域创建的 Query / Executor 会绑定外部事务，不能自行提交或回滚；如果作用域释放前未调用 `Commit()` 或 `Rollback()`，会自动回滚。
+
+如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。流式读取、长时间导出或 DataReader 场景不应静默降级为事务策略。
+
+### 6. 显式实体映射
 
 当同一实体需要映射到不同库、不同表或不同列时，可通过 `SqlMetadataOptions.EntityMappings` 显式配置：
 
@@ -367,16 +439,16 @@ await executor.ExecuteSqlAsync<User>(
         .Map("userId", x => x.Id));
 ```
 
-    如果需要显式写入 `null`，使用 `Add` 并传入第三个参数；如果需要从源对象读取值，使用 `Map`：
+如果需要显式写入 `null`，使用 `Add` 并传入第三个参数；如果需要从源对象读取值，使用 `Map`：
 
-    ```csharp
-    executor.ExecuteSql<User>(
-        "update users set name=@name where id=@id",
-        new { id },
-        map => map
+```csharp
+executor.ExecuteSql<User>(
+    "update users set name=@name where id=@id",
+    new { id },
+    map => map
         .Add("name", x => x.Name, null)
         .Map("id", x => x.Id));
-    ```
+```
 
 能力说明：
 
@@ -385,8 +457,9 @@ await executor.ExecuteSqlAsync<User>(
     - `Add(name, property, null)` 表示显式传入空值，执行时会绑定为 `DBNull.Value`；
     - `Map(name, property)` 表示从源对象读取参数值；
 - 找不到值时会降级为弱元数据，不会破坏旧调用方式；
-    - 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数；
-    - 执行诊断消息会包含原始参数、绑定后的参数对象和增强参数元数据，便于排查参数类型与映射问题。
+- 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数；
+- 执行诊断消息会包含原始参数、绑定后的参数对象和增强参数元数据，便于排查参数类型与映射问题；
+- 新诊断字段 `ParameterSnapshot` 会统一承载参数快照，旧字段 `Parameters`、`RawParameters`、`BoundParameters`、`SqlParametersMetadata` 继续兼容填充。
 
 ### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
 

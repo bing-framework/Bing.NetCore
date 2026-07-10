@@ -36,4 +36,33 @@ public sealed class DatabaseContext
     /// 映射版本
     /// </summary>
     public string MappingVersion { get; set; }
+
+    /// <summary>
+    /// 读取偏好
+    /// </summary>
+    public SqlReadPreference ReadPreference { get; set; } = SqlReadPreference.Default;
+
+    /// <summary>
+    /// 映射配置标识
+    /// </summary>
+    public string MappingProfile
+    {
+        get => string.IsNullOrWhiteSpace(_mappingProfile) ? MappingVersion : _mappingProfile;
+        set => _mappingProfile = value;
+    }
+
+    /// <summary>
+    /// 数据源键
+    /// </summary>
+    public string DataSourceKey { get; set; }
+
+    /// <summary>
+    /// 数据源描述信息
+    /// </summary>
+    public SqlDataSourceDescriptor DataSource { get; set; }
+
+    /// <summary>
+    /// 映射配置标识
+    /// </summary>
+    private string _mappingProfile;
 }

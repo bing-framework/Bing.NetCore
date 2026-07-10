@@ -37,6 +37,11 @@ public abstract class SqlFactoryBase
     private readonly ISqlImplementationTypeResolver _implementationTypeResolver;
 
     /// <summary>
+    /// SQL 数据源解析器
+    /// </summary>
+    private readonly ISqlDataSourceResolver _dataSourceResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
@@ -44,17 +49,53 @@ public abstract class SqlFactoryBase
     /// <param name="databaseDescriptorResolver">数据库描述解析器</param>
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <param name="implementationTypeResolver">SQL 实现类型解析器</param>
+    /// <param name="dataSourceResolver">SQL 数据源解析器</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         IDatabaseDescriptorResolver databaseDescriptorResolver = null,
         SqlMetadataOptions metadataOptions = null,
-        ISqlImplementationTypeResolver implementationTypeResolver = null)
+        ISqlImplementationTypeResolver implementationTypeResolver = null,
+        ISqlDataSourceResolver dataSourceResolver = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
         _databaseDescriptorResolver = databaseDescriptorResolver;
         _metadataOptions = metadataOptions ?? new SqlMetadataOptions();
         _implementationTypeResolver = implementationTypeResolver;
+        _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_metadataOptions);
+    }
+
+    /// <summary>
+    /// 创建数据库上下文
+    /// </summary>
+    /// <param name="dbKey">数据库键</param>
+    /// <returns>数据库上下文</returns>
+    protected DatabaseContext CreateContext(string dbKey)
+    {
+        var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
+        var options = new DatabaseScopeOptions
+        {
+            DbKey = dbKey,
+            TenantId = current?.TenantId,
+            ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default,
+            MappingProfile = current?.MappingProfile,
+            Role = current?.Role ?? DatabaseRole.Default,
+            ReadOnly = current?.ReadOnly
+        };
+        var dataSource = _dataSourceResolver.Resolve(dbKey, options);
+        return new DatabaseContext
+        {
+            DbKey = string.IsNullOrWhiteSpace(dataSource.DbKey) ? dataSource.Key : dataSource.DbKey,
+            DataSourceKey = dataSource.Key,
+            DataSource = dataSource,
+            DatabaseType = dataSource.DatabaseType,
+            Role = options.Role,
+            TenantId = options.TenantId,
+            ReadOnly = dataSource.IsReadOnly,
+            MappingVersion = dataSource.MappingProfile ?? current?.MappingVersion,
+            MappingProfile = dataSource.MappingProfile ?? current?.MappingProfile,
+            ReadPreference = options.ReadPreference
+        };
     }
 
     /// <summary>
@@ -76,7 +117,9 @@ public abstract class SqlFactoryBase
             Role = role,
             TenantId = current?.TenantId,
             ReadOnly = current?.ReadOnly ?? false,
-            MappingVersion = current?.MappingVersion
+            MappingVersion = current?.MappingVersion,
+            MappingProfile = current?.MappingProfile,
+            ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
         };
     }
 
@@ -99,7 +142,11 @@ public abstract class SqlFactoryBase
                 Role = current.Role,
                 TenantId = current.TenantId,
                 ReadOnly = current.ReadOnly,
-                MappingVersion = current.MappingVersion
+                MappingVersion = current.MappingVersion,
+                MappingProfile = current.MappingProfile,
+                DataSourceKey = current.DataSourceKey,
+                DataSource = current.DataSource,
+                ReadPreference = current.ReadPreference
             };
         }
 
@@ -179,7 +226,11 @@ public abstract class SqlFactoryBase
             Role = descriptor.Role,
             TenantId = context?.TenantId,
             ReadOnly = descriptor.ReadOnly,
-            MappingVersion = context?.MappingVersion
+            MappingVersion = context?.MappingVersion,
+            MappingProfile = context?.MappingProfile,
+            DataSourceKey = context?.DataSourceKey,
+            DataSource = context?.DataSource,
+            ReadPreference = context?.ReadPreference ?? SqlReadPreference.Default
         });
         if (string.IsNullOrWhiteSpace(descriptor.ConnectionString) == false)
         {

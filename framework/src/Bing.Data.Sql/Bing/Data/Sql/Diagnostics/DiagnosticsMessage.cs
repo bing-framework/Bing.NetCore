@@ -20,6 +20,16 @@ public class SqlParameterDiagnosticInfo
     public object Value { get; set; }
 
     /// <summary>
+    /// 原始参数值
+    /// </summary>
+    public object OriginalValue { get; set; }
+
+    /// <summary>
+    /// 是否敏感参数
+    /// </summary>
+    public bool IsSensitive { get; set; }
+
+    /// <summary>
     /// 参数类型
     /// </summary>
     public DbType? DbType { get; set; }
@@ -101,6 +111,84 @@ public class SqlParameterDiagnosticInfo
 }
 
 /// <summary>
+/// SQL 参数诊断快照
+/// </summary>
+public sealed class SqlParameterDiagnosticSnapshot
+{
+    /// <summary>
+    /// 原始参数对象
+    /// </summary>
+    public object RawParameters { get; set; }
+
+    /// <summary>
+    /// 绑定后的参数对象
+    /// </summary>
+    public object BoundParameters { get; set; }
+
+    /// <summary>
+    /// 参数诊断项
+    /// </summary>
+    public IReadOnlyCollection<SqlParameterDiagnosticInfo> Items { get; set; } = new List<SqlParameterDiagnosticInfo>();
+}
+
+/// <summary>
+/// SQL 连接诊断信息
+/// </summary>
+public sealed class SqlConnectionDiagnosticInfo
+{
+    /// <summary>
+    /// 数据库
+    /// </summary>
+    public string Database { get; set; }
+
+    /// <summary>
+    /// 数据源
+    /// </summary>
+    public string DataSource { get; set; }
+
+    /// <summary>
+    /// 数据源键
+    /// </summary>
+    public string DataSourceKey { get; set; }
+
+    /// <summary>
+    /// 数据库类型
+    /// </summary>
+    public DatabaseType DatabaseType { get; set; }
+
+    /// <summary>
+    /// 连接状态
+    /// </summary>
+    public ConnectionState State { get; set; }
+
+    /// <summary>
+    /// 连接类型
+    /// </summary>
+    public string ConnectionType { get; set; }
+}
+
+/// <summary>
+/// SQL 事务诊断信息
+/// </summary>
+public sealed class SqlTransactionDiagnosticInfo
+{
+    /// <summary>
+    /// 是否存在事务
+    /// </summary>
+    public bool HasTransaction { get; set; }
+
+    /// <summary>
+    /// 事务隔离级别
+    /// </summary>
+    public IsolationLevel? IsolationLevel { get; set; }
+
+    /// <summary>
+    /// 事务类型
+    /// </summary>
+    public string TransactionType { get; set; }
+}
+
+/// <summary>
 /// 诊断消息
 /// </summary>
 public class DiagnosticsMessage
@@ -144,6 +232,21 @@ public class DiagnosticsMessage
     /// Sql 增强参数元数据
     /// </summary>
     public IReadOnlyCollection<SqlParameterDiagnosticInfo> SqlParametersMetadata { get; set; }
+
+    /// <summary>
+    /// SQL 参数诊断快照
+    /// </summary>
+    public SqlParameterDiagnosticSnapshot ParameterSnapshot { get; set; }
+
+    /// <summary>
+    /// SQL 连接诊断信息
+    /// </summary>
+    public SqlConnectionDiagnosticInfo Connection { get; set; }
+
+    /// <summary>
+    /// SQL 事务诊断信息
+    /// </summary>
+    public SqlTransactionDiagnosticInfo Transaction { get; set; }
 
     /// <summary>
     /// 数据库类型

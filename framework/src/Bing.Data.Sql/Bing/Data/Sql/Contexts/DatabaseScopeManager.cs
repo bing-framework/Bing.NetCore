@@ -20,14 +20,47 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
+    /// SQL 数据源解析器
+    /// </summary>
+    private readonly ISqlDataSourceResolver _dataSourceResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="DatabaseScopeManager"/>类型的实例
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
-    public DatabaseScopeManager(IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions options = null)
+    /// <param name="dataSourceResolver">SQL 数据源解析器</param>
+    public DatabaseScopeManager(IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions options = null,
+        ISqlDataSourceResolver dataSourceResolver = null)
     {
         _databaseContextAccessor = databaseContextAccessor ?? throw new ArgumentNullException(nameof(databaseContextAccessor));
         _options = options ?? new SqlMetadataOptions();
+        _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_options);
+    }
+
+    /// <inheritdoc />
+    public IDatabaseScope Use(string dbKey) => Use(new DatabaseScopeOptions { DbKey = dbKey });
+
+    /// <inheritdoc />
+    public IDatabaseScope Use(DatabaseScopeOptions options)
+    {
+        options ??= new DatabaseScopeOptions();
+        var parent = _databaseContextAccessor.Current;
+        var dataSource = _dataSourceResolver.Resolve(options.DbKey, options);
+        _databaseContextAccessor.Current = new DatabaseContext
+        {
+            DbKey = string.IsNullOrWhiteSpace(dataSource.DbKey) ? dataSource.Key : dataSource.DbKey,
+            DataSourceKey = dataSource.Key,
+            DataSource = dataSource,
+            DatabaseType = dataSource.DatabaseType,
+            Role = options.Role,
+            TenantId = options.TenantId ?? parent?.TenantId,
+            ReadOnly = dataSource.IsReadOnly,
+            MappingVersion = dataSource.MappingProfile ?? parent?.MappingVersion ?? _options.DefaultDatabaseContext?.MappingVersion,
+            MappingProfile = dataSource.MappingProfile ?? parent?.MappingProfile ?? _options.DefaultDatabaseContext?.MappingProfile,
+            ReadPreference = options.ReadPreference
+        };
+        return new DatabaseScope(_databaseContextAccessor, parent);
     }
 
     /// <summary>
@@ -43,22 +76,15 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
     public IDatabaseScope Use(string dbKey, DatabaseType databaseType, DatabaseRole role = DatabaseRole.Default,
         string tenantId = null, bool readOnly = false, string mappingVersion = null)
     {
-        var parent = _databaseContextAccessor.Current;
-        var defaultContext = _options.DefaultDatabaseContext ?? new DatabaseContext
+        return Use(new DatabaseScopeOptions
         {
-            DbKey = ConnectionStringCollection.DefaultConnectionStringName,
-            DatabaseType = DatabaseType.SqlServer
-        };
-        _databaseContextAccessor.Current = new DatabaseContext
-        {
-            DbKey = string.IsNullOrWhiteSpace(dbKey) ? defaultContext.DbKey : dbKey,
+            DbKey = dbKey,
             DatabaseType = databaseType,
             Role = role,
-            TenantId = tenantId ?? parent?.TenantId,
+            TenantId = tenantId,
             ReadOnly = readOnly,
-            MappingVersion = mappingVersion ?? parent?.MappingVersion ?? defaultContext.MappingVersion
-        };
-        return new DatabaseScope(_databaseContextAccessor, parent);
+            MappingProfile = mappingVersion
+        });
     }
 
     /// <summary>

@@ -12,6 +12,14 @@ public interface ISqlQueryFactory
     /// </summary>
     /// <typeparam name="TQuery">Sql 查询对象类型</typeparam>
     /// <param name="dbKey">数据库键</param>
+    /// <returns>Sql 查询对象</returns>
+    TQuery Create<TQuery>(string dbKey) where TQuery : class, ISqlQuery;
+
+    /// <summary>
+    /// 创建 Sql 查询对象
+    /// </summary>
+    /// <typeparam name="TQuery">Sql 查询对象类型</typeparam>
+    /// <param name="dbKey">数据库键</param>
     /// <param name="databaseType">数据库类型</param>
     /// <param name="role">数据库角色</param>
     /// <returns>Sql 查询对象</returns>

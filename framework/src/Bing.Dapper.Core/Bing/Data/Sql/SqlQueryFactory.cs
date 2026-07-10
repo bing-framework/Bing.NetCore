@@ -16,15 +16,21 @@ public sealed class SqlQueryFactory : SqlFactoryBase, ISqlQueryFactory
     /// <param name="databaseDescriptorResolver">数据库描述解析器</param>
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <param name="implementationTypeResolver">SQL 实现类型解析器</param>
+    /// <param name="dataSourceResolver">SQL 数据源解析器</param>
     public SqlQueryFactory(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         IDatabaseDescriptorResolver databaseDescriptorResolver = null,
         SqlMetadataOptions metadataOptions = null,
-        ISqlImplementationTypeResolver implementationTypeResolver = null)
+        ISqlImplementationTypeResolver implementationTypeResolver = null,
+        ISqlDataSourceResolver dataSourceResolver = null)
         : base(serviceProvider, databaseContextAccessor, databaseDescriptorResolver, metadataOptions,
-            implementationTypeResolver)
+            implementationTypeResolver, dataSourceResolver)
     {
     }
+
+    /// <inheritdoc />
+    public TQuery Create<TQuery>(string dbKey) where TQuery : class, ISqlQuery =>
+        CreateInstance<TQuery>(CreateContext(dbKey));
 
     /// <inheritdoc />
     public TQuery Create<TQuery>(string dbKey, DatabaseType databaseType, DatabaseRole role = DatabaseRole.Default)

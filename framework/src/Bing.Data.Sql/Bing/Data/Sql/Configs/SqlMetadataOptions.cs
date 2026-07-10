@@ -9,6 +9,11 @@ namespace Bing.Data.Sql.Configs;
 public class SqlMetadataOptions
 {
     /// <summary>
+    /// SQL 数据源配置
+    /// </summary>
+    public SqlDataSourceOptions DataSources { get; } = new();
+
+    /// <summary>
     /// 数据库描述信息集合
     /// </summary>
     public IDictionary<string, DatabaseDescriptor> Databases { get; } =

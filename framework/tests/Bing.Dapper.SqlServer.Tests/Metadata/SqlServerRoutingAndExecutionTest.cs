@@ -53,6 +53,76 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - 查询工厂只传 dbKey 时应通过数据源解析数据库类型和连接字符串。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_CreateWithDbKey_ShouldResolveDataSource()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DbKey = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=reporting;Database=test;",
+            MappingProfile = "reporting-v2"
+        };
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=default;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+
+        // Assert
+        query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
+        query.CurrentOptions.DatabaseType.ShouldBe(DatabaseType.SqlServer);
+        query.CurrentOptions.GetDatabaseContext().MappingProfile.ShouldBe("reporting-v2");
+    }
+
+    /// <summary>
+    /// 测试 - UsePrimary 应按数据源配置切换到主库连接字符串。
+    /// </summary>
+    [Fact]
+    public void UsePrimary_WhenPrimaryDataSourceConfigured_ShouldResolvePrimaryConnectionString()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
+        {
+            Key = "default",
+            DbKey = "default",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=primary;Database=test;"
+        };
+        metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DbKey = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=reporting;Database=test;",
+            PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
+            PrimaryDataSourceKey = "default"
+        };
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=template;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+
+        // Act
+        query.UsePrimary();
+        var connectionString = query.InvokeResolveConnectionString();
+
+        // Assert
+        connectionString.ShouldBe("Server=primary;Database=test;");
+    }
+
+    /// <summary>
     /// 测试 - 查询工厂创建接口查询对象时不应为了获取实现类型而提前创建实例。
     /// </summary>
     [Fact]
@@ -190,8 +260,14 @@ public class SqlServerRoutingAndExecutionTest
         message.RawParameters.ShouldBeOfType<SqlParameterMap<MappedSample>>();
         message.BoundParameters.ShouldNotBeNull();
         message.SqlParametersMetadata.Count.ShouldBe(2);
+        message.ParameterSnapshot.ShouldNotBeNull();
+        message.ParameterSnapshot.Items.Count.ShouldBe(2);
+        message.Connection.ShouldNotBeNull();
+        message.Connection.Database.ShouldBe("test");
+        message.Transaction.ShouldNotBeNull();
         var name = message.SqlParametersMetadata.Single(t => t.Name == "name");
         name.Value.ShouldBeNull();
+        name.OriginalValue.ShouldBeNull();
         name.PropertyName.ShouldBe(nameof(MappedSample.Name));
         name.Source.ShouldBe(SqlParameterSource.RawSql);
         name.MetadataLevel.ShouldBe(SqlParameterMetadataLevel.Full);
@@ -216,6 +292,80 @@ public class SqlServerRoutingAndExecutionTest
         var parameter = connection.LastCreatedParameters.Single();
         parameter.ParameterName.ShouldBe("name");
         parameter.Value.ShouldBe("abc");
+    }
+
+    /// <summary>
+    /// 测试 - 外部事务执行失败时，执行器不应回滚或关闭外部事务连接。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenExternalTransactionFails_ShouldNotRollbackExternalTransaction()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ThrowOnExecute = true };
+        var transaction = new CaptureDbTransaction(connection);
+        var executor = CreateExecutor(connection);
+        executor.SetTransaction(transaction);
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" }));
+
+        // Assert
+        exception.Message.ShouldBe("execute failed");
+        transaction.RollbackCount.ShouldBe(0);
+        transaction.CommitCount.ShouldBe(0);
+        connection.State.ShouldBe(ConnectionState.Open);
+    }
+
+    /// <summary>
+    /// 测试 - 独立 SQL 事务作用域提交时应提交作用域拥有的事务。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_Commit_ShouldCommitOwnedTransaction()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
+
+        // Act
+        using var scope = scopeFactory.Create();
+        var executor = scope.CreateExecutor();
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" });
+        scope.Commit();
+
+        // Assert
+        connection.LastTransaction.ShouldNotBeNull();
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试 - 独立 SQL 事务作用域未完成时 Dispose 应自动回滚。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_DisposeWhenNotCompleted_ShouldRollbackOwnedTransaction()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
+
+        // Act
+        using (scopeFactory.Create())
+        {
+        }
+
+        // Assert
+        connection.LastTransaction.ShouldNotBeNull();
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -375,6 +525,8 @@ public class SqlServerRoutingAndExecutionTest
         public string CurrentSql => GetSql();
 
         public Task<int> InvokeCountAsync() => GetCountAsync();
+
+        public string InvokeResolveConnectionString() => ResolveConnectionString();
     }
 
     /// <summary>
@@ -438,6 +590,10 @@ public class SqlServerRoutingAndExecutionTest
 
         public List<CaptureDbParameter> LastCreatedParameters { get; private set; } = new();
 
+        public bool ThrowOnExecute { get; set; }
+
+        public CaptureDbTransaction LastTransaction { get; private set; }
+
         public override string ConnectionString { get; set; }
 
         public override string Database => "test";
@@ -454,12 +610,20 @@ public class SqlServerRoutingAndExecutionTest
 
         public override void Open() => _state = ConnectionState.Open;
 
-        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) => null;
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
+        {
+            LastTransaction = new CaptureDbTransaction(this, isolationLevel);
+            return LastTransaction;
+        }
 
         protected override DbCommand CreateDbCommand() => new CaptureDbCommand(this);
 
         protected override ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
-            CancellationToken cancellationToken) => ValueTask.FromResult<DbTransaction>(null);
+            CancellationToken cancellationToken)
+        {
+            LastTransaction = new CaptureDbTransaction(this, isolationLevel);
+            return ValueTask.FromResult<DbTransaction>(LastTransaction);
+        }
 
         public override Task OpenAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
@@ -501,6 +665,8 @@ public class SqlServerRoutingAndExecutionTest
 
         public override int ExecuteNonQuery()
         {
+            if (_connection.ThrowOnExecute)
+                throw new InvalidOperationException("execute failed");
             _connection.SetParameters(_parameters.Items);
             return 1;
         }
@@ -519,6 +685,8 @@ public class SqlServerRoutingAndExecutionTest
 
         public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
         {
+            if (_connection.ThrowOnExecute)
+                throw new InvalidOperationException("execute failed");
             _connection.SetParameters(_parameters.Items);
             return Task.FromResult(1);
         }
@@ -626,6 +794,34 @@ public class SqlServerRoutingAndExecutionTest
         public override byte Scale { get; set; }
 
         public override void ResetDbType() { }
+    }
+
+    /// <summary>
+    /// 捕获数据库事务
+    /// </summary>
+    private sealed class CaptureDbTransaction : DbTransaction
+    {
+        private readonly CaptureDbConnection _connection;
+
+        private readonly IsolationLevel _isolationLevel;
+
+        public CaptureDbTransaction(CaptureDbConnection connection, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            _connection = connection;
+            _isolationLevel = isolationLevel;
+        }
+
+        public int CommitCount { get; private set; }
+
+        public int RollbackCount { get; private set; }
+
+        public override IsolationLevel IsolationLevel => _isolationLevel;
+
+        protected override DbConnection DbConnection => _connection;
+
+        public override void Commit() => CommitCount++;
+
+        public override void Rollback() => RollbackCount++;
     }
 
     /// <summary>

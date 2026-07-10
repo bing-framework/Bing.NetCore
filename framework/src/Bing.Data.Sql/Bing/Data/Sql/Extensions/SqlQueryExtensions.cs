@@ -43,4 +43,52 @@ public static partial class SqlQueryExtensions
     }
 
     #endregion
+
+    #region UseReadPreference(设置读取偏好)
+
+    /// <summary>
+    /// 设置读取偏好
+    /// </summary>
+    /// <param name="source">源</param>
+    /// <param name="readPreference">读取偏好</param>
+    public static ISqlQuery UseReadPreference(this ISqlQuery source, SqlReadPreference readPreference)
+    {
+        source.CheckNull(nameof(source));
+        source.Config(options =>
+        {
+            var context = options.GetDatabaseContext() ?? new DatabaseContext
+            {
+                DatabaseType = options.DatabaseType
+            };
+            context.ReadPreference = readPreference;
+            options.SetDatabaseContext(context);
+        });
+        return source;
+    }
+
+    /// <summary>
+    /// 使用主库读取
+    /// </summary>
+    /// <param name="source">源</param>
+    public static ISqlQuery UsePrimary(this ISqlQuery source) =>
+        source.UseReadPreference(SqlReadPreference.Primary);
+
+    #endregion
+
+    #region SetTransaction(设置数据库事务)
+
+    /// <summary>
+    /// 设置数据库事务
+    /// </summary>
+    /// <param name="source">源</param>
+    /// <param name="transaction">数据库事务</param>
+    public static ISqlQuery SetTransaction(this ISqlQuery source, IDbTransaction transaction)
+    {
+        source.CheckNull(nameof(source));
+        if (source is IDbTransactionManager manager)
+            manager.SetTransaction(transaction);
+        return source;
+    }
+
+    #endregion
 }

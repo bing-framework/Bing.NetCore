@@ -87,9 +87,23 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// </summary>
     protected virtual ISqlQuery CreateSqlQuery()
     {
-        var result = ServiceLocator.Instance.GetService<ISqlQuery>();
-        result.SetConnection(Connection);
-        return result;
+        return CreateEfCoreSqlQueryFactory().Create(UnitOfWork, EfCoreSqlConnectionMode.Shared);
+    }
+
+    /// <summary>
+    /// 创建独立 SQL 查询对象
+    /// </summary>
+    protected virtual ISqlQuery CreateIndependentSqlQuery()
+    {
+        return CreateEfCoreSqlQueryFactory().Create(UnitOfWork, EfCoreSqlConnectionMode.Independent);
+    }
+
+    /// <summary>
+    /// 创建 EF Core SQL 查询工厂
+    /// </summary>
+    protected virtual IEfCoreSqlQueryFactory CreateEfCoreSqlQueryFactory()
+    {
+        return ServiceLocator.Instance.GetService<IEfCoreSqlQueryFactory>() ?? new EfCoreSqlQueryFactory();
     }
 
     /// <summary>

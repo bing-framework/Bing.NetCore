@@ -18,7 +18,9 @@ public abstract partial class SqlQueryBase
         if (transaction == null)
             return;
         _transaction = transaction;
+        _transactionOwnership = SqlResourceOwnership.External;
         _connection = transaction.Connection;
+        _connectionOwnership = SqlResourceOwnership.External;
     }
 
     #endregion
@@ -61,13 +63,13 @@ public abstract partial class SqlQueryBase
             _transaction = isolationLevel == null
                 ? connection.BeginTransaction()
                 : connection.BeginTransaction(isolationLevel.SafeValue());
+            _transactionOwnership = SqlResourceOwnership.Owned;
             return _transaction;
         }
         catch
         {
-            if (_connection?.State == ConnectionState.Open)
-                _connection?.Close();
-            _transaction?.Dispose();
+            CloseOwnedConnection();
+            ReleaseTransaction();
             throw;
         }
     }
@@ -81,21 +83,23 @@ public abstract partial class SqlQueryBase
     /// </summary>
     public void CommitTransaction()
     {
+        if (_transaction == null)
+            return;
+        if (_transactionOwnership == SqlResourceOwnership.External)
+            return;
         try
         {
-            _transaction?.Commit();
+            _transaction.Commit();
         }
         catch
         {
-            _transaction?.Rollback();
+            _transaction.Rollback();
             throw;
         }
         finally
         {
-            if (_connection?.State == ConnectionState.Open)
-                _connection.Close();
-            _transaction?.Dispose();
-            _transaction = null;
+            CloseOwnedConnection();
+            ReleaseTransaction();
         }
     }
 
@@ -108,18 +112,30 @@ public abstract partial class SqlQueryBase
     /// </summary>
     public void RollbackTransaction()
     {
+        if (_transaction == null)
+            return;
+        if (_transactionOwnership == SqlResourceOwnership.External)
+            return;
         try
         {
-            if (_connection.State != ConnectionState.Closed)
-                _transaction?.Rollback();
+            if (_connection?.State != ConnectionState.Closed)
+                _transaction.Rollback();
         }
         finally
         {
-            if (_connection?.State == ConnectionState.Open)
-                _connection?.Close();
-            _transaction?.Dispose();
-            _transaction = null;
+            CloseOwnedConnection();
+            ReleaseTransaction();
         }
+    }
+
+    /// <summary>
+    /// 回滚内部拥有的事务
+    /// </summary>
+    protected void RollbackOwnedTransaction()
+    {
+        if (_transactionOwnership != SqlResourceOwnership.Owned)
+            return;
+        RollbackTransaction();
     }
 
     #endregion
