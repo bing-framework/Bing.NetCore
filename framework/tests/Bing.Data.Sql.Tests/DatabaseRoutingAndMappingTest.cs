@@ -1,4 +1,5 @@
 using Bing.Data.Enums;
+using Bing.Data;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
@@ -178,6 +179,39 @@ public class DatabaseRoutingAndMappingTest
         // Assert
         defaultCondition.ShouldBe("[status]=@_p_0");
         reportingCondition.ShouldBe("[status_code]=@_p_0");
+    }
+
+    /// <summary>
+    /// 测试 - SqlOptions 绑定的数据库上下文应优先于当前作用域上下文。
+    /// </summary>
+    [Fact]
+    public void LambdaWhere_WithSqlOptionsContext_ShouldUseBoundContext()
+    {
+        // Arrange
+        var metadata = new TestEntityMetadata();
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var options = CreateMetadataOptions();
+        var resolver = new DefaultEntityMappingResolver(metadata, accessor, options);
+        var sqlOptions = new SqlOptions().SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "reporting",
+            DatabaseType = DatabaseType.MySql,
+            Role = DatabaseRole.Reporting
+        });
+        accessor.Current = new DatabaseContext
+        {
+            DbKey = "default",
+            DatabaseType = DatabaseType.MySql,
+            Role = DatabaseRole.Default
+        };
+        var builder = new TestSqlBuilder(TestDialect.Instance, metadata, entityMappingResolver: resolver,
+            databaseContextAccessor: accessor, metadataOptions: options, options: sqlOptions);
+
+        // Act
+        builder.Where<Sample>(t => t.StringValue, "abc");
+
+        // Assert
+        builder.GetCondition().ShouldBe("[status_code]=@_p_0");
     }
 
     /// <summary>

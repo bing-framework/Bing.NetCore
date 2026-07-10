@@ -74,6 +74,7 @@ public static partial class DapperServiceCollectionExtensions
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
+        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -145,6 +146,7 @@ public static partial class DapperServiceCollectionExtensions
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
+        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;

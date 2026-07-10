@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Bing.Data;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Builders.Params;
@@ -28,12 +29,15 @@ public class PredicateExpressionResolver
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
     /// <param name="options">Sql 元数据配置</param>
+    /// <param name="sqlOptions">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     public PredicateExpressionResolver(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
         IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions options = null) =>
+        SqlMetadataOptions options = null, SqlOptions sqlOptions = null,
+        ISqlDatabaseContextResolver databaseContextResolver = null) =>
         _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, options);
+            databaseContextAccessor, sqlParameterFactory, options, sqlOptions, databaseContextResolver);
 
     /// <summary>
     /// 解析谓词表达式

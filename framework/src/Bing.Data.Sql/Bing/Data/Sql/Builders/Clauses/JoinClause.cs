@@ -1,10 +1,12 @@
 ﻿using System.Linq.Expressions;
 using System.Text;
+using Bing.Data;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Expressions;
 using Bing.Extensions;
@@ -69,6 +71,36 @@ public class JoinClause : IJoinClause
     private readonly Helper _helper;
 
     /// <summary>
+    /// 实体映射解析器
+    /// </summary>
+    private readonly IEntityMappingResolver _entityMappingResolver;
+
+    /// <summary>
+    /// 数据库上下文访问器
+    /// </summary>
+    private readonly IDatabaseContextAccessor _databaseContextAccessor;
+
+    /// <summary>
+    /// Sql 参数工厂
+    /// </summary>
+    private readonly ISqlParameterFactory _sqlParameterFactory;
+
+    /// <summary>
+    /// Sql 元数据配置
+    /// </summary>
+    private readonly SqlMetadataOptions _metadataOptions;
+
+    /// <summary>
+    /// Sql 配置
+    /// </summary>
+    private readonly SqlOptions _sqlOptions;
+
+    /// <summary>
+    /// SQL 数据库上下文解析器
+    /// </summary>
+    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
+
+    /// <summary>
     /// 连接参数
     /// </summary>
     private readonly List<JoinItem> _params;
@@ -87,13 +119,25 @@ public class JoinClause : IJoinClause
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="joinItems">连接参数列表</param>
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
+    /// <param name="metadataOptions">Sql 元数据配置</param>
+    /// <param name="sqlOptions">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     public JoinClause(ISqlBuilder sqlBuilder
         , IDialect dialect
         , IEntityResolver resolver
         , IEntityAliasRegister register
         , IParameterManager parameterManager
         , ITableDatabase tableDatabase
-        , List<JoinItem> joinItems = null)
+        , List<JoinItem> joinItems = null
+        , IEntityMappingResolver entityMappingResolver = null
+        , IDatabaseContextAccessor databaseContextAccessor = null
+        , ISqlParameterFactory sqlParameterFactory = null
+        , SqlMetadataOptions metadataOptions = null
+        , SqlOptions sqlOptions = null
+        , ISqlDatabaseContextResolver databaseContextResolver = null)
     {
         _sqlBuilder = sqlBuilder;
         _dialect = dialect;
@@ -101,7 +145,14 @@ public class JoinClause : IJoinClause
         _register = register;
         _parameterManager = parameterManager;
         TableDatabase = tableDatabase;
-        _helper = new Helper(dialect, resolver, register, parameterManager);
+        _entityMappingResolver = entityMappingResolver;
+        _databaseContextAccessor = databaseContextAccessor;
+        _sqlParameterFactory = sqlParameterFactory;
+        _metadataOptions = metadataOptions;
+        _sqlOptions = sqlOptions;
+        _databaseContextResolver = databaseContextResolver;
+        _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
+            databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver);
         _params = joinItems ?? new List<JoinItem>();
     }
 
@@ -117,9 +168,11 @@ public class JoinClause : IJoinClause
     /// <param name="parameterManager">参数管理器</param>
     public IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager)
     {
-        var helper = new Helper(_dialect, _resolver, register, parameterManager);
+        var helper = new Helper(_dialect, _resolver, register, parameterManager, _entityMappingResolver,
+            _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
         return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager, TableDatabase,
-            _params.Select(t => t.Clone(helper)).ToList());
+            _params.Select(t => t.Clone(helper)).ToList(), _entityMappingResolver, _databaseContextAccessor,
+            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
     }
 
     #endregion

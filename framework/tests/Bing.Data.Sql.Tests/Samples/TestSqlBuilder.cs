@@ -1,4 +1,5 @@
-﻿using Bing.Data.Sql.Builders;
+﻿using Bing.Data;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -27,12 +28,15 @@ public class TestSqlBuilder : SqlBuilderBase
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
     /// <param name="metadataOptions">Sql 元数据配置</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     public TestSqlBuilder(IDialect dialect = null, IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
         IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions metadataOptions = null)
+        SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
+        ISqlDatabaseContextResolver databaseContextResolver = null)
         : base(metadata, tableDatabase, parameterManager, entityMappingResolver, databaseContextAccessor,
-            sqlParameterFactory, metadataOptions)
+            sqlParameterFactory, metadataOptions, options, databaseContextResolver)
     {
         _dialect = dialect;
     }
@@ -57,7 +61,7 @@ public class TestSqlBuilder : SqlBuilderBase
     public override ISqlBuilder New()
     {
         return new TestSqlBuilder(Dialect, EntityMetadata, TableDatabase, ParameterManager, EntityMappingResolver,
-            DatabaseContextAccessor, SqlParameterFactory, MetadataOptions);
+            DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options, DatabaseContextResolver);
     }
 
     /// <inheritdoc />

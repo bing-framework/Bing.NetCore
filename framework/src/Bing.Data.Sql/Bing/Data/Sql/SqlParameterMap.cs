@@ -75,9 +75,30 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
     /// </summary>
     /// <param name="name">参数名</param>
     /// <param name="property">实体属性表达式</param>
+    /// <returns>Sql 参数映射</returns>
+    public SqlParameterMap<TEntity> Add(string name, Expression<Func<TEntity, object>> property) =>
+        AddCore(name, property, null, false);
+
+    /// <summary>
+    /// 添加参数映射
+    /// </summary>
+    /// <param name="name">参数名</param>
+    /// <param name="property">实体属性表达式</param>
     /// <param name="value">参数值</param>
     /// <returns>Sql 参数映射</returns>
-    public SqlParameterMap<TEntity> Add(string name, Expression<Func<TEntity, object>> property, object value = null)
+    public SqlParameterMap<TEntity> Add(string name, Expression<Func<TEntity, object>> property, object value) =>
+        AddCore(name, property, value, true);
+
+    /// <summary>
+    /// 添加参数映射
+    /// </summary>
+    /// <param name="name">参数名</param>
+    /// <param name="property">实体属性表达式</param>
+    /// <param name="value">参数值</param>
+    /// <param name="hasExplicitValue">是否已显式提供参数值</param>
+    /// <returns>Sql 参数映射</returns>
+    private SqlParameterMap<TEntity> AddCore(string name, Expression<Func<TEntity, object>> property, object value,
+        bool hasExplicitValue)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentNullException(nameof(name));
@@ -88,8 +109,8 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
             EntityType = typeof(TEntity),
             PropertyName = Lambdas.GetLastName(property),
             Value = value,
-            HasExplicitValue = value != null,
-            ValueResolved = value != null
+            HasExplicitValue = hasExplicitValue,
+            ValueResolved = hasExplicitValue
         };
         return this;
     }
@@ -101,7 +122,7 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
     /// <param name="property">实体属性表达式</param>
     /// <returns>Sql 参数映射</returns>
     public SqlParameterMap<TEntity> Map(string name, Expression<Func<TEntity, object>> property) =>
-        Add(name, property);
+        AddCore(name, property, null, false);
 
     /// <summary>
     /// 绑定参数源对象

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using Bing.Data;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Params;
@@ -104,6 +105,16 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// Sql 元数据配置
     /// </summary>
     protected SqlMetadataOptions MetadataOptions { get; private set; }
+
+    /// <summary>
+    /// Sql 配置
+    /// </summary>
+    protected SqlOptions Options { get; private set; }
+
+    /// <summary>
+    /// SQL 数据库上下文解析器
+    /// </summary>
+    protected ISqlDatabaseContextResolver DatabaseContextResolver { get; private set; }
 
     /// <summary>
     /// 实体解析器
@@ -214,21 +225,28 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
     /// <param name="metadataOptions">Sql 元数据配置</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     protected SqlBuilderBase(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
         IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions metadataOptions = null)
+        SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
+        ISqlDatabaseContextResolver databaseContextResolver = null)
     {
         EntityMetadata = metadata;
         TableDatabase = tableDatabase;
         _parameterManager = parameterManager;
         MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
+        Options = options;
         DatabaseContextAccessor = databaseContextAccessor;
+        DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
+            MetadataOptions);
         EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(metadata, databaseContextAccessor,
             MetadataOptions);
         SqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, MetadataOptions), databaseContextAccessor, MetadataOptions);
-        EntityResolver = new EntityResolver(metadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions);
+        EntityResolver = new EntityResolver(metadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions,
+            Options, DatabaseContextResolver);
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
@@ -263,13 +281,16 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 创建Join子句
     /// </summary>
-    protected virtual IJoinClause CreateJoinClause() => new JoinClause(this, Dialect, EntityResolver, AliasRegister, ParameterManager, TableDatabase);
+    protected virtual IJoinClause CreateJoinClause() => new JoinClause(this, Dialect, EntityResolver, AliasRegister,
+        ParameterManager, TableDatabase, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory,
+        MetadataOptions, Options, DatabaseContextResolver);
 
     /// <summary>
     /// 创建Where子句
     /// </summary>
     protected virtual IWhereClause CreateWhereClause() => new WhereClause(this, Dialect, EntityResolver, AliasRegister,
-        ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions);
+        ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions,
+        Options, DatabaseContextResolver);
 
     /// <summary>
     /// 创建分组子句
@@ -305,13 +326,17 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             throw new ArgumentNullException(nameof(sqlBuilder));
 
         EntityMetadata = sqlBuilder.EntityMetadata;
+        TableDatabase = sqlBuilder.TableDatabase;
         _parameterManager = sqlBuilder._parameterManager?.Clone();
         MetadataOptions = sqlBuilder.MetadataOptions;
+        Options = sqlBuilder.Options;
         DatabaseContextAccessor = sqlBuilder.DatabaseContextAccessor;
+        DatabaseContextResolver = sqlBuilder.DatabaseContextResolver;
         EntityMappingResolver = sqlBuilder.EntityMappingResolver;
         SqlParameterFactory = sqlBuilder.SqlParameterFactory;
         EntityResolver = sqlBuilder.EntityResolver ??
-            new EntityResolver(EntityMetadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions);
+            new EntityResolver(EntityMetadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
+                DatabaseContextResolver);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
 
         // 克隆各子句
@@ -338,7 +363,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// </summary>
     /// <returns>数据库上下文</returns>
     internal virtual DatabaseContext GetDatabaseContext() =>
-        DatabaseContextAccessor?.Current ?? MetadataOptions?.DefaultDatabaseContext;
+        DatabaseContextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ??
+        MetadataOptions?.DefaultDatabaseContext;
 
     /// <summary>
     /// 解析列映射元数据
@@ -686,7 +712,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
 
         _isAddFilters = true;
         var context = new SqlContext(Dialect, AliasRegister, EntityMetadata, ParameterManager, this,
-            EntityMappingResolver, DatabaseContextAccessor, MetadataOptions);
+            EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver);
         foreach (var filter in SqlFilterCollection.Filters)
         {
             if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))

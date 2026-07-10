@@ -41,7 +41,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 return 0;
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
-            message = ExecuteBefore(sql, param, connection);
+            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            message = ExecuteBefore(sql, param, connection, dbParameters, parameterMetadata);
             result = connection.Execute(sql, dbParameters, GetTransaction(), timeout);
             ExecuteAfter(message);
             return result;
@@ -79,7 +80,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 return 0;
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
-            message = ExecuteBefore(sql, param, connection);
+            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            message = ExecuteBefore(sql, param, connection, dbParameters, parameterMetadata);
             result = await connection.ExecuteAsync(sql, dbParameters, GetTransaction(), timeout);
             ExecuteAfter(message);
             return result;
@@ -117,7 +119,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 return 0;
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
-            message = ExecuteBefore(procedure, param, connection);
+            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            message = ExecuteBefore(procedure, param, connection, dbParameters, parameterMetadata);
             result = connection.Execute(procedure, dbParameters, GetTransaction(), timeout, GetProcedureCommandType());
             ExecuteAfter(message);
             return result;
@@ -155,7 +158,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 return 0;
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
-            message = ExecuteBefore(procedure, param, connection);
+            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            message = ExecuteBefore(procedure, param, connection, dbParameters, parameterMetadata);
             result = await connection.ExecuteAsync(procedure, dbParameters, GetTransaction(), timeout, GetProcedureCommandType());
             ExecuteAfter(message);
             return result;

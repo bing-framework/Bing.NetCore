@@ -4,10 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -51,6 +53,70 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - 查询工厂创建接口查询对象时不应为了获取实现类型而提前创建实例。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_CreateInterface_ShouldNotInstantiateServiceWhenResolvingImplementationType()
+    {
+        // Arrange
+        CountedSqlServerQuery.CreatedCount = 0;
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.SqlServer,
+            DatabaseRole.Reporting)] = new DatabaseDescriptor
+        {
+            DbKey = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            Role = DatabaseRole.Reporting,
+            ConnectionString = "Server=reporting;Database=test;"
+        };
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerSqlQuery<ICountedSqlServerQuery, CountedSqlServerQuery>(options =>
+            options.ConnectionString("Server=default;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var query = factory.Create<ICountedSqlServerQuery>("reporting", DatabaseType.SqlServer,
+            DatabaseRole.Reporting);
+
+        // Assert
+        query.ShouldBeOfType<CountedSqlServerQuery>();
+        CountedSqlServerQuery.CreatedCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 工厂创建的查询对象应在连接上下文与实体映射上下文之间保持一致。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_ShouldUseSameContextForConnectionAndEntityMapping()
+    {
+        // Arrange
+        var metadataOptions = CreateRoutingMetadataOptions();
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=default;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
+
+        // Act
+        var query = factory.Create<InspectableSqlServerQuery>("reporting", DatabaseType.SqlServer,
+            DatabaseRole.Reporting);
+        accessor.Current = new DatabaseContext
+        {
+            DbKey = "default",
+            DatabaseType = DatabaseType.SqlServer,
+            Role = DatabaseRole.Default
+        };
+        query.From<MappedSample>("u").Where<MappedSample>(t => t.Name, "abc");
+
+        // Assert
+        query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
+        query.CurrentSql.ShouldContain("[Users_Reporting]");
+        query.CurrentSql.ShouldContain("[reporting_name]");
+    }
+
+    /// <summary>
     /// 测试 - 原生 SQL 参数映射应生成带完整元数据的数据库参数。
     /// </summary>
     [Fact]
@@ -75,6 +141,60 @@ public class SqlServerRoutingAndExecutionTest
         name.Size.ShouldBe(20);
         var id = connection.LastCreatedParameters.Single(t => t.ParameterName == "id");
         id.Value.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 原生 SQL 参数映射显式传入 null 时应绑定 DBNull 而不是从源对象回退取值。
+    /// </summary>
+    [Fact]
+    public void RawSql_WithParameterMapExplicitNull_ShouldBindDbNull()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var executor = CreateExecutor(connection);
+
+        // Act
+        var result = executor.ExecuteSql<MappedSample>(
+            "Update [Users] Set [Name]=@name Where [Id]=@id",
+            new { name = "source", id = 1 },
+            map => map.Add("name", t => t.Name, null).Map("id", t => t.Id));
+
+        // Assert
+        result.ShouldBe(1);
+        var name = connection.LastCreatedParameters.Single(t => t.ParameterName == "name");
+        name.Value.ShouldBe(DBNull.Value);
+        var id = connection.LastCreatedParameters.Single(t => t.ParameterName == "id");
+        id.Value.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - Dapper 执行诊断应包含增强参数元数据。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WithParameterMap_ShouldPublishParameterMetadataDiagnostics()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(t => message = t);
+        var connection = new CaptureDbConnection();
+        var executor = CreateExecutor(connection);
+
+        // Act
+        executor.ExecuteSql<MappedSample>(
+            "Update [Users] Set [Name]=@name Where [Id]=@id",
+            new { id = 1 },
+            map => map.Add("name", t => t.Name, null).Map("id", t => t.Id));
+
+        // Assert
+        message.ShouldNotBeNull();
+        message.RawParameters.ShouldBeOfType<SqlParameterMap<MappedSample>>();
+        message.BoundParameters.ShouldNotBeNull();
+        message.SqlParametersMetadata.Count.ShouldBe(2);
+        var name = message.SqlParametersMetadata.Single(t => t.Name == "name");
+        name.Value.ShouldBeNull();
+        name.PropertyName.ShouldBe(nameof(MappedSample.Name));
+        name.Source.ShouldBe(SqlParameterSource.RawSql);
+        name.MetadataLevel.ShouldBe(SqlParameterMetadataLevel.Full);
     }
 
     /// <summary>
@@ -154,6 +274,56 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建路由元数据配置
+    /// </summary>
+    /// <returns>Sql 元数据配置</returns>
+    private static SqlMetadataOptions CreateRoutingMetadataOptions()
+    {
+        var options = new SqlMetadataOptions();
+        options.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.SqlServer,
+            DatabaseRole.Reporting)] = new DatabaseDescriptor
+        {
+            DbKey = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            Role = DatabaseRole.Reporting,
+            ConnectionString = "Server=reporting;Database=test;"
+        };
+        options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(MappedSample),
+            DbKey = "default",
+            DatabaseType = DatabaseType.SqlServer,
+            Role = DatabaseRole.Default,
+            TableName = "Users",
+            Columns =
+            {
+                [nameof(MappedSample.Name)] = new ColumnMappingOptions
+                {
+                    PropertyName = nameof(MappedSample.Name),
+                    ColumnName = "Name"
+                }
+            }
+        });
+        options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(MappedSample),
+            DbKey = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            Role = DatabaseRole.Reporting,
+            TableName = "Users_Reporting",
+            Columns =
+            {
+                [nameof(MappedSample.Name)] = new ColumnMappingOptions
+                {
+                    PropertyName = nameof(MappedSample.Name),
+                    ColumnName = "reporting_name"
+                }
+            }
+        });
+        return options;
+    }
+
+    /// <summary>
     /// 创建查询对象
     /// </summary>
     /// <param name="connection">数据库连接</param>
@@ -202,7 +372,31 @@ public class SqlServerRoutingAndExecutionTest
 
         public SqlOptions CurrentOptions => Options;
 
+        public string CurrentSql => GetSql();
+
         public Task<int> InvokeCountAsync() => GetCountAsync();
+    }
+
+    /// <summary>
+    /// 计数查询接口
+    /// </summary>
+    private interface ICountedSqlServerQuery : ISqlQuery
+    {
+    }
+
+    /// <summary>
+    /// 计数查询对象
+    /// </summary>
+    private sealed class CountedSqlServerQuery : SqlServerSqlQueryBase, ICountedSqlServerQuery
+    {
+        public static int CreatedCount { get; set; }
+
+        public CountedSqlServerQuery(IServiceProvider serviceProvider,
+            SqlOptions<CountedSqlServerQuery> options, IDatabase database = null)
+            : base(serviceProvider, options, database)
+        {
+            CreatedCount++;
+        }
     }
 
     /// <summary>
@@ -432,5 +626,46 @@ public class SqlServerRoutingAndExecutionTest
         public override byte Scale { get; set; }
 
         public override void ResetDbType() { }
+    }
+
+    /// <summary>
+    /// Sql 诊断观察器
+    /// </summary>
+    private sealed class SqlDiagnosticObserver : IObserver<DiagnosticListener>,
+        IObserver<KeyValuePair<string, object>>, IDisposable
+    {
+        private readonly Action<DiagnosticsMessage> _onMessage;
+        private readonly IDisposable _allSubscription;
+        private IDisposable _listenerSubscription;
+
+        public SqlDiagnosticObserver(Action<DiagnosticsMessage> onMessage)
+        {
+            _onMessage = onMessage;
+            _allSubscription = DiagnosticListener.AllListeners.Subscribe(this);
+        }
+
+        public void OnNext(DiagnosticListener value)
+        {
+            if (value.Name != SqlQueryDiagnosticListenerNames.DiagnosticListenerName)
+                return;
+            _listenerSubscription = value.Subscribe(this,
+                name => name == SqlQueryDiagnosticListenerNames.BeforeExecute);
+        }
+
+        public void OnNext(KeyValuePair<string, object> value)
+        {
+            if (value.Value is DiagnosticsMessage message)
+                _onMessage(message);
+        }
+
+        public void OnCompleted() { }
+
+        public void OnError(Exception error) { }
+
+        public void Dispose()
+        {
+            _listenerSubscription?.Dispose();
+            _allSubscription.Dispose();
+        }
     }
 }

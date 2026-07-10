@@ -32,21 +32,29 @@ public abstract class SqlFactoryBase
     private readonly SqlMetadataOptions _metadataOptions;
 
     /// <summary>
+    /// SQL 实现类型解析器
+    /// </summary>
+    private readonly ISqlImplementationTypeResolver _implementationTypeResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="databaseDescriptorResolver">数据库描述解析器</param>
     /// <param name="metadataOptions">Sql 元数据配置</param>
+    /// <param name="implementationTypeResolver">SQL 实现类型解析器</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         IDatabaseDescriptorResolver databaseDescriptorResolver = null,
-        SqlMetadataOptions metadataOptions = null)
+        SqlMetadataOptions metadataOptions = null,
+        ISqlImplementationTypeResolver implementationTypeResolver = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
         _databaseDescriptorResolver = databaseDescriptorResolver;
         _metadataOptions = metadataOptions ?? new SqlMetadataOptions();
+        _implementationTypeResolver = implementationTypeResolver;
     }
 
     /// <summary>
@@ -75,11 +83,10 @@ public abstract class SqlFactoryBase
     /// <summary>
     /// 获取当前数据库上下文
     /// </summary>
-    /// <param name="implementationType">实现类型</param>
+    /// <param name="serviceType">服务类型</param>
     /// <returns>数据库上下文</returns>
-    protected DatabaseContext GetCurrentContext(Type implementationType)
+    protected DatabaseContext GetCurrentContext(Type serviceType)
     {
-        var template = GetTemplateOptions(implementationType);
         var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
         if (current != null)
         {
@@ -96,6 +103,8 @@ public abstract class SqlFactoryBase
             };
         }
 
+        var implementationType = GetImplementationType(serviceType);
+        var template = GetTemplateOptions(implementationType);
         return new DatabaseContext
         {
             DbKey = ConnectionStringCollection.DefaultConnectionStringName,
@@ -112,7 +121,7 @@ public abstract class SqlFactoryBase
     /// <returns>服务实例</returns>
     protected TService CreateInstance<TService>(DatabaseContext context) where TService : class
     {
-        var implementationType = GetImplementationType<TService>();
+        var implementationType = GetImplementationType(typeof(TService), context?.DatabaseType);
         var options = CreateOptions(implementationType, context);
         return (TService)ActivatorUtilities.CreateInstance(_serviceProvider, implementationType, _serviceProvider,
             options);
@@ -125,10 +134,25 @@ public abstract class SqlFactoryBase
     /// <returns>实现类型</returns>
     protected Type GetImplementationType<TService>() where TService : class
     {
-        var serviceType = typeof(TService);
+        return GetImplementationType(typeof(TService));
+    }
+
+    /// <summary>
+    /// 获取实现类型
+    /// </summary>
+    /// <param name="serviceType">服务类型</param>
+    /// <param name="databaseType">数据库类型</param>
+    /// <returns>实现类型</returns>
+    protected Type GetImplementationType(Type serviceType, DatabaseType? databaseType = null)
+    {
+        var implementationType = _implementationTypeResolver?.Resolve(serviceType, databaseType);
+        if (implementationType != null)
+            return implementationType;
         if (serviceType.IsAbstract == false && serviceType.IsInterface == false)
             return serviceType;
-        var service = _serviceProvider.GetService<TService>();
+
+        // 回退到旧逻辑会实例化服务，仅在没有显式实现类型映射时使用。
+        var service = _serviceProvider.GetService(serviceType);
         if (service == null)
             throw new InvalidOperationException($"未注册类型 {serviceType.FullName} 的实现");
         return service.GetType();
@@ -148,6 +172,15 @@ public abstract class SqlFactoryBase
         var options = (SqlOptions)Activator.CreateInstance(optionsType);
         CopyOptions(template, options);
         options.DatabaseType = descriptor.DatabaseType;
+        options.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = descriptor.DbKey,
+            DatabaseType = descriptor.DatabaseType,
+            Role = descriptor.Role,
+            TenantId = context?.TenantId,
+            ReadOnly = descriptor.ReadOnly,
+            MappingVersion = context?.MappingVersion
+        });
         if (string.IsNullOrWhiteSpace(descriptor.ConnectionString) == false)
         {
             options.ConnectionString = descriptor.ConnectionString;

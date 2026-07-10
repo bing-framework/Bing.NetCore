@@ -1,5 +1,7 @@
-﻿using Bing.Data.Sql.Builders.Core;
+﻿using Bing.Data;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Clauses;
@@ -18,8 +20,19 @@ public class MySqlJoinClause : JoinClause
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="tableDatabase">表数据库</param>
-    public MySqlJoinClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register, IParameterManager parameterManager, ITableDatabase tableDatabase)
-        : base(sqlBuilder, dialect, resolver, register, parameterManager, tableDatabase)
+    /// <param name="entityMappingResolver">实体映射解析器</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
+    /// <param name="metadataOptions">Sql 元数据配置</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    public MySqlJoinClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
+        IEntityAliasRegister register, IParameterManager parameterManager, ITableDatabase tableDatabase,
+        IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
+        ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions metadataOptions = null,
+        SqlOptions options = null, ISqlDatabaseContextResolver databaseContextResolver = null)
+        : base(sqlBuilder, dialect, resolver, register, parameterManager, tableDatabase, null, entityMappingResolver,
+            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver)
     {
     }
 

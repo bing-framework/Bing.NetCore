@@ -38,12 +38,15 @@ public static partial class DapperServiceCollectionExtensions
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
         services.TryAddSingleton<IDatabaseDescriptorResolver, DefaultDatabaseDescriptorResolver>();
+        services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
         services.TryAddSingleton<IEntityMappingResolver, DefaultEntityMappingResolver>();
         services.TryAddSingleton<IFieldValueConverter, DefaultFieldValueConverter>();
         services.TryAddSingleton<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
         services.TryAddSingleton<ISqlParameterFactory, DefaultSqlParameterFactory>();
         services.TryAddSingleton<ISqlParameterBinder, DefaultSqlParameterBinder>();
+        services.TryAddSingleton<SqlImplementationTypeOptions>();
+        services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
         services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
         return services;
@@ -92,6 +95,40 @@ public static partial class DapperServiceCollectionExtensions
             Converter = provider.GetRequiredService<TConverter>()
         });
         return services;
+    }
+
+    /// <summary>
+    /// 注册 SQL 实现类型映射
+    /// </summary>
+    /// <typeparam name="TService">服务类型</typeparam>
+    /// <typeparam name="TImplementation">实现类型</typeparam>
+    /// <param name="services">服务集合</param>
+    /// <param name="databaseType">数据库类型</param>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddSqlImplementationType<TService, TImplementation>(this IServiceCollection services,
+        Bing.Data.Enums.DatabaseType databaseType)
+        where TImplementation : TService
+    {
+        var options = GetOrCreateImplementationTypeOptions(services);
+        options.Map(typeof(TService), typeof(TImplementation), databaseType);
+        options.Map(typeof(TImplementation), typeof(TImplementation), databaseType);
+        return services;
+    }
+
+    /// <summary>
+    /// 获取或创建 SQL 实现类型配置
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <returns>SQL 实现类型配置</returns>
+    private static SqlImplementationTypeOptions GetOrCreateImplementationTypeOptions(IServiceCollection services)
+    {
+        var descriptor = services.LastOrDefault(t => t.ServiceType == typeof(SqlImplementationTypeOptions));
+        if (descriptor?.ImplementationInstance is SqlImplementationTypeOptions options)
+            return options;
+        options = new SqlImplementationTypeOptions();
+        services.RemoveAll<SqlImplementationTypeOptions>();
+        services.AddSingleton(options);
+        return options;
     }
 
 }

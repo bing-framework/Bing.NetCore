@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
+using Bing.Data;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Expressions;
@@ -34,19 +35,35 @@ public class EntityResolver : IEntityResolver
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
+    /// Sql 配置
+    /// </summary>
+    private readonly SqlOptions _sqlOptions;
+
+    /// <summary>
+    /// SQL 数据库上下文解析器
+    /// </summary>
+    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="EntityResolver"/>类型的实例
     /// </summary>
     /// <param name="matedata">实体元数据</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
+    /// <param name="sqlOptions">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     public EntityResolver(IEntityMetadata matedata = null, IEntityMappingResolver entityMappingResolver = null,
-        IDatabaseContextAccessor databaseContextAccessor = null, SqlMetadataOptions options = null)
+        IDatabaseContextAccessor databaseContextAccessor = null, SqlMetadataOptions options = null,
+        SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null)
     {
         _matedata = matedata;
         _entityMappingResolver = entityMappingResolver;
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
+        _sqlOptions = sqlOptions;
+        _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
+            _options);
     }
 
     /// <summary>
@@ -270,9 +287,16 @@ public class EntityResolver : IEntityResolver
     {
         if (entityType == null || _entityMappingResolver == null)
             return null;
-        return _entityMappingResolver.Resolve(entityType,
-            _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext);
+        return _entityMappingResolver.Resolve(entityType, GetDatabaseContext());
     }
+
+    /// <summary>
+    /// 获取数据库上下文
+    /// </summary>
+    /// <returns>数据库上下文</returns>
+    private DatabaseContext GetDatabaseContext() =>
+        _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
+        _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
 
     /// <summary>
     /// 解析列名

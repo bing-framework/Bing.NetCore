@@ -25,7 +25,9 @@ public abstract class SqliteSqlQueryBase : SqlQueryBase
         ServiceProvider.GetService<IEntityMappingResolver>(),
         ServiceProvider.GetService<IDatabaseContextAccessor>(),
         ServiceProvider.GetService<ISqlParameterFactory>(),
-        ServiceProvider.GetService<SqlMetadataOptions>());
+        ServiceProvider.GetService<SqlMetadataOptions>(),
+        Options,
+        ServiceProvider.GetService<ISqlDatabaseContextResolver>());
 
     /// <inheritdoc />
     protected override IDatabaseFactory CreateDatabaseFactory() => new SqliteDatabaseFactory();

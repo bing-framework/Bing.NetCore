@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
@@ -69,6 +70,16 @@ public class WhereClause : IWhereClause
     /// </summary>
     private readonly SqlMetadataOptions _metadataOptions;
 
+    /// <summary>
+    /// Sql 配置
+    /// </summary>
+    private readonly SqlOptions _sqlOptions;
+
+    /// <summary>
+    /// SQL 数据库上下文解析器
+    /// </summary>
+    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
+
     #endregion
 
     #region 构造函数
@@ -86,10 +97,13 @@ public class WhereClause : IWhereClause
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
     /// <param name="metadataOptions">Sql 元数据配置</param>
+    /// <param name="sqlOptions">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     public WhereClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
         IParameterManager parameterManager, ICondition condition = null,
         IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
-        ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions metadataOptions = null)
+        ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions metadataOptions = null,
+        SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null)
     {
         Builder = builder;
         _dialect = dialect;
@@ -99,10 +113,13 @@ public class WhereClause : IWhereClause
         _databaseContextAccessor = databaseContextAccessor;
         _sqlParameterFactory = sqlParameterFactory;
         _metadataOptions = metadataOptions;
+        _sqlOptions = sqlOptions;
+        _databaseContextResolver = databaseContextResolver;
         _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions);
+            databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver);
         _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager,
-            entityMappingResolver, databaseContextAccessor, sqlParameterFactory, metadataOptions);
+            entityMappingResolver, databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions,
+            databaseContextResolver);
     }
 
     #endregion
@@ -118,7 +135,7 @@ public class WhereClause : IWhereClause
     public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager) =>
         new WhereClause(builder, _dialect, _resolver, register, parameterManager,
             new SqlCondition(_condition?.GetCondition()), _entityMappingResolver, _databaseContextAccessor,
-            _sqlParameterFactory, _metadataOptions);
+            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
 
     #endregion
 

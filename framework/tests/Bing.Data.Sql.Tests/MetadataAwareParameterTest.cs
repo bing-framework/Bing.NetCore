@@ -116,4 +116,44 @@ public class MetadataAwareParameterTest
         parameter.MetadataLevel.ShouldBe(SqlParameterMetadataLevel.Full);
         parameter.Source.ShouldBe(SqlParameterSource.Manual);
     }
+
+    /// <summary>
+    /// 测试 - 原生 SQL 参数 Add 显式传入 null 时应保留显式空值语义。
+    /// </summary>
+    [Fact]
+    public void SqlParameterMap_AddExplicitNull_ShouldMarkValueResolved()
+    {
+        // Arrange
+        var map = new SqlParameterMap<Sample>()
+            .UseSource(new { name = "source" });
+
+        // Act
+        map.Add("name", t => t.StringValue, null);
+        var item = map.GetItems().Single();
+
+        // Assert
+        item.HasExplicitValue.ShouldBeTrue();
+        item.ValueResolved.ShouldBeTrue();
+        item.Value.ShouldBeNull();
+    }
+
+    /// <summary>
+    /// 测试 - 原生 SQL 参数 Map 应继续从参数源对象解析值。
+    /// </summary>
+    [Fact]
+    public void SqlParameterMap_Map_ShouldReadValueFromSource()
+    {
+        // Arrange
+        var map = new SqlParameterMap<Sample>()
+            .UseSource(new { name = "source" });
+
+        // Act
+        map.Map("name", t => t.StringValue);
+        var item = map.GetItems().Single();
+
+        // Assert
+        item.HasExplicitValue.ShouldBeFalse();
+        item.ValueResolved.ShouldBeTrue();
+        item.Value.ShouldBe("source");
+    }
 }

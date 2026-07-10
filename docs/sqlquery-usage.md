@@ -265,21 +265,24 @@ services.AddSingleton(new SqlMetadataOptions
 
 services.AddDatabase<AppDatabase>();
 services.AddMySqlQuery();
-services.AddMySqlSqlExecutor();
+services.AddMySqlExecutor();
 ```
 
 ### 2. 使用作用域切换当前数据库上下文
 
 ```csharp
 public async Task<List<UserDto>> QueryReportingUsersAsync(
-    IDatabaseScopeManager scopeManager,
-    ISqlQueryFactory queryFactory)
+    IDatabaseScopeManager _databaseScopeManager,
+    ISqlQueryFactory _sqlQueryFactory)
 {
-    using (scopeManager.Use("reporting", DatabaseType.PgSql, DatabaseRole.Reporting))
+    using (_databaseScopeManager.Use("reporting", DatabaseType.MySql, DatabaseRole.Reporting))
     {
-        var query = queryFactory.Create<ISqlQuery>();
-        query.From<User>("u").Where<User>(x => x.Enabled, true);
-        return await query.ToListAsync<UserDto>();
+        var query = _sqlQueryFactory.Create<ISqlQuery>();
+        var result = await query
+            .From<User>()
+            .Where<User>(x => x.Status, UserStatus.Enabled)
+            .ToListAsync<UserDto>();
+        return result;
     }
 }
 ```
@@ -288,9 +291,23 @@ public async Task<List<UserDto>> QueryReportingUsersAsync(
 
 - `DatabaseScopeManager` 支持嵌套作用域，内层释放后会恢复父级上下文；
 - `ISqlQueryFactory` / `ISqlExecutorFactory` 会基于当前 `DatabaseContext` 解析连接串并创建对应实例；
+- 工厂创建出的 Query / Executor 会携带解析后的 `DatabaseContext`，后续 SQL 映射和参数元数据解析不会因外部作用域变化而漂移；
 - 同一实体在不同上下文下，SQL 中输出的表名、列名和执行连接可以不同。
 
-### 3. 显式实体映射
+### 3. 显式创建指定数据库上下文
+
+如果调用点不依赖当前作用域，也可以在工厂创建时直接指定数据库上下文：
+
+```csharp
+var query = _sqlQueryFactory.Create<ISqlQuery>(
+    "reporting",
+    DatabaseType.MySql,
+    DatabaseRole.Reporting);
+```
+
+该方式会同时影响连接解析、实体映射解析和增强参数元数据解析，避免出现“连接是 reporting，但 SQL 映射仍是 default”的情况。
+
+### 4. 显式实体映射
 
 当同一实体需要映射到不同库、不同表或不同列时，可通过 `SqlMetadataOptions.EntityMappings` 显式配置：
 
@@ -350,12 +367,26 @@ await executor.ExecuteSqlAsync<User>(
         .Map("userId", x => x.Id));
 ```
 
+    如果需要显式写入 `null`，使用 `Add` 并传入第三个参数；如果需要从源对象读取值，使用 `Map`：
+
+    ```csharp
+    executor.ExecuteSql<User>(
+        "update users set name=@name where id=@id",
+        new { id },
+        map => map
+        .Add("name", x => x.Name, null)
+        .Map("id", x => x.Id));
+    ```
+
 能力说明：
 
 - 支持“参数名”和“实体属性名”不一致；
 - 参数值可来自匿名对象、字典或普通 POCO；
+    - `Add(name, property, null)` 表示显式传入空值，执行时会绑定为 `DBNull.Value`；
+    - `Map(name, property)` 表示从源对象读取参数值；
 - 找不到值时会降级为弱元数据，不会破坏旧调用方式；
-- 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数。
+    - 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数；
+    - 执行诊断消息会包含原始参数、绑定后的参数对象和增强参数元数据，便于排查参数类型与映射问题。
 
 ### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
+using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
@@ -58,6 +59,16 @@ public class Helper
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
+    /// Sql 配置
+    /// </summary>
+    private readonly SqlOptions _sqlOptions;
+
+    /// <summary>
+    /// SQL 数据库上下文解析器
+    /// </summary>
+    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="Helper"/>类型的实例
     /// </summary>
     /// <param name="dialect">Sql方言</param>
@@ -68,10 +79,13 @@ public class Helper
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
     /// <param name="options">Sql 元数据配置</param>
+    /// <param name="sqlOptions">Sql 配置</param>
+    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     public Helper(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
         IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions options = null)
+        SqlMetadataOptions options = null, SqlOptions sqlOptions = null,
+        ISqlDatabaseContextResolver databaseContextResolver = null)
     {
         _dialect = dialect;
         _resolver = resolver;
@@ -81,6 +95,9 @@ public class Helper
         _databaseContextAccessor = databaseContextAccessor;
         _sqlParameterFactory = sqlParameterFactory;
         _options = options ?? new SqlMetadataOptions();
+        _sqlOptions = sqlOptions;
+        _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
+            _options);
     }
 
     /// <summary>
@@ -335,6 +352,7 @@ public class Helper
     /// </summary>
     /// <returns>数据库上下文</returns>
     private DatabaseContext GetDatabaseContext() =>
+        _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
         _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
 
     /// <summary>

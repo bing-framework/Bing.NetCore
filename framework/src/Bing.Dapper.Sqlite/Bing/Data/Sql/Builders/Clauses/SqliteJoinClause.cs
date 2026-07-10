@@ -1,5 +1,7 @@
-﻿using Bing.Data.Sql.Builders.Core;
+﻿using Bing.Data;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Clauses;
@@ -15,8 +17,15 @@ public class SqliteJoinClause : JoinClause
         , IEntityResolver resolver
         , IEntityAliasRegister register
         , IParameterManager parameterManager
-        , ITableDatabase tableDatabase)
-        : base(sqlBuilder, dialect, resolver, register, parameterManager, tableDatabase)
+        , ITableDatabase tableDatabase
+        , IEntityMappingResolver entityMappingResolver = null
+        , IDatabaseContextAccessor databaseContextAccessor = null
+        , ISqlParameterFactory sqlParameterFactory = null
+        , SqlMetadataOptions metadataOptions = null
+        , SqlOptions options = null
+        , ISqlDatabaseContextResolver databaseContextResolver = null)
+        : base(sqlBuilder, dialect, resolver, register, parameterManager, tableDatabase, null, entityMappingResolver,
+            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver)
     {
     }
 

@@ -238,7 +238,8 @@ public abstract partial class SqlQueryBase
             var connection = GetConnection();
             var sql = GetSql();
             var dbParameters = GetDbParameters();
-            message = ExecuteBefore(sql, Params, connection);
+            var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
+            message = ExecuteBefore(sql, Params, connection, dbParameters, parameterMetadata);
             WriteTraceLog(sql, Params, GetDebugSql());
             result = func(connection, sql, dbParameters, GetTransaction());
             ExecuteAfter(message);
@@ -271,7 +272,8 @@ public abstract partial class SqlQueryBase
             var connection = GetConnection();
             var sql = GetSql();
             var dbParameters = GetDbParameters();
-            message = ExecuteBefore(sql, Params, connection);
+            var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
+            message = ExecuteBefore(sql, Params, connection, dbParameters, parameterMetadata);
             WriteTraceLog(sql, Params, GetDebugSql());
             result = await func(connection, sql, dbParameters, GetTransaction());
             ExecuteAfter(message);

@@ -234,7 +234,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             ServiceProvider.GetService<IEntityMappingResolver>(),
             ServiceProvider.GetService<IDatabaseContextAccessor>(),
             ServiceProvider.GetService<ISqlParameterFactory>(),
-            ServiceProvider.GetService<SqlMetadataOptions>());
+            ServiceProvider.GetService<SqlMetadataOptions>(),
+            ServiceProvider.GetService<ISqlDatabaseContextResolver>());
 
     /// <summary>
     /// 解析连接字符串
@@ -245,7 +246,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         var resolver = ServiceProvider.GetService<IDatabaseDescriptorResolver>();
         var contextAccessor = ServiceProvider.GetService<IDatabaseContextAccessor>();
         var metadataOptions = ServiceProvider.GetService<SqlMetadataOptions>();
-        var context = contextAccessor?.Current ?? metadataOptions?.DefaultDatabaseContext;
+        var contextResolver = ServiceProvider.GetService<ISqlDatabaseContextResolver>();
+        var context = contextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? contextAccessor?.Current ??
+                  metadataOptions?.DefaultDatabaseContext;
         var descriptor = resolver?.Resolve(context);
         if (string.IsNullOrWhiteSpace(descriptor?.ConnectionString) == false)
             return descriptor.ConnectionString;
@@ -333,14 +336,20 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     /// <param name="builder">Sql 生成器</param>
     /// <returns>数据库参数</returns>
-    protected object GetDbParameters(ISqlBuilder builder) => SqlParameterBinder.Bind(builder);
+    protected object GetDbParameters(ISqlBuilder builder) =>
+        SqlParameterBinder is ISqlParameterContextBinder binder
+            ? binder.Bind(builder, Options)
+            : SqlParameterBinder.Bind(builder);
 
     /// <summary>
     /// 获取数据库参数
     /// </summary>
     /// <param name="parameter">原始参数对象</param>
     /// <returns>数据库参数</returns>
-    protected object GetDbParameters(object parameter) => SqlParameterBinder.Bind(parameter);
+    protected object GetDbParameters(object parameter) =>
+        SqlParameterBinder is ISqlParameterContextBinder binder
+            ? binder.Bind(parameter, Options)
+            : SqlParameterBinder.Bind(parameter);
 
     /// <summary>
     /// 分页查询
@@ -371,7 +380,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var sql = builder.ToSql();
             var conn = GetConnection();
             var dbParameters = GetDbParameters(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), conn);
+            var parameterMetadata = GetSqlParameterDiagnostics(builder);
+            message = ExecuteBefore(sql, builder.GetParams(), conn, dbParameters, parameterMetadata);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
             var result = conn.ExecuteScalar(sql, dbParameters, GetTransaction(), timeout);
@@ -434,7 +444,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var sql = builder.ToSql();
             var conn = GetConnection();
             var dbParameters = GetDbParameters(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), conn);
+            var parameterMetadata = GetSqlParameterDiagnostics(builder);
+            message = ExecuteBefore(sql, builder.GetParams(), conn, dbParameters, parameterMetadata);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
             var result = await conn.ExecuteScalarAsync(sql, dbParameters, GetTransaction(), timeout);
