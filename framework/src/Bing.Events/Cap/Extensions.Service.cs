@@ -25,6 +25,7 @@ public static class Extensions
         services.TryAddScoped<IMessageEventBus, MessageEventBus>();
         services.TryAddScoped<IEventBus, EventBus>();
         var builder = services.AddCap(action);
+        builder.AddSubscribeFilter<LogContextSubscribeFilter>();
         builderSetup?.Invoke(builder);
         return services;
     }

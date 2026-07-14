@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using Bing.DependencyInjection;
-using Bing.Tracing;
-
-namespace Bing.Logging.Serilog.Enrichers;
+﻿namespace Bing.Logging.Serilog.Enrichers;
 
 /// <summary>
 /// 日志上下文扩展属性
@@ -10,9 +6,25 @@ namespace Bing.Logging.Serilog.Enrichers;
 internal class LogContextEnricher : ILogEventEnricher
 {
     /// <summary>
-    /// 日志上下文
+    /// 日志上下文快照访问函数
     /// </summary>
-    private LogContext _context;
+    private readonly Func<LogContextSnapshot> _snapshotAccessor;
+
+    /// <summary>
+    /// 初始化一个<see cref="LogContextEnricher"/>类型的实例
+    /// </summary>
+    public LogContextEnricher(ILogContextAccessor accessor)
+    {
+        if (accessor == null)
+            throw new ArgumentNullException(nameof(accessor));
+        _snapshotAccessor = () => accessor.Current;
+    }
+
+    /// <summary>
+    /// 初始化一个<see cref="LogContextEnricher"/>类型的实例
+    /// </summary>
+    public LogContextEnricher(Func<LogContextSnapshot> snapshotAccessor) =>
+        _snapshotAccessor = snapshotAccessor ?? throw new ArgumentNullException(nameof(snapshotAccessor));
 
     /// <summary>
     /// 扩展属性
@@ -21,131 +33,58 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <param name="propertyFactory">日志事件属性工厂</param>
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-        if (!ServiceLocator.Instance.IsProviderEnabled)
+        var context = _snapshotAccessor();
+        if (context == null)
             return;
-        var accessor = ServiceLocator.Instance.GetService<ILogContextAccessor>();
-        if (accessor == null)
-            return;
-        _context = accessor.Context;
-        if (_context == null)
-            return;
-        //RemoveProperties(logEvent);
-        AddTraceId(logEvent, propertyFactory);
-        AddSessionId(logEvent, propertyFactory);
-        AddUserId(logEvent, propertyFactory);
-        AddTenantId(logEvent, propertyFactory);
-        AddApplication(logEvent, propertyFactory);
-        AddEnvironment(logEvent, propertyFactory);
-        AddExtraData(logEvent, propertyFactory);
-        AddTags(logEvent, propertyFactory);
+        AddProperty(logEvent, propertyFactory, "TraceId", context.TraceId);
+        AddProperty(logEvent, propertyFactory, "SessionId", context.Identity.SessionId);
+        AddProperty(logEvent, propertyFactory, "UserId", context.Identity.UserId);
+        AddProperty(logEvent, propertyFactory, "TenantId", context.Identity.TenantId);
+        AddProperty(logEvent, propertyFactory, "Application", context.Client.Application);
+        AddProperty(logEvent, propertyFactory, "Environment", context.Client.Environment);
+        AddProperty(logEvent, propertyFactory, "ClientIp", context.Client.Ip);
+        AddProperty(logEvent, propertyFactory, "Host", context.Client.Host);
+        AddProperty(logEvent, propertyFactory, "Browser", context.Client.Browser);
+        AddProperty(logEvent, propertyFactory, "Url", context.Client.Url);
+        AddProperty(logEvent, propertyFactory, "BusinessTraceId", context.Business.BusinessTraceId);
+        AddExtraData(logEvent, propertyFactory, context.Business.Data);
+        AddTags(logEvent, propertyFactory, context.Business.Tags);
     }
 
     /// <summary>
-    /// 移除默认设置的部分属性
+    /// 添加属性
     /// </summary>
-    private void RemoveProperties(LogEvent logEvent)
+    private static void AddProperty(LogEvent logEvent, ILogEventPropertyFactory propertyFactory, string name, object value)
     {
-        logEvent.RemovePropertyIfPresent("ActionId");
-        logEvent.RemovePropertyIfPresent("ActionName");
-        logEvent.RemovePropertyIfPresent("RequestId");
-        logEvent.RemovePropertyIfPresent("RequestPath");
-        logEvent.RemovePropertyIfPresent("ConnectionId");
-    }
-
-    /// <summary>
-    /// 添加跟踪号
-    /// </summary>
-    private void AddTraceId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        var traceId = _context.TraceId;
-        if (!_context.IsWebEnv)
-            traceId = TraceIdContext.Current?.TraceId;
-        if (string.IsNullOrWhiteSpace(traceId))
+        if (value == null || value is string text && string.IsNullOrWhiteSpace(text))
             return;
-        Debug.WriteLine($"【{nameof(LogContextEnricher)}】TraceId: {traceId}");
-        var property = propertyFactory.CreateProperty("TraceId", traceId);
-        logEvent.AddOrUpdateProperty(property);
-    }
-
-    /// <summary>
-    /// 添加会话标识
-    /// </summary>
-    private void AddSessionId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        if (string.IsNullOrWhiteSpace(_context.SessionId))
-            return;
-        var property = propertyFactory.CreateProperty("SessionId", _context.SessionId);
-        logEvent.AddOrUpdateProperty(property);
-    }
-
-    /// <summary>
-    /// 添加用户标识
-    /// </summary>
-    private void AddUserId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        if (string.IsNullOrWhiteSpace(_context.UserId))
-            return;
-        var property = propertyFactory.CreateProperty("UserId", _context.UserId);
-        logEvent.AddOrUpdateProperty(property);
-    }
-
-    /// <summary>
-    /// 添加租户标识
-    /// </summary>
-    private void AddTenantId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        if (string.IsNullOrWhiteSpace(_context.TenantId))
-            return;
-        var property = propertyFactory.CreateProperty("TenantId", _context.UserId);
-        logEvent.AddOrUpdateProperty(property);
-    }
-
-    /// <summary>
-    /// 添加应用程序
-    /// </summary>
-    private void AddApplication(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        if (string.IsNullOrWhiteSpace(_context.Application))
-            return;
-        var property = propertyFactory.CreateProperty("Application", _context.Application);
-        logEvent.AddOrUpdateProperty(property);
-    }
-
-    /// <summary>
-    /// 添加执行环境
-    /// </summary>
-    private void AddEnvironment(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-    {
-        if (string.IsNullOrWhiteSpace(_context.Environment))
-            return;
-        var property = propertyFactory.CreateProperty("Environment", _context.Environment);
-        logEvent.AddOrUpdateProperty(property);
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(name, value));
     }
 
     /// <summary>
     /// 添加扩展数据
     /// </summary>
-    private void AddExtraData(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    private static void AddExtraData(
+        LogEvent logEvent,
+        ILogEventPropertyFactory propertyFactory,
+        IReadOnlyDictionary<string, object> data)
     {
-        if (_context.Data.Count == 0)
+        if (data.Count == 0)
             return;
-        foreach (var item in _context.Data)
-        {
-            if (item.Value == null)
-                continue;
-            var property = propertyFactory.CreateProperty(item.Key, item.Value);
-            logEvent.AddOrUpdateProperty(property);
-        }
+        foreach (var item in data)
+            AddProperty(logEvent, propertyFactory, item.Key, item.Value);
     }
 
     /// <summary>
     /// 添加标签
     /// </summary>
-    private void AddTags(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    private static void AddTags(
+        LogEvent logEvent,
+        ILogEventPropertyFactory propertyFactory,
+        IReadOnlyList<string> tags)
     {
-        if (_context.Tags.Count == 0)
+        if (tags.Count == 0)
             return;
-        var property = propertyFactory.CreateProperty("Tags", _context.Tags.Distinct(), true);
-        logEvent.AddOrUpdateProperty(property);
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("Tags", tags, true));
     }
 }

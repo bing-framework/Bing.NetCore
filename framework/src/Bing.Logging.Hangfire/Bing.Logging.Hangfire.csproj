@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Logging.Hangfire</AssemblyName>
+    <PackageId>Bing.Logging.Hangfire</PackageId>
+    <Description>Bing.Logging.Hangfire是Bing应用框架集成Hangfire后台任务的日志上下文组件。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.Core" Version="1.7.36" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
+  </ItemGroup>
+</Project>

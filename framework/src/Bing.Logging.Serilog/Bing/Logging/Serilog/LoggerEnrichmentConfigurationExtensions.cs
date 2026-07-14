@@ -16,7 +16,26 @@ public static class LoggerEnrichmentConfigurationExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        return source.With<LogContextEnricher>();
+        return source.With(new LogContextEnricher(() =>
+        {
+            if (!Bing.DependencyInjection.ServiceLocator.Instance.IsProviderEnabled)
+                return null;
+            return Bing.DependencyInjection.ServiceLocator.Instance.GetService<ILogContextAccessor>()?.Current;
+        }));
+    }
+
+    /// <summary>
+    /// 添加日志上下文扩展属性
+    /// </summary>
+    /// <param name="source">日志扩展配置</param>
+    /// <param name="accessor">日志上下文访问器</param>
+    public static LoggerConfiguration WithLogContext(this LoggerEnrichmentConfiguration source, ILogContextAccessor accessor)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (accessor == null)
+            throw new ArgumentNullException(nameof(accessor));
+        return source.With(new LogContextEnricher(accessor));
     }
 
     /// <summary>

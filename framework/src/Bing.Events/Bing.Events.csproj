@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
     <ProjectReference Include="..\Bing.Data\Bing.Data.csproj" />
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
   </ItemGroup>
 
 </Project>

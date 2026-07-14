@@ -25,16 +25,27 @@ public class BingCorrelationIdMiddleware : IMiddleware
     private readonly ICorrelationIdProvider _correlationIdProvider;
 
     /// <summary>
+    /// 跟踪关联ID生成器
+    /// </summary>
+    private readonly ICorrelationIdGenerator _correlationIdGenerator;
+
+    /// <summary>
     /// 初始化一个<see cref="BingCorrelationIdMiddleware"/>类型的实例
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="options">跟踪关联ID配置选项信息</param>
     /// <param name="correlationIdProvider">跟踪关联ID提供程序</param>
-    public BingCorrelationIdMiddleware(RequestDelegate next, IOptions<CorrelationIdOptions> options, ICorrelationIdProvider correlationIdProvider)
+    /// <param name="correlationIdGenerator">跟踪关联ID生成器</param>
+    public BingCorrelationIdMiddleware(
+        RequestDelegate next,
+        IOptions<CorrelationIdOptions> options,
+        ICorrelationIdProvider correlationIdProvider,
+        ICorrelationIdGenerator correlationIdGenerator)
     {
         _next = next;
         _options = options.Value;
         _correlationIdProvider = correlationIdProvider;
+        _correlationIdGenerator = correlationIdGenerator;
     }
 
     /// <summary>
@@ -44,7 +55,6 @@ public class BingCorrelationIdMiddleware : IMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var correlationId = GetCorrelationIdFromRequest(context);
-        TraceIdContext.Current ??= new TraceIdContext(correlationId);
         using (_correlationIdProvider.Change(correlationId))
         {
             CheckAndSetCorrelationIdOnResponse(context, _options, correlationId);
@@ -62,7 +72,7 @@ public class BingCorrelationIdMiddleware : IMiddleware
         var correlationId = context.Request.Headers[_options.HttpHeaderName];
         if (string.IsNullOrEmpty(correlationId))
         {
-            correlationId = Guid.NewGuid().ToString("N");
+            correlationId = _correlationIdGenerator.Create();
             context.Request.Headers[_options.HttpHeaderName] = correlationId;
         }
         return correlationId;

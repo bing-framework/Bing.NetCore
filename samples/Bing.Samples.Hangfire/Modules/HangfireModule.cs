@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using AspectCore.DependencyInjection;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Samples.Hangfire.Jobs;
-using Bing.Tracing;
+using Bing.Logging.Hangfire;
 using Hangfire;
-using Hangfire.Client;
-using Hangfire.Common;
 using Hangfire.MemoryStorage;
-using Hangfire.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,7 +37,6 @@ namespace Bing.Samples.Hangfire.Modules
             services.AddHangfire(o =>
             {
                 o.UseMemoryStorage();
-                o.UseFilter(new CorrelateFilterAttribute());
             });
             return services;
         }
@@ -53,7 +48,9 @@ namespace Bing.Samples.Hangfire.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             Enabled = true;
-            GlobalConfiguration.Configuration.UseActivator(new HangfireDIActivator(app.ApplicationServices));
+            GlobalConfiguration.Configuration
+                .UseActivator(new HangfireDIActivator(app.ApplicationServices))
+                .UseBingLogging(app.ApplicationServices);
             app.UseHangfireDashboard();
             app.UseHangfireServer();
             RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0/5 5 * * * ? ", TimeZoneInfo.Local);
@@ -163,45 +160,4 @@ namespace Bing.Samples.Hangfire.Modules
         }
     }
 
-    /// <summary>
-    /// 关联ID 过滤器
-    /// </summary>
-    internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, IServerFilter
-    {
-        private const string CorrelationIdKey = "CorrelationId";
-        private const string CorrelateActivityKey = "Correlate-Activity";
-
-        /// <summary>Called before the creation of the job.</summary>
-        /// <param name="filterContext">The filter context.</param>
-        public void OnCreating(CreatingContext filterContext)
-        {
-            // 如果作业在相关上下文中启动，则将跟踪ID分配给作业
-            TraceIdContext.Current ??= new TraceIdContext(string.Empty);
-            Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnCreating]TraceId: {TraceIdContext.Current.TraceId}");
-            filterContext.SetJobParameter(CorrelationIdKey, TraceIdContext.Current.TraceId);
-        }
-
-        /// <summary>Called after the creation of the job.</summary>
-        /// <param name="filterContext">The filter context.</param>
-        public void OnCreated(CreatedContext filterContext)
-        {
-            Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnCreated]TraceId: {TraceIdContext.Current.TraceId}");
-        }
-
-        /// <summary>Called before the performance of the job.</summary>
-        /// <param name="filterContext">The filter context.</param>
-        public void OnPerforming(PerformingContext filterContext)
-        {
-            var correlationId = filterContext.GetJobParameter<string>(CorrelationIdKey) ?? filterContext.BackgroundJob.Id;
-            TraceIdContext.Current = new TraceIdContext(correlationId);
-            Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnPerforming]TraceId: {TraceIdContext.Current.TraceId}");
-        }
-
-        /// <summary>Called after the performance of the job.</summary>
-        /// <param name="filterContext">The filter context.</param>
-        public void OnPerformed(PerformedContext filterContext)
-        {
-            Debug.WriteLine($"[{nameof(CorrelateFilterAttribute)}-OnPerformed]TraceId: {TraceIdContext.Current.TraceId}");
-        }
-    }
 }

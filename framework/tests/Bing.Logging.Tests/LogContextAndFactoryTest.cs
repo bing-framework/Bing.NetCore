@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using Xunit;
+using Bing.Tracing;
 
 namespace Bing.Logging.Tests;
 
@@ -149,55 +150,76 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：当 LogContext.Current 为 null 时，LogContextAccessor.Context 应创建并返回新实例，
-    /// 确保不返回 null。
+    /// 测试目的：访问器应从关联标识提供程序读取 TraceId，不能自行生成第二套标识。
     /// </summary>
     [Fact]
-    public void LogContextAccessor_Context_WhenCurrentIsNull_ShouldCreateNew()
+    public void LogContextAccessor_Current_ShouldUseCorrelationIdProvider()
     {
         // Arrange
-        var original = LogContext.Current;
-        LogContext.Current = null;
-        try
-        {
-            var accessor = new LogContextAccessor();
+        var provider = new DefaultCorrelationIdProvider();
+        var accessor = new LogContextAccessor(provider);
 
-            // Act
-            var ctx = accessor.Context;
+        // Act
+        using var scope = provider.Change("trace-001");
+        var snapshot = accessor.Current;
 
-            // Assert
-            ctx.ShouldNotBeNull();
-        }
-        finally
-        {
-            LogContext.Current = original;
-        }
+        // Assert
+        snapshot.ShouldNotBeNull();
+        snapshot.TraceId.ShouldBe("trace-001");
     }
 
     /// <summary>
-    /// 测试目的：新创建的 LogContext 应包含非空的 TraceId，
-    /// 确保分布式追踪字段不为空。
+    /// 测试目的：嵌套日志上下文作用域释放后应恢复父级快照和父级 TraceId。
     /// </summary>
     [Fact]
-    public void LogContextAccessor_Context_ShouldHaveNonNullTraceId()
+    public void LogContextAccessor_BeginScope_WhenNested_ShouldRestoreParentSnapshot()
     {
         // Arrange
-        var original = LogContext.Current;
-        LogContext.Current = null;
-        try
-        {
-            var accessor = new LogContextAccessor();
+        var provider = new DefaultCorrelationIdProvider();
+        var accessor = new LogContextAccessor(provider);
+        var parent = new LogContextSnapshot(
+            "parent",
+            new LogIdentityContext(userId: "user-parent"));
+        var child = new LogContextSnapshot(
+            "child",
+            new LogIdentityContext(userId: "user-child"));
 
-            // Act
-            var ctx = accessor.Context;
-
-            // Assert
-            ctx.TraceId.ShouldNotBeNullOrEmpty();
-        }
-        finally
+        // Act & Assert
+        using (accessor.BeginScope(parent))
         {
-            LogContext.Current = original;
+            accessor.Current.ShouldBeSameAs(parent);
+            provider.Get().ShouldBe("parent");
+            using (accessor.BeginScope(child))
+            {
+                accessor.Current.ShouldBeSameAs(child);
+                provider.Get().ShouldBe("child");
+            }
+            accessor.Current.ShouldBeSameAs(parent);
+            provider.Get().ShouldBe("parent");
         }
+        provider.Get().ShouldBeNull();
+    }
+
+    /// <summary>
+    /// 测试目的：捕获的日志上下文应复制集合，防止源集合后续修改污染边界快照。
+    /// </summary>
+    [Fact]
+    public void LogContextSnapshot_WhenSourceCollectionsChange_ShouldRemainUnchanged()
+    {
+        // Arrange
+        var tags = new List<string> { "initial" };
+        var data = new Dictionary<string, object> { ["key"] = "initial" };
+
+        // Act
+        var snapshot = new LogContextSnapshot(
+            "trace",
+            business: new BusinessLogContext(tags: tags, data: data));
+        tags.Add("changed");
+        data["key"] = "changed";
+
+        // Assert
+        snapshot.Business.Tags.ShouldBe(new[] { "initial" });
+        snapshot.Business.Data["key"].ShouldBe("initial");
     }
 
     // ═══════════════════════════════════════════════════════════
