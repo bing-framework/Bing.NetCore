@@ -4,10 +4,7 @@ using System.Diagnostics;
 using Bing.DependencyInjection;
 using Bing.Logging;
 using Bing.Utils.Json;
-using Exceptionless;
 using Microsoft.Extensions.Logging;
-using el = global::Exceptionless;
-using LogLevel = Exceptionless.Logging.LogLevel;
 
 namespace Bing.Samples.Hangfire.Jobs
 {
@@ -42,10 +39,6 @@ namespace Bing.Samples.Hangfire.Jobs
             //    .Caption("DebugLogJob")
             //    .Content($"2、【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 {nameof(WriteLog)} | 写入日志")
             //    .Debug();
-            el.ExceptionlessClient.Default
-                .CreateLog($"隔壁老王的信息-Source【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 ", LogLevel.Info).Submit();
-            el.ExceptionlessClient.Default
-                .CreateLog($"隔壁老王的信息-Source-NotLevel【{DateTime.Now:yyyy-MM-dd HH:mm:ss.sss}】 ").Submit();
             Debug.WriteLine($"CurrentLog: {CurrentLog.GetType()}");
             var id = Guid.NewGuid().ToString();
             using (CurrentLog.BeginScope(new Dictionary<string, object>

@@ -18,19 +18,21 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">最小日志事件级别</param>
+    /// <param name="mapperOptions">日志事件映射配置</param>
     /// <exception cref="ArgumentNullException"></exception>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         string apiKey,
         Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        ExceptionlessLogEventMapperOptions mapperOptions = null)
     {
         if (loggerSinkConfiguration == null)
             throw new ArgumentNullException(nameof(loggerSinkConfiguration));
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
-        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, null, null, additionalOperation, includeProperties, restrictedToMinimumLevel), restrictedToMinimumLevel);
+        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, null, null, additionalOperation, includeProperties, restrictedToMinimumLevel, mapperOptions), restrictedToMinimumLevel);
     }
 
     /// <summary>
@@ -43,6 +45,7 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">最小日志事件级别</param>
+    /// <param name="mapperOptions">日志事件映射配置</param>
     /// <exception cref="ArgumentNullException"></exception>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
@@ -51,13 +54,14 @@ public static partial class LoggerSinkConfigurationExtensions
         string[] defaultTags = null,
         Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        ExceptionlessLogEventMapperOptions mapperOptions = null)
     {
         if (loggerSinkConfiguration == null)
             throw new ArgumentNullException(nameof(loggerSinkConfiguration));
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
-        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, serverUrl, defaultTags, additionalOperation, includeProperties, restrictedToMinimumLevel), restrictedToMinimumLevel);
+        return loggerSinkConfiguration.Sink(new ExceptionlessSink(apiKey, serverUrl, defaultTags, additionalOperation, includeProperties, restrictedToMinimumLevel, mapperOptions), restrictedToMinimumLevel);
     }
 
     /// <summary>
@@ -68,15 +72,17 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">最小日志事件级别</param>
     /// <param name="client">Exceptionless客户端</param>
+    /// <param name="mapperOptions">日志事件映射配置</param>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        ExceptionlessClient client = null)
+        ExceptionlessClient client = null,
+        ExceptionlessLogEventMapperOptions mapperOptions = null)
     {
         if (loggerSinkConfiguration == null)
             throw new ArgumentNullException(nameof(loggerSinkConfiguration));
-        return loggerSinkConfiguration.Sink(new ExceptionlessSink(additionalOperation, includeProperties, client, restrictedToMinimumLevel), restrictedToMinimumLevel);
+        return loggerSinkConfiguration.Sink(new ExceptionlessSink(additionalOperation, includeProperties, client, restrictedToMinimumLevel, mapperOptions), restrictedToMinimumLevel);
     }
 }

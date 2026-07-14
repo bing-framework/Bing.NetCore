@@ -3,8 +3,6 @@ using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging;
 using Bing.Logging.Serilog;
-using Bing.Tracing;
-using Exceptionless;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -36,13 +34,6 @@ namespace Bing.Samples.Hangfire.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            //services.AddNLog();
-            // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
-            services.AddExceptionless(o =>
-            {
-                o.ApiKey = "2R8FksPOpJikquJ2SLUfZMNES6d6dIsBsFYWTJR7";
-                o.ServerUrl = "http://10.186.135.27:5100";
-            });
             services.AddBingLogging(x => { });
             services.AddLogging(loggingBuilder =>
             {
@@ -52,13 +43,9 @@ namespace Bing.Samples.Hangfire.Modules
                     .Enrich.WithLogContext()
                     .Enrich.WithLogLevel()
                     .Enrich.WithSpan()
-                    .WriteTo.Exceptionless(additionalOperation: (builder) =>
-                    {
-                        if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
-                            builder.Target.AddTags(traceId.ToString() ?? string.Empty);
-                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
-                        return builder;
-                    })
+                    .WriteTo.Exceptionless(
+                        apiKey: configuration["Exceptionless:ApiKey"] ?? string.Empty,
+                        serverUrl: configuration["Exceptionless:ServerUrl"])
                     .ReadFrom.Configuration(configuration)
                     .ConfigLogLevel(configuration)
                     .CreateLogger();

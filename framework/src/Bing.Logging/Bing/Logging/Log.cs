@@ -14,9 +14,18 @@ public class Log : ILog
     #region 字段
 
     /// <summary>
-    /// 当前的日志事件描述符
+    /// 当前异步流的日志事件状态
     /// </summary>
-    private LogEventDescriptor CurrentDescriptor { get; set; }
+    private readonly AsyncLocal<LogEventState> _currentState = new();
+
+    /// <summary>
+    /// 当前日志事件状态
+    /// </summary>
+    private LogEventState CurrentState
+    {
+        get => _currentState.Value ??= new LogEventState();
+        set => _currentState.Value = value;
+    }
 
     /// <summary>
     /// 日志错误事件ID
@@ -36,11 +45,7 @@ public class Log : ILog
     public Log(ILoggerWrapper logger, ILogContextAccessor logContextAccessor = null)
     {
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        LogContext = logContextAccessor?.Context;
-        LogProperties = new Dictionary<string, object>();
-        LogMessage = new StringBuilder();
-        LogMessageArgs = new List<object>();
-        CurrentDescriptor = new LogEventDescriptor();
+        LogContext = logContextAccessor?.Current;
     }
 
     #endregion
@@ -64,42 +69,62 @@ public class Log : ILog
     /// <summary>
     /// 日志上下文
     /// </summary>
-    protected LogContext LogContext { get; }
+    protected LogContextSnapshot LogContext { get; }
 
     /// <summary>
     /// 日志级别
     /// </summary>
-    protected LogLevel LogLevel { get; set; }
+    protected LogLevel LogLevel
+    {
+        get => CurrentState.LogLevel;
+        set => UpdateState(state => state.LogLevel = value);
+    }
 
     /// <summary>
     /// 日志事件标识
     /// </summary>
-    protected EventId LogEventId { get; set; }
+    protected EventId LogEventId
+    {
+        get => CurrentState.LogEventId;
+        set => UpdateState(state => state.LogEventId = value);
+    }
 
     /// <summary>
     /// 日志异常
     /// </summary>
-    protected Exception LogException { get; set; }
+    protected Exception LogException
+    {
+        get => CurrentState.LogException;
+        set => UpdateState(state => state.LogException = value);
+    }
 
     /// <summary>
     /// 日志内容
     /// </summary>
-    protected IDictionary<string, object> LogProperties { get; set; }
+    protected IDictionary<string, object> LogProperties
+    {
+        get => CurrentState.LogProperties;
+        set => UpdateState(state => state.LogProperties = new Dictionary<string, object>(value ?? new Dictionary<string, object>()));
+    }
 
     /// <summary>
     /// 日志状态
     /// </summary>
-    protected object LogState { get; set; }
+    protected object LogState
+    {
+        get => CurrentState.LogState;
+        set => UpdateState(state => state.LogState = value);
+    }
 
     /// <summary>
     /// 日志消息
     /// </summary>
-    protected StringBuilder LogMessage { get; }
+    protected StringBuilder LogMessage => CurrentState.LogMessage;
 
     /// <summary>
     /// 日志消息参数
     /// </summary>
-    protected List<object> LogMessageArgs { get; }
+    protected List<object> LogMessageArgs => CurrentState.LogMessageArgs;
 
     #endregion
 
@@ -132,12 +157,13 @@ public class Log : ILog
     {
         if (string.IsNullOrWhiteSpace(propertyName))
             return this;
-        if (LogProperties.ContainsKey(propertyName))
+        UpdateState(state =>
         {
-            LogProperties[propertyName] += propertyValue;
-            return this;
-        }
-        LogProperties.Add(propertyName, propertyValue);
+            if (state.LogProperties.ContainsKey(propertyName))
+                state.LogProperties[propertyName] += propertyValue;
+            else
+                state.LogProperties.Add(propertyName, propertyValue);
+        });
         return this;
     }
 
@@ -153,7 +179,7 @@ public class Log : ILog
     {
         if (action == null)
             throw new ArgumentNullException(nameof(action));
-        action(CurrentDescriptor);
+        UpdateState(state => state.DescriptorActions.Add(action));
         return this;
     }
 
@@ -175,8 +201,11 @@ public class Log : ILog
     /// <inheritdoc />
     public virtual ILog Message(string message, params object[] args)
     {
-        LogMessage.Append(message);
-        LogMessageArgs.AddRange(args);
+        UpdateState(state =>
+        {
+            state.LogMessage.Append(message);
+            state.LogMessageArgs.AddRange(args);
+        });
         return this;
     }
 
@@ -271,15 +300,17 @@ public class Log : ILog
         if (LogState == null)
             return;
         var state = Conv.ToDictionary(LogState);
+        var properties = new Dictionary<string, object>(LogProperties);
         foreach (var item in state)
         {
             if (item.Value.SafeString().IsEmpty())
                 continue;
-            if (LogProperties.ContainsKey(item.Key))
-                LogProperties[item.Key] = item.Value;
+            if (properties.ContainsKey(item.Key))
+                properties[item.Key] = item.Value;
             else
-                LogProperties.Add(item.Key, item.Value);
+                properties.Add(item.Key, item.Value);
         }
+        LogProperties = properties;
     }
 
     /// <summary>
@@ -328,7 +359,10 @@ public class Log : ILog
         try
         {
             LogLevel = level;
-            var scopeDict = CurrentDescriptor.Context.ExposeScopeState();
+            var descriptor = new LogEventDescriptor();
+            foreach (var action in CurrentState.DescriptorActions)
+                action(descriptor);
+            var scopeDict = descriptor.Context.ExposeScopeState();
             using (Logger.BeginScope(scopeDict))
             {
                 Init();
@@ -395,14 +429,51 @@ public class Log : ILog
     /// </summary>
     protected virtual void Clear()
     {
-        LogLevel = LogLevel.None;
-        LogEventId = 0;
-        LogException = null;
-        LogState = null;
-        LogProperties = new Dictionary<string, object>();
-        LogMessage.Clear();
-        LogMessageArgs.Clear();
-        CurrentDescriptor = new LogEventDescriptor();
+        CurrentState = new LogEventState();
+    }
+
+    /// <summary>
+    /// 使用写时复制更新当前异步流的日志事件状态
+    /// </summary>
+    private void UpdateState(Action<LogEventState> action)
+    {
+        var state = CurrentState.Clone();
+        action(state);
+        CurrentState = state;
+    }
+
+    /// <summary>
+    /// 日志事件状态
+    /// </summary>
+    private sealed class LogEventState
+    {
+        public LogLevel LogLevel { get; set; }
+
+        public EventId LogEventId { get; set; }
+
+        public Exception LogException { get; set; }
+
+        public IDictionary<string, object> LogProperties { get; set; } = new Dictionary<string, object>();
+
+        public object LogState { get; set; }
+
+        public StringBuilder LogMessage { get; set; } = new();
+
+        public List<object> LogMessageArgs { get; set; } = new();
+
+        public List<Action<LogEventDescriptor>> DescriptorActions { get; set; } = new();
+
+        public LogEventState Clone() => new()
+        {
+            LogLevel = LogLevel,
+            LogEventId = LogEventId,
+            LogException = LogException,
+            LogProperties = new Dictionary<string, object>(LogProperties),
+            LogState = LogState,
+            LogMessage = new StringBuilder(LogMessage.ToString()),
+            LogMessageArgs = new List<object>(LogMessageArgs),
+            DescriptorActions = new List<Action<LogEventDescriptor>>(DescriptorActions)
+        };
     }
 
     #endregion

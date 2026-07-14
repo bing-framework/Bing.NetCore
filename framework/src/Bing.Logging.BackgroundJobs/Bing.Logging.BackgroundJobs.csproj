@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+    <AssemblyName>Bing.Logging.BackgroundJobs</AssemblyName>
+    <PackageId>Bing.Logging.BackgroundJobs</PackageId>
+    <Description>Bing.Logging.BackgroundJobs是支持日志上下文传播的后台任务队列组件。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Logging\Bing.Logging.csproj" />
+  </ItemGroup>
+</Project>

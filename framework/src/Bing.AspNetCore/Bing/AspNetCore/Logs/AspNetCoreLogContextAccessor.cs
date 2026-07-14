@@ -5,7 +5,9 @@ using Bing.Tracing;
 using Bing.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Bing.AspNetCore.Logs;
 
@@ -31,54 +33,61 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
     protected ICurrentUser CurrentUser { get; }
 
     /// <summary>
+    /// 主机环境
+    /// </summary>
+    protected IHostEnvironment HostEnvironment { get; }
+
+    /// <summary>
     /// 初始化一个<see cref="AspNetCoreLogContextAccessor"/>类型的实例
     /// </summary>
     /// <param name="webClientInfoProvider">Web客户端信息提供程序</param>
     /// <param name="httpContextAccessor">Http上下文访问器</param>
     /// <param name="currentUser">当前用户</param>
+    /// <param name="correlationIdProvider">关联标识提供程序</param>
+    /// <param name="hostEnvironment">主机环境</param>
     public AspNetCoreLogContextAccessor(
         IHttpContextAccessor httpContextAccessor,
         IWebClientInfoProvider webClientInfoProvider,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationIdProvider correlationIdProvider,
+        IHostEnvironment hostEnvironment) : base(correlationIdProvider)
     {
         HttpContextAccessor = httpContextAccessor;
         WebClientInfoProvider = webClientInfoProvider;
         CurrentUser = currentUser;
+        HostEnvironment = hostEnvironment;
     }
 
     /// <summary>
     /// 创建日志上下文
     /// </summary>
-    protected override LogContext Create()
+    protected override LogContextSnapshot Create()
     {
-        var context = base.Create();
-        context.Ip = WebClientInfoProvider.ClientIpAddress;
-        context.Browser = WebClientInfoProvider.ClientIpAddress;
-        context.Url = HttpContextAccessor.HttpContext?.Request?.GetDisplayUrl();
-        context.IsWebEnv = HttpContextAccessor.HttpContext?.Request != null;
-        context.UserId = CurrentUser.UserId;
-        context.TenantId = CurrentUser.TenantId;
-        context.Application = CurrentUser.GetApplicationName();
-        context.Data["UserName"] = CurrentUser.GetUserName();
-        context.Data["FullName"] = CurrentUser.GetFullName();
-        context.Data["TenantCode"] = CurrentUser.GetTenantCode();
-        context.Data["TenantName"] = CurrentUser.GetTenantName();
-        if (!context.IsWebEnv)
-            context.TraceId = base.GetTraceId();
-        return context;
-    }
-
-    /// <summary>
-    /// 获取跟踪标识
-    /// </summary>
-    protected override string GetTraceId()
-    {
-        if (TraceIdContext.Current != null)
-            return TraceIdContext.Current.TraceId;
-        var correlationId = HttpContextAccessor.HttpContext?.Request.Headers["X-Correlation-Id"];
-        if (!string.IsNullOrWhiteSpace(correlationId))
-            return correlationId;
-        var traceId = HttpContextAccessor.HttpContext?.TraceIdentifier;
-        return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString("N") : Guid.TryParse(traceId, out _) ? traceId : Guid.NewGuid().ToString("N");
+        var baseContext = base.Create();
+        var httpContext = HttpContextAccessor.HttpContext;
+        var data = new Dictionary<string, object>
+        {
+            ["UserName"] = CurrentUser.GetUserName(),
+            ["FullName"] = CurrentUser.GetFullName(),
+            ["TenantCode"] = CurrentUser.GetTenantCode(),
+            ["TenantName"] = CurrentUser.GetTenantName()
+        };
+        var identity = new LogIdentityContext(
+            CurrentUser.UserId,
+            CurrentUser.TenantId,
+            httpContext?.Features.Get<ISessionFeature>()?.Session?.Id);
+        var client = new LogClientContext(
+            CurrentUser.GetApplicationName() ?? HostEnvironment.ApplicationName,
+            HostEnvironment.EnvironmentName,
+            WebClientInfoProvider.ClientIpAddress,
+            baseContext.Client.Host,
+            WebClientInfoProvider.BrowserInfo,
+            httpContext?.Request?.GetDisplayUrl(),
+            httpContext?.Request != null);
+        return new LogContextSnapshot(
+            baseContext.TraceId,
+            identity,
+            client,
+            new BusinessLogContext(data: data));
     }
 }

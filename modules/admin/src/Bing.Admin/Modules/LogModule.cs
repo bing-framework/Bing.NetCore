@@ -1,12 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Logging;
 using Bing.Logging.Serilog;
-using Bing.Tracing;
-using Exceptionless;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -40,16 +37,6 @@ namespace Bing.Admin.Modules
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             services.AddBingLogging(x => { });
-            // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
-            
-            //ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
-            //ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
-            //ExceptionlessClient.Default.Startup();
-            services.AddExceptionless(x =>
-            {
-                x.ApiKey = "aUBmHcfhK8VvPLqsTYvVOeXJYY4jN5QghOY68FZe";
-                x.ServerUrl = "http://10.186.135.147:5100";
-            });
             services.AddLogging(loggingBuilder =>
             {
                 var logFilePath = $"{AppContext.BaseDirectory}logs\\log-.log";
@@ -59,22 +46,9 @@ namespace Bing.Admin.Modules
                     .Enrich.WithLogContext()
                     .Enrich.WithLogLevel()
                     .Enrich.WithSpan()
-                    .WriteTo.Exceptionless(additionalOperation: (builder) =>
-                    {
-                        if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
-                        {
-                            builder.Target.AddTags(traceId.ToString() ?? string.Empty);
-                            Debug.WriteLine($"Exceptionless[TraceId:{traceId}]");
-                        }
-                        else
-                        {
-                            var id = (TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId;
-                            builder.Target.AddTags(id);
-                            Debug.WriteLine($"Exceptionless-Id[TraceId:{id}]");
-                        }
-                        
-                        return builder;
-                    })
+                    .WriteTo.Exceptionless(
+                        apiKey: configuration["Exceptionless:ApiKey"] ?? string.Empty,
+                        serverUrl: configuration["Exceptionless:ServerUrl"])
                     .WriteTo.Async(o =>
                     {
                         o.File(logFilePath,
@@ -97,9 +71,6 @@ namespace Bing.Admin.Modules
         /// 应用AspNetCore的服务业务
         /// </summary>
         /// <param name="app">应用程序构建器</param>
-        public override void UseModule(IApplicationBuilder app)
-        {
-            app.UseExceptionless();
-        }
+        public override void UseModule(IApplicationBuilder app) { }
     }
 }

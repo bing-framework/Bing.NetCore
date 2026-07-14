@@ -1,11 +1,7 @@
-﻿using Bing.Logging.ExtraSupports;
-using Bing.Logging.Sinks.Exceptionless.Internals;
-using Bing.Text;
+﻿using Bing.Logging.Sinks.Exceptionless.Internals;
 using Exceptionless;
 using Exceptionless.Dependency;
 using Exceptionless.Logging;
-using Exceptionless.Models;
-using Exceptionless.Models.Data;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -37,6 +33,11 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     private readonly ExceptionlessClient _client;
 
     /// <summary>
+    /// 日志事件映射器
+    /// </summary>
+    private readonly ExceptionlessLogEventMapper _mapper;
+
+    /// <summary>
     /// 初始化一个<see cref="ExceptionlessSink"/>类型的实例
     /// </summary>
     /// <param name="apiKey">API密钥</param>
@@ -45,13 +46,15 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">将事件写入接收器所需的最低日志事件级别</param>
+    /// <param name="mapperOptions">日志事件映射配置</param>
     public ExceptionlessSink(
         string apiKey, 
         string serverUrl = null, 
         string[] defaultTags = null, 
         Func<EventBuilder, EventBuilder> additionalOperation = null, 
         bool includeProperties = true,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        ExceptionlessLogEventMapperOptions mapperOptions = null)
     {
         if (apiKey == null)
             throw new ArgumentNullException(nameof(apiKey));
@@ -68,6 +71,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
         _defaultTags = defaultTags;
         _additionalOperation = additionalOperation;
         _includeProperties = includeProperties;
+        _mapper = new ExceptionlessLogEventMapper(mapperOptions);
     }
 
     /// <summary>
@@ -77,14 +81,17 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="client">Exceptionless客户端</param>
     /// <param name="restrictedToMinimumLevel">将事件写入接收器所需的最低日志事件级别</param>
+    /// <param name="mapperOptions">日志事件映射配置</param>
     public ExceptionlessSink(
         Func<EventBuilder, EventBuilder> additionalOperation = null,
         bool includeProperties = true,
         ExceptionlessClient client = null,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        ExceptionlessLogEventMapperOptions mapperOptions = null)
     {
         _additionalOperation = additionalOperation;
         _includeProperties = includeProperties;
+        _mapper = new ExceptionlessLogEventMapper(mapperOptions);
         _client = client ?? ExceptionlessClient.Default;
         if (_client.Configuration.Resolver.HasDefaultRegistration<IExceptionlessLog, NullExceptionlessLog>())
             _client.Configuration.UseLogger(new SelfLogLogger());
@@ -103,67 +110,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
         if (LogLevelSwitcher.Switch(logEvent.Level) < minLogLevel)
             return;
 
-        var builder = _client
-            .CreateFromLogEvent(logEvent)
-            .AddTags(_defaultTags);
-
-        if (_includeProperties)
-        {
-            foreach (var property in logEvent.Properties)
-            {
-                switch (property.Key)
-                {
-                    case Constants.SourceContextPropertyName:
-                        continue;
-                    case Event.KnownDataKeys.UserInfo when property.Value is StructureValue uis && string.Equals(nameof(UserInfo), uis.TypeTag):
-                        var userInfo = uis.FlattenProperties() as Dictionary<string, object>;
-                        if (userInfo is null)
-                            continue;
-                        // 忽略数据属性
-                        var identity = userInfo[nameof(UserInfo.Identity)] as string;
-                        var name = userInfo[nameof(UserInfo.Name)] as string;
-                        if (!string.IsNullOrWhiteSpace(identity) || !string.IsNullOrWhiteSpace(name))
-                            builder.SetUserIdentity(identity, name);
-                        break;
-                        
-                    case Event.KnownDataKeys.UserDescription when property.Value is StructureValue uds && string.Equals(nameof(UserDescription), uds.TypeTag):
-                        var userDescription = uds.FlattenProperties() as Dictionary<string, object>;
-                        if (userDescription is null)
-                            continue;
-                        // 忽略数据属性
-                        var emailAddress = userDescription[nameof(UserDescription.EmailAddress)] as string;
-                        var description = userDescription[nameof(UserDescription.Description)] as string;
-                        if (!string.IsNullOrWhiteSpace(emailAddress) || !string.IsNullOrWhiteSpace(description))
-                            builder.SetUserDescription(emailAddress, description);
-                        break;
-                    case "Tags":
-                        builder.AddTags(property.Value.GetTags());
-                        break;
-                    case ContextDataTypes.Tags:
-                        builder.AddTags(property.Value.GetTags());
-                        break;
-                    case ContextDataTypes.CallerInfo when property.Value is ScalarValue callerInfo:
-                        {
-                            var caller = callerInfo.FlattenProperties();
-                            if (caller is null)
-                                continue;
-                            builder.SetProperty("CallerInfo", caller);
-                        }
-                        break;
-                    default:
-                        {
-                            // 特殊处理扩展属性
-                            if (property.Key.StartsWith(ContextDataTypes.ExtraProperty))
-                            {
-                                builder.SetProperty(property.Key.TrimPhraseStart(ContextDataTypes.ExtraProperty), property.Value.FlattenProperties());
-                                break;
-                            }
-                            builder.SetProperty(property.Key, property.Value.FlattenProperties());
-                        }
-                        break;
-                }
-            }
-        }
+        var builder = _mapper.Map(_client, logEvent, _includeProperties, _defaultTags);
 
         _additionalOperation?.Invoke(builder);
         builder.Submit();

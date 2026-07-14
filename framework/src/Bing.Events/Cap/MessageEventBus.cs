@@ -1,6 +1,6 @@
 ﻿using Bing.Data.Transaction;
 using Bing.Events.Messages;
-using Bing.Tracing;
+using Bing.Logging;
 using Bing.Utils.Json;
 using DotNetCore.CAP;
 using Microsoft.Extensions.Logging;
@@ -29,18 +29,26 @@ public class MessageEventBus : IMessageEventBus
     protected ILogger<MessageEventBus> Logger { get; }
 
     /// <summary>
+    /// 日志上下文访问器
+    /// </summary>
+    protected ILogContextAccessor LogContextAccessor { get; }
+
+    /// <summary>
     /// 初始化一个<see cref="MessageEventBus"/>类型的实例
     /// </summary>
     /// <param name="publisher">事件发布器</param>
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="logger">日志</param>
+    /// <param name="logContextAccessor">日志上下文访问器</param>
     public MessageEventBus(ICapPublisher publisher,
         ITransactionActionManager transactionActionManager,
-        ILogger<MessageEventBus> logger)
+        ILogger<MessageEventBus> logger,
+        ILogContextAccessor logContextAccessor)
     {
         Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         TransactionActionManager = transactionActionManager ?? throw new ArgumentNullException(nameof(transactionActionManager));
         Logger = logger ?? NullLogger<MessageEventBus>.Instance;
+        LogContextAccessor = logContextAccessor ?? throw new ArgumentNullException(nameof(logContextAccessor));
     }
 
     /// <summary>
@@ -64,7 +72,7 @@ public class MessageEventBus : IMessageEventBus
     public async Task PublishAsync(string name, object data, string callback = null, bool send = false, CancellationToken cancellationToken = default)
     {
         var headers = new Dictionary<string, string> { { DotNetCore.CAP.Messages.Headers.CallbackName, callback } };
-        InitTraceIdContext(headers);
+        CapLogContextHeaders.Write(headers, LogContextAccessor.Capture());
         if (send)
         {
             await InternalPublishAsync(name, data, headers, callback, cancellationToken);
@@ -118,14 +126,4 @@ public class MessageEventBus : IMessageEventBus
         }
     }
 
-    /// <summary>
-    /// 初始化跟踪标识上下文
-    /// </summary>
-    private static void InitTraceIdContext(IDictionary<string, string> headers)
-    {
-        if (TraceIdContext.Current == null)
-            TraceIdContext.Current = new TraceIdContext(string.Empty);
-        if (!headers.ContainsKey(Headers.TraceId))
-            headers[Headers.TraceId] = TraceIdContext.Current.TraceId;
-    }
 }
