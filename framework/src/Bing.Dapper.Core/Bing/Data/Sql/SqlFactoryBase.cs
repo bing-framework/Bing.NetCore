@@ -1,6 +1,4 @@
-using System.Reflection;
-using Bing.Data;
-using Bing.Data.Enums;
+﻿using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 using Microsoft.Extensions.DependencyInjection;
 

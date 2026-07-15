@@ -1,12 +1,10 @@
-﻿using Bing.Data;
-using Bing.Data.Sql.Builders;
+﻿using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
-using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Text;
 using Microsoft.Extensions.DependencyInjection;

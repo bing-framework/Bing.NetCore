@@ -1,6 +1,4 @@
-using Bing.Data.Sql.Database;
-
-namespace Bing.Data.Sql;
+﻿namespace Bing.Data.Sql;
 
 /// <summary>
 /// SQL 事务作用域工厂
