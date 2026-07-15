@@ -1,4 +1,3 @@
-using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -60,8 +59,7 @@ public class DefaultSqlParameterFactory : ISqlParameterFactory
             EntityType = entityType,
             PropertyName = column?.PropertyName,
             ColumnName = column?.ColumnName,
-            DatabaseType = context?.DatabaseType,
-            DatabaseRole = context?.Role,
+            DatabaseType = context?.DataSource?.DatabaseType,
             ProviderTypeName = column?.ProviderTypeName,
             Source = source,
             MetadataLevel = column == null ? SqlParameterMetadataLevel.Weak : SqlParameterMetadataLevel.Full,
@@ -84,11 +82,6 @@ public class DefaultSqlParameterFactory : ISqlParameterFactory
             return _databaseContextAccessor.Current;
         if (_options.DefaultDatabaseContext != null)
             return _options.DefaultDatabaseContext;
-        return new DatabaseContext
-        {
-            DbKey = ConnectionStringCollection.DefaultConnectionStringName,
-            DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Default
-        };
+        return new DatabaseContext();
     }
 }

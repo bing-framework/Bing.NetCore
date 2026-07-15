@@ -85,11 +85,6 @@ public class SqlParam
     public DatabaseType? DatabaseType { get; set; }
 
     /// <summary>
-    /// 数据库角色
-    /// </summary>
-    public DatabaseRole? DatabaseRole { get; set; }
-
-    /// <summary>
     /// Provider 数据类型名称
     /// </summary>
     public string ProviderTypeName { get; set; }

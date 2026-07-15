@@ -1,75 +1,65 @@
-using System.Reflection;
-using Bing.Data;
-using Bing.Data.Enums;
+﻿using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql 工厂基类
+/// SQL 工厂基类。
 /// </summary>
 public abstract class SqlFactoryBase
 {
     /// <summary>
-    /// 服务提供程序
+    /// 服务提供程序。
     /// </summary>
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 数据库上下文访问器
+    /// 数据库上下文访问器。
     /// </summary>
     private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
     /// <summary>
-    /// 数据库描述解析器
-    /// </summary>
-    private readonly IDatabaseDescriptorResolver _databaseDescriptorResolver;
-
-    /// <summary>
-    /// Sql 元数据配置
+    /// SQL 元数据配置。
     /// </summary>
     private readonly SqlMetadataOptions _metadataOptions;
 
     /// <summary>
-    /// SQL 实现类型解析器
+    /// SQL 实现类型解析器。
     /// </summary>
     private readonly ISqlImplementationTypeResolver _implementationTypeResolver;
 
     /// <summary>
-    /// SQL 数据源解析器
+    /// SQL 数据源解析器。
     /// </summary>
     private readonly ISqlDataSourceResolver _dataSourceResolver;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例
+    /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例。
     /// </summary>
-    /// <param name="serviceProvider">服务提供程序</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="databaseDescriptorResolver">数据库描述解析器</param>
-    /// <param name="metadataOptions">Sql 元数据配置</param>
-    /// <param name="implementationTypeResolver">SQL 实现类型解析器</param>
-    /// <param name="dataSourceResolver">SQL 数据源解析器</param>
+    /// <param name="serviceProvider">服务提供程序。</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
+    /// <param name="metadataOptions">SQL 元数据配置。</param>
+    /// <param name="implementationTypeResolver">SQL 实现类型解析器。</param>
+    /// <param name="dataSourceResolver">SQL 数据源解析器。</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
-        IDatabaseDescriptorResolver databaseDescriptorResolver = null,
         SqlMetadataOptions metadataOptions = null,
         ISqlImplementationTypeResolver implementationTypeResolver = null,
         ISqlDataSourceResolver dataSourceResolver = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
-        _databaseDescriptorResolver = databaseDescriptorResolver;
         _metadataOptions = metadataOptions ?? new SqlMetadataOptions();
         _implementationTypeResolver = implementationTypeResolver;
         _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_metadataOptions);
     }
 
     /// <summary>
-    /// 创建数据库上下文
+    /// 创建数据库上下文。
     /// </summary>
-    /// <param name="dbKey">数据库键</param>
-    /// <returns>数据库上下文</returns>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <returns>数据库上下文。</returns>
     protected DatabaseContext CreateContext(string dbKey)
     {
         var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
@@ -77,119 +67,63 @@ public abstract class SqlFactoryBase
         {
             DbKey = dbKey,
             TenantId = current?.TenantId,
-            ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default,
-            MappingProfile = current?.MappingProfile,
-            Role = current?.Role ?? DatabaseRole.Default,
-            ReadOnly = current?.ReadOnly
-        };
-        var dataSource = _dataSourceResolver.Resolve(dbKey, options);
-        return new DatabaseContext
-        {
-            DbKey = string.IsNullOrWhiteSpace(dataSource.DbKey) ? dataSource.Key : dataSource.DbKey,
-            DataSourceKey = dataSource.Key,
-            DataSource = dataSource,
-            DatabaseType = dataSource.DatabaseType,
-            Role = options.Role,
-            TenantId = options.TenantId,
-            ReadOnly = dataSource.IsReadOnly,
-            MappingVersion = dataSource.MappingProfile ?? current?.MappingVersion,
-            MappingProfile = dataSource.MappingProfile ?? current?.MappingProfile,
-            ReadPreference = options.ReadPreference
-        };
-    }
-
-    /// <summary>
-    /// 创建数据库上下文
-    /// </summary>
-    /// <param name="dbKey">数据库键</param>
-    /// <param name="databaseType">数据库类型</param>
-    /// <param name="role">数据库角色</param>
-    /// <returns>数据库上下文</returns>
-    protected DatabaseContext CreateContext(string dbKey, DatabaseType databaseType, DatabaseRole role)
-    {
-        var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
-        return new DatabaseContext
-        {
-            DbKey = string.IsNullOrWhiteSpace(dbKey)
-                ? current?.DbKey ?? ConnectionStringCollection.DefaultConnectionStringName
-                : dbKey,
-            DatabaseType = databaseType,
-            Role = role,
-            TenantId = current?.TenantId,
-            ReadOnly = current?.ReadOnly ?? false,
-            MappingVersion = current?.MappingVersion,
-            MappingProfile = current?.MappingProfile,
             ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
         };
+        var dataSource = _dataSourceResolver.Resolve(dbKey, options);
+        return CreateContext(dataSource, options.TenantId, current?.MappingProfile, options.ReadPreference);
     }
 
     /// <summary>
-    /// 获取当前数据库上下文
+    /// 获取当前数据库上下文。
     /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <returns>数据库上下文</returns>
+    /// <param name="serviceType">服务类型。</param>
+    /// <returns>数据库上下文。</returns>
     protected DatabaseContext GetCurrentContext(Type serviceType)
     {
         var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
-        if (current != null)
+        if (current?.DataSource != null)
+            return Clone(current);
+        var options = new DatabaseScopeOptions
         {
-            return new DatabaseContext
-            {
-                DbKey = string.IsNullOrWhiteSpace(current.DbKey)
-                    ? ConnectionStringCollection.DefaultConnectionStringName
-                    : current.DbKey,
-                DatabaseType = current.DatabaseType,
-                Role = current.Role,
-                TenantId = current.TenantId,
-                ReadOnly = current.ReadOnly,
-                MappingVersion = current.MappingVersion,
-                MappingProfile = current.MappingProfile,
-                DataSourceKey = current.DataSourceKey,
-                DataSource = current.DataSource,
-                ReadPreference = current.ReadPreference
-            };
-        }
-
-        var implementationType = GetImplementationType(serviceType);
-        var template = GetTemplateOptions(implementationType);
-        return new DatabaseContext
-        {
-            DbKey = ConnectionStringCollection.DefaultConnectionStringName,
-            DatabaseType = template?.DatabaseType ?? DatabaseType.SqlServer,
-            Role = DatabaseRole.Default
+            DbKey = current?.DbKey,
+            TenantId = current?.TenantId,
+            ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
         };
+        var dataSource = _dataSourceResolver.Resolve(current?.DbKey, options);
+        return CreateContext(dataSource, options.TenantId, current?.MappingProfile, options.ReadPreference);
     }
 
     /// <summary>
-    /// 创建实例
+    /// 创建实例。
     /// </summary>
-    /// <typeparam name="TService">服务类型</typeparam>
-    /// <param name="context">数据库上下文</param>
-    /// <returns>服务实例</returns>
+    /// <typeparam name="TService">服务类型。</typeparam>
+    /// <param name="context">数据库上下文。</param>
+    /// <returns>服务实例。</returns>
     protected TService CreateInstance<TService>(DatabaseContext context) where TService : class
     {
-        var implementationType = GetImplementationType(typeof(TService), context?.DatabaseType);
+        var databaseType = context?.DataSource?.DatabaseType;
+        var implementationType = GetImplementationType(typeof(TService), databaseType);
         var options = CreateOptions(implementationType, context);
         return (TService)ActivatorUtilities.CreateInstance(_serviceProvider, implementationType, _serviceProvider,
             options);
     }
 
     /// <summary>
-    /// 获取实现类型
+    /// 获取实现类型。
     /// </summary>
-    /// <typeparam name="TService">服务类型</typeparam>
-    /// <returns>实现类型</returns>
+    /// <typeparam name="TService">服务类型。</typeparam>
+    /// <returns>实现类型。</returns>
     protected Type GetImplementationType<TService>() where TService : class
     {
         return GetImplementationType(typeof(TService));
     }
 
     /// <summary>
-    /// 获取实现类型
+    /// 获取实现类型。
     /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <param name="databaseType">数据库类型</param>
-    /// <returns>实现类型</returns>
+    /// <param name="serviceType">服务类型。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <returns>实现类型。</returns>
     protected Type GetImplementationType(Type serviceType, DatabaseType? databaseType = null)
     {
         var implementationType = _implementationTypeResolver?.Resolve(serviceType, databaseType);
@@ -197,91 +131,119 @@ public abstract class SqlFactoryBase
             return implementationType;
         if (serviceType.IsAbstract == false && serviceType.IsInterface == false)
             return serviceType;
-
-        // 回退到旧逻辑会实例化服务，仅在没有显式实现类型映射时使用。
-        var service = _serviceProvider.GetService(serviceType);
-        if (service == null)
-            throw new InvalidOperationException($"未注册类型 {serviceType.FullName} 的实现");
-        return service.GetType();
+        throw new InvalidOperationException($"未注册类型 {serviceType.FullName} 在数据库类型 {databaseType?.ToString() ?? "<未指定>"} 下的 SQL 实现类型");
     }
 
     /// <summary>
-    /// 创建 Sql 配置
+    /// 创建 SQL 配置。
     /// </summary>
-    /// <param name="implementationType">实现类型</param>
-    /// <param name="context">数据库上下文</param>
-    /// <returns>Sql 配置</returns>
+    /// <param name="implementationType">实现类型。</param>
+    /// <param name="context">数据库上下文。</param>
+    /// <returns>SQL 配置。</returns>
     protected SqlOptions CreateOptions(Type implementationType, DatabaseContext context)
     {
         var template = GetTemplateOptions(implementationType);
-        var descriptor = ResolveDescriptor(context, template);
+        var dataSource = context?.DataSource ?? _dataSourceResolver.Resolve(context?.DbKey);
         var optionsType = typeof(SqlOptions<>).MakeGenericType(implementationType);
         var options = (SqlOptions)Activator.CreateInstance(optionsType);
         CopyOptions(template, options);
-        options.DatabaseType = descriptor.DatabaseType;
-        options.SetDatabaseContext(new DatabaseContext
+        options.DatabaseType = dataSource.DatabaseType;
+        options.SetDatabaseContext(CreateContext(dataSource, context?.TenantId, context?.MappingProfile,
+            context?.ReadPreference ?? SqlReadPreference.Default));
+        var connectionString = ResolveConnectionString(dataSource, template);
+        if (string.IsNullOrWhiteSpace(connectionString) == false)
         {
-            DbKey = descriptor.DbKey,
-            DatabaseType = descriptor.DatabaseType,
-            Role = descriptor.Role,
-            TenantId = context?.TenantId,
-            ReadOnly = descriptor.ReadOnly,
-            MappingVersion = context?.MappingVersion,
-            MappingProfile = context?.MappingProfile,
-            DataSourceKey = context?.DataSourceKey,
-            DataSource = context?.DataSource,
-            ReadPreference = context?.ReadPreference ?? SqlReadPreference.Default
-        });
-        if (string.IsNullOrWhiteSpace(descriptor.ConnectionString) == false)
-        {
-            options.ConnectionString = descriptor.ConnectionString;
+            options.ConnectionString = connectionString;
             options.Connection = null;
         }
-
         return options;
     }
 
     /// <summary>
-    /// 获取模板 Sql 配置
+    /// 获取模板 SQL 配置。
     /// </summary>
-    /// <param name="implementationType">实现类型</param>
-    /// <returns>模板 Sql 配置</returns>
+    /// <param name="implementationType">实现类型。</param>
+    /// <returns>模板 SQL 配置。</returns>
     protected SqlOptions GetTemplateOptions(Type implementationType) =>
         _serviceProvider.GetService(typeof(SqlOptions<>).MakeGenericType(implementationType)) as SqlOptions;
 
     /// <summary>
-    /// 解析数据库描述信息
+    /// 创建数据库上下文。
     /// </summary>
-    /// <param name="context">数据库上下文</param>
-    /// <param name="template">模板 Sql 配置</param>
-    /// <returns>数据库描述信息</returns>
-    protected DatabaseDescriptor ResolveDescriptor(DatabaseContext context, SqlOptions template)
+    /// <param name="dataSource">数据源描述。</param>
+    /// <param name="tenantId">租户标识。</param>
+    /// <param name="mappingProfile">映射配置名称。</param>
+    /// <param name="readPreference">读取偏好。</param>
+    /// <returns>数据库上下文。</returns>
+    private static DatabaseContext CreateContext(SqlDataSourceDescriptor dataSource, string tenantId,
+        string mappingProfile, SqlReadPreference readPreference)
     {
-        var databaseContext = context ?? new DatabaseContext
+        if (dataSource == null)
+            throw new InvalidOperationException("SQL 数据源描述不能为空");
+        return new DatabaseContext
         {
-            DbKey = ConnectionStringCollection.DefaultConnectionStringName,
-            DatabaseType = template?.DatabaseType ?? DatabaseType.SqlServer,
-            Role = DatabaseRole.Default
+            DbKey = dataSource.Key,
+            TenantId = tenantId,
+            MappingProfile = string.IsNullOrWhiteSpace(dataSource.MappingProfile) ? mappingProfile : dataSource.MappingProfile,
+            ReadPreference = readPreference,
+            DataSource = dataSource
         };
-        var descriptor = _databaseDescriptorResolver?.Resolve(databaseContext) ?? new DatabaseDescriptor
-        {
-            DbKey = databaseContext.DbKey,
-            DatabaseType = databaseContext.DatabaseType,
-            Role = databaseContext.Role,
-            ReadOnly = databaseContext.ReadOnly
-        };
-        if (string.IsNullOrWhiteSpace(descriptor.ConnectionString))
-            descriptor.ConnectionString = template?.ConnectionString;
-        if (string.IsNullOrWhiteSpace(descriptor.DbKey))
-            descriptor.DbKey = databaseContext.DbKey;
-        return descriptor;
     }
 
     /// <summary>
-    /// 复制 Sql 配置
+    /// 克隆数据库上下文。
     /// </summary>
-    /// <param name="source">源配置</param>
-    /// <param name="target">目标配置</param>
+    /// <param name="context">数据库上下文。</param>
+    /// <returns>数据库上下文。</returns>
+    private static DatabaseContext Clone(DatabaseContext context)
+    {
+        if (context == null)
+            return null;
+        return new DatabaseContext
+        {
+            DbKey = context.DbKey,
+            TenantId = context.TenantId,
+            MappingProfile = context.MappingProfile,
+            ReadPreference = context.ReadPreference,
+            DataSource = context.DataSource
+        };
+    }
+
+    /// <summary>
+    /// 解析连接字符串。
+    /// </summary>
+    /// <param name="dataSource">数据源描述。</param>
+    /// <param name="template">模板 SQL 配置。</param>
+    /// <returns>连接字符串。</returns>
+    private string ResolveConnectionString(SqlDataSourceDescriptor dataSource, SqlOptions template)
+    {
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false)
+            return dataSource.ConnectionString;
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false)
+        {
+            var collection = _serviceProvider.GetService<ConnectionStringCollection>();
+            var connectionString = collection != null &&
+                                   collection.TryGetValue(dataSource.ConnectionStringName, out var value)
+                ? value
+                : null;
+            if (string.IsNullOrWhiteSpace(connectionString) == false)
+                return connectionString;
+            if (template?.Connection != null)
+                return null;
+            throw new InvalidOperationException(
+                $"SQL 数据源 {dataSource.Key} 未找到连接字符串。缺失配置字段: {nameof(SqlDataSourceDescriptor.ConnectionString)} 或连接字符串名称 {dataSource.ConnectionStringName}。");
+        }
+        if (template?.Connection != null)
+            return null;
+        throw new InvalidOperationException(
+            $"SQL 数据源 {dataSource?.Key ?? "<未指定>"} 缺少连接字符串配置。缺失配置字段: {nameof(SqlDataSourceDescriptor.ConnectionString)} 或 {nameof(SqlDataSourceDescriptor.ConnectionStringName)}。");
+    }
+
+    /// <summary>
+    /// 复制 SQL 配置。
+    /// </summary>
+    /// <param name="source">源配置。</param>
+    /// <param name="target">目标配置。</param>
     private static void CopyOptions(SqlOptions source, SqlOptions target)
     {
         if (source == null || target == null)

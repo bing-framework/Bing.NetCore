@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql.Configs;
@@ -93,11 +92,9 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         var cacheKey = new EntityMappingCacheKey(
             entityType,
             context.DbKey,
-            context.DatabaseType,
-            context.Role,
+            GetMappingProfile(context, mappingOptions),
             schema,
-            GetTableRouteKey(context, mappingOptions),
-            GetMappingVersion(context, mappingOptions));
+            GetTableRouteKey(context, mappingOptions));
         return _mappingCache.GetOrAdd(cacheKey,
             _ => CreateMapping(entityType, context, schema, tableName, mappingOptions));
     }
@@ -115,12 +112,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             return _databaseContextAccessor.Current;
         if (_options.DefaultDatabaseContext != null)
             return _options.DefaultDatabaseContext;
-        return new DatabaseContext
-        {
-            DbKey = ConnectionStringCollection.DefaultConnectionStringName,
-            DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Default
-        };
+        return new DatabaseContext();
     }
 
     /// <summary>
@@ -136,16 +128,16 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             : mappingOptions.TableRouteKey;
 
     /// <summary>
-    /// 获取映射版本
+    /// 获取映射配置名称
     /// </summary>
     /// <param name="databaseContext">数据库上下文</param>
     /// <param name="mappingOptions">实体映射配置</param>
-    /// <returns>映射版本</returns>
-    protected virtual string GetMappingVersion(DatabaseContext databaseContext,
+    /// <returns>映射配置名称</returns>
+    protected virtual string GetMappingProfile(DatabaseContext databaseContext,
         EntityMappingOptions mappingOptions = null) =>
-        string.IsNullOrWhiteSpace(databaseContext?.MappingVersion)
-            ? mappingOptions?.MappingVersion ?? string.Empty
-            : databaseContext.MappingVersion;
+        string.IsNullOrWhiteSpace(databaseContext?.MappingProfile)
+            ? mappingOptions?.MappingProfile ?? string.Empty
+            : databaseContext.MappingProfile;
 
     /// <summary>
     /// 获取架构
@@ -178,13 +170,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     protected virtual EntityMappingOptions ResolveEntityMappingOptions(Type entityType, DatabaseContext databaseContext)
     {
         var routeKey = GetTableRouteKey(databaseContext);
-        var mappingVersion = GetMappingVersion(databaseContext);
+        var mappingProfile = GetMappingProfile(databaseContext);
         return _options.EntityMappings
             .Where(t => t != null && t.EntityType == entityType)
             .Where(t => string.IsNullOrWhiteSpace(t.DbKey) || string.Equals(t.DbKey, databaseContext?.DbKey, StringComparison.OrdinalIgnoreCase))
-            .Where(t => t.DatabaseType == databaseContext.DatabaseType)
-            .Where(t => t.Role == databaseContext.Role)
-            .Where(t => string.IsNullOrWhiteSpace(t.MappingVersion) || string.Equals(t.MappingVersion, mappingVersion, StringComparison.OrdinalIgnoreCase))
+            .Where(t => string.IsNullOrWhiteSpace(t.MappingProfile) || string.Equals(t.MappingProfile, mappingProfile, StringComparison.OrdinalIgnoreCase))
             .Where(t => string.IsNullOrWhiteSpace(t.TableRouteKey) || string.Equals(t.TableRouteKey, routeKey, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(GetMappingSpecificity)
             .FirstOrDefault();
@@ -202,7 +192,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         var result = 0;
         if (string.IsNullOrWhiteSpace(mappingOptions.DbKey) == false)
             result += 4;
-        if (string.IsNullOrWhiteSpace(mappingOptions.MappingVersion) == false)
+        if (string.IsNullOrWhiteSpace(mappingOptions.MappingProfile) == false)
             result += 2;
         if (string.IsNullOrWhiteSpace(mappingOptions.TableRouteKey) == false)
             result += 1;
@@ -253,13 +243,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         {
             EntityType = entityType,
             DbKey = databaseContext.DbKey,
-            DatabaseType = databaseContext.DatabaseType,
-            Role = databaseContext.Role,
+            MappingProfile = GetMappingProfile(databaseContext, mappingOptions),
             Schema = schema,
             TableName = tableName,
             FullTableName = string.IsNullOrWhiteSpace(schema) ? tableName : $"{schema}.{tableName}",
             TableRouteKey = GetTableRouteKey(databaseContext, mappingOptions),
-            MappingVersion = GetMappingVersion(databaseContext, mappingOptions),
             Columns = columns
         };
     }
@@ -312,7 +300,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
                 : mappingOptions.ColumnName,
             ClrType = property.PropertyType,
             DbType = mappingOptions?.DbType ?? GetDbType(propertyType, providerTypeName, size,
-                databaseContext?.DatabaseType ?? DatabaseType.SqlServer),
+                GetDatabaseType(databaseContext)),
             Size = size,
             Precision = mappingOptions?.Precision ?? GetPrecision(providerTypeName),
             Scale = mappingOptions?.Scale ?? GetScale(providerTypeName),
@@ -324,6 +312,14 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         };
         return column;
     }
+
+    /// <summary>
+    /// 获取数据库类型
+    /// </summary>
+    /// <param name="databaseContext">数据库上下文</param>
+    /// <returns>数据库类型</returns>
+    protected virtual DatabaseType? GetDatabaseType(DatabaseContext databaseContext) =>
+        databaseContext?.DataSource?.DatabaseType;
 
     /// <summary>
     /// 判断是否为主键属性
@@ -406,9 +402,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <param name="length">长度</param>
     /// <param name="databaseType">数据库类型</param>
     /// <returns>DbType</returns>
-    protected virtual DbType? GetDbType(Type type, string providerTypeName, int? length, DatabaseType databaseType)
+    protected virtual DbType? GetDbType(Type type, string providerTypeName, int? length, DatabaseType? databaseType)
     {
-        var dbType = _typeConverterResolver.Resolve(databaseType)?.ToDbType(GetProviderDataTypeName(providerTypeName), length);
+        var dbType = databaseType == null
+            ? null
+            : _typeConverterResolver.Resolve(databaseType.Value)?.ToDbType(GetProviderDataTypeName(providerTypeName), length);
         if (dbType != null)
             return dbType;
         if (type.IsEnum)

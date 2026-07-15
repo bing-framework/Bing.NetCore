@@ -73,6 +73,8 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
+        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlDatabaseFactory().Create(connection).GetConnection());
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -145,6 +147,7 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

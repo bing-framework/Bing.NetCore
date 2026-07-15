@@ -19,10 +19,10 @@ public abstract class SqliteSqlQueryBase : SqlQueryBase
 
     /// <inheritdoc />
     protected override ISqlBuilder CreateSqlBuilder() => new SqliteBuilder(
-        ServiceProvider.GetService<IEntityMetadata>(),
+        EntityMetadata,
         ServiceProvider.GetService<ITableDatabase>(),
         null,
-        ServiceProvider.GetService<IEntityMappingResolver>(),
+        EntityMappingResolver,
         ServiceProvider.GetService<IDatabaseContextAccessor>(),
         ServiceProvider.GetService<ISqlParameterFactory>(),
         ServiceProvider.GetService<SqlMetadataOptions>(),

@@ -7,7 +7,7 @@ namespace Bing.Data.Sql.Diagnostics;
 /// <summary>
 /// Sql 参数诊断信息
 /// </summary>
-public class SqlParameterDiagnosticInfo
+public sealed class SqlParameterDiagnosticInfo
 {
     /// <summary>
     /// 参数名
@@ -70,16 +70,6 @@ public class SqlParameterDiagnosticInfo
     public string ColumnName { get; set; }
 
     /// <summary>
-    /// 数据库类型
-    /// </summary>
-    public DatabaseType? DatabaseType { get; set; }
-
-    /// <summary>
-    /// 数据库角色
-    /// </summary>
-    public DatabaseRole? DatabaseRole { get; set; }
-
-    /// <summary>
     /// Provider 数据类型名称
     /// </summary>
     public string ProviderTypeName { get; set; }
@@ -94,20 +84,6 @@ public class SqlParameterDiagnosticInfo
     /// </summary>
     public SqlParameterMetadataLevel MetadataLevel { get; set; }
 
-    /// <summary>
-    /// 字段存储方式
-    /// </summary>
-    public ColumnStorageKind StorageKind { get; set; }
-
-    /// <summary>
-    /// 字段值转换器类型
-    /// </summary>
-    public FieldValueConverterKind ConverterKind { get; set; }
-
-    /// <summary>
-    /// 自定义转换器名称
-    /// </summary>
-    public string CustomConverterName { get; set; }
 }
 
 /// <summary>
@@ -116,19 +92,19 @@ public class SqlParameterDiagnosticInfo
 public sealed class SqlParameterDiagnosticSnapshot
 {
     /// <summary>
-    /// 原始参数对象
+    /// 原始参数类型名称
     /// </summary>
-    public object RawParameters { get; set; }
+    public string OriginalParameterType { get; set; }
 
     /// <summary>
-    /// 绑定后的参数对象
+    /// 是否通过元数据绑定参数
     /// </summary>
-    public object BoundParameters { get; set; }
+    public bool IsMetadataBound { get; set; }
 
     /// <summary>
     /// 参数诊断项
     /// </summary>
-    public IReadOnlyCollection<SqlParameterDiagnosticInfo> Items { get; set; } = new List<SqlParameterDiagnosticInfo>();
+    public IReadOnlyList<SqlParameterDiagnosticInfo> Items { get; set; } = Array.Empty<SqlParameterDiagnosticInfo>();
 }
 
 /// <summary>
@@ -142,14 +118,9 @@ public sealed class SqlConnectionDiagnosticInfo
     public string Database { get; set; }
 
     /// <summary>
-    /// 数据源
+    /// 数据源标识
     /// </summary>
-    public string DataSource { get; set; }
-
-    /// <summary>
-    /// 数据源键
-    /// </summary>
-    public string DataSourceKey { get; set; }
+    public string DbKey { get; set; }
 
     /// <summary>
     /// 数据库类型
@@ -157,14 +128,24 @@ public sealed class SqlConnectionDiagnosticInfo
     public DatabaseType DatabaseType { get; set; }
 
     /// <summary>
-    /// 连接状态
+    /// 连接来源
     /// </summary>
-    public ConnectionState State { get; set; }
+    public SqlConnectionSource Source { get; set; }
 
     /// <summary>
-    /// 连接类型
+    /// 连接资源所有权
     /// </summary>
-    public string ConnectionType { get; set; }
+    public SqlResourceOwnership Ownership { get; set; }
+
+    /// <summary>
+    /// 是否只读数据源
+    /// </summary>
+    public bool IsReadOnly { get; set; }
+
+    /// <summary>
+    /// 读取偏好
+    /// </summary>
+    public SqlReadPreference ReadPreference { get; set; }
 }
 
 /// <summary>
@@ -172,6 +153,11 @@ public sealed class SqlConnectionDiagnosticInfo
 /// </summary>
 public sealed class SqlTransactionDiagnosticInfo
 {
+    /// <summary>
+    /// 事务标识
+    /// </summary>
+    public string TransactionId { get; set; }
+
     /// <summary>
     /// 是否存在事务
     /// </summary>
@@ -183,15 +169,20 @@ public sealed class SqlTransactionDiagnosticInfo
     public IsolationLevel? IsolationLevel { get; set; }
 
     /// <summary>
-    /// 事务类型
+    /// 事务资源所有权
     /// </summary>
-    public string TransactionType { get; set; }
+    public SqlResourceOwnership Ownership { get; set; }
+
+    /// <summary>
+    /// 是否为主库读取短事务
+    /// </summary>
+    public bool IsPrimaryReadTransaction { get; set; }
 }
 
 /// <summary>
 /// 诊断消息
 /// </summary>
-public class DiagnosticsMessage
+public sealed class DiagnosticsMessage
 {
     /// <summary>
     /// 当前时间戳
@@ -214,29 +205,9 @@ public class DiagnosticsMessage
     public string Sql { get; set; }
 
     /// <summary>
-    /// Sql参数
-    /// </summary>
-    public object Parameters { get; set; }
-
-    /// <summary>
-    /// 原始 Sql 参数
-    /// </summary>
-    public object RawParameters { get; set; }
-
-    /// <summary>
-    /// 绑定后的 Sql 参数
-    /// </summary>
-    public object BoundParameters { get; set; }
-
-    /// <summary>
-    /// Sql 增强参数元数据
-    /// </summary>
-    public IReadOnlyCollection<SqlParameterDiagnosticInfo> SqlParametersMetadata { get; set; }
-
-    /// <summary>
     /// SQL 参数诊断快照
     /// </summary>
-    public SqlParameterDiagnosticSnapshot ParameterSnapshot { get; set; }
+    public SqlParameterDiagnosticSnapshot Parameters { get; set; }
 
     /// <summary>
     /// SQL 连接诊断信息
@@ -249,16 +220,6 @@ public class DiagnosticsMessage
     public SqlTransactionDiagnosticInfo Transaction { get; set; }
 
     /// <summary>
-    /// 数据库类型
-    /// </summary>
-    public DatabaseType DatabaseType { get; set; }
-
-    /// <summary>
-    /// 数据库
-    /// </summary>
-    public string Database { get; set; }
-
-    /// <summary>
     /// 耗时(ms)
     /// </summary>
     public long? ElapsedMilliseconds { get; set; }
@@ -267,107 +228,4 @@ public class DiagnosticsMessage
     /// 异常
     /// </summary>
     public Exception Exception { get; set; }
-}
-
-/// <summary>
-/// SqlQuery日志诊断 - 执行前消息
-/// </summary>
-public class SqlQueryDiagnosticBeforeMessage
-{
-    /// <summary>
-    /// Sql语句
-    /// </summary>
-    public string Sql { get; set; }
-
-    /// <summary>
-    /// Json参数
-    /// </summary>
-    public string ParameterJson { get; set; }
-
-    /// <summary>
-    /// 数据库类型
-    /// </summary>
-    public DatabaseType DatabaseType { get; set; }
-
-    /// <summary>
-    /// 数据源
-    /// </summary>
-    public string DataSource { get; set; }
-
-    /// <summary>
-    /// 时间戳
-    /// </summary>
-    public long? Timestamp { get; set; }
-
-    /// <summary>
-    /// 操作标识
-    /// </summary>
-    public string OperationId { get; set; }
-
-    /// <summary>
-    /// 执行时间
-    /// </summary>
-    public DateTime ExecuteBefore { get; set; }
-}
-
-/// <summary>
-/// SqlQuery日志诊断 - 执行后消息
-/// </summary>
-public class SqlQueryDiagnosticAfterMessage
-{
-    /// <summary>
-    /// Sql语句
-    /// </summary>
-    public string Sql { get; set; }
-
-    /// <summary>
-    /// Json参数
-    /// </summary>
-    public string ParameterJson { get; set; }
-
-    /// <summary>
-    /// 数据源
-    /// </summary>
-    public string DataSource { get; set; }
-
-    /// <summary>
-    /// 耗时(ms)
-    /// </summary>
-    public long? ElapsedMilliseconds { get; set; }
-
-    /// <summary>
-    /// 操作标识
-    /// </summary>
-    public string OperationId { get; set; }
-
-    /// <summary>
-    /// 执行时间
-    /// </summary>
-    public DateTime ExecuteAfter { get; set; }
-}
-
-/// <summary>
-/// SqlQuery日志诊断 - 异常消息
-/// </summary>
-public class SqlQueryDiagnosticErrorMessage
-{
-    /// <summary>
-    /// 异常
-    /// </summary>
-    public Exception Exception { get; set; }
-
-    /// <summary>
-    /// 耗时(ms)
-    /// </summary>
-    public long? ElapsedMilliseconds { get; set; }
-
-    /// <summary>
-    /// 操作标识
-    /// </summary>
-    public string OperationId { get; set; }
-
-    /// <summary>
-    /// 执行时间
-    /// </summary>
-    public DateTime ExecuteError { get; set; }
 }

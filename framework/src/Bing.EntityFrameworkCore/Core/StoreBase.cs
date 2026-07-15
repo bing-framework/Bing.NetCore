@@ -2,7 +2,6 @@
 using System.Linq.Expressions;
 using Bing.Data;
 using Bing.Data.Sql;
-using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.Extensions;
@@ -103,7 +102,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// </summary>
     protected virtual IEfCoreSqlQueryFactory CreateEfCoreSqlQueryFactory()
     {
-        return ServiceLocator.Instance.GetService<IEfCoreSqlQueryFactory>() ?? new EfCoreSqlQueryFactory();
+        var factory = UnitOfWork.ServiceProvider?.GetService(typeof(IEfCoreSqlQueryFactory)) as IEfCoreSqlQueryFactory;
+        return factory ?? throw new InvalidOperationException("未注册 IEfCoreSqlQueryFactory，无法创建 EF Core SQL 查询对象。");
     }
 
     /// <summary>

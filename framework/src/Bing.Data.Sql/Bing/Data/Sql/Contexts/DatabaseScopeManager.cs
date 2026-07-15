@@ -1,5 +1,4 @@
 using Bing.Data;
-using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 
 namespace Bing.Data.Sql;
@@ -49,42 +48,13 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
         var dataSource = _dataSourceResolver.Resolve(options.DbKey, options);
         _databaseContextAccessor.Current = new DatabaseContext
         {
-            DbKey = string.IsNullOrWhiteSpace(dataSource.DbKey) ? dataSource.Key : dataSource.DbKey,
-            DataSourceKey = dataSource.Key,
+            DbKey = dataSource.Key,
             DataSource = dataSource,
-            DatabaseType = dataSource.DatabaseType,
-            Role = options.Role,
             TenantId = options.TenantId ?? parent?.TenantId,
-            ReadOnly = dataSource.IsReadOnly,
-            MappingVersion = dataSource.MappingProfile ?? parent?.MappingVersion ?? _options.DefaultDatabaseContext?.MappingVersion,
             MappingProfile = dataSource.MappingProfile ?? parent?.MappingProfile ?? _options.DefaultDatabaseContext?.MappingProfile,
             ReadPreference = options.ReadPreference
         };
         return new DatabaseScope(_databaseContextAccessor, parent);
-    }
-
-    /// <summary>
-    /// 使用指定数据库上下文
-    /// </summary>
-    /// <param name="dbKey">数据库标识</param>
-    /// <param name="databaseType">数据库类型</param>
-    /// <param name="role">数据库角色</param>
-    /// <param name="tenantId">租户标识</param>
-    /// <param name="readOnly">是否只读</param>
-    /// <param name="mappingVersion">映射版本</param>
-    /// <returns>数据库上下文作用域</returns>
-    public IDatabaseScope Use(string dbKey, DatabaseType databaseType, DatabaseRole role = DatabaseRole.Default,
-        string tenantId = null, bool readOnly = false, string mappingVersion = null)
-    {
-        return Use(new DatabaseScopeOptions
-        {
-            DbKey = dbKey,
-            DatabaseType = databaseType,
-            Role = role,
-            TenantId = tenantId,
-            ReadOnly = readOnly,
-            MappingProfile = mappingVersion
-        });
     }
 
     /// <summary>

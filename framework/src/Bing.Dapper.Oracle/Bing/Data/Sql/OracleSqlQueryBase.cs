@@ -20,10 +20,10 @@ public abstract class OracleSqlQueryBase : SqlQueryBase
 
     /// <inheritdoc />
     protected override ISqlBuilder CreateSqlBuilder() => new OracleBuilder(
-        ServiceProvider.GetService<IEntityMetadata>(),
+        EntityMetadata,
         ServiceProvider.GetService<ITableDatabase>(),
         null,
-        ServiceProvider.GetService<IEntityMappingResolver>(),
+        EntityMappingResolver,
         ServiceProvider.GetService<IDatabaseContextAccessor>(),
         ServiceProvider.GetService<ISqlParameterFactory>(),
         ServiceProvider.GetService<SqlMetadataOptions>(),

@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <!--<ProjectReference Include="..\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />-->
     <ProjectReference Include="..\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
     <!-- 直接引用 Auditing 实现，原因：UnitOfWorkBase 依赖 IAuditPropertySetter（P0-2 后不再从 Ddd.Domain 传递） -->
     <ProjectReference Include="..\Bing.Auditing\Bing.Auditing.csproj" />

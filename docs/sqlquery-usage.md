@@ -216,7 +216,7 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 
 ## 多数据源上下文与运行时切库
 
-当前实现支持以 `dbKey` 作为业务入口在运行期切换数据源，并让连接串、实体映射、参数元数据和诊断上下文同步切换。新代码应优先只传 `dbKey`，`DatabaseType`、连接字符串、只读标识、映射配置和主库策略由数据源配置解析。旧的 `DatabaseRole` API 仍保留兼容，但不建议新代码继续依赖它。
+当前实现支持以 `dbKey` 作为业务入口在运行期切换数据源，并让连接串、实体映射、参数元数据和诊断上下文同步切换。调用方只传 `dbKey`；`DatabaseType`、连接字符串、只读标识、映射配置和主库策略均由数据源配置解析。
 
 ### 1. 注册数据库上下文能力
 
@@ -225,7 +225,6 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 - `IDatabaseContextAccessor`
 - `IDatabaseScopeManager`
 - `ISqlDataSourceResolver`
-- `IDatabaseDescriptorResolver`
 - `IEntityMappingResolver`
 - `ITypeConverterResolver`
 - `ISqlQueryFactory`
@@ -234,60 +233,26 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 如果需要显式配置多库连接描述与实体映射，建议在注册数据库服务前提供自定义 `SqlMetadataOptions`。新数据源配置使用 `DataSources`：
 
 ```csharp
-services.AddSingleton(new SqlMetadataOptions
+services.ConfigureSqlMetadata(options =>
 {
-    DefaultDatabaseContext = new DatabaseContext
+    options.DataSources.DefaultDataSourceKey = "default";
+    options.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
     {
-        DbKey = "default",
+        Key = "default",
         DatabaseType = DatabaseType.MySql,
-        Role = DatabaseRole.Default
-    },
-    DataSources =
+        ConnectionStringName = "DefaultConnection",
+        MappingProfile = "default"
+    };
+    options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
     {
-        DefaultDataSourceKey = "default",
-        DataSources =
-        {
-            ["default"] = new SqlDataSourceDescriptor
-            {
-                Key = "default",
-                DbKey = "default",
-                DatabaseType = DatabaseType.MySql,
-                ConnectionString = "Server=127.0.0.1;Database=app;Uid=root;Pwd=123456;",
-                MappingProfile = "default"
-            },
-            ["reporting"] = new SqlDataSourceDescriptor
-            {
-                Key = "reporting",
-                DbKey = "reporting",
-                DatabaseType = DatabaseType.PgSql,
-                ConnectionString = "Host=127.0.0.1;Database=reporting;Username=postgres;Password=123456;",
-                IsReadOnly = true,
-                MappingProfile = "reporting",
-                PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
-                PrimaryDataSourceKey = "default"
-            }
-        }
-    },
-    Databases =
-    {
-        [SqlMetadataOptions.GetDatabaseDescriptorKey("default", DatabaseType.MySql, DatabaseRole.Default)] =
-            new DatabaseDescriptor
-            {
-                DbKey = "default",
-                DatabaseType = DatabaseType.MySql,
-                Role = DatabaseRole.Default,
-                ConnectionString = "Server=127.0.0.1;Database=app;Uid=root;Pwd=123456;"
-            },
-        [SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.PgSql, DatabaseRole.Reporting)] =
-            new DatabaseDescriptor
-            {
-                DbKey = "reporting",
-                DatabaseType = DatabaseType.PgSql,
-                Role = DatabaseRole.Reporting,
-                ConnectionString = "Host=127.0.0.1;Database=reporting;Username=postgres;Password=123456;",
-                ReadOnly = true
-            }
-    }
+        Key = "reporting",
+        DatabaseType = DatabaseType.PgSql,
+        ConnectionStringName = "ReportingConnection",
+        IsReadOnly = true,
+        MappingProfile = "reporting",
+        PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
+        PrimaryDataSourceKey = "default"
+    };
 });
 
 services.AddDatabase<AppDatabase>();
@@ -295,7 +260,7 @@ services.AddMySqlQuery();
 services.AddMySqlExecutor();
 ```
 
-`Databases` 会继续兼容旧配置，并自动适配为数据源描述。迁移期可以同时保留旧配置和新 `DataSources`，新解析器会优先使用 `DataSources`。
+`DataSources` 是唯一的数据源配置入口。`ConnectionString` 非空时直接使用；否则框架通过 `ConnectionStringName` 从配置的连接字符串集合读取。
 
 ### 2. 使用作用域切换当前数据库上下文
 
@@ -333,14 +298,6 @@ var query = _sqlQueryFactory.Create<ISqlQuery>("reporting");
 ```
 
 该方式会同时影响连接解析、实体映射解析和增强参数元数据解析，避免出现“连接是 reporting，但 SQL 映射仍是 default”的情况。
-
-旧重载仍可使用：
-
-```csharp
-var query = _sqlQueryFactory.Create<ISqlQuery>("reporting", DatabaseType.MySql, DatabaseRole.Reporting);
-```
-
-该重载用于兼容历史配置。新代码应迁移到只传 `dbKey` 的方式。
 
 ### 4. EF Core Shared / Independent 查询
 
@@ -389,8 +346,6 @@ options.EntityMappings.Add(new EntityMappingOptions
 {
     EntityType = typeof(User),
     DbKey = "default",
-    DatabaseType = DatabaseType.MySql,
-    Role = DatabaseRole.Default,
     TableName = "users",
     Columns =
     {
@@ -406,8 +361,6 @@ options.EntityMappings.Add(new EntityMappingOptions
 {
     EntityType = typeof(User),
     DbKey = "reporting",
-    DatabaseType = DatabaseType.PgSql,
-    Role = DatabaseRole.Reporting,
     TableName = "users_archive",
     Columns =
     {
@@ -458,8 +411,8 @@ executor.ExecuteSql<User>(
     - `Map(name, property)` 表示从源对象读取参数值；
 - 找不到值时会降级为弱元数据，不会破坏旧调用方式；
 - 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数；
-- 执行诊断消息会包含原始参数、绑定后的参数对象和增强参数元数据，便于排查参数类型与映射问题；
-- 新诊断字段 `ParameterSnapshot` 会统一承载参数快照，旧字段 `Parameters`、`RawParameters`、`BoundParameters`、`SqlParametersMetadata` 继续兼容填充。
+- 执行诊断消息会包含标准化参数快照和增强参数元数据，便于排查参数类型与映射问题；
+- 诊断参数快照不暴露 Dapper 内部参数对象。
 
 ### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
 

@@ -11,19 +11,14 @@ public sealed class EntityMappingMetadata
     public Type EntityType { get; set; }
 
     /// <summary>
-    /// 数据库标识
+    /// 数据源标识
     /// </summary>
     public string DbKey { get; set; }
 
     /// <summary>
-    /// 数据库类型
+    /// 映射配置名称
     /// </summary>
-    public Bing.Data.Enums.DatabaseType DatabaseType { get; set; }
-
-    /// <summary>
-    /// 数据库角色
-    /// </summary>
-    public DatabaseRole Role { get; set; }
+    public string MappingProfile { get; set; }
 
     /// <summary>
     /// 架构
@@ -44,11 +39,6 @@ public sealed class EntityMappingMetadata
     /// 表路由键
     /// </summary>
     public string TableRouteKey { get; set; }
-
-    /// <summary>
-    /// 映射版本
-    /// </summary>
-    public string MappingVersion { get; set; }
 
     /// <summary>
     /// 列映射集合

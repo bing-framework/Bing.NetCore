@@ -18,6 +18,7 @@ public abstract partial class SqlQueryBase
         if (transaction == null)
             return;
         _transaction = transaction;
+        _transactionId = Guid.NewGuid().ToString("N");
         _transactionOwnership = SqlResourceOwnership.External;
         _connection = transaction.Connection;
         _connectionOwnership = SqlResourceOwnership.External;
@@ -30,7 +31,58 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 获取数据库事务
     /// </summary>
-    public IDbTransaction GetTransaction() => _transaction;
+    public IDbTransaction GetTransaction() => _transaction ?? _externalTransactionResolver?.Invoke();
+
+    /// <summary>
+    /// 获取查询事务。
+    /// </summary>
+    protected IDbTransaction GetQueryTransaction()
+    {
+        var transaction = GetTransaction();
+        if (transaction != null)
+            return transaction;
+        var context = Options.GetDatabaseContext();
+        if (context?.ReadPreference != SqlReadPreference.Primary)
+            return null;
+        if (context.DataSource?.PrimaryReadStrategy != PrimaryReadStrategy.Transaction)
+            return null;
+        _primaryReadTransactionStarted = true;
+        return BeginTransaction();
+    }
+
+    /// <summary>
+    /// 完成查询事务。
+    /// </summary>
+    protected void CompleteQueryTransaction()
+    {
+        if (_primaryReadTransactionStarted == false)
+            return;
+        try
+        {
+            CommitTransaction();
+        }
+        finally
+        {
+            _primaryReadTransactionStarted = false;
+        }
+    }
+
+    /// <summary>
+    /// 回滚查询事务。
+    /// </summary>
+    protected void RollbackQueryTransaction()
+    {
+        if (_primaryReadTransactionStarted == false)
+            return;
+        try
+        {
+            RollbackOwnedTransaction();
+        }
+        finally
+        {
+            _primaryReadTransactionStarted = false;
+        }
+    }
 
     #endregion
 
@@ -63,6 +115,7 @@ public abstract partial class SqlQueryBase
             _transaction = isolationLevel == null
                 ? connection.BeginTransaction()
                 : connection.BeginTransaction(isolationLevel.SafeValue());
+            _transactionId = Guid.NewGuid().ToString("N");
             _transactionOwnership = SqlResourceOwnership.Owned;
             return _transaction;
         }

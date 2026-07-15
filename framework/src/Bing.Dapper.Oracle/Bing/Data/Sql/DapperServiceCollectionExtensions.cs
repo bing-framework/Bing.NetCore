@@ -75,6 +75,8 @@ public static partial class DapperServiceCollectionExtensions
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         sqlOptions.RegisterGuidTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);
+        services.AddSqlDbConnectionFactory(DatabaseType.Oracle, connection => new OracleDatabaseFactory().Create(connection).GetConnection());
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Oracle);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -147,6 +149,7 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Oracle);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

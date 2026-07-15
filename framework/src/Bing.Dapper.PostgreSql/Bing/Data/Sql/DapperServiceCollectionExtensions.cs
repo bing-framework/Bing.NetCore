@@ -73,6 +73,8 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
+        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new PostgreSqlDatabaseFactory().Create(connection).GetConnection());
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -145,6 +147,7 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

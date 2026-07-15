@@ -73,7 +73,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
         : base(options)
     {
         TraceId = Guid.NewGuid().ToString();
-        _serviceProvider = serviceProvider ?? ServiceLocator.Instance.GetService<IServiceProvider>();
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetLogger(GetType());
         RegisterToManager();
     }
@@ -98,6 +98,11 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
             return default;
         return (T)result;
     }
+
+    /// <summary>
+    /// 获取作用域服务提供程序
+    /// </summary>
+    internal IServiceProvider ServiceProvider => _serviceProvider;
 
     #endregion
 

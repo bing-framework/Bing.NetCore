@@ -169,7 +169,6 @@ public class ParameterManager : IAdvancedParameterManager
             PropertyName = parameter.PropertyName,
             ColumnName = parameter.ColumnName,
             DatabaseType = parameter.DatabaseType,
-            DatabaseRole = parameter.DatabaseRole,
             ProviderTypeName = parameter.ProviderTypeName,
             Source = parameter.Source,
             MetadataLevel = parameter.MetadataLevel,

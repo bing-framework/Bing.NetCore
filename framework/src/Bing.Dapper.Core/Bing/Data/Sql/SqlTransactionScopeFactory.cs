@@ -1,6 +1,4 @@
-using Bing.Data.Sql.Database;
-
-namespace Bing.Data.Sql;
+﻿namespace Bing.Data.Sql;
 
 /// <summary>
 /// SQL 事务作用域工厂
@@ -29,7 +27,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     }
 
     /// <inheritdoc />
-    public ISqlTransactionScope Create(string dbKey = null)
+    public ISqlTransactionScope Begin(string dbKey = null)
     {
         var query = string.IsNullOrWhiteSpace(dbKey)
             ? _queryFactory.Create<ISqlQuery>()
@@ -39,6 +37,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             connection.Open();
         var transaction = connection.BeginTransaction();
         return new SqlTransactionScope(dbKey, query, transaction, _queryFactory, _executorFactory);
+    }
+
+    /// <inheritdoc />
+    public Task<ISqlTransactionScope> BeginAsync(string dbKey = null, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Begin(dbKey));
     }
 
     /// <summary>
@@ -65,6 +70,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 
         /// <inheritdoc />
         public string DbKey { get; }
+
+        /// <inheritdoc />
+        public string TransactionId { get; } = Guid.NewGuid().ToString("N");
 
         /// <inheritdoc />
         public ISqlQuery CreateQuery() => CreateQuery<ISqlQuery>();
@@ -104,6 +112,14 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         }
 
         /// <inheritdoc />
+        public Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Commit();
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
         public void Rollback()
         {
             if (_disposed)
@@ -111,6 +127,14 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             _transaction.Rollback();
             _completed = true;
             Dispose();
+        }
+
+        /// <inheritdoc />
+        public Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Rollback();
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
@@ -129,6 +153,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 _ownerQuery.Dispose();
                 _disposed = true;
             }
+        }
+
+        /// <inheritdoc />
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return new ValueTask();
         }
 
         /// <summary>

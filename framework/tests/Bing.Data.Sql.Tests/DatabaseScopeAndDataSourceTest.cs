@@ -10,7 +10,7 @@ namespace Bing.Data.Sql.Tests;
 public class DatabaseScopeAndDataSourceTest
 {
     /// <summary>
-    /// 测试目的：当配置新数据源时，解析器应仅通过 dbKey 返回数据源描述。
+    /// 测试 - 仅传入 dbKey 时应解析数据库类型和连接字符串。
     /// </summary>
     [Fact]
     public void Resolve_WhenDataSourceConfigured_ShouldReturnDescriptorByDbKey()
@@ -20,7 +20,6 @@ public class DatabaseScopeAndDataSourceTest
         options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
             Key = "reporting",
-            DbKey = "reporting",
             DatabaseType = DatabaseType.MySql,
             ConnectionString = "Server=reporting;Database=test;",
             IsReadOnly = true,
@@ -40,59 +39,31 @@ public class DatabaseScopeAndDataSourceTest
     }
 
     /// <summary>
-    /// 测试目的：当只配置旧 Databases 时，数据源解析器应兼容旧描述信息。
+    /// 测试 - 显式数据源不存在时应立即抛出异常。
     /// </summary>
     [Fact]
-    public void Resolve_WhenLegacyDatabaseConfigured_ShouldAdaptDescriptor()
+    public void Resolve_WhenExplicitDbKeyMissing_ShouldThrow()
     {
         // Arrange
         var options = new SqlMetadataOptions();
-        options.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("archive", DatabaseType.PgSql)] =
-            new DatabaseDescriptor
-            {
-                DbKey = "archive",
-                DatabaseType = DatabaseType.PgSql,
-                ConnectionString = "Host=archive;Database=test;",
-                ReadOnly = true
-            };
-        var resolver = new DefaultSqlDataSourceResolver(options);
-
-        // Act
-        var result = resolver.Resolve("archive", new DatabaseScopeOptions { DatabaseType = DatabaseType.PgSql });
-
-        // Assert
-        Assert.Equal("archive", result.Key);
-        Assert.Equal(DatabaseType.PgSql, result.DatabaseType);
-        Assert.Equal("Host=archive;Database=test;", result.ConnectionString);
-        Assert.True(result.IsReadOnly);
-    }
-
-    /// <summary>
-    /// 测试目的：显式传入未配置 dbKey 时，不应被默认库覆盖。
-    /// </summary>
-    [Fact]
-    public void Resolve_WhenExplicitDbKeyMissing_ShouldKeepRequestedDbKey()
-    {
-        // Arrange
-        var options = new SqlMetadataOptions();
-        options.DefaultDatabaseContext = new DatabaseContext
+        options.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
         {
-            DbKey = "default",
-            DatabaseType = DatabaseType.SqlServer
+            Key = "default",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=default;Database=test;"
         };
         var resolver = new DefaultSqlDataSourceResolver(options);
 
         // Act
-        var result = resolver.Resolve("reporting", new DatabaseScopeOptions { DatabaseType = DatabaseType.Oracle });
+        var exception = Assert.Throws<InvalidOperationException>(() => resolver.Resolve("archive"));
 
         // Assert
-        Assert.Equal("reporting", result.Key);
-        Assert.Equal("reporting", result.DbKey);
-        Assert.Equal(DatabaseType.Oracle, result.DatabaseType);
+        Assert.Contains("archive", exception.Message);
+        Assert.Contains("default", exception.Message);
     }
 
     /// <summary>
-    /// 测试目的：数据库作用域应使用新数据源解析结果，并在释放后恢复父级上下文。
+    /// 测试 - 数据库作用域应使用数据源解析结果并恢复父级上下文。
     /// </summary>
     [Fact]
     public void Use_WhenDataSourceConfigured_ShouldSetContextAndRestoreParent()
@@ -103,7 +74,6 @@ public class DatabaseScopeAndDataSourceTest
             Current = new DatabaseContext
             {
                 DbKey = "default",
-                DatabaseType = DatabaseType.SqlServer,
                 TenantId = "tenant-a",
                 MappingProfile = "default-profile"
             }
@@ -112,8 +82,8 @@ public class DatabaseScopeAndDataSourceTest
         options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
             Key = "reporting",
-            DbKey = "reporting",
             DatabaseType = DatabaseType.MySql,
+            ConnectionString = "Server=reporting;Database=test;",
             IsReadOnly = true,
             MappingProfile = "reporting-profile"
         };
@@ -124,13 +94,113 @@ public class DatabaseScopeAndDataSourceTest
         {
             // Assert
             Assert.Equal("reporting", accessor.Current.DbKey);
-            Assert.Equal(DatabaseType.MySql, accessor.Current.DatabaseType);
-            Assert.True(accessor.Current.ReadOnly);
+            Assert.Equal(DatabaseType.MySql, accessor.Current.DataSource.DatabaseType);
+            Assert.True(accessor.Current.DataSource.IsReadOnly);
             Assert.Equal("reporting-profile", accessor.Current.MappingProfile);
             Assert.Equal("tenant-a", accessor.Current.TenantId);
         }
 
         Assert.Equal("default", accessor.Current.DbKey);
         Assert.Equal("default-profile", accessor.Current.MappingProfile);
+    }
+
+    /// <summary>
+    /// 测试 - 未指定数据源时应使用默认数据源。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDbKeyNotSpecified_ShouldUseDefaultDataSource()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+        options.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
+        {
+            Key = "default",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=default;Database=test;"
+        };
+        options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.MySql,
+            ConnectionString = "Server=reporting;Database=test;"
+        };
+        var resolver = new DefaultSqlDataSourceResolver(options);
+
+        // Act
+        var result = resolver.Resolve();
+
+        // Assert
+        Assert.Equal("default", result.Key);
+        Assert.Equal(DatabaseType.SqlServer, result.DatabaseType);
+    }
+
+    /// <summary>
+    /// 测试 - 默认数据源未配置时应使用唯一数据源。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenOnlyOneDataSourceConfigured_ShouldUseUniqueDataSource()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+        options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.MySql
+        };
+        var resolver = new DefaultSqlDataSourceResolver(options);
+
+        // Act
+        var result = resolver.Resolve();
+
+        // Assert
+        Assert.Equal("reporting", result.Key);
+        Assert.Equal(DatabaseType.MySql, result.DatabaseType);
+    }
+
+    /// <summary>
+    /// 测试 - 默认数据库上下文不应写入历史默认连接名称。
+    /// </summary>
+    [Fact]
+    public void SqlMetadataOptions_DefaultContext_ShouldNotInjectLegacyDefaultDbKey()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+
+        // Act
+        var context = options.DefaultDatabaseContext;
+
+        // Assert
+        Assert.NotNull(context);
+        Assert.True(string.IsNullOrWhiteSpace(context.DbKey));
+        Assert.Null(context.DataSource);
+    }
+
+    /// <summary>
+    /// 测试 - 多数据源且默认数据源未配置时应抛出异常。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenMultipleDataSourcesWithoutConfiguredDefault_ShouldThrow()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+        options.DataSources.DefaultDataSourceKey = null;
+        options.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
+        {
+            Key = "default",
+            DatabaseType = DatabaseType.SqlServer
+        };
+        options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.MySql
+        };
+        var resolver = new DefaultSqlDataSourceResolver(options);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => resolver.Resolve());
+
+        // Assert
+        Assert.Contains("default,reporting", exception.Message);
+        Assert.Contains(nameof(SqlDataSourceOptions.DefaultDataSourceKey), exception.Message);
     }
 }
