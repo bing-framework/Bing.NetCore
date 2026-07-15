@@ -66,6 +66,18 @@ public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposabl
         int? timeout = null);
 
     /// <summary>
+    /// 流式查询
+    /// </summary>
+    IEnumerable<TEntity> StreamQuery<TEntity>(int? timeout = null);
+
+    /// <summary>
+    /// 异步流式查询
+    /// </summary>
+    IAsyncEnumerable<TEntity> StreamQueryAsync<TEntity>(
+        int? timeout = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 临时禁用调试日志
     /// </summary>
     ISqlQuery DisableDebugLog();
@@ -82,6 +94,7 @@ public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposabl
 - `Config(Action<SqlOptions> configAction)`：对当前查询对象进行配置，例如设置执行超时、是否执行后清空等。
 - `GetBuilder()`：获取当前查询关联的 `ISqlBuilder` 实例，通常用于高级场景或自定义执行逻辑。
 - `PagerQuery` / `PagerQueryAsync`：在给定分页参数 `IPager` 的基础上，统一完成分页逻辑，返回 `PagerList<TResult>`。
+- `StreamQuery` / `StreamQueryAsync`：以非缓冲方式读取结果集，适合导出、大结果集扫描等场景；调用方必须自行控制枚举生命周期。
 - `DisableDebugLog()`：临时禁用调试日志输出，适合高频调用、对日志量敏感的场景。
 
 ---
@@ -230,7 +243,7 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 - `ISqlQueryFactory`
 - `ISqlExecutorFactory`
 
-如果需要显式配置多库连接描述与实体映射，建议在注册数据库服务前提供自定义 `SqlMetadataOptions`。新数据源配置使用 `DataSources`：
+如果需要显式配置多库连接描述与实体映射，建议通过 `ConfigureSqlMetadata(...)` 统一追加配置。新数据源配置使用 `DataSources`：
 
 ```csharp
 services.ConfigureSqlMetadata(options =>
@@ -321,7 +334,7 @@ Independent 模式创建独立 SQL Query，不绑定 EF 连接和事务。它适
 需要让多个 Query / Executor 共享一个独立事务时，可使用 `ISqlTransactionScopeFactory`：
 
 ```csharp
-using var scope = transactionScopeFactory.Create("reporting");
+using var scope = transactionScopeFactory.Begin("reporting");
 
 var executor = scope.CreateExecutor();
 executor.ExecuteSql("update users set name=@name where id=@id", new { name = "Tom", id = 1 });
@@ -334,7 +347,7 @@ scope.Commit();
 
 作用域拥有连接和事务。作用域创建的 Query / Executor 会绑定外部事务，不能自行提交或回滚；如果作用域释放前未调用 `Commit()` 或 `Rollback()`，会自动回滚。
 
-如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。流式读取、长时间导出或 DataReader 场景不应静默降级为事务策略。
+如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。当前实现对 `StreamQuery` / `StreamQueryAsync` 会在创建读取器前直接抛出异常，避免在流式场景里静默退回到短事务策略。
 
 ### 6. 显式实体映射
 
@@ -409,7 +422,7 @@ executor.ExecuteSql<User>(
 - 参数值可来自匿名对象、字典或普通 POCO；
     - `Add(name, property, null)` 表示显式传入空值，执行时会绑定为 `DBNull.Value`；
     - `Map(name, property)` 表示从源对象读取参数值；
-- 找不到值时会降级为弱元数据，不会破坏旧调用方式；
+- 使用映射增强时，找不到必需输入值会抛出 `SqlParameterBindingException`；只有未启用映射增强的旧调用路径才保留原有弱元数据行为；
 - 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数；
 - 执行诊断消息会包含标准化参数快照和增强参数元数据，便于排查参数类型与映射问题；
 - 诊断参数快照不暴露 Dapper 内部参数对象。

@@ -1,3 +1,6 @@
+using Bing.Data.Enums;
+using Bing.Data.Sql.Configs;
+
 namespace Bing.EntityFrameworkCore.Tests.Core;
 
 /// <summary>
@@ -76,17 +79,129 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：同一 Provider 存在多个 SQL 数据源且未显式指定 dbKey 时，应抛出明确异常而不是取第一个。
+    /// </summary>
+    [Fact]
+    public void Create_WhenMultipleMatchingDataSourcesWithoutDbKey_ShouldThrow()
+    {
+        // Arrange
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => factory.Create(unitOfWork));
+
+        // Assert
+        Assert.Contains("请显式指定 dbKey", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Independent 模式显式指定 dbKey 时，应使用目标数据源的连接字符串创建独立连接。
+    /// </summary>
+    [Fact]
+    public void Create_WhenIndependentWithDbKey_ShouldUseSelectedDataSourceConnectionString()
+    {
+        // Arrange
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "reporting");
+
+        // Assert
+        var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
+        Assert.Equal("Data Source=reporting.db", independentConnection.ConnectionString);
+    }
+
+    /// <summary>
+    /// 测试目的：显式指定的 dbKey 与 EF Core Provider 类型不一致时，应抛出明确异常。
+    /// </summary>
+    [Fact]
+    public void Create_WhenDbKeyProviderMismatch_ShouldThrow()
+    {
+        // Arrange
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "sqlserver"));
+
+        // Assert
+        Assert.Contains("不一致", exception.Message);
+    }
+
+    /// <summary>
     /// 创建服务提供程序
     /// </summary>
     /// <returns>服务提供程序</returns>
-    private static ServiceProvider CreateServiceProvider()
+    private static ServiceProvider CreateServiceProvider(SqlMetadataOptions metadataOptions = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
+        if (metadataOptions != null)
+            services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
         services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();
         services.AddSqliteSqlQuery("Data Source=:memory:");
         services.AddEfCoreSqlQueryFactory();
         return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建测试元数据配置
+    /// </summary>
+    /// <returns>Sql 元数据配置</returns>
+    private static SqlMetadataOptions CreateMetadataOptions()
+    {
+        var options = new SqlMetadataOptions();
+        options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = "Data Source=reporting.db"
+        };
+        options.DataSources.DataSources["sqlserver"] = new SqlDataSourceDescriptor
+        {
+            Key = "sqlserver",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=sqlserver;Database=test;"
+        };
+        return options;
+    }
+
+    /// <summary>
+    /// 应用测试元数据配置
+    /// </summary>
+    /// <param name="target">目标配置</param>
+    /// <param name="source">源配置</param>
+    private static void ApplyMetadataOptions(SqlMetadataOptions target, SqlMetadataOptions source)
+    {
+        if (target == null || source == null)
+            return;
+        target.DataSources.DefaultDataSourceKey = source.DataSources.DefaultDataSourceKey;
+        foreach (var dataSource in source.DataSources.DataSources.Values)
+        {
+            target.DataSources.DataSources[dataSource.Key] = new SqlDataSourceDescriptor
+            {
+                Key = dataSource.Key,
+                DatabaseType = dataSource.DatabaseType,
+                ConnectionString = dataSource.ConnectionString,
+                ConnectionStringName = dataSource.ConnectionStringName,
+                IsReadOnly = dataSource.IsReadOnly,
+                MappingProfile = dataSource.MappingProfile,
+                PrimaryReadStrategy = dataSource.PrimaryReadStrategy,
+                PrimaryDataSourceKey = dataSource.PrimaryDataSourceKey
+            };
+        }
     }
 
     /// <summary>

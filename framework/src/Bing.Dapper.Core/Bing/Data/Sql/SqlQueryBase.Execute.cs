@@ -50,7 +50,9 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     public object ExecuteProcedureScalar(string procedure, int? timeout = null)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.ExecuteScalar(command, param, transaction, timeout,
+                GetProcedureCommandType()));
     }
 
     /// <summary>
@@ -61,7 +63,9 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     public T ExecuteProcedureScalar<T>(string procedure, int? timeout = null)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.ExecuteScalar<T>(command, param, transaction, timeout,
+                GetProcedureCommandType()));
     }
 
     #endregion
@@ -75,7 +79,9 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     public Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => await conn.ExecuteScalarAsync(new CommandDefinition(command,
+                param, transaction, timeout, GetProcedureCommandType())));
     }
 
     /// <summary>
@@ -86,7 +92,9 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     public Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => await conn.ExecuteScalarAsync<T>(new CommandDefinition(command,
+                param, transaction, timeout, GetProcedureCommandType())));
     }
 
     #endregion
@@ -125,7 +133,9 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     public TEntity ExecuteProcedureSingle<TEntity>(string procedure, int? timeout = null)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.QueryFirstOrDefault<TEntity>(command, param, transaction,
+                timeout, GetProcedureCommandType()));
     }
 
     #endregion
@@ -140,7 +150,9 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     public Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => await conn.QueryFirstOrDefaultAsync<TEntity>(
+                new CommandDefinition(command, param, transaction, timeout, GetProcedureCommandType())));
     }
 
     #endregion

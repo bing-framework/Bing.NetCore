@@ -132,6 +132,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// </summary>
     public string ContextId { get; private set; }
 
+    /// <inheritdoc />
+    public ISqlOutputParameterAccessor OutputParameters { get; private set; }
+
     /// <summary>
     /// 服务提供程序
     /// </summary>
@@ -448,20 +451,28 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// </summary>
     /// <param name="builder">Sql 生成器</param>
     /// <returns>数据库参数</returns>
-    protected object GetDbParameters(ISqlBuilder builder) =>
-        SqlParameterBinder is ISqlParameterContextBinder binder
+    protected object GetDbParameters(ISqlBuilder builder)
+    {
+        var parameters = SqlParameterBinder is ISqlParameterContextBinder binder
             ? binder.Bind(builder, Options)
             : SqlParameterBinder.Bind(builder);
+        OutputParameters = parameters as ISqlOutputParameterAccessor;
+        return parameters;
+    }
 
     /// <summary>
     /// 获取数据库参数
     /// </summary>
     /// <param name="parameter">原始参数对象</param>
     /// <returns>数据库参数</returns>
-    protected object GetDbParameters(object parameter) =>
-        SqlParameterBinder is ISqlParameterContextBinder binder
+    protected object GetDbParameters(object parameter)
+    {
+        var parameters = SqlParameterBinder is ISqlParameterContextBinder binder
             ? binder.Bind(parameter, Options)
             : SqlParameterBinder.Bind(parameter);
+        OutputParameters = parameters as ISqlOutputParameterAccessor;
+        return parameters;
+    }
 
     /// <summary>
     /// 分页查询
@@ -747,7 +758,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// 获取存储过程名城管
     /// </summary>
     /// <param name="procedure">存储过程</param>
-    protected virtual string GetProcedure(string procedure) => string.Empty;
+    protected virtual string GetProcedure(string procedure) => procedure;
 
     /// <summary>
     /// 获取存储过程命令类型

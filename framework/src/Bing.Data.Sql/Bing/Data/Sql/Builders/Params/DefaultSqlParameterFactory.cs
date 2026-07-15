@@ -56,6 +56,7 @@ public class DefaultSqlParameterFactory : ISqlParameterFactory
         var convertedValue = column == null ? value : _selector.ConvertToProvider(value, column, context);
         return new SqlParam(name, convertedValue, column?.DbType, null, column?.Size, column?.Precision, column?.Scale)
         {
+            OriginalValue = value,
             EntityType = entityType,
             PropertyName = column?.PropertyName,
             ColumnName = column?.ColumnName,

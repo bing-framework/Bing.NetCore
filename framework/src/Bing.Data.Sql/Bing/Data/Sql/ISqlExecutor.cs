@@ -8,6 +8,11 @@ namespace Bing.Data.Sql;
 public interface ISqlExecutor : ISqlQuery, ISqlOperation
 {
     /// <summary>
+    /// 最近一次执行的输出参数访问器
+    /// </summary>
+    ISqlOutputParameterAccessor OutputParameters { get; }
+
+    /// <summary>
     /// 执行指定的SQL语句
     /// </summary>
     /// <param name="sql">执行的SQL语句</param>

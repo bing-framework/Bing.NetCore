@@ -542,6 +542,185 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - 存储过程标量执行应使用 StoredProcedure 命令类型并保留增强参数元数据。
+    /// </summary>
+    [Fact]
+    public void ExecuteProcedureScalar_ShouldUseStoredProcedureCommandAndMetadataParameters()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ScalarResult = 7 };
+        var query = CreateQuery(connection);
+        query.From<MappedSample>("a").Where<MappedSample>(t => t.Name, "abc");
+
+        // Act
+        var result = query.ExecuteProcedureScalar<int>("usp_users_count");
+
+        // Assert
+        result.ShouldBe(7);
+        connection.LastCommandText.ShouldBe("usp_users_count");
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+        connection.LastCreatedParameters.Count.ShouldBe(1);
+        connection.LastCreatedParameters[0].DbType.ShouldBe(DbType.String);
+        connection.LastCreatedParameters[0].Size.ShouldBe(20);
+    }
+
+    /// <summary>
+    /// 测试 - 存储过程单行异步执行应使用 StoredProcedure 命令并正确映射结果。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteProcedureSingleAsync_ShouldUseStoredProcedureCommandAndMapEntity()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 2, Name = "Alice" })
+        };
+        var query = CreateQuery(connection);
+
+        // Act
+        var result = await query.ExecuteProcedureSingleAsync<MappedSample>("usp_users_single");
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(2);
+        result.Name.ShouldBe("Alice");
+        connection.LastCommandText.ShouldBe("usp_users_single");
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+        connection.ReaderDisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 存储过程集合执行应返回完整结果集并释放读取器。
+    /// </summary>
+    [Fact]
+    public void ExecuteProcedureQuery_ShouldReturnRowsAndDisposeReader()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 1, Name = "Alice" },
+                new MappedSample { Id = 2, Name = "Bob" })
+        };
+        var query = CreateQuery(connection);
+
+        // Act
+        var result = query.ExecuteProcedureQuery<MappedSample>("usp_users_query");
+
+        // Assert
+        result.Count.ShouldBe(2);
+        result[0].Name.ShouldBe("Alice");
+        result[1].Name.ShouldBe("Bob");
+        connection.LastCommandText.ShouldBe("usp_users_query");
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+        connection.ReaderDisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 流式查询完整枚举后应释放读取器并返回所有行。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenFullyEnumerated_ShouldReturnRowsAndDisposeReader()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 1, Name = "Alice" },
+                new MappedSample { Id = 2, Name = "Bob" })
+        };
+        var query = CreateQuery(connection);
+        query.Select("Id,Name").From("Users");
+
+        // Act
+        var result = query.StreamQuery<MappedSample>().ToList();
+
+        // Assert
+        result.Count.ShouldBe(2);
+        result[0].Id.ShouldBe(1);
+        result[1].Name.ShouldBe("Bob");
+        connection.ReaderCreateCount.ShouldBe(1);
+        connection.ReaderDisposeCount.ShouldBe(1);
+        connection.LastCommandType.ShouldBe(CommandType.Text);
+    }
+
+    /// <summary>
+    /// 测试 - 流式查询提前终止时也应释放读取器。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenEnumerationStopsEarly_ShouldDisposeReader()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 1, Name = "Alice" },
+                new MappedSample { Id = 2, Name = "Bob" })
+        };
+        var query = CreateQuery(connection);
+        query.Select("Id,Name").From("Users");
+
+        // Act
+        using (var enumerator = query.StreamQuery<MappedSample>().GetEnumerator())
+        {
+            enumerator.MoveNext().ShouldBeTrue();
+            enumerator.Current.Name.ShouldBe("Alice");
+        }
+
+        // Assert
+        connection.ReaderCreateCount.ShouldBe(1);
+        connection.ReaderDisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 异步流式查询提前终止时也应释放读取器。
+    /// </summary>
+    [Fact]
+    public async Task StreamQueryAsync_WhenEnumerationStopsEarly_ShouldDisposeReader()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 1, Name = "Alice" },
+                new MappedSample { Id = 2, Name = "Bob" })
+        };
+        var query = CreateQuery(connection);
+        query.Select("Id,Name").From("Users");
+
+        // Act
+        await foreach (var item in query.StreamQueryAsync<MappedSample>())
+        {
+            item.Name.ShouldBe("Alice");
+            break;
+        }
+
+        // Assert
+        connection.ReaderCreateCount.ShouldBe(1);
+        connection.ReaderDisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 主库短事务策略下应拒绝流式查询。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenPrimaryReadStrategyIsTransaction_ShouldThrow()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var query = CreateQuery(connection);
+        query.Select("Id,Name").From("Users");
+        ConfigurePrimaryReadTransaction(query);
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => query.StreamQuery<MappedSample>());
+
+        // Assert
+        exception.Message.ShouldContain("PrimaryReadStrategy.Transaction");
+        connection.ReaderCreateCount.ShouldBe(0);
+    }
+
+    /// <summary>
     /// 测试 - 类型转换器解析器应解析 SqlServer 对应的 Provider 转换器。
     /// </summary>
     [Fact]
@@ -625,6 +804,21 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建样例结果集
+    /// </summary>
+    /// <param name="items">结果项</param>
+    /// <returns>数据表</returns>
+    private static DataTable CreateMappedSampleTable(params MappedSample[] items)
+    {
+        var table = new DataTable();
+        table.Columns.Add(nameof(MappedSample.Id), typeof(int));
+        table.Columns.Add(nameof(MappedSample.Name), typeof(string));
+        foreach (var item in items)
+            table.Rows.Add(item.Id, item.Name);
+        return table;
+    }
+
+    /// <summary>
     /// 创建查询对象
     /// </summary>
     /// <param name="connection">数据库连接</param>
@@ -636,6 +830,21 @@ public class SqlServerRoutingAndExecutionTest
             options.Connection(connection));
         var provider = services.BuildServiceProvider();
         return provider.GetRequiredService<InspectableSqlServerQuery>();
+    }
+
+    /// <summary>
+    /// 创建拥有连接的查询对象
+    /// </summary>
+    /// <param name="connection">数据库连接</param>
+    /// <returns>查询对象</returns>
+    private static InspectableSqlServerQuery CreateOwnedQuery(CaptureDbConnection connection)
+    {
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<SqlOptions<InspectableSqlServerQuery>>();
+        return new InspectableSqlServerQuery(provider, options, new ConnectionDatabase(connection));
     }
 
     /// <summary>
@@ -674,6 +883,24 @@ public class SqlServerRoutingAndExecutionTest
     private static void ConfigurePrimaryReadTransaction(InspectableSqlServerExecutor executor)
     {
         executor.Config(options => options.SetDatabaseContext(new DatabaseContext
+        {
+            ReadPreference = SqlReadPreference.Primary,
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "primary",
+                DatabaseType = DatabaseType.SqlServer,
+                PrimaryReadStrategy = PrimaryReadStrategy.Transaction
+            }
+        }));
+    }
+
+    /// <summary>
+    /// 配置主库短事务策略
+    /// </summary>
+    /// <param name="query">SQL 查询对象</param>
+    private static void ConfigurePrimaryReadTransaction(ISqlQuery query)
+    {
+        query.Config(options => options.SetDatabaseContext(new DatabaseContext
         {
             ReadPreference = SqlReadPreference.Primary,
             DataSource = new SqlDataSourceDescriptor
@@ -786,6 +1013,20 @@ public class SqlServerRoutingAndExecutionTest
 
         public List<CaptureDbParameter> LastCreatedParameters { get; private set; } = new();
 
+        public string LastCommandText { get; private set; }
+
+        public CommandType LastCommandType { get; private set; } = CommandType.Text;
+
+        public object ScalarResult { get; set; } = 1;
+
+        public int NonQueryResult { get; set; } = 1;
+
+        public DataTable ResultSet { get; set; } = new();
+
+        public int ReaderCreateCount { get; private set; }
+
+        public int ReaderDisposeCount { get; private set; }
+
         public bool ThrowOnExecute { get; set; }
 
         public CaptureDbTransaction LastTransaction { get; private set; }
@@ -825,6 +1066,22 @@ public class SqlServerRoutingAndExecutionTest
 
         public void SetParameters(IEnumerable<CaptureDbParameter> parameters) =>
             LastCreatedParameters = parameters.ToList();
+
+        public void SetCommand(string commandText, CommandType commandType, IEnumerable<CaptureDbParameter> parameters)
+        {
+            LastCommandText = commandText;
+            LastCommandType = commandType;
+            SetParameters(parameters);
+        }
+
+        public DbDataReader CreateReader()
+        {
+            ReaderCreateCount++;
+            var table = ResultSet ?? new DataTable();
+            return new CaptureDbDataReader(table.CreateDataReader(), this);
+        }
+
+        public void OnReaderDisposed() => ReaderDisposeCount++;
     }
 
     /// <summary>
@@ -863,34 +1120,143 @@ public class SqlServerRoutingAndExecutionTest
         {
             if (_connection.ThrowOnExecute)
                 throw new InvalidOperationException("execute failed");
-            _connection.SetParameters(_parameters.Items);
-            return 1;
+            _connection.SetCommand(CommandText, CommandType, _parameters.Items);
+            return _connection.NonQueryResult;
         }
 
         public override object ExecuteScalar()
         {
-            _connection.SetParameters(_parameters.Items);
-            return 1;
+            _connection.SetCommand(CommandText, CommandType, _parameters.Items);
+            return _connection.ScalarResult;
         }
 
         public override void Prepare() { }
 
         protected override DbParameter CreateDbParameter() => new CaptureDbParameter();
 
-        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior) => throw new NotSupportedException();
+        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        {
+            if (_connection.ThrowOnExecute)
+                throw new InvalidOperationException("execute failed");
+            _connection.SetCommand(CommandText, CommandType, _parameters.Items);
+            return _connection.CreateReader();
+        }
 
         public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
         {
             if (_connection.ThrowOnExecute)
                 throw new InvalidOperationException("execute failed");
-            _connection.SetParameters(_parameters.Items);
-            return Task.FromResult(1);
+            _connection.SetCommand(CommandText, CommandType, _parameters.Items);
+            return Task.FromResult(_connection.NonQueryResult);
         }
 
         public override Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
-            _connection.SetParameters(_parameters.Items);
-            return Task.FromResult<object>(1);
+            _connection.SetCommand(CommandText, CommandType, _parameters.Items);
+            return Task.FromResult(_connection.ScalarResult);
+        }
+    }
+
+    /// <summary>
+    /// 捕获释放行为的数据读取器
+    /// </summary>
+    private sealed class CaptureDbDataReader : DbDataReader
+    {
+        private readonly DbDataReader _reader;
+        private readonly CaptureDbConnection _connection;
+
+        public CaptureDbDataReader(DbDataReader reader, CaptureDbConnection connection)
+        {
+            _reader = reader;
+            _connection = connection;
+        }
+
+        public override int Depth => _reader.Depth;
+
+        public override int FieldCount => _reader.FieldCount;
+
+        public override bool HasRows => _reader.HasRows;
+
+        public override bool IsClosed => _reader.IsClosed;
+
+        public override int RecordsAffected => _reader.RecordsAffected;
+
+        public override object this[int ordinal] => _reader[ordinal];
+
+        public override object this[string name] => _reader[name];
+
+        public override bool GetBoolean(int ordinal) => _reader.GetBoolean(ordinal);
+
+        public override byte GetByte(int ordinal) => _reader.GetByte(ordinal);
+
+        public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length) =>
+            _reader.GetBytes(ordinal, dataOffset, buffer, bufferOffset, length);
+
+        public override char GetChar(int ordinal) => _reader.GetChar(ordinal);
+
+        public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length) =>
+            _reader.GetChars(ordinal, dataOffset, buffer, bufferOffset, length);
+
+        public override string GetDataTypeName(int ordinal) => _reader.GetDataTypeName(ordinal);
+
+        public override DateTime GetDateTime(int ordinal) => _reader.GetDateTime(ordinal);
+
+        public override decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);
+
+        public override double GetDouble(int ordinal) => _reader.GetDouble(ordinal);
+
+        public override IEnumerator GetEnumerator() => ((IEnumerable)_reader).GetEnumerator();
+
+        public override Type GetFieldType(int ordinal) => _reader.GetFieldType(ordinal);
+
+        public override float GetFloat(int ordinal) => _reader.GetFloat(ordinal);
+
+        public override Guid GetGuid(int ordinal) => _reader.GetGuid(ordinal);
+
+        public override short GetInt16(int ordinal) => _reader.GetInt16(ordinal);
+
+        public override int GetInt32(int ordinal) => _reader.GetInt32(ordinal);
+
+        public override long GetInt64(int ordinal) => _reader.GetInt64(ordinal);
+
+        public override string GetName(int ordinal) => _reader.GetName(ordinal);
+
+        public override int GetOrdinal(string name) => _reader.GetOrdinal(name);
+
+        public override DataTable GetSchemaTable() => _reader.GetSchemaTable();
+
+        public override string GetString(int ordinal) => _reader.GetString(ordinal);
+
+        public override object GetValue(int ordinal) => _reader.GetValue(ordinal);
+
+        public override int GetValues(object[] values) => _reader.GetValues(values);
+
+        public override bool IsDBNull(int ordinal) => _reader.IsDBNull(ordinal);
+
+        public override bool NextResult() => _reader.NextResult();
+
+        public override Task<bool> NextResultAsync(CancellationToken cancellationToken) =>
+            _reader.NextResultAsync(cancellationToken);
+
+        public override bool Read() => _reader.Read();
+
+        public override Task<bool> ReadAsync(CancellationToken cancellationToken) =>
+            _reader.ReadAsync(cancellationToken);
+
+        public override T GetFieldValue<T>(int ordinal) => _reader.GetFieldValue<T>(ordinal);
+
+        public override Task<T> GetFieldValueAsync<T>(int ordinal, CancellationToken cancellationToken) =>
+            _reader.GetFieldValueAsync<T>(ordinal, cancellationToken);
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _reader.Dispose();
+                _connection.OnReaderDisposed();
+            }
+
+            base.Dispose(disposing);
         }
     }
 

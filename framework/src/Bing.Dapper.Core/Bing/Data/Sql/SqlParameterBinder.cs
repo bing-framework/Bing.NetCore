@@ -2,6 +2,7 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Enums;
 
 namespace Bing.Data.Sql;
 
@@ -64,6 +65,17 @@ public interface ISqlParameterContextBinder : ISqlParameterBinder
 }
 
 /// <summary>
+/// Dapper 增强参数集访问器
+/// </summary>
+public interface IDapperSqlParameterSet
+{
+    /// <summary>
+    /// 获取增强参数集合
+    /// </summary>
+    IReadOnlyCollection<SqlParam> Parameters { get; }
+}
+
+/// <summary>
 /// 默认 Sql 参数绑定器
 /// </summary>
 public class DefaultSqlParameterBinder : ISqlParameterContextBinder
@@ -94,6 +106,16 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     private readonly ISqlDatabaseContextResolver _databaseContextResolver;
 
     /// <summary>
+    /// SQL 参数解析器
+    /// </summary>
+    private readonly ISqlParameterResolver _parameterResolver;
+
+    /// <summary>
+    /// 数据库参数定制器集合
+    /// </summary>
+    private readonly IReadOnlyCollection<ISqlDbParameterCustomizer> _dbParameterCustomizers;
+
+    /// <summary>
     /// 初始化一个<see cref="DefaultSqlParameterBinder"/>类型的实例
     /// </summary>
     /// <param name="entityMetadata">实体元数据解析器</param>
@@ -102,10 +124,13 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    /// <param name="parameterResolver">SQL 参数解析器</param>
+    /// <param name="dbParameterCustomizers">数据库参数定制器集合</param>
     public DefaultSqlParameterBinder(IEntityMetadata entityMetadata = null,
         IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
         ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null)
+        ISqlDatabaseContextResolver databaseContextResolver = null, ISqlParameterResolver parameterResolver = null,
+        IEnumerable<ISqlDbParameterCustomizer> dbParameterCustomizers = null)
     {
         _options = options ?? new SqlMetadataOptions();
         _databaseContextAccessor = databaseContextAccessor;
@@ -115,6 +140,9 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
             new DefaultEntityMappingResolver(entityMetadata, databaseContextAccessor, _options);
         _sqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, _options), databaseContextAccessor, _options);
+        _parameterResolver = parameterResolver ?? new DefaultSqlParameterResolver();
+        _dbParameterCustomizers = dbParameterCustomizers?.Where(t => t != null).ToList() ??
+                      new List<ISqlDbParameterCustomizer>();
     }
 
     /// <summary>
@@ -136,7 +164,7 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
             return null;
         var parameters = GetSqlParams(builder, options);
         if (parameters.Count > 0)
-            return new MetadataDynamicParameters(parameters);
+            return new MetadataDynamicParameters(parameters, _dbParameterCustomizers);
         return builder.GetParams();
     }
 
@@ -159,10 +187,8 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
             return null;
         if (parameter is SqlMapper.IDynamicParameters)
             return parameter;
-        if (parameter is ISqlParameterMap map)
-            return Bind(map, options);
-        if (parameter is IEnumerable<SqlParam> sqlParams)
-            return new MetadataDynamicParameters(sqlParams);
+        if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
+            return new MetadataDynamicParameters(GetSqlParams(parameter, options), _dbParameterCustomizers);
         return parameter;
     }
 
@@ -187,10 +213,18 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <returns>Sql 增强参数集合</returns>
     public IReadOnlyCollection<SqlParam> GetSqlParams(object parameter, SqlOptions options)
     {
-        if (parameter is ISqlParameterMap map)
-            return map.GetItems().Select(t => CreateSqlParam(t, options)).Where(t => t != null).ToList();
-        if (parameter is IEnumerable<SqlParam> sqlParams)
-            return sqlParams.Where(t => t != null).ToList();
+        if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
+        {
+            var result = _parameterResolver.Resolve(new SqlParameterBindingContext
+            {
+                EntityType = parameter is ISqlParameterMap map
+                    ? map.GetItems().FirstOrDefault()?.EntityType
+                    : null,
+                Source = parameter,
+                DatabaseType = GetDatabaseContext(options)?.DataSource?.DatabaseType ?? options?.DatabaseType ?? default
+            });
+            return result.Items.Select(t => CreateSqlParam(t, options)).Where(t => t != null).ToList();
+        }
         return new List<SqlParam>();
     }
 
@@ -211,8 +245,7 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     {
         if (map == null)
             return null;
-        var parameters = map.GetItems().Select(t => CreateSqlParam(t, options)).Where(t => t != null).ToList();
-        return new MetadataDynamicParameters(parameters);
+        return new MetadataDynamicParameters(GetSqlParams(map, options), _dbParameterCustomizers);
     }
 
     /// <summary>
@@ -245,6 +278,40 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
         var column = ResolveColumnMetadata(item.EntityType, item.PropertyName, options);
         return _sqlParameterFactory.Create(item.Name, item.Value, column, GetDatabaseContext(options), item.EntityType,
             SqlParameterSource.RawSql);
+    }
+
+    /// <summary>
+    /// 根据统一绑定项创建增强 Sql 参数
+    /// </summary>
+    /// <param name="item">参数绑定项</param>
+    /// <param name="options">Sql 配置</param>
+    /// <returns>增强 Sql 参数</returns>
+    protected virtual SqlParam CreateSqlParam(SqlParameterBindingItem item, SqlOptions options)
+    {
+        if (item == null)
+            return null;
+        var metadata = item.Metadata;
+        var column = ResolveColumnMetadata(metadata?.EntityType, metadata?.PropertyName, options);
+        var converted = _sqlParameterFactory.Create(item.Name, item.Value, column, GetDatabaseContext(options),
+            metadata?.EntityType, metadata?.Source ?? SqlParameterSource.RawSql);
+        return new SqlParam(item.Name, converted.Value, metadata?.DbType ?? converted.DbType,
+            metadata?.Direction ?? converted.Direction, metadata?.Size ?? converted.Size,
+            metadata?.Precision ?? converted.Precision, metadata?.Scale ?? converted.Scale)
+        {
+            OriginalValue = item.OriginalValue,
+            EntityType = metadata?.EntityType ?? converted.EntityType,
+            PropertyName = metadata?.PropertyName ?? converted.PropertyName,
+            ColumnName = metadata?.ColumnName ?? converted.ColumnName,
+            DatabaseType = metadata?.DatabaseType ?? converted.DatabaseType,
+            ProviderTypeName = metadata?.ProviderTypeName ?? converted.ProviderTypeName,
+            Source = metadata?.Source ?? converted.Source,
+            MetadataLevel = metadata?.MetadataLevel > converted.MetadataLevel
+                ? metadata.MetadataLevel
+                : converted.MetadataLevel,
+            StorageKind = metadata?.StorageKind ?? converted.StorageKind,
+            ConverterKind = metadata?.ConverterKind ?? converted.ConverterKind,
+            CustomConverterName = metadata?.CustomConverterName ?? converted.CustomConverterName
+        };
     }
 
     /// <summary>
@@ -297,7 +364,8 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <summary>
     /// 元数据参数对象
     /// </summary>
-    private sealed class MetadataDynamicParameters : SqlMapper.IDynamicParameters
+    private sealed class MetadataDynamicParameters : SqlMapper.IDynamicParameters, ISqlOutputParameterAccessor,
+        IDapperSqlParameterSet
     {
         /// <summary>
         /// 参数集合
@@ -305,11 +373,30 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
         private readonly IReadOnlyCollection<SqlParam> _parameters;
 
         /// <summary>
+        /// 数据库参数定制器集合
+        /// </summary>
+        private readonly IReadOnlyCollection<ISqlDbParameterCustomizer> _customizers;
+
+        /// <summary>
+        /// 实际创建的数据库参数
+        /// </summary>
+        private readonly IDictionary<string, IDbDataParameter> _dbParameters =
+            new Dictionary<string, IDbDataParameter>(StringComparer.OrdinalIgnoreCase);
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<SqlParam> Parameters => _parameters;
+
+        /// <summary>
         /// 初始化一个<see cref="MetadataDynamicParameters"/>类型的实例
         /// </summary>
         /// <param name="parameters">参数集合</param>
-        public MetadataDynamicParameters(IEnumerable<SqlParam> parameters) =>
+        /// <param name="customizers">数据库参数定制器集合</param>
+        public MetadataDynamicParameters(IEnumerable<SqlParam> parameters,
+            IReadOnlyCollection<ISqlDbParameterCustomizer> customizers = null)
+        {
             _parameters = parameters?.Where(t => t != null).ToList() ?? new List<SqlParam>();
+            _customizers = customizers ?? Array.Empty<ISqlDbParameterCustomizer>();
+        }
 
         /// <summary>
         /// 将参数添加到命令对象
@@ -321,7 +408,10 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
             if (command == null)
                 return;
             foreach (var parameter in _parameters)
-                AddParameter(command, parameter);
+            {
+                var dbParameter = AddParameter(command, parameter, _customizers);
+                _dbParameters[NormalizeName(parameter.Name)] = dbParameter;
+            }
         }
 
         /// <summary>
@@ -329,7 +419,9 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
         /// </summary>
         /// <param name="command">命令对象</param>
         /// <param name="parameter">Sql 参数</param>
-        private static void AddParameter(IDbCommand command, SqlParam parameter)
+        /// <param name="customizers">数据库参数定制器集合</param>
+        private static IDbDataParameter AddParameter(IDbCommand command, SqlParam parameter,
+            IEnumerable<ISqlDbParameterCustomizer> customizers)
         {
             var dbParameter = command.CreateParameter();
             dbParameter.ParameterName = parameter.Name;
@@ -344,7 +436,68 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
                 dbParameter.Precision = parameter.Precision.Value;
             if (parameter.Scale.HasValue)
                 dbParameter.Scale = parameter.Scale.Value;
+            var customizer = customizers?.FirstOrDefault(t => t.CanHandle(parameter.DatabaseType ?? default));
+            customizer?.Configure(dbParameter, parameter);
             command.Parameters.Add(dbParameter);
+            return dbParameter;
+        }
+
+        /// <inheritdoc />
+        public object GetValue(string name)
+        {
+            if (_dbParameters.TryGetValue(NormalizeName(name), out var parameter) == false)
+                throw new KeyNotFoundException($"未找到输出参数 '{name}'。");
+            return parameter.Value == DBNull.Value ? null : parameter.Value;
+        }
+
+        /// <inheritdoc />
+        public T GetValue<T>(string name)
+        {
+            if (TryGetValue<T>(name, out var value))
+                return value;
+            throw new InvalidCastException($"输出参数 '{name}' 无法转换为 {typeof(T).FullName}。");
+        }
+
+        /// <inheritdoc />
+        public bool TryGetValue<T>(string name, out T value)
+        {
+            var rawValue = GetValue(name);
+            if (rawValue == null)
+            {
+                value = default;
+                return true;
+            }
+            if (rawValue is T typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+            var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+            try
+            {
+                value = targetType.IsEnum
+                    ? (T)Enum.ToObject(targetType, rawValue)
+                    : (T)Convert.ChangeType(rawValue, targetType);
+                return true;
+            }
+            catch (Exception) when (rawValue is IConvertible)
+            {
+                value = default;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 规范化参数名称
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <returns>标准参数名称</returns>
+        private static string NormalizeName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return string.Empty;
+            name = name.Trim();
+            return name[0] is '@' or ':' or '?' ? name.Substring(1) : name;
         }
     }
 }

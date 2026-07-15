@@ -13,7 +13,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public List<dynamic> ExecuteProcedureQuery(string procedure, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, param, transaction, buffered, timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -25,7 +27,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public List<TEntity> ExecuteProcedureQuery<TEntity>(string procedure, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query<TEntity>(command, param, transaction, buffered, timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -40,7 +44,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public List<TEntity> ExecuteProcedureQuery<T1, T2, TEntity>(string procedure, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, map, param, transaction, buffered, "Id", timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -56,7 +62,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public List<TEntity> ExecuteProcedureQuery<T1, T2, T3, TEntity>(string procedure, Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, map, param, transaction, buffered, "Id", timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -74,7 +82,9 @@ public abstract partial class SqlQueryBase
     public List<TEntity> ExecuteProcedureQuery<T1, T2, T3, T4, TEntity>(string procedure, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, map, param, transaction, buffered, "Id", timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -93,7 +103,9 @@ public abstract partial class SqlQueryBase
     public List<TEntity> ExecuteProcedureQuery<T1, T2, T3, T4, T5, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, map, param, transaction, buffered, "Id", timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -113,7 +125,9 @@ public abstract partial class SqlQueryBase
     public List<TEntity> ExecuteProcedureQuery<T1, T2, T3, T4, T5, T6, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, map, param, transaction, buffered, "Id", timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     /// <summary>
@@ -134,7 +148,9 @@ public abstract partial class SqlQueryBase
     public List<TEntity> ExecuteProcedureQuery<T1, T2, T3, T4, T5, T6, T7, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQuery(procedure,
+            (conn, command, param, transaction) => conn.Query(command, map, param, transaction, buffered, "Id", timeout,
+                GetProcedureCommandType()).ToList());
     }
 
     #endregion
@@ -149,7 +165,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public Task<List<dynamic>> ExecuteProcedureQueryAsync(string procedure, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(new CommandDefinition(command, param,
+                transaction, timeout, GetProcedureCommandType()))).ToList());
     }
 
     /// <summary>
@@ -161,7 +179,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<TEntity>(string procedure, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync<TEntity>(new CommandDefinition(command,
+                param, transaction, timeout, GetProcedureCommandType()))).ToList());
     }
 
     /// <summary>
@@ -176,7 +196,9 @@ public abstract partial class SqlQueryBase
     /// <param name="buffered">是否缓存。默认值：true</param>
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, TEntity>(string procedure, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(command, map, param, transaction,
+                buffered, "Id", timeout, GetProcedureCommandType())).ToList());
     }
 
     /// <summary>
@@ -193,7 +215,9 @@ public abstract partial class SqlQueryBase
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, TEntity>(string procedure, Func<T1, T2, T3, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(command, map, param, transaction,
+                buffered, "Id", timeout, GetProcedureCommandType())).ToList());
     }
 
     /// <summary>
@@ -211,7 +235,9 @@ public abstract partial class SqlQueryBase
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, TEntity>(string procedure, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(command, map, param, transaction,
+                buffered, "Id", timeout, GetProcedureCommandType())).ToList());
     }
 
     /// <summary>
@@ -230,7 +256,9 @@ public abstract partial class SqlQueryBase
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(command, map, param, transaction,
+                buffered, "Id", timeout, GetProcedureCommandType())).ToList());
     }
 
     /// <summary>
@@ -250,7 +278,9 @@ public abstract partial class SqlQueryBase
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(command, map, param, transaction,
+                buffered, "Id", timeout, GetProcedureCommandType())).ToList());
     }
 
     /// <summary>
@@ -271,7 +301,9 @@ public abstract partial class SqlQueryBase
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(string procedure, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null,
         bool buffered = true)
     {
-        throw new NotImplementedException();
+        return InternalProcedureQueryAsync(procedure,
+            async (conn, command, param, transaction) => (await conn.QueryAsync(command, map, param, transaction,
+                buffered, "Id", timeout, GetProcedureCommandType())).ToList());
     }
 
     #endregion

@@ -12,6 +12,8 @@ public interface IEfCoreSqlQueryFactory
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="mode">连接模式</param>
+    /// <param name="dbKey">数据源标识</param>
     /// <returns>SQL 查询对象</returns>
-    ISqlQuery Create(UnitOfWorkBase unitOfWork, EfCoreSqlConnectionMode mode = EfCoreSqlConnectionMode.Shared);
+    ISqlQuery Create(UnitOfWorkBase unitOfWork, EfCoreSqlConnectionMode mode = EfCoreSqlConnectionMode.Shared,
+        string dbKey = null);
 }

@@ -37,7 +37,12 @@ public class SqlParam
     /// <summary>
     /// 参数值
     /// </summary>
-    public object Value { get; }
+    public object Value { get; set; }
+
+    /// <summary>
+    /// Provider 转换前的原始参数值
+    /// </summary>
+    public object OriginalValue { get; set; }
 
     /// <summary>
     /// 参数方向

@@ -59,16 +59,20 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     }
 
     /// <inheritdoc />
-    public ISqlQuery Create(UnitOfWorkBase unitOfWork, EfCoreSqlConnectionMode mode = EfCoreSqlConnectionMode.Shared)
+    public ISqlQuery Create(UnitOfWorkBase unitOfWork, EfCoreSqlConnectionMode mode = EfCoreSqlConnectionMode.Shared,
+        string dbKey = null)
     {
         if (unitOfWork == null)
             throw new ArgumentNullException(nameof(unitOfWork));
         var databaseType = ResolveDatabaseType(unitOfWork);
-        var query = CreateQuery(databaseType);
+        var dataSource = ResolveDataSource(databaseType, dbKey);
+        var query = CreateQuery(dataSource);
         BindEntityMetadata(query, unitOfWork);
+        ApplyDatabaseContext(query, dataSource);
         if (mode == EfCoreSqlConnectionMode.Independent)
         {
-            var connection = CreateIndependentConnection(databaseType, unitOfWork.Database.GetConnectionString());
+            var connectionString = ResolveIndependentConnectionString(unitOfWork, dataSource);
+            var connection = CreateIndependentConnection(databaseType, connectionString);
             var independentContext = GetExternalContext(query);
             independentContext.SetOwnedConnection(connection);
             independentContext.SetConnectionSource(SqlConnectionSource.DataSource);
@@ -79,6 +83,24 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         externalContext.SetConnectionSource(SqlConnectionSource.EntityFrameworkCore);
         externalContext.SetExternalTransactionResolver(() => unitOfWork.Database.CurrentTransaction?.GetDbTransaction());
         return query;
+    }
+
+    /// <summary>
+    /// 应用数据库上下文
+    /// </summary>
+    /// <param name="query">SQL 查询对象</param>
+    /// <param name="dataSource">数据源</param>
+    private static void ApplyDatabaseContext(ISqlQuery query, SqlDataSourceDescriptor dataSource)
+    {
+        if (query == null || dataSource == null)
+            return;
+        query.Config(options =>
+        {
+            var context = options.GetDatabaseContext() ?? new DatabaseContext();
+            context.DbKey = dataSource.Key;
+            context.DataSource = dataSource;
+            options.SetDatabaseContext(context);
+        });
     }
 
     /// <summary>
@@ -110,16 +132,55 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     }
 
     /// <summary>
-    /// 创建与 EF Core Provider 对应的 SQL 查询对象
+    /// 解析独立连接字符串
+    /// </summary>
+    /// <param name="unitOfWork">工作单元</param>
+    /// <param name="dataSource">数据源</param>
+    /// <returns>连接字符串</returns>
+    private static string ResolveIndependentConnectionString(UnitOfWorkBase unitOfWork,
+        SqlDataSourceDescriptor dataSource)
+    {
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false)
+            return dataSource.ConnectionString;
+        return unitOfWork.Database.GetConnectionString();
+    }
+
+    /// <summary>
+    /// 解析 SQL 数据源
     /// </summary>
     /// <param name="databaseType">数据库类型</param>
-    /// <returns>SQL 查询对象</returns>
-    private ISqlQuery CreateQuery(DatabaseType databaseType)
+    /// <param name="dbKey">数据源标识</param>
+    /// <returns>SQL 数据源</returns>
+    private SqlDataSourceDescriptor ResolveDataSource(DatabaseType databaseType, string dbKey)
     {
-        var dataSource = _metadataOptions.DataSources.DataSources.Values
-            .FirstOrDefault(t => t.DatabaseType == databaseType);
-        if (dataSource == null)
+        if (string.IsNullOrWhiteSpace(dbKey) == false)
+        {
+            if (_metadataOptions.DataSources.DataSources.TryGetValue(dbKey, out var dataSource) == false)
+                throw new InvalidOperationException($"未注册 SQL 数据源 {dbKey}。");
+            if (dataSource.DatabaseType != databaseType)
+                throw new InvalidOperationException($"SQL 数据源 {dbKey} 的数据库类型 {dataSource.DatabaseType} 与 EF Core Provider 对应的数据库类型 {databaseType} 不一致。");
+            return dataSource;
+        }
+
+        var matches = _metadataOptions.DataSources.DataSources.Values
+            .Where(t => t.DatabaseType == databaseType)
+            .ToList();
+        if (matches.Count == 0)
             throw new InvalidOperationException($"未注册数据库类型 {databaseType} 的 SQL 数据源。");
+        if (matches.Count > 1)
+            throw new InvalidOperationException($"检测到多个数据库类型 {databaseType} 的 SQL 数据源，请显式指定 dbKey。");
+        return matches[0];
+    }
+
+    /// <summary>
+    /// 创建与 EF Core Provider 对应的 SQL 查询对象
+    /// </summary>
+    /// <param name="dataSource">数据源</param>
+    /// <returns>SQL 查询对象</returns>
+    private ISqlQuery CreateQuery(SqlDataSourceDescriptor dataSource)
+    {
+        if (dataSource == null)
+            throw new InvalidOperationException("未解析到可用的 SQL 数据源。");
         return _queryFactory.Create<ISqlQuery>(dataSource.Key);
     }
 

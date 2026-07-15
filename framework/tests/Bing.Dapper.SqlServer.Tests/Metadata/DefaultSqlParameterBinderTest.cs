@@ -61,6 +61,29 @@ public class DefaultSqlParameterBinderTest
     }
 
     /// <summary>
+    /// 测试 - 输出参数访问器应读取执行完成后 ADO 参数的最终值。
+    /// </summary>
+    [Fact]
+    public void Bind_WithOutputParameter_ShouldExposeFinalValueThroughAccessor()
+    {
+        // Arrange
+        var binder = new DefaultSqlParameterBinder();
+        var map = new SqlParameterMap<Sample>().AddOutput("result", t => t.StringValue, DbType.String, 20);
+        var parameters = Assert.IsAssignableFrom<SqlMapper.IDynamicParameters>(binder.Bind(map));
+        var accessor = Assert.IsAssignableFrom<ISqlOutputParameterAccessor>(parameters);
+        var command = new FakeDbCommand();
+
+        // Act
+        parameters.AddParameters(command, null);
+        command.CreatedParameters.Single().Value = "done";
+
+        // Assert
+        accessor.GetValue<string>("@result").ShouldBe("done");
+        accessor.TryGetValue<string>(":result", out var value).ShouldBeTrue();
+        value.ShouldBe("done");
+    }
+
+    /// <summary>
     /// 测试样例
     /// </summary>
     private sealed class Sample

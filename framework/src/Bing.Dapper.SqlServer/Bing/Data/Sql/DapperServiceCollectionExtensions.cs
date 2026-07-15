@@ -74,6 +74,7 @@ public static partial class DapperServiceCollectionExtensions
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlServerDatabaseFactory().Create(connection).GetConnection());
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
@@ -148,6 +149,7 @@ public static partial class DapperServiceCollectionExtensions
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

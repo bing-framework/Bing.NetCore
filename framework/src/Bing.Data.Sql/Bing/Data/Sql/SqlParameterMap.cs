@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq.Expressions;
 using Bing.Expressions;
 using Bing.Extensions;
@@ -10,6 +11,11 @@ namespace Bing.Data.Sql;
 /// </summary>
 public interface ISqlParameterMap
 {
+    /// <summary>
+    /// 参数源对象
+    /// </summary>
+    object Source { get; }
+
     /// <summary>
     /// 获取参数映射项集合
     /// </summary>
@@ -51,6 +57,31 @@ public class SqlParameterMapItem
     /// 参数值是否已成功解析
     /// </summary>
     public bool ValueResolved { get; set; }
+
+    /// <summary>
+    /// 参数方向
+    /// </summary>
+    public ParameterDirection? Direction { get; set; }
+
+    /// <summary>
+    /// 参数类型
+    /// </summary>
+    public DbType? DbType { get; set; }
+
+    /// <summary>
+    /// 参数长度
+    /// </summary>
+    public int? Size { get; set; }
+
+    /// <summary>
+    /// 数值有效位数
+    /// </summary>
+    public byte? Precision { get; set; }
+
+    /// <summary>
+    /// 数值小数位数
+    /// </summary>
+    public byte? Scale { get; set; }
 }
 
 /// <summary>
@@ -69,6 +100,9 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
     /// 参数源对象
     /// </summary>
     private object _source;
+
+    /// <inheritdoc />
+    public object Source => _source;
 
     /// <summary>
     /// 添加参数映射
@@ -90,15 +124,30 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
         AddCore(name, property, value, true);
 
     /// <summary>
+    /// 添加输出参数映射
+    /// </summary>
+    /// <param name="name">参数名</param>
+    /// <param name="property">实体属性表达式</param>
+    /// <param name="dbType">参数类型</param>
+    /// <param name="size">参数长度</param>
+    /// <returns>Sql 参数映射</returns>
+    public SqlParameterMap<TEntity> AddOutput(string name, Expression<Func<TEntity, object>> property,
+        DbType? dbType = null, int? size = null) =>
+        AddCore(name, property, null, false, ParameterDirection.Output, dbType, size);
+
+    /// <summary>
     /// 添加参数映射
     /// </summary>
     /// <param name="name">参数名</param>
     /// <param name="property">实体属性表达式</param>
     /// <param name="value">参数值</param>
     /// <param name="hasExplicitValue">是否已显式提供参数值</param>
+    /// <param name="direction">参数方向</param>
+    /// <param name="dbType">参数类型</param>
+    /// <param name="size">参数长度</param>
     /// <returns>Sql 参数映射</returns>
     private SqlParameterMap<TEntity> AddCore(string name, Expression<Func<TEntity, object>> property, object value,
-        bool hasExplicitValue)
+        bool hasExplicitValue, ParameterDirection? direction = null, DbType? dbType = null, int? size = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentNullException(nameof(name));
@@ -110,7 +159,10 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
             PropertyName = Lambdas.GetLastName(property),
             Value = value,
             HasExplicitValue = hasExplicitValue,
-            ValueResolved = hasExplicitValue
+            ValueResolved = hasExplicitValue,
+            Direction = direction,
+            DbType = dbType,
+            Size = size
         };
         return this;
     }
@@ -156,7 +208,12 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
             PropertyName = item.PropertyName,
             Value = item.Value,
             HasExplicitValue = item.HasExplicitValue,
-            ValueResolved = item.ValueResolved
+            ValueResolved = item.ValueResolved,
+            Direction = item.Direction,
+            DbType = item.DbType,
+            Size = item.Size,
+            Precision = item.Precision,
+            Scale = item.Scale
         };
         if (item.HasExplicitValue)
             return result;
