@@ -6,13 +6,13 @@ namespace Bing.Data.Sql.Configs;
 public sealed class SqlDataSourceOptions
 {
     /// <summary>
+    /// 默认数据源标识
+    /// </summary>
+    public string DefaultDataSourceKey { get; set; } = "default";
+
+    /// <summary>
     /// 数据源集合
     /// </summary>
     public IDictionary<string, SqlDataSourceDescriptor> DataSources { get; } =
         new Dictionary<string, SqlDataSourceDescriptor>(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// 默认数据源键
-    /// </summary>
-    public string DefaultDataSourceKey { get; set; }
 }

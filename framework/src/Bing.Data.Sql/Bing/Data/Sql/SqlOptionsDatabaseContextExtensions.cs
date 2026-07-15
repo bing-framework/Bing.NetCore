@@ -53,14 +53,9 @@ public static class SqlOptionsDatabaseContextExtensions
         return new DatabaseContext
         {
             DbKey = context.DbKey,
-            DatabaseType = context.DatabaseType,
-            Role = context.Role,
             TenantId = context.TenantId,
-            ReadOnly = context.ReadOnly,
-            MappingVersion = context.MappingVersion,
             ReadPreference = context.ReadPreference,
             MappingProfile = context.MappingProfile,
-            DataSourceKey = context.DataSourceKey,
             DataSource = context.DataSource
         };
     }

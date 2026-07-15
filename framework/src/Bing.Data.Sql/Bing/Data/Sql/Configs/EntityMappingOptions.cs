@@ -1,5 +1,3 @@
-using Bing.Data.Enums;
-
 namespace Bing.Data.Sql.Configs;
 
 /// <summary>
@@ -13,19 +11,14 @@ public sealed class EntityMappingOptions
     public Type EntityType { get; set; }
 
     /// <summary>
-    /// 数据库键
+    /// 数据源标识
     /// </summary>
     public string DbKey { get; set; }
 
     /// <summary>
-    /// 数据库类型
+    /// 实体映射配置名称
     /// </summary>
-    public DatabaseType DatabaseType { get; set; }
-
-    /// <summary>
-    /// 数据库角色
-    /// </summary>
-    public DatabaseRole Role { get; set; } = DatabaseRole.Default;
+    public string MappingProfile { get; set; }
 
     /// <summary>
     /// 架构
@@ -41,11 +34,6 @@ public sealed class EntityMappingOptions
     /// 表路由键
     /// </summary>
     public string TableRouteKey { get; set; }
-
-    /// <summary>
-    /// 映射版本
-    /// </summary>
-    public string MappingVersion { get; set; }
 
     /// <summary>
     /// 列映射配置集合

@@ -23,8 +23,12 @@ public class MySqlRoutingAndMappingTest
         var sqlOptions = new SqlOptions().SetDatabaseContext(new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DatabaseType = DatabaseType.MySql,
+                ConnectionString = "Server=reporting;Database=test;"
+            }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
         var builder = new MySqlBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
@@ -50,8 +54,6 @@ public class MySqlRoutingAndMappingTest
         {
             EntityType = typeof(RoutingSample),
             DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting,
             TableName = "users_reporting",
             Columns =
             {

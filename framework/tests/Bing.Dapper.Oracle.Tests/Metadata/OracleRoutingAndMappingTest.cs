@@ -23,8 +23,12 @@ public class OracleRoutingAndMappingTest
         var sqlOptions = new SqlOptions().SetDatabaseContext(new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.Oracle,
-            Role = DatabaseRole.Reporting
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DatabaseType = DatabaseType.Oracle,
+                ConnectionString = "Data Source=reporting;"
+            }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
         var builder = new OracleBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
@@ -50,8 +54,6 @@ public class OracleRoutingAndMappingTest
         {
             EntityType = typeof(RoutingSample),
             DbKey = "reporting",
-            DatabaseType = DatabaseType.Oracle,
-            Role = DatabaseRole.Reporting,
             TableName = "users_reporting",
             Columns =
             {

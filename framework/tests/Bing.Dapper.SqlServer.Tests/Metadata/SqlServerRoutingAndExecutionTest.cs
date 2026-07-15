@@ -11,6 +11,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.Metadata;
@@ -28,12 +29,10 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var metadataOptions = new SqlMetadataOptions();
-        metadataOptions.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.SqlServer,
-            DatabaseRole.Reporting)] = new DatabaseDescriptor
+        metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
-            DbKey = "reporting",
+            Key = "reporting",
             DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Reporting,
             ConnectionString = "Server=reporting;Database=test;"
         };
         var services = CreateServices(metadataOptions);
@@ -43,8 +42,7 @@ public class SqlServerRoutingAndExecutionTest
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<InspectableSqlServerQuery>("reporting", DatabaseType.SqlServer,
-            DatabaseRole.Reporting);
+        var query = factory.Create<InspectableSqlServerQuery>("reporting");
 
         // Assert
         query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
@@ -63,7 +61,6 @@ public class SqlServerRoutingAndExecutionTest
         metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
             Key = "reporting",
-            DbKey = "reporting",
             DatabaseType = DatabaseType.SqlServer,
             ConnectionString = "Server=reporting;Database=test;",
             MappingProfile = "reporting-v2"
@@ -84,6 +81,92 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - 数据源注册应支持从 IConfiguration.GetConnectionString 读取连接字符串。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WithConfiguration_ShouldUseConnectionStringSection()
+    {
+        // Arrange
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["ConnectionStrings:reporting"] = "Server=config;Database=test;"
+            })
+            .Build();
+        var services = CreateServices();
+        services.AddSqlDataSource(configuration, "reporting", DatabaseType.SqlServer);
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=default;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+
+        // Assert
+        query.CurrentOptions.ConnectionString.ShouldBe("Server=config;Database=test;");
+    }
+
+    /// <summary>
+    /// 测试 - 命名连接字符串不存在时不应回退到模板连接字符串。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenNamedConnectionStringMissing_ShouldThrow()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionStringName = "ReportingConnection"
+        };
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=template;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            factory.Create<InspectableSqlServerQuery>("reporting"));
+
+        // Assert
+        exception.Message.ShouldContain("reporting");
+        exception.Message.ShouldContain("ReportingConnection");
+    }
+
+    /// <summary>
+    /// 测试 - 命名连接字符串未命中时不应回退到默认连接字符串。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenNamedConnectionStringNotConfigured_ShouldNotUseDefaultConnection()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionStringName = "ReportingConnection"
+        };
+        var services = CreateServices(metadataOptions);
+        services.AddSingleton(new ConnectionStringCollection { Default = "Server=default;Database=test;" });
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=template;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            factory.Create<InspectableSqlServerQuery>("reporting"));
+
+        // Assert
+        exception.Message.ShouldContain("ReportingConnection");
+        exception.Message.ShouldNotContain("Server=default");
+    }
+
+    /// <summary>
     /// 测试 - UsePrimary 应按数据源配置切换到主库连接字符串。
     /// </summary>
     [Fact]
@@ -94,14 +177,12 @@ public class SqlServerRoutingAndExecutionTest
         metadataOptions.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
         {
             Key = "default",
-            DbKey = "default",
             DatabaseType = DatabaseType.SqlServer,
             ConnectionString = "Server=primary;Database=test;"
         };
         metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
             Key = "reporting",
-            DbKey = "reporting",
             DatabaseType = DatabaseType.SqlServer,
             ConnectionString = "Server=reporting;Database=test;",
             PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
@@ -131,12 +212,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         CountedSqlServerQuery.CreatedCount = 0;
         var metadataOptions = new SqlMetadataOptions();
-        metadataOptions.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.SqlServer,
-            DatabaseRole.Reporting)] = new DatabaseDescriptor
+        metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
-            DbKey = "reporting",
+            Key = "reporting",
             DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Reporting,
             ConnectionString = "Server=reporting;Database=test;"
         };
         var services = CreateServices(metadataOptions);
@@ -146,8 +225,7 @@ public class SqlServerRoutingAndExecutionTest
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<ICountedSqlServerQuery>("reporting", DatabaseType.SqlServer,
-            DatabaseRole.Reporting);
+        var query = factory.Create<ICountedSqlServerQuery>("reporting");
 
         // Assert
         query.ShouldBeOfType<CountedSqlServerQuery>();
@@ -170,13 +248,16 @@ public class SqlServerRoutingAndExecutionTest
         var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
 
         // Act
-        var query = factory.Create<InspectableSqlServerQuery>("reporting", DatabaseType.SqlServer,
-            DatabaseRole.Reporting);
+        var query = factory.Create<InspectableSqlServerQuery>("reporting");
         accessor.Current = new DatabaseContext
         {
             DbKey = "default",
-            DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Default
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "default",
+                DatabaseType = DatabaseType.SqlServer,
+                ConnectionString = "Server=default;Database=test;"
+            }
         };
         query.From<MappedSample>("u").Where<MappedSample>(t => t.Name, "abc");
 
@@ -238,7 +319,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试 - Dapper 执行诊断应包含增强参数元数据。
+    /// 测试 - SQL 诊断应只包含一个标准化参数快照。
     /// </summary>
     [Fact]
     public void ExecuteSql_WithParameterMap_ShouldPublishParameterMetadataDiagnostics()
@@ -257,15 +338,16 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         message.ShouldNotBeNull();
-        message.RawParameters.ShouldBeOfType<SqlParameterMap<MappedSample>>();
-        message.BoundParameters.ShouldNotBeNull();
-        message.SqlParametersMetadata.Count.ShouldBe(2);
-        message.ParameterSnapshot.ShouldNotBeNull();
-        message.ParameterSnapshot.Items.Count.ShouldBe(2);
+        message.Parameters.ShouldNotBeNull();
+        message.Parameters.OriginalParameterType.ShouldBe(typeof(SqlParameterMap<MappedSample>).FullName);
+        message.Parameters.IsMetadataBound.ShouldBeTrue();
+        message.Parameters.Items.Count.ShouldBe(2);
         message.Connection.ShouldNotBeNull();
         message.Connection.Database.ShouldBe("test");
+        message.Connection.Source.ShouldBe(SqlConnectionSource.External);
+        message.Connection.Ownership.ShouldBe(SqlResourceOwnership.External);
         message.Transaction.ShouldNotBeNull();
-        var name = message.SqlParametersMetadata.Single(t => t.Name == "name");
+        var name = message.Parameters.Items.Single(t => t.Name == "name");
         name.Value.ShouldBeNull();
         name.OriginalValue.ShouldBeNull();
         name.PropertyName.ShouldBe(nameof(MappedSample.Name));
@@ -318,6 +400,50 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：主库短事务策略执行成功后应提交内部事务并关闭内部连接。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenPrimaryReadTransactionSucceeds_ShouldCommitAndCloseOwnedResources()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        var result = executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" });
+
+        // Assert
+        result.ShouldBe(1);
+        connection.LastTransaction.ShouldNotBeNull();
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.State.ShouldBe(ConnectionState.Closed);
+    }
+
+    /// <summary>
+    /// 测试目的：主库短事务策略执行失败后应回滚内部事务并关闭内部连接。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenPrimaryReadTransactionFails_ShouldRollbackAndCloseOwnedResources()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ThrowOnExecute = true };
+        var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        Should.Throw<InvalidOperationException>(() =>
+            executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" }));
+
+        // Assert
+        connection.LastTransaction.ShouldNotBeNull();
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+        connection.State.ShouldBe(ConnectionState.Closed);
+    }
+
+    /// <summary>
     /// 测试 - 独立 SQL 事务作用域提交时应提交作用域拥有的事务。
     /// </summary>
     [Fact]
@@ -332,7 +458,7 @@ public class SqlServerRoutingAndExecutionTest
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
-        using var scope = scopeFactory.Create();
+        using var scope = scopeFactory.Begin();
         var executor = scope.CreateExecutor();
         executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" });
         scope.Commit();
@@ -358,7 +484,7 @@ public class SqlServerRoutingAndExecutionTest
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
-        using (scopeFactory.Create())
+        using (scopeFactory.Begin())
         {
         }
 
@@ -366,6 +492,31 @@ public class SqlServerRoutingAndExecutionTest
         connection.LastTransaction.ShouldNotBeNull();
         connection.LastTransaction.CommitCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：异步事务作用域应提供事务标识，并在异步提交后释放其拥有的事务。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_BeginAsyncAndCommitAsync_ShouldCommitOwnedTransaction()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
+
+        // Act
+        await using var scope = await scopeFactory.BeginAsync();
+        await scope.CommitAsync();
+
+        // Assert
+        scope.TransactionId.ShouldNotBeNullOrWhiteSpace();
+        connection.LastTransaction.ShouldNotBeNull();
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
     /// <summary>
@@ -430,20 +581,22 @@ public class SqlServerRoutingAndExecutionTest
     private static SqlMetadataOptions CreateRoutingMetadataOptions()
     {
         var options = new SqlMetadataOptions();
-        options.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.SqlServer,
-            DatabaseRole.Reporting)] = new DatabaseDescriptor
+        options.DataSources.DataSources["default"] = new SqlDataSourceDescriptor
         {
-            DbKey = "reporting",
+            Key = "default",
             DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Reporting,
+            ConnectionString = "Server=default;Database=test;"
+        };
+        options.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
+        {
+            Key = "reporting",
+            DatabaseType = DatabaseType.SqlServer,
             ConnectionString = "Server=reporting;Database=test;"
         };
         options.EntityMappings.Add(new EntityMappingOptions
         {
             EntityType = typeof(MappedSample),
             DbKey = "default",
-            DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Default,
             TableName = "Users",
             Columns =
             {
@@ -458,8 +611,6 @@ public class SqlServerRoutingAndExecutionTest
         {
             EntityType = typeof(MappedSample),
             DbKey = "reporting",
-            DatabaseType = DatabaseType.SqlServer,
-            Role = DatabaseRole.Reporting,
             TableName = "Users_Reporting",
             Columns =
             {
@@ -502,11 +653,56 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建拥有连接的执行器
+    /// </summary>
+    /// <param name="connection">数据库连接</param>
+    /// <returns>执行器</returns>
+    private static InspectableSqlServerExecutor CreateOwnedExecutor(CaptureDbConnection connection)
+    {
+        var services = CreateServices();
+        services.AddSqlServerSqlExecutor<InspectableSqlServerExecutor, InspectableSqlServerExecutor>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<SqlOptions<InspectableSqlServerExecutor>>();
+        return new InspectableSqlServerExecutor(provider, options, new ConnectionDatabase(connection));
+    }
+
+    /// <summary>
+    /// 配置主库短事务策略
+    /// </summary>
+    /// <param name="executor">SQL 执行器</param>
+    private static void ConfigurePrimaryReadTransaction(InspectableSqlServerExecutor executor)
+    {
+        executor.Config(options => options.SetDatabaseContext(new DatabaseContext
+        {
+            ReadPreference = SqlReadPreference.Primary,
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "primary",
+                DatabaseType = DatabaseType.SqlServer,
+                PrimaryReadStrategy = PrimaryReadStrategy.Transaction
+            }
+        }));
+    }
+
+    /// <summary>
     /// 测试数据库
     /// </summary>
     private sealed class TestDatabase : IDatabase
     {
         public IDbConnection GetConnection() => null;
+    }
+
+    /// <summary>
+    /// 返回指定连接的测试数据库
+    /// </summary>
+    private sealed class ConnectionDatabase : IDatabase
+    {
+        private readonly IDbConnection _connection;
+
+        public ConnectionDatabase(IDbConnection connection) => _connection = connection;
+
+        public IDbConnection GetConnection() => _connection;
     }
 
     /// <summary>

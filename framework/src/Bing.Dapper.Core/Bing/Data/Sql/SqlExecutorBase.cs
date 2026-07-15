@@ -42,8 +42,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
             var parameterMetadata = GetSqlParameterDiagnostics(param);
-            message = ExecuteBefore(sql, param, connection, dbParameters, parameterMetadata);
-            result = connection.Execute(sql, dbParameters, GetTransaction(), timeout);
+            message = ExecuteBefore(sql, param, connection, parameterMetadata);
+            result = connection.Execute(sql, dbParameters, GetQueryTransaction(), timeout);
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
@@ -81,8 +82,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
             var parameterMetadata = GetSqlParameterDiagnostics(param);
-            message = ExecuteBefore(sql, param, connection, dbParameters, parameterMetadata);
-            result = await connection.ExecuteAsync(sql, dbParameters, GetTransaction(), timeout);
+            message = ExecuteBefore(sql, param, connection, parameterMetadata);
+            result = await connection.ExecuteAsync(sql, dbParameters, GetQueryTransaction(), timeout);
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
@@ -120,8 +122,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
             var parameterMetadata = GetSqlParameterDiagnostics(param);
-            message = ExecuteBefore(procedure, param, connection, dbParameters, parameterMetadata);
-            result = connection.Execute(procedure, dbParameters, GetTransaction(), timeout, GetProcedureCommandType());
+            message = ExecuteBefore(procedure, param, connection, parameterMetadata);
+            result = connection.Execute(procedure, dbParameters, GetQueryTransaction(), timeout, GetProcedureCommandType());
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
@@ -159,8 +162,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var connection = GetConnection();
             var dbParameters = GetDbParameters(param);
             var parameterMetadata = GetSqlParameterDiagnostics(param);
-            message = ExecuteBefore(procedure, param, connection, dbParameters, parameterMetadata);
-            result = await connection.ExecuteAsync(procedure, dbParameters, GetTransaction(), timeout, GetProcedureCommandType());
+            message = ExecuteBefore(procedure, param, connection, parameterMetadata);
+            result = await connection.ExecuteAsync(procedure, dbParameters, GetQueryTransaction(), timeout, GetProcedureCommandType());
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }

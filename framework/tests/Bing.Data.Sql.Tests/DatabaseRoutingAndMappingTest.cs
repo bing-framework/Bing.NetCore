@@ -20,65 +20,49 @@ public class DatabaseRoutingAndMappingTest
     {
         // Arrange
         var accessor = new AsyncLocalDatabaseContextAccessor();
-        var manager = new DatabaseScopeManager(accessor, new SqlMetadataOptions());
+        var options = CreateDataSourceOptions();
+        var manager = new DatabaseScopeManager(accessor, options);
 
         // Act
-        using (manager.Use("default", DatabaseType.MySql))
+        using (manager.Use("default"))
         {
             accessor.Current.ShouldNotBeNull();
             accessor.Current.DbKey.ShouldBe("default");
-            accessor.Current.DatabaseType.ShouldBe(DatabaseType.MySql);
+            accessor.Current.DataSource.DatabaseType.ShouldBe(DatabaseType.MySql);
 
-            using (manager.Use("reporting", DatabaseType.PgSql, DatabaseRole.Reporting))
+            using (manager.Use("reporting"))
             {
                 accessor.Current.DbKey.ShouldBe("reporting");
-                accessor.Current.DatabaseType.ShouldBe(DatabaseType.PgSql);
-                accessor.Current.Role.ShouldBe(DatabaseRole.Reporting);
+                accessor.Current.DataSource.DatabaseType.ShouldBe(DatabaseType.PgSql);
             }
 
             // Assert
             accessor.Current.ShouldNotBeNull();
             accessor.Current.DbKey.ShouldBe("default");
-            accessor.Current.DatabaseType.ShouldBe(DatabaseType.MySql);
-            accessor.Current.Role.ShouldBe(DatabaseRole.Default);
+            accessor.Current.DataSource.DatabaseType.ShouldBe(DatabaseType.MySql);
         }
 
         accessor.Current.ShouldBeNull();
     }
 
     /// <summary>
-    /// 测试 - 数据库描述解析器应按 DbKey、DatabaseType 与 Role 命中配置。
+    /// 测试 - 数据源解析器应按 DbKey 命中配置。
     /// </summary>
     [Fact]
-    public void DatabaseDescriptorResolver_ShouldResolveByDbKeyDatabaseTypeAndRole()
+    public void SqlDataSourceResolver_ShouldResolveByDbKey()
     {
         // Arrange
-        var options = new SqlMetadataOptions();
-        options.Databases[SqlMetadataOptions.GetDatabaseDescriptorKey("reporting", DatabaseType.MySql,
-            DatabaseRole.Reporting)] = new DatabaseDescriptor
-        {
-            DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting,
-            ConnectionString = "Server=reporting;",
-            ReadOnly = true
-        };
-        var resolver = new DefaultDatabaseDescriptorResolver(options);
+        var options = CreateDataSourceOptions();
+        var resolver = new DefaultSqlDataSourceResolver(options);
 
         // Act
-        var descriptor = resolver.Resolve(new DatabaseContext
-        {
-            DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting
-        });
+        var descriptor = resolver.Resolve("reporting");
 
         // Assert
-        descriptor.DbKey.ShouldBe("reporting");
-        descriptor.DatabaseType.ShouldBe(DatabaseType.MySql);
-        descriptor.Role.ShouldBe(DatabaseRole.Reporting);
+        descriptor.Key.ShouldBe("reporting");
+        descriptor.DatabaseType.ShouldBe(DatabaseType.PgSql);
         descriptor.ConnectionString.ShouldBe("Server=reporting;");
-        descriptor.ReadOnly.ShouldBeTrue();
+        descriptor.IsReadOnly.ShouldBeTrue();
     }
 
     /// <summary>
@@ -95,14 +79,12 @@ public class DatabaseRoutingAndMappingTest
         var defaultMapping = resolver.Resolve(typeof(Sample), new DatabaseContext
         {
             DbKey = "default",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Default
+            DataSource = CreateDataSource("default", DatabaseType.MySql)
         });
         var reportingMapping = resolver.Resolve(typeof(Sample), new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting
+            DataSource = CreateDataSource("reporting", DatabaseType.PgSql)
         });
 
         // Assert
@@ -124,14 +106,12 @@ public class DatabaseRoutingAndMappingTest
         var defaultContext = new DatabaseContext
         {
             DbKey = "default",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Default
+            DataSource = CreateDataSource("default", DatabaseType.MySql)
         };
         var reportingContext = new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting
+            DataSource = CreateDataSource("reporting", DatabaseType.PgSql)
         };
 
         // Act
@@ -145,6 +125,52 @@ public class DatabaseRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 测试 - 不同 MappingProfile 应使用独立映射缓存。
+    /// </summary>
+    [Fact]
+    public void EntityMappingResolver_DifferentMappingProfiles_ShouldUseIndependentCache()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+        options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(Sample),
+            DbKey = "default",
+            MappingProfile = "read",
+            TableName = "users_read"
+        });
+        options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(Sample),
+            DbKey = "default",
+            MappingProfile = "write",
+            TableName = "users_write"
+        });
+        var resolver = new DefaultEntityMappingResolver(new TestEntityMetadata(), null, options);
+        var readContext = new DatabaseContext
+        {
+            DbKey = "default",
+            MappingProfile = "read",
+            DataSource = CreateDataSource("default", DatabaseType.MySql)
+        };
+        var writeContext = new DatabaseContext
+        {
+            DbKey = "default",
+            MappingProfile = "write",
+            DataSource = CreateDataSource("default", DatabaseType.MySql)
+        };
+
+        // Act
+        var readMapping = resolver.Resolve(typeof(Sample), readContext);
+        var writeMapping = resolver.Resolve(typeof(Sample), writeContext);
+
+        // Assert
+        readMapping.TableName.ShouldBe("users_read");
+        writeMapping.TableName.ShouldBe("users_write");
+        ReferenceEquals(readMapping, writeMapping).ShouldBeFalse();
+    }
+
+    /// <summary>
     /// 测试 - Lambda Where 在不同数据库上下文下应拼接不同列名。
     /// </summary>
     [Fact]
@@ -154,12 +180,13 @@ public class DatabaseRoutingAndMappingTest
         var metadata = new TestEntityMetadata();
         var accessor = new AsyncLocalDatabaseContextAccessor();
         var options = CreateMetadataOptions();
+        AddDataSources(options);
         var resolver = new DefaultEntityMappingResolver(metadata, accessor, options);
         var scopeManager = new DatabaseScopeManager(accessor, options);
 
         // Act
         string defaultCondition;
-        using (scopeManager.Use("default", DatabaseType.MySql))
+        using (scopeManager.Use("default"))
         {
             var builder = new TestSqlBuilder(TestDialect.Instance, metadata, entityMappingResolver: resolver,
                 databaseContextAccessor: accessor, metadataOptions: options);
@@ -168,7 +195,7 @@ public class DatabaseRoutingAndMappingTest
         }
 
         string reportingCondition;
-        using (scopeManager.Use("reporting", DatabaseType.MySql, DatabaseRole.Reporting))
+        using (scopeManager.Use("reporting"))
         {
             var builder = new TestSqlBuilder(TestDialect.Instance, metadata, entityMappingResolver: resolver,
                 databaseContextAccessor: accessor, metadataOptions: options);
@@ -195,14 +222,12 @@ public class DatabaseRoutingAndMappingTest
         var sqlOptions = new SqlOptions().SetDatabaseContext(new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting
+            DataSource = CreateDataSource("reporting", DatabaseType.PgSql)
         });
         accessor.Current = new DatabaseContext
         {
             DbKey = "default",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Default
+            DataSource = CreateDataSource("default", DatabaseType.MySql)
         };
         var builder = new TestSqlBuilder(TestDialect.Instance, metadata, entityMappingResolver: resolver,
             databaseContextAccessor: accessor, metadataOptions: options, options: sqlOptions);
@@ -225,8 +250,6 @@ public class DatabaseRoutingAndMappingTest
         {
             EntityType = typeof(Sample),
             DbKey = "default",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Default,
             TableName = "users",
             Columns =
             {
@@ -241,8 +264,6 @@ public class DatabaseRoutingAndMappingTest
         {
             EntityType = typeof(Sample),
             DbKey = "reporting",
-            DatabaseType = DatabaseType.MySql,
-            Role = DatabaseRole.Reporting,
             TableName = "users_reporting",
             Columns =
             {
@@ -255,4 +276,42 @@ public class DatabaseRoutingAndMappingTest
         });
         return options;
     }
+
+    /// <summary>
+    /// 创建数据源配置。
+    /// </summary>
+    /// <returns>Sql 元数据配置。</returns>
+    private static SqlMetadataOptions CreateDataSourceOptions()
+    {
+        var options = new SqlMetadataOptions();
+        AddDataSources(options);
+        return options;
+    }
+
+    /// <summary>
+    /// 添加数据源配置。
+    /// </summary>
+    /// <param name="options">Sql 元数据配置。</param>
+    private static void AddDataSources(SqlMetadataOptions options)
+    {
+        options.DataSources.DataSources["default"] = CreateDataSource("default", DatabaseType.MySql, "Server=default;");
+        options.DataSources.DataSources["reporting"] = CreateDataSource("reporting", DatabaseType.PgSql, "Server=reporting;", true);
+    }
+
+    /// <summary>
+    /// 创建数据源描述。
+    /// </summary>
+    /// <param name="key">数据源标识。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <param name="connectionString">连接字符串。</param>
+    /// <param name="isReadOnly">是否只读。</param>
+    /// <returns>数据源描述。</returns>
+    private static SqlDataSourceDescriptor CreateDataSource(string key, DatabaseType databaseType,
+        string connectionString = "Server=test;", bool isReadOnly = false) => new()
+    {
+        Key = key,
+        DatabaseType = databaseType,
+        ConnectionString = connectionString,
+        IsReadOnly = isReadOnly
+    };
 }

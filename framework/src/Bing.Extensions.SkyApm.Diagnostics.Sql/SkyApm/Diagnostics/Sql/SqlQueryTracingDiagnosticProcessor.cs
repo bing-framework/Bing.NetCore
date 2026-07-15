@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Extensions;
-using Bing.Utils.Json;
 using SkyApm.Common;
 using SkyApm.Config;
 using SkyApm.Tracing;
@@ -73,14 +72,22 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         if (message == null || string.IsNullOrWhiteSpace(message.Sql))
             return;
-        var parameterJson = (message.ParameterSnapshot?.Items ?? message.SqlParametersMetadata)?.ToJson() ?? message.Parameters.ToJson();
-        var newLine = Environment.NewLine;
         var context = CreateLocalSegmentContext(message.Sql);
-        context.Span.AddTag(Common.Tags.DB_INSTANCE, message.Connection?.Database ?? message.Database);
+        context.Span.AddTag(Common.Tags.DB_INSTANCE, message.Connection?.Database);
         context.Span.AddTag(Common.Tags.DB_STATEMENT, message.Sql);
         context.Span.AddTag(Common.Tags.DB_BIND_VARIABLES, BuildParameterVariables(message));
+        context.Span.AddTag("db.key", message.Connection?.DbKey);
+        context.Span.AddTag("db.readonly", message.Connection?.IsReadOnly.ToString());
+        context.Span.AddTag("db.connection.source", message.Connection?.Source.ToString());
+        context.Span.AddTag("db.connection.ownership", message.Connection?.Ownership.ToString());
+        if (message.Transaction?.HasTransaction == true)
+        {
+            context.Span.AddTag("db.transaction.id", message.Transaction.TransactionId);
+            context.Span.AddTag("db.transaction.ownership", message.Transaction.Ownership.ToString());
+            context.Span.AddTag("db.transaction.primary_read", message.Transaction.IsPrimaryReadTransaction.ToString());
+        }
         context.Span.AddLog(LogEvent.Event($"{SqlQueryDiagnosticListenerNames.BeforeExecute.Split(' ').Last()}: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}"));
-        context.Span.AddLog(LogEvent.Message($"sql: {message.Sql}{newLine}parameters: {parameterJson}{newLine}databaseType: {message.DatabaseType}{newLine}database: {message.Connection?.Database ?? message.Database}{newLine}timestamp: {message.Timestamp}"));
+        context.Span.AddLog(LogEvent.Message($"databaseType: {message.Connection?.DatabaseType}{Environment.NewLine}database: {message.Connection?.Database}{Environment.NewLine}timestamp: {message.Timestamp}"));
     }
 
     /// <summary>
@@ -132,19 +139,8 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// <param name="message">诊断消息</param>
     private string BuildParameterVariables(DiagnosticsMessage message)
     {
-        if (message?.ParameterSnapshot?.Items != null && message.ParameterSnapshot.Items.Count > 0)
-            return FormatParameters(message.ParameterSnapshot.Items, _logParameterValue);
-        return BuildParameterVariables(message?.Parameters);
-    }
-
-    /// <summary>
-    /// 构建参数变量
-    /// </summary>
-    /// <param name="parameters">参数</param>
-    private string BuildParameterVariables(object parameters)
-    {
-        if (parameters is IReadOnlyDictionary<string, object> dict)
-            return FormatParameters(dict, _logParameterValue);
+        if (message?.Parameters?.Items != null && message.Parameters.Items.Count > 0)
+            return FormatParameters(message.Parameters.Items, _logParameterValue);
         return string.Empty;
     }
 
@@ -156,17 +152,6 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     private static string FormatParameters(IEnumerable<SqlParameterDiagnosticInfo> parameters, bool logParameterValues)
     {
         return parameters.Select(x => FormatParameter(x.Name, logParameterValues && x.IsSensitive == false ? x.Value : "?"))
-            .Join();
-    }
-
-    /// <summary>
-    /// 格式化参数
-    /// </summary>
-    /// <param name="parameters">参数字典</param>
-    /// <param name="logParameterValues">是否记录参数值</param>
-    private static string FormatParameters(IReadOnlyDictionary<string, object> parameters, bool logParameterValues)
-    {
-        return parameters.Select(x => FormatParameter(x.Key, logParameterValues ? x.Value : "?"))
             .Join();
     }
 

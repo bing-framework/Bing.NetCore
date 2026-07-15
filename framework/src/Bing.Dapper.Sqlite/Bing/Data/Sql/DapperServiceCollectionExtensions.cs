@@ -73,6 +73,8 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
+        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteDatabaseFactory().Create(connection).GetConnection());
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -145,6 +147,7 @@ public static partial class DapperServiceCollectionExtensions
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

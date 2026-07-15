@@ -3,8 +3,13 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 事务作用域
 /// </summary>
-public interface ISqlTransactionScope : IDisposable
+public interface ISqlTransactionScope : IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    /// 事务标识
+    /// </summary>
+    string TransactionId { get; }
+
     /// <summary>
     /// 数据库键
     /// </summary>
@@ -38,7 +43,21 @@ public interface ISqlTransactionScope : IDisposable
     void Commit();
 
     /// <summary>
+    /// 异步提交事务
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>任务</returns>
+    Task CommitAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 回滚事务
     /// </summary>
     void Rollback();
+
+    /// <summary>
+    /// 异步回滚事务
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>任务</returns>
+    Task RollbackAsync(CancellationToken cancellationToken = default);
 }

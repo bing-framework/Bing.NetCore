@@ -23,8 +23,12 @@ public class PostgreSqlRoutingAndMappingTest
         var sqlOptions = new SqlOptions().SetDatabaseContext(new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.PgSql,
-            Role = DatabaseRole.Reporting
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DatabaseType = DatabaseType.PgSql,
+                ConnectionString = "Host=reporting;Database=test;"
+            }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
         var builder = new PostgreSqlBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
@@ -50,8 +54,6 @@ public class PostgreSqlRoutingAndMappingTest
         {
             EntityType = typeof(RoutingSample),
             DbKey = "reporting",
-            DatabaseType = DatabaseType.PgSql,
-            Role = DatabaseRole.Reporting,
             TableName = "users_reporting",
             Columns =
             {

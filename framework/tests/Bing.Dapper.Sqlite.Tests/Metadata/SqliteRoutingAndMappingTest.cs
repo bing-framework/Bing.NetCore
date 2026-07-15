@@ -23,8 +23,12 @@ public class SqliteRoutingAndMappingTest
         var sqlOptions = new SqlOptions().SetDatabaseContext(new DatabaseContext
         {
             DbKey = "reporting",
-            DatabaseType = DatabaseType.Sqlite,
-            Role = DatabaseRole.Reporting
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DatabaseType = DatabaseType.Sqlite,
+                ConnectionString = "Data Source=reporting.db"
+            }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
         var builder = new SqliteBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
@@ -50,8 +54,6 @@ public class SqliteRoutingAndMappingTest
         {
             EntityType = typeof(RoutingSample),
             DbKey = "reporting",
-            DatabaseType = DatabaseType.Sqlite,
-            Role = DatabaseRole.Reporting,
             TableName = "users_reporting",
             Columns =
             {

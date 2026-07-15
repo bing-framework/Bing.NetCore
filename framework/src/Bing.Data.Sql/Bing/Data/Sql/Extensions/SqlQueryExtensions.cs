@@ -56,10 +56,7 @@ public static partial class SqlQueryExtensions
         source.CheckNull(nameof(source));
         source.Config(options =>
         {
-            var context = options.GetDatabaseContext() ?? new DatabaseContext
-            {
-                DatabaseType = options.DatabaseType
-            };
+            var context = options.GetDatabaseContext() ?? new DatabaseContext();
             context.ReadPreference = readPreference;
             options.SetDatabaseContext(context);
         });

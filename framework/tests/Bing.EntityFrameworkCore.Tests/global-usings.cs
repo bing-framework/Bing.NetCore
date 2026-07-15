@@ -1,0 +1,11 @@
+global using System;
+global using System.Data;
+global using Bing.Data;
+global using Bing.Data.Sql;
+global using Bing.Data.Sql.Database;
+global using Bing.Datas.EntityFramework.Core;
+global using Microsoft.Data.Sqlite;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Storage;
+global using Microsoft.Extensions.DependencyInjection;
+global using Xunit;

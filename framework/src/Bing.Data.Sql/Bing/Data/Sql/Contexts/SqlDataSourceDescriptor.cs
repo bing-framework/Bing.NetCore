@@ -8,22 +8,17 @@ namespace Bing.Data.Sql;
 public sealed class SqlDataSourceDescriptor
 {
     /// <summary>
-    /// 数据源键
+    /// 数据源标识
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// 业务数据库标识
-    /// </summary>
-    public string DbKey { get; set; }
-
-    /// <summary>
-    /// 数据库类型
+    /// 数据库类型，仅供框架内部使用
     /// </summary>
     public DatabaseType DatabaseType { get; set; }
 
     /// <summary>
-    /// 连接字符串名称
+    /// 连接字符串配置名称
     /// </summary>
     public string ConnectionStringName { get; set; }
 
@@ -33,22 +28,22 @@ public sealed class SqlDataSourceDescriptor
     public string ConnectionString { get; set; }
 
     /// <summary>
-    /// 是否只读
+    /// 是否为只读数据源标识。该属性仅描述用途，不构成数据库权限约束。
     /// </summary>
     public bool IsReadOnly { get; set; }
 
     /// <summary>
-    /// 映射配置标识
+    /// 实体映射配置名称
     /// </summary>
     public string MappingProfile { get; set; }
 
     /// <summary>
-    /// 主库读取策略
+    /// 强制读取主库时采用的策略
     /// </summary>
     public PrimaryReadStrategy PrimaryReadStrategy { get; set; } = PrimaryReadStrategy.None;
 
     /// <summary>
-    /// 主库数据源键
+    /// 主库数据源标识
     /// </summary>
     public string PrimaryDataSourceKey { get; set; }
 }

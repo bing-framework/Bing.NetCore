@@ -1,4 +1,5 @@
-﻿using Bing.Data.Sql.Builders;
+﻿using Bing.Data;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -17,7 +18,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql查询对象基类
 /// </summary>
-public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager
 {
     #region 字段
 
@@ -47,6 +48,16 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     private IDbTransaction _transaction;
 
     /// <summary>
+    /// 当前事务诊断标识
+    /// </summary>
+    private string _transactionId;
+
+    /// <summary>
+    /// 是否已为主库读取创建内部事务。
+    /// </summary>
+    private bool _primaryReadTransactionStarted;
+
+    /// <summary>
     /// 事务所有权
     /// </summary>
     private SqlResourceOwnership _transactionOwnership = SqlResourceOwnership.Owned;
@@ -60,6 +71,26 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// Sql 参数绑定器
     /// </summary>
     private ISqlParameterBinder _sqlParameterBinder;
+
+    /// <summary>
+    /// 外部实体元数据
+    /// </summary>
+    private IEntityMetadata _entityMetadata;
+
+    /// <summary>
+    /// 外部实体映射解析器
+    /// </summary>
+    private IEntityMappingResolver _entityMappingResolver;
+
+    /// <summary>
+    /// 外部事务解析器
+    /// </summary>
+    private Func<IDbTransaction> _externalTransactionResolver;
+
+    /// <summary>
+    /// 连接来源
+    /// </summary>
+    private SqlConnectionSource _connectionSource;
 
     #endregion
 
@@ -122,6 +153,22 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// Sql配置
     /// </summary>
     protected SqlOptions Options { get; set; }
+
+    /// <summary>
+    /// 实体元数据
+    /// </summary>
+    protected IEntityMetadata EntityMetadata => _entityMetadata ?? ServiceProvider.GetService<IEntityMetadata>();
+
+    /// <summary>
+    /// 实体映射解析器
+    /// </summary>
+    protected IEntityMappingResolver EntityMappingResolver =>
+        _entityMappingResolver ?? ServiceProvider.GetService<IEntityMappingResolver>();
+
+    /// <summary>
+    /// 连接来源
+    /// </summary>
+    protected SqlConnectionSource ConnectionSource => _connectionSource;
 
     /// <summary>
     /// 是否启用调试SQL
@@ -242,8 +289,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <returns>Sql 参数绑定器</returns>
     protected virtual ISqlParameterBinder CreateSqlParameterBinder() =>
         ServiceProvider.GetService<ISqlParameterBinder>() ?? new DefaultSqlParameterBinder(
-            ServiceProvider.GetService<IEntityMetadata>(),
-            ServiceProvider.GetService<IEntityMappingResolver>(),
+            EntityMetadata,
+            EntityMappingResolver,
             ServiceProvider.GetService<IDatabaseContextAccessor>(),
             ServiceProvider.GetService<ISqlParameterFactory>(),
             ServiceProvider.GetService<SqlMetadataOptions>(),
@@ -255,16 +302,48 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <returns>连接字符串</returns>
     protected virtual string ResolveConnectionString()
     {
-        var resolver = ServiceProvider.GetService<IDatabaseDescriptorResolver>();
         var contextAccessor = ServiceProvider.GetService<IDatabaseContextAccessor>();
         var metadataOptions = ServiceProvider.GetService<SqlMetadataOptions>();
         var contextResolver = ServiceProvider.GetService<ISqlDatabaseContextResolver>();
         var context = contextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? contextAccessor?.Current ??
                   metadataOptions?.DefaultDatabaseContext;
-        var descriptor = resolver?.Resolve(context);
-        if (string.IsNullOrWhiteSpace(descriptor?.ConnectionString) == false)
-            return descriptor.ConnectionString;
+        var dataSource = ResolveReadPreferenceDataSource(context);
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false)
+            return dataSource.ConnectionString;
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false)
+        {
+            var collection = ServiceProvider.GetService<ConnectionStringCollection>();
+            var connectionString = collection != null &&
+                                   collection.TryGetValue(dataSource.ConnectionStringName, out var value)
+                ? value
+                : null;
+            if (string.IsNullOrWhiteSpace(connectionString) == false)
+                return connectionString;
+            throw new InvalidOperationException(
+                $"SQL 数据源 {dataSource.Key} 未找到连接字符串。缺失配置字段: {nameof(SqlDataSourceDescriptor.ConnectionString)} 或连接字符串名称 {dataSource.ConnectionStringName}。");
+        }
         return Options.ConnectionString;
+    }
+
+    /// <summary>
+    /// 根据读取偏好解析数据源。
+    /// </summary>
+    /// <param name="context">数据库上下文。</param>
+    /// <returns>数据源描述。</returns>
+    protected virtual SqlDataSourceDescriptor ResolveReadPreferenceDataSource(DatabaseContext context)
+    {
+        var dataSource = context?.DataSource;
+        if (context?.ReadPreference != SqlReadPreference.Primary)
+            return dataSource;
+        if (dataSource?.PrimaryReadStrategy != PrimaryReadStrategy.PrimaryDataSource)
+            return dataSource;
+        var resolver = ServiceProvider.GetService<ISqlDataSourceResolver>();
+        return resolver?.Resolve(dataSource.Key, new DatabaseScopeOptions
+        {
+            DbKey = dataSource.Key,
+            TenantId = context.TenantId,
+            ReadPreference = SqlReadPreference.Primary
+        }) ?? dataSource;
     }
 
     #endregion
@@ -310,6 +389,27 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     /// <param name="configAction">配置操作</param>
     public void Config(Action<SqlOptions> configAction) => configAction?.Invoke(Options);
+
+    /// <inheritdoc />
+    public void SetEntityMetadata(IEntityMetadata metadata) => _entityMetadata = metadata;
+
+    /// <inheritdoc />
+    public void SetEntityMappingResolver(IEntityMappingResolver resolver) => _entityMappingResolver = resolver;
+
+    /// <inheritdoc />
+    public void SetOwnedConnection(IDbConnection connection)
+    {
+        if (connection == null)
+            return;
+        _connection = connection;
+        _connectionOwnership = SqlResourceOwnership.Owned;
+    }
+
+    /// <inheritdoc />
+    public void SetExternalTransactionResolver(Func<IDbTransaction> resolver) => _externalTransactionResolver = resolver;
+
+    /// <inheritdoc />
+    public void SetConnectionSource(SqlConnectionSource source) => _connectionSource = source;
 
     #endregion
 
@@ -395,16 +495,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var conn = GetConnection();
             var dbParameters = GetDbParameters(builder);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), conn, dbParameters, parameterMetadata);
+            var transaction = GetQueryTransaction();
+            message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = conn.ExecuteScalar(sql, dbParameters, GetTransaction(), timeout);
+            var result = conn.ExecuteScalar(sql, dbParameters, transaction, timeout);
 
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return Conv.ToInt(result);
         }
         catch (Exception e)
         {
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -459,16 +562,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var conn = GetConnection();
             var dbParameters = GetDbParameters(builder);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), conn, dbParameters, parameterMetadata);
+            var transaction = GetQueryTransaction();
+            message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
 
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
-            var result = await conn.ExecuteScalarAsync(sql, dbParameters, GetTransaction(), timeout);
+            var result = await conn.ExecuteScalarAsync(sql, dbParameters, transaction, timeout);
 
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return Conv.ToInt(result);
         }
         catch (Exception e)
         {
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -584,6 +690,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         if (_transactionOwnership == SqlResourceOwnership.Owned)
             _transaction?.Dispose();
         _transaction = null;
+        _transactionId = null;
         _transactionOwnership = SqlResourceOwnership.Owned;
     }
 

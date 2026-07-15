@@ -239,14 +239,17 @@ public abstract partial class SqlQueryBase
             var sql = GetSql();
             var dbParameters = GetDbParameters();
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
-            message = ExecuteBefore(sql, Params, connection, dbParameters, parameterMetadata);
+            var transaction = GetQueryTransaction();
+            message = ExecuteBefore(sql, Params, connection, parameterMetadata);
             WriteTraceLog(sql, Params, GetDebugSql());
-            result = func(connection, sql, dbParameters, GetTransaction());
+            result = func(connection, sql, dbParameters, transaction);
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
         catch (Exception e)
         {
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -273,14 +276,17 @@ public abstract partial class SqlQueryBase
             var sql = GetSql();
             var dbParameters = GetDbParameters();
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
-            message = ExecuteBefore(sql, Params, connection, dbParameters, parameterMetadata);
+            var transaction = GetQueryTransaction();
+            message = ExecuteBefore(sql, Params, connection, parameterMetadata);
             WriteTraceLog(sql, Params, GetDebugSql());
-            result = await func(connection, sql, dbParameters, GetTransaction());
+            result = await func(connection, sql, dbParameters, transaction);
+            CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
         catch (Exception e)
         {
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }

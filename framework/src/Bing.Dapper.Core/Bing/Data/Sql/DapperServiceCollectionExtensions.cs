@@ -1,6 +1,9 @@
-﻿using Bing.Data.Sql.Builders.Params;
+﻿using Bing.Data;
+using Bing.Data.Enums;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -34,11 +37,16 @@ public static partial class DapperServiceCollectionExtensions
     {
         services.TryAddScoped(typeof(TInterface), typeof(TImplementation));
         services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
-        services.TryAddSingleton<SqlMetadataOptions>();
+        services.TryAddSingleton(provider =>
+        {
+            var options = new SqlMetadataOptions();
+            foreach (var configure in provider.GetServices<ISqlMetadataOptionsConfigure>())
+                configure.Configure(options);
+            return options;
+        });
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
-        services.TryAddSingleton<IDatabaseDescriptorResolver, DefaultDatabaseDescriptorResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
         services.TryAddSingleton<IEntityMappingResolver, DefaultEntityMappingResolver>();
@@ -51,7 +59,76 @@ public static partial class DapperServiceCollectionExtensions
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
         services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
         services.TryAddSingleton<ISqlTransactionScopeFactory, SqlTransactionScopeFactory>();
+        services.TryAddSingleton<ISqlDbConnectionFactoryResolver, DefaultSqlDbConnectionFactoryResolver>();
         return services;
+    }
+
+    /// <summary>
+    /// 配置 SQL 元数据选项。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="setupAction">配置操作。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection ConfigureSqlMetadata(this IServiceCollection services,
+        Action<SqlMetadataOptions> setupAction)
+    {
+        if (setupAction == null)
+            return services;
+        services.AddSingleton<ISqlMetadataOptionsConfigure>(new DelegateSqlMetadataOptionsConfigure(setupAction));
+        return services;
+    }
+
+    /// <summary>
+    /// 注册 SQL 数据源。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="key">数据源标识。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <param name="connectionString">连接字符串。</param>
+    /// <param name="connectionStringName">连接字符串配置名称。</param>
+    /// <param name="setupAction">数据源配置操作。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlDataSource(this IServiceCollection services, string key,
+        DatabaseType databaseType, string connectionString = null, string connectionStringName = null,
+        Action<SqlDataSourceDescriptor> setupAction = null)
+    {
+        return services.ConfigureSqlMetadata(options =>
+        {
+            var dataSourceKey = string.IsNullOrWhiteSpace(key) ? options.DataSources.DefaultDataSourceKey : key;
+            if (string.IsNullOrWhiteSpace(options.DataSources.DefaultDataSourceKey))
+                options.DataSources.DefaultDataSourceKey = dataSourceKey;
+            if (!options.DataSources.DataSources.TryGetValue(dataSourceKey, out var descriptor))
+            {
+                descriptor = new SqlDataSourceDescriptor();
+                options.DataSources.DataSources[dataSourceKey] = descriptor;
+            }
+            descriptor.Key = dataSourceKey;
+            descriptor.DatabaseType = databaseType;
+            if (string.IsNullOrWhiteSpace(connectionString) == false)
+                descriptor.ConnectionString = connectionString;
+            if (string.IsNullOrWhiteSpace(connectionStringName) == false)
+                descriptor.ConnectionStringName = connectionStringName;
+            setupAction?.Invoke(descriptor);
+        });
+    }
+
+    /// <summary>
+    /// 从配置注册 SQL 数据源。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="configuration">配置。</param>
+    /// <param name="key">数据源标识。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <param name="connectionStringName">连接字符串配置名称。</param>
+    /// <param name="setupAction">数据源配置操作。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlDataSource(this IServiceCollection services, IConfiguration configuration,
+        string key, DatabaseType databaseType, string connectionStringName = null,
+        Action<SqlDataSourceDescriptor> setupAction = null)
+    {
+        var name = string.IsNullOrWhiteSpace(connectionStringName) ? key : connectionStringName;
+        var connectionString = configuration?.GetConnectionString(name);
+        return services.AddSqlDataSource(key, databaseType, connectionString, name, setupAction);
     }
 
     /// <summary>
@@ -97,6 +174,59 @@ public static partial class DapperServiceCollectionExtensions
             Converter = provider.GetRequiredService<TConverter>()
         });
         return services;
+    }
+
+    /// <summary>
+    /// 注册独立数据库连接工厂。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <param name="factory">连接创建委托。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlDbConnectionFactory(this IServiceCollection services,
+        DatabaseType databaseType, Func<string, System.Data.IDbConnection> factory)
+    {
+        if (factory == null)
+            throw new ArgumentNullException(nameof(factory));
+        services.AddSingleton(new SqlDbConnectionFactoryRegistration
+        {
+            DatabaseType = databaseType,
+            Factory = factory
+        });
+        return services;
+    }
+
+    /// <summary>
+    /// SQL 元数据选项配置。
+    /// </summary>
+    private interface ISqlMetadataOptionsConfigure
+    {
+        /// <summary>
+        /// 配置 SQL 元数据选项。
+        /// </summary>
+        /// <param name="options">SQL 元数据选项。</param>
+        void Configure(SqlMetadataOptions options);
+    }
+
+    /// <summary>
+    /// 委托 SQL 元数据选项配置。
+    /// </summary>
+    private sealed class DelegateSqlMetadataOptionsConfigure : ISqlMetadataOptionsConfigure
+    {
+        /// <summary>
+        /// 配置操作。
+        /// </summary>
+        private readonly Action<SqlMetadataOptions> _setupAction;
+
+        /// <summary>
+        /// 初始化一个<see cref="DelegateSqlMetadataOptionsConfigure"/>类型的实例。
+        /// </summary>
+        /// <param name="setupAction">配置操作。</param>
+        public DelegateSqlMetadataOptionsConfigure(Action<SqlMetadataOptions> setupAction) =>
+            _setupAction = setupAction;
+
+        /// <inheritdoc />
+        public void Configure(SqlMetadataOptions options) => _setupAction(options);
     }
 
     /// <summary>

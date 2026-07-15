@@ -1,5 +1,3 @@
-using Bing.Data;
-using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 
 namespace Bing.Data.Sql;
@@ -37,12 +35,7 @@ public sealed class DefaultSqlDatabaseContextResolver : ISqlDatabaseContextResol
         var context = options.GetDatabaseContext() ?? _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
         if (context != null)
             return Normalize(context, options);
-        return new DatabaseContext
-        {
-            DbKey = ConnectionStringCollection.DefaultConnectionStringName,
-            DatabaseType = options?.DatabaseType ?? DatabaseType.SqlServer,
-            Role = DatabaseRole.Default
-        };
+        return null;
     }
 
     /// <summary>
@@ -54,8 +47,6 @@ public sealed class DefaultSqlDatabaseContextResolver : ISqlDatabaseContextResol
     private static DatabaseContext Normalize(DatabaseContext context, SqlOptions options)
     {
         var result = SqlOptionsDatabaseContextExtensions.Clone(context);
-        if (string.IsNullOrWhiteSpace(result.DbKey))
-            result.DbKey = ConnectionStringCollection.DefaultConnectionStringName;
         return result;
     }
 }
