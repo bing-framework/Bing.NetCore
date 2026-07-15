@@ -20,4 +20,11 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- FakeClock 依赖 IClock 抽象 -->
+    <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
+    <!-- FakeCurrentUser 依赖 ICurrentUser 接口 -->
+    <ProjectReference Include="..\..\src\Bing.Security\Bing.Security.csproj" />
+  </ItemGroup>
+
 </Project>

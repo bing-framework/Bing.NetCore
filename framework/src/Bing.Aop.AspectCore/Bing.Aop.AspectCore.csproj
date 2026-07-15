@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+    <ProjectReference Include="..\Bing.Validation\Bing.Validation.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Security\Bing.Security.csproj" />
+    <!-- FakeClock / FakeCurrentUser -->
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+  </ItemGroup>
+</Project>

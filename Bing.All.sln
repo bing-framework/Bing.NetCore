@@ -194,6 +194,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Serilog", "fra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Sinks.Exceptionless", "framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj", "{C7E17279-AAEB-4A58-BBBB-AF443F924D9E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Serilog.Tests", "framework\tests\Bing.Logging.Serilog.Tests\Bing.Logging.Serilog.Tests.csproj", "{D3F2A891-5E7C-4B8A-9F61-C2D3E4F5A678}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Logging.Tests", "framework\tests\Bing.Logging.Tests\Bing.Logging.Tests.csproj", "{73871EF9-9CF6-479F-BC1C-AD443CE037AE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Validation.Abstractions", "framework\src\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj", "{19A3A852-6F7B-4864-8F53-AE91A04D0732}"
@@ -315,6 +317,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.PostgreSql.Tests.Integration", "framework\tests\Bing.Dapper.PostgreSql.Tests.Integration\Bing.Dapper.PostgreSql.Tests.Integration.csproj", "{13183A7C-470C-4E91-B6AB-F49FB2897B30}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.SqlServer.Tests.Integration", "framework\tests\Bing.Dapper.SqlServer.Tests.Integration\Bing.Dapper.SqlServer.Tests.Integration.csproj", "{AF2C8041-3B77-4912-8BC3-A19A18864215}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.SqlServer.Tests", "framework\tests\Bing.Dapper.SqlServer.Tests\Bing.Dapper.SqlServer.Tests.csproj", "{5026A352-2C26-48CD-A4CE-61ABF1B448C8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Dapper.Oracle.Tests", "framework\tests\Bing.Dapper.Oracle.Tests\Bing.Dapper.Oracle.Tests.csproj", "{12F822A5-1353-4C27-922C-02F2655E9443}"
 EndProject
@@ -624,6 +628,10 @@ Global
 		{C7E17279-AAEB-4A58-BBBB-AF443F924D9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7E17279-AAEB-4A58-BBBB-AF443F924D9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7E17279-AAEB-4A58-BBBB-AF443F924D9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3F2A891-5E7C-4B8A-9F61-C2D3E4F5A678}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3F2A891-5E7C-4B8A-9F61-C2D3E4F5A678}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3F2A891-5E7C-4B8A-9F61-C2D3E4F5A678}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3F2A891-5E7C-4B8A-9F61-C2D3E4F5A678}.Release|Any CPU.Build.0 = Release|Any CPU
 		{73871EF9-9CF6-479F-BC1C-AD443CE037AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{73871EF9-9CF6-479F-BC1C-AD443CE037AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73871EF9-9CF6-479F-BC1C-AD443CE037AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -740,6 +748,10 @@ Global
 		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF2C8041-3B77-4912-8BC3-A19A18864215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5026A352-2C26-48CD-A4CE-61ABF1B448C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5026A352-2C26-48CD-A4CE-61ABF1B448C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5026A352-2C26-48CD-A4CE-61ABF1B448C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5026A352-2C26-48CD-A4CE-61ABF1B448C8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{12F822A5-1353-4C27-922C-02F2655E9443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{12F822A5-1353-4C27-922C-02F2655E9443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12F822A5-1353-4C27-922C-02F2655E9443}.Release|Any CPU.ActiveCfg = Release|Any CPU

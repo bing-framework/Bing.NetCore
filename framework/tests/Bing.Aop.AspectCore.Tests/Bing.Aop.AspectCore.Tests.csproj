@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
   </ItemGroup>
