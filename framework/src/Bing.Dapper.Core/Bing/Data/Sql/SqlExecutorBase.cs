@@ -40,17 +40,18 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
-            var dbParameters = GetDbParameters(param);
-            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            var transaction = GetQueryTransaction();
+            var dbParameters = GetDbParameters(param, sql);
+            var parameterMetadata = GetSqlParameterDiagnostics(param, sql);
             message = ExecuteBefore(sql, param, connection, parameterMetadata);
-            result = connection.Execute(sql, dbParameters, GetQueryTransaction(), timeout);
+            result = connection.Execute(sql, dbParameters, transaction, timeout);
             CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
         catch (Exception e)
         {
-            RollbackOwnedTransaction();
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -80,17 +81,18 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
-            var dbParameters = GetDbParameters(param);
-            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            var transaction = GetQueryTransaction();
+            var dbParameters = GetDbParameters(param, sql);
+            var parameterMetadata = GetSqlParameterDiagnostics(param, sql);
             message = ExecuteBefore(sql, param, connection, parameterMetadata);
-            result = await connection.ExecuteAsync(sql, dbParameters, GetQueryTransaction(), timeout);
+            result = await connection.ExecuteAsync(sql, dbParameters, transaction, timeout);
             CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
         catch (Exception e)
         {
-            RollbackOwnedTransaction();
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -120,17 +122,18 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
-            var dbParameters = GetDbParameters(param);
-            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            var transaction = GetQueryTransaction();
+            var dbParameters = GetDbParameters(param, procedure);
+            var parameterMetadata = GetSqlParameterDiagnostics(param, procedure);
             message = ExecuteBefore(procedure, param, connection, parameterMetadata);
-            result = connection.Execute(procedure, dbParameters, GetQueryTransaction(), timeout, GetProcedureCommandType());
+            result = connection.Execute(procedure, dbParameters, transaction, timeout, GetProcedureCommandType());
             CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
         catch (Exception e)
         {
-            RollbackOwnedTransaction();
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }
@@ -160,17 +163,18 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetConnection();
-            var dbParameters = GetDbParameters(param);
-            var parameterMetadata = GetSqlParameterDiagnostics(param);
+            var transaction = GetQueryTransaction();
+            var dbParameters = GetDbParameters(param, procedure);
+            var parameterMetadata = GetSqlParameterDiagnostics(param, procedure);
             message = ExecuteBefore(procedure, param, connection, parameterMetadata);
-            result = await connection.ExecuteAsync(procedure, dbParameters, GetQueryTransaction(), timeout, GetProcedureCommandType());
+            result = await connection.ExecuteAsync(procedure, dbParameters, transaction, timeout, GetProcedureCommandType());
             CompleteQueryTransaction();
             ExecuteAfter(message);
             return result;
         }
         catch (Exception e)
         {
-            RollbackOwnedTransaction();
+            RollbackQueryTransaction();
             ExecuteError(message, e);
             throw;
         }

@@ -40,12 +40,30 @@ public interface ISqlParameterContextBinder : ISqlParameterBinder
     object Bind(ISqlBuilder builder, SqlOptions options);
 
     /// <summary>
+    /// 绑定 Sql 生成器参数
+    /// </summary>
+    /// <param name="builder">Sql 生成器</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="context">当前执行的参数绑定上下文</param>
+    /// <returns>Dapper 可识别的参数对象</returns>
+    object Bind(ISqlBuilder builder, SqlOptions options, SqlParameterBindingContext context);
+
+    /// <summary>
     /// 绑定参数对象
     /// </summary>
     /// <param name="parameter">参数对象</param>
     /// <param name="options">Sql 配置</param>
     /// <returns>Dapper 可识别的参数对象</returns>
     object Bind(object parameter, SqlOptions options);
+
+    /// <summary>
+    /// 绑定参数对象
+    /// </summary>
+    /// <param name="parameter">参数对象</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="context">当前执行的参数绑定上下文</param>
+    /// <returns>Dapper 可识别的参数对象</returns>
+    object Bind(object parameter, SqlOptions options, SqlParameterBindingContext context);
 
     /// <summary>
     /// 获取 Sql 增强参数集合
@@ -58,10 +76,30 @@ public interface ISqlParameterContextBinder : ISqlParameterBinder
     /// <summary>
     /// 获取 Sql 增强参数集合
     /// </summary>
+    /// <param name="builder">Sql 生成器</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="context">当前执行的参数绑定上下文</param>
+    /// <returns>Sql 增强参数集合</returns>
+    IReadOnlyCollection<SqlParam> GetSqlParams(ISqlBuilder builder, SqlOptions options,
+        SqlParameterBindingContext context);
+
+    /// <summary>
+    /// 获取 Sql 增强参数集合
+    /// </summary>
     /// <param name="parameter">参数对象</param>
     /// <param name="options">Sql 配置</param>
     /// <returns>Sql 增强参数集合</returns>
     IReadOnlyCollection<SqlParam> GetSqlParams(object parameter, SqlOptions options);
+
+    /// <summary>
+    /// 获取 Sql 增强参数集合
+    /// </summary>
+    /// <param name="parameter">参数对象</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="context">当前执行的参数绑定上下文</param>
+    /// <returns>Sql 增强参数集合</returns>
+    IReadOnlyCollection<SqlParam> GetSqlParams(object parameter, SqlOptions options,
+        SqlParameterBindingContext context);
 }
 
 /// <summary>
@@ -159,10 +197,14 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <param name="options">Sql 配置</param>
     /// <returns>Dapper 可识别的参数对象</returns>
     public object Bind(ISqlBuilder builder, SqlOptions options)
+        => Bind(builder, options, null);
+
+    /// <inheritdoc />
+    public object Bind(ISqlBuilder builder, SqlOptions options, SqlParameterBindingContext context)
     {
         if (builder == null)
             return null;
-        var parameters = GetSqlParams(builder, options);
+        var parameters = GetSqlParams(builder, options, context);
         if (parameters.Count > 0)
             return new MetadataDynamicParameters(parameters, _dbParameterCustomizers);
         return builder.GetParams();
@@ -182,13 +224,17 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <param name="options">Sql 配置</param>
     /// <returns>Dapper 可识别的参数对象</returns>
     public object Bind(object parameter, SqlOptions options)
+        => Bind(parameter, options, null);
+
+    /// <inheritdoc />
+    public object Bind(object parameter, SqlOptions options, SqlParameterBindingContext context)
     {
         if (parameter == null)
             return null;
         if (parameter is SqlMapper.IDynamicParameters)
             return parameter;
         if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
-            return new MetadataDynamicParameters(GetSqlParams(parameter, options), _dbParameterCustomizers);
+            return new MetadataDynamicParameters(GetSqlParams(parameter, options, context), _dbParameterCustomizers);
         return parameter;
     }
 
@@ -199,6 +245,11 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <param name="options">Sql 配置</param>
     /// <returns>Sql 增强参数集合</returns>
     public IReadOnlyCollection<SqlParam> GetSqlParams(ISqlBuilder builder, SqlOptions options)
+        => GetSqlParams(builder, options, null);
+
+    /// <inheritdoc />
+    public IReadOnlyCollection<SqlParam> GetSqlParams(ISqlBuilder builder, SqlOptions options,
+        SqlParameterBindingContext context)
     {
         if (builder is ISqlPartAccessor accessor && accessor.ParameterManager is IAdvancedParameterManager advanced)
             return advanced.GetSqlParams().Values.Where(t => t != null).ToList();
@@ -212,20 +263,40 @@ public class DefaultSqlParameterBinder : ISqlParameterContextBinder
     /// <param name="options">Sql 配置</param>
     /// <returns>Sql 增强参数集合</returns>
     public IReadOnlyCollection<SqlParam> GetSqlParams(object parameter, SqlOptions options)
+        => GetSqlParams(parameter, options, null);
+
+    /// <inheritdoc />
+    public IReadOnlyCollection<SqlParam> GetSqlParams(object parameter, SqlOptions options,
+        SqlParameterBindingContext context)
     {
         if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
         {
-            var result = _parameterResolver.Resolve(new SqlParameterBindingContext
-            {
-                EntityType = parameter is ISqlParameterMap map
-                    ? map.GetItems().FirstOrDefault()?.EntityType
-                    : null,
-                Source = parameter,
-                DatabaseType = GetDatabaseContext(options)?.DataSource?.DatabaseType ?? options?.DatabaseType ?? default
-            });
+            var result = _parameterResolver.Resolve(CreateBindingContext(parameter, options, context));
             return result.Items.Select(t => CreateSqlParam(t, options)).Where(t => t != null).ToList();
         }
         return new List<SqlParam>();
+    }
+
+    /// <summary>
+    /// 创建包含当前执行信息的参数绑定上下文
+    /// </summary>
+    /// <param name="parameter">参数对象</param>
+    /// <param name="options">Sql 配置</param>
+    /// <param name="context">调用方提供的执行上下文</param>
+    /// <returns>参数绑定上下文</returns>
+    private SqlParameterBindingContext CreateBindingContext(object parameter, SqlOptions options,
+        SqlParameterBindingContext context)
+    {
+        var databaseContext = GetDatabaseContext(options);
+        return new SqlParameterBindingContext
+        {
+            Sql = context?.Sql,
+            DbKey = context?.DbKey ?? databaseContext?.DataSource?.Key ?? databaseContext?.DbKey,
+            DatabaseType = context?.DatabaseType ?? databaseContext?.DataSource?.DatabaseType ??
+                           options?.DatabaseType ?? default,
+            EntityType = context?.EntityType ?? (parameter as ISqlParameterMap)?.GetItems().FirstOrDefault()?.EntityType,
+            Source = parameter
+        };
     }
 
     /// <summary>

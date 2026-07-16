@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 
 namespace Bing.Data.Metadata;
 
@@ -12,6 +13,44 @@ public class OracleTypeConverter : ITypeConverter
     {
         if (string.IsNullOrWhiteSpace(dataType))
             return null;
-        throw new System.NotImplementedException();
+        switch (dataType.Trim().ToLowerInvariant())
+        {
+            case "varchar2":
+            case "nvarchar2":
+            case "char":
+            case "nchar":
+            case "long":
+            case "clob":
+            case "nclob":
+            case "rowid":
+            case "urowid":
+                return DbType.String;
+            case "number":
+            case "numeric":
+            case "decimal":
+                return DbType.Decimal;
+            case "binary_float":
+                return DbType.Single;
+            case "binary_double":
+            case "float":
+                return DbType.Double;
+            case "date":
+                return DbType.DateTime;
+            case "timestamp":
+                return DbType.DateTime2;
+            case "timestamp with time zone":
+            case "timestamp with local time zone":
+                return DbType.DateTimeOffset;
+            case "raw":
+            case "long raw":
+            case "blob":
+            case "bfile":
+                return DbType.Binary;
+            case "xmltype":
+                return DbType.Xml;
+            case "boolean":
+                return DbType.Boolean;
+        }
+        throw new NotSupportedException($"不支持 Oracle 数据类型 {dataType}。");
     }
 }

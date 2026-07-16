@@ -120,6 +120,62 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：Independent 模式应通过目标数据源的命名连接字符串创建连接。
+    /// </summary>
+    [Fact]
+    public void Create_WhenIndependentDataSourceUsesConnectionStringName_ShouldUseNamedConnection()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+        var reporting = metadataOptions.DataSources.DataSources["reporting"];
+        reporting.ConnectionString = null;
+        reporting.ConnectionStringName = "ReportingConnection";
+        var connectionStrings = new ConnectionStringCollection
+        {
+            ["ReportingConnection"] = "Data Source=named-reporting.db"
+        };
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(metadataOptions, connectionStrings);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "reporting");
+
+        // Assert
+        var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
+        Assert.Equal("Data Source=named-reporting.db", independentConnection.ConnectionString);
+    }
+
+    /// <summary>
+    /// 测试目的：Independent 模式找不到数据源命名连接时必须失败，不能回退到 DbContext 连接。
+    /// </summary>
+    [Fact]
+    public void Create_WhenIndependentNamedConnectionIsMissing_ShouldNotFallbackToDbContextConnection()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+        var reporting = metadataOptions.DataSources.DataSources["reporting"];
+        reporting.ConnectionString = null;
+        reporting.ConnectionStringName = "MissingReportingConnection";
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(metadataOptions);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "reporting"));
+
+        // Assert
+        Assert.Contains("reporting", exception.Message);
+        Assert.Contains("MissingReportingConnection", exception.Message);
+        Assert.DoesNotContain(connection.ConnectionString, exception.Message);
+    }
+
+    /// <summary>
     /// 测试目的：显式指定的 dbKey 与 EF Core Provider 类型不一致时，应抛出明确异常。
     /// </summary>
     [Fact]
@@ -141,13 +197,39 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：Shared 模式显式指定不同物理数据库时必须拒绝复用 DbContext 连接。
+    /// </summary>
+    [Fact]
+    public void Create_WhenSharedDbKeyTargetsDifferentPhysicalDatabase_ShouldThrow()
+    {
+        // Arrange
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            factory.Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "reporting"));
+
+        // Assert
+        Assert.Contains("不同的物理数据库", exception.Message);
+        Assert.Contains(nameof(EfCoreSqlConnectionMode.Independent), exception.Message);
+        Assert.Same(connection, unitOfWork.Database.GetDbConnection());
+    }
+
+    /// <summary>
     /// 创建服务提供程序
     /// </summary>
     /// <returns>服务提供程序</returns>
-    private static ServiceProvider CreateServiceProvider(SqlMetadataOptions metadataOptions = null)
+    private static ServiceProvider CreateServiceProvider(SqlMetadataOptions metadataOptions = null,
+        ConnectionStringCollection connectionStrings = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
+        if (connectionStrings != null)
+            services.AddSingleton(connectionStrings);
         if (metadataOptions != null)
             services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
         services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();

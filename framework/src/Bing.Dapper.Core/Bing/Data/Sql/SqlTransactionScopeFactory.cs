@@ -1,4 +1,6 @@
-﻿namespace Bing.Data.Sql;
+﻿using Bing.Data.Enums;
+
+namespace Bing.Data.Sql;
 
 /// <summary>
 /// SQL 事务作用域工厂
@@ -27,7 +29,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     }
 
     /// <inheritdoc />
-    public ISqlTransactionScope Begin(string dbKey = null)
+    public ISqlTransactionScope Begin(string dbKey = null) => Begin(dbKey, IsolationLevel.ReadCommitted);
+
+    /// <inheritdoc />
+    public ISqlTransactionScope Begin(string dbKey, IsolationLevel isolationLevel)
     {
         var query = string.IsNullOrWhiteSpace(dbKey)
             ? _queryFactory.Create<ISqlQuery>()
@@ -35,15 +40,20 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         var connection = query.GetConnection();
         if (connection.State == ConnectionState.Closed)
             connection.Open();
-        var transaction = connection.BeginTransaction();
-        return new SqlTransactionScope(dbKey, query, transaction, _queryFactory, _executorFactory);
+        var transaction = connection.BeginTransaction(isolationLevel);
+        return new SqlTransactionScope(dbKey, query, connection, transaction, _queryFactory, _executorFactory);
     }
 
     /// <inheritdoc />
     public Task<ISqlTransactionScope> BeginAsync(string dbKey = null, CancellationToken cancellationToken = default)
+        => BeginAsync(dbKey, IsolationLevel.ReadCommitted, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<ISqlTransactionScope> BeginAsync(string dbKey, IsolationLevel isolationLevel,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(Begin(dbKey));
+        return Task.FromResult(Begin(dbKey, isolationLevel));
     }
 
     /// <summary>
@@ -52,17 +62,19 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     private sealed class SqlTransactionScope : ISqlTransactionScope
     {
         private readonly ISqlQuery _ownerQuery;
+        private readonly IDbConnection _connection;
         private readonly IDbTransaction _transaction;
         private readonly ISqlQueryFactory _queryFactory;
         private readonly ISqlExecutorFactory _executorFactory;
         private bool _completed;
         private bool _disposed;
 
-        public SqlTransactionScope(string dbKey, ISqlQuery ownerQuery, IDbTransaction transaction,
+        public SqlTransactionScope(string dbKey, ISqlQuery ownerQuery, IDbConnection connection, IDbTransaction transaction,
             ISqlQueryFactory queryFactory, ISqlExecutorFactory executorFactory)
         {
             DbKey = dbKey;
             _ownerQuery = ownerQuery;
+            _connection = connection ?? throw new InvalidOperationException("SQL 连接不能为空");
             _transaction = transaction ?? throw new InvalidOperationException("SQL 事务不能为空");
             _queryFactory = queryFactory;
             _executorFactory = executorFactory;
@@ -70,6 +82,21 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 
         /// <inheritdoc />
         public string DbKey { get; }
+
+        /// <inheritdoc />
+        public DatabaseType DatabaseType => _ownerQuery is SqlQueryBase query ? query.GetDatabaseType() : default;
+
+        /// <inheritdoc />
+        public IsolationLevel IsolationLevel => _transaction.IsolationLevel;
+
+        /// <inheritdoc />
+        public IDbConnection Connection => _connection;
+
+        /// <inheritdoc />
+        public IDbTransaction Transaction => _transaction;
+
+        /// <inheritdoc />
+        public bool IsCompleted => _completed;
 
         /// <inheritdoc />
         public string TransactionId { get; } = Guid.NewGuid().ToString("N");

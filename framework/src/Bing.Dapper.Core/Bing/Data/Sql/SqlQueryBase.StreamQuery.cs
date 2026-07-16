@@ -80,7 +80,7 @@ public abstract partial class SqlQueryBase
         {
             if (completed == false)
                 RollbackQueryTransaction();
-            ExecuteAfter(null);
+            ExecuteAfter((object)null);
         }
     }
 
@@ -127,13 +127,43 @@ public abstract partial class SqlQueryBase
             {
                 if (reader is DbDataReader dbReader)
                 {
-                    while (await ReadAsync(dbReader, cancellationToken, message))
-                        yield return parser(dbReader);
+                    while (true)
+                    {
+                        TEntity item;
+                        try
+                        {
+                            if (await ReadAsync(dbReader, cancellationToken) == false)
+                                break;
+                            item = parser(dbReader);
+                        }
+                        catch (Exception e)
+                        {
+                            RollbackQueryTransaction();
+                            ExecuteError(message, e);
+                            throw;
+                        }
+                        yield return item;
+                    }
                 }
                 else
                 {
-                    while (Read(reader, cancellationToken, message))
-                        yield return parser(reader);
+                    while (true)
+                    {
+                        TEntity item;
+                        try
+                        {
+                            if (Read(reader, cancellationToken) == false)
+                                break;
+                            item = parser(reader);
+                        }
+                        catch (Exception e)
+                        {
+                            RollbackQueryTransaction();
+                            ExecuteError(message, e);
+                            throw;
+                        }
+                        yield return item;
+                    }
                 }
             }
             CompleteQueryTransaction();
@@ -144,30 +174,30 @@ public abstract partial class SqlQueryBase
         {
             if (completed == false)
                 RollbackQueryTransaction();
-            ExecuteAfter(null);
+            ExecuteAfter((object)null);
         }
     }
+
+    /// <summary>
+    /// 以非缓冲方式异步逐行读取实体。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>实体异步流。</returns>
+    public IAsyncEnumerable<TEntity> StreamAsync<TEntity>(int? timeout = null,
+        CancellationToken cancellationToken = default) => StreamQueryAsync<TEntity>(timeout, cancellationToken);
 
     /// <summary>
     /// 同步读取下一行并记录执行异常
     /// </summary>
     /// <param name="reader">数据读取器</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <param name="message">诊断消息</param>
     /// <returns>存在下一行时返回 true</returns>
-    private bool Read(IDataReader reader, CancellationToken cancellationToken, DiagnosticsMessage message)
+    private bool Read(IDataReader reader, CancellationToken cancellationToken)
     {
-        try
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return reader.Read();
-        }
-        catch (Exception e)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
-        }
+        cancellationToken.ThrowIfCancellationRequested();
+        return reader.Read();
     }
 
     /// <summary>
@@ -175,20 +205,10 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="reader">数据读取器</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <param name="message">诊断消息</param>
     /// <returns>存在下一行时返回 true</returns>
-    private async Task<bool> ReadAsync(DbDataReader reader, CancellationToken cancellationToken, DiagnosticsMessage message)
+    private async Task<bool> ReadAsync(DbDataReader reader, CancellationToken cancellationToken)
     {
-        try
-        {
-            return await reader.ReadAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
-        }
+        return await reader.ReadAsync(cancellationToken);
     }
 
     /// <summary>

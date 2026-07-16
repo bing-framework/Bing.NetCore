@@ -149,10 +149,21 @@ public abstract partial class SqlQueryBase
     /// <param name="builder">Sql 生成器</param>
     /// <returns>Sql 参数诊断元数据</returns>
     protected virtual IReadOnlyCollection<SqlParameterDiagnosticInfo> GetSqlParameterDiagnostics(ISqlBuilder builder)
+        => GetSqlParameterDiagnostics(builder, null);
+
+    /// <summary>
+    /// 获取 Sql 参数诊断元数据
+    /// </summary>
+    /// <param name="builder">Sql 生成器</param>
+    /// <param name="sql">当前执行的 Sql 语句</param>
+    /// <returns>Sql 参数诊断元数据</returns>
+    protected virtual IReadOnlyCollection<SqlParameterDiagnosticInfo> GetSqlParameterDiagnostics(ISqlBuilder builder,
+        string sql)
     {
         if (SqlParameterBinder is not ISqlParameterContextBinder binder)
             return new List<SqlParameterDiagnosticInfo>();
-        return binder.GetSqlParams(builder, Options).Select(CreateSqlParameterDiagnosticInfo).ToList();
+        return binder.GetSqlParams(builder, Options, CreateParameterBindingContext(sql, builder?.GetParams()))
+            .Select(CreateSqlParameterDiagnosticInfo).ToList();
     }
 
     /// <summary>
@@ -161,10 +172,21 @@ public abstract partial class SqlQueryBase
     /// <param name="parameter">Sql 参数对象</param>
     /// <returns>Sql 参数诊断元数据</returns>
     protected virtual IReadOnlyCollection<SqlParameterDiagnosticInfo> GetSqlParameterDiagnostics(object parameter)
+        => GetSqlParameterDiagnostics(parameter, null);
+
+    /// <summary>
+    /// 获取 Sql 参数诊断元数据
+    /// </summary>
+    /// <param name="parameter">Sql 参数对象</param>
+    /// <param name="sql">当前执行的 Sql 语句</param>
+    /// <returns>Sql 参数诊断元数据</returns>
+    protected virtual IReadOnlyCollection<SqlParameterDiagnosticInfo> GetSqlParameterDiagnostics(object parameter,
+        string sql)
     {
         if (SqlParameterBinder is not ISqlParameterContextBinder binder)
             return new List<SqlParameterDiagnosticInfo>();
-        return binder.GetSqlParams(parameter, Options).Select(CreateSqlParameterDiagnosticInfo).ToList();
+        return binder.GetSqlParams(parameter, Options, CreateParameterBindingContext(sql, parameter))
+            .Select(CreateSqlParameterDiagnosticInfo).ToList();
     }
 
     /// <summary>
@@ -180,6 +202,7 @@ public abstract partial class SqlQueryBase
         {
             Name = parameter.Name,
             Value = IsSensitiveParameter(parameter.Name) ? null : parameter.Value,
+            OriginalValue = IsSensitiveParameter(parameter.Name) ? null : parameter.OriginalValue,
             IsSensitive = IsSensitiveParameter(parameter.Name),
             DbType = parameter.DbType,
             Direction = parameter.Direction,

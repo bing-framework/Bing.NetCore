@@ -5,6 +5,7 @@ using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Enums;
 using Bing.Helpers;
 using Bing.Text;
 using Microsoft.Extensions.DependencyInjection;
@@ -172,6 +173,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     protected SqlConnectionSource ConnectionSource => _connectionSource;
 
     /// <summary>
+    /// 当前查询解析后的数据库类型
+    /// </summary>
+    internal DatabaseType GetDatabaseType() => Options.GetDatabaseContext()?.DataSource?.DatabaseType ??
+                                               Options.DatabaseType;
+
+    /// <summary>
     /// 是否启用调试SQL
     /// </summary>
     protected bool EnabledDebugSql { get; set; } = true;
@@ -309,19 +316,13 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
         var context = contextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? contextAccessor?.Current ??
                   metadataOptions?.DefaultDatabaseContext;
         var dataSource = ResolveReadPreferenceDataSource(context);
-        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false)
-            return dataSource.ConnectionString;
-        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false)
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false ||
+            string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false)
         {
-            var collection = ServiceProvider.GetService<ConnectionStringCollection>();
-            var connectionString = collection != null &&
-                                   collection.TryGetValue(dataSource.ConnectionStringName, out var value)
-                ? value
-                : null;
-            if (string.IsNullOrWhiteSpace(connectionString) == false)
-                return connectionString;
-            throw new InvalidOperationException(
-                $"SQL 数据源 {dataSource.Key} 未找到连接字符串。缺失配置字段: {nameof(SqlDataSourceDescriptor.ConnectionString)} 或连接字符串名称 {dataSource.ConnectionStringName}。");
+            var resolver = ServiceProvider.GetService<ISqlConnectionStringResolver>() ??
+                           new DefaultSqlConnectionStringResolver(
+                               ServiceProvider.GetService<ConnectionStringCollection>());
+            return resolver.Resolve(dataSource);
         }
         return Options.ConnectionString;
     }
@@ -452,9 +453,18 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// <param name="builder">Sql 生成器</param>
     /// <returns>数据库参数</returns>
     protected object GetDbParameters(ISqlBuilder builder)
+        => GetDbParameters(builder, null);
+
+    /// <summary>
+    /// 获取数据库参数
+    /// </summary>
+    /// <param name="builder">Sql 生成器</param>
+    /// <param name="sql">当前执行的 Sql 语句</param>
+    /// <returns>数据库参数</returns>
+    protected object GetDbParameters(ISqlBuilder builder, string sql)
     {
         var parameters = SqlParameterBinder is ISqlParameterContextBinder binder
-            ? binder.Bind(builder, Options)
+            ? binder.Bind(builder, Options, CreateParameterBindingContext(sql, builder?.GetParams()))
             : SqlParameterBinder.Bind(builder);
         OutputParameters = parameters as ISqlOutputParameterAccessor;
         return parameters;
@@ -466,12 +476,42 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// <param name="parameter">原始参数对象</param>
     /// <returns>数据库参数</returns>
     protected object GetDbParameters(object parameter)
+        => GetDbParameters(parameter, null);
+
+    /// <summary>
+    /// 获取数据库参数
+    /// </summary>
+    /// <param name="parameter">原始参数对象</param>
+    /// <param name="sql">当前执行的 Sql 语句</param>
+    /// <returns>数据库参数</returns>
+    protected object GetDbParameters(object parameter, string sql)
     {
         var parameters = SqlParameterBinder is ISqlParameterContextBinder binder
-            ? binder.Bind(parameter, Options)
+            ? binder.Bind(parameter, Options, CreateParameterBindingContext(sql, parameter))
             : SqlParameterBinder.Bind(parameter);
         OutputParameters = parameters as ISqlOutputParameterAccessor;
         return parameters;
+    }
+
+    /// <summary>
+    /// 创建参数绑定上下文
+    /// </summary>
+    /// <param name="sql">当前执行的 Sql 语句</param>
+    /// <param name="source">原始参数源</param>
+    /// <param name="entityType">关联实体类型</param>
+    /// <returns>参数绑定上下文</returns>
+    protected virtual SqlParameterBindingContext CreateParameterBindingContext(string sql, object source,
+        Type entityType = null)
+    {
+        var context = Options.GetDatabaseContext();
+        return new SqlParameterBindingContext
+        {
+            Sql = sql,
+            DbKey = context?.DataSource?.Key ?? context?.DbKey,
+            DatabaseType = context?.DataSource?.DatabaseType ?? Options.DatabaseType,
+            EntityType = entityType,
+            Source = source
+        };
     }
 
     /// <summary>

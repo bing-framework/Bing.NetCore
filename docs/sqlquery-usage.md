@@ -446,6 +446,48 @@ sqlQuery.GetBuilder().AddParam<User>("statusCode", x => x.Status, 1);
 
 ---
 
+## 列表、参数集合与流式读取
+
+### 异步列表的 buffered 语义
+
+`ToListAsync<T>()`、`ToDynamicListAsync()`、分页列表和对应的存储过程列表都支持 `buffered` 参数，默认值为 `true`：
+
+```csharp
+var users = await query.ToListAsync<User>(buffered: false);
+```
+
+`buffered: false` 会将 Dapper 命令标记为非缓冲读取，但框架会在连接与事务仍有效时立即物化成 `List<T>`。因此该选项不返回延迟枚举，也不适合作为大结果集导出 API。
+
+### 可枚举参数集合与输出参数
+
+`SqlParameterCollection` 用于需要同时指定输入、输出、类型和长度的原生 SQL 调用。参数名称会按不含 `@`、`:`、`?` 前缀的标准名称去重，执行时仍会由当前 Provider 生成实际参数。
+
+```csharp
+var parameters = new SqlParameterCollection()
+    .Add("@name", "Bing", DbType.String, size: 32)
+    .AddOutput("result", DbType.Int32);
+
+executor.ExecuteSql("exec usp_save_user @name, @result output", parameters);
+var result = executor.OutputParameters.GetValue<int>("result");
+```
+
+输出值来自执行完成后的实际 `DbParameter`。实体映射、显式 `null`、`DbType`、长度、精度和 Provider 类型配置会沿同一绑定路径传递到命令对象。
+
+### StreamAsync
+
+对需要逐条消费大结果集的场景，使用 `StreamAsync<T>()`：
+
+```csharp
+await foreach (var user in query.StreamAsync<User>(cancellationToken: cancellationToken))
+{
+    await ExportAsync(user, cancellationToken);
+}
+```
+
+该 API 使用异步 Reader 逐行读取。完整枚举、提前 `break`、取消和读取异常都会释放 Reader；调用方传入的外部连接和外部事务不会被 Query 关闭、提交或回滚。`PrimaryReadStrategy.Transaction` 不支持流式读取，会在创建 Reader 前抛出异常。
+
+---
+
 ## 典型使用示例
 
 > 以下示例中的执行部分（`SomeExecutor.Execute*`）仅为示意，请根据实际项目中 `ISqlQueryOperation` 的实现替换为真实调用方式。

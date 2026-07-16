@@ -35,6 +35,11 @@ public abstract class SqlFactoryBase
     private readonly ISqlDataSourceResolver _dataSourceResolver;
 
     /// <summary>
+    /// SQL 连接字符串解析器。
+    /// </summary>
+    private readonly ISqlConnectionStringResolver _connectionStringResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
@@ -42,17 +47,23 @@ public abstract class SqlFactoryBase
     /// <param name="metadataOptions">SQL 元数据配置。</param>
     /// <param name="implementationTypeResolver">SQL 实现类型解析器。</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器。</param>
+    /// <param name="connectionStringResolver">SQL 连接字符串解析器。</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ISqlImplementationTypeResolver implementationTypeResolver = null,
-        ISqlDataSourceResolver dataSourceResolver = null)
+        ISqlDataSourceResolver dataSourceResolver = null,
+        ISqlConnectionStringResolver connectionStringResolver = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
         _metadataOptions = metadataOptions ?? new SqlMetadataOptions();
         _implementationTypeResolver = implementationTypeResolver;
         _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_metadataOptions);
+        _connectionStringResolver = connectionStringResolver ??
+                                    _serviceProvider.GetService<ISqlConnectionStringResolver>() ??
+                                    new DefaultSqlConnectionStringResolver(
+                                        _serviceProvider.GetService<ConnectionStringCollection>());
     }
 
     /// <summary>
@@ -217,26 +228,12 @@ public abstract class SqlFactoryBase
     /// <returns>连接字符串。</returns>
     private string ResolveConnectionString(SqlDataSourceDescriptor dataSource, SqlOptions template)
     {
-        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false)
-            return dataSource.ConnectionString;
-        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false)
-        {
-            var collection = _serviceProvider.GetService<ConnectionStringCollection>();
-            var connectionString = collection != null &&
-                                   collection.TryGetValue(dataSource.ConnectionStringName, out var value)
-                ? value
-                : null;
-            if (string.IsNullOrWhiteSpace(connectionString) == false)
-                return connectionString;
-            if (template?.Connection != null)
-                return null;
-            throw new InvalidOperationException(
-                $"SQL 数据源 {dataSource.Key} 未找到连接字符串。缺失配置字段: {nameof(SqlDataSourceDescriptor.ConnectionString)} 或连接字符串名称 {dataSource.ConnectionStringName}。");
-        }
+        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false ||
+            string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false)
+            return _connectionStringResolver.Resolve(dataSource);
         if (template?.Connection != null)
             return null;
-        throw new InvalidOperationException(
-            $"SQL 数据源 {dataSource?.Key ?? "<未指定>"} 缺少连接字符串配置。缺失配置字段: {nameof(SqlDataSourceDescriptor.ConnectionString)} 或 {nameof(SqlDataSourceDescriptor.ConnectionStringName)}。");
+        return _connectionStringResolver.Resolve(dataSource);
     }
 
     /// <summary>

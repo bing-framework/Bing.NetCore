@@ -166,8 +166,8 @@ public abstract partial class SqlQueryBase
     public Task<List<dynamic>> ExecuteProcedureQueryAsync(string procedure, int? timeout = null, bool buffered = true)
     {
         return InternalProcedureQueryAsync(procedure,
-            async (conn, command, param, transaction) => (await conn.QueryAsync(new CommandDefinition(command, param,
-                transaction, timeout, GetProcedureCommandType()))).ToList());
+            async (conn, command, param, transaction) => (await conn.QueryAsync(CreateQueryCommandDefinition(command,
+                param, transaction, timeout, buffered, commandType: GetProcedureCommandType()))).ToList());
     }
 
     /// <summary>
@@ -180,8 +180,9 @@ public abstract partial class SqlQueryBase
     public Task<List<TEntity>> ExecuteProcedureQueryAsync<TEntity>(string procedure, int? timeout = null, bool buffered = true)
     {
         return InternalProcedureQueryAsync(procedure,
-            async (conn, command, param, transaction) => (await conn.QueryAsync<TEntity>(new CommandDefinition(command,
-                param, transaction, timeout, GetProcedureCommandType()))).ToList());
+            async (conn, command, param, transaction) =>
+                (await conn.QueryAsync<TEntity>(CreateQueryCommandDefinition(command, param, transaction, timeout,
+                    buffered, commandType: GetProcedureCommandType()))).ToList());
     }
 
     /// <summary>

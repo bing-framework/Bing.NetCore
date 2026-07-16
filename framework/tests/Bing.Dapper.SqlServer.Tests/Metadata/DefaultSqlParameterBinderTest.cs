@@ -84,6 +84,36 @@ public class DefaultSqlParameterBinderTest
     }
 
     /// <summary>
+    /// 测试 - 框架参数集合应在实际命令中保留输入和输出参数的完整元数据。
+    /// </summary>
+    [Fact]
+    public void Bind_WithSqlParameterCollection_ShouldPopulateInputAndOutputDbParameters()
+    {
+        // Arrange
+        var binder = new DefaultSqlParameterBinder();
+        var collection = new SqlParameterCollection()
+            .Add("@name", "Bing", DbType.String, 32)
+            .AddOutput(":result", DbType.Int32);
+        var parameters = Assert.IsAssignableFrom<SqlMapper.IDynamicParameters>(binder.Bind(collection));
+        var accessor = Assert.IsAssignableFrom<ISqlOutputParameterAccessor>(parameters);
+        var command = new FakeDbCommand();
+
+        // Act
+        parameters.AddParameters(command, null);
+        command.CreatedParameters.Single(t => t.ParameterName == "result").Value = 42;
+
+        // Assert
+        command.CreatedParameters.Count.ShouldBe(2);
+        var input = command.CreatedParameters.Single(t => t.ParameterName == "name");
+        input.Value.ShouldBe("Bing");
+        input.Size.ShouldBe(32);
+        input.Direction.ShouldBe(ParameterDirection.Input);
+        var output = command.CreatedParameters.Single(t => t.ParameterName == "result");
+        output.Direction.ShouldBe(ParameterDirection.Output);
+        accessor.GetValue<int>("result").ShouldBe(42);
+    }
+
+    /// <summary>
     /// 测试样例
     /// </summary>
     private sealed class Sample

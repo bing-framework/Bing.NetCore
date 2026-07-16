@@ -46,6 +46,7 @@ public static partial class DapperServiceCollectionExtensions
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
+        services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
         services.TryAddSingleton<IEntityMappingResolver, DefaultEntityMappingResolver>();

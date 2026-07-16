@@ -31,6 +31,7 @@ public sealed class PostgreSqlDbParameterCustomizer : ISqlDbParameterCustomizer
     private static string GetTypeName(string typeName)
     {
         var index = typeName?.IndexOf('(') ?? -1;
-        return index < 0 ? typeName : typeName.Substring(0, index).Trim();
+        var name = index < 0 ? typeName : typeName.Substring(0, index).Trim();
+        return name?.Replace("|", ",");
     }
 }

@@ -119,19 +119,26 @@ public abstract partial class SqlQueryBase
     /// 获取实体集合
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken))).ToList());
+    public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null,
+        bool buffered = true, CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) =>
+            (await conn.QueryAsync(CreateQueryCommandDefinition(sql, param, transaction, timeout, buffered,
+                cancellationToken))).ToList());
 
     /// <summary>
     /// 获取实体集合
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
     public async Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null,
-        CancellationToken cancellationToken = default) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync<TEntity>(new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken))).ToList());
+        bool buffered = true, CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) =>
+            (await conn.QueryAsync<TEntity>(CreateQueryCommandDefinition(sql, param, transaction, timeout, buffered,
+                cancellationToken))).ToList());
 
     /// <summary>
     /// 获取实体集合
@@ -221,6 +228,25 @@ public abstract partial class SqlQueryBase
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(sql, map, param, transaction, buffered, "Id", timeout)).ToList());
 
     #endregion
+
+    /// <summary>
+    /// 创建异步列表查询命令定义
+    /// </summary>
+    /// <param name="sql">SQL 语句</param>
+    /// <param name="parameters">Dapper 参数对象</param>
+    /// <param name="transaction">数据库事务</param>
+    /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="buffered">是否由 Dapper 缓冲结果</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <param name="commandType">命令类型</param>
+    /// <returns>Dapper 命令定义</returns>
+    protected virtual CommandDefinition CreateQueryCommandDefinition(string sql, object parameters,
+        IDbTransaction transaction, int? timeout, bool buffered, CancellationToken cancellationToken = default,
+        CommandType? commandType = null)
+    {
+        return new CommandDefinition(sql, parameters, transaction, timeout, commandType,
+            buffered ? CommandFlags.Buffered : CommandFlags.None, cancellationToken);
+    }
 
     /// <summary>
     /// 内部查询

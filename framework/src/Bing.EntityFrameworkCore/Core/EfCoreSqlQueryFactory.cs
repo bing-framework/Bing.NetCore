@@ -2,6 +2,7 @@ using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -38,6 +39,11 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     private readonly ISqlDbConnectionFactoryResolver _connectionFactoryResolver;
 
     /// <summary>
+    /// SQL 连接字符串解析器
+    /// </summary>
+    private readonly ISqlConnectionStringResolver _connectionStringResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="EfCoreSqlQueryFactory"/>类型的实例
     /// </summary>
     /// <param name="queryFactory">SQL 查询对象工厂</param>
@@ -45,17 +51,20 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <param name="metadataOptions">SQL 元数据配置</param>
     /// <param name="typeConverterResolver">数据库类型转换器解析器</param>
     /// <param name="connectionFactoryResolver">独立数据库连接工厂解析器</param>
+    /// <param name="connectionStringResolver">SQL 连接字符串解析器</param>
     public EfCoreSqlQueryFactory(ISqlQueryFactory queryFactory,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ITypeConverterResolver typeConverterResolver = null,
-        ISqlDbConnectionFactoryResolver connectionFactoryResolver = null)
+        ISqlDbConnectionFactoryResolver connectionFactoryResolver = null,
+        ISqlConnectionStringResolver connectionStringResolver = null)
     {
         _queryFactory = queryFactory ?? throw new ArgumentNullException(nameof(queryFactory));
         _databaseContextAccessor = databaseContextAccessor;
         _metadataOptions = metadataOptions ?? new SqlMetadataOptions();
         _typeConverterResolver = typeConverterResolver;
         _connectionFactoryResolver = connectionFactoryResolver;
+        _connectionStringResolver = connectionStringResolver ?? new DefaultSqlConnectionStringResolver();
     }
 
     /// <inheritdoc />
@@ -66,12 +75,14 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
             throw new ArgumentNullException(nameof(unitOfWork));
         var databaseType = ResolveDatabaseType(unitOfWork);
         var dataSource = ResolveDataSource(databaseType, dbKey);
+        if (mode == EfCoreSqlConnectionMode.Shared && string.IsNullOrWhiteSpace(dbKey) == false)
+            EnsureSharedConnectionMatches(unitOfWork, dataSource);
         var query = CreateQuery(dataSource);
         BindEntityMetadata(query, unitOfWork);
         ApplyDatabaseContext(query, dataSource);
         if (mode == EfCoreSqlConnectionMode.Independent)
         {
-            var connectionString = ResolveIndependentConnectionString(unitOfWork, dataSource);
+            var connectionString = ResolveIndependentConnectionString(dataSource);
             var connection = CreateIndependentConnection(databaseType, connectionString);
             var independentContext = GetExternalContext(query);
             independentContext.SetOwnedConnection(connection);
@@ -134,15 +145,45 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <summary>
     /// 解析独立连接字符串
     /// </summary>
-    /// <param name="unitOfWork">工作单元</param>
     /// <param name="dataSource">数据源</param>
     /// <returns>连接字符串</returns>
-    private static string ResolveIndependentConnectionString(UnitOfWorkBase unitOfWork,
-        SqlDataSourceDescriptor dataSource)
+    private string ResolveIndependentConnectionString(SqlDataSourceDescriptor dataSource)
     {
-        if (string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false)
-            return dataSource.ConnectionString;
-        return unitOfWork.Database.GetConnectionString();
+        return _connectionStringResolver.Resolve(dataSource);
+    }
+
+    /// <summary>
+    /// 确保 Shared 模式的显式数据源与当前 DbContext 指向同一物理数据库
+    /// </summary>
+    /// <param name="unitOfWork">工作单元</param>
+    /// <param name="dataSource">显式选择的数据源</param>
+    private void EnsureSharedConnectionMatches(UnitOfWorkBase unitOfWork, SqlDataSourceDescriptor dataSource)
+    {
+        var dataSourceConnectionString = _connectionStringResolver.Resolve(dataSource);
+        var dbContextConnectionString = unitOfWork.Database.GetDbConnection().ConnectionString;
+        if (string.Equals(GetDatabaseIdentity(dataSourceConnectionString), GetDatabaseIdentity(dbContextConnectionString),
+                StringComparison.OrdinalIgnoreCase))
+            return;
+        throw new InvalidOperationException(
+            $"SQL 数据源 {dataSource.Key} 与当前 DbContext 指向不同的物理数据库，Shared 模式不能复用该连接，请使用 {nameof(EfCoreSqlConnectionMode.Independent)} 模式。");
+    }
+
+    /// <summary>
+    /// 获取用于比较物理数据库的连接标识
+    /// </summary>
+    /// <param name="connectionString">连接字符串</param>
+    /// <returns>规范化后的数据库标识</returns>
+    private static string GetDatabaseIdentity(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return string.Empty;
+        var builder = new DbConnectionStringBuilder { ConnectionString = connectionString };
+        foreach (var key in new[] { "Data Source", "DataSource", "Database", "Initial Catalog", "Filename" })
+        {
+            if (builder.TryGetValue(key, out var value) && string.IsNullOrWhiteSpace(value?.ToString()) == false)
+                return value.ToString().Trim();
+        }
+        return connectionString.Replace(" ", string.Empty);
     }
 
     /// <summary>

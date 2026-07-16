@@ -20,4 +20,14 @@ public partial interface ISqlQuery
     /// <returns>实体异步流</returns>
     IAsyncEnumerable<TEntity> StreamQueryAsync<TEntity>(int? timeout = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 以非缓冲方式异步逐行读取实体。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>实体异步流。</returns>
+    IAsyncEnumerable<TEntity> StreamAsync<TEntity>(int? timeout = null,
+        CancellationToken cancellationToken = default);
 }

@@ -7,16 +7,20 @@ public partial interface ISqlQuery
     /// 获取实体集合
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
-    Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null, CancellationToken cancellationToken = default);
+    Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null, bool buffered = true,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
-    Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null, CancellationToken cancellationToken = default);
+    Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null, bool buffered = true,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合

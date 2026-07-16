@@ -1,4 +1,5 @@
 using Bing.Data.Metadata;
+using System.Data;
 using Shouldly;
 using Xunit;
 
@@ -6,8 +7,7 @@ namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
 /// <see cref="OracleTypeConverter"/> 单元测试。
-/// 当前实现中除空输入返回 null 外，所有类型均抛出 NotImplementedException（待实现）。
-/// 测试目的是锁定现有边界行为，防止意外改动破坏空输入语义。
+/// 测试常见 Oracle 类型映射与未知类型的明确错误语义。
 /// </summary>
 public class OracleTypeConverterTest
 {
@@ -44,21 +44,36 @@ public class OracleTypeConverterTest
         _converter.ToDbType("   ").ShouldBeNull();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // 未实现类型 → NotImplementedException（占位）
-    // ═══════════════════════════════════════════════════════════
-
     /// <summary>
-    /// 测试目的：传入任意非空类型时应抛出 NotImplementedException（当前 Oracle 实现尚未完成）。
+    /// 测试目的：常见 Oracle 数据类型应映射为对应的 DbType。
     /// </summary>
     [Theory]
-    [InlineData("varchar2")]
-    [InlineData("number")]
-    [InlineData("date")]
-    [InlineData("clob")]
-    [InlineData("blob")]
-    public void ToDbType_AnyNonEmptyType_ShouldThrowNotImplementedException(string dataType)
+    [InlineData("varchar2", DbType.String)]
+    [InlineData("number", DbType.Decimal)]
+    [InlineData("date", DbType.DateTime)]
+    [InlineData("timestamp with time zone", DbType.DateTimeOffset)]
+    [InlineData("clob", DbType.String)]
+    [InlineData("blob", DbType.Binary)]
+    [InlineData("xmltype", DbType.Xml)]
+    public void ToDbType_WhenDataTypeIsSupported_ShouldReturnMappedDbType(string dataType, DbType expected)
     {
-        Should.Throw<NotImplementedException>(() => _converter.ToDbType(dataType));
+        // Act
+        var result = _converter.ToDbType(dataType);
+
+        // Assert
+        result.ShouldBe(expected);
+    }
+
+    /// <summary>
+    /// 测试目的：未知 Oracle 数据类型应抛出明确的不支持异常。
+    /// </summary>
+    [Fact]
+    public void ToDbType_WhenDataTypeIsUnknown_ShouldThrowNotSupportedException()
+    {
+        // Act
+        var exception = Should.Throw<NotSupportedException>(() => _converter.ToDbType("unsupported_type"));
+
+        // Assert
+        exception.Message.ShouldContain("unsupported_type");
     }
 }

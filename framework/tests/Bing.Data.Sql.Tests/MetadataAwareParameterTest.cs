@@ -222,4 +222,31 @@ public class MetadataAwareParameterTest
         exception.DbKey.ShouldBe("master");
         exception.PropertyName.ShouldBe(nameof(Sample.StringValue));
     }
+
+    /// <summary>
+    /// 测试 - 框架参数集合应按标准名称替换参数并保留输出参数元数据。
+    /// </summary>
+    [Fact]
+    public void SqlParameterCollection_ShouldNormalizeNamesAndPreserveOutputMetadata()
+    {
+        // Arrange
+        var parameters = new SqlParameterCollection()
+            .Add("@name", "first", DbType.String, 10)
+            .Add(":name", "second", DbType.String, 20)
+            .AddOutput("?result", DbType.Int32);
+
+        // Act
+        var result = new DefaultSqlParameterResolver().Resolve(new SqlParameterBindingContext
+        {
+            Source = parameters
+        });
+
+        // Assert
+        parameters.Count.ShouldBe(2);
+        result.Items.Count.ShouldBe(2);
+        result.Items.Single(t => t.Name == "name").Value.ShouldBe("second");
+        var output = result.Items.Single(t => t.Name == "result").Metadata;
+        output.Direction.ShouldBe(ParameterDirection.Output);
+        output.DbType.ShouldBe(DbType.Int32);
+    }
 }

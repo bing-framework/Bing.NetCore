@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders.Params;
 using Dapper;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Bing.Dapper.Tests.Metadata;
 
@@ -34,6 +37,27 @@ public class DefaultSqlParameterBinderTest
         Assert.Equal("abc", parameter.Value);
         Assert.Equal(DbType.String, parameter.DbType);
         Assert.Equal(20, parameter.Size);
+    }
+
+    /// <summary>
+    /// 测试 - PostgreSQL 组合 Provider 类型应写入实际参数的 NpgsqlDbType。
+    /// </summary>
+    [Fact]
+    public void PostgreSqlDbParameterCustomizer_WithCombinedFlags_ShouldConfigureNpgsqlDbType()
+    {
+        // Arrange
+        var customizer = new PostgreSqlDbParameterCustomizer();
+        var parameter = new NpgsqlParameter();
+        var sqlParameter = new SqlParam("ids", Array.Empty<Guid>())
+        {
+            ProviderTypeName = "Array | Uuid"
+        };
+
+        // Act
+        customizer.Configure(parameter, sqlParameter);
+
+        // Assert
+        Assert.Equal(NpgsqlDbType.Array | NpgsqlDbType.Uuid, parameter.NpgsqlDbType);
     }
 
     /// <summary>
