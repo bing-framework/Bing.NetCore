@@ -1,5 +1,7 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
+using Bing.Dapper;
+using Bing.Dapper.Sqlite;
 
 namespace Bing.EntityFrameworkCore.Tests.Core;
 
@@ -117,6 +119,33 @@ public class EfCoreSqlQueryFactoryTest
         // Assert
         var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
         Assert.Equal("Data Source=reporting.db", independentConnection.ConnectionString);
+    }
+
+    /// <summary>
+    /// 测试目的：未显式指定 dbKey 时，Independent 模式应使用环境 Use(dbKey) 解析的数据源，并在作用域释放后保持查询快照。
+    /// </summary>
+    [Fact]
+    public void Create_WhenAmbientDatabaseScopeIsSet_ShouldUseScopedDataSourceSnapshot()
+    {
+        // Arrange
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+        var databaseScopeManager = serviceProvider.GetRequiredService<IDatabaseScopeManager>();
+
+        // Act
+        ISqlQuery query;
+        using (databaseScopeManager.Use("reporting"))
+            query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
+
+        // Assert
+        using (query)
+        {
+            var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
+            Assert.Equal("Data Source=reporting.db", independentConnection.ConnectionString);
+        }
     }
 
     /// <summary>

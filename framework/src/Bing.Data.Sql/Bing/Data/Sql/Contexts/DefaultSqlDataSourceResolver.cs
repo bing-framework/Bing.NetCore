@@ -76,7 +76,8 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
             IsReadOnly = descriptor.IsReadOnly,
             MappingProfile = descriptor.MappingProfile,
             PrimaryReadStrategy = descriptor.PrimaryReadStrategy,
-            PrimaryDataSourceKey = descriptor.PrimaryDataSourceKey
+            PrimaryDataSourceKey = descriptor.PrimaryDataSourceKey,
+            SupportsTransactions = descriptor.SupportsTransactions
         };
         return result;
     }

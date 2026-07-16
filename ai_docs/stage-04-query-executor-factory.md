@@ -25,3 +25,10 @@
 - `ISqlQueryFactory` 与 `ISqlExecutorFactory` 仍仅保留无参和 `dbKey` 创建入口。
 - Factory 按数据源描述精确解析命名连接字符串；缺失命名配置不再回退 `Default`。
 - `Bing.Dapper.SqlServer.Tests` 已增至 174 passed，其中包含 Factory 连接字符串错误及事务 API 回归。
+
+## 2026-07-16 多 Provider 收尾
+
+- 新增 `AddMySqlProvider`、`AddPostgreSqlProvider`、`AddSqlServerProvider` 与 `AddSqliteProvider`。这些入口仅注册 Provider 实现、方言、参数定制器、类型转换器和连接工厂，不写入默认数据源。
+- 同容器场景应先注册 Provider 能力，再通过具名 `AddSqlDataSource` 配置 `mysql`、`pgsql`、`sqlserver`、`sqlite` 等数据源。原有 `Add*Query` / `Add*Executor` 快捷入口保持单默认数据源兼容行为。
+- 无键数据源快捷注册尝试把已存在默认数据源从一个 Provider 覆盖为另一个 Provider 时，会抛出明确异常，避免静默后注册覆盖。
+- `Bing.Dapper.SqlServer.Tests` 新增同容器四 Provider 路由测试，验证按 `dbKey` 创建正确 Query 和方言。

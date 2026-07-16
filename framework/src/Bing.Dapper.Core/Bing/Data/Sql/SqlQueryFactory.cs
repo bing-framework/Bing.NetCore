@@ -32,4 +32,27 @@ public sealed class SqlQueryFactory : SqlFactoryBase, ISqlQueryFactory
     /// <inheritdoc />
     public TQuery Create<TQuery>() where TQuery : class, ISqlQuery =>
         CreateInstance<TQuery>(GetCurrentContext(typeof(TQuery)));
+
+    /// <summary>
+    /// 创建固定在事务主库上下文中的查询对象。
+    /// </summary>
+    /// <typeparam name="TQuery">查询类型。</typeparam>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <param name="context">已解析的事务数据库上下文。</param>
+    /// <returns>查询对象。</returns>
+    internal TQuery CreateForTransaction<TQuery>(string dbKey, out DatabaseContext context)
+        where TQuery : class, ISqlQuery
+    {
+        context = CreateTransactionContext(dbKey);
+        return CreateInstance<TQuery>(context);
+    }
+
+    /// <summary>
+    /// 使用固定事务数据库上下文创建查询对象。
+    /// </summary>
+    /// <typeparam name="TQuery">查询类型。</typeparam>
+    /// <param name="context">事务数据库上下文。</param>
+    /// <returns>查询对象。</returns>
+    internal TQuery CreateForTransaction<TQuery>(DatabaseContext context) where TQuery : class, ISqlQuery =>
+        CreateInstance<TQuery>(context ?? throw new ArgumentNullException(nameof(context)));
 }

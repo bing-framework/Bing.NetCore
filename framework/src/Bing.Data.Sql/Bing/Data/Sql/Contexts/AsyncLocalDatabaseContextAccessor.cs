@@ -6,34 +6,58 @@ namespace Bing.Data.Sql;
 public sealed class AsyncLocalDatabaseContextAccessor : IDatabaseContextAccessor
 {
     /// <summary>
-    /// 当前上下文持有器
+    /// 当前数据库上下文。
     /// </summary>
-    private static readonly AsyncLocal<DatabaseContextHolder> CurrentHolder = new();
+    private readonly AsyncLocal<DatabaseContext> _current = new();
 
     /// <summary>
     /// 当前数据库上下文
     /// </summary>
     public DatabaseContext Current
     {
-        get => CurrentHolder.Value?.Context;
-        set
-        {
-            var holder = CurrentHolder.Value;
-            if (holder != null)
-                holder.Context = null;
-            if (value != null)
-                CurrentHolder.Value = new DatabaseContextHolder { Context = value };
-        }
+        get => Clone(_current.Value);
+        set => _current.Value = Clone(value);
     }
 
     /// <summary>
-    /// 数据库上下文持有器
+    /// 创建数据库上下文快照。
     /// </summary>
-    private sealed class DatabaseContextHolder
+    /// <param name="context">数据库上下文。</param>
+    /// <returns>数据库上下文快照。</returns>
+    private static DatabaseContext Clone(DatabaseContext context)
     {
-        /// <summary>
-        /// 数据库上下文
-        /// </summary>
-        public DatabaseContext Context { get; set; }
+        if (context == null)
+            return null;
+        return new DatabaseContext
+        {
+            DbKey = context.DbKey,
+            TenantId = context.TenantId,
+            ReadPreference = context.ReadPreference,
+            MappingProfile = context.MappingProfile,
+            DataSource = Clone(context.DataSource)
+        };
+    }
+
+    /// <summary>
+    /// 创建 SQL 数据源描述快照。
+    /// </summary>
+    /// <param name="dataSource">SQL 数据源描述。</param>
+    /// <returns>SQL 数据源描述快照。</returns>
+    private static SqlDataSourceDescriptor Clone(SqlDataSourceDescriptor dataSource)
+    {
+        if (dataSource == null)
+            return null;
+        return new SqlDataSourceDescriptor
+        {
+            Key = dataSource.Key,
+            DatabaseType = dataSource.DatabaseType,
+            ConnectionStringName = dataSource.ConnectionStringName,
+            ConnectionString = dataSource.ConnectionString,
+            IsReadOnly = dataSource.IsReadOnly,
+            MappingProfile = dataSource.MappingProfile,
+            PrimaryReadStrategy = dataSource.PrimaryReadStrategy,
+            PrimaryDataSourceKey = dataSource.PrimaryDataSourceKey,
+            SupportsTransactions = dataSource.SupportsTransactions
+        };
     }
 }

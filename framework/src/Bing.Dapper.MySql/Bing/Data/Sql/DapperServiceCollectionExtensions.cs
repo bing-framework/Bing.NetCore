@@ -1,15 +1,45 @@
-﻿using Bing.Data.Enums;
+﻿using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Metadata;
+using Bing.Data.Sql;
+using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Bing.Data.Sql;
+namespace Bing.Dapper.MySql;
 
 /// <summary>
-/// Dapper服务集合扩展
+/// MySql 服务集合扩展
 /// </summary>
-public static partial class DapperServiceCollectionExtensions
+public static class MySqlServiceCollectionExtensions
 {
+    /// <summary>
+    /// 注册 MySQL Provider 能力，不配置默认数据源。
+    /// 多 Provider 容器应先调用此方法，再通过具名 <c>AddSqlDataSource</c> 配置实际数据源。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddMySqlProvider(this IServiceCollection services)
+    {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        var queryOptions = new SqlOptions<MySqlQuery>();
+        var executorOptions = new SqlOptions<MySqlExecutor>();
+        queryOptions.RegisterStringTypeHandler();
+        executorOptions.RegisterStringTypeHandler();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.MySql,
+            connection => new MySqlDatabaseFactory().Create(connection).GetConnection());
+        services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.MySql);
+        services.TryAddTransient<ISqlQuery, MySqlQuery>();
+        services.TryAddTransient<ISqlExecutor, MySqlExecutor>();
+        services.TryAddSingleton(queryOptions);
+        services.TryAddSingleton(executorOptions);
+        return services;
+    }
+
     #region AddMySqlQuery(注册MySql Sql查询对象)
 
     /// <summary>

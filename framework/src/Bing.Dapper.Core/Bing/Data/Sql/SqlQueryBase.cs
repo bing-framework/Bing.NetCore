@@ -179,6 +179,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
                                                Options.DatabaseType;
 
     /// <summary>
+    /// 获取当前查询固定的数据库上下文。
+    /// </summary>
+    /// <returns>数据库上下文。</returns>
+    internal DatabaseContext GetDatabaseContext() => Options.GetDatabaseContext();
+
+    /// <summary>
     /// 是否启用调试SQL
     /// </summary>
     protected bool EnabledDebugSql { get; set; } = true;

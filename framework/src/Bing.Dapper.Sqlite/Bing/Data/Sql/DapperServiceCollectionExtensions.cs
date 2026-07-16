@@ -1,15 +1,45 @@
-﻿using Bing.Data.Enums;
+﻿using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Metadata;
+using Bing.Data.Sql;
+using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Bing.Data.Sql;
+namespace Bing.Dapper.Sqlite;
 
 /// <summary>
-/// Dapper服务集合扩展
+/// Sqlite 服务集合扩展
 /// </summary>
-public static partial class DapperServiceCollectionExtensions
+public static class SqliteServiceCollectionExtensions
 {
+    /// <summary>
+    /// 注册 SQLite Provider 能力，不配置默认数据源。
+    /// 多 Provider 容器应通过具名数据源完成运行时路由。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqliteProvider(this IServiceCollection services)
+    {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        var queryOptions = new SqlOptions<SqliteSqlQuery>();
+        var executorOptions = new SqlOptions<SqliteSqlExecutor>();
+        queryOptions.RegisterStringTypeHandler();
+        executorOptions.RegisterStringTypeHandler();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite,
+            connection => new SqliteDatabaseFactory().Create(connection).GetConnection());
+        services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
+        services.AddSqlImplementationType<ISqlQuery, SqliteSqlQuery>(DatabaseType.Sqlite);
+        services.AddSqlImplementationType<ISqlExecutor, SqliteSqlExecutor>(DatabaseType.Sqlite);
+        services.TryAddTransient<ISqlQuery, SqliteSqlQuery>();
+        services.TryAddTransient<ISqlExecutor, SqliteSqlExecutor>();
+        services.TryAddSingleton(queryOptions);
+        services.TryAddSingleton(executorOptions);
+        return services;
+    }
+
     #region AddSqliteSqlQuery(注册Sqlite Sql查询对象)
 
     /// <summary>

@@ -29,11 +29,15 @@ public abstract partial class SqlQueryBase
     {
         DiagnosticsMessage message = null;
         var completed = false;
+        var failed = false;
         IEnumerator<TEntity> enumerator = null;
+        if (ExecuteBefore() == false)
+        {
+            ExecuteAfter((object)null);
+            yield break;
+        }
         try
         {
-            if (ExecuteBefore() == false)
-                yield break;
             var connection = GetConnection();
             var sql = GetSql();
             var dbParameters = GetDbParameters();
@@ -47,6 +51,7 @@ public abstract partial class SqlQueryBase
         {
             RollbackQueryTransaction();
             ExecuteError(message, e);
+            ExecuteAfter((object)null);
             throw;
         }
 
@@ -65,6 +70,7 @@ public abstract partial class SqlQueryBase
                     }
                     catch (Exception e)
                     {
+                        failed = true;
                         RollbackQueryTransaction();
                         ExecuteError(message, e);
                         throw;
@@ -73,13 +79,14 @@ public abstract partial class SqlQueryBase
                 }
             }
             CompleteQueryTransaction();
-            ExecuteAfter(message);
             completed = true;
         }
         finally
         {
             if (completed == false)
                 RollbackQueryTransaction();
+            if (failed == false)
+                ExecuteAfter(message);
             ExecuteAfter((object)null);
         }
     }
@@ -97,12 +104,16 @@ public abstract partial class SqlQueryBase
         EnsureStreamingSupported();
         DiagnosticsMessage message = null;
         var completed = false;
+        var failed = false;
         IDataReader reader = null;
         Func<IDataReader, TEntity> parser = null;
+        if (ExecuteBefore() == false)
+        {
+            ExecuteAfter((object)null);
+            yield break;
+        }
         try
         {
-            if (ExecuteBefore() == false)
-                yield break;
             var connection = GetConnection();
             var sql = GetSql();
             var dbParameters = GetDbParameters();
@@ -118,6 +129,7 @@ public abstract partial class SqlQueryBase
         {
             RollbackQueryTransaction();
             ExecuteError(message, e);
+            ExecuteAfter((object)null);
             throw;
         }
 
@@ -138,6 +150,7 @@ public abstract partial class SqlQueryBase
                         }
                         catch (Exception e)
                         {
+                            failed = true;
                             RollbackQueryTransaction();
                             ExecuteError(message, e);
                             throw;
@@ -158,6 +171,7 @@ public abstract partial class SqlQueryBase
                         }
                         catch (Exception e)
                         {
+                            failed = true;
                             RollbackQueryTransaction();
                             ExecuteError(message, e);
                             throw;
@@ -167,13 +181,14 @@ public abstract partial class SqlQueryBase
                 }
             }
             CompleteQueryTransaction();
-            ExecuteAfter(message);
             completed = true;
         }
         finally
         {
             if (completed == false)
                 RollbackQueryTransaction();
+            if (failed == false)
+                ExecuteAfter(message);
             ExecuteAfter((object)null);
         }
     }

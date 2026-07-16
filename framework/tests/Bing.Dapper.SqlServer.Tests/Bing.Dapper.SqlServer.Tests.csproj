@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.Oracle\Bing.Dapper.Oracle.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.PostgreSql\Bing.Dapper.PostgreSql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.SqlServer\Bing.Dapper.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.Sqlite\Bing.Dapper.Sqlite.csproj" />
   </ItemGroup>
 
   <ItemGroup>

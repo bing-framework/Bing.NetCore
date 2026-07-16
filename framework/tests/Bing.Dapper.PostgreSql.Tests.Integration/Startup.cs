@@ -1,4 +1,5 @@
 using AspectCore.Extensions.Hosting;
+using Bing.Dapper.PostgreSql;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.Configuration;

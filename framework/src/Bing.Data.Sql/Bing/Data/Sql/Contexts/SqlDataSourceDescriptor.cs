@@ -46,4 +46,9 @@ public sealed class SqlDataSourceDescriptor
     /// 主库数据源标识
     /// </summary>
     public string PrimaryDataSourceKey { get; set; }
+
+    /// <summary>
+    /// 是否支持本地事务。Doris 等仅通过 MySQL 协议提供分析查询的数据源应设为 false。
+    /// </summary>
+    public bool SupportsTransactions { get; set; } = true;
 }

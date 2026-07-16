@@ -5,6 +5,8 @@ using Bing.Admin.Data.UnitOfWorks.MySql;
 using Bing.Core.Modularity;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Dapper;
+using Bing.Dapper.MySql;
 using Bing.FreeSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

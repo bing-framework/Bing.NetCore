@@ -9,6 +9,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Database;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
 using Dapper;
@@ -106,6 +107,27 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         query.CurrentOptions.ConnectionString.ShouldBe("Server=config;Database=test;");
+    }
+
+    /// <summary>
+    /// 测试目的：无键数据源快捷注册不应静默覆盖已注册的其他 Provider 默认数据源。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WhenDefaultProviderDiffers_ShouldRequireNamedDataSource()
+    {
+        // Arrange
+        var services = CreateServices();
+        services.AddSqlDataSource(null, DatabaseType.SqlServer, "Server=default;Database=test;");
+        services.AddSqlDataSource(null, DatabaseType.Sqlite, "Data Source=default.db");
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            provider.GetRequiredService<SqlMetadataOptions>());
+
+        // Assert
+        exception.Message.ShouldContain("多 Provider");
+        exception.Message.ShouldContain("具名数据源");
     }
 
     /// <summary>
@@ -544,6 +566,35 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - 禁用本地事务的数据源不应创建连接或事务。
+    /// </summary>
+    [Fact]
+    public void BeginTransaction_WhenDataSourceDoesNotSupportTransactions_ShouldThrowBeforeOpeningConnection()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var query = CreateOwnedQuery(connection);
+        query.Config(options => options.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "doris",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "doris",
+                DatabaseType = DatabaseType.MySql,
+                SupportsTransactions = false
+            }
+        }));
+
+        // Act
+        var exception = Should.Throw<NotSupportedException>(() => query.BeginTransaction());
+
+        // Assert
+        exception.Message.ShouldContain("doris");
+        connection.LastTransaction.ShouldBeNull();
+        connection.State.ShouldBe(ConnectionState.Open);
+    }
+
+    /// <summary>
     /// 测试 - 独立 SQL 事务作用域提交时应提交作用域拥有的事务。
     /// </summary>
     [Fact]
@@ -649,6 +700,52 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         scope.IsCompleted.ShouldBeTrue();
         connection.LastTransaction.CommitCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：事务开始后切换环境数据库时，子查询和执行器仍应使用开始时解析的主库上下文、连接和事务。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenAmbientContextChanges_ShouldKeepCapturedPrimaryContext()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var metadataOptions = CreateRoutingMetadataOptions();
+        metadataOptions.DataSources.DataSources["default"].ConnectionString = null;
+        metadataOptions.DataSources.DataSources["reporting"].ConnectionString = null;
+        metadataOptions.DataSources.DataSources["reporting"].PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource;
+        metadataOptions.DataSources.DataSources["reporting"].PrimaryDataSourceKey = "default";
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var databaseScopeManager = provider.GetRequiredService<IDatabaseScopeManager>();
+        var transactionScopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
+        var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
+
+        // Act
+        using (databaseScopeManager.Use("reporting"))
+        using (var transactionScope = transactionScopeFactory.Begin())
+        {
+            accessor.Current = new DatabaseContext
+            {
+                DbKey = "reporting",
+                DataSource = metadataOptions.DataSources.DataSources["reporting"],
+                MappingProfile = "changed-after-begin"
+            };
+            var query = transactionScope.CreateQuery();
+            var executor = transactionScope.CreateExecutor();
+
+            // Assert
+            transactionScope.DbKey.ShouldBe("default");
+            transactionScope.DatabaseType.ShouldBe(DatabaseType.SqlServer);
+            query.GetConnection().ShouldBeSameAs(connection);
+            ((IDbTransactionManager)query).GetTransaction().ShouldBeSameAs(transactionScope.Transaction);
+            executor.GetConnection().ShouldBeSameAs(connection);
+            ((IDbTransactionManager)executor).GetTransaction().ShouldBeSameAs(transactionScope.Transaction);
+        }
+
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -853,6 +950,35 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         connection.ReaderCreateCount.ShouldBe(1);
+        connection.ReaderDisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 流式查询提前终止时应完成一次成功诊断。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenEnumerationStopsEarly_ShouldPublishAfterDiagnosticsOnce()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add,
+            name => name == SqlQueryDiagnosticListenerNames.AfterExecute);
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 1, Name = "Alice" },
+                new MappedSample { Id = 2, Name = "Bob" })
+        };
+        var query = CreateQuery(connection);
+        query.Select("Id,Name").From("Users");
+
+        // Act
+        using (var enumerator = query.StreamQuery<MappedSample>().GetEnumerator())
+            enumerator.MoveNext().ShouldBeTrue();
+
+        // Assert
+        messages.Count.ShouldBe(1);
+        messages[0].Operation.ShouldBe(SqlQueryDiagnosticListenerNames.AfterExecute);
         connection.ReaderDisposeCount.ShouldBe(1);
     }
 

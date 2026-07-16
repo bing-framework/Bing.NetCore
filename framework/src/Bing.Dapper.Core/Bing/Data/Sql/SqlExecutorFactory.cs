@@ -32,4 +32,13 @@ public sealed class SqlExecutorFactory : SqlFactoryBase, ISqlExecutorFactory
     /// <inheritdoc />
     public TExecutor Create<TExecutor>() where TExecutor : class, ISqlExecutor =>
         CreateInstance<TExecutor>(GetCurrentContext(typeof(TExecutor)));
+
+    /// <summary>
+    /// 使用固定事务数据库上下文创建执行器对象。
+    /// </summary>
+    /// <typeparam name="TExecutor">执行器类型。</typeparam>
+    /// <param name="context">事务数据库上下文。</param>
+    /// <returns>执行器对象。</returns>
+    internal TExecutor CreateForTransaction<TExecutor>(DatabaseContext context) where TExecutor : class, ISqlExecutor =>
+        CreateInstance<TExecutor>(context ?? throw new ArgumentNullException(nameof(context)));
 }

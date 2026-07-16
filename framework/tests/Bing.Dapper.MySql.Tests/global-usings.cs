@@ -7,5 +7,7 @@ global using System.Text;
 global using System.Threading.Tasks;
 global using System.Threading;
 global using System;
+global using Bing.Dapper;
+global using Bing.Dapper.MySql;
 global using Shouldly;
 global using Xunit;

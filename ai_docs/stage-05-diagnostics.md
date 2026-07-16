@@ -29,3 +29,9 @@
 
 - 诊断模型继续仅使用统一参数、连接和事务快照，未重新引入旧参数字段。
 - EF Shared 与 Independent 连接来源、事务快照的专项断言将随诊断消费者的 Integration Test 一并补充。
+
+## 2026-07-16 流式查询收尾
+
+- `StreamQuery<T>` 和 `StreamQueryAsync<T>` 在完整枚举、提前终止时都会完成一次 `AfterExecute` 诊断；异常路径仅发布 `ErrorExecute`。
+- 流式枚举提前终止仍释放 Reader，保留现有 `buffered:false` 列表查询语义：列表 API 会物化最终结果，真正逐行读取继续使用流式 API。
+- SQL Server Provider 测试新增提前终止流式枚举的单次完成诊断断言。

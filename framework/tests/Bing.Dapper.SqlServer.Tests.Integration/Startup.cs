@@ -1,4 +1,8 @@
 using AspectCore.Extensions.Hosting;
+using Bing.Dapper;
+using Bing.Dapper.MySql;
+using Bing.Dapper.PostgreSql;
+using Bing.Dapper.SqlServer;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.Configuration;
@@ -46,11 +50,18 @@ public class Startup
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
     {
         var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+        var mySqlConnectionString = context.Configuration.GetConnectionString("MySqlConnection");
+        var postgreSqlConnectionString = context.Configuration.GetConnectionString("PostgreSqlConnection");
 
         // 如果连接字符串为空，SqlQuery/SqlExecutor 将无法正常工作，
         // 但 Startup 本身不应抛异常，测试通过 [IntegrationFact] 跳过机制保护。
         services.AddSqlServerSqlQuery(connectionString ?? string.Empty);
         services.AddSqlServerSqlExecutor(connectionString ?? string.Empty);
+        services.AddMySqlProvider();
+        services.AddPostgreSqlProvider();
+        services.AddSqlDataSource("mysql", Bing.Data.Enums.DatabaseType.MySql, mySqlConnectionString);
+        services.AddSqlDataSource("pgsql", Bing.Data.Enums.DatabaseType.PgSql, postgreSqlConnectionString);
+        services.AddSqlDataSource("sqlserver", Bing.Data.Enums.DatabaseType.SqlServer, connectionString);
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
         services.AddBing();
     }

@@ -95,8 +95,8 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
         {
             if (_disposed)
                 return;
-            _databaseContextAccessor.Current = _parent;
             _disposed = true;
+            _databaseContextAccessor.Current = _parent;
         }
     }
 }

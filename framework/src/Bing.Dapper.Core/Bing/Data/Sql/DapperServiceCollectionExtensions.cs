@@ -1,4 +1,6 @@
-﻿using Bing.Data.Enums;
+﻿using Bing.Data;
+using Bing.Data.Enums;
+using Bing.Data.Sql;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -6,12 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Bing.Data.Sql;
+namespace Bing.Dapper;
 
 /// <summary>
-/// Dapper服务集合扩展
+/// Dapper 核心服务集合扩展
 /// </summary>
-public static partial class DapperServiceCollectionExtensions
+public static class DapperCoreServiceCollectionExtensions
 {
     /// <summary>
     /// 注册数据库信息
@@ -45,6 +47,7 @@ public static partial class DapperServiceCollectionExtensions
         });
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
+        services.TryAddScoped<IReadPreferenceScopeManager, ReadPreferenceScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
@@ -101,6 +104,11 @@ public static partial class DapperServiceCollectionExtensions
             {
                 descriptor = new SqlDataSourceDescriptor();
                 options.DataSources.DataSources[dataSourceKey] = descriptor;
+            }
+            else if (string.IsNullOrWhiteSpace(key) && descriptor.DatabaseType != databaseType)
+            {
+                throw new InvalidOperationException(
+                    $"默认 SQL 数据源 {dataSourceKey} 已注册为 {descriptor.DatabaseType}，不能使用无键注册覆盖为 {databaseType}。多 Provider 请使用具名数据源。");
             }
             descriptor.Key = dataSourceKey;
             descriptor.DatabaseType = databaseType;

@@ -13,7 +13,7 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 测试 - 获取实体集合
     /// </summary>
-    [Fact]
+    [IntegrationFact]
     public async Task Test_ExecuteQuery_1()
     {
         // 插入2条数据

@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
     <ProjectReference Include="..\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj" />
   </ItemGroup>
 

@@ -7,6 +7,28 @@ namespace Bing.Data.Sql;
 /// </summary>
 public abstract partial class SqlQueryBase
 {
+    /// <summary>
+    /// 绑定固定事务执行上下文。
+    /// </summary>
+    /// <param name="context">事务数据库上下文。</param>
+    /// <param name="connection">事务连接。</param>
+    /// <param name="transaction">事务。</param>
+    internal void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction)
+    {
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
+        if (connection == null)
+            throw new ArgumentNullException(nameof(connection));
+        if (transaction == null)
+            throw new ArgumentNullException(nameof(transaction));
+        if (transaction.Connection != null && ReferenceEquals(transaction.Connection, connection) == false)
+            throw new InvalidOperationException("事务连接与固定事务执行上下文不一致");
+        Options.DatabaseType = context.DataSource?.DatabaseType ?? Options.DatabaseType;
+        Options.SetDatabaseContext(context);
+        SetConnection(connection);
+        SetTransaction(transaction);
+    }
+
     #region SetTransaction(设置数据库事务)
 
     /// <summary>
@@ -20,8 +42,11 @@ public abstract partial class SqlQueryBase
         _transaction = transaction;
         _transactionId = Guid.NewGuid().ToString("N");
         _transactionOwnership = SqlResourceOwnership.External;
-        _connection = transaction.Connection;
-        _connectionOwnership = SqlResourceOwnership.External;
+        if (transaction.Connection != null)
+        {
+            _connection = transaction.Connection;
+            _connectionOwnership = SqlResourceOwnership.External;
+        }
     }
 
     #endregion
@@ -46,8 +71,9 @@ public abstract partial class SqlQueryBase
             return null;
         if (context.DataSource?.PrimaryReadStrategy != PrimaryReadStrategy.Transaction)
             return null;
+        var primaryReadTransaction = BeginTransaction();
         _primaryReadTransactionStarted = true;
-        return BeginTransaction();
+        return primaryReadTransaction;
     }
 
     /// <summary>
@@ -109,6 +135,7 @@ public abstract partial class SqlQueryBase
         {
             if (_transaction != null)
                 return _transaction;
+            EnsureTransactionsSupported();
             var connection = GetConnection();
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
@@ -125,6 +152,18 @@ public abstract partial class SqlQueryBase
             ReleaseTransaction();
             throw;
         }
+    }
+
+    /// <summary>
+    /// 确保当前数据源支持本地事务。
+    /// </summary>
+    private void EnsureTransactionsSupported()
+    {
+        var dataSource = Options.GetDatabaseContext()?.DataSource;
+        if (dataSource?.SupportsTransactions != false)
+            return;
+        var dbKey = dataSource.Key ?? Options.GetDatabaseContext()?.DbKey ?? "<default>";
+        throw new NotSupportedException($"数据源 {dbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
     }
 
     #endregion

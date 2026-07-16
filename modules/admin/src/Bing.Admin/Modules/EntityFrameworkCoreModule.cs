@@ -3,6 +3,8 @@ using Bing.Admin.Data;
 using Bing.Core.Modularity;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Dapper;
+using Bing.Dapper.MySql;
 using Bing.Datas.EntityFramework.MySql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

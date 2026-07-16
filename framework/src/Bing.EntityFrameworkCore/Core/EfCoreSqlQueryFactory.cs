@@ -44,6 +44,11 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     private readonly ISqlConnectionStringResolver _connectionStringResolver;
 
     /// <summary>
+    /// SQL 数据源解析器。
+    /// </summary>
+    private readonly ISqlDataSourceResolver _dataSourceResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="EfCoreSqlQueryFactory"/>类型的实例
     /// </summary>
     /// <param name="queryFactory">SQL 查询对象工厂</param>
@@ -52,12 +57,14 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <param name="typeConverterResolver">数据库类型转换器解析器</param>
     /// <param name="connectionFactoryResolver">独立数据库连接工厂解析器</param>
     /// <param name="connectionStringResolver">SQL 连接字符串解析器</param>
+    /// <param name="dataSourceResolver">SQL 数据源解析器</param>
     public EfCoreSqlQueryFactory(ISqlQueryFactory queryFactory,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ITypeConverterResolver typeConverterResolver = null,
         ISqlDbConnectionFactoryResolver connectionFactoryResolver = null,
-        ISqlConnectionStringResolver connectionStringResolver = null)
+        ISqlConnectionStringResolver connectionStringResolver = null,
+        ISqlDataSourceResolver dataSourceResolver = null)
     {
         _queryFactory = queryFactory ?? throw new ArgumentNullException(nameof(queryFactory));
         _databaseContextAccessor = databaseContextAccessor;
@@ -65,6 +72,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         _typeConverterResolver = typeConverterResolver;
         _connectionFactoryResolver = connectionFactoryResolver;
         _connectionStringResolver = connectionStringResolver ?? new DefaultSqlConnectionStringResolver();
+        _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_metadataOptions);
     }
 
     /// <inheritdoc />
@@ -101,16 +109,21 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// </summary>
     /// <param name="query">SQL 查询对象</param>
     /// <param name="dataSource">数据源</param>
-    private static void ApplyDatabaseContext(ISqlQuery query, SqlDataSourceDescriptor dataSource)
+    private void ApplyDatabaseContext(ISqlQuery query, SqlDataSourceDescriptor dataSource)
     {
         if (query == null || dataSource == null)
             return;
+        var current = _databaseContextAccessor?.Current;
         query.Config(options =>
         {
-            var context = options.GetDatabaseContext() ?? new DatabaseContext();
-            context.DbKey = dataSource.Key;
-            context.DataSource = dataSource;
-            options.SetDatabaseContext(context);
+            options.SetDatabaseContext(new DatabaseContext
+            {
+                DbKey = dataSource.Key,
+                DataSource = dataSource,
+                TenantId = current?.TenantId,
+                MappingProfile = dataSource.MappingProfile ?? current?.MappingProfile,
+                ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
+            });
         });
     }
 
@@ -194,12 +207,18 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <returns>SQL 数据源</returns>
     private SqlDataSourceDescriptor ResolveDataSource(DatabaseType databaseType, string dbKey)
     {
-        if (string.IsNullOrWhiteSpace(dbKey) == false)
+        var current = _databaseContextAccessor?.Current;
+        var requestedDbKey = string.IsNullOrWhiteSpace(dbKey) ? current?.DbKey : dbKey;
+        if (string.IsNullOrWhiteSpace(requestedDbKey) == false)
         {
-            if (_metadataOptions.DataSources.DataSources.TryGetValue(dbKey, out var dataSource) == false)
-                throw new InvalidOperationException($"未注册 SQL 数据源 {dbKey}。");
+            var dataSource = _dataSourceResolver.Resolve(requestedDbKey, new DatabaseScopeOptions
+            {
+                DbKey = requestedDbKey,
+                TenantId = current?.TenantId,
+                ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
+            });
             if (dataSource.DatabaseType != databaseType)
-                throw new InvalidOperationException($"SQL 数据源 {dbKey} 的数据库类型 {dataSource.DatabaseType} 与 EF Core Provider 对应的数据库类型 {databaseType} 不一致。");
+                throw new InvalidOperationException($"SQL 数据源 {requestedDbKey} 的数据库类型 {dataSource.DatabaseType} 与 EF Core Provider 对应的数据库类型 {databaseType} 不一致。");
             return dataSource;
         }
 

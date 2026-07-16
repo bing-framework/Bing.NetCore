@@ -11,7 +11,7 @@ public partial class MySqlExecutorTest
     /// <summary>
     /// 测试 - 执行Sql增删改操作
     /// </summary>
-    [Fact]
+    [IntegrationFact]
     public async Task Test_ExecuteAsync()
     {
         var id = Guid.NewGuid();

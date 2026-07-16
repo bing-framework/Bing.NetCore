@@ -26,3 +26,9 @@
 ## 风险
 
 - `BeginAsync` 在 `netstandard2.0` 上以同步开始事务并返回已完成任务实现；底层 Provider 的真正异步打开和开始事务需要在后续提高目标框架或采用 Provider 专用适配器时处理。
+
+## 2026-07-16 上下文固定与 Doris 边界
+
+- 事务开始时通过主库读取偏好解析并复制完整数据库上下文；事务子 Query 和 Executor 复用该快照、同一连接和同一事务，不再读取后续 Ambient Context。
+- 数据源快照会复制连接名称、映射配置、读写策略与本地事务能力，避免运行期间修改描述符导致事务上下文漂移。
+- `SqlDataSourceDescriptor.SupportsTransactions` 默认值为 `true`。Doris 使用 `DatabaseType.MySql` 和独立 Mapping Profile 接入时应设为 `false`，本地事务开始会明确抛出不支持异常。Doris 复用 MySQL 协议、方言与参数格式，但不默认具备完整 MySQL 的事务、更新、锁和批量写能力。

@@ -1,6 +1,7 @@
 ﻿using AspectCore.Extensions.DependencyInjection;
 using AspectCore.Extensions.Hosting;
-using Bing.Dapper.Tests.Infrastructure;
+using Bing.Dapper;
+using Bing.Dapper.MySql;
 using Bing.Data.Sql;
 using Bing.Datas.EntityFramework.MySql;
 using Bing.DependencyInjection;
@@ -49,19 +50,6 @@ public class Startup
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
         services.EnableAop();
         services.AddBing();
-        InitDatabase(services);
-        
-    }
-
-    /// <summary>
-    /// 初始化数据库
-    /// </summary>
-    private void InitDatabase(IServiceCollection services)
-    {
-        var unitOfWork = (MySqlUnitOfWork)services.BuildServiceContextProvider().GetService<ITestUnitOfWork>();
-        unitOfWork?.Database.EnsureDeleted();
-        unitOfWork?.Database.EnsureCreated();
-        DatabaseScript.InitProcedures(unitOfWork?.Database);
     }
 
     /// <summary>

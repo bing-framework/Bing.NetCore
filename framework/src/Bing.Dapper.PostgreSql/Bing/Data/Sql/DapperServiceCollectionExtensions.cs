@@ -1,15 +1,45 @@
-﻿using Bing.Data.Enums;
+﻿using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Metadata;
+using Bing.Data.Sql;
+using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Bing.Data.Sql;
+namespace Bing.Dapper.PostgreSql;
 
 /// <summary>
-/// Dapper服务集合扩展
+/// PostgreSql 服务集合扩展
 /// </summary>
-public static partial class DapperServiceCollectionExtensions
+public static class PostgreSqlServiceCollectionExtensions
 {
+    /// <summary>
+    /// 注册 PostgreSQL Provider 能力，不配置默认数据源。
+    /// 多 Provider 容器应通过具名数据源完成运行时路由。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddPostgreSqlProvider(this IServiceCollection services)
+    {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        var queryOptions = new SqlOptions<PostgreSqlQuery>();
+        var executorOptions = new SqlOptions<PostgreSqlExecutor>();
+        queryOptions.RegisterStringTypeHandler();
+        executorOptions.RegisterStringTypeHandler();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.PgSql,
+            connection => new PostgreSqlDatabaseFactory().Create(connection).GetConnection());
+        services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
+        services.AddSqlImplementationType<ISqlQuery, PostgreSqlQuery>(DatabaseType.PgSql);
+        services.AddSqlImplementationType<ISqlExecutor, PostgreSqlExecutor>(DatabaseType.PgSql);
+        services.TryAddTransient<ISqlQuery, PostgreSqlQuery>();
+        services.TryAddTransient<ISqlExecutor, PostgreSqlExecutor>();
+        services.TryAddSingleton(queryOptions);
+        services.TryAddSingleton(executorOptions);
+        return services;
+    }
+
     #region AddPostgreSqlQuery(注册PostgreSql Sql查询对象)
 
     /// <summary>

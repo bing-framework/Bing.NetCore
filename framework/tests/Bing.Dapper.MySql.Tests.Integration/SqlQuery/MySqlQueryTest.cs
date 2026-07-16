@@ -30,7 +30,7 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 测试 - 临时禁用调试日志
     /// </summary>
-    [Fact]
+    [IntegrationFact]
     public async Task Test_DisableDebugLog()
     {
         // 插入2条数据

@@ -105,6 +105,25 @@ public abstract class SqlFactoryBase
     }
 
     /// <summary>
+    /// 创建事务使用的主库数据库上下文。
+    /// </summary>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <returns>数据库上下文。</returns>
+    protected DatabaseContext CreateTransactionContext(string dbKey)
+    {
+        var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
+        var requestedDbKey = string.IsNullOrWhiteSpace(dbKey) ? current?.DbKey : dbKey;
+        var options = new DatabaseScopeOptions
+        {
+            DbKey = requestedDbKey,
+            TenantId = current?.TenantId,
+            ReadPreference = SqlReadPreference.Primary
+        };
+        var dataSource = _dataSourceResolver.Resolve(requestedDbKey, options);
+        return CreateContext(dataSource, options.TenantId, current?.MappingProfile, options.ReadPreference);
+    }
+
+    /// <summary>
     /// 创建实例。
     /// </summary>
     /// <typeparam name="TService">服务类型。</typeparam>

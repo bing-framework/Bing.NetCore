@@ -1,12 +1,14 @@
-﻿using Bing.Data.Enums;
+﻿using Bing.Data;
+using Bing.Data.Enums;
+using Bing.Data.Sql;
 using Dapper.Handlers;
 
-namespace Bing.Data.Sql;
+namespace Bing.Dapper;
 
 /// <summary>
-/// Sql配置扩展
+/// Dapper Sql 配置扩展
 /// </summary>
-public static partial class SqlOptionsExtensions
+public static class DapperSqlOptionsExtensions
 {
     /// <summary>
     /// 注册字符串类型处理器

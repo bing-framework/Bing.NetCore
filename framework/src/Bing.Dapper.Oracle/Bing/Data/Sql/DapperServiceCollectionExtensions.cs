@@ -1,16 +1,48 @@
 ﻿using System;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
+using Bing.Data.Sql;
+using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Bing.Data.Sql;
+namespace Bing.Dapper.Oracle;
 
 /// <summary>
-/// Dapper服务集合扩展
+/// Oracle 服务集合扩展
 /// </summary>
-public static partial class DapperServiceCollectionExtensions
+public static class OracleServiceCollectionExtensions
 {
+    /// <summary>
+    /// 注册 Oracle Provider 能力，不配置默认数据源。
+    /// 多 Provider 容器应先调用此方法，再通过具名 <c>AddSqlDataSource</c> 配置实际数据源。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddOracleProvider(this IServiceCollection services)
+    {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        var queryOptions = new SqlOptions<OracleSqlQuery>();
+        var executorOptions = new SqlOptions<OracleSqlExecutor>();
+        queryOptions.RegisterStringTypeHandler();
+        queryOptions.RegisterGuidTypeHandler();
+        executorOptions.RegisterStringTypeHandler();
+        executorOptions.RegisterGuidTypeHandler();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.Oracle,
+            connection => new OracleDatabaseFactory().Create(connection).GetConnection());
+        services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
+        services.AddSqlImplementationType<ISqlQuery, OracleSqlQuery>(DatabaseType.Oracle);
+        services.AddSqlImplementationType<ISqlExecutor, OracleSqlExecutor>(DatabaseType.Oracle);
+        services.TryAddTransient<ISqlQuery, OracleSqlQuery>();
+        services.TryAddTransient<ISqlExecutor, OracleSqlExecutor>();
+        services.TryAddSingleton(queryOptions);
+        services.TryAddSingleton(executorOptions);
+        return services;
+    }
+
     #region AddOracleSqlQuery(注册Oracle Sql查询对象)
 
     /// <summary>
