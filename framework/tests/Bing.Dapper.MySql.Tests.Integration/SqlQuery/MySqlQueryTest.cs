@@ -19,12 +19,25 @@ public partial class MySqlQueryTest
     private readonly ISqlQuery _sqlQuery;
 
     /// <summary>
+    /// Sql 查询工厂。
+    /// </summary>
+    private readonly ISqlQueryFactory _sqlQueryFactory;
+
+    /// <summary>
+    /// SQL 事务作用域工厂。
+    /// </summary>
+    private readonly ISqlTransactionScopeFactory _transactionScopeFactory;
+
+    /// <summary>
     /// 测试初始化
     /// </summary>
-    public MySqlQueryTest(ISqlExecutor sqlExecutor, ISqlQuery sqlQuery)
+    public MySqlQueryTest(ISqlExecutor sqlExecutor, ISqlQuery sqlQuery, ISqlQueryFactory sqlQueryFactory,
+        ISqlTransactionScopeFactory transactionScopeFactory)
     {
         _sqlExecutor = sqlExecutor;
         _sqlQuery = sqlQuery;
+        _sqlQueryFactory = sqlQueryFactory;
+        _transactionScopeFactory = transactionScopeFactory;
     }
 
     /// <summary>

@@ -183,6 +183,9 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         var dbContextConnectionString = unitOfWork.Database.GetDbConnection().ConnectionString;
         var dataSourceIdentity = _databaseIdentityResolver.Resolve(dataSource.DatabaseType, dataSourceConnectionString);
         var dbContextIdentity = _databaseIdentityResolver.Resolve(dataSource.DatabaseType, dbContextConnectionString);
+        if (dataSourceIdentity.IsExclusiveMemory || dbContextIdentity.IsExclusiveMemory)
+            throw new InvalidOperationException(
+                "SQLite 独占内存数据库不能安全地用于 Shared 模式。请使用 Independent 模式或配置命名的 file: 共享内存数据库。");
         if (dataSourceIdentity.Equals(dbContextIdentity))
             return;
         throw new InvalidOperationException(
@@ -198,28 +201,21 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     private SqlDataSourceDescriptor ResolveDataSource(DatabaseType databaseType, string dbKey)
     {
         var current = _databaseContextAccessor?.Current;
-        var requestedDbKey = string.IsNullOrWhiteSpace(dbKey) ? current?.DbKey : dbKey;
-        if (string.IsNullOrWhiteSpace(requestedDbKey) == false)
+        var requestedDbKey = string.IsNullOrWhiteSpace(dbKey) == false
+            ? dbKey
+            : current?.DbKey;
+        if (string.IsNullOrWhiteSpace(requestedDbKey))
+            requestedDbKey = _metadataOptions.DefaultDatabaseContext?.DbKey;
+        var options = new DatabaseScopeOptions
         {
-            var dataSource = _dataSourceResolver.Resolve(requestedDbKey, new DatabaseScopeOptions
-            {
-                DbKey = requestedDbKey,
-                TenantId = current?.TenantId,
-                ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
-            });
-            if (dataSource.DatabaseType != databaseType)
-                throw new InvalidOperationException($"SQL 数据源 {requestedDbKey} 的数据库类型 {dataSource.DatabaseType} 与 EF Core Provider 对应的数据库类型 {databaseType} 不一致。");
-            return dataSource;
-        }
-
-        var matches = _metadataOptions.DataSources.DataSources.Values
-            .Where(t => t.DatabaseType == databaseType)
-            .ToList();
-        if (matches.Count == 0)
-            throw new InvalidOperationException($"未注册数据库类型 {databaseType} 的 SQL 数据源。");
-        if (matches.Count > 1)
-            throw new InvalidOperationException($"检测到多个数据库类型 {databaseType} 的 SQL 数据源，请显式指定 dbKey。");
-        return matches[0];
+            DbKey = requestedDbKey,
+            TenantId = current?.TenantId,
+            ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
+        };
+        var dataSource = _dataSourceResolver.Resolve(requestedDbKey, options);
+        if (dataSource.DatabaseType != databaseType)
+            throw new InvalidOperationException($"SQL 数据源 {dataSource.Key} 的数据库类型 {dataSource.DatabaseType} 与 EF Core Provider 对应的数据库类型 {databaseType} 不一致。");
+        return dataSource;
     }
 
     /// <summary>

@@ -117,4 +117,135 @@ public class SqlDatabaseIdentityResolverTest
         // Assert
         Assert.NotEqual(first, second);
     }
+
+    /// <summary>
+    /// 测试目的：Oracle 相同数据源和服务名应忽略凭据等非物理身份字段。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenOraclePhysicalIdentityMatches_ShouldReturnSameIdentity()
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var first = resolver.Resolve(DatabaseType.Oracle,
+            "Data Source=oracle01;Service Name=orders;User Id=app;Password=secret;");
+        var second = resolver.Resolve(DatabaseType.Oracle,
+            "Password=other;Service Name=orders;Data Source=oracle01;User Id=worker;");
+
+        // Assert
+        Assert.Equal(first, second);
+    }
+
+    /// <summary>
+    /// 测试目的：Oracle 服务名不同时应识别为不同物理数据库。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenOracleServiceNameDiffers_ShouldReturnDifferentIdentities()
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var first = resolver.Resolve(DatabaseType.Oracle, "Data Source=oracle01;Service Name=orders;");
+        var second = resolver.Resolve(DatabaseType.Oracle, "Data Source=oracle01;Service Name=reporting;");
+
+        // Assert
+        Assert.NotEqual(first, second);
+    }
+
+    /// <summary>
+    /// 测试目的：服务器型 Provider 缺少服务器地址时不能安全比较物理身份。
+    /// </summary>
+    [Theory]
+    [InlineData(DatabaseType.SqlServer, "Database=orders;")]
+    [InlineData(DatabaseType.MySql, "Database=orders;")]
+    [InlineData(DatabaseType.PgSql, "Database=orders;")]
+    public void Resolve_WhenServerAddressMissing_ShouldThrow(DatabaseType databaseType, string connectionString)
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => resolver.Resolve(databaseType, connectionString));
+
+        // Assert
+        Assert.Contains("服务器地址", exception.Message);
+        Assert.DoesNotContain(connectionString, exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：服务器型 Provider 缺少数据库名称时不能安全比较物理身份。
+    /// </summary>
+    [Theory]
+    [InlineData(DatabaseType.SqlServer, "Server=sql01;")]
+    [InlineData(DatabaseType.MySql, "Server=mysql01;")]
+    [InlineData(DatabaseType.PgSql, "Host=pg01;")]
+    public void Resolve_WhenDatabaseNameMissing_ShouldThrow(DatabaseType databaseType, string connectionString)
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => resolver.Resolve(databaseType, connectionString));
+
+        // Assert
+        Assert.Contains("数据库名称", exception.Message);
+        Assert.DoesNotContain(connectionString, exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：普通 SQLite 内存数据库应被标记为独占，不能用于 Shared 身份复用。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenSqliteUsesExclusiveMemory_ShouldMarkExclusiveMemory()
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var identity = resolver.Resolve(DatabaseType.Sqlite, "Data Source=:memory:;");
+
+        // Assert
+        Assert.True(identity.IsExclusiveMemory);
+    }
+
+    /// <summary>
+    /// 测试目的：同名 SQLite 共享内存 URI 应识别为相同且可复用的物理身份。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenSqliteUsesSameNamedSharedMemory_ShouldReturnSameReusableIdentity()
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var first = resolver.Resolve(DatabaseType.Sqlite,
+            "Data Source=file:identity-tests?mode=memory&cache=shared;");
+        var second = resolver.Resolve(DatabaseType.Sqlite,
+            "Data Source=file:identity-tests?cache=shared&mode=memory;");
+
+        // Assert
+        Assert.Equal(first, second);
+        Assert.False(first.IsExclusiveMemory);
+    }
+
+    /// <summary>
+    /// 测试目的：不同命名 SQLite 共享内存 URI 应识别为不同物理数据库。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenSqliteSharedMemoryNamesDiffer_ShouldReturnDifferentIdentities()
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var first = resolver.Resolve(DatabaseType.Sqlite,
+            "Data Source=file:identity-first?mode=memory&cache=shared;");
+        var second = resolver.Resolve(DatabaseType.Sqlite,
+            "Data Source=file:identity-second?mode=memory&cache=shared;");
+
+        // Assert
+        Assert.NotEqual(first, second);
+    }
 }

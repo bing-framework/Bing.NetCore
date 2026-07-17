@@ -42,6 +42,14 @@ public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
     /// </summary>
     public string ServiceName { get; set; }
 
+    /// <summary>
+    /// 是否为仅当前连接可见的 SQLite 独占内存数据库。
+    /// </summary>
+    /// <remarks>
+    /// 独占内存数据库不能作为 EF Core Shared 模式的可复用物理身份。
+    /// </remarks>
+    public bool IsExclusiveMemory { get; set; }
+
     /// <inheritdoc />
     public bool Equals(SqlDatabaseIdentity other)
     {
@@ -55,7 +63,8 @@ public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
                string.Equals(Database, other.Database, StringComparison.OrdinalIgnoreCase) &&
                string.Equals(Instance, other.Instance, StringComparison.OrdinalIgnoreCase) &&
                string.Equals(FilePath, other.FilePath, StringComparison.OrdinalIgnoreCase) &&
-               string.Equals(ServiceName, other.ServiceName, StringComparison.OrdinalIgnoreCase);
+               string.Equals(ServiceName, other.ServiceName, StringComparison.OrdinalIgnoreCase) &&
+               IsExclusiveMemory == other.IsExclusiveMemory;
     }
 
     /// <inheritdoc />
@@ -73,6 +82,7 @@ public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
         hash = hash * 31 + (Instance == null ? 0 : comparer.GetHashCode(Instance));
         hash = hash * 31 + (FilePath == null ? 0 : comparer.GetHashCode(FilePath));
         hash = hash * 31 + (ServiceName == null ? 0 : comparer.GetHashCode(ServiceName));
+        hash = hash * 31 + IsExclusiveMemory.GetHashCode();
         return hash;
     }
 }

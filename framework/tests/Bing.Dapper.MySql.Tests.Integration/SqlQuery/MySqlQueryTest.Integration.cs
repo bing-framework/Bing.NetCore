@@ -275,7 +275,7 @@ public partial class MySqlQueryTest
     [Trait("Database", "MySql")]
     public Task TransactionScope_ShouldPersistDataAfterCommit()
     {
-        using (var scope = _fixture.GetTransactionScopeFactory().Begin())
+        using (var scope = _transactionScopeFactory.Begin())
         using (var executor = scope.CreateExecutor())
         {
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
@@ -295,7 +295,7 @@ public partial class MySqlQueryTest
     [Trait("Database", "MySql")]
     public Task TransactionScope_ShouldNotPersistDataAfterRollback()
     {
-        using (var scope = _fixture.GetTransactionScopeFactory().Begin())
+        using (var scope = _transactionScopeFactory.Begin())
         using (var executor = scope.CreateExecutor())
         {
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
@@ -315,7 +315,7 @@ public partial class MySqlQueryTest
     [Trait("Database", "MySql")]
     public Task TransactionScope_ShouldRollbackWhenDisposedWithoutCompletion()
     {
-        using (var scope = _fixture.GetTransactionScopeFactory().Begin())
+        using (var scope = _transactionScopeFactory.Begin())
         using (var executor = scope.CreateExecutor())
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
                 new { productId = Guid.NewGuid(), code = "implicit-rollback" });
@@ -332,7 +332,7 @@ public partial class MySqlQueryTest
     [Trait("Database", "MySql")]
     public Task TransactionScope_ShouldShareTransactionBetweenQueryAndExecutor()
     {
-        using (var scope = _fixture.GetTransactionScopeFactory().Begin())
+        using (var scope = _transactionScopeFactory.Begin())
         using (var executor = scope.CreateExecutor())
         using (var query = scope.CreateQuery())
         {
@@ -449,7 +449,7 @@ public partial class MySqlQueryTest
     /// 创建产品查询对象。
     /// </summary>
     /// <returns>产品查询对象。</returns>
-    private ISqlQuery CreateProductQuery() => _fixture.CreateQuery()
+    private ISqlQuery CreateProductQuery() => _sqlQueryFactory.Create<ISqlQuery>()
         .Select<Product>(true).From<Product>().AppendWhere("1=1 Order By Code");
 
     /// <summary>

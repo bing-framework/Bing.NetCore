@@ -17,17 +17,18 @@ namespace Bing.Test.Shared;
 /// </summary>
 public sealed class IntegrationFactAttribute : FactAttribute
 {
-    private const string EnvVar = "RUN_INTEGRATION_TESTS";
-
     /// <summary>
     /// 初始化集成测试特性，若环境变量未设置则自动跳过
     /// </summary>
-    public IntegrationFactAttribute()
+    public IntegrationFactAttribute() : this(null)
     {
-        var runIntegration = Environment.GetEnvironmentVariable(EnvVar);
-        if (!string.Equals(runIntegration, "true", StringComparison.OrdinalIgnoreCase))
-            Skip = $"集成测试已跳过。设置环境变量 {EnvVar}=true 以启用。";
     }
+
+    /// <summary>
+    /// 初始化指定 Provider 的集成测试特性，若对应环境变量未设置则自动跳过。
+    /// </summary>
+    /// <param name="provider">数据库 Provider 名称。</param>
+    public IntegrationFactAttribute(string provider) => Skip = IntegrationTestGate.GetSkipReason(provider);
 }
 
 /// <summary>
@@ -36,15 +37,16 @@ public sealed class IntegrationFactAttribute : FactAttribute
 /// </summary>
 public sealed class IntegrationTheoryAttribute : TheoryAttribute
 {
-    private const string EnvVar = "RUN_INTEGRATION_TESTS";
-
     /// <summary>
     /// 初始化集成测试特性，若环境变量未设置则自动跳过
     /// </summary>
-    public IntegrationTheoryAttribute()
+    public IntegrationTheoryAttribute() : this(null)
     {
-        var runIntegration = Environment.GetEnvironmentVariable(EnvVar);
-        if (!string.Equals(runIntegration, "true", StringComparison.OrdinalIgnoreCase))
-            Skip = $"集成测试已跳过。设置环境变量 {EnvVar}=true 以启用。";
     }
+
+    /// <summary>
+    /// 初始化指定 Provider 的集成测试特性，若对应环境变量未设置则自动跳过。
+    /// </summary>
+    /// <param name="provider">数据库 Provider 名称。</param>
+    public IntegrationTheoryAttribute(string provider) => Skip = IntegrationTestGate.GetSkipReason(provider);
 }

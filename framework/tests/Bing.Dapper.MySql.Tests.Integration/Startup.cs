@@ -21,6 +21,24 @@ namespace Bing.Dapper.Tests;
 public class Startup
 {
     /// <summary>
+    /// 为独立集成测试固定装置配置 SQL 服务。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="connectionString">MySQL 测试连接字符串。</param>
+    public static void ConfigureSqlServices(IServiceCollection services, string connectionString)
+    {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        services.AddMySqlUnitOfWork<ITestUnitOfWork, MySqlUnitOfWork>(connectionString);
+        services.AddMySqlQuery(connectionString);
+        services.AddMySqlExecutor(connectionString);
+        services.AddEntityMetadata<MySqlUnitOfWork>();
+        services.AddLogging();
+        services.EnableAop();
+        services.AddBing();
+    }
+
+    /// <summary>
     /// 配置主机
     /// </summary>
     public void ConfigureHost(IHostBuilder hostBuilder)
@@ -42,14 +60,9 @@ public class Startup
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
     {
         var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-        services.AddMySqlUnitOfWork<ITestUnitOfWork, MySqlUnitOfWork>(connectionString);
-        services.AddMySqlQuery(connectionString);
-        services.AddMySqlExecutor(connectionString);
-        services.AddEntityMetadata<MySqlUnitOfWork>();
+        ConfigureSqlServices(services, connectionString);
         // 日志
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
-        services.EnableAop();
-        services.AddBing();
     }
 
     /// <summary>

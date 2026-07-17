@@ -69,3 +69,12 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 - `Bing.Dapper.Sqlite.Tests.Integration` 使用临时 SQLite 文件执行真实 SQL；无需环境变量，`net6.0` 与 `net8.0` 共 66 项通过。
 - SQL Server、PostgreSQL 与 MySQL 集成项目继续由 `IntegrationFact` 门控。未提供连接字符串时，它们成功构建并跳过；启用真实执行分别需要 `RUN_SQLSERVER_INTEGRATION_TESTS=true`、`RUN_POSTGRESQL_INTEGRATION_TESTS=true` 或 `RUN_MYSQL_INTEGRATION_TESTS=true`，以及相应的 `ConnectionStrings__*Connection`。
 - 外部 Provider 的真实执行不应使用生产库。共享测试基建会要求明确启用开关，并校验测试数据库名称以避免清理过程误操作系统库或业务库。
+
+## 2026-07-17 一致性补充
+
+- EF Core SQL Query Factory 已统一使用 `显式 dbKey > Ambient dbKey > 默认 DatabaseContext > 默认数据源 > 唯一数据源` 的顺序。未知显式 key 不会回退；最终 descriptor 的 Provider 必须与 EF Core Provider 一致。
+- EF Core Shared 模式以最终解析的数据源进行物理身份校验。SQLite 文件按绝对路径比较；普通 `:memory:` 为独占内存数据库并明确拒绝 Shared，命名 `file:` 共享内存 URI 才可比较。
+- SQL Server、MySQL、PostgreSQL 身份解析要求同时具备服务器地址和数据库名称；Oracle 要求数据源。无法安全解析时拒绝 Shared，不输出完整连接字符串或凭据。
+- `DatabaseScopeOptions.ReadPreference` 未指定时继承父级，显式 Default/Primary 覆盖父级；数据库 Scope 与读取偏好 Scope 均按严格 LIFO 恢复。`Current` 返回深快照，使用 `Update(...)` 才会写回。
+- 事务 Scope 结束后，已创建的 Query/Executor 会因租约失效而拒绝继续执行；Before/After/Error 诊断事件发布互不共享的消息快照，并保留同一操作标识和最终 `DbKey`、读取偏好、事务标识。
+- 本轮实际执行：`Bing.Data.Sql.Tests`（net6.0/net8.0，992 通过）、`Bing.EntityFrameworkCore.Tests`（net6.0，20 通过，含 SQLite 双文件真实执行）、`Bing.Dapper.SqlServer.Tests`（net6.0/net8.0，230 通过）。SQL Server net8.0 仍报告已有 SQLite RID `NETSDK1206` 警告。

@@ -7,33 +7,58 @@ namespace Bing.Test.Shared;
 /// </summary>
 public static class IntegrationDatabaseSafetyValidator
 {
-    private const string RunIntegrationTestsEnvironmentVariable = "RUN_INTEGRATION_TESTS";
     private const string AllowDatabaseResetEnvironmentVariable = "ALLOW_DATABASE_RESET_FOR_TESTS";
+
+    private static readonly HashSet<string> SystemDatabaseNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "information_schema", "master", "model", "msdb", "mysql", "performance_schema", "postgres", "sys",
+        "tempdb", "template0", "template1"
+    };
 
     /// <summary>
     /// 验证当前进程是否允许重置指定的专用测试数据库。
     /// </summary>
     /// <param name="connectionString">数据库连接字符串。</param>
-    /// <param name="databaseNamePrefix">允许的数据库名称前缀。</param>
-    /// <param name="databaseNameSuffix">允许的数据库名称后缀。</param>
-    public static void EnsureResetAllowed(string connectionString, string databaseNamePrefix = "bing_",
-        string databaseNameSuffix = "_test")
+    /// <param name="provider">数据库 Provider 名称。</param>
+    public static void EnsureResetAllowed(string connectionString, string provider = null)
     {
-        if (IsEnabled(RunIntegrationTestsEnvironmentVariable) == false)
-            throw new InvalidOperationException($"重置集成测试数据库要求设置 {RunIntegrationTestsEnvironmentVariable}=true。");
+        EnsureDatabaseOperationAllowed(connectionString, provider);
         if (IsEnabled(AllowDatabaseResetEnvironmentVariable) == false)
             throw new InvalidOperationException($"重置集成测试数据库要求设置 {AllowDatabaseResetEnvironmentVariable}=true。");
-        if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("重置集成测试数据库要求提供连接字符串。");
+    }
 
+    /// <summary>
+    /// 验证当前进程是否允许操作指定的专用测试数据库。
+    /// </summary>
+    /// <param name="connectionString">数据库连接字符串。</param>
+    /// <param name="provider">数据库 Provider 名称。</param>
+    public static void EnsureDatabaseOperationAllowed(string connectionString, string provider = null)
+    {
+        if (IntegrationTestGate.IsProviderEnabled(provider) == false)
+            throw new InvalidOperationException($"集成测试数据库操作未启用。{IntegrationTestGate.GetSkipReason(provider)}");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("集成测试数据库操作要求提供连接字符串。");
         var databaseName = GetDatabaseName(connectionString);
-        if (string.IsNullOrWhiteSpace(databaseName) ||
-            databaseName.StartsWith(databaseNamePrefix, StringComparison.OrdinalIgnoreCase) == false ||
-            databaseName.EndsWith(databaseNameSuffix, StringComparison.OrdinalIgnoreCase) == false)
-        {
-            throw new InvalidOperationException(
-                $"拒绝重置数据库 {databaseName ?? "<unknown>"}。仅允许名称以 {databaseNamePrefix} 开头且以 {databaseNameSuffix} 结尾的专用测试数据库。");
-        }
+        if (IsSafeTestDatabaseName(databaseName) == false)
+            throw new InvalidOperationException($"拒绝操作数据库 {databaseName ?? "<unknown>"}。仅允许专用测试数据库。");
+    }
+
+    /// <summary>
+    /// 判断数据库名称是否符合专用集成测试数据库安全约定。
+    /// </summary>
+    /// <param name="databaseName">数据库名称。</param>
+    /// <returns>安全时返回 true。</returns>
+    public static bool IsSafeTestDatabaseName(string databaseName)
+    {
+        if (string.IsNullOrWhiteSpace(databaseName))
+            return false;
+        var normalizedName = databaseName.Trim();
+        if (SystemDatabaseNames.Contains(normalizedName) || HasUnsafeEnvironmentToken(normalizedName))
+            return false;
+        return normalizedName.EndsWith("_test", StringComparison.OrdinalIgnoreCase) ||
+               normalizedName.EndsWith("_tests", StringComparison.OrdinalIgnoreCase) ||
+               normalizedName.EndsWith("_integration", StringComparison.OrdinalIgnoreCase) ||
+               normalizedName.EndsWith("_integration_test", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -50,6 +75,19 @@ public static class IntegrationDatabaseSafetyValidator
                 return value.ToString().Trim();
         }
         return null;
+    }
+
+    /// <summary>
+    /// 判断数据库名是否含有危险的环境标识。
+    /// </summary>
+    /// <param name="databaseName">数据库名称。</param>
+    /// <returns>包含危险环境标识时返回 true。</returns>
+    private static bool HasUnsafeEnvironmentToken(string databaseName)
+    {
+        var tokens = databaseName.Split(new[] { '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
+        return tokens.Any(token => string.Equals(token, "prod", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(token, "production", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(token, "development", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

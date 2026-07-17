@@ -11,13 +11,19 @@ namespace Bing.EntityFrameworkCore.Tests.Core;
 public class EfCoreSqlQueryFactoryTest
 {
     /// <summary>
+    /// 可安全用于 Shared 模式的命名 SQLite 共享内存数据库连接字符串。
+    /// </summary>
+    private const string SharedMemoryConnectionString =
+        "Data Source=file:ef-core-query-factory?mode=memory&cache=shared";
+
+    /// <summary>
     /// 测试目的：Shared 模式应复用 DbContext 连接，并使用 EF Core 模型映射生成 SQL。
     /// </summary>
     [Fact]
     public void Create_WhenShared_ShouldUseDbContextConnectionAndModelMapping()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider();
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -41,7 +47,7 @@ public class EfCoreSqlQueryFactoryTest
     public void Create_WhenEfTransactionStartsAfterQueryCreation_ShouldResolveCurrentTransaction()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider();
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -63,7 +69,7 @@ public class EfCoreSqlQueryFactoryTest
     public void Create_WhenIndependent_ShouldUseSeparateProviderConnection()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider();
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -81,23 +87,23 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：同一 Provider 存在多个 SQL 数据源且未显式指定 dbKey 时，应抛出明确异常而不是取第一个。
+    /// 测试目的：配置默认数据源后，同一 Provider 的多个数据源未指定 dbKey 时应使用默认数据源。
     /// </summary>
     [Fact]
-    public void Create_WhenMultipleMatchingDataSourcesWithoutDbKey_ShouldThrow()
+    public void Create_WhenDefaultDataSourceConfigured_ShouldUseDefaultDataSource()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
         var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => factory.Create(unitOfWork));
+        using var query = factory.Create(unitOfWork);
 
         // Assert
-        Assert.Contains("请显式指定 dbKey", exception.Message);
+        Assert.Same(connection, query.GetConnection());
     }
 
     /// <summary>
@@ -107,7 +113,7 @@ public class EfCoreSqlQueryFactoryTest
     public void Create_WhenIndependentWithDbKey_ShouldUseSelectedDataSourceConnectionString()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -128,7 +134,7 @@ public class EfCoreSqlQueryFactoryTest
     public void Create_WhenAmbientDatabaseScopeIsSet_ShouldUseScopedDataSourceSnapshot()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -163,7 +169,7 @@ public class EfCoreSqlQueryFactoryTest
         {
             ["ReportingConnection"] = "Data Source=named-reporting.db"
         };
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(metadataOptions, connectionStrings);
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -188,7 +194,7 @@ public class EfCoreSqlQueryFactoryTest
         var reporting = metadataOptions.DataSources.DataSources["reporting"];
         reporting.ConnectionString = null;
         reporting.ConnectionStringName = "MissingReportingConnection";
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(metadataOptions);
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -211,7 +217,7 @@ public class EfCoreSqlQueryFactoryTest
     public void Create_WhenDbKeyProviderMismatch_ShouldThrow()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -232,7 +238,7 @@ public class EfCoreSqlQueryFactoryTest
     public void Create_WhenSharedDbKeyTargetsDifferentPhysicalDatabase_ShouldThrow()
     {
         // Arrange
-        using var connection = new SqliteConnection("Data Source=:memory:");
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
         connection.Open();
         using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
@@ -249,6 +255,143 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：默认数据库上下文的 dbKey 应优先于默认数据源。
+    /// </summary>
+    [Fact]
+    public void Create_WhenDefaultDatabaseContextIsConfigured_ShouldUseItsDbKey()
+    {
+        // Arrange
+        var metadataOptions = CreateSqliteMetadataOptions("reporting", "Data Source=reporting.db", "archive",
+            "Data Source=archive.db");
+        metadataOptions.DefaultDatabaseContext.DbKey = "archive";
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProviderWithoutDefault(metadataOptions);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
+
+        // Assert
+        Assert.Equal("Data Source=archive.db", query.GetConnection().ConnectionString);
+    }
+
+    /// <summary>
+    /// 测试目的：无默认上下文时应使用配置的默认数据源。
+    /// </summary>
+    [Fact]
+    public void Create_WhenOnlyDefaultDataSourceIsConfigured_ShouldUseItsDbKey()
+    {
+        // Arrange
+        var metadataOptions = CreateSqliteMetadataOptions("reporting", "Data Source=reporting.db", "archive",
+            "Data Source=archive.db");
+        metadataOptions.DataSources.DefaultDataSourceKey = "archive";
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProviderWithoutDefault(metadataOptions);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
+
+        // Assert
+        Assert.Equal("Data Source=archive.db", query.GetConnection().ConnectionString);
+    }
+
+    /// <summary>
+    /// 测试目的：未配置默认键且仅存在一个数据源时应使用唯一数据源。
+    /// </summary>
+    [Fact]
+    public void Create_WhenOnlyOneDataSourceExists_ShouldUseUniqueDataSource()
+    {
+        // Arrange
+        var metadataOptions = CreateSqliteMetadataOptions("reporting", "Data Source=reporting.db");
+        metadataOptions.DataSources.DefaultDataSourceKey = null;
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProviderWithoutDefault(metadataOptions);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
+
+        // Assert
+        Assert.Equal("Data Source=reporting.db", query.GetConnection().ConnectionString);
+    }
+
+    /// <summary>
+    /// 测试目的：未配置默认上下文和默认数据源时，多个数据源必须报歧义错误。
+    /// </summary>
+    [Fact]
+    public void Create_WhenMultipleDataSourcesHaveNoDefault_ShouldThrow()
+    {
+        // Arrange
+        var metadataOptions = CreateSqliteMetadataOptions("reporting", "Data Source=reporting.db", "archive",
+            "Data Source=archive.db");
+        metadataOptions.DataSources.DefaultDataSourceKey = null;
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProviderWithoutDefault(metadataOptions);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent));
+
+        // Assert
+        Assert.Contains(nameof(SqlDataSourceOptions.DefaultDataSourceKey), exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：显式 dbKey 应覆盖环境数据库作用域。
+    /// </summary>
+    [Fact]
+    public void Create_WhenExplicitDbKeyAndAmbientDbKeyDiffer_ShouldPreferExplicitDbKey()
+    {
+        // Arrange
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions());
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+        var databaseScopeManager = serviceProvider.GetRequiredService<IDatabaseScopeManager>();
+
+        // Act
+        using (databaseScopeManager.Use("reporting"))
+        using (var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "default"))
+        {
+            // Assert
+            Assert.Equal(SharedMemoryConnectionString, query.GetConnection().ConnectionString);
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：Shared 模式不能把 SQLite 独占内存数据库当作可复用物理身份。
+    /// </summary>
+    [Fact]
+    public void Create_WhenSharedSqliteConnectionUsesExclusiveMemory_ShouldThrow()
+    {
+        // Arrange
+        var metadataOptions = CreateSqliteMetadataOptions("default", "Data Source=:memory:");
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using var serviceProvider = CreateServiceProviderWithoutDefault(metadataOptions);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => factory.Create(unitOfWork));
+
+        // Assert
+        Assert.Contains("独占内存", exception.Message);
+        Assert.Contains(nameof(EfCoreSqlConnectionMode.Independent), exception.Message);
+    }
+
+    /// <summary>
     /// 创建服务提供程序
     /// </summary>
     /// <returns>服务提供程序</returns>
@@ -262,7 +405,23 @@ public class EfCoreSqlQueryFactoryTest
         if (metadataOptions != null)
             services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
         services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();
-        services.AddSqliteSqlQuery("Data Source=:memory:");
+        services.AddSqliteSqlQuery(SharedMemoryConnectionString);
+        services.AddEfCoreSqlQueryFactory();
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建不额外注册默认数据源的服务提供程序。
+    /// </summary>
+    /// <param name="metadataOptions">Sql 元数据配置。</param>
+    /// <returns>服务提供程序。</returns>
+    private static ServiceProvider CreateServiceProviderWithoutDefault(SqlMetadataOptions metadataOptions)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
+        services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();
+        services.AddSqliteProvider();
         services.AddEfCoreSqlQueryFactory();
         return services.BuildServiceProvider();
     }
@@ -290,6 +449,36 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 创建 SQLite 数据源测试配置。
+    /// </summary>
+    /// <param name="firstKey">第一个数据源标识。</param>
+    /// <param name="firstConnectionString">第一个连接字符串。</param>
+    /// <param name="secondKey">第二个数据源标识。</param>
+    /// <param name="secondConnectionString">第二个连接字符串。</param>
+    /// <returns>Sql 元数据配置。</returns>
+    private static SqlMetadataOptions CreateSqliteMetadataOptions(string firstKey, string firstConnectionString,
+        string secondKey = null, string secondConnectionString = null)
+    {
+        var options = new SqlMetadataOptions();
+        options.DataSources.DataSources[firstKey] = new SqlDataSourceDescriptor
+        {
+            Key = firstKey,
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = firstConnectionString
+        };
+        if (string.IsNullOrWhiteSpace(secondKey) == false)
+        {
+            options.DataSources.DataSources[secondKey] = new SqlDataSourceDescriptor
+            {
+                Key = secondKey,
+                DatabaseType = DatabaseType.Sqlite,
+                ConnectionString = secondConnectionString
+            };
+        }
+        return options;
+    }
+
+    /// <summary>
     /// 应用测试元数据配置
     /// </summary>
     /// <param name="target">目标配置</param>
@@ -299,6 +488,13 @@ public class EfCoreSqlQueryFactoryTest
         if (target == null || source == null)
             return;
         target.DataSources.DefaultDataSourceKey = source.DataSources.DefaultDataSourceKey;
+        target.DefaultDatabaseContext = new DatabaseContext
+        {
+            DbKey = source.DefaultDatabaseContext?.DbKey,
+            TenantId = source.DefaultDatabaseContext?.TenantId,
+            ReadPreference = source.DefaultDatabaseContext?.ReadPreference ?? SqlReadPreference.Default,
+            MappingProfile = source.DefaultDatabaseContext?.MappingProfile
+        };
         foreach (var dataSource in source.DataSources.DataSources.Values)
         {
             target.DataSources.DataSources[dataSource.Key] = new SqlDataSourceDescriptor
@@ -365,7 +561,7 @@ public class EfCoreSqlQueryFactoryTest
     private sealed class TestDatabase : Bing.Data.IDatabase
     {
         /// <inheritdoc />
-        public IDbConnection GetConnection() => new SqliteConnection("Data Source=:memory:");
+        public IDbConnection GetConnection() => new SqliteConnection(SharedMemoryConnectionString);
     }
 
     /// <summary>

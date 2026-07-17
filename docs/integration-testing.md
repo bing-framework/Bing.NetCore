@@ -1,6 +1,6 @@
 # 数据库集成测试
 
-SQLite 集成测试始终执行，使用临时文件数据库，不需要额外配置。MySQL、PostgreSQL、SQL Server 和 Oracle 测试默认跳过；只有在本机或受保护 CI 中显式开启后才会连接外部数据库。
+SQLite 集成测试始终执行，使用临时文件数据库，不需要额外配置。`Bing.Dapper.Sqlite.Tests.Integration` 验证 Dapper 双文件路由和事务；`Bing.EntityFrameworkCore.Tests` 同时验证 EF Core Independent/Shared 模式在两个真实 SQLite 文件上的路由与跨文件拒绝。MySQL、PostgreSQL、SQL Server 和 Oracle 测试默认跳过；只有在本机或受保护 CI 中显式开启后才会连接外部数据库。
 
 ## 本地运行
 
@@ -26,8 +26,10 @@ Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受�
 
 外部测试初始化和清理前都会校验 Provider 已启用且数据库名符合测试库命名规则。系统数据库、生产数据库命名和不安全名称会被拒绝。
 
+允许的专用数据库名必须以 `_test`、`_tests`、`_integration` 或 `_integration_test` 结尾；系统库以及名称中含独立 `prod`、`production`、`development` 环境标识的数据库会被拒绝。校验异常不得回显完整连接字符串或密码。
+
 表级初始化和清理不执行删库。数据库级重置额外要求 `ALLOW_DATABASE_RESET_FOR_TESTS=true`，并且仍受安全数据库名校验保护。
 
 ## CI
 
-常规 CI 显式关闭所有外部 Provider 门控，只运行无凭据测试和 SQLite 集成测试。外部数据库测试应放在独立、受保护的构建中：连接字符串通过 CI 密钥注入，Provider 门控只在该构建中设为 `true`，日志不得输出连接字符串或凭据。
+常规 CI 显式关闭所有外部 Provider 门控，只运行无凭据测试和 SQLite 集成测试。外部数据库测试应放在独立、受保护的构建中：连接字符串通过 CI 密钥注入，Provider 门控只在该构建中设为 `true`，日志不得输出连接字符串或凭据。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。

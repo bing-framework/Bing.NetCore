@@ -324,7 +324,19 @@ var query = CreateIndependentSqlQuery();
 
 Independent 模式创建独立 SQL Query，不绑定 EF 连接和事务。它适合报表、旁路查询、只读查询等不应参与当前 EF 事务的场景。Shared 模式保持 `Sql.From<T>()` 等既有写法不变。
 
-### 5. 连接和事务所有权
+EF Core SQL Query Factory 的数据源优先级为：显式 `dbKey`、Ambient `DatabaseContext.DbKey`、`SqlMetadataOptions.DefaultDatabaseContext.DbKey`、`DataSources.DefaultDataSourceKey`、唯一数据源。显式不存在的 `dbKey` 会立即失败，不会回退到默认数据源；最终解析的数据源 Provider 必须与当前 EF Core Provider 一致。
+
+Shared 模式在绑定 EF 连接前会比较最终数据源与 `DbContext` 的物理数据库身份。SQLite 普通 `Data Source=:memory:` 是连接独占内存库，不能用于 Shared 比较；请使用 Independent 模式，或使用命名共享内存 URI，例如 `Data Source=file:reporting?mode=memory&cache=shared`。SQLite 文件路径会按绝对路径比较；服务器型 Provider 缺少服务器地址或数据库名称时也会拒绝 Shared 比较，避免误复用连接。
+
+### 5. 上下文、读取偏好与租户边界
+
+`DatabaseScopeOptions.ReadPreference` 为可空值。未指定时，数据库 Scope 继承父级读取偏好；显式 `SqlReadPreference.Default` 或 `SqlReadPreference.Primary` 会覆盖父级。内层 Scope 释放后恢复父级上下文，Scope 必须按 LIFO 顺序释放，乱序释放会抛出异常并保持当前栈顶上下文不变。
+
+`IDatabaseContextAccessor.Current` 返回独立深快照，直接修改返回对象不会回写当前异步上下文。需要更新时使用 `accessor.Update(...)` 或重新设置 `Current`。Query、Executor 和事务 Scope 在创建时固定数据源快照，因此外层 Ambient Scope 后续切换不会改变已创建对象的连接、映射或诊断上下文。
+
+`TenantId` 会随 `DatabaseContext` 传播，并可供既有映射路由使用；默认不会根据 TenantId 自动选择 `dbKey`、连接字符串或物理数据库，也不会自动追加租户过滤条件。业务层必须显式建立租户到数据源或过滤器的绑定关系。
+
+### 6. 连接和事务所有权
 
 - `SetConnection(connection)`：外部连接，Query/Executor 不负责关闭或释放。
 - `SetTransaction(transaction)`：外部事务，Query/Executor 不提交、不回滚、不释放，也不会关闭事务连接。
@@ -351,7 +363,7 @@ scope.Commit();
 
 如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。当前实现对 `StreamQuery` / `StreamQueryAsync` 会在创建读取器前直接抛出异常，避免在流式场景里静默退回到短事务策略。
 
-### 6. 显式实体映射
+### 7. 显式实体映射
 
 当同一实体需要映射到不同库、不同表或不同列时，可通过 `SqlMetadataOptions.EntityMappings` 显式配置：
 

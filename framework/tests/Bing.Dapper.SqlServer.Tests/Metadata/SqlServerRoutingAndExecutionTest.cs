@@ -646,6 +646,69 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：事务作用域提交后，已创建的子执行器必须拒绝在已结束事务外继续执行。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenCompleted_ShouldRejectExecutionFromExistingChild()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
+        var scope = scopeFactory.Begin();
+        var executor = scope.CreateExecutor();
+
+        // Act
+        scope.Commit();
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "after-complete" }));
+
+        // Assert
+        exception.Message.ShouldContain("事务作用域已结束");
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：Before 诊断载荷被订阅者修改后，不应污染同一操作的 After 诊断快照。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenDiagnosticObserverMutatesBeforePayload_ShouldKeepAfterPayloadIndependent()
+    {
+        // Arrange
+        DiagnosticsMessage before = null;
+        DiagnosticsMessage after = null;
+        using var observer = new SqlDiagnosticObserver(message =>
+        {
+            if (message.Operation == SqlQueryDiagnosticListenerNames.BeforeExecute)
+            {
+                before = message;
+                message.Connection.DbKey = "mutated";
+                return;
+            }
+            if (message.Operation == SqlQueryDiagnosticListenerNames.AfterExecute)
+                after = message;
+        }, name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                 name == SqlQueryDiagnosticListenerNames.AfterExecute);
+        var connection = new CaptureDbConnection();
+        var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "Bing" });
+
+        // Assert
+        before.ShouldNotBeNull();
+        after.ShouldNotBeNull();
+        before.ShouldNotBeSameAs(after);
+        before.OperationId.ShouldBe(after.OperationId);
+        after.Connection.DbKey.ShouldBe("primary");
+        after.Transaction.TransactionId.ShouldNotBeNullOrWhiteSpace();
+    }
+
+    /// <summary>
     /// 测试目的：异步事务作用域应提供事务标识，并在异步提交后释放其拥有的事务。
     /// </summary>
     [Fact]

@@ -399,6 +399,184 @@ public class DatabaseScopeAndDataSourceTest
     }
 
     /// <summary>
+    /// 测试目的：数据库作用域未指定读取偏好时应继承父级 Primary 偏好并继续路由到主库。
+    /// </summary>
+    [Fact]
+    public void Use_WhenReadPreferenceIsNotSpecified_ShouldInheritParentPreference()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreatePrimaryReadOptions());
+
+        // Act
+        using (manager.Use(new DatabaseScopeOptions { DbKey = "read", ReadPreference = SqlReadPreference.Primary }))
+        {
+            using (manager.Use(new DatabaseScopeOptions { DbKey = "read" }))
+            {
+                // Assert
+                Assert.Equal("primary", accessor.Current.DbKey);
+                Assert.Equal(SqlReadPreference.Primary, accessor.Current.ReadPreference);
+            }
+
+            Assert.Equal("primary", accessor.Current.DbKey);
+            Assert.Equal(SqlReadPreference.Primary, accessor.Current.ReadPreference);
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：数据库作用域显式 Default 偏好应覆盖父级 Primary 偏好并在释放后恢复。
+    /// </summary>
+    [Fact]
+    public void Use_WhenReadPreferenceIsExplicitDefault_ShouldOverrideAndRestoreParentPreference()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreatePrimaryReadOptions());
+
+        // Act
+        using (manager.Use(new DatabaseScopeOptions { DbKey = "read", ReadPreference = SqlReadPreference.Primary }))
+        {
+            using (manager.Use(new DatabaseScopeOptions { DbKey = "read", ReadPreference = SqlReadPreference.Default }))
+            {
+                // Assert
+                Assert.Equal("read", accessor.Current.DbKey);
+                Assert.Equal(SqlReadPreference.Default, accessor.Current.ReadPreference);
+            }
+
+            Assert.Equal("primary", accessor.Current.DbKey);
+            Assert.Equal(SqlReadPreference.Primary, accessor.Current.ReadPreference);
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：主从数据源 Provider 不一致时必须拒绝切换到主库。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenPrimaryDataSourceProviderDiffers_ShouldThrow()
+    {
+        // Arrange
+        var options = CreatePrimaryReadOptions();
+        options.DataSources.DataSources["primary"].DatabaseType = DatabaseType.MySql;
+        var resolver = new DefaultSqlDataSourceResolver(options);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => resolver.Resolve("read",
+            new DatabaseScopeOptions { ReadPreference = SqlReadPreference.Primary }));
+
+        // Assert
+        Assert.Contains("read", exception.Message);
+        Assert.Contains("primary", exception.Message);
+        Assert.Contains("Provider", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Doris 使用 MySQL Provider 且不支持本地事务时仍可作为主从数据源路由。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDorisUsesMySqlProvider_ShouldAllowPrimaryRouting()
+    {
+        // Arrange
+        var options = CreatePrimaryReadOptions();
+        options.DataSources.DataSources["primary"].DatabaseType = DatabaseType.MySql;
+        options.DataSources.DataSources["read"].DatabaseType = DatabaseType.MySql;
+        options.DataSources.DataSources["read"].SupportsTransactions = false;
+        var resolver = new DefaultSqlDataSourceResolver(options);
+
+        // Act
+        var result = resolver.Resolve("read", new DatabaseScopeOptions
+        {
+            ReadPreference = SqlReadPreference.Primary
+        });
+
+        // Assert
+        Assert.Equal("primary", result.Key);
+        Assert.Equal(DatabaseType.MySql, result.DatabaseType);
+    }
+
+    /// <summary>
+    /// 测试目的：作用域乱序释放应抛出异常且不能破坏当前栈顶上下文。
+    /// </summary>
+    [Fact]
+    public void Use_WhenScopesAreDisposedOutOfOrder_ShouldThrowAndKeepTopContext()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+        var parent = manager.Use("default");
+        var child = manager.Use("mysql");
+
+        try
+        {
+            // Act
+            var exception = Assert.Throws<InvalidOperationException>(() => parent.Dispose());
+
+            // Assert
+            Assert.Contains("LIFO", exception.Message);
+            Assert.Equal("mysql", accessor.Current.DbKey);
+        }
+        finally
+        {
+            child.Dispose();
+            parent.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：读取 Current 返回的快照被修改时不应回写访问器内部上下文。
+    /// </summary>
+    [Fact]
+    public void Current_WhenReturnedSnapshotIsMutated_ShouldNotChangeAccessorContext()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor
+        {
+            Current = new DatabaseContext
+            {
+                DbKey = "default",
+                DataSource = new SqlDataSourceDescriptor
+                {
+                    Key = "default",
+                    DatabaseType = DatabaseType.Sqlite
+                }
+            }
+        };
+
+        // Act
+        var snapshot = accessor.Current;
+        snapshot.DbKey = "changed";
+        snapshot.DataSource.Key = "changed";
+
+        // Assert
+        Assert.Equal("default", accessor.Current.DbKey);
+        Assert.Equal("default", accessor.Current.DataSource.Key);
+    }
+
+    /// <summary>
+    /// 测试目的：Update 应将返回的新上下文写回访问器并返回独立快照。
+    /// </summary>
+    [Fact]
+    public void Update_WhenUpdaterReturnsContext_ShouldWriteBackUpdatedSnapshot()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor
+        {
+            Current = new DatabaseContext { DbKey = "default", TenantId = "tenant-a" }
+        };
+
+        // Act
+        var result = accessor.Update(context =>
+        {
+            context.DbKey = "mysql";
+            return context;
+        });
+        result.DbKey = "changed";
+
+        // Assert
+        Assert.Equal("mysql", accessor.Current.DbKey);
+        Assert.Equal("tenant-a", accessor.Current.TenantId);
+    }
+
+    /// <summary>
     /// 切换并读取指定数据库上下文。
     /// </summary>
     /// <param name="manager">数据库上下文作用域管理器。</param>
@@ -473,6 +651,30 @@ public class DatabaseScopeAndDataSourceTest
             Key = "pgsql",
             DatabaseType = DatabaseType.PgSql,
             ConnectionString = "Host=pgsql;Database=test;"
+        };
+        return options;
+    }
+
+    /// <summary>
+    /// 创建主库读取策略测试配置。
+    /// </summary>
+    /// <returns>SQL 元数据配置。</returns>
+    private static SqlMetadataOptions CreatePrimaryReadOptions()
+    {
+        var options = new SqlMetadataOptions();
+        options.DataSources.DataSources["read"] = new SqlDataSourceDescriptor
+        {
+            Key = "read",
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = "Data Source=read.db",
+            PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
+            PrimaryDataSourceKey = "primary"
+        };
+        options.DataSources.DataSources["primary"] = new SqlDataSourceDescriptor
+        {
+            Key = "primary",
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = "Data Source=primary.db"
         };
         return options;
     }
