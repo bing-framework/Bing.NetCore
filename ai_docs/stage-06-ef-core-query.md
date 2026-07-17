@@ -22,3 +22,9 @@
 ## 风险
 
 - 不受支持的 EF Core Provider 会抛出明确异常；接入新 Provider 时需同时注册其 SQL 数据源和独立连接工厂。
+
+## 2026-07-17 Shared 物理身份校验
+
+- Shared 模式在解析 Ambient `DatabaseContext` 和最终数据源后，分别比较 EF 连接与 SQL 数据源的物理数据库身份，而非直接比较原始连接字符串。
+- 身份比较忽略密码、用户和连接池参数，识别 SQL Server 实例、MySQL/PostgreSQL 主机端口、Oracle 服务名，以及 SQLite 规范化文件路径；同服务器不同数据库会被明确拒绝。
+- Independent 模式仍创建独立连接，不绑定 EF 事务。`Bing.EntityFrameworkCore.Tests` 已覆盖 Ambient 同库、不同库和最终路由数据源校验。

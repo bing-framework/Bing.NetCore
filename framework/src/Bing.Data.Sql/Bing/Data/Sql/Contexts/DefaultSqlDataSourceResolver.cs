@@ -102,6 +102,9 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
         if (!_options.DataSources.DataSources.TryGetValue(descriptor.PrimaryDataSourceKey, out var primary))
             throw CreateDataSourceMissingException(descriptor.PrimaryDataSourceKey);
         var result = CreateDescriptor(descriptor.PrimaryDataSourceKey, primary);
+        if (result.DatabaseType != descriptor.DatabaseType)
+            throw new InvalidOperationException(
+                $"数据源 {descriptor.Key} 的 Provider {descriptor.DatabaseType} 与主库数据源 {result.Key} 的 Provider {result.DatabaseType} 不一致，无法建立主库读取关系。");
         if (string.IsNullOrWhiteSpace(result.MappingProfile))
             result.MappingProfile = descriptor.MappingProfile;
         return result;

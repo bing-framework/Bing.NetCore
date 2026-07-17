@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <RUN_SQLSERVER_INTEGRATION_TESTS>true</RUN_SQLSERVER_INTEGRATION_TESTS>
+      <ConnectionStrings__SqlServerConnection>Server=127.0.0.1,1433;Database=bing_framework_sqlserver_test;User Id=sa;Password=replace-me;TrustServerCertificate=true;</ConnectionStrings__SqlServerConnection>
+      <ALLOW_DATABASE_RESET_FOR_TESTS>false</ALLOW_DATABASE_RESET_FOR_TESTS>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>

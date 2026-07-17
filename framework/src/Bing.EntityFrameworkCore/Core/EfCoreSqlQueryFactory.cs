@@ -2,7 +2,6 @@ using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
-using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -49,6 +48,11 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     private readonly ISqlDataSourceResolver _dataSourceResolver;
 
     /// <summary>
+    /// SQL 数据库物理身份解析器。
+    /// </summary>
+    private readonly ISqlDatabaseIdentityResolver _databaseIdentityResolver;
+
+    /// <summary>
     /// 初始化一个<see cref="EfCoreSqlQueryFactory"/>类型的实例
     /// </summary>
     /// <param name="queryFactory">SQL 查询对象工厂</param>
@@ -58,13 +62,15 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <param name="connectionFactoryResolver">独立数据库连接工厂解析器</param>
     /// <param name="connectionStringResolver">SQL 连接字符串解析器</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器</param>
+    /// <param name="databaseIdentityResolver">SQL 数据库物理身份解析器。</param>
     public EfCoreSqlQueryFactory(ISqlQueryFactory queryFactory,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ITypeConverterResolver typeConverterResolver = null,
         ISqlDbConnectionFactoryResolver connectionFactoryResolver = null,
         ISqlConnectionStringResolver connectionStringResolver = null,
-        ISqlDataSourceResolver dataSourceResolver = null)
+        ISqlDataSourceResolver dataSourceResolver = null,
+        ISqlDatabaseIdentityResolver databaseIdentityResolver = null)
     {
         _queryFactory = queryFactory ?? throw new ArgumentNullException(nameof(queryFactory));
         _databaseContextAccessor = databaseContextAccessor;
@@ -73,6 +79,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         _connectionFactoryResolver = connectionFactoryResolver;
         _connectionStringResolver = connectionStringResolver ?? new DefaultSqlConnectionStringResolver();
         _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_metadataOptions);
+        _databaseIdentityResolver = databaseIdentityResolver ?? new DefaultSqlDatabaseIdentityResolver();
     }
 
     /// <inheritdoc />
@@ -83,7 +90,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
             throw new ArgumentNullException(nameof(unitOfWork));
         var databaseType = ResolveDatabaseType(unitOfWork);
         var dataSource = ResolveDataSource(databaseType, dbKey);
-        if (mode == EfCoreSqlConnectionMode.Shared && string.IsNullOrWhiteSpace(dbKey) == false)
+        if (mode == EfCoreSqlConnectionMode.Shared)
             EnsureSharedConnectionMatches(unitOfWork, dataSource);
         var query = CreateQuery(dataSource);
         BindEntityMetadata(query, unitOfWork);
@@ -166,37 +173,20 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     }
 
     /// <summary>
-    /// 确保 Shared 模式的显式数据源与当前 DbContext 指向同一物理数据库
+    /// 确保 Shared 模式的最终数据源与当前 DbContext 指向同一物理数据库
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
-    /// <param name="dataSource">显式选择的数据源</param>
+    /// <param name="dataSource">最终解析的数据源。</param>
     private void EnsureSharedConnectionMatches(UnitOfWorkBase unitOfWork, SqlDataSourceDescriptor dataSource)
     {
         var dataSourceConnectionString = _connectionStringResolver.Resolve(dataSource);
         var dbContextConnectionString = unitOfWork.Database.GetDbConnection().ConnectionString;
-        if (string.Equals(GetDatabaseIdentity(dataSourceConnectionString), GetDatabaseIdentity(dbContextConnectionString),
-                StringComparison.OrdinalIgnoreCase))
+        var dataSourceIdentity = _databaseIdentityResolver.Resolve(dataSource.DatabaseType, dataSourceConnectionString);
+        var dbContextIdentity = _databaseIdentityResolver.Resolve(dataSource.DatabaseType, dbContextConnectionString);
+        if (dataSourceIdentity.Equals(dbContextIdentity))
             return;
         throw new InvalidOperationException(
             $"SQL 数据源 {dataSource.Key} 与当前 DbContext 指向不同的物理数据库，Shared 模式不能复用该连接，请使用 {nameof(EfCoreSqlConnectionMode.Independent)} 模式。");
-    }
-
-    /// <summary>
-    /// 获取用于比较物理数据库的连接标识
-    /// </summary>
-    /// <param name="connectionString">连接字符串</param>
-    /// <returns>规范化后的数据库标识</returns>
-    private static string GetDatabaseIdentity(string connectionString)
-    {
-        if (string.IsNullOrWhiteSpace(connectionString))
-            return string.Empty;
-        var builder = new DbConnectionStringBuilder { ConnectionString = connectionString };
-        foreach (var key in new[] { "Data Source", "DataSource", "Database", "Initial Catalog", "Filename" })
-        {
-            if (builder.TryGetValue(key, out var value) && string.IsNullOrWhiteSpace(value?.ToString()) == false)
-                return value.ToString().Trim();
-        }
-        return connectionString.Replace(" ", string.Empty);
     }
 
     /// <summary>

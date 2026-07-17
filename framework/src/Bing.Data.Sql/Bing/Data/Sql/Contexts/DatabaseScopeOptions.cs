@@ -18,5 +18,5 @@ public sealed class DatabaseScopeOptions
     /// <summary>
     /// 读取偏好
     /// </summary>
-    public SqlReadPreference ReadPreference { get; set; } = SqlReadPreference.Default;
+    public SqlReadPreference? ReadPreference { get; set; }
 }

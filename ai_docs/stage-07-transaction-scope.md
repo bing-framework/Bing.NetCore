@@ -32,3 +32,9 @@
 - 事务开始时通过主库读取偏好解析并复制完整数据库上下文；事务子 Query 和 Executor 复用该快照、同一连接和同一事务，不再读取后续 Ambient Context。
 - 数据源快照会复制连接名称、映射配置、读写策略与本地事务能力，避免运行期间修改描述符导致事务上下文漂移。
 - `SqlDataSourceDescriptor.SupportsTransactions` 默认值为 `true`。Doris 使用 `DatabaseType.MySql` 和独立 Mapping Profile 接入时应设为 `false`，本地事务开始会明确抛出不支持异常。Doris 复用 MySQL 协议、方言与参数格式，但不默认具备完整 MySQL 的事务、更新、锁和批量写能力。
+
+## 2026-07-17 子对象生命周期
+
+- Scope 创建的 Query 与 Executor 共享内部事务 lease 和 Scope 的 `TransactionId`，诊断事件可关联到同一事务。
+- `Commit`、`Rollback` 或 `Dispose` 开始时即使 lease 失效；此前创建的子对象再次获取连接、事务或执行命令会抛出明确异常，不能重新建连或脱离已结束的事务运行。
+- Scope 结束会释放其创建的子对象；子对象只将连接和事务视为外部资源，不会提前释放 Scope 所拥有的 ADO 资源。

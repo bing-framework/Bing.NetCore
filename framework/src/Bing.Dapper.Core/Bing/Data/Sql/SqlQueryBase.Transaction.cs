@@ -13,7 +13,9 @@ public abstract partial class SqlQueryBase
     /// <param name="context">事务数据库上下文。</param>
     /// <param name="connection">事务连接。</param>
     /// <param name="transaction">事务。</param>
-    internal void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction)
+    /// <param name="lease">事务作用域执行租约。</param>
+    internal void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
+        SqlTransactionScopeLease lease)
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
@@ -21,12 +23,15 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(connection));
         if (transaction == null)
             throw new ArgumentNullException(nameof(transaction));
+        if (lease == null)
+            throw new ArgumentNullException(nameof(lease));
         if (transaction.Connection != null && ReferenceEquals(transaction.Connection, connection) == false)
             throw new InvalidOperationException("事务连接与固定事务执行上下文不一致");
         Options.DatabaseType = context.DataSource?.DatabaseType ?? Options.DatabaseType;
         Options.SetDatabaseContext(context);
         SetConnection(connection);
-        SetTransaction(transaction);
+        _transactionScopeLease = lease;
+        SetTransaction(transaction, lease.TransactionId);
     }
 
     #region SetTransaction(设置数据库事务)
@@ -37,10 +42,20 @@ public abstract partial class SqlQueryBase
     /// <param name="transaction">数据库事务</param>
     public void SetTransaction(IDbTransaction transaction)
     {
+        SetTransaction(transaction, null);
+    }
+
+    /// <summary>
+    /// 设置数据库事务并指定诊断事务标识。
+    /// </summary>
+    /// <param name="transaction">数据库事务。</param>
+    /// <param name="transactionId">诊断事务标识。</param>
+    private void SetTransaction(IDbTransaction transaction, string transactionId)
+    {
         if (transaction == null)
             return;
         _transaction = transaction;
-        _transactionId = Guid.NewGuid().ToString("N");
+        _transactionId = transactionId ?? Guid.NewGuid().ToString("N");
         _transactionOwnership = SqlResourceOwnership.External;
         if (transaction.Connection != null)
         {
@@ -56,13 +71,18 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 获取数据库事务
     /// </summary>
-    public IDbTransaction GetTransaction() => _transaction ?? _externalTransactionResolver?.Invoke();
+    public IDbTransaction GetTransaction()
+    {
+        _transactionScopeLease?.EnsureActive();
+        return _transaction ?? _externalTransactionResolver?.Invoke();
+    }
 
     /// <summary>
     /// 获取查询事务。
     /// </summary>
     protected IDbTransaction GetQueryTransaction()
     {
+        _transactionScopeLease?.EnsureActive();
         var transaction = GetTransaction();
         if (transaction != null)
             return transaction;

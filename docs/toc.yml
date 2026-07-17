@@ -4,5 +4,7 @@
   href: api/
 - name: 发行说明
   href: ReleaseNotes.md
+- name: 数据库集成测试
+  href: integration-testing.md
 - name: Github
   href: https://github.com/bing-framework/Bing.NetCore

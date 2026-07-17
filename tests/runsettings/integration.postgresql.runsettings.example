@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <RUN_POSTGRESQL_INTEGRATION_TESTS>true</RUN_POSTGRESQL_INTEGRATION_TESTS>
+      <ConnectionStrings__PostgreSqlConnection>Host=127.0.0.1;Port=5432;Database=bing_framework_postgresql_test;Username=postgres;Password=replace-me;</ConnectionStrings__PostgreSqlConnection>
+      <ALLOW_DATABASE_RESET_FOR_TESTS>false</ALLOW_DATABASE_RESET_FOR_TESTS>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>

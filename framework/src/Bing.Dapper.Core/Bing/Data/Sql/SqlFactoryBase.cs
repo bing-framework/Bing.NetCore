@@ -40,6 +40,11 @@ public abstract class SqlFactoryBase
     private readonly ISqlConnectionStringResolver _connectionStringResolver;
 
     /// <summary>
+    /// 数据库上下文快照工厂。
+    /// </summary>
+    private readonly IDatabaseContextSnapshotFactory _snapshotFactory;
+
+    /// <summary>
     /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
@@ -48,12 +53,14 @@ public abstract class SqlFactoryBase
     /// <param name="implementationTypeResolver">SQL 实现类型解析器。</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器。</param>
     /// <param name="connectionStringResolver">SQL 连接字符串解析器。</param>
+    /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ISqlImplementationTypeResolver implementationTypeResolver = null,
         ISqlDataSourceResolver dataSourceResolver = null,
-        ISqlConnectionStringResolver connectionStringResolver = null)
+        ISqlConnectionStringResolver connectionStringResolver = null,
+        IDatabaseContextSnapshotFactory snapshotFactory = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
@@ -64,6 +71,8 @@ public abstract class SqlFactoryBase
                                     _serviceProvider.GetService<ISqlConnectionStringResolver>() ??
                                     new DefaultSqlConnectionStringResolver(
                                         _serviceProvider.GetService<ConnectionStringCollection>());
+        _snapshotFactory = snapshotFactory ?? _serviceProvider.GetService<IDatabaseContextSnapshotFactory>() ??
+                           new DefaultDatabaseContextSnapshotFactory();
     }
 
     /// <summary>
@@ -81,7 +90,8 @@ public abstract class SqlFactoryBase
             ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
         };
         var dataSource = _dataSourceResolver.Resolve(dbKey, options);
-        return CreateContext(dataSource, options.TenantId, current?.MappingProfile, options.ReadPreference);
+        return CreateContext(dataSource, options.TenantId, current?.MappingProfile,
+            options.ReadPreference ?? SqlReadPreference.Default);
     }
 
     /// <summary>
@@ -101,7 +111,8 @@ public abstract class SqlFactoryBase
             ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
         };
         var dataSource = _dataSourceResolver.Resolve(current?.DbKey, options);
-        return CreateContext(dataSource, options.TenantId, current?.MappingProfile, options.ReadPreference);
+        return CreateContext(dataSource, options.TenantId, current?.MappingProfile,
+            options.ReadPreference ?? SqlReadPreference.Default);
     }
 
     /// <summary>
@@ -120,7 +131,8 @@ public abstract class SqlFactoryBase
             ReadPreference = SqlReadPreference.Primary
         };
         var dataSource = _dataSourceResolver.Resolve(requestedDbKey, options);
-        return CreateContext(dataSource, options.TenantId, current?.MappingProfile, options.ReadPreference);
+        return CreateContext(dataSource, options.TenantId, current?.MappingProfile,
+            options.ReadPreference ?? SqlReadPreference.Default);
     }
 
     /// <summary>
@@ -205,19 +217,19 @@ public abstract class SqlFactoryBase
     /// <param name="mappingProfile">映射配置名称。</param>
     /// <param name="readPreference">读取偏好。</param>
     /// <returns>数据库上下文。</returns>
-    private static DatabaseContext CreateContext(SqlDataSourceDescriptor dataSource, string tenantId,
+    private DatabaseContext CreateContext(SqlDataSourceDescriptor dataSource, string tenantId,
         string mappingProfile, SqlReadPreference readPreference)
     {
         if (dataSource == null)
             throw new InvalidOperationException("SQL 数据源描述不能为空");
-        return new DatabaseContext
+        return _snapshotFactory.Create(new DatabaseContext
         {
             DbKey = dataSource.Key,
             TenantId = tenantId,
             MappingProfile = string.IsNullOrWhiteSpace(dataSource.MappingProfile) ? mappingProfile : dataSource.MappingProfile,
             ReadPreference = readPreference,
             DataSource = dataSource
-        };
+        });
     }
 
     /// <summary>
@@ -225,18 +237,9 @@ public abstract class SqlFactoryBase
     /// </summary>
     /// <param name="context">数据库上下文。</param>
     /// <returns>数据库上下文。</returns>
-    private static DatabaseContext Clone(DatabaseContext context)
+    private DatabaseContext Clone(DatabaseContext context)
     {
-        if (context == null)
-            return null;
-        return new DatabaseContext
-        {
-            DbKey = context.DbKey,
-            TenantId = context.TenantId,
-            MappingProfile = context.MappingProfile,
-            ReadPreference = context.ReadPreference,
-            DataSource = context.DataSource
-        };
+        return _snapshotFactory.Create(context);
     }
 
     /// <summary>

@@ -1,0 +1,14 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.IO;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using Bing.Data;
+global using Bing.Data.Enums;
+global using Bing.Data.Sql;
+global using Bing.Dapper.Sqlite;
+global using Microsoft.Data.Sqlite;
+global using Microsoft.Extensions.DependencyInjection;
+global using Xunit;

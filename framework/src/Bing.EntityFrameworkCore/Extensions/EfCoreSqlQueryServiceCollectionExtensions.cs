@@ -19,6 +19,7 @@ public static class EfCoreSqlQueryServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+        services.TryAddSingleton<ISqlDatabaseIdentityResolver, DefaultSqlDatabaseIdentityResolver>();
         services.TryAddSingleton<IEfCoreSqlQueryFactory, EfCoreSqlQueryFactory>();
         return services;
     }

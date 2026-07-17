@@ -63,3 +63,9 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 - 中：Doris 能力边界由数据源配置声明，尚未接入真实 Doris 环境验证。建议在有可控 Doris CI 服务后增加只读查询、分页和能力拒绝集成测试。
 - 低：`BeginAsync` 在 `netstandard2.0` 仍以同步方式开启底层事务；不影响事务数据源固定，但不提供真实异步打开语义。
 - 非阻断：仓库保留 `net6.0` 生命周期、历史 NuGet 漏洞及 SQLite RID 相关警告，均不由本阶段引入。
+
+## 2026-07-17 验收补充
+
+- `Bing.Dapper.Sqlite.Tests.Integration` 使用临时 SQLite 文件执行真实 SQL；无需环境变量，`net6.0` 与 `net8.0` 共 66 项通过。
+- SQL Server、PostgreSQL 与 MySQL 集成项目继续由 `IntegrationFact` 门控。未提供连接字符串时，它们成功构建并跳过；启用真实执行分别需要 `RUN_SQLSERVER_INTEGRATION_TESTS=true`、`RUN_POSTGRESQL_INTEGRATION_TESTS=true` 或 `RUN_MYSQL_INTEGRATION_TESTS=true`，以及相应的 `ConnectionStrings__*Connection`。
+- 外部 Provider 的真实执行不应使用生产库。共享测试基建会要求明确启用开关，并校验测试数据库名称以避免清理过程误操作系统库或业务库。

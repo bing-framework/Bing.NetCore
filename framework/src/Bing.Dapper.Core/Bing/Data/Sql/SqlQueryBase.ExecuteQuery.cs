@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Diagnostics;
+using System.Data.Common;
 
 namespace Bing.Data.Sql;
 
@@ -124,8 +125,9 @@ public abstract partial class SqlQueryBase
     public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null,
         bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) =>
-            (await conn.QueryAsync(CreateQueryCommandDefinition(sql, param, transaction, timeout, buffered,
-                cancellationToken))).ToList());
+            await ExecuteMaterializedQueryAsync<dynamic>(conn,
+                CreateQueryCommandDefinition(sql, param, transaction, timeout, buffered, cancellationToken),
+                cancellationToken));
 
     /// <summary>
     /// 获取实体集合
@@ -137,8 +139,9 @@ public abstract partial class SqlQueryBase
     public async Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null,
         bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) =>
-            (await conn.QueryAsync<TEntity>(CreateQueryCommandDefinition(sql, param, transaction, timeout, buffered,
-                cancellationToken))).ToList());
+            await ExecuteMaterializedQueryAsync<TEntity>(conn,
+                CreateQueryCommandDefinition(sql, param, transaction, timeout, buffered, cancellationToken),
+                cancellationToken));
 
     /// <summary>
     /// 获取实体集合
@@ -246,6 +249,25 @@ public abstract partial class SqlQueryBase
     {
         return new CommandDefinition(sql, parameters, transaction, timeout, commandType,
             buffered ? CommandFlags.Buffered : CommandFlags.None, cancellationToken);
+    }
+
+    /// <summary>
+    /// 异步执行列表查询并在读取器有效期内完成结果物化。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="connection">数据库连接。</param>
+    /// <param name="command">Dapper 命令定义。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>已完整物化的实体集合。</returns>
+    protected virtual async Task<List<TEntity>> ExecuteMaterializedQueryAsync<TEntity>(IDbConnection connection,
+        CommandDefinition command, CancellationToken cancellationToken)
+    {
+        using var reader = (DbDataReader)await connection.ExecuteReaderAsync(command);
+        var parser = reader.GetRowParser<TEntity>();
+        var result = new List<TEntity>();
+        while (await reader.ReadAsync(cancellationToken))
+            result.Add(parser(reader));
+        return result;
     }
 
     /// <summary>

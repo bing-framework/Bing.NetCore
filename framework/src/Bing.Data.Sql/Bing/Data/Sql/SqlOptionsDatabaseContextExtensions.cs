@@ -25,7 +25,7 @@ public static class SqlOptionsDatabaseContextExtensions
             throw new ArgumentNullException(nameof(options));
         Contexts.Remove(options);
         if (context != null)
-            Contexts.Add(options, new DatabaseContextHolder(Clone(context)));
+            Contexts.Add(options, new DatabaseContextHolder(DatabaseContextSnapshot.Create(context)));
         return options;
     }
 
@@ -38,7 +38,7 @@ public static class SqlOptionsDatabaseContextExtensions
     {
         if (options == null)
             return null;
-        return Contexts.TryGetValue(options, out var holder) ? Clone(holder.Context) : null;
+        return Contexts.TryGetValue(options, out var holder) ? DatabaseContextSnapshot.Create(holder.Context) : null;
     }
 
     /// <summary>
@@ -48,16 +48,7 @@ public static class SqlOptionsDatabaseContextExtensions
     /// <returns>数据库上下文</returns>
     internal static DatabaseContext Clone(DatabaseContext context)
     {
-        if (context == null)
-            return null;
-        return new DatabaseContext
-        {
-            DbKey = context.DbKey,
-            TenantId = context.TenantId,
-            ReadPreference = context.ReadPreference,
-            MappingProfile = context.MappingProfile,
-            DataSource = context.DataSource
-        };
+        return DatabaseContextSnapshot.Create(context);
     }
 
     /// <summary>

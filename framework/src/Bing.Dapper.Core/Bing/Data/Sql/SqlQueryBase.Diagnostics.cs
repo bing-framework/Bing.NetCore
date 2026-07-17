@@ -36,7 +36,7 @@ public abstract partial class SqlQueryBase
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute
         };
-        _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, message);
+        _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, CloneDiagnosticsMessage(message));
         return message;
     }
 
@@ -243,9 +243,10 @@ public abstract partial class SqlQueryBase
             return;
         if (message?.Timestamp != null)
         {
-            message.Operation = SqlQueryDiagnosticListenerNames.AfterExecute;
-            message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.Timestamp.Value;
-            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.AfterExecute, message);
+            var snapshot = CloneDiagnosticsMessage(message);
+            snapshot.Operation = SqlQueryDiagnosticListenerNames.AfterExecute;
+            snapshot.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - snapshot.Timestamp.Value;
+            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.AfterExecute, snapshot);
         }
     }
 
@@ -258,11 +259,91 @@ public abstract partial class SqlQueryBase
     {
         if (exception != null && message?.Timestamp != null && _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.ErrorExecute))
         {
-            message.Exception = exception;
-            message.Operation = SqlQueryDiagnosticListenerNames.ErrorExecute;
-            message.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - message.Timestamp.Value;
+            var snapshot = CloneDiagnosticsMessage(message);
+            snapshot.Exception = exception;
+            snapshot.Operation = SqlQueryDiagnosticListenerNames.ErrorExecute;
+            snapshot.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - snapshot.Timestamp.Value;
 
-            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.ErrorExecute, message);
+            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.ErrorExecute, snapshot);
         }
+    }
+
+    /// <summary>
+    /// 创建互不共享可变对象的诊断消息副本。
+    /// </summary>
+    /// <param name="message">原始诊断消息。</param>
+    /// <returns>诊断消息副本。</returns>
+    private static DiagnosticsMessage CloneDiagnosticsMessage(DiagnosticsMessage message)
+    {
+        if (message == null)
+            return null;
+        return new DiagnosticsMessage
+        {
+            Timestamp = message.Timestamp,
+            Operation = message.Operation,
+            OperationId = message.OperationId,
+            Sql = message.Sql,
+            Parameters = message.Parameters == null
+                ? null
+                : new SqlParameterDiagnosticSnapshot
+                {
+                    OriginalParameterType = message.Parameters.OriginalParameterType,
+                    IsMetadataBound = message.Parameters.IsMetadataBound,
+                    Items = message.Parameters.Items.Select(CloneSqlParameterDiagnosticInfo).ToList()
+                },
+            Connection = message.Connection == null
+                ? null
+                : new SqlConnectionDiagnosticInfo
+                {
+                    Database = message.Connection.Database,
+                    DbKey = message.Connection.DbKey,
+                    DatabaseType = message.Connection.DatabaseType,
+                    Source = message.Connection.Source,
+                    Ownership = message.Connection.Ownership,
+                    IsReadOnly = message.Connection.IsReadOnly,
+                    ReadPreference = message.Connection.ReadPreference
+                },
+            Transaction = message.Transaction == null
+                ? null
+                : new SqlTransactionDiagnosticInfo
+                {
+                    TransactionId = message.Transaction.TransactionId,
+                    HasTransaction = message.Transaction.HasTransaction,
+                    IsolationLevel = message.Transaction.IsolationLevel,
+                    Ownership = message.Transaction.Ownership,
+                    IsPrimaryReadTransaction = message.Transaction.IsPrimaryReadTransaction
+                },
+            ElapsedMilliseconds = message.ElapsedMilliseconds,
+            Exception = message.Exception
+        };
+    }
+
+    /// <summary>
+    /// 创建 SQL 参数诊断信息副本。
+    /// </summary>
+    /// <param name="parameter">原始 SQL 参数诊断信息。</param>
+    /// <returns>SQL 参数诊断信息副本。</returns>
+    private static SqlParameterDiagnosticInfo CloneSqlParameterDiagnosticInfo(SqlParameterDiagnosticInfo parameter)
+    {
+        if (parameter == null)
+            return null;
+        return new SqlParameterDiagnosticInfo
+        {
+            Name = parameter.Name,
+            Value = parameter.Value,
+            OriginalValue = parameter.OriginalValue,
+            IsSensitive = parameter.IsSensitive,
+            DbType = parameter.DbType,
+            Direction = parameter.Direction,
+            Size = parameter.Size,
+            Precision = parameter.Precision,
+            Scale = parameter.Scale,
+            EntityType = parameter.EntityType,
+            PropertyName = parameter.PropertyName,
+            ColumnName = parameter.ColumnName,
+            ProviderTypeName = parameter.ProviderTypeName,
+            Source = parameter.Source,
+            MetadataLevel = parameter.MetadataLevel
+        };
     }
 }

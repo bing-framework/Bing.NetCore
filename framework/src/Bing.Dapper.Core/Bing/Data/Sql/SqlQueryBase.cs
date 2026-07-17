@@ -52,6 +52,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     private string _transactionId;
 
     /// <summary>
+    /// 事务作用域执行租约。
+    /// </summary>
+    private SqlTransactionScopeLease _transactionScopeLease;
+
+    /// <summary>
     /// 是否已为主库读取创建内部事务。
     /// </summary>
     private bool _primaryReadTransactionStarted;
@@ -379,9 +384,15 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// </summary>
     public IDbConnection GetConnection()
     {
+        _transactionScopeLease?.EnsureActive();
         if (_connection != null)
             return _connection;
-        _connection = Database.GetConnection();
+        var dataSource = Options.GetDatabaseContext()?.DataSource;
+        var hasResolvedConnection = string.IsNullOrWhiteSpace(dataSource?.ConnectionString) == false ||
+                                    string.IsNullOrWhiteSpace(dataSource?.ConnectionStringName) == false;
+        _connection = hasResolvedConnection
+            ? CreateDatabase().GetConnection()
+            : Database.GetConnection();
         _connectionOwnership = SqlResourceOwnership.Owned;
         if (_connection == null)
             throw new InvalidOperationException("数据库连接不能为空");

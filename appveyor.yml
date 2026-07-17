@@ -16,7 +16,9 @@ build:
 build_script:
   - cmd: dotnet build -c Release
 test_script:
-  - cmd: dotnet test -c Release
+  # 常规 CI 只运行无需凭据的单元测试和 SQLite 集成测试。
+  # 外部 Provider 测试由受保护的专用构建注入连接字符串和 RUN_*_INTEGRATION_TESTS=true。
+  - cmd: set RUN_INTEGRATION_TESTS=false&& set RUN_MYSQL_INTEGRATION_TESTS=false&& set RUN_POSTGRESQL_INTEGRATION_TESTS=false&& set RUN_SQLSERVER_INTEGRATION_TESTS=false&& set RUN_ORACLE_INTEGRATION_TESTS=false&& dotnet test -c Release
 artifacts:
   - path: '**\*.nupkg'
 nuget:

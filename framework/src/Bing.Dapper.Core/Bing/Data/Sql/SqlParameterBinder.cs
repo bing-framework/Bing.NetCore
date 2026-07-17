@@ -103,20 +103,38 @@ public interface ISqlParameterContextBinder : ISqlParameterBinder
 }
 
 /// <summary>
-/// Dapper 增强参数集访问器
+/// Dapper 参数绑定器。
 /// </summary>
-public interface IDapperSqlParameterSet
+/// <remarks>
+/// 保留 <see cref="ISqlParameterBinder"/> 作为通用 SQL 兼容入口；Dapper 调用方可逐步迁移到此契约。
+/// </remarks>
+public interface IDapperParameterBinder : ISqlParameterContextBinder
+{
+}
+
+/// <summary>
+/// Dapper 增强参数集访问器。
+/// </summary>
+public interface IDapperParameterSet
 {
     /// <summary>
-    /// 获取增强参数集合
+    /// 获取增强参数集合。
     /// </summary>
     IReadOnlyCollection<SqlParam> Parameters { get; }
 }
 
 /// <summary>
+/// Dapper 增强参数集访问器
+/// </summary>
+/// <remarks>兼容旧命名，新增代码应使用 <see cref="IDapperParameterSet"/>。</remarks>
+public interface IDapperSqlParameterSet : IDapperParameterSet
+{
+}
+
+/// <summary>
 /// 默认 Sql 参数绑定器
 /// </summary>
-public class DefaultSqlParameterBinder : ISqlParameterContextBinder
+public class DefaultSqlParameterBinder : IDapperParameterBinder
 {
     /// <summary>
     /// 实体映射解析器

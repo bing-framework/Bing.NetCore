@@ -6,7 +6,7 @@ namespace Bing.Data.Sql;
 public sealed class AsyncLocalDatabaseContextAccessor : IDatabaseContextAccessor
 {
     /// <summary>
-    /// 当前数据库上下文。
+    /// 当前数据库上下文快照。读取该属性返回独立副本，直接修改返回值不会写回当前异步执行上下文，应通过设置该属性或 <see cref="DatabaseContextAccessorExtensions.Update"/> 更新。
     /// </summary>
     private readonly AsyncLocal<DatabaseContext> _current = new();
 
@@ -15,49 +15,7 @@ public sealed class AsyncLocalDatabaseContextAccessor : IDatabaseContextAccessor
     /// </summary>
     public DatabaseContext Current
     {
-        get => Clone(_current.Value);
-        set => _current.Value = Clone(value);
-    }
-
-    /// <summary>
-    /// 创建数据库上下文快照。
-    /// </summary>
-    /// <param name="context">数据库上下文。</param>
-    /// <returns>数据库上下文快照。</returns>
-    private static DatabaseContext Clone(DatabaseContext context)
-    {
-        if (context == null)
-            return null;
-        return new DatabaseContext
-        {
-            DbKey = context.DbKey,
-            TenantId = context.TenantId,
-            ReadPreference = context.ReadPreference,
-            MappingProfile = context.MappingProfile,
-            DataSource = Clone(context.DataSource)
-        };
-    }
-
-    /// <summary>
-    /// 创建 SQL 数据源描述快照。
-    /// </summary>
-    /// <param name="dataSource">SQL 数据源描述。</param>
-    /// <returns>SQL 数据源描述快照。</returns>
-    private static SqlDataSourceDescriptor Clone(SqlDataSourceDescriptor dataSource)
-    {
-        if (dataSource == null)
-            return null;
-        return new SqlDataSourceDescriptor
-        {
-            Key = dataSource.Key,
-            DatabaseType = dataSource.DatabaseType,
-            ConnectionStringName = dataSource.ConnectionStringName,
-            ConnectionString = dataSource.ConnectionString,
-            IsReadOnly = dataSource.IsReadOnly,
-            MappingProfile = dataSource.MappingProfile,
-            PrimaryReadStrategy = dataSource.PrimaryReadStrategy,
-            PrimaryDataSourceKey = dataSource.PrimaryDataSourceKey,
-            SupportsTransactions = dataSource.SupportsTransactions
-        };
+        get => DatabaseContextSnapshot.Create(_current.Value);
+        set => _current.Value = DatabaseContextSnapshot.Create(value);
     }
 }

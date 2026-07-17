@@ -46,9 +46,11 @@ public static class DapperCoreServiceCollectionExtensions
             return options;
         });
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
+        services.TryAddSingleton<IDatabaseContextSnapshotFactory, DefaultDatabaseContextSnapshotFactory>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
         services.TryAddScoped<IReadPreferenceScopeManager, ReadPreferenceScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
+        services.TryAddSingleton<ISqlDatabaseIdentityResolver, DefaultSqlDatabaseIdentityResolver>();
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
@@ -56,7 +58,8 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<IFieldValueConverter, DefaultFieldValueConverter>();
         services.TryAddSingleton<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
         services.TryAddSingleton<ISqlParameterFactory, DefaultSqlParameterFactory>();
-        services.TryAddSingleton<ISqlParameterBinder, DefaultSqlParameterBinder>();
+        services.TryAddSingleton<IDapperParameterBinder, DefaultSqlParameterBinder>();
+        services.TryAddSingleton<ISqlParameterBinder>(provider => provider.GetRequiredService<IDapperParameterBinder>());
         services.TryAddSingleton<SqlImplementationTypeOptions>();
         services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();

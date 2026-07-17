@@ -35,3 +35,9 @@
 - `StreamQuery<T>` 和 `StreamQueryAsync<T>` 在完整枚举、提前终止时都会完成一次 `AfterExecute` 诊断；异常路径仅发布 `ErrorExecute`。
 - 流式枚举提前终止仍释放 Reader，保留现有 `buffered:false` 列表查询语义：列表 API 会物化最终结果，真正逐行读取继续使用流式 API。
 - SQL Server Provider 测试新增提前终止流式枚举的单次完成诊断断言。
+
+## 2026-07-17 事件快照隔离
+
+- `BeforeExecute`、`AfterExecute` 与 `ErrorExecute` 分别发布深拷贝诊断载荷；后续事件不会修改订阅方已接收的 `BeforeExecute` 对象。
+- 每个事件保留相同的 `OperationId`、SQL、参数、连接和事务快照，`AfterExecute` 只在自己的载荷上补充耗时，`ErrorExecute` 只在自己的载荷上补充异常。
+- SQL Server 捕获式 Provider 测试验证 Before/After 对象、参数、连接和事务快照均不共享引用。

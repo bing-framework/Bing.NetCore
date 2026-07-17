@@ -347,6 +347,8 @@ scope.Commit();
 
 作用域拥有连接和事务。作用域创建的 Query / Executor 会绑定外部事务，不能自行提交或回滚；如果作用域释放前未调用 `Commit()` 或 `Rollback()`，会自动回滚。
 
+`Commit()`、`Rollback()` 或 Scope `Dispose()` 后，不得继续使用此前通过 Scope 创建的 Query / Executor。它们会立即拒绝获取连接、事务或执行 SQL，防止在已结束的事务之外重新建连执行。需要继续访问数据库时，请创建新的 Scope 或通过工厂创建新的 Query / Executor。
+
 如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。当前实现对 `StreamQuery` / `StreamQueryAsync` 会在创建读取器前直接抛出异常，避免在流式场景里静默退回到短事务策略。
 
 ### 6. 显式实体映射
@@ -594,3 +596,19 @@ public async Task<Order> GetDeletedOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 2. **合理控制清理行为**：默认自动清理适合大多数场景；需要多次复用查询时，可使用 `ClearAfterExecution(false)` 或手动调用 `Clear*` 系列方法。
 3. **善用 GetDebugSql 进行排查**：在开发和问题排查时，输出 `GetDebugSql()` 的结果便于和实际数据库环境对比验证。
 4. **谨慎忽略过滤器**：`IgnoreDeletedFilter()` 等方法仅应在确有需要的管理/审计场景使用，避免破坏业务数据约束。
+
+---
+
+## 集成测试
+
+SQLite 真实执行测试位于 `framework/tests/Bing.Dapper.Sqlite.Tests.Integration`，默认随测试运行，不依赖外部服务。
+
+MySQL、PostgreSQL 和 SQL Server 集成测试默认跳过。启用其中一个 Provider 时，设置对应开关和 `ConnectionStrings__DefaultConnection`，例如：
+
+```powershell
+$env:RUN_MYSQL_INTEGRATION_TESTS = "true"
+$env:ConnectionStrings__DefaultConnection = "Server=127.0.0.1;Database=bing_dapper_test;User Id=test;Password=..."
+dotnet test .\framework\tests\Bing.Dapper.MySql.Tests.Integration\Bing.Dapper.MySql.Tests.Integration.csproj
+```
+
+也可设置 `RUN_INTEGRATION_TESTS=true` 一次启用全部外部 Provider。测试数据库名称必须以 `_test`、`_tests` 或 `_integration` 结尾，且不能包含 `prod`、`production`、`master`、`mysql` 或 `information_schema`。本地连接配置应使用环境变量或未跟踪的 `appsettings.Development.json`，不要提交凭据。

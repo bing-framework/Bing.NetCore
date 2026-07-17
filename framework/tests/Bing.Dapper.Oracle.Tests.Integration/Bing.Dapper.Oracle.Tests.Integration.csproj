@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Bing.Dapper.Tests</RootNamespace>
+    <XunitStartupFullName>Bing.Dapper.Tests.Startup</XunitStartupFullName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Dapper.Oracle\Bing.Dapper.Oracle.csproj" />
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+  </ItemGroup>
+</Project>
