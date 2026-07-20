@@ -240,6 +240,63 @@ public class DatabaseRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 测试 - SqlOptions 写入和读取数据库上下文时均应使用深快照，避免外部修改反写固定上下文。
+    /// </summary>
+    [Fact]
+    public void DatabaseContext_WhenBoundToSqlOptions_ShouldUseIndependentDeepSnapshots()
+    {
+        // Arrange
+        var context = new DatabaseContext
+        {
+            DbKey = "reporting",
+            TenantId = "tenant-a",
+            MappingProfile = "profile-a",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DatabaseType = DatabaseType.PgSql,
+                ConnectionString = "Server=reporting;Database=reports;",
+                ConnectionStringName = "ReportingConnection",
+                IsReadOnly = true,
+                MappingProfile = "reporting-profile",
+                PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource,
+                PrimaryDataSourceKey = "primary",
+                SupportsTransactions = false
+            }
+        };
+        var options = new SqlOptions().SetDatabaseContext(context);
+
+        // Act
+        context.DbKey = "changed-input";
+        context.DataSource.Key = "changed-input";
+        context.DataSource.ConnectionString = "Server=changed;";
+        context.DataSource.ConnectionStringName = "ChangedConnection";
+        context.DataSource.IsReadOnly = false;
+        context.DataSource.MappingProfile = "changed-profile";
+        context.DataSource.PrimaryReadStrategy = PrimaryReadStrategy.Transaction;
+        context.DataSource.PrimaryDataSourceKey = "changed-primary";
+        context.DataSource.SupportsTransactions = true;
+        var snapshot = options.GetDatabaseContext();
+        snapshot.DbKey = "changed-output";
+        snapshot.DataSource.Key = "changed-output";
+
+        // Assert
+        var stored = options.GetDatabaseContext();
+        stored.DbKey.ShouldBe("reporting");
+        stored.TenantId.ShouldBe("tenant-a");
+        stored.MappingProfile.ShouldBe("profile-a");
+        stored.DataSource.Key.ShouldBe("reporting");
+        stored.DataSource.DatabaseType.ShouldBe(DatabaseType.PgSql);
+        stored.DataSource.ConnectionString.ShouldBe("Server=reporting;Database=reports;");
+        stored.DataSource.ConnectionStringName.ShouldBe("ReportingConnection");
+        stored.DataSource.IsReadOnly.ShouldBeTrue();
+        stored.DataSource.MappingProfile.ShouldBe("reporting-profile");
+        stored.DataSource.PrimaryReadStrategy.ShouldBe(PrimaryReadStrategy.PrimaryDataSource);
+        stored.DataSource.PrimaryDataSourceKey.ShouldBe("primary");
+        stored.DataSource.SupportsTransactions.ShouldBeFalse();
+    }
+
+    /// <summary>
     /// 创建 Sql 元数据配置
     /// </summary>
     /// <returns>Sql 元数据配置</returns>

@@ -577,6 +577,298 @@ public class DatabaseScopeAndDataSourceTest
     }
 
     /// <summary>
+    /// 测试目的：子执行流释放继承的数据库作用域不应阻止父执行流随后恢复上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenChildFlowDisposesScope_ShouldRestoreContextInEachFlow()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+        var scope = manager.Use("default");
+
+        // Act
+        await Task.Run(() =>
+        {
+            Assert.Equal("default", accessor.Current.DbKey);
+            scope.Dispose();
+            Assert.Null(accessor.Current);
+        });
+
+        // Assert
+        Assert.Equal("default", accessor.Current.DbKey);
+        scope.Dispose();
+        Assert.Null(accessor.Current);
+    }
+
+    /// <summary>
+    /// 测试目的：当前执行流已经释放作用域后重复释放应保持幂等，不影响后续上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenScopeIsAlreadyAbsentInCurrentFlow_ShouldRemainIdempotent()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+        var scope = manager.Use("default");
+
+        // Act
+        await Task.Run(() => scope.Dispose());
+        await Task.Run(() => scope.Dispose());
+
+        // Assert
+        Assert.Equal("default", accessor.Current.DbKey);
+        scope.Dispose();
+        Assert.Null(accessor.Current);
+    }
+
+    /// <summary>
+    /// 测试目的：子执行流中乱序释放继承的父级作用域时应抛出异常且保持子流栈顶上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenChildFlowDisposesScopeOutOfOrder_ShouldThrowAndKeepChildContext()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+        using var parent = manager.Use("default");
+
+        // Act
+        await Task.Run(() =>
+        {
+            using var child = manager.Use("mysql");
+            var exception = Assert.Throws<InvalidOperationException>(() => parent.Dispose());
+
+            // Assert
+            Assert.Contains("LIFO", exception.Message);
+            Assert.Equal("mysql", accessor.Current.DbKey);
+        });
+
+        Assert.Equal("default", accessor.Current.DbKey);
+    }
+
+    /// <summary>
+    /// 测试目的：抑制 ExecutionContext 流转的任务不应取得或释放父级数据库作用域。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenExecutionContextFlowIsSuppressed_ShouldNotChangeParentContext()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+        using var scope = manager.Use("default");
+        Task task;
+
+        // Act
+        using (ExecutionContext.SuppressFlow())
+            task = Task.Run(() =>
+            {
+                Assert.Null(accessor.Current);
+                scope.Dispose();
+                Assert.Null(accessor.Current);
+            });
+        await task;
+
+        // Assert
+        Assert.Equal("default", accessor.Current.DbKey);
+    }
+
+    /// <summary>
+    /// 测试 - TaskRun默认应流转当前数据库上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenTaskRunUsesDefaultExecutionContext_ShouldFlowDatabaseContext()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+
+        // Act
+        using (manager.Use("default"))
+        {
+            var dbKey = await Task.Run(() => accessor.Current?.DbKey);
+
+            // Assert
+            Assert.Equal("default", dbKey);
+            Assert.Equal("default", accessor.Current.DbKey);
+        }
+    }
+
+    /// <summary>
+    /// 测试 - 数据库作用域内部抛出异常后应恢复父上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenChildScopeThrows_ShouldRestoreChildAndParentContexts()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+
+        // Act
+        using (manager.Use("default"))
+        {
+            var childRestoredDbKey = await Task.Run(() =>
+            {
+                try
+                {
+                    using (manager.Use("mysql"))
+                    {
+                        Assert.Equal("mysql", accessor.Current.DbKey);
+                        throw new InvalidOperationException("test failure");
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    return accessor.Current?.DbKey;
+                }
+            });
+
+            // Assert
+            Assert.Equal("default", childRestoredDbKey);
+            Assert.Equal("default", accessor.Current.DbKey);
+        }
+    }
+
+    /// <summary>
+    /// 测试 - 数据库作用域内部取消后应恢复父上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenChildScopeIsCanceled_ShouldRestoreChildAndParentContexts()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+        var childRestoredDbKey = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // Act
+        using (manager.Use("default"))
+        {
+            var task = Task.Run(() =>
+            {
+                try
+                {
+                    using (manager.Use("mysql"))
+                    {
+                        Assert.Equal("mysql", accessor.Current.DbKey);
+                        throw new OperationCanceledException();
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    childRestoredDbKey.SetResult(accessor.Current?.DbKey);
+                    throw;
+                }
+            });
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
+
+            // Assert
+            Assert.Equal("default", await childRestoredDbKey.Task);
+            Assert.Equal("default", accessor.Current.DbKey);
+        }
+    }
+
+    /// <summary>
+    /// 测试 - 并行任务更新TenantId不应相互污染。
+    /// </summary>
+    [Fact]
+    public async Task Update_WhenParallelTasksChangeTenantId_ShouldKeepValuesIsolated()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor
+        {
+            Current = new DatabaseContext { DbKey = "default", TenantId = "parent" }
+        };
+
+        // Act
+        var values = await Task.WhenAll(
+            CaptureUpdatedContextAsync(accessor, "tenant-a", null),
+            CaptureUpdatedContextAsync(accessor, "tenant-b", null));
+
+        // Assert
+        Assert.Contains(("tenant-a", (string)null), values);
+        Assert.Contains(("tenant-b", (string)null), values);
+        Assert.Equal("parent", accessor.Current.TenantId);
+    }
+
+    /// <summary>
+    /// 测试 - 并行任务更新MappingProfile不应相互污染。
+    /// </summary>
+    [Fact]
+    public async Task Update_WhenParallelTasksChangeMappingProfile_ShouldKeepValuesIsolated()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor
+        {
+            Current = new DatabaseContext { DbKey = "default", MappingProfile = "parent" }
+        };
+
+        // Act
+        var values = await Task.WhenAll(
+            CaptureUpdatedContextAsync(accessor, null, "profile-a"),
+            CaptureUpdatedContextAsync(accessor, null, "profile-b"));
+
+        // Assert
+        Assert.Contains(((string)null, "profile-a"), values);
+        Assert.Contains(((string)null, "profile-b"), values);
+        Assert.Equal("parent", accessor.Current.MappingProfile);
+    }
+
+    /// <summary>
+    /// 测试目的：并行执行流中的租户和映射配置应相互隔离，并在异常取消后恢复父级上下文。
+    /// </summary>
+    [Fact]
+    public async Task Use_WhenParallelFlowsAreCanceled_ShouldKeepTenantAndMappingProfileIsolated()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor
+        {
+            Current = new DatabaseContext
+            {
+                DbKey = "default",
+                TenantId = "parent-tenant",
+                MappingProfile = "parent-profile"
+            }
+        };
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+
+        // Act
+        var first = Task.Run(async () =>
+        {
+            accessor.Update(context =>
+            {
+                context.TenantId = "tenant-a";
+                context.MappingProfile = "profile-a";
+                return context;
+            });
+            await Task.Yield();
+            Assert.Equal("tenant-a", accessor.Current.TenantId);
+            Assert.Equal("profile-a", accessor.Current.MappingProfile);
+            throw new OperationCanceledException();
+        });
+        var second = Task.Run(async () =>
+        {
+            using (manager.Use("mysql"))
+            {
+                accessor.Update(context =>
+                {
+                    context.TenantId = "tenant-b";
+                    context.MappingProfile = "profile-b";
+                    return context;
+                });
+                await Task.Yield();
+                return $"{accessor.Current.TenantId}:{accessor.Current.MappingProfile}";
+            }
+        });
+
+        // Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first);
+        Assert.Equal("tenant-b:profile-b", await second);
+        Assert.Equal("parent-tenant", accessor.Current.TenantId);
+        Assert.Equal("parent-profile", accessor.Current.MappingProfile);
+    }
+
+    /// <summary>
     /// 切换并读取指定数据库上下文。
     /// </summary>
     /// <param name="manager">数据库上下文作用域管理器。</param>
@@ -625,6 +917,29 @@ public class DatabaseScopeAndDataSourceTest
             await Task.Yield();
             return accessor.Current.ReadPreference;
         }
+    }
+
+    /// <summary>
+    /// 在独立执行流中更新并读取数据库上下文字段。
+    /// </summary>
+    /// <param name="accessor">数据库上下文访问器。</param>
+    /// <param name="tenantId">待更新的租户标识。</param>
+    /// <param name="mappingProfile">待更新的映射配置。</param>
+    /// <returns>当前执行流读取到的租户标识与映射配置。</returns>
+    private static async Task<(string TenantId, string MappingProfile)> CaptureUpdatedContextAsync(
+        IDatabaseContextAccessor accessor, string tenantId, string mappingProfile)
+    {
+        return await Task.Run(async () =>
+        {
+            accessor.Update(context =>
+            {
+                context.TenantId = tenantId;
+                context.MappingProfile = mappingProfile;
+                return context;
+            });
+            await Task.Yield();
+            return (accessor.Current.TenantId, accessor.Current.MappingProfile);
+        });
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Bing.Dapper.Tests.Infrastructure;
+using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Database;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -46,6 +48,77 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var names = await _fixture.ReadNamesAsync();
 
         Assert.Equal(new[] { "async" }, names);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite 真实执行诊断应保留作用域映射配置，并仅在显式启用后输出租户标识。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSql_WhenDiagnosticsEnabled_ShouldPublishPinnedScopeContext()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqliteDiagnosticObserver(item => message = item);
+        var manager = _fixture.GetDatabaseScopeManager();
+
+        // Act
+        using (manager.Use(new DatabaseScopeOptions { DbKey = "first", TenantId = "tenant-sqlite" }))
+        using (var executor = _fixture.CreateExecutor("first"))
+        {
+            executor.Config(options => options.IncludeTenantIdInDiagnostics = true);
+            await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "diagnostic" });
+        }
+
+        // Assert
+        Assert.NotNull(message);
+        Assert.Equal("first", message.Connection.DbKey);
+        Assert.Equal("first-profile", message.MappingProfile);
+        Assert.Equal("tenant-sqlite", message.TenantId);
+    }
+
+    /// <summary>
+    /// 测试目的：未显式启用租户诊断时，真实 SQLite 执行不应输出环境租户标识。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSql_WhenTenantDiagnosticsIsNotEnabled_ShouldNotPublishTenantId()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqliteDiagnosticObserver(item => message = item);
+        var manager = _fixture.GetDatabaseScopeManager();
+
+        // Act
+        using (manager.Use(new DatabaseScopeOptions { DbKey = "first", TenantId = "tenant-hidden" }))
+        using (var executor = _fixture.CreateExecutor("first"))
+            await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "hidden-tenant" });
+
+        // Assert
+        Assert.NotNull(message);
+        Assert.Null(message.TenantId);
+        Assert.Equal(new[] { "hidden-tenant" }, await _fixture.ReadNamesAsync("first"));
+    }
+
+    /// <summary>
+    /// 测试 - Query 创建后切换环境数据源执行时，诊断应仍使用创建时固定的数据库上下文。
+    /// </summary>
+    [Fact]
+    public void ExecuteQuery_WhenAmbientDataSourceChanges_ShouldPublishPinnedQueryContext()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqliteDiagnosticObserver(item => message = item);
+        var manager = _fixture.GetDatabaseScopeManager();
+        using var query = _fixture.CreateQuery("first");
+        query.AppendSelect("Count(*)").AppendFrom("samples");
+
+        // Act
+        using (manager.Use("second"))
+            query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.NotNull(message);
+        Assert.Equal("first", message.Connection.DbKey);
+        Assert.Equal("first-profile", message.MappingProfile);
     }
 
     /// <summary>
@@ -513,6 +586,84 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试 - 子数据库作用域异常退出后应恢复父上下文，并将后续写入落到父数据库文件。
+    /// </summary>
+    [Fact]
+    public async Task DatabaseScope_WhenChildThrows_ShouldRestoreParentContextAndTargetFile()
+    {
+        // Arrange
+        var manager = _fixture.GetDatabaseScopeManager();
+        var accessor = _fixture.ServiceProvider.GetRequiredService<IDatabaseContextAccessor>();
+        var executorFactory = _fixture.ServiceProvider.GetRequiredService<ISqlExecutorFactory>();
+
+        // Act
+        using (manager.Use("first"))
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                using (manager.Use("second"))
+                {
+                    Assert.Equal("second", accessor.Current.DbKey);
+                    using var childExecutor = executorFactory.Create<ISqlExecutor>();
+                    await childExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
+                        new { name = "child-exception" });
+                    throw new InvalidOperationException("expected child failure");
+                }
+            });
+
+            Assert.Equal("first", accessor.Current.DbKey);
+            using var parentExecutor = executorFactory.Create<ISqlExecutor>();
+            await parentExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
+                new { name = "parent-after-exception" });
+        }
+
+        // Assert
+        Assert.Equal(new[] { "parent-after-exception" }, await _fixture.ReadNamesAsync("first"));
+        Assert.Equal(new[] { "child-exception" }, await _fixture.ReadNamesAsync("second"));
+        Assert.Null(accessor.Current);
+    }
+
+    /// <summary>
+    /// 测试 - 子数据库作用域取消退出后应恢复父上下文，并将后续写入落到父数据库文件。
+    /// </summary>
+    [Fact]
+    public async Task DatabaseScope_WhenChildIsCancelled_ShouldRestoreParentContextAndTargetFile()
+    {
+        // Arrange
+        var manager = _fixture.GetDatabaseScopeManager();
+        var accessor = _fixture.ServiceProvider.GetRequiredService<IDatabaseContextAccessor>();
+        var executorFactory = _fixture.ServiceProvider.GetRequiredService<ISqlExecutorFactory>();
+        using var cancellationTokenSource = new CancellationTokenSource();
+
+        // Act
+        using (manager.Use("first"))
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                using (manager.Use("second"))
+                {
+                    Assert.Equal("second", accessor.Current.DbKey);
+                    using var childExecutor = executorFactory.Create<ISqlExecutor>();
+                    await childExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
+                        new { name = "child-cancelled" });
+                    cancellationTokenSource.Cancel();
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                }
+            });
+
+            Assert.Equal("first", accessor.Current.DbKey);
+            using var parentExecutor = executorFactory.Create<ISqlExecutor>();
+            await parentExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
+                new { name = "parent-after-cancellation" });
+        }
+
+        // Assert
+        Assert.Equal(new[] { "parent-after-cancellation" }, await _fixture.ReadNamesAsync("first"));
+        Assert.Equal(new[] { "child-cancelled" }, await _fixture.ReadNamesAsync("second"));
+        Assert.Null(accessor.Current);
+    }
+
+    /// <summary>
     /// 测试 - SQLite并行数据库作用域应保持隔离。
     /// </summary>
     [Fact]
@@ -635,5 +786,44 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         /// 金额。
         /// </summary>
         public decimal? Amount { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite SQL 诊断观察器。
+    /// </summary>
+    private sealed class SqliteDiagnosticObserver : IObserver<DiagnosticListener>,
+        IObserver<KeyValuePair<string, object>>, IDisposable
+    {
+        private readonly Action<DiagnosticsMessage> _onMessage;
+        private readonly IDisposable _allSubscription;
+        private IDisposable _listenerSubscription;
+
+        public SqliteDiagnosticObserver(Action<DiagnosticsMessage> onMessage)
+        {
+            _onMessage = onMessage;
+            _allSubscription = DiagnosticListener.AllListeners.Subscribe(this);
+        }
+
+        public void OnNext(DiagnosticListener listener)
+        {
+            if (listener.Name == SqlQueryDiagnosticListenerNames.DiagnosticListenerName)
+                _listenerSubscription = listener.Subscribe(this);
+        }
+
+        public void OnNext(KeyValuePair<string, object> value)
+        {
+            if (value.Key == SqlQueryDiagnosticListenerNames.BeforeExecute && value.Value is DiagnosticsMessage message)
+                _onMessage(message);
+        }
+
+        public void OnCompleted() { }
+
+        public void OnError(Exception error) { }
+
+        public void Dispose()
+        {
+            _listenerSubscription?.Dispose();
+            _allSubscription.Dispose();
+        }
     }
 }

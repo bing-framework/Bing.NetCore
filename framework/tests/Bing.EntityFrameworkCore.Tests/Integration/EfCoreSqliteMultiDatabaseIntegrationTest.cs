@@ -119,6 +119,73 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         Assert.Equal("first-row", name);
     }
 
+    /// <summary>
+    /// 测试目的：EF Core Shared 模式应接受 SQLite 构建器格式的命名共享内存身份，并在真实连接中读取相同数据库。
+    /// </summary>
+    [Fact]
+    public async Task Create_WhenSharedUsesNamedMemoryBuilderConnection_ShouldReuseEfConnectionAndExecute()
+    {
+        // Arrange
+        var connectionString = $"Data Source=ef-shared-{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+        await using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "Create Table shared_memory_users(Id Integer Primary Key, Name Text Not Null); Insert Into shared_memory_users(Id, Name) Values (1, 'shared-memory');";
+            await command.ExecuteNonQueryAsync();
+        }
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddDatabase<Bing.Data.IDatabase, FileTestDatabase>();
+        services.AddSqlDataSource("shared", DatabaseType.Sqlite, connectionString);
+        services.AddSqliteProvider();
+        services.AddEfCoreSqlQueryFactory();
+        using var serviceProvider = services.BuildServiceProvider();
+        var options = new DbContextOptionsBuilder<FileUnitOfWork>().UseSqlite(connection).Options;
+        using var unitOfWork = new FileUnitOfWork(options, serviceProvider);
+
+        // Act
+        using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>()
+            .Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "shared");
+        var name = query.AppendSelect("Name").AppendFrom("shared_memory_users").AppendWhere("Id=1")
+            .ExecuteScalar<string>();
+
+        // Assert
+        Assert.Same(connection, query.GetConnection());
+        Assert.Equal("shared-memory", name);
+    }
+
+    /// <summary>
+    /// 测试目的：不同名称的 SQLite 共享内存数据库不能在 EF Core Shared 模式复用同一连接。
+    /// </summary>
+    [Fact]
+    public async Task Create_WhenSharedTargetsDifferentNamedMemory_ShouldRejectConnectionReuse()
+    {
+        // Arrange
+        var currentConnectionString = $"Data Source=ef-current-{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+        var targetConnectionString = $"Data Source=ef-target-{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+        await using var connection = new SqliteConnection(currentConnectionString);
+        await connection.OpenAsync();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddDatabase<Bing.Data.IDatabase, FileTestDatabase>();
+        services.AddSqlDataSource("target", DatabaseType.Sqlite, targetConnectionString);
+        services.AddSqliteProvider();
+        services.AddEfCoreSqlQueryFactory();
+        using var serviceProvider = services.BuildServiceProvider();
+        var options = new DbContextOptionsBuilder<FileUnitOfWork>().UseSqlite(connection).Options;
+        using var unitOfWork = new FileUnitOfWork(options, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            factory.Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "target"));
+
+        // Assert
+        Assert.Contains("不同的物理数据库", exception.Message);
+        Assert.Same(connection, unitOfWork.Database.GetDbConnection());
+    }
+
     /// <inheritdoc />
     public async Task InitializeAsync()
     {

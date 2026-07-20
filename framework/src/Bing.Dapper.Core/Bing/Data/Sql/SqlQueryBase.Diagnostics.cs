@@ -27,9 +27,12 @@ public abstract partial class SqlQueryBase
             return null;
         var parameters = CreateParameterDiagnostics(parameter, parameterMetadata);
         var connectionInfo = CreateConnectionDiagnosticInfo(connection);
+        var context = Options.GetDatabaseContext();
         var message = new DiagnosticsMessage
         {
             Sql = sql,
+            MappingProfile = context?.MappingProfile,
+            TenantId = Options.IncludeTenantIdInDiagnostics ? context?.TenantId : null,
             Parameters = parameters,
             Connection = connectionInfo,
             Transaction = CreateTransactionDiagnosticInfo(GetTransaction()),
@@ -283,6 +286,8 @@ public abstract partial class SqlQueryBase
             Operation = message.Operation,
             OperationId = message.OperationId,
             Sql = message.Sql,
+            MappingProfile = message.MappingProfile,
+            TenantId = message.TenantId,
             Parameters = message.Parameters == null
                 ? null
                 : new SqlParameterDiagnosticSnapshot
@@ -330,8 +335,8 @@ public abstract partial class SqlQueryBase
         return new SqlParameterDiagnosticInfo
         {
             Name = parameter.Name,
-            Value = parameter.Value,
-            OriginalValue = parameter.OriginalValue,
+            Value = CloneDiagnosticValue(parameter.Value),
+            OriginalValue = CloneDiagnosticValue(parameter.OriginalValue),
             IsSensitive = parameter.IsSensitive,
             DbType = parameter.DbType,
             Direction = parameter.Direction,
@@ -346,4 +351,13 @@ public abstract partial class SqlQueryBase
             MetadataLevel = parameter.MetadataLevel
         };
     }
+
+    /// <summary>
+    /// 复制诊断中常见的可变参数值，避免观察器修改影响其它诊断快照。
+    /// </summary>
+    /// <param name="value">原始参数值。</param>
+    /// <returns>可安全暴露给诊断观察器的参数值。</returns>
+    private static object CloneDiagnosticValue(object value) => value is Array array && array.Rank == 1
+        ? array.Clone()
+        : value;
 }

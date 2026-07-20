@@ -29,6 +29,11 @@ public class SqlOptions
     public string LogCategory { get; set; } = "Bing.Data.Sql";
 
     /// <summary>
+    /// 是否在 SQL 诊断消息中包含租户标识，默认为 false。
+    /// </summary>
+    public bool IncludeTenantIdInDiagnostics { get; set; }
+
+    /// <summary>
     /// 数据库连接字符串
     /// </summary>
     public string ConnectionString { get; set; }

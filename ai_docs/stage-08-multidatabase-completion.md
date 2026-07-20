@@ -78,3 +78,23 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 - `DatabaseScopeOptions.ReadPreference` 未指定时继承父级，显式 Default/Primary 覆盖父级；数据库 Scope 与读取偏好 Scope 均按严格 LIFO 恢复。`Current` 返回深快照，使用 `Update(...)` 才会写回。
 - 事务 Scope 结束后，已创建的 Query/Executor 会因租约失效而拒绝继续执行；Before/After/Error 诊断事件发布互不共享的消息快照，并保留同一操作标识和最终 `DbKey`、读取偏好、事务标识。
 - 本轮实际执行：`Bing.Data.Sql.Tests`（net6.0/net8.0，992 通过）、`Bing.EntityFrameworkCore.Tests`（net6.0，20 通过，含 SQLite 双文件真实执行）、`Bing.Dapper.SqlServer.Tests`（net6.0/net8.0，230 通过）。SQL Server net8.0 仍报告已有 SQLite RID `NETSDK1206` 警告。
+
+## 多数据库边界加固补充
+
+- Scope 释放改为执行流局部语义：栈顶正常恢复、栈内乱序抛错、当前流缺少帧时幂等返回。子流释放继承 Scope 不会阻止父流恢复，`SuppressFlow` 不会取得父流数据库上下文。
+- 数据库身份解析改为贡献者模型。SQLite 构建器共享内存格式、默认端口、SQL Server `tcp:host,port` 和 Oracle EZConnect 均被规范；无法安全解析的 Oracle 别名或复杂描述符明确拒绝 EF Shared。
+- 移除了可替换的 `IDatabaseContextSnapshotFactory`，Accessor、Scope、`SqlOptions`、Factory 与事务统一使用静态深快照机制。
+- 事务 Scope 使用显式状态机；Lease 在结束前失效，清理异常不会中断后续资源释放，异步方法优先调用 Provider 的原生 ADO.NET 异步成员。
+- 原生异步事务成员命中后不会再同步回退重复提交或回滚；开始事务失败时，Query 清理异常与原始失败会以聚合异常保留。
+- 诊断消息增加 Mapping Profile；TenantId 默认不输出，需通过 `SqlOptions.IncludeTenantIdInDiagnostics` 显式启用。一维数组参数会按事件快照复制，SkyAPM 追加映射配置、读取偏好、隔离级别及条件租户标签。
+
+### 本轮定向验证
+
+| 项目 | 总计 | 通过 | 失败 | 备注 |
+| --- | ---: | ---: | ---: | --- |
+| `Bing.Data.Sql.Tests` | 1056 | 1056 | 0 | net6.0 / net8.0，含 Scope、完整描述符快照与身份解析 |
+| `Bing.Dapper.SqlServer.Tests` | 252 | 252 | 0 | net6.0 / net8.0，含开始失败聚合与一维数组诊断快照 |
+| `Bing.Dapper.Sqlite.Tests.Integration` | 76 | 76 | 0 | net6.0 / net8.0，含真实 SQLite 异常/取消 Scope 恢复 |
+| `Bing.EntityFrameworkCore.Tests` | 23 | 23 | 0 | net6.0，含自定义身份贡献器的 Shared 比较 |
+
+剩余风险：Oracle TNS 别名和复杂描述符刻意不做连接探测或别名展开，因此会拒绝 Shared；严格单地址 TCP TNS 可比较，但同时指定 Service Name 与 SID 的普通主机或 EZConnect 仍会拒绝 Shared。需要该能力的应用应使用 Independent 模式，或提供唯一的可比较目标。外部 Provider 集成测试仍由门控变量和受保护 CI 环境负责，且不使用生产连接。

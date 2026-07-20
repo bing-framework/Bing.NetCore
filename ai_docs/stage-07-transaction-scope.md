@@ -38,3 +38,9 @@
 - Scope 创建的 Query 与 Executor 共享内部事务 lease 和 Scope 的 `TransactionId`，诊断事件可关联到同一事务。
 - `Commit`、`Rollback` 或 `Dispose` 开始时即使 lease 失效；此前创建的子对象再次获取连接、事务或执行命令会抛出明确异常，不能重新建连或脱离已结束的事务运行。
 - Scope 结束会释放其创建的子对象；子对象只将连接和事务视为外部资源，不会提前释放 Scope 所拥有的 ADO 资源。
+
+## 本轮补充
+
+- 提交或回滚后保留完成态，重复同一完成操作保持幂等且不会重复释放资源；交叉提交/回滚会抛出明确异常。
+- 显式 `Dispose` 或 `DisposeAsync` 后，后续提交、回滚及创建子对象会抛出 `ObjectDisposedException`。
+- `Bing.Dapper.SqlServer.Tests` 已覆盖同步和异步完成态；SQLite 真实集成测试验证完成后子对象创建仍遵循释放语义。

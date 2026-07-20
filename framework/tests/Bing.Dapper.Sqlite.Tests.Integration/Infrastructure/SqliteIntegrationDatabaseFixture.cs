@@ -53,7 +53,8 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
         var services = new ServiceCollection();
         services.AddDatabase<TestDatabase>();
         services.AddSqlDataSource("default", DatabaseType.Sqlite, FirstConnectionString);
-        services.AddSqlDataSource(FirstDatabaseKey, DatabaseType.Sqlite, FirstConnectionString);
+        services.AddSqlDataSource(FirstDatabaseKey, DatabaseType.Sqlite, FirstConnectionString,
+            setupAction: descriptor => descriptor.MappingProfile = "first-profile");
         services.AddSqlDataSource(SecondDatabaseKey, DatabaseType.Sqlite, SecondConnectionString);
         services.AddSqliteSqlQuery();
         services.AddSqliteSqlExecutor();

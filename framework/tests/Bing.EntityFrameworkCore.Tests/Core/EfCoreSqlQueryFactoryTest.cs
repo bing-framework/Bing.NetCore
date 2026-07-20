@@ -2,6 +2,7 @@ using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
+using System.Data.Common;
 
 namespace Bing.EntityFrameworkCore.Tests.Core;
 
@@ -255,6 +256,28 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：通过 DI 注册的自定义物理身份贡献器应参与 Shared 模式连接比较。
+    /// </summary>
+    [Fact]
+    public void Create_WhenCustomIdentityContributorIsRegistered_ShouldUseItForSharedConnectionComparison()
+    {
+        // Arrange
+        var contributor = new TestSqliteIdentityContributor();
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider(CreateMetadataOptions(), identityContributor: contributor);
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        // Act
+        using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "reporting");
+
+        // Assert
+        Assert.Same(connection, query.GetConnection());
+        Assert.True(contributor.ResolveCount >= 2);
+    }
+
+    /// <summary>
     /// 测试目的：默认数据库上下文的 dbKey 应优先于默认数据源。
     /// </summary>
     [Fact]
@@ -396,12 +419,15 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     /// <returns>服务提供程序</returns>
     private static ServiceProvider CreateServiceProvider(SqlMetadataOptions metadataOptions = null,
-        ConnectionStringCollection connectionStrings = null)
+        ConnectionStringCollection connectionStrings = null,
+        ISqlDatabaseIdentityContributor identityContributor = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
         if (connectionStrings != null)
             services.AddSingleton(connectionStrings);
+        if (identityContributor != null)
+            services.AddSingleton<ISqlDatabaseIdentityContributor>(identityContributor);
         if (metadataOptions != null)
             services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
         services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();
@@ -562,6 +588,31 @@ public class EfCoreSqlQueryFactoryTest
     {
         /// <inheritdoc />
         public IDbConnection GetConnection() => new SqliteConnection(SharedMemoryConnectionString);
+    }
+
+    /// <summary>
+    /// 测试用 SQLite 物理身份贡献器。
+    /// </summary>
+    private sealed class TestSqliteIdentityContributor : ISqlDatabaseIdentityContributor
+    {
+        /// <summary>
+        /// 解析调用次数。
+        /// </summary>
+        public int ResolveCount { get; private set; }
+
+        /// <inheritdoc />
+        public bool CanResolve(DatabaseType databaseType) => databaseType == DatabaseType.Sqlite;
+
+        /// <inheritdoc />
+        public SqlDatabaseIdentity Resolve(DatabaseType databaseType, DbConnectionStringBuilder builder)
+        {
+            ResolveCount++;
+            return new SqlDatabaseIdentity
+            {
+                DatabaseType = databaseType,
+                FilePath = "custom-sqlite-identity"
+            };
+        }
     }
 
     /// <summary>

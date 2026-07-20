@@ -11,21 +11,13 @@ public sealed class ReadPreferenceScopeManager : IReadPreferenceScopeManager
     private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
     /// <summary>
-    /// 数据库上下文快照工厂。
-    /// </summary>
-    private readonly IDatabaseContextSnapshotFactory _snapshotFactory;
-
-    /// <summary>
     /// 初始化一个<see cref="ReadPreferenceScopeManager"/>类型的实例。
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
-    /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
-    public ReadPreferenceScopeManager(IDatabaseContextAccessor databaseContextAccessor,
-        IDatabaseContextSnapshotFactory snapshotFactory = null)
+    public ReadPreferenceScopeManager(IDatabaseContextAccessor databaseContextAccessor)
     {
         _databaseContextAccessor = databaseContextAccessor ??
             throw new ArgumentNullException(nameof(databaseContextAccessor));
-        _snapshotFactory = snapshotFactory ?? new DefaultDatabaseContextSnapshotFactory();
     }
 
     /// <inheritdoc />
@@ -33,6 +25,6 @@ public sealed class ReadPreferenceScopeManager : IReadPreferenceScopeManager
     {
         var context = _databaseContextAccessor.Current ?? new DatabaseContext();
         context.ReadPreference = readPreference;
-        return DatabaseContextScopeStack.Enter(_databaseContextAccessor, context, _snapshotFactory);
+        return DatabaseContextScopeStack.Enter(_databaseContextAccessor, context);
     }
 }

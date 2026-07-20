@@ -40,11 +40,6 @@ public abstract class SqlFactoryBase
     private readonly ISqlConnectionStringResolver _connectionStringResolver;
 
     /// <summary>
-    /// 数据库上下文快照工厂。
-    /// </summary>
-    private readonly IDatabaseContextSnapshotFactory _snapshotFactory;
-
-    /// <summary>
     /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
@@ -53,14 +48,12 @@ public abstract class SqlFactoryBase
     /// <param name="implementationTypeResolver">SQL 实现类型解析器。</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器。</param>
     /// <param name="connectionStringResolver">SQL 连接字符串解析器。</param>
-    /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ISqlImplementationTypeResolver implementationTypeResolver = null,
         ISqlDataSourceResolver dataSourceResolver = null,
-        ISqlConnectionStringResolver connectionStringResolver = null,
-        IDatabaseContextSnapshotFactory snapshotFactory = null)
+        ISqlConnectionStringResolver connectionStringResolver = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
@@ -71,8 +64,6 @@ public abstract class SqlFactoryBase
                                     _serviceProvider.GetService<ISqlConnectionStringResolver>() ??
                                     new DefaultSqlConnectionStringResolver(
                                         _serviceProvider.GetService<ConnectionStringCollection>());
-        _snapshotFactory = snapshotFactory ?? _serviceProvider.GetService<IDatabaseContextSnapshotFactory>() ??
-                           new DefaultDatabaseContextSnapshotFactory();
     }
 
     /// <summary>
@@ -222,7 +213,7 @@ public abstract class SqlFactoryBase
     {
         if (dataSource == null)
             throw new InvalidOperationException("SQL 数据源描述不能为空");
-        return _snapshotFactory.Create(new DatabaseContext
+        return DatabaseContextSnapshot.Create(new DatabaseContext
         {
             DbKey = dataSource.Key,
             TenantId = tenantId,
@@ -239,7 +230,7 @@ public abstract class SqlFactoryBase
     /// <returns>数据库上下文。</returns>
     private DatabaseContext Clone(DatabaseContext context)
     {
-        return _snapshotFactory.Create(context);
+        return DatabaseContextSnapshot.Create(context);
     }
 
     /// <summary>

@@ -7,11 +7,11 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// <summary>
 /// SqlServer SQL 查询集成测试骨架。
 /// 所有测试方法使用 <see cref="IntegrationFactAttribute"/> 标注，
-/// 在未设置 RUN_INTEGRATION_TESTS=true 时自动跳过。
+/// 在未设置 RUN_SQLSERVER_INTEGRATION_TESTS=true 时自动跳过。
 ///
 /// 运行前提：
-/// - 设置环境变量 RUN_INTEGRATION_TESTS=true
-/// - 设置环境变量 ConnectionStrings__DefaultConnection（或创建 appsettings.Development.json）
+/// - 设置环境变量 RUN_SQLSERVER_INTEGRATION_TESTS=true
+/// - 设置环境变量 ConnectionStrings__SqlServerConnection（或创建 appsettings.Development.json）
 /// - SQL Server 实例可访问，数据库和账号已准备好
 /// </summary>
 public class SqlServerQueryTest
@@ -31,7 +31,7 @@ public class SqlServerQueryTest
     /// <summary>
     /// 测试目的：验证 SQL Server 连接可用，SELECT 1 应返回 1。
     /// </summary>
-    [IntegrationFact]
+    [IntegrationFact("SqlServer")]
     public async Task GetValue_SelectOne_ShouldReturnOne()
     {
         // Arrange

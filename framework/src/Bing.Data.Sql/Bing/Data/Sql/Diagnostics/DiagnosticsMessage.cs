@@ -205,6 +205,16 @@ public sealed class DiagnosticsMessage
     public string Sql { get; set; }
 
     /// <summary>
+    /// 映射配置名称。
+    /// </summary>
+    public string MappingProfile { get; set; }
+
+    /// <summary>
+    /// 租户标识，仅在调用方显式启用诊断租户输出时提供。
+    /// </summary>
+    public string TenantId { get; set; }
+
+    /// <summary>
     /// SQL 参数诊断快照
     /// </summary>
     public SqlParameterDiagnosticSnapshot Parameters { get; set; }

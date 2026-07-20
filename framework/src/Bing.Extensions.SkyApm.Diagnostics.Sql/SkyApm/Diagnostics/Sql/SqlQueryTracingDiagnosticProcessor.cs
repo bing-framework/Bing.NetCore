@@ -80,11 +80,16 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
         context.Span.AddTag("db.readonly", message.Connection?.IsReadOnly.ToString());
         context.Span.AddTag("db.connection.source", message.Connection?.Source.ToString());
         context.Span.AddTag("db.connection.ownership", message.Connection?.Ownership.ToString());
+        context.Span.AddTag("db.mapping.profile", message.MappingProfile);
+        context.Span.AddTag("db.read.preference", message.Connection?.ReadPreference.ToString());
+        if (string.IsNullOrWhiteSpace(message.TenantId) == false)
+            context.Span.AddTag("db.tenant.id", message.TenantId);
         if (message.Transaction?.HasTransaction == true)
         {
             context.Span.AddTag("db.transaction.id", message.Transaction.TransactionId);
             context.Span.AddTag("db.transaction.ownership", message.Transaction.Ownership.ToString());
             context.Span.AddTag("db.transaction.primary_read", message.Transaction.IsPrimaryReadTransaction.ToString());
+            context.Span.AddTag("db.transaction.isolation", message.Transaction.IsolationLevel?.ToString());
         }
         context.Span.AddLog(LogEvent.Event($"{SqlQueryDiagnosticListenerNames.BeforeExecute.Split(' ').Last()}: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}"));
         context.Span.AddLog(LogEvent.Message($"databaseType: {message.Connection?.DatabaseType}{Environment.NewLine}database: {message.Connection?.Database}{Environment.NewLine}timestamp: {message.Timestamp}"));

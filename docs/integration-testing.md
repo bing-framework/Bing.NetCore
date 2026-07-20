@@ -33,3 +33,16 @@ Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受�
 ## CI
 
 常规 CI 显式关闭所有外部 Provider 门控，只运行无凭据测试和 SQLite 集成测试。外部数据库测试应放在独立、受保护的构建中：连接字符串通过 CI 密钥注入，Provider 门控只在该构建中设为 `true`，日志不得输出连接字符串或凭据。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
+
+## SQLite 边界覆盖
+
+SQLite 无需外部服务，除双文件路由、事务和流式资源释放外，还覆盖：
+
+- `ExecutionContext` 中 Scope 的嵌套、并行、异常和取消恢复；
+- 诊断事件从 Query 固定上下文输出 `DbKey`、映射配置；租户标识仅在显式启用时输出，一维数组参数按独立快照发布；
+- EF Core Shared 模式在同一 SQLite 文件复用连接、跨文件和不同命名共享内存均拒绝复用；
+- `Data Source=<name>;Mode=Memory;Cache=Shared` 的命名共享内存数据库在 EF Core Shared 模式下实际执行查询。
+
+事务替身测试还覆盖 Provider 原生异步提交和回滚不会再同步重复执行，以及开始失败与 owner Query 清理失败的异常聚合。外部 Provider 集成项目仍须通过门控变量启用，且不得使用生产连接字符串。
+
+命名共享内存数据库必须保持至少一个打开连接，直到测试完成；普通 `:memory:` 连接彼此独占，不能用于跨连接或 EF Core Shared 测试。两种场景均无需外部数据库服务。

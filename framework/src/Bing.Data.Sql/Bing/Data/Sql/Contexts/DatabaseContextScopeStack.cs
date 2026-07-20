@@ -17,17 +17,15 @@ internal static class DatabaseContextScopeStack
     /// </summary>
     /// <param name="accessor">数据库上下文访问器。</param>
     /// <param name="context">目标数据库上下文。</param>
-    /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
     /// <returns>数据库上下文作用域。</returns>
-    public static IDatabaseScope Enter(IDatabaseContextAccessor accessor, DatabaseContext context,
-        IDatabaseContextSnapshotFactory snapshotFactory)
+    public static IDatabaseScope Enter(IDatabaseContextAccessor accessor, DatabaseContext context)
     {
         if (accessor == null)
             throw new ArgumentNullException(nameof(accessor));
         if (context == null)
             throw new ArgumentNullException(nameof(context));
         var stack = Stacks.GetValue(accessor, _ => new ScopeStack());
-        return stack.Enter(accessor, context, snapshotFactory ?? new DefaultDatabaseContextSnapshotFactory());
+        return stack.Enter(accessor, context);
     }
 
     /// <summary>
@@ -45,18 +43,16 @@ internal static class DatabaseContextScopeStack
         /// </summary>
         /// <param name="accessor">数据库上下文访问器。</param>
         /// <param name="context">目标数据库上下文。</param>
-        /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
         /// <returns>数据库上下文作用域。</returns>
-        public IDatabaseScope Enter(IDatabaseContextAccessor accessor, DatabaseContext context,
-            IDatabaseContextSnapshotFactory snapshotFactory)
+        public IDatabaseScope Enter(IDatabaseContextAccessor accessor, DatabaseContext context)
         {
             var parent = _current.Value;
             var parentContext = parent?.Context ?? accessor.Current;
-            var frame = new ScopeFrame(Guid.NewGuid(), parent, snapshotFactory.Create(parentContext),
-                snapshotFactory.Create(context));
+            var frame = new ScopeFrame(Guid.NewGuid(), parent, DatabaseContextSnapshot.Create(parentContext),
+                DatabaseContextSnapshot.Create(context));
             _current.Value = frame;
             accessor.Current = frame.Context;
-            return new Scope(accessor, this, frame, snapshotFactory);
+            return new Scope(accessor, this, frame);
         }
 
         /// <summary>
@@ -64,15 +60,36 @@ internal static class DatabaseContextScopeStack
         /// </summary>
         /// <param name="accessor">数据库上下文访问器。</param>
         /// <param name="frame">待退出的作用域帧。</param>
-        /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
-        public void Exit(IDatabaseContextAccessor accessor, ScopeFrame frame,
-            IDatabaseContextSnapshotFactory snapshotFactory)
+        public void Exit(IDatabaseContextAccessor accessor, ScopeFrame frame)
         {
             var current = _current.Value;
-            if (ReferenceEquals(current, frame) == false)
+            if (ReferenceEquals(current, frame))
+            {
+                _current.Value = frame.Parent;
+                accessor.Current = DatabaseContextSnapshot.Create(frame.Parent?.Context ?? frame.ParentContext);
+                return;
+            }
+
+            if (Contains(current, frame))
                 throw CreateOutOfOrderException(frame, current);
-            _current.Value = frame.Parent;
-            accessor.Current = snapshotFactory.Create(frame.Parent?.Context ?? frame.ParentContext);
+        }
+
+        /// <summary>
+        /// 判断当前执行流的作用域栈是否包含指定帧。
+        /// </summary>
+        /// <param name="current">当前栈顶帧。</param>
+        /// <param name="frame">待查找帧。</param>
+        /// <returns>是否包含指定帧。</returns>
+        private static bool Contains(ScopeFrame current, ScopeFrame frame)
+        {
+            while (current != null)
+            {
+                if (ReferenceEquals(current, frame))
+                    return true;
+                current = current.Parent;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -153,29 +170,16 @@ internal static class DatabaseContextScopeStack
         private readonly ScopeFrame _frame;
 
         /// <summary>
-        /// 数据库上下文快照工厂。
-        /// </summary>
-        private readonly IDatabaseContextSnapshotFactory _snapshotFactory;
-
-        /// <summary>
-        /// 是否已释放。
-        /// </summary>
-        private bool _disposed;
-
-        /// <summary>
         /// 初始化一个<see cref="Scope"/>类型的实例。
         /// </summary>
         /// <param name="accessor">数据库上下文访问器。</param>
         /// <param name="stack">作用域帧栈。</param>
         /// <param name="frame">当前作用域帧。</param>
-        /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
-        public Scope(IDatabaseContextAccessor accessor, ScopeStack stack, ScopeFrame frame,
-            IDatabaseContextSnapshotFactory snapshotFactory)
+        public Scope(IDatabaseContextAccessor accessor, ScopeStack stack, ScopeFrame frame)
         {
             _accessor = accessor;
             _stack = stack;
             _frame = frame;
-            _snapshotFactory = snapshotFactory;
         }
 
         /// <summary>
@@ -183,10 +187,7 @@ internal static class DatabaseContextScopeStack
         /// </summary>
         public void Dispose()
         {
-            if (_disposed)
-                return;
-            _stack.Exit(_accessor, _frame, _snapshotFactory);
-            _disposed = true;
+            _stack.Exit(_accessor, _frame);
         }
     }
 }

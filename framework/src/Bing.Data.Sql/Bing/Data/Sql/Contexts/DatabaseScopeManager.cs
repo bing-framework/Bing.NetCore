@@ -24,24 +24,17 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
     private readonly ISqlDataSourceResolver _dataSourceResolver;
 
     /// <summary>
-    /// 数据库上下文快照工厂。
-    /// </summary>
-    private readonly IDatabaseContextSnapshotFactory _snapshotFactory;
-
-    /// <summary>
     /// 初始化一个<see cref="DatabaseScopeManager"/>类型的实例
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器</param>
-    /// <param name="snapshotFactory">数据库上下文快照工厂。</param>
     public DatabaseScopeManager(IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions options = null,
-        ISqlDataSourceResolver dataSourceResolver = null, IDatabaseContextSnapshotFactory snapshotFactory = null)
+        ISqlDataSourceResolver dataSourceResolver = null)
     {
         _databaseContextAccessor = databaseContextAccessor ?? throw new ArgumentNullException(nameof(databaseContextAccessor));
         _options = options ?? new SqlMetadataOptions();
         _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_options);
-        _snapshotFactory = snapshotFactory ?? new DefaultDatabaseContextSnapshotFactory();
     }
 
     /// <inheritdoc />
@@ -68,6 +61,6 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
             MappingProfile = dataSource.MappingProfile ?? parent?.MappingProfile ?? _options.DefaultDatabaseContext?.MappingProfile,
             ReadPreference = readPreference
         };
-        return DatabaseContextScopeStack.Enter(_databaseContextAccessor, context, _snapshotFactory);
+        return DatabaseContextScopeStack.Enter(_databaseContextAccessor, context);
     }
 }

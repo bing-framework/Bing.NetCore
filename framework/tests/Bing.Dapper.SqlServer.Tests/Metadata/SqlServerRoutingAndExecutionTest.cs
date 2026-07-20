@@ -403,6 +403,69 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：诊断观察器接收的二进制参数快照不能与调用方输入数组共享引用。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenParameterIsBinary_ShouldPublishIndependentDiagnosticSnapshot()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item => message = item);
+        var connection = new CaptureDbConnection();
+        var executor = CreateExecutor(connection);
+        var payload = new byte[] { 1, 2, 3 };
+
+        // Act
+        executor.ExecuteSql<MappedSample>("Update [Users] Set [Payload]=@payload", new { payload },
+            map => map.Add("payload", item => item.Payload, payload));
+        payload[0] = 9;
+
+        // Assert
+        var parameter = message.Parameters.Items.Single();
+        ((byte[])parameter.Value).ShouldBe(new byte[] { 1, 2, 3 });
+        ((byte[])parameter.OriginalValue).ShouldBe(new byte[] { 1, 2, 3 });
+    }
+
+    /// <summary>
+    /// 测试目的：诊断应记录固定映射配置，租户标识默认不输出且可由 Query 选项显式启用。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenTenantDiagnosticsIsConfigured_ShouldApplyOptInPolicy()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add);
+        var connection = new CaptureDbConnection();
+        var executor = CreateExecutor(connection);
+        executor.Config(options =>
+        {
+            options.SetDatabaseContext(new DatabaseContext
+            {
+                DbKey = "diagnostics",
+                TenantId = "tenant-a",
+                MappingProfile = "profile-a",
+                DataSource = new SqlDataSourceDescriptor
+                {
+                    Key = "diagnostics",
+                    DatabaseType = DatabaseType.SqlServer
+                }
+            });
+        });
+
+        // Act
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "default" });
+        executor.Config(options => options.IncludeTenantIdInDiagnostics = true);
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "opt-in" });
+
+        // Assert
+        messages.Count.ShouldBe(2);
+        messages[0].MappingProfile.ShouldBe("profile-a");
+        messages[0].TenantId.ShouldBeNull();
+        messages[1].MappingProfile.ShouldBe("profile-a");
+        messages[1].TenantId.ShouldBe("tenant-a");
+    }
+
+    /// <summary>
     /// 测试目的：执行路径缺失映射输入时，绑定异常应包含实际 SQL 与数据源键。
     /// </summary>
     [Fact]
@@ -709,6 +772,38 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - 诊断观察器修改一维数组参数后，不应污染同一操作的 After 诊断快照。
+    /// </summary>
+    [Fact]
+    public void Diagnostics_WhenObserverMutatesArrayValue_ShouldKeepAfterValueIndependent()
+    {
+        // Arrange
+        DiagnosticsMessage after = null;
+        using var observer = new SqlDiagnosticObserver(message =>
+        {
+            var value = (int[])message.Parameters.Items.Single().Value;
+            if (message.Operation == SqlQueryDiagnosticListenerNames.BeforeExecute)
+            {
+                value[0] = 99;
+                return;
+            }
+
+            if (message.Operation == SqlQueryDiagnosticListenerNames.AfterExecute)
+                after = message;
+        }, name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                 name == SqlQueryDiagnosticListenerNames.AfterExecute);
+        var connection = new CaptureDbConnection();
+        var executor = CreateExecutor(connection);
+
+        // Act
+        executor.PublishDiagnosticsForTest(new[] { 1, 2 });
+
+        // Assert
+        after.ShouldNotBeNull();
+        ((int[])after.Parameters.Items.Single().Value).ShouldBe(new[] { 1, 2 });
+    }
+
+    /// <summary>
     /// 测试目的：异步事务作用域应提供事务标识，并在异步提交后释放其拥有的事务。
     /// </summary>
     [Fact]
@@ -729,8 +824,208 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         scope.TransactionId.ShouldNotBeNullOrWhiteSpace();
         connection.LastTransaction.ShouldNotBeNull();
+        (connection.LastTransaction.CommitCount + connection.LastTransaction.AsyncCommitCount).ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：事务提交后重复提交应保持幂等，回滚应被拒绝，显式释放后完成操作应报告对象已释放。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenCommitted_ShouldBeIdempotentAndRejectOppositeCompletion()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+
+        // Act
+        scope.Commit();
+        scope.Commit();
+
+        // Assert
+        Should.Throw<InvalidOperationException>(() => scope.Rollback());
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
+        scope.Dispose();
+        Should.Throw<ObjectDisposedException>(() => scope.Commit());
+        Should.Throw<ObjectDisposedException>(() => scope.Rollback());
+    }
+
+    /// <summary>
+    /// 测试目的：事务回滚后重复回滚应保持幂等，提交应被拒绝，资源只应释放一次。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenRolledBack_ShouldBeIdempotentAndRejectOppositeCompletion()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+
+        // Act
+        scope.Rollback();
+        scope.Rollback();
+
+        // Assert
+        Should.Throw<InvalidOperationException>(() => scope.Commit());
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+        connection.LastTransaction.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：异步事务完成路径应与同步路径具有一致的幂等和终态语义。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenCompletedAsync_ShouldBeIdempotentAndRejectInvalidCompletion()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+
+        // Act
+        await scope.CommitAsync();
+        await scope.CommitAsync();
+
+        // Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => scope.RollbackAsync());
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.DisposeCount.ShouldBe(1);
+        await scope.DisposeAsync();
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => scope.CommitAsync());
+    }
+
+    /// <summary>
+    /// 测试目的：事务资源释放失败时仍应使租约失效并完成状态收口。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenTransactionDisposeFails_ShouldInvalidateLeaseAndFinalizeScope()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        var executor = scope.CreateExecutor();
+        connection.LastTransaction.ThrowOnDispose = true;
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => scope.Commit());
+
+        // Assert
+        exception.Message.ShouldBe("transaction dispose failed");
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.DisposeCount.ShouldBe(1);
+        Should.Throw<InvalidOperationException>(() => executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "after" }));
+        scope.Dispose();
+    }
+
+    /// <summary>
+    /// 测试目的：异步事务开始和提交应优先调用 ADO.NET 原生异步成员。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenNativeAsyncMembersExist_ShouldUseThem()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+        await scope.CommitAsync();
+
+        // Assert
+        connection.AsyncBeginCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：原生异步回滚完成后不能再同步回退执行一次回滚。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenNativeAsyncRollbackExists_ShouldNotFallbackToSynchronousRollback()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+        await scope.RollbackAsync();
+
+        // Assert
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试 - 异步事务开始失败且 Owner Query 清理失败时，应聚合保留两个失败原因。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenBeginAsyncAndOwnerQueryCleanupFail_ShouldAggregateFailures()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ThrowOnAsyncBegin = true, ThrowOnDispose = true };
+        var services = CreateServices();
+        services.AddSingleton(new ConnectionDatabase(connection));
+        services.AddSqlServerSqlQuery<ISqlQuery, FaultingTransactionSqlServerQuery>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<AggregateException>(() =>
+            provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync());
+
+        // Assert
+        exception.Flatten().InnerExceptions.Select(item => item.Message)
+            .ShouldBe(new[] { "async begin failed", "connection dispose failed" }, ignoreOrder: true);
+        connection.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - 预先取消异步事务开始时不应打开连接或创建事务。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenBeginAsyncIsCancelled_ShouldNotOpenConnectionOrCreateTransaction()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync(cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        connection.AsyncBeginCount.ShouldBe(0);
+        connection.LastTransaction.ShouldBeNull();
     }
 
     /// <summary>
@@ -1404,6 +1699,33 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 事务开始失败测试查询对象。
+    /// </summary>
+    private sealed class FaultingTransactionSqlServerQuery : SqlServerSqlQueryBase
+    {
+        private readonly ConnectionDatabase _database;
+
+        /// <summary>
+        /// 初始化一个<see cref="FaultingTransactionSqlServerQuery"/>类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
+        /// <param name="database">测试连接数据库。</param>
+        public FaultingTransactionSqlServerQuery(IServiceProvider serviceProvider,
+            SqlOptions<FaultingTransactionSqlServerQuery> options, ConnectionDatabase database)
+            : base(serviceProvider, options, database)
+        {
+            _database = database;
+        }
+
+        /// <summary>
+        /// 返回测试替身数据库，避免故障路径连接真实 SQL Server。
+        /// </summary>
+        /// <returns>测试数据库。</returns>
+        protected override IDatabase CreateDatabase() => _database;
+    }
+
+    /// <summary>
     /// 计数查询接口
     /// </summary>
     private interface ICountedSqlServerQuery : ISqlQuery
@@ -1435,6 +1757,19 @@ public class SqlServerRoutingAndExecutionTest
             : base(serviceProvider, options, database)
         {
         }
+
+        /// <summary>
+        /// 发布受控的 Before 和 After 诊断事件，用于验证诊断快照隔离。
+        /// </summary>
+        /// <param name="value">诊断参数值。</param>
+        public void PublishDiagnosticsForTest(int[] value)
+        {
+            var message = ExecuteBefore("Select @payload", null, GetConnection(), new[]
+            {
+                new SqlParameterDiagnosticInfo { Name = "payload", Value = value, OriginalValue = value }
+            });
+            ExecuteAfter(message);
+        }
     }
 
     /// <summary>
@@ -1453,6 +1788,11 @@ public class SqlServerRoutingAndExecutionTest
         [StringLength(20)]
         [Column(TypeName = "nvarchar(20)")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// 二进制载荷。
+        /// </summary>
+        public byte[] Payload { get; set; }
     }
 
     /// <summary>
@@ -1480,7 +1820,24 @@ public class SqlServerRoutingAndExecutionTest
 
         public bool ThrowOnExecute { get; set; }
 
+        /// <summary>
+        /// 是否在原生异步开始事务时抛出异常。
+        /// </summary>
+        public bool ThrowOnAsyncBegin { get; set; }
+
+        /// <summary>
+        /// 是否在连接释放时抛出异常。
+        /// </summary>
+        public bool ThrowOnDispose { get; set; }
+
         public CaptureDbTransaction LastTransaction { get; private set; }
+
+        public int AsyncBeginCount { get; private set; }
+
+        /// <summary>
+        /// 连接释放次数。
+        /// </summary>
+        public int DisposeCount { get; private set; }
 
         public override string ConnectionString { get; set; }
 
@@ -1509,11 +1866,30 @@ public class SqlServerRoutingAndExecutionTest
         protected override ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            AsyncBeginCount++;
+            if (ThrowOnAsyncBegin)
+                throw new InvalidOperationException("async begin failed");
             LastTransaction = new CaptureDbTransaction(this, isolationLevel);
             return ValueTask.FromResult<DbTransaction>(LastTransaction);
         }
 
-        public override Task OpenAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+        public override Task OpenAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            _state = ConnectionState.Open;
+            return Task.CompletedTask;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing == false)
+                return;
+            DisposeCount++;
+            if (ThrowOnDispose)
+                throw new InvalidOperationException("connection dispose failed");
+            base.Dispose(disposing);
+        }
 
         public void SetParameters(IEnumerable<CaptureDbParameter> parameters) =>
             LastCreatedParameters = parameters.ToList();
@@ -1828,13 +2204,42 @@ public class SqlServerRoutingAndExecutionTest
 
         public int RollbackCount { get; private set; }
 
+        public int AsyncCommitCount { get; private set; }
+
+        public int AsyncRollbackCount { get; private set; }
+
+        public int DisposeCount { get; private set; }
+
+        public bool ThrowOnDispose { get; set; }
+
         public override IsolationLevel IsolationLevel => _isolationLevel;
 
         protected override DbConnection DbConnection => _connection;
 
         public override void Commit() => CommitCount++;
 
+        public override Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            AsyncCommitCount++;
+            return Task.CompletedTask;
+        }
+
         public override void Rollback() => RollbackCount++;
+
+        public override Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            AsyncRollbackCount++;
+            return Task.CompletedTask;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing == false)
+                return;
+            DisposeCount++;
+            if (ThrowOnDispose)
+                throw new InvalidOperationException("transaction dispose failed");
+        }
     }
 
     /// <summary>

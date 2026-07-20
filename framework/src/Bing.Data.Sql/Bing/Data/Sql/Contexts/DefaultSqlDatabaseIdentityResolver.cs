@@ -8,212 +8,34 @@ namespace Bing.Data.Sql;
 /// </summary>
 public sealed class DefaultSqlDatabaseIdentityResolver : ISqlDatabaseIdentityResolver
 {
+    /// <summary>
+    /// 身份解析贡献者。
+    /// </summary>
+    private readonly IReadOnlyList<ISqlDatabaseIdentityContributor> _contributors;
+
+    /// <summary>
+    /// 初始化一个<see cref="DefaultSqlDatabaseIdentityResolver"/>类型的实例。
+    /// </summary>
+    /// <param name="contributors">身份解析贡献者。</param>
+    public DefaultSqlDatabaseIdentityResolver(IEnumerable<ISqlDatabaseIdentityContributor> contributors = null)
+    {
+        _contributors = contributors?.ToList() ?? new List<ISqlDatabaseIdentityContributor>
+        {
+            new DefaultSqlDatabaseIdentityContributor()
+        };
+    }
+
     /// <inheritdoc />
     public SqlDatabaseIdentity Resolve(DatabaseType databaseType, string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new InvalidOperationException("数据库连接字符串不能为空，无法解析物理数据库身份。");
+        var contributor = _contributors.FirstOrDefault(item => item is not DefaultSqlDatabaseIdentityContributor &&
+            item.CanResolve(databaseType)) ?? _contributors.FirstOrDefault(item => item != null && item.CanResolve(databaseType));
+        if (contributor == null)
+            throw new NotSupportedException($"数据库类型 {databaseType} 不支持物理数据库身份比较。");
         var builder = new DbConnectionStringBuilder { ConnectionString = connectionString };
-        return databaseType switch
-        {
-            DatabaseType.Sqlite => ResolveSqlite(builder),
-            DatabaseType.SqlServer => ResolveSqlServer(builder),
-            DatabaseType.MySql => ResolveServerDatabase(databaseType, builder, "Server", "Data Source", "Host"),
-            DatabaseType.PgSql => ResolveServerDatabase(databaseType, builder, "Host", "Server", "Data Source"),
-            DatabaseType.Oracle => ResolveOracle(builder),
-            _ => throw new NotSupportedException($"数据库类型 {databaseType} 不支持物理数据库身份比较。")
-        };
+        return contributor.Resolve(databaseType, builder) ??
+            throw new InvalidOperationException($"数据库类型 {databaseType} 的物理身份解析结果不能为空。");
     }
-
-    /// <summary>
-    /// 解析 SQL Server 数据库物理身份。
-    /// </summary>
-    /// <param name="builder">连接字符串构建器。</param>
-    /// <returns>SQL Server 数据库物理身份。</returns>
-    private static SqlDatabaseIdentity ResolveSqlServer(DbConnectionStringBuilder builder)
-    {
-        var endpoint = GetValue(builder, "Server", "Data Source", "DataSource", "Address", "Addr", "Network Address");
-        var separatorIndex = endpoint?.IndexOf('\\') ?? -1;
-        var server = separatorIndex > -1 ? endpoint.Substring(0, separatorIndex) : endpoint;
-        var instance = separatorIndex > -1 ? endpoint.Substring(separatorIndex + 1) : null;
-        var database = Normalize(GetValue(builder, "Database", "Initial Catalog"));
-        EnsureRequired(server, "服务器地址");
-        EnsureRequired(database, "数据库名称");
-        return new SqlDatabaseIdentity
-        {
-            DatabaseType = DatabaseType.SqlServer,
-            Server = Normalize(server),
-            Instance = Normalize(instance),
-            Port = ParsePort(GetValue(builder, "Port")),
-            Database = database
-        };
-    }
-
-    /// <summary>
-    /// 解析服务器与数据库名称构成的物理身份。
-    /// </summary>
-    /// <param name="databaseType">数据库类型。</param>
-    /// <param name="builder">连接字符串构建器。</param>
-    /// <param name="serverKeys">服务器字段名称。</param>
-    /// <returns>数据库物理身份。</returns>
-    private static SqlDatabaseIdentity ResolveServerDatabase(DatabaseType databaseType,
-        DbConnectionStringBuilder builder, params string[] serverKeys)
-    {
-        var server = Normalize(GetValue(builder, serverKeys));
-        var database = Normalize(GetValue(builder, "Database", "Initial Catalog"));
-        EnsureRequired(server, "服务器地址");
-        EnsureRequired(database, "数据库名称");
-        return new SqlDatabaseIdentity
-        {
-            DatabaseType = databaseType,
-            Server = server,
-            Port = ParsePort(GetValue(builder, "Port")),
-            Database = database
-        };
-    }
-
-    /// <summary>
-    /// 解析 Oracle 数据库物理身份。
-    /// </summary>
-    /// <param name="builder">连接字符串构建器。</param>
-    /// <returns>Oracle 数据库物理身份。</returns>
-    private static SqlDatabaseIdentity ResolveOracle(DbConnectionStringBuilder builder)
-    {
-        var dataSource = Normalize(GetValue(builder, "Data Source", "DataSource", "Server"));
-        EnsureRequired(dataSource, "数据源");
-        return new SqlDatabaseIdentity
-        {
-            DatabaseType = DatabaseType.Oracle,
-            Server = dataSource,
-            ServiceName = Normalize(GetValue(builder, "Service Name", "SID")) ?? dataSource
-        };
-    }
-
-    /// <summary>
-    /// 解析 SQLite 数据库物理身份。
-    /// </summary>
-    /// <param name="builder">连接字符串构建器。</param>
-    /// <returns>SQLite 数据库物理身份。</returns>
-    private static SqlDatabaseIdentity ResolveSqlite(DbConnectionStringBuilder builder)
-    {
-        var dataSource = GetValue(builder, "Data Source", "DataSource", "Filename");
-        if (string.IsNullOrWhiteSpace(dataSource))
-            throw new InvalidOperationException("SQLite 连接字符串缺少 Data Source 或 Filename，无法解析物理数据库身份。");
-        var mode = Normalize(GetValue(builder, "Mode"));
-        var cache = Normalize(GetValue(builder, "Cache"));
-        var normalizedSource = dataSource.Trim();
-        var uriMode = GetSqliteUriOption(normalizedSource, "mode");
-        var uriCache = GetSqliteUriOption(normalizedSource, "cache");
-        var isMemory = string.Equals(normalizedSource, ":memory:", StringComparison.OrdinalIgnoreCase) ||
-                       string.Equals(mode, "memory", StringComparison.OrdinalIgnoreCase) ||
-                       string.Equals(uriMode, "memory", StringComparison.OrdinalIgnoreCase);
-        if (isMemory)
-        {
-            var isSharedMemory = normalizedSource.StartsWith("file:", StringComparison.OrdinalIgnoreCase) &&
-                                 string.Equals(mode ?? uriMode, "memory", StringComparison.OrdinalIgnoreCase) &&
-                                 string.Equals(cache ?? uriCache, "shared", StringComparison.OrdinalIgnoreCase);
-            var name = GetSqliteMemoryName(normalizedSource);
-            return new SqlDatabaseIdentity
-            {
-                DatabaseType = DatabaseType.Sqlite,
-                FilePath = isSharedMemory ? $"memory:{name}" : "memory:exclusive",
-                IsExclusiveMemory = !isSharedMemory
-            };
-        }
-        if (normalizedSource.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
-        {
-            return new SqlDatabaseIdentity
-            {
-                DatabaseType = DatabaseType.Sqlite,
-                FilePath = Normalize(normalizedSource)
-            };
-        }
-        return new SqlDatabaseIdentity
-        {
-            DatabaseType = DatabaseType.Sqlite,
-            FilePath = Path.GetFullPath(normalizedSource)
-        };
-    }
-
-    /// <summary>
-    /// 获取 SQLite URI 查询参数。
-    /// </summary>
-    /// <param name="dataSource">SQLite 数据源。</param>
-    /// <param name="name">参数名称。</param>
-    /// <returns>参数值。</returns>
-    private static string GetSqliteUriOption(string dataSource, string name)
-    {
-        if (dataSource?.StartsWith("file:", StringComparison.OrdinalIgnoreCase) != true)
-            return null;
-        var queryIndex = dataSource.IndexOf('?');
-        if (queryIndex < 0 || queryIndex == dataSource.Length - 1)
-            return null;
-        var parameters = dataSource.Substring(queryIndex + 1).Split('&');
-        foreach (var parameter in parameters)
-        {
-            var separatorIndex = parameter.IndexOf('=');
-            if (separatorIndex < 1)
-                continue;
-            var key = parameter.Substring(0, separatorIndex);
-            if (string.Equals(key, name, StringComparison.OrdinalIgnoreCase))
-                return Uri.UnescapeDataString(parameter.Substring(separatorIndex + 1));
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// 获取 SQLite 命名内存数据库标识。
-    /// </summary>
-    /// <param name="dataSource">SQLite 数据源。</param>
-    /// <returns>内存数据库标识。</returns>
-    private static string GetSqliteMemoryName(string dataSource)
-    {
-        if (dataSource?.StartsWith("file:", StringComparison.OrdinalIgnoreCase) != true)
-            return "exclusive";
-        var queryIndex = dataSource.IndexOf('?');
-        var name = queryIndex < 0 ? dataSource.Substring("file:".Length) :
-            dataSource.Substring("file:".Length, queryIndex - "file:".Length);
-        return string.IsNullOrWhiteSpace(name) ? "exclusive" : Uri.UnescapeDataString(name.Trim());
-    }
-
-    /// <summary>
-    /// 确保身份关键字段已配置。
-    /// </summary>
-    /// <param name="value">字段值。</param>
-    /// <param name="fieldName">字段名称。</param>
-    private static void EnsureRequired(string value, string fieldName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new InvalidOperationException($"数据库连接字符串缺少{fieldName}，无法安全比较物理数据库身份。");
-    }
-
-    /// <summary>
-    /// 获取连接字符串字段值。
-    /// </summary>
-    /// <param name="builder">连接字符串构建器。</param>
-    /// <param name="keys">字段名称。</param>
-    /// <returns>第一个非空字段值。</returns>
-    private static string GetValue(DbConnectionStringBuilder builder, params string[] keys)
-    {
-        foreach (var key in keys)
-        {
-            if (builder.TryGetValue(key, out var value) && string.IsNullOrWhiteSpace(value?.ToString()) == false)
-                return value.ToString();
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// 解析端口。
-    /// </summary>
-    /// <param name="value">端口字符串。</param>
-    /// <returns>端口号。</returns>
-    private static int? ParsePort(string value) => int.TryParse(value, out var port) ? port : null;
-
-    /// <summary>
-    /// 规范化身份字段。
-    /// </summary>
-    /// <param name="value">待规范化的字段值。</param>
-    /// <returns>规范化后的字段值。</returns>
-    private static string Normalize(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

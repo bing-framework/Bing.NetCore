@@ -43,6 +43,26 @@ public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
     public string ServiceName { get; set; }
 
     /// <summary>
+    /// Oracle SID。
+    /// </summary>
+    public string Sid { get; set; }
+
+    /// <summary>
+    /// Oracle 未展开的数据源别名。
+    /// </summary>
+    public string OracleAlias { get; set; }
+
+    /// <summary>
+    /// SQLite 命名共享内存数据库名称。
+    /// </summary>
+    public string SharedMemoryName { get; set; }
+
+    /// <summary>
+    /// 是否可以安全比较物理身份。
+    /// </summary>
+    public bool IsComparable { get; set; } = true;
+
+    /// <summary>
     /// 是否为仅当前连接可见的 SQLite 独占内存数据库。
     /// </summary>
     /// <remarks>
@@ -64,7 +84,11 @@ public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
                string.Equals(Instance, other.Instance, StringComparison.OrdinalIgnoreCase) &&
                string.Equals(FilePath, other.FilePath, StringComparison.OrdinalIgnoreCase) &&
                string.Equals(ServiceName, other.ServiceName, StringComparison.OrdinalIgnoreCase) &&
-               IsExclusiveMemory == other.IsExclusiveMemory;
+               string.Equals(Sid, other.Sid, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(OracleAlias, other.OracleAlias, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(SharedMemoryName, other.SharedMemoryName, StringComparison.OrdinalIgnoreCase) &&
+               IsExclusiveMemory == other.IsExclusiveMemory &&
+               IsComparable == other.IsComparable;
     }
 
     /// <inheritdoc />
@@ -82,7 +106,11 @@ public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
         hash = hash * 31 + (Instance == null ? 0 : comparer.GetHashCode(Instance));
         hash = hash * 31 + (FilePath == null ? 0 : comparer.GetHashCode(FilePath));
         hash = hash * 31 + (ServiceName == null ? 0 : comparer.GetHashCode(ServiceName));
+        hash = hash * 31 + (Sid == null ? 0 : comparer.GetHashCode(Sid));
+        hash = hash * 31 + (OracleAlias == null ? 0 : comparer.GetHashCode(OracleAlias));
+        hash = hash * 31 + (SharedMemoryName == null ? 0 : comparer.GetHashCode(SharedMemoryName));
         hash = hash * 31 + IsExclusiveMemory.GetHashCode();
+        hash = hash * 31 + IsComparable.GetHashCode();
         return hash;
     }
 }

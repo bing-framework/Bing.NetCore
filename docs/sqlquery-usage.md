@@ -326,7 +326,7 @@ Independent 模式创建独立 SQL Query，不绑定 EF 连接和事务。它适
 
 EF Core SQL Query Factory 的数据源优先级为：显式 `dbKey`、Ambient `DatabaseContext.DbKey`、`SqlMetadataOptions.DefaultDatabaseContext.DbKey`、`DataSources.DefaultDataSourceKey`、唯一数据源。显式不存在的 `dbKey` 会立即失败，不会回退到默认数据源；最终解析的数据源 Provider 必须与当前 EF Core Provider 一致。
 
-Shared 模式在绑定 EF 连接前会比较最终数据源与 `DbContext` 的物理数据库身份。SQLite 普通 `Data Source=:memory:` 是连接独占内存库，不能用于 Shared 比较；请使用 Independent 模式，或使用命名共享内存 URI，例如 `Data Source=file:reporting?mode=memory&cache=shared`。SQLite 文件路径会按绝对路径比较；服务器型 Provider 缺少服务器地址或数据库名称时也会拒绝 Shared 比较，避免误复用连接。
+Shared 模式在绑定 EF 连接前会比较最终数据源与 `DbContext` 的物理数据库身份。SQLite 普通 `Data Source=:memory:` 是连接独占内存库，不能用于 Shared 比较；请使用 Independent 模式，或使用命名共享内存 URI，例如 `Data Source=file:reporting?mode=memory&cache=shared`。SQLite 文件路径会按绝对路径比较，命名共享内存名称不同也会拒绝复用；服务器型 Provider 缺少服务器地址或数据库名称时同样会拒绝 Shared 比较，避免误复用连接。Oracle 支持严格单地址 TCP TNS Descriptor，但别名、复杂 Descriptor，以及同时指定 `Service Name` 和 `SID` 的目标均不可安全比较。
 
 ### 5. 上下文、读取偏好与租户边界
 
@@ -360,6 +360,8 @@ scope.Commit();
 作用域拥有连接和事务。作用域创建的 Query / Executor 会绑定外部事务，不能自行提交或回滚；如果作用域释放前未调用 `Commit()` 或 `Rollback()`，会自动回滚。
 
 `Commit()`、`Rollback()` 或 Scope `Dispose()` 后，不得继续使用此前通过 Scope 创建的 Query / Executor。它们会立即拒绝获取连接、事务或执行 SQL，防止在已结束的事务之外重新建连执行。需要继续访问数据库时，请创建新的 Scope 或通过工厂创建新的 Query / Executor。
+
+`BeginAsync()`、`CommitAsync()` 和 `RollbackAsync()` 会优先调用 Provider 公开的原生异步成员；只有成员不存在时才同步回退。开始事务失败时，框架仍会释放 Owner Query；若释放也失败，会同时保留开始失败和清理失败信息。
 
 如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。当前实现对 `StreamQuery` / `StreamQueryAsync` 会在创建读取器前直接抛出异常，避免在流式场景里静默退回到短事务策略。
 
@@ -433,9 +435,7 @@ executor.ExecuteSql<User>(
 能力说明：
 
 - 支持“参数名”和“实体属性名”不一致；
-- 参数值可来自匿名对象、字典或普通 POCO；
-    - `Add(name, property, null)` 表示显式传入空值，执行时会绑定为 `DBNull.Value`；
-    - `Map(name, property)` 表示从源对象读取参数值；
+- 参数值可来自匿名对象、字典或普通 POCO；`Add(name, property, null)` 表示显式传入空值，执行时会绑定为 `DBNull.Value`；`Map(name, property)` 表示从源对象读取参数值；
 - 使用映射增强时，找不到必需输入值会抛出 `SqlParameterBindingException`；只有未启用映射增强的旧调用路径才保留原有弱元数据行为；
 - 执行阶段会把 `DbType`、`Size`、`Precision`、`Scale`、`ProviderTypeName` 等元数据补齐到 ADO 参数；
 - 执行诊断消息会包含标准化参数快照和增强参数元数据，便于排查参数类型与映射问题；
@@ -457,6 +457,40 @@ sqlQuery.GetBuilder().AddParam<User>("statusCode", x => x.Status, 1);
 - 让 `GetCountAsync()`、原生 SQL 执行、分页等路径统一走增强参数绑定。
 
 注意：`GetBuilder().GetParams()` 仍然保留轻量参数列表语义，便于调试；真正执行时会自动绑定增强后的数据库参数。
+
+---
+
+## 多数据库边界加固
+
+### ExecutionContext 作用域规则
+
+数据库 Scope 使用 `AsyncLocal` 保存当前执行流的栈帧。`Task.Run` 默认会继承当前上下文，但子流释放继承的 Scope 只恢复子流自身的父上下文，不会改变父流；父流随后仍可独立释放同一 Scope。当前执行流没有该 Scope 帧时重复释放是幂等操作。当前栈中存在该帧但它不是栈顶时，仍会抛出 LIFO 异常。
+
+`ExecutionContext.SuppressFlow()` 创建的任务不会获得 Ambient 数据库上下文，也不能释放父流的 Scope。不要将 Scope 跨越 `IAsyncLifetime.InitializeAsync` 和 `DisposeAsync` 保存。
+
+### 物理数据库身份
+
+EF Core Shared 模式只在数据源与 `DbContext` 身份可安全比较且相等时复用连接。身份解析通过 `ISqlDatabaseIdentityContributor` 扩展；内置贡献者不依赖 Provider 包，并规范以下形式：
+
+- SQLite 文件使用绝对路径；`Data Source=name;Mode=Memory;Cache=Shared` 与等价 `file:name?mode=memory&cache=shared` 识别为同一命名共享内存库；`:memory:` 永远不可用于 Shared。
+- MySQL、PostgreSQL、SQL Server 的省略默认端口与显式默认端口视为一致。SQL Server 支持 `tcp:host,port`、`host\\instance` 和独立 `Port` 字段。
+- Oracle 仅比较可展开的 EZConnect 或显式主机与 Service Name/SID；TNS 别名与复杂描述符标记为不可比较，Shared 模式会拒绝，而不会猜测它们是否指向同一库。
+
+### 事务状态与异步 API
+
+`ISqlTransactionScope` 的状态为 Active、Committed、RolledBack、Faulted 或 Disposed。仅 Active 状态允许创建子 Query/Executor 或完成事务；提交、回滚及释放会先让 Lease 失效，防止现有子对象在事务结束后继续执行。
+
+资源清理始终会尝试释放全部子对象、事务和 owner Query。一个清理步骤失败不会阻止后续步骤；多个异常以 `AggregateException` 返回。`BeginAsync`、`CommitAsync`、`RollbackAsync` 和 `DisposeAsync` 优先调用 Provider 可用的原生 ADO.NET 异步成员，缺失时才同步回退，不会使用 `Task.Run` 包装同步数据库操作。
+
+### 诊断上下文与租户策略
+
+Before、After 和 Error 诊断消息均携带 Query 创建时固定的 `DbKey`、读取偏好、事务、`MappingProfile` 和参数快照。`TenantId` 默认不输出；只有在当前 Query/Executor 上显式配置后才写入诊断消息：
+
+```csharp
+executor.Config(options => options.IncludeTenantIdInDiagnostics = true);
+```
+
+SkyAPM 标签会记录映射配置、读取偏好和事务隔离级别；只有诊断消息含租户标识时才会追加租户标签。各诊断事件持有独立消息快照；一维数组参数会复制，避免订阅器修改 Before 事件数据影响 After 或 Error 事件。不要将连接字符串、密码或其他凭据写入诊断订阅器。
 
 ---
 
@@ -615,11 +649,11 @@ public async Task<Order> GetDeletedOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 
 SQLite 真实执行测试位于 `framework/tests/Bing.Dapper.Sqlite.Tests.Integration`，默认随测试运行，不依赖外部服务。
 
-MySQL、PostgreSQL 和 SQL Server 集成测试默认跳过。启用其中一个 Provider 时，设置对应开关和 `ConnectionStrings__DefaultConnection`，例如：
+MySQL、PostgreSQL 和 SQL Server 集成测试默认跳过。启用其中一个 Provider 时，设置对应开关和 `ConnectionStrings__<Provider>Connection`；`ConnectionStrings__DefaultConnection` 仅用于兼容旧配置，例如：
 
 ```powershell
 $env:RUN_MYSQL_INTEGRATION_TESTS = "true"
-$env:ConnectionStrings__DefaultConnection = "Server=127.0.0.1;Database=bing_dapper_test;User Id=test;Password=..."
+$env:ConnectionStrings__MySqlConnection = "Server=127.0.0.1;Database=bing_dapper_test;User Id=test;Password=..."
 dotnet test .\framework\tests\Bing.Dapper.MySql.Tests.Integration\Bing.Dapper.MySql.Tests.Integration.csproj
 ```
 

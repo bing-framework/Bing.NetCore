@@ -46,10 +46,10 @@ public static class DapperCoreServiceCollectionExtensions
             return options;
         });
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
-        services.TryAddSingleton<IDatabaseContextSnapshotFactory, DefaultDatabaseContextSnapshotFactory>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
         services.TryAddScoped<IReadPreferenceScopeManager, ReadPreferenceScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDatabaseIdentityContributor, DefaultSqlDatabaseIdentityContributor>());
         services.TryAddSingleton<ISqlDatabaseIdentityResolver, DefaultSqlDatabaseIdentityResolver>();
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
