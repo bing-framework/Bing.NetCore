@@ -4,8 +4,8 @@
 
 - Shared 模式继续复用当前 `DbContext` 连接，并通过动态委托读取当前 EF Core 事务。
 - Independent 模式依据 `DbContext.Database.ProviderName` 选择对应的 SQL Provider，并由 `ISqlDbConnectionFactoryResolver` 创建独立连接。
-- SQL Server、MySQL、PostgreSQL、SQLite 和 Oracle Provider 通过各自的 `*DatabaseFactory` 注册独立连接工厂，未使用反射构造连接。
-- 独立连接通过 `ISqlQueryExternalContext.SetOwnedConnection` 交给 Query 生命周期释放，不共享 EF 连接或事务。
+- SQL Server、MySQL、PostgreSQL、SQLite 和 Oracle Provider 通过 `ISqlDbConnectionFactoryResolver` 注册独立连接工厂，未使用反射构造连接。
+- 独立连接通过内部资源 Binder 交给 Query 生命周期释放，不共享 EF 连接或事务；该 Binder 不属于公开 API。
 - `UnitOfWorkBase` 不再回退 `ServiceLocator` 获取服务提供程序，构造时必须显式注入。
 
 ## 测试

@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <VersionMajor>6</VersionMajor>
+    <VersionMajor>7</VersionMajor>
     <VersionMinor>0</VersionMinor>
     <VersionPatch>0</VersionPatch>
     <VersionQuality>20250319-1</VersionQuality>

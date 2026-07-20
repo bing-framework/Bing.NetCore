@@ -6,8 +6,8 @@
 public class SqlServerSqlQuery : SqlServerSqlQueryBase
 {
     /// <inheritdoc />
-    public SqlServerSqlQuery(IServiceProvider serviceProvider, SqlOptions<SqlServerSqlQuery> options, IDatabase database = null)
-        : base(serviceProvider, options, database)
+    public SqlServerSqlQuery(IServiceProvider serviceProvider, SqlOptions<SqlServerSqlQuery> options)
+        : base(serviceProvider, options)
     {
     }
 }

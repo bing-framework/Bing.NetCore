@@ -57,7 +57,7 @@ namespace Bing.Admin.Modules
                     t.DatabaseType = DatabaseType.MySql;
                     t.IsClearAfterExecution = true;
                 })
-                .AddDatabase<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>()
+                .AddSqlCore()
                 .AddEntityMetadata<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>();
             // 注册SqlExecutor
             services.AddMySqlExecutor();

@@ -1,5 +1,4 @@
-﻿using Bing.Data;
-using Bing.Data.Enums;
+﻿using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -16,27 +15,16 @@ namespace Bing.Dapper;
 public static class DapperCoreServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册数据库信息
+    /// 注册 Dapper SQL 核心服务。
     /// </summary>
-    /// <typeparam name="TDatabase">数据库信息类型</typeparam>
-    /// <param name="services">服务集合</param>
-    public static IServiceCollection AddDatabase<TDatabase>(this IServiceCollection services)
-        where TDatabase : class, IDatabase
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    /// <remarks>
+    /// 该方法不注册或解析跨 ORM 的 <c>IDatabase</c> 服务。Dapper 自有连接仅由
+    /// <see cref="ISqlDbConnectionFactoryResolver"/> 创建，外部连接仅能由内部资源绑定器绑定。
+    /// </remarks>
+    public static IServiceCollection AddSqlCore(this IServiceCollection services)
     {
-        return services.AddDatabase<IDatabase, TDatabase>();
-    }
-
-    /// <summary>
-    /// 注册数据库信息
-    /// </summary>
-    /// <typeparam name="TInterface">接口类型</typeparam>
-    /// <typeparam name="TImplementation">实现类型</typeparam>
-    /// <param name="services">服务集合</param>
-    public static IServiceCollection AddDatabase<TInterface, TImplementation>(this IServiceCollection services)
-        where TInterface : IDatabase
-        where TImplementation : class, TInterface
-    {
-        services.TryAddScoped(typeof(TInterface), typeof(TImplementation));
         services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
         services.TryAddSingleton(provider =>
         {

@@ -113,7 +113,7 @@ public class MultiProviderRegistrationTest
     private static ServiceProvider CreateProvider()
     {
         var services = new ServiceCollection();
-        services.AddDatabase<TestDatabase>();
+        services.AddSqlCore();
         services.AddMySqlProvider();
         services.AddPostgreSqlProvider();
         services.AddSqlServerProvider();
@@ -141,7 +141,7 @@ public class MultiProviderRegistrationTest
     private static ServiceProvider CreateExecutorOnlyProvider()
     {
         var services = new ServiceCollection();
-        services.AddDatabase<TestDatabase>();
+        services.AddSqlCore();
         services.AddMySqlExecutor("Server=mysql;Database=test;");
         services.AddPostgreSqlExecutor("Host=pgsql;Database=test;");
         services.AddSqlServerSqlExecutor("Server=sqlserver;Database=test;");

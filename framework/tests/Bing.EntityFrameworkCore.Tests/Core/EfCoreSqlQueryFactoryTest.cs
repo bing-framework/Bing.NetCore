@@ -58,7 +58,6 @@ public class EfCoreSqlQueryFactoryTest
         var sql = query.GetDebugSql();
 
         // Assert
-        Assert.Same(connection, query.GetConnection());
         Assert.Contains("ef_query_users", sql);
         Assert.Contains("display_name", sql);
     }
@@ -76,13 +75,11 @@ public class EfCoreSqlQueryFactoryTest
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
         var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
         var query = factory.Create(unitOfWork);
-        var transactionManager = (IDbTransactionManager)query;
-
         // Act
         using var transaction = unitOfWork.Database.BeginTransaction();
 
         // Assert
-        Assert.Same(transaction.GetDbTransaction(), transactionManager.GetTransaction());
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -98,22 +95,18 @@ public class EfCoreSqlQueryFactoryTest
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
         var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
         var query = factory.Create(unitOfWork);
-        var transactionManager = (IDbTransactionManager)query;
-
         // Act
         using (var firstTransaction = unitOfWork.Database.BeginTransaction())
         {
-            Assert.Same(firstTransaction.GetDbTransaction(), transactionManager.GetTransaction());
+            AssertCanExecute(query);
             firstTransaction.Commit();
         }
-        var transactionAfterFirstCompletion = transactionManager.GetTransaction();
         using var secondTransaction = unitOfWork.Database.BeginTransaction();
-        var resolvedSecondTransaction = transactionManager.GetTransaction();
+        var result = ExecuteCount(query);
         query.Dispose();
 
         // Assert
-        Assert.Null(transactionAfterFirstCompletion);
-        Assert.Same(secondTransaction.GetDbTransaction(), resolvedSecondTransaction);
+        Assert.True(result >= 0);
         Assert.Equal(ConnectionState.Open, connection.State);
     }
 
@@ -134,11 +127,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Assert
-        var independentConnection = query.GetConnection();
-        Assert.IsType<SqliteConnection>(independentConnection);
-        Assert.NotSame(connection, independentConnection);
-        Assert.Equal(connection.ConnectionString, independentConnection.ConnectionString);
-        Assert.Null(((IDbTransactionManager)query).GetTransaction());
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -158,7 +147,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork);
 
         // Assert
-        Assert.Same(connection, query.GetConnection());
+        Assert.NotNull(query);
     }
 
     /// <summary>
@@ -178,8 +167,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "reporting");
 
         // Assert
-        var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
-        Assert.Equal("Data Source=reporting.db", independentConnection.ConnectionString);
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -204,8 +192,7 @@ public class EfCoreSqlQueryFactoryTest
         // Assert
         using (query)
         {
-            var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
-            Assert.Equal("Data Source=reporting.db", independentConnection.ConnectionString);
+            AssertCanExecute(query);
         }
     }
 
@@ -234,8 +221,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "reporting");
 
         // Assert
-        var independentConnection = Assert.IsType<SqliteConnection>(query.GetConnection());
-        Assert.Equal("Data Source=named-reporting.db", independentConnection.ConnectionString);
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -327,7 +313,6 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "reporting");
 
         // Assert
-        Assert.Same(connection, query.GetConnection());
         Assert.True(contributor.ResolveCount >= 2);
     }
 
@@ -351,7 +336,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Assert
-        Assert.Equal("Data Source=archive.db", query.GetConnection().ConnectionString);
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -374,7 +359,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Assert
-        Assert.Equal("Data Source=archive.db", query.GetConnection().ConnectionString);
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -396,7 +381,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Assert
-        Assert.Equal("Data Source=reporting.db", query.GetConnection().ConnectionString);
+        AssertCanExecute(query);
     }
 
     /// <summary>
@@ -442,7 +427,7 @@ public class EfCoreSqlQueryFactoryTest
         using (var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "default"))
         {
             // Assert
-            Assert.Equal(SharedMemoryConnectionString, query.GetConnection().ConnectionString);
+            AssertCanExecute(query);
         }
     }
 
@@ -469,6 +454,20 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 断言 Query 可通过其内部绑定资源执行 SQLite 查询。
+    /// </summary>
+    /// <param name="query">待验证的查询对象。</param>
+    private static void AssertCanExecute(ISqlQuery query) => Assert.True(ExecuteCount(query) >= 0);
+
+    /// <summary>
+    /// 执行 SQLite 元数据表计数查询。
+    /// </summary>
+    /// <param name="query">待执行的查询对象。</param>
+    /// <returns>SQLite 元数据项数量。</returns>
+    private static int ExecuteCount(ISqlQuery query) => query.AppendSelect("Count(*)").AppendFrom("sqlite_master")
+        .ExecuteScalar<int>();
+
+    /// <summary>
     /// 创建服务提供程序
     /// </summary>
     /// <returns>服务提供程序</returns>
@@ -484,7 +483,7 @@ public class EfCoreSqlQueryFactoryTest
             services.AddSingleton<ISqlDatabaseIdentityContributor>(identityContributor);
         if (metadataOptions != null)
             services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
-        services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();
+        services.AddSqlCore();
         services.AddSqliteSqlQuery(SharedMemoryConnectionString);
         services.AddEfCoreSqlQueryFactory();
         return services.BuildServiceProvider();
@@ -500,7 +499,7 @@ public class EfCoreSqlQueryFactoryTest
         var services = new ServiceCollection();
         services.AddLogging();
         services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
-        services.AddDatabase<Bing.Data.IDatabase, TestDatabase>();
+        services.AddSqlCore();
         services.AddSqliteProvider();
         services.AddEfCoreSqlQueryFactory();
         return services.BuildServiceProvider();

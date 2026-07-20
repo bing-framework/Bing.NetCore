@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using Bing.Data;
-using Bing.Data.Sql.Database;
 
 namespace Bing.Data.Sql.Tests;
 
@@ -29,33 +27,6 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试 - 旧事务和连接管理器应标记为废弃。
-    /// </summary>
-    [Fact]
-    public void LegacyManagers_ShouldBeMarkedObsoleteAndHidden()
-    {
-        // Arrange
-    #pragma warning disable CS0618
-        var managerTypes = new[] { typeof(IDbConnectionManager), typeof(IDbTransactionManager) };
-    #pragma warning restore CS0618
-
-        // Act
-        var attributes = managerTypes.Select(type => new
-        {
-            Obsolete = type.GetCustomAttribute<ObsoleteAttribute>(),
-            EditorBrowsable = type.GetCustomAttribute<EditorBrowsableAttribute>()
-        }).ToList();
-
-        // Assert
-        Assert.All(attributes, attribute =>
-        {
-            Assert.NotNull(attribute.Obsolete);
-            Assert.NotNull(attribute.EditorBrowsable);
-            Assert.Equal(EditorBrowsableState.Never, attribute.EditorBrowsable.State);
-        });
-    }
-
-    /// <summary>
     /// 测试 - Query执行资源接口不应作为普通业务API公开。
     /// </summary>
     [Fact]
@@ -78,77 +49,55 @@ public class TransactionApiContractTest
         Assert.False(metadataBinder.IsPublic);
     }
 
-    #pragma warning disable CS0618
     /// <summary>
-    /// 测试 - 历史外部上下文的资源绑定成员应标记为废弃并隐藏。
+    /// 测试目的：旧连接、事务、外部上下文和数据库工厂契约必须完全移除。
     /// </summary>
     [Fact]
-    public void QueryExternalContext_LegacyResourceBindingMembers_ShouldBeMarkedObsoleteAndHidden()
+    public void LegacyContracts_ShouldNotExist()
     {
         // Arrange
-        var methods = new[]
+        var assembly = typeof(ISqlTransactionScope).Assembly;
+
+        // Act
+        var legacyTypes = new[]
         {
-            typeof(ISqlQueryExternalContext).GetMethod(nameof(ISqlQueryExternalContext.SetOwnedConnection)),
-            typeof(ISqlQueryExternalContext).GetMethod(nameof(ISqlQueryExternalContext.SetExternalTransactionResolver)),
-            typeof(ISqlQueryExternalContext).GetMethod(nameof(ISqlQueryExternalContext.SetConnectionSource))
+            "Bing.Data.Sql.Database.IDbConnectionManager",
+            "Bing.Data.Sql.Database.IDbTransactionManager",
+            "Bing.Data.Sql.ISqlQueryExternalContext",
+            "Bing.Data.IDatabaseFactory"
+        };
+
+        // Assert
+        Assert.All(legacyTypes, typeName => Assert.Null(assembly.GetType(typeName)));
+    }
+
+    /// <summary>
+    /// 测试目的：Query 公共契约不得暴露连接或事务生命周期入口。
+    /// </summary>
+    [Fact]
+    public void QueryContract_ShouldNotExposeConnectionOrTransactionLifecycle()
+    {
+        // Arrange
+        var queryType = typeof(ISqlQuery);
+        var forbiddenMethods = new[]
+        {
+            "GetConnection", "SetConnection", "GetTransaction", "SetTransaction", "BeginTransaction",
+            "CommitTransaction", "RollbackTransaction"
         };
 
         // Act
-        var attributes = methods.Select(method => new
-        {
-            Obsolete = method.GetCustomAttribute<ObsoleteAttribute>(),
-            EditorBrowsable = method.GetCustomAttribute<EditorBrowsableAttribute>()
-        }).ToList();
+        var methods = queryType.GetMethods().Select(method => method.Name).ToList();
 
         // Assert
-        Assert.All(attributes, attribute =>
-        {
-            Assert.NotNull(attribute.Obsolete);
-            Assert.NotNull(attribute.EditorBrowsable);
-            Assert.Equal(EditorBrowsableState.Never, attribute.EditorBrowsable.State);
-        });
+        Assert.DoesNotContain(methods, method => forbiddenMethods.Contains(method));
     }
 
     /// <summary>
-    /// 测试 - 历史外部上下文应作为隐藏的兼容接口保留。
+    /// 测试目的：跨 ORM 的数据库契约仍应提供只读连接访问器。
     /// </summary>
     [Fact]
-    public void QueryExternalContext_ShouldBeMarkedObsoleteAndHidden()
+    public void DatabaseContract_ShouldUseConnectionAccessor()
     {
-        // Arrange
-        var contextType = typeof(ISqlQueryExternalContext);
-
-        // Act
-        var obsolete = contextType.GetCustomAttribute<ObsoleteAttribute>();
-        var editorBrowsable = contextType.GetCustomAttribute<EditorBrowsableAttribute>();
-
-        // Assert
-        Assert.NotNull(obsolete);
-        Assert.NotNull(editorBrowsable);
-        Assert.Equal(EditorBrowsableState.Never, editorBrowsable.State);
-    }
-    #pragma warning restore CS0618
-
-    /// <summary>
-    /// 测试 - 历史数据库接口应继承只读连接访问器并保留兼容标记。
-    /// </summary>
-    [Fact]
-    public void DatabaseCompatibilityContract_ShouldUseConnectionAccessor()
-    {
-        // Arrange
-    #pragma warning disable CS0618
-        var databaseType = typeof(IDatabase);
-        var factoryType = typeof(IDatabaseFactory);
-    #pragma warning restore CS0618
-
-        // Act
-        var factoryObsolete = factoryType.GetCustomAttribute<ObsoleteAttribute>();
-        var factoryEditorBrowsable = factoryType.GetCustomAttribute<EditorBrowsableAttribute>();
-
-        // Assert
-        Assert.True(typeof(IDatabaseConnectionAccessor).IsAssignableFrom(databaseType));
-        Assert.NotNull(factoryObsolete);
-        Assert.NotNull(factoryEditorBrowsable);
-        Assert.Equal(EditorBrowsableState.Never, factoryEditorBrowsable.State);
+        Assert.True(typeof(IDatabaseConnectionAccessor).IsAssignableFrom(typeof(IDatabase)));
     }
 }

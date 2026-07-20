@@ -233,7 +233,7 @@ ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
 
 ### 1. 注册数据库上下文能力
 
-`AddDatabase<TDatabase>()` 现在会一并注册：
+`AddSqlCore()` 会一并注册：
 
 - `IDatabaseContextAccessor`
 - `IDatabaseScopeManager`
@@ -268,7 +268,7 @@ services.ConfigureSqlMetadata(options =>
     };
 });
 
-services.AddDatabase<AppDatabase>();
+services.AddSqlCore();
 services.AddMySqlQuery();
 services.AddMySqlExecutor();
 ```
@@ -363,7 +363,7 @@ await scope.CommitAsync();
 | EF Core Independent | 框架 | 通过 `ISqlDbConnectionFactoryResolver` 创建独立连接，可交给 Scope 管理。 |
 | `PrimaryReadStrategy.Transaction` | Query 内部 | 仅用于内部短事务；流式 API 不支持该策略。 |
 
-旧的 `SetConnection(connection)`、`SetTransaction(transaction)`、`BeginTransaction()`、`CommitTransaction()`、`RollbackTransaction()`、`IDbConnectionManager` 和 `IDbTransactionManager` 已标记为废弃并从 IntelliSense 隐藏。它们只保留一个主版本的兼容转发，禁止在新业务代码中使用。
+`SetConnection(connection)`、`GetConnection()`、`SetTransaction(transaction)`、`GetTransaction()`、`BeginTransaction()`、`CommitTransaction()`、`RollbackTransaction()`、`IDbConnectionManager`、`IDbTransactionManager` 和 `ISqlQueryExternalContext` 已在 7.0.0 删除。业务代码必须通过 `ISqlTransactionScopeFactory` 和 `ISqlTransactionScope` 管理事务；Query 与 Executor 不提供替换连接或绑定事务的公开入口。
 
 外部连接或事务绑定属于框架内部能力。绑定时会校验事务连接、固定 `DatabaseContext`、数据库类型和脱敏物理数据库身份；不一致、不可安全比较或试图覆盖自有事务时会立即拒绝。Query 不会接管外部连接或外部事务的提交、回滚、关闭和释放。
 
@@ -393,7 +393,7 @@ scope.Commit();
 
 Dapper 的默认连接创建路径为 `DatabaseType -> ISqlDbConnectionFactoryResolver -> IDbConnection`。每个 Provider 的 `Add*Provider`、`Add*Query` 和 `Add*Executor` 都注册对应连接工厂，因此仅注册 Executor 的场景同样可以解析独立连接。
 
-`IDatabaseConnectionAccessor` 是跨 ORM 的只读连接访问契约。`Bing.Data.IDatabase` 继续继承该接口以保持 EF Core、FreeSQL 等历史集成的兼容，不与事务 Scope 合并。`IDatabaseFactory` 和各 Provider `XxxDatabaseFactory` 已废弃并隐藏；它们仅作为一个主版本的兼容扩展点保留，Dapper 新路径不再依赖它们。
+`IDatabaseConnectionAccessor` 是跨 ORM 的只读连接访问契约。`Bing.Data.IDatabase` 继续继承该接口以保持 EF Core、FreeSQL 等历史集成的兼容，不与事务 Scope 合并。`IDatabaseFactory` 和各 Provider `XxxDatabaseFactory` 已在 7.0.0 删除；Dapper 不构造或解析 `IDatabase`，仅通过 `ISqlDbConnectionFactoryResolver` 创建自有连接。
 
 ### 7. 显式实体映射
 

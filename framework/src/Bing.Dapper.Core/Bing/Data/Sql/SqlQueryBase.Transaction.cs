@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.ExceptionServices;
+﻿using System.Runtime.ExceptionServices;
 using Bing.Extensions;
 
 namespace Bing.Data.Sql;
@@ -47,19 +46,6 @@ public abstract partial class SqlQueryBase
         _transactionOwnership = SqlResourceOwnership.External;
     }
 
-    #region SetTransaction(设置数据库事务)
-
-    /// <summary>
-    /// 设置数据库事务
-    /// </summary>
-    /// <param name="transaction">数据库事务</param>
-    [Obsolete("事务绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void SetTransaction(IDbTransaction transaction)
-    {
-        ((ISqlExecutionResourceBinder)this).BindExternalTransaction(transaction);
-    }
-
     /// <summary>
     /// 设置数据库事务并指定诊断事务标识。
     /// </summary>
@@ -83,20 +69,6 @@ public abstract partial class SqlQueryBase
         _transaction = transaction;
         _transactionId = transactionId ?? Guid.NewGuid().ToString("N");
         _transactionOwnership = SqlResourceOwnership.External;
-    }
-
-    #endregion
-
-    #region GetTransaction(获取数据库事务)
-
-    /// <summary>
-    /// 获取数据库事务
-    /// </summary>
-    [Obsolete("事务管理已内部化，请使用 ISqlTransactionScope。")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public IDbTransaction GetTransaction()
-    {
-        return GetExecutionTransaction();
     }
 
     /// <summary>
@@ -184,25 +156,6 @@ public abstract partial class SqlQueryBase
         }
     }
 
-    #endregion
-
-    #region BeginTransaction(开始事务)
-
-    /// <summary>
-    /// 开始事务
-    /// </summary>
-    [Obsolete("请使用 ISqlTransactionScopeFactory 创建事务作用域。")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public IDbTransaction BeginTransaction() => BeginOwnedTransaction();
-
-    /// <summary>
-    /// 开始事务
-    /// </summary>
-    /// <param name="isolationLevel">事务隔离级别</param>
-    [Obsolete("请使用 ISqlTransactionScopeFactory 创建事务作用域。")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public IDbTransaction BeginTransaction(IsolationLevel isolationLevel) => BeginOwnedTransaction(isolationLevel);
-
     /// <summary>
     /// 开始 Query 内部拥有的事务。
     /// </summary>
@@ -255,20 +208,6 @@ public abstract partial class SqlQueryBase
         throw new NotSupportedException($"数据源 {dbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
     }
 
-    #endregion
-
-    #region CommitTransaction(提交事务)
-
-    /// <summary>
-    /// 提交事务
-    /// </summary>
-    [Obsolete("请使用 ISqlTransactionScope 提交事务。")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CommitTransaction()
-    {
-        CommitOwnedTransaction();
-    }
-
     /// <summary>
     /// 提交 Query 内部拥有的事务。
     /// </summary>
@@ -300,24 +239,10 @@ public abstract partial class SqlQueryBase
         }
     }
 
-    #endregion
-
-    #region RollbackTransaction(回滚事务)
-
-    /// <summary>
-    /// 回滚事务
-    /// </summary>
-    [Obsolete("请使用 ISqlTransactionScope 回滚事务。")]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void RollbackTransaction()
-    {
-        RollbackOwnedTransaction();
-    }
-
     /// <summary>
     /// 回滚内部拥有的事务
     /// </summary>
-    protected void RollbackOwnedTransaction()
+    private void RollbackOwnedTransaction()
     {
         if (_transaction == null)
             return;
@@ -396,5 +321,4 @@ public abstract partial class SqlQueryBase
     void ISqlExecutionResourceBinder.BindTransactionScope(DatabaseContext context, IDbConnection connection,
         IDbTransaction transaction, SqlTransactionScopeLease lease) => SetTransactionContext(context, connection, transaction, lease);
 
-    #endregion
 }

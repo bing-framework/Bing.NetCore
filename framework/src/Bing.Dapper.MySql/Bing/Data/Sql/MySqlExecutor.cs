@@ -10,9 +10,8 @@ public class MySqlExecutor : MySqlExecutorBase
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>
-    /// <param name="database">数据库</param>
-    public MySqlExecutor(IServiceProvider serviceProvider, SqlOptions<MySqlExecutor> options, IDatabase database = null)
-        : base(serviceProvider, options, database)
+    public MySqlExecutor(IServiceProvider serviceProvider, SqlOptions<MySqlExecutor> options)
+        : base(serviceProvider, options)
     {
     }
 }

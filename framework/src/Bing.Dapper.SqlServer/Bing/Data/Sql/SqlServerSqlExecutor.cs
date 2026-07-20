@@ -10,9 +10,8 @@ public class SqlServerSqlExecutor : SqlServerSqlExecutorBase
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>
-    /// <param name="database">数据库</param>
-    public SqlServerSqlExecutor(IServiceProvider serviceProvider, SqlOptions<SqlServerSqlExecutor> options, IDatabase database)
-        : base(serviceProvider, options, database)
+    public SqlServerSqlExecutor(IServiceProvider serviceProvider, SqlOptions<SqlServerSqlExecutor> options)
+        : base(serviceProvider, options)
     {
     }
 }

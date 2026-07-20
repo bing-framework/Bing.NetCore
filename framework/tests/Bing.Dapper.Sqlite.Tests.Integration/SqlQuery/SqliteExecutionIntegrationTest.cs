@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Data.Sql.Diagnostics;
-using Bing.Data.Sql.Database;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -523,23 +522,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         scope.Dispose();
 
         Assert.Throws<ObjectDisposedException>(() => scope.CreateExecutor());
-    }
-
-    /// <summary>
-    /// 测试 - SQLite查询和执行器工厂应按dbKey解析各自的受管理连接。
-    /// </summary>
-    [Fact]
-    public void Factories_ShouldCreateSeparateConnectionsForResolvedDataSources()
-    {
-        using var firstQuery = _fixture.CreateQuery("first");
-        using var secondExecutor = _fixture.CreateExecutor("second");
-
-        var firstConnection = Assert.IsType<SqliteConnection>(((IDbConnectionManager)firstQuery).GetConnection());
-        var secondConnection = Assert.IsType<SqliteConnection>(((IDbConnectionManager)secondExecutor).GetConnection());
-
-        Assert.Equal(_fixture.FirstConnectionString, firstConnection.ConnectionString);
-        Assert.Equal(_fixture.SecondConnectionString, secondConnection.ConnectionString);
-        Assert.NotSame(firstConnection, secondConnection);
     }
 
     /// <summary>

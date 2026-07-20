@@ -1,5 +1,16 @@
 # Bing 发行说明
 
+## [7.0.0]
+
+### 破坏性变更
+
+* Dapper Query 和 Executor 不再公开连接或事务管理入口；请使用 `ISqlTransactionScopeFactory` 创建并完成 `ISqlTransactionScope`。
+* 已删除 `IDbConnectionManager`、`IDbTransactionManager`、`ISqlQueryExternalContext`、`IDatabaseFactory` 及五个 Provider 的 `XxxDatabaseFactory`。
+* Dapper 自有连接统一由 `ISqlDbConnectionFactoryResolver` 创建，不再通过 `IDatabase` 或 `DefaultDatabase` 回退。
+* `IDatabase` 和 `IDatabaseConnectionAccessor` 继续保留给 EF Core、FreeSQL 等跨 ORM 集成。
+
+迁移步骤见 [SQL 事务 API 迁移说明](migrations/sql-transaction-api-vNext.md)。
+
 ## [6.0.0](https://www.nuget.org/packages/Bing.Core/6.0.0)
 
 ### 🚀 新功能

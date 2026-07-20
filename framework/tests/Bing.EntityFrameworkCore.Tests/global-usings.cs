@@ -2,7 +2,6 @@ global using System;
 global using System.Data;
 global using Bing.Data;
 global using Bing.Data.Sql;
-global using Bing.Data.Sql.Database;
 global using Bing.Datas.EntityFramework.Core;
 global using Microsoft.Data.Sqlite;
 global using Microsoft.EntityFrameworkCore;

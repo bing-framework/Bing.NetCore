@@ -254,7 +254,7 @@ public class SqliteMultiDataSourceExecutionTest
     private static ServiceProvider CreateProvider(string firstPath, string secondPath)
     {
         var services = new ServiceCollection();
-        services.AddDatabase<TestDatabase>();
+        services.AddSqlCore();
         services.AddSqlDataSource("first", DatabaseType.Sqlite, $"Data Source={firstPath};Pooling=False");
         services.AddSqlDataSource("second", DatabaseType.Sqlite, $"Data Source={secondPath};Pooling=False");
         services.AddSqliteSqlQuery();

@@ -6,8 +6,8 @@
 public class SqliteSqlQuery : SqliteSqlQueryBase
 {
     /// <inheritdoc />
-    public SqliteSqlQuery(IServiceProvider serviceProvider, SqlOptions<SqliteSqlQuery> options, IDatabase database = null)
-        : base(serviceProvider, options, database)
+    public SqliteSqlQuery(IServiceProvider serviceProvider, SqlOptions<SqliteSqlQuery> options)
+        : base(serviceProvider, options)
     {
     }
 }

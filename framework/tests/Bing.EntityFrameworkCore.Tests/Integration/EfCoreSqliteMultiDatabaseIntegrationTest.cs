@@ -64,7 +64,6 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
             .ExecuteScalar<string>();
 
         // Assert
-        Assert.Same(connection, query.GetConnection());
         Assert.Equal("first-row", name);
     }
 
@@ -114,8 +113,6 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
                 .ExecuteScalar<string>();
 
         // Assert
-        Assert.Same(connection, query.GetConnection());
-        Assert.Same(transaction.GetDbTransaction(), ((IDbTransactionManager)query).GetTransaction());
         Assert.Equal("first-row", name);
     }
 
@@ -136,7 +133,7 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         }
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddDatabase<Bing.Data.IDatabase, FileTestDatabase>();
+        services.AddSqlCore();
         services.AddSqlDataSource("shared", DatabaseType.Sqlite, connectionString);
         services.AddSqliteProvider();
         services.AddEfCoreSqlQueryFactory();
@@ -151,7 +148,6 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
             .ExecuteScalar<string>();
 
         // Assert
-        Assert.Same(connection, query.GetConnection());
         Assert.Equal("shared-memory", name);
     }
 
@@ -168,7 +164,7 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         await connection.OpenAsync();
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddDatabase<Bing.Data.IDatabase, FileTestDatabase>();
+        services.AddSqlCore();
         services.AddSqlDataSource("target", DatabaseType.Sqlite, targetConnectionString);
         services.AddSqliteProvider();
         services.AddEfCoreSqlQueryFactory();
@@ -198,7 +194,7 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         var services = new ServiceCollection();
         services.AddLogging();
         services.ConfigureSqlMetadata(options => options.DataSources.DefaultDataSourceKey = "first");
-        services.AddDatabase<Bing.Data.IDatabase, FileTestDatabase>();
+        services.AddSqlCore();
         services.AddSqlDataSource("first", DatabaseType.Sqlite, _firstConnectionString);
         services.AddSqlDataSource("second", DatabaseType.Sqlite, _secondConnectionString);
         services.AddSqliteProvider();

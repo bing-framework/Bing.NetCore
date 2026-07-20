@@ -21,7 +21,7 @@ public class PostgreSqlTypeConverterResolverTest
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddDatabase<TestDatabase>();
+        services.AddSqlCore();
         services.AddPostgreSqlQuery("Host=localhost;Database=test;");
         using var provider = services.BuildServiceProvider();
 

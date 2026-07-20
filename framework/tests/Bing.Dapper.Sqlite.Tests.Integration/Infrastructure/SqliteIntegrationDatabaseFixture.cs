@@ -51,7 +51,7 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
         TestDatabase.DefaultConnectionString = FirstConnectionString;
 
         var services = new ServiceCollection();
-        services.AddDatabase<TestDatabase>();
+        services.AddSqlCore();
         services.AddSqlDataSource("default", DatabaseType.Sqlite, FirstConnectionString);
         services.AddSqlDataSource(FirstDatabaseKey, DatabaseType.Sqlite, FirstConnectionString,
             setupAction: descriptor => descriptor.MappingProfile = "first-profile");

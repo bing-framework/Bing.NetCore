@@ -12,8 +12,8 @@ namespace Bing.Data.Sql;
 public abstract class MySqlQueryBase : SqlQueryBase
 {
     /// <inheritdoc />
-    protected MySqlQueryBase(IServiceProvider serviceProvider, SqlOptions options, IDatabase database)
-        : base(serviceProvider, options, database)
+    protected MySqlQueryBase(IServiceProvider serviceProvider, SqlOptions options)
+        : base(serviceProvider, options)
     {
     }
 
@@ -28,9 +28,4 @@ public abstract class MySqlQueryBase : SqlQueryBase
         ServiceProvider.GetService<SqlMetadataOptions>(),
         Options,
         ServiceProvider.GetService<ISqlDatabaseContextResolver>());
-
-    /// <inheritdoc />
-    [System.Obsolete("Dapper 连接创建已迁移至 ISqlDbConnectionFactoryResolver。")]
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    protected override IDatabaseFactory CreateDatabaseFactory() => new MySqlDatabaseFactory();
 }

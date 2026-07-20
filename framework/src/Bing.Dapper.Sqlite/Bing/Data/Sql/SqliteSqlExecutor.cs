@@ -10,9 +10,8 @@ public class SqliteSqlExecutor : SqliteSqlExecutorBase
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>
-    /// <param name="database">数据库</param>
-    public SqliteSqlExecutor(IServiceProvider serviceProvider, SqlOptions<SqliteSqlExecutor> options, IDatabase database)
-        : base(serviceProvider, options, database)
+    public SqliteSqlExecutor(IServiceProvider serviceProvider, SqlOptions<SqliteSqlExecutor> options)
+        : base(serviceProvider, options)
     {
     }
 }
