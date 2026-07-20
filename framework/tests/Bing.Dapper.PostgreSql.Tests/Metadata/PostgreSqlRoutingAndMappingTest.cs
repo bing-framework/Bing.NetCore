@@ -44,6 +44,31 @@ public class PostgreSqlRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 测试目的：PostgreSql 类型化 From 应将物理架构与表名分段引用。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenPhysicalSchemaConfigured_ShouldRenderSchemaAndTable()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+        metadataOptions.EntityMappings[0].PhysicalSchema = "reports";
+        var builder = new PostgreSqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+            metadataOptions: metadataOptions, options: CreateSqlOptions());
+
+        // Act
+        builder.From<RoutingSample>();
+
+        // Assert
+        Assert.Contains("\"reports\".\"users_reporting\"", builder.ToSql());
+    }
+
+    private static SqlOptions CreateSqlOptions() => new SqlOptions().SetDatabaseContext(new DatabaseContext
+    {
+        DbKey = "reporting",
+        DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = DatabaseType.PgSql }
+    });
+
+    /// <summary>
     /// 创建 Sql 元数据配置
     /// </summary>
     /// <returns>Sql 元数据配置</returns>

@@ -23,8 +23,9 @@ public class MySqlFromClause : FromClause
         IEntityResolver resolver,
         IEntityAliasRegister register,
         ITableDatabase tableDatabase, 
-        SqlItem table = null) 
-        : base(builder, dialect, resolver, register, tableDatabase, table)
+        SqlItem table = null,
+        ISqlObjectNameFormatter objectNameFormatter = null)
+        : base(builder, dialect, resolver, register, tableDatabase, table, objectNameFormatter)
     {
     }
 
@@ -45,6 +46,6 @@ public class MySqlFromClause : FromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new MySqlFromClause(builder, Dialect, Resolver, register, TableDatabase, Table);
+        return new MySqlFromClause(builder, Dialect, Resolver, register, TableDatabase, Table, ObjectNameFormatter);
     }
 }

@@ -42,6 +42,11 @@ public class FromClause : IFromClause
     protected ITableDatabase TableDatabase;
 
     /// <summary>
+    /// SQL 对象名称格式化器。
+    /// </summary>
+    protected readonly ISqlObjectNameFormatter ObjectNameFormatter;
+
+    /// <summary>
     /// 初始化一个<see cref="FromClause"/>类型的实例
     /// </summary>
     /// <param name="builder">Sql生成器</param>
@@ -50,12 +55,14 @@ public class FromClause : IFromClause
     /// <param name="register">实体别名注册器</param>
     /// <param name="tableDatabase">表数据库</param>
     /// <param name="table">表</param>
+    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
     public FromClause(ISqlBuilder builder
         , IDialect dialect
         , IEntityResolver resolver
         , IEntityAliasRegister register
         , ITableDatabase tableDatabase
-        , SqlItem table = null)
+        , SqlItem table = null
+        , ISqlObjectNameFormatter objectNameFormatter = null)
     {
         Builder = builder;
         Dialect = dialect;
@@ -63,6 +70,7 @@ public class FromClause : IFromClause
         Register = register;
         TableDatabase = tableDatabase;
         Table = table;
+        ObjectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
     }
 
     /// <summary>
@@ -74,7 +82,7 @@ public class FromClause : IFromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new FromClause(builder, Dialect, Resolver, register, TableDatabase, Table);
+        return new FromClause(builder, Dialect, Resolver, register, TableDatabase, Table, ObjectNameFormatter);
     }
 
     /// <summary>
@@ -102,11 +110,28 @@ public class FromClause : IFromClause
     public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
         var type = typeof(TEntity);
-        var table = Resolver.GetTableAndSchema(type);
-        Table = CreateSqlItem(table, schema, alias);
+        var reference = Resolver.GetTableReference(type).WithAlias(alias);
+        if (string.IsNullOrWhiteSpace(schema) == false)
+            reference = reference.WithPhysicalSchema(schema);
+        Table = CreateStructuredSqlItem(reference);
         Register.Register(type, Resolver.GetAlias(type, alias));
         Register.FromType = type;
     }
+
+    /// <summary>
+    /// 创建结构化表引用 Sql 项
+    /// </summary>
+    /// <param name="reference">结构化表引用</param>
+    protected virtual SqlItem CreateStructuredSqlItem(SqlTableReference reference)
+    {
+        return new StructuredSqlItem(reference, ObjectNameFormatter);
+    }
+
+    /// <summary>
+    /// 获取当前类型化 From 使用的结构化表引用。
+    /// </summary>
+    /// <returns>结构化表引用；原始字符串 From 返回 <see langword="null"/>。</returns>
+    internal SqlTableReference GetStructuredReference() => (Table as StructuredSqlItem)?.Reference;
 
     /// <summary>
     /// 设置子查询表

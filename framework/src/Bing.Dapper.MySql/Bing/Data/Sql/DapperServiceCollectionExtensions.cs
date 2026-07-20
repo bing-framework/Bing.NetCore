@@ -30,9 +30,13 @@ public static class MySqlServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(DatabaseType.Doris, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
+        services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
         services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.MySql);
         services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.Doris);
+        services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.Doris);
         services.TryAddTransient<ISqlQuery, MySqlQuery>();
         services.TryAddTransient<ISqlExecutor, MySqlExecutor>();
         services.TryAddSingleton(queryOptions);

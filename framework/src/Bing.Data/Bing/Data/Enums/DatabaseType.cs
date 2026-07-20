@@ -28,5 +28,10 @@ public enum DatabaseType
     /// <summary>
     /// Sqlite数据库
     /// </summary>
-    Sqlite
+    Sqlite,
+
+    /// <summary>
+    /// Doris数据库
+    /// </summary>
+    Doris
 }

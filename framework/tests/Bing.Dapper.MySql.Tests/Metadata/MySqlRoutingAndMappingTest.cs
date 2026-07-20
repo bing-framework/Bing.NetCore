@@ -44,6 +44,35 @@ public class MySqlRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 测试目的：旧 Schema 应作为 MySql 逻辑表名前缀，而不是点号分隔的物理架构。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenLegacySchemaConfigured_ShouldRenderLogicalPrefix()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+#pragma warning disable CS0618
+        metadataOptions.EntityMappings[0].Schema = "order";
+#pragma warning restore CS0618
+        metadataOptions.EntityMappings[0].TableName = "orderinfo";
+        var builder = new MySqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+            metadataOptions: metadataOptions, options: CreateSqlOptions(DatabaseType.MySql));
+
+        // Act
+        builder.From<RoutingSample>();
+
+        // Assert
+        Assert.Contains("`order_orderinfo`", builder.ToSql());
+    }
+
+    private static SqlOptions CreateSqlOptions(DatabaseType databaseType) => new SqlOptions().SetDatabaseContext(
+        new DatabaseContext
+        {
+            DbKey = "reporting",
+            DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = databaseType }
+        });
+
+    /// <summary>
     /// 创建 Sql 元数据配置
     /// </summary>
     /// <returns>Sql 元数据配置</returns>

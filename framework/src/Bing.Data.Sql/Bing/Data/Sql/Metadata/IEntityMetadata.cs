@@ -3,9 +3,13 @@
 namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
-/// 实体元数据
+/// 实体元数据。
 /// </summary>
+/// <remarks>
+/// 此接口已过时，请改用 <see cref="IEntityModelMetadataProvider"/> 提供 ORM 原始映射信息。
+/// </remarks>
 [IgnoreAspect]
+[Obsolete("请使用 IEntityModelMetadataProvider 提供实体模型原始元数据。")]
 public interface IEntityMetadata
 {
     /// <summary>

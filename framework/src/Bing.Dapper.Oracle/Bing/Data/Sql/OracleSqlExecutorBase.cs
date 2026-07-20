@@ -32,5 +32,8 @@ public abstract class OracleSqlExecutorBase : SqlExecutorBase
         ServiceProvider.GetService<ISqlParameterFactory>(),
         ServiceProvider.GetService<SqlMetadataOptions>(),
         Options,
-        ServiceProvider.GetService<ISqlDatabaseContextResolver>());
+        ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
+        ServiceProvider.GetService<ISqlTableReferenceResolver>(),
+        ServiceProvider.GetService<ISqlObjectNameFormatter>(),
+        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>());
 }

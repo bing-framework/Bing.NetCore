@@ -18,6 +18,11 @@ public sealed class ColumnMappingMetadata
     public string ColumnName { get; set; }
 
     /// <summary>
+    /// 结构化列标识符
+    /// </summary>
+    public ColumnIdentifier Column { get; set; }
+
+    /// <summary>
     /// CLR 类型
     /// </summary>
     public Type ClrType { get; set; }

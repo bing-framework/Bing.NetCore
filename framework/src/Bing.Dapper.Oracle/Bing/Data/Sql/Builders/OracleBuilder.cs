@@ -24,13 +24,20 @@ public class OracleBuilder : SqlBuilderBase
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <param name="options">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    /// <param name="tableReferenceResolver">SQL 表引用解析器</param>
+    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
+    /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
     public OracleBuilder(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
         IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null) 
+        ISqlDatabaseContextResolver databaseContextResolver = null,
+        ISqlTableReferenceResolver tableReferenceResolver = null,
+        ISqlObjectNameFormatter objectNameFormatter = null,
+        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null)
         : base(metadata, tableDatabase, parameterManager, entityMappingResolver, databaseContextAccessor,
-            sqlParameterFactory, metadataOptions, options, databaseContextResolver)
+            sqlParameterFactory, metadataOptions, options, databaseContextResolver, tableReferenceResolver,
+            objectNameFormatter, crossDatabaseQueryValidator)
     {
     }
 
@@ -48,16 +55,17 @@ public class OracleBuilder : SqlBuilderBase
     /// <inheritdoc />
     public override ISqlBuilder New() => new OracleBuilder(EntityMetadata, TableDatabase, ParameterManager,
         EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options,
-        DatabaseContextResolver);
+        DatabaseContextResolver, TableReferenceResolver, ObjectNameFormatter, CrossDatabaseQueryValidator);
 
     /// <inheritdoc />
     protected override string CreateLimitSql() => $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
 
     /// <inheritdoc />
-    protected override IFromClause CreateFromClause() => new OracleFromClause(this, GetDialect(), EntityResolver, AliasRegister, TableDatabase);
+    protected override IFromClause CreateFromClause() => new OracleFromClause(this, GetDialect(), EntityResolver,
+        AliasRegister, TableDatabase, null, ObjectNameFormatter);
 
     /// <inheritdoc />
     protected override IJoinClause CreateJoinClause() => new OracleJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
         TableDatabase, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options,
-        DatabaseContextResolver);
+        DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator);
 }

@@ -1,10 +1,33 @@
-﻿namespace Bing.Data.Sql.Builders.Extensions;
+﻿using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Builders.Core;
+
+namespace Bing.Data.Sql.Builders.Extensions;
 
 /// <summary>
 /// 实体解析器扩展
 /// </summary>
 public static class EntityResolverExtensions
 {
+    /// <summary>
+    /// 获取结构化表引用
+    /// </summary>
+    /// <param name="resolver">实体解析器</param>
+    /// <param name="entity">实体类型</param>
+    public static SqlTableReference GetTableReference(this IEntityResolver resolver, Type entity)
+    {
+        if (resolver == null)
+            throw new ArgumentNullException(nameof(resolver));
+        if (resolver is EntityResolver entityResolver)
+            return entityResolver.GetTableReference(entity);
+        var table = resolver.GetTable(entity);
+        return new SqlTableReference
+        {
+            TableName = table,
+            ResolvedTableName = table,
+            PhysicalSchema = resolver.GetSchema(entity)
+        };
+    }
+
     /// <summary>
     /// 获取表，带架构
     /// </summary>

@@ -64,6 +64,14 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 - 低：`BeginAsync` 在 `netstandard2.0` 仍以同步方式开启底层事务；不影响事务数据源固定，但不提供真实异步打开语义。
 - 非阻断：仓库保留 `net6.0` 生命周期、历史 NuGet 漏洞及 SQLite RID 相关警告，均不由本阶段引入。
 
+## 结构化表引用收敛
+
+- 已完成：实体映射缓存以实体、DbKey、Mapping Profile、Catalog、物理/逻辑架构、命名模式、兼容模式、链接和附加别名隔离，避免不同数据源复用错误表名。
+- 已完成：类型化 `From` / `Join` 在最终 SQL 渲染阶段按 Provider 格式化并复核跨库约束；旧字符串 API 继续保持原始片段语义。
+- 已完成：同一 DbKey 的跨 Catalog 查询由 Provider 能力决定；不同 DbKey 在 Join 阶段明确拒绝，不改变既有连接和事务生命周期。
+- 已完成：MySQL/Doris、SQL Server、PostgreSQL、Oracle 和 SQLite 的对象名称限定规则集中在能力模型中，未知已声明 Provider 失败关闭。
+- 待真实环境验证：外部 MySQL、PostgreSQL、SQL Server 与 Oracle 的跨 Catalog/Link 行为继续受集成测试门控保护；SQLite ATTACH 使用临时文件数据库验证。
+
 ## 2026-07-17 验收补充
 
 - `Bing.Dapper.Sqlite.Tests.Integration` 使用临时 SQLite 文件执行真实 SQL；无需环境变量，`net6.0` 与 `net8.0` 共 66 项通过。

@@ -42,7 +42,18 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
+        services.TryAddSingleton<IDatabaseDialectAdapter, DefaultDatabaseDialectAdapter>();
+        services.TryAddSingleton<ITableNamingStrategy, DefaultTableNamingStrategy>();
+        services.TryAddSingleton<IEntityModelMetadataProvider>(provider =>
+        {
+            var metadata = provider.GetService<IEntityMetadata>();
+            return metadata as IEntityModelMetadataProvider ?? new EntityModelMetadataProviderAdapter(metadata);
+        });
+        services.TryAddSingleton<ISqlObjectNameFormatter, DefaultSqlObjectNameFormatter>();
+        services.TryAddSingleton<ISqlObjectNameCapabilityProvider, DefaultSqlObjectNameCapabilityProvider>();
+        services.TryAddSingleton<ISqlCrossDatabaseQueryValidator, DefaultSqlCrossDatabaseQueryValidator>();
         services.TryAddSingleton<IEntityMappingResolver, DefaultEntityMappingResolver>();
+        services.TryAddSingleton<ISqlTableReferenceResolver, DefaultSqlTableReferenceResolver>();
         services.TryAddSingleton<IFieldValueConverter, DefaultFieldValueConverter>();
         services.TryAddSingleton<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
         services.TryAddSingleton<ISqlParameterFactory, DefaultSqlParameterFactory>();
@@ -103,6 +114,8 @@ public static class DapperCoreServiceCollectionExtensions
             }
             descriptor.Key = dataSourceKey;
             descriptor.DatabaseType = databaseType;
+            if (databaseType == DatabaseType.Doris)
+                descriptor.SupportsTransactions = CrossDatabaseSyntax.Doris.SupportsTransactions;
             if (string.IsNullOrWhiteSpace(connectionString) == false)
                 descriptor.ConnectionString = connectionString;
             if (string.IsNullOrWhiteSpace(connectionStringName) == false)

@@ -11,7 +11,8 @@ namespace Bing.Data.Sql;
 public sealed class MySqlDbParameterCustomizer : ISqlDbParameterCustomizer
 {
     /// <inheritdoc />
-    public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.MySql;
+    public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.MySql ||
+                                                       databaseType == DatabaseType.Doris;
 
     /// <inheritdoc />
     public void Configure(IDbDataParameter dbParameter, SqlParam sqlParameter)

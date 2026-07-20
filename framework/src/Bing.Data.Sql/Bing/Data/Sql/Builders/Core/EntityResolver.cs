@@ -20,6 +20,11 @@ public class EntityResolver : IEntityResolver
     private readonly IEntityMetadata _matedata;
 
     /// <summary>
+    /// 实体模型元数据提供器。
+    /// </summary>
+    private readonly IEntityModelMetadataProvider _entityModelMetadataProvider;
+
+    /// <summary>
     /// 实体映射解析器
     /// </summary>
     private readonly IEntityMappingResolver _entityMappingResolver;
@@ -53,11 +58,14 @@ public class EntityResolver : IEntityResolver
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="sqlOptions">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
     public EntityResolver(IEntityMetadata matedata = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, SqlMetadataOptions options = null,
-        SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null)
+        SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null,
+        IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
         _matedata = matedata;
+        _entityModelMetadataProvider = entityModelMetadataProvider ?? new EntityModelMetadataProviderAdapter(matedata);
         _entityMappingResolver = entityMappingResolver;
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
@@ -77,8 +85,25 @@ public class EntityResolver : IEntityResolver
             return mapping.TableName;
         if (_matedata == null)
             return entity.Name;
-        var result = _matedata.GetTable(entity);
+        var result = _entityModelMetadataProvider.GetTableName(entity);
         return string.IsNullOrWhiteSpace(result) ? entity.Name : result;
+    }
+
+    /// <summary>
+    /// 获取结构化表引用
+    /// </summary>
+    /// <param name="entity">实体类型</param>
+    public SqlTableReference GetTableReference(Type entity)
+    {
+        var mapping = GetMapping(entity);
+        if (mapping?.TableReference != null)
+            return mapping.TableReference;
+        return new SqlTableReference
+        {
+            TableName = GetTable(entity),
+            ResolvedTableName = GetTable(entity),
+            PhysicalSchema = GetSchema(entity)
+        };
     }
 
     /// <summary>
@@ -90,7 +115,7 @@ public class EntityResolver : IEntityResolver
         var mapping = GetMapping(entity);
         if (string.IsNullOrWhiteSpace(mapping?.Schema) == false)
             return mapping.Schema;
-        return _matedata?.GetSchema(entity);
+        return _entityModelMetadataProvider.GetPhysicalSchema(entity);
     }
 
     /// <summary>

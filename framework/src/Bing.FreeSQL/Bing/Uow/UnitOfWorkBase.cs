@@ -17,7 +17,7 @@ namespace Bing.Uow;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityMetadata
+public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityMetadata, IEntityModelMetadataProvider
 {
     #region 字段
 
@@ -247,7 +247,9 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
             return null;
         try
         {
-            return Orm.CodeFirst.GetTableByEntity(entity)?.DbName;
+            var dbName = Orm.CodeFirst.GetTableByEntity(entity)?.DbName;
+            var names = (Orm.Select<object>() as Select0Provider)._commonUtils.SplitTableName(dbName);
+            return names.Length == 2 ? names[1] : dbName;
         }
         catch
         {
@@ -295,6 +297,18 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
             return property;
         }
     }
+
+    /// <inheritdoc />
+    public string GetTableName(Type entityType) => GetTable(entityType);
+
+    /// <inheritdoc />
+    public string GetPhysicalSchema(Type entityType) => GetSchema(entityType);
+
+    /// <inheritdoc />
+    public string GetLogicalSchema(Type entityType) => null;
+
+    /// <inheritdoc />
+    public string GetColumnName(Type entityType, string propertyName) => GetColumn(entityType, propertyName);
 
     #endregion
 

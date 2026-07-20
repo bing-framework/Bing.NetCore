@@ -15,8 +15,9 @@ public class OracleFromClause : FromClause
         IEntityResolver resolver,
         IEntityAliasRegister register,
         ITableDatabase tableDatabase,
-        SqlItem table = null)
-        : base(builder, dialect, resolver, register, tableDatabase, table)
+        SqlItem table = null,
+        ISqlObjectNameFormatter objectNameFormatter = null)
+        : base(builder, dialect, resolver, register, tableDatabase, table, objectNameFormatter)
     {
     }
 
@@ -25,6 +26,6 @@ public class OracleFromClause : FromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new OracleFromClause(builder, Dialect, Resolver, register, TableDatabase, Table);
+        return new OracleFromClause(builder, Dialect, Resolver, register, TableDatabase, Table, ObjectNameFormatter);
     }
 }

@@ -25,9 +25,12 @@ public class OracleJoinClause : JoinClause
         ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions metadataOptions = null,
         SqlOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null)
+        ISqlDatabaseContextResolver databaseContextResolver = null,
+        ISqlObjectNameFormatter objectNameFormatter = null,
+        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null)
         : base(sqlBuilder, dialect, resolver, register, parameterManager, tableDatabase, null, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver)
+            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver,
+            objectNameFormatter, crossDatabaseQueryValidator)
     {
     }
 

@@ -3,6 +3,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Metadata;
 using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Dapper.Oracle;
@@ -76,6 +77,30 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
+    /// 测试目的：SQL Server Provider 应将 Catalog、架构和表名逐段格式化。
+    /// </summary>
+    [Fact]
+    public void Formatter_WhenSqlServerReferenceContainsCatalogAndSchema_ShouldFormatThreeParts()
+    {
+        // Arrange
+        using var provider = CreateProvider();
+        var formatter = provider.GetRequiredService<ISqlObjectNameFormatter>();
+        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlserver");
+        var reference = new SqlTableReference
+        {
+            Catalog = "reporting",
+            PhysicalSchema = "dbo",
+            ResolvedTableName = "users"
+        };
+
+        // Act
+        var result = formatter.Format(reference, ((ISqlPartAccessor)query).Dialect, DatabaseType.SqlServer);
+
+        // Assert
+        Assert.Equal("[reporting].[dbo].[users]", result);
+    }
+
+    /// <summary>
     /// 测试 - 仅注册各 Provider 执行器时，连接工厂解析器仍应创建对应连接。
     /// </summary>
     [Fact]
@@ -125,11 +150,10 @@ public class MultiProviderRegistrationTest
         services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=:memory:");
         services.AddSqlDataSource("oracle", DatabaseType.Oracle,
             "User Id=bing;Password=secret;Data Source=oracle-test");
-        services.AddSqlDataSource("doris", DatabaseType.MySql, "Server=doris;Database=analytics;",
+        services.AddSqlDataSource("doris", DatabaseType.Doris, "Server=doris;Database=analytics;",
             setupAction: source =>
             {
                 source.MappingProfile = "doris";
-                source.SupportsTransactions = false;
             });
         return services.BuildServiceProvider();
     }

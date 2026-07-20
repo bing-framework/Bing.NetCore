@@ -30,6 +30,8 @@ public abstract class DialectBase : IDialect
             return string.Empty;
         if (name == "*")
             return name;
+        if (name.IndexOfAny(new[] { '\r', '\n', ';' }) >= 0)
+            throw new ArgumentException("标识符包含无效字符。", nameof(name));
         return GetSafeName(FilterName(name));
     }
 
@@ -43,7 +45,8 @@ public abstract class DialectBase : IDialect
     /// 获取安全名称
     /// </summary>
     /// <param name="name">名称</param>
-    protected virtual string GetSafeName(string name) => $"{OpeningIdentifier}{name}{ClosingIdentifier}";
+    protected virtual string GetSafeName(string name) =>
+        $"{OpeningIdentifier}{name.Replace(ClosingIdentifier.ToString(), new string(ClosingIdentifier, 2))}{ClosingIdentifier}";
 
     /// <summary>
     /// 获取参数前缀

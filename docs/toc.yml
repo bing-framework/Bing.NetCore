@@ -8,5 +8,7 @@
   href: integration-testing.md
 - name: SQL事务集成测试
   href: testing/database-integration-tests.md
+- name: 结构化表引用与跨数据库查询
+  href: sql-table-reference-and-cross-database-query.md
 - name: Github
   href: https://github.com/bing-framework/Bing.NetCore

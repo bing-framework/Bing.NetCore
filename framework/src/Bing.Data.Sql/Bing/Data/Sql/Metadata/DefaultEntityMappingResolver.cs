@@ -26,9 +26,9 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     private readonly ConcurrentDictionary<EntityMappingCacheKey, EntityMappingMetadata> _mappingCache = new();
 
     /// <summary>
-    /// 实体元数据解析器
+    /// 实体模型元数据提供器
     /// </summary>
-    private readonly IEntityMetadata _entityMetadata;
+    private readonly IEntityModelMetadataProvider _entityModelMetadataProvider;
 
     /// <summary>
     /// 数据库上下文访问器
@@ -46,21 +46,40 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     private readonly ITypeConverterResolver _typeConverterResolver;
 
     /// <summary>
+    /// 数据库方言适配器
+    /// </summary>
+    private readonly IDatabaseDialectAdapter _dialectAdapter;
+
+    /// <summary>
+    /// 表命名策略
+    /// </summary>
+    private readonly ITableNamingStrategy _tableNamingStrategy;
+
+    /// <summary>
     /// 初始化一个<see cref="DefaultEntityMappingResolver"/>类型的实例
     /// </summary>
     /// <param name="entityMetadata">实体元数据解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="typeConverterResolver">数据类型转换器解析器</param>
+    /// <param name="dialectAdapter">数据库方言适配器</param>
+    /// <param name="tableNamingStrategy">表命名策略</param>
+    /// <param name="entityModelMetadataProvider">实体模型元数据提供器</param>
     public DefaultEntityMappingResolver(IEntityMetadata entityMetadata = null,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions options = null,
-        ITypeConverterResolver typeConverterResolver = null)
+        ITypeConverterResolver typeConverterResolver = null,
+        IDatabaseDialectAdapter dialectAdapter = null,
+        ITableNamingStrategy tableNamingStrategy = null,
+        IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
-        _entityMetadata = entityMetadata ?? new DefaultEntityMetadata();
+        _entityModelMetadataProvider = entityModelMetadataProvider ??
+                                       new EntityModelMetadataProviderAdapter(entityMetadata);
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
         _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
+        _dialectAdapter = dialectAdapter ?? new DefaultDatabaseDialectAdapter();
+        _tableNamingStrategy = tableNamingStrategy ?? new DefaultTableNamingStrategy();
     }
 
     /// <summary>
@@ -87,14 +106,24 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             throw new ArgumentNullException(nameof(entityType));
         var context = GetDatabaseContext(databaseContext);
         var mappingOptions = ResolveEntityMappingOptions(entityType, context);
-        var schema = GetSchema(entityType, mappingOptions);
+        var schema = GetSchema(entityType, mappingOptions, context);
+        var physicalSchema = GetPhysicalSchema(entityType, mappingOptions, context);
+        var logicalSchema = GetLogicalSchema(entityType, mappingOptions, context);
         var tableName = GetTableName(entityType, mappingOptions);
         var cacheKey = new EntityMappingCacheKey(
             entityType,
             context.DbKey,
             GetMappingProfile(context, mappingOptions),
             schema,
-            GetTableRouteKey(context, mappingOptions));
+            GetTableRouteKey(context, mappingOptions),
+            GetDatabaseType(context),
+            mappingOptions?.Catalog ?? string.Empty,
+            physicalSchema,
+            logicalSchema,
+            mappingOptions?.NamingMode ?? LogicalTableNamingMode.Prefix,
+            mappingOptions?.SchemaCompatibilityMode ?? SchemaCompatibilityMode.Auto,
+            mappingOptions?.DatabaseLink ?? string.Empty,
+            mappingOptions?.AttachedAlias ?? string.Empty);
         return _mappingCache.GetOrAdd(cacheKey,
             _ => CreateMapping(entityType, context, schema, tableName, mappingOptions));
     }
@@ -144,11 +173,41 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="mappingOptions">实体映射配置</param>
+    /// <param name="databaseContext">数据库上下文</param>
     /// <returns>架构</returns>
-    protected virtual string GetSchema(Type entityType, EntityMappingOptions mappingOptions) =>
-        string.IsNullOrWhiteSpace(mappingOptions?.Schema)
-            ? _entityMetadata.GetSchema(entityType) ?? string.Empty
-            : mappingOptions.Schema;
+    protected virtual string GetSchema(Type entityType, EntityMappingOptions mappingOptions,
+        DatabaseContext databaseContext = null) => GetPhysicalSchema(entityType, mappingOptions, databaseContext);
+
+    /// <summary>
+    /// 获取物理架构
+    /// </summary>
+    protected virtual string GetPhysicalSchema(Type entityType, EntityMappingOptions mappingOptions,
+        DatabaseContext databaseContext = null)
+    {
+        if (string.IsNullOrWhiteSpace(mappingOptions?.PhysicalSchema) == false)
+            return mappingOptions.PhysicalSchema;
+#pragma warning disable CS0618
+        if (IsLegacySchemaPhysical(mappingOptions, GetDatabaseType(databaseContext)) &&
+            string.IsNullOrWhiteSpace(mappingOptions.Schema) == false)
+            return mappingOptions.Schema;
+#pragma warning restore CS0618
+        return _entityModelMetadataProvider.GetPhysicalSchema(entityType) ?? string.Empty;
+    }
+
+    /// <summary>
+    /// 获取逻辑架构
+    /// </summary>
+    protected virtual string GetLogicalSchema(Type entityType, EntityMappingOptions mappingOptions,
+        DatabaseContext databaseContext = null)
+    {
+        if (string.IsNullOrWhiteSpace(mappingOptions?.LogicalSchema) == false)
+            return mappingOptions.LogicalSchema;
+#pragma warning disable CS0618
+        if (IsLegacySchemaLogical(mappingOptions, GetDatabaseType(databaseContext)))
+            return mappingOptions.Schema ?? string.Empty;
+        return _entityModelMetadataProvider.GetLogicalSchema(entityType) ?? string.Empty;
+#pragma warning restore CS0618
+    }
 
     /// <summary>
     /// 获取表名
@@ -158,7 +217,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <returns>表名</returns>
     protected virtual string GetTableName(Type entityType, EntityMappingOptions mappingOptions) =>
         string.IsNullOrWhiteSpace(mappingOptions?.TableName)
-            ? _entityMetadata.GetTable(entityType) ?? entityType.Name
+            ? _entityModelMetadataProvider.GetTableName(entityType) ?? entityType.Name
             : mappingOptions.TableName;
 
     /// <summary>
@@ -239,17 +298,76 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             t => t.Name,
             t => CreateColumnMetadata(entityType, t, GetColumnMappingOptions(mappingOptions, t), databaseContext),
             StringComparer.OrdinalIgnoreCase);
-        return new EntityMappingMetadata
+        var databaseType = GetDatabaseType(databaseContext);
+        var physicalSchema = GetPhysicalSchema(entityType, mappingOptions, databaseContext);
+        var logicalSchema = GetLogicalSchema(entityType, mappingOptions, databaseContext);
+        var resolvedTableName = _tableNamingStrategy.Resolve(tableName, logicalSchema,
+            mappingOptions?.NamingMode ?? LogicalTableNamingMode.Prefix);
+        if (mappingOptions?.NamingMode == LogicalTableNamingMode.PhysicalSchema &&
+            string.IsNullOrWhiteSpace(logicalSchema) == false && string.IsNullOrWhiteSpace(physicalSchema))
+            physicalSchema = logicalSchema;
+        var table = new TableIdentifier(physicalSchema, resolvedTableName);
+        var tableReference = new SqlTableReference
         {
             EntityType = entityType,
             DbKey = databaseContext.DbKey,
-            MappingProfile = GetMappingProfile(databaseContext, mappingOptions),
-            Schema = schema,
+            DatabaseType = databaseType,
+            Catalog = mappingOptions?.Catalog,
+            PhysicalSchema = physicalSchema,
+            LogicalSchema = logicalSchema,
             TableName = tableName,
-            FullTableName = string.IsNullOrWhiteSpace(schema) ? tableName : $"{schema}.{tableName}",
+            ResolvedTableName = resolvedTableName,
+            DatabaseLink = mappingOptions?.DatabaseLink,
+            AttachedAlias = mappingOptions?.AttachedAlias
+        };
+        return new EntityMappingMetadata
+        {
+            EntityType = entityType,
+            DatabaseType = databaseType,
+            DbKey = databaseContext.DbKey,
+            MappingProfile = GetMappingProfile(databaseContext, mappingOptions),
+            Catalog = tableReference.Catalog,
+            PhysicalSchema = physicalSchema,
+            LogicalSchema = logicalSchema,
+            Schema = physicalSchema,
+            TableName = tableName,
+            ResolvedTableName = resolvedTableName,
+            FullTableName = string.IsNullOrWhiteSpace(physicalSchema) ? resolvedTableName : $"{physicalSchema}.{resolvedTableName}",
+            Table = table,
+            TableReference = tableReference,
             TableRouteKey = GetTableRouteKey(databaseContext, mappingOptions),
             Columns = columns
         };
+    }
+
+    /// <summary>
+    /// 判断旧 Schema 是否应解释为物理架构。
+    /// </summary>
+    /// <param name="mappingOptions">实体映射配置。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <returns>旧 Schema 应作为物理架构时返回 <see langword="true"/>。</returns>
+    private static bool IsLegacySchemaPhysical(EntityMappingOptions mappingOptions, DatabaseType? databaseType)
+    {
+        if (mappingOptions?.SchemaCompatibilityMode == SchemaCompatibilityMode.LegacySchemaAsPhysical)
+            return true;
+        if (mappingOptions?.SchemaCompatibilityMode != SchemaCompatibilityMode.Auto)
+            return false;
+        return databaseType is DatabaseType.SqlServer or DatabaseType.PgSql or DatabaseType.Oracle;
+    }
+
+    /// <summary>
+    /// 判断旧 Schema 是否应解释为逻辑架构。
+    /// </summary>
+    /// <param name="mappingOptions">实体映射配置。</param>
+    /// <param name="databaseType">数据库类型。</param>
+    /// <returns>旧 Schema 应作为逻辑架构时返回 <see langword="true"/>。</returns>
+    private static bool IsLegacySchemaLogical(EntityMappingOptions mappingOptions, DatabaseType? databaseType)
+    {
+        if (mappingOptions?.SchemaCompatibilityMode == SchemaCompatibilityMode.LegacySchemaAsLogical)
+            return true;
+        if (mappingOptions?.SchemaCompatibilityMode != SchemaCompatibilityMode.Auto)
+            return false;
+        return databaseType is DatabaseType.MySql or DatabaseType.Doris or DatabaseType.Sqlite;
     }
 
     /// <summary>
@@ -292,12 +410,14 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         var converterKind = mappingOptions == null || mappingOptions.ConverterKind == FieldValueConverterKind.None
             ? GetConverterKind(propertyType, storageKind)
             : mappingOptions.ConverterKind;
+        var columnName = string.IsNullOrWhiteSpace(mappingOptions?.ColumnName)
+            ? _entityModelMetadataProvider.GetColumnName(entityType, property.Name) ?? property.Name
+            : mappingOptions.ColumnName;
         var column = new ColumnMappingMetadata
         {
             PropertyName = string.IsNullOrWhiteSpace(mappingOptions?.PropertyName) ? property.Name : mappingOptions.PropertyName,
-            ColumnName = string.IsNullOrWhiteSpace(mappingOptions?.ColumnName)
-                ? _entityMetadata.GetColumn(entityType, property.Name) ?? property.Name
-                : mappingOptions.ColumnName,
+            ColumnName = columnName,
+            Column = new ColumnIdentifier(columnName),
             ClrType = property.PropertyType,
             DbType = mappingOptions?.DbType ?? GetDbType(propertyType, providerTypeName, size,
                 GetDatabaseType(databaseContext)),

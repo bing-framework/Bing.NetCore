@@ -50,6 +50,44 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：SQLite 应在同一连接内通过受控别名访问附加数据库，并在结束时分离该数据库。
+    /// </summary>
+    [Fact]
+    public async Task AttachDatabase_WhenUsingSameConnection_ShouldQueryAttachedDatabase()
+    {
+        // Arrange
+        using (var executor = _fixture.CreateExecutor("second"))
+            await executor.ExecuteSqlAsync("Insert Into samples(Name, Amount) Values (@name, @amount)",
+                new { name = "attached", amount = 1m });
+        await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
+        await connection.OpenAsync();
+
+        // Act
+        await using (var attachCommand = connection.CreateCommand())
+        {
+            attachCommand.CommandText = "Attach Database $path As reporting";
+            attachCommand.Parameters.AddWithValue("$path", _fixture.SecondDatabasePath);
+            await attachCommand.ExecuteNonQueryAsync();
+        }
+
+        try
+        {
+            await using var queryCommand = connection.CreateCommand();
+            queryCommand.CommandText = "Select Name From reporting.samples";
+            var result = Convert.ToString(await queryCommand.ExecuteScalarAsync());
+
+            // Assert
+            Assert.Equal("attached", result);
+        }
+        finally
+        {
+            await using var detachCommand = connection.CreateCommand();
+            detachCommand.CommandText = "Detach Database reporting";
+            await detachCommand.ExecuteNonQueryAsync();
+        }
+    }
+
+    /// <summary>
     /// 测试目的：SQLite 真实执行诊断应保留作用域映射配置，并仅在显式启用后输出租户标识。
     /// </summary>
     [Fact]

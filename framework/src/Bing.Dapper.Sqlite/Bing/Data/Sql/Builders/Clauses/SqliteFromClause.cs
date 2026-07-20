@@ -15,8 +15,9 @@ public class SqliteFromClause : FromClause
         IEntityResolver resolver,
         IEntityAliasRegister register,
         ITableDatabase tableDatabase,
-        SqlItem table = null)
-        : base(builder, dialect, resolver, register, tableDatabase, table)
+        SqlItem table = null,
+        ISqlObjectNameFormatter objectNameFormatter = null)
+        : base(builder, dialect, resolver, register, tableDatabase, table, objectNameFormatter)
     {
     }
 
@@ -29,6 +30,6 @@ public class SqliteFromClause : FromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new SqliteFromClause(builder, Dialect, Resolver, register, TableDatabase, Table);
+        return new SqliteFromClause(builder, Dialect, Resolver, register, TableDatabase, Table, ObjectNameFormatter);
     }
 }

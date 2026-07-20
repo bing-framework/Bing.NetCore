@@ -133,6 +133,26 @@ ISqlQuery RightJoin<TEntity>(string alias = null, string schema = null);
 - `columns`：一组列表达式，如 `x => new object[] { x.Id, x.Name }`。
 - `alias` / `schema`：表别名与架构名。
 
+### 结构化表引用与跨 Catalog Join
+
+实体类型 `From<TEntity>`、`Join<TEntity>` 不再直接将旧 `Schema` 与表名拼接为字符串。框架先解析 `SqlTableReference`，再在生成 SQL 时按当前 Provider 渲染。该引用分别保存数据源 `DbKey`、`Catalog`、物理架构、逻辑架构、原始表名和最终物理表名，避免把业务逻辑架构误当成数据库架构。
+
+默认命名仍兼容 MySQL 旧模式：实体映射的 `Schema = "order"` 与 `TableName = "orderinfo"` 在逻辑前缀模式下生成 `` `order_orderinfo` ``。新代码应通过 `EntityMappingOptions` 明确设置 `Catalog`、`PhysicalSchema`、`LogicalSchema` 和 `LogicalTableNamingMode`，不应再依赖旧 `Schema` 的 Provider 推断。
+
+同一 `DbKey` 下可以连接不同 `Catalog` 的表。不同 `DbKey` 的 `Join` 会在生成 SQL 时被拒绝，因为它们可能需要不同连接、事务和 Provider。显式字符串 `From("...")`、`Join("...")` 被视为原始 SQL 片段，框架不会猜测或重写其数据库限定符；包含外部输入时必须使用参数化条件而非字符串拼接。
+
+各 Provider 的限定名规则如下：
+
+| Provider | 支持的限定部分 |
+| --- | --- |
+| MySQL / Doris | `Catalog.Table` |
+| SQL Server | `Catalog.PhysicalSchema.Table` |
+| PostgreSQL | `PhysicalSchema.Table`，不支持 `Catalog` |
+| Oracle | `PhysicalSchema.Table@DatabaseLink` |
+| SQLite | `AttachedAlias.Table`，不支持物理架构 |
+
+详细说明见 [结构化表引用与跨数据库查询](sql-table-reference-and-cross-database-query.md)。
+
 ### 2. 条件：Where / Or / On
 
 用于构建 `WHERE` 和 `JOIN ... ON` 条件。

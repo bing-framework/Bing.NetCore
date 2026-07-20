@@ -44,6 +44,32 @@ public class OracleRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 测试目的：Oracle 类型化 From 应仅通过显式 DatabaseLink 输出远端限定符。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenDatabaseLinkConfigured_ShouldRenderDatabaseLink()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+        metadataOptions.EntityMappings[0].PhysicalSchema = "SCOTT";
+        metadataOptions.EntityMappings[0].DatabaseLink = "REMOTE";
+        var builder = new OracleBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+            metadataOptions: metadataOptions, options: CreateSqlOptions());
+
+        // Act
+        builder.From<RoutingSample>();
+
+        // Assert
+        Assert.Contains("\"SCOTT\".\"users_reporting\"@\"REMOTE\"", builder.ToSql());
+    }
+
+    private static SqlOptions CreateSqlOptions() => new SqlOptions().SetDatabaseContext(new DatabaseContext
+    {
+        DbKey = "reporting",
+        DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = DatabaseType.Oracle }
+    });
+
+    /// <summary>
     /// 创建 Sql 元数据配置
     /// </summary>
     /// <returns>Sql 元数据配置</returns>

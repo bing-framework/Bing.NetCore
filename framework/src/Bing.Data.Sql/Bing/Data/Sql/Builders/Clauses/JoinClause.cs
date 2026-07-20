@@ -101,6 +101,16 @@ public class JoinClause : IJoinClause
     private readonly ISqlDatabaseContextResolver _databaseContextResolver;
 
     /// <summary>
+    /// SQL 对象名格式化器
+    /// </summary>
+    private readonly ISqlObjectNameFormatter _objectNameFormatter;
+
+    /// <summary>
+    /// 跨数据库查询校验器
+    /// </summary>
+    private readonly ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator;
+
+    /// <summary>
     /// 连接参数
     /// </summary>
     private readonly List<JoinItem> _params;
@@ -125,6 +135,8 @@ public class JoinClause : IJoinClause
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <param name="sqlOptions">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
+    /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
     public JoinClause(ISqlBuilder sqlBuilder
         , IDialect dialect
         , IEntityResolver resolver
@@ -137,7 +149,9 @@ public class JoinClause : IJoinClause
         , ISqlParameterFactory sqlParameterFactory = null
         , SqlMetadataOptions metadataOptions = null
         , SqlOptions sqlOptions = null
-        , ISqlDatabaseContextResolver databaseContextResolver = null)
+        , ISqlDatabaseContextResolver databaseContextResolver = null
+        , ISqlObjectNameFormatter objectNameFormatter = null
+        , ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null)
     {
         _sqlBuilder = sqlBuilder;
         _dialect = dialect;
@@ -151,6 +165,8 @@ public class JoinClause : IJoinClause
         _metadataOptions = metadataOptions;
         _sqlOptions = sqlOptions;
         _databaseContextResolver = databaseContextResolver;
+        _objectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
+        _crossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
         _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
             databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver);
         _params = joinItems ?? new List<JoinItem>();
@@ -172,7 +188,8 @@ public class JoinClause : IJoinClause
             _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
         return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager, TableDatabase,
             _params.Select(t => t.Clone(helper)).ToList(), _entityMappingResolver, _databaseContextAccessor,
-            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
+            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _objectNameFormatter,
+            _crossDatabaseQueryValidator);
     }
 
     #endregion
@@ -248,11 +265,60 @@ public class JoinClause : IJoinClause
     private void Join<TEntity>(string joinType, string alias, string schema)
     {
         var type = typeof(TEntity);
-        var table = _resolver.GetTableAndSchema(type);
-        var item = CreateJoinItem(joinType, table, schema, alias, type);
+        var reference = _resolver.GetTableReference(type).WithAlias(alias);
+        if (string.IsNullOrWhiteSpace(schema) == false)
+            reference = reference.WithPhysicalSchema(schema);
+        var databaseContext = GetCurrentDatabaseContext();
+        var sourceReference = GetSourceReference(databaseContext);
+        _crossDatabaseQueryValidator.Validate(sourceReference, reference, databaseContext);
+        var item = CreateStructuredJoinItem(joinType, reference, type, sourceReference, databaseContext);
         AddItem(item);
         _register.Register(type, _resolver.GetAlias(type, alias));
     }
+
+    /// <summary>
+    /// 创建结构化连接项
+    /// </summary>
+    /// <param name="joinType">连接类型</param>
+    /// <param name="reference">结构化表引用</param>
+    /// <param name="type">实体类型</param>
+    /// <param name="sourceReference">From 子句的结构化表引用</param>
+    /// <param name="databaseContext">执行数据库上下文</param>
+    protected virtual JoinItem CreateStructuredJoinItem(string joinType, SqlTableReference reference, Type type,
+        SqlTableReference sourceReference, DatabaseContext databaseContext)
+    {
+        return new JoinItem(joinType, new StructuredSqlItem(reference, _objectNameFormatter, databaseContext,
+            _crossDatabaseQueryValidator, sourceReference), type, null);
+    }
+
+    /// <summary>
+    /// 获取类型化 Join 的源表引用。
+    /// </summary>
+    /// <param name="databaseContext">执行数据库上下文。</param>
+    /// <returns>From 表引用；原始 From 使用最小执行上下文引用。</returns>
+    private SqlTableReference GetSourceReference(DatabaseContext databaseContext)
+    {
+        if (_sqlBuilder is SqlBuilderBase builder)
+        {
+            var reference = builder.GetStructuredFromReference();
+            if (reference != null)
+                return reference;
+        }
+        return new SqlTableReference
+        {
+            DbKey = databaseContext?.DbKey,
+            DatabaseType = databaseContext?.DataSource?.DatabaseType,
+            TableName = "__execution__",
+            ResolvedTableName = "__execution__"
+        };
+    }
+
+    /// <summary>
+    /// 获取当前数据库上下文
+    /// </summary>
+    private DatabaseContext GetCurrentDatabaseContext() =>
+        _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
+        _databaseContextAccessor?.Current ?? _metadataOptions?.DefaultDatabaseContext;
 
     /// <summary>
     /// 内连接子查询
