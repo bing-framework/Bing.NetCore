@@ -22,7 +22,7 @@ public abstract partial class SqlQueryBase
         {
             if (ExecuteBefore() == false)
                 return default;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var dbParameters = GetDbParameters();
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
             var transaction = GetQueryTransaction();
@@ -62,7 +62,7 @@ public abstract partial class SqlQueryBase
         {
             if (ExecuteBefore() == false)
                 return default;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var dbParameters = GetDbParameters();
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
             var transaction = GetQueryTransaction();

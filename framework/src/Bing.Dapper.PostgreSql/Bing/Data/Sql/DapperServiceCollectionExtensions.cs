@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Dapper;
+using Npgsql;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -28,8 +29,7 @@ public static class PostgreSqlServiceCollectionExtensions
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.PgSql,
-            connection => new PostgreSqlDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlQuery, PostgreSqlQuery>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlExecutor, PostgreSqlExecutor>(DatabaseType.PgSql);
@@ -105,7 +105,7 @@ public static class PostgreSqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new PostgreSqlDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -180,6 +180,7 @@ public static class PostgreSqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

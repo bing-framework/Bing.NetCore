@@ -31,5 +31,7 @@ public abstract class OracleSqlQueryBase : SqlQueryBase
         ServiceProvider.GetService<ISqlDatabaseContextResolver>());
 
     /// <inheritdoc />
+    [System.Obsolete("Dapper 连接创建已迁移至 ISqlDbConnectionFactoryResolver。")]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     protected override IDatabaseFactory CreateDatabaseFactory() => new OracleDatabaseFactory();
 }

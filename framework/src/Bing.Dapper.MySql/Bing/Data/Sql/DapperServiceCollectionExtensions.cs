@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Dapper;
+using MySqlConnector;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -28,8 +29,7 @@ public static class MySqlServiceCollectionExtensions
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.MySql,
-            connection => new MySqlDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.MySql);
         services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.MySql);
@@ -105,7 +105,7 @@ public static class MySqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -180,6 +180,7 @@ public static class MySqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

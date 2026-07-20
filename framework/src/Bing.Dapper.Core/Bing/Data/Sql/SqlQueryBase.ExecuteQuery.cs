@@ -283,7 +283,7 @@ public abstract partial class SqlQueryBase
         {
             if (ExecuteBefore() == false)
                 return default;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var sql = GetSql();
             var dbParameters = GetDbParameters();
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
@@ -320,7 +320,7 @@ public abstract partial class SqlQueryBase
         {
             if (ExecuteBefore() == false)
                 return default;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var sql = GetSql();
             var dbParameters = GetDbParameters();
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);

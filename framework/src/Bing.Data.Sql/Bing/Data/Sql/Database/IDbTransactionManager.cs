@@ -1,10 +1,13 @@
 ﻿using System.Data;
+using System.ComponentModel;
 
 namespace Bing.Data.Sql.Database;
 
 /// <summary>
 /// 数据库事务管理器
 /// </summary>
+[Obsolete("请使用 ISqlTransactionScopeFactory 创建事务作用域。")]
+[EditorBrowsable(EditorBrowsableState.Never)]
 public interface IDbTransactionManager
 {
     /// <summary>

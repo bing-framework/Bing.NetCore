@@ -93,22 +93,35 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         if (mode == EfCoreSqlConnectionMode.Shared)
             EnsureSharedConnectionMatches(unitOfWork, dataSource);
         var query = CreateQuery(dataSource);
-        BindEntityMetadata(query, unitOfWork);
-        ApplyDatabaseContext(query, dataSource);
-        if (mode == EfCoreSqlConnectionMode.Independent)
+        try
         {
-            var connectionString = ResolveIndependentConnectionString(dataSource);
-            var connection = CreateIndependentConnection(databaseType, connectionString);
-            var independentContext = GetExternalContext(query);
-            independentContext.SetOwnedConnection(connection);
-            independentContext.SetConnectionSource(SqlConnectionSource.DataSource);
+            BindEntityMetadata(query, unitOfWork);
+            ApplyDatabaseContext(query, dataSource);
+            if (mode == EfCoreSqlConnectionMode.Independent)
+            {
+                var connectionString = ResolveIndependentConnectionString(dataSource);
+                var connection = CreateIndependentConnection(databaseType, connectionString);
+                try
+                {
+                    GetResourceBinder(query).BindOwnedConnection(connection, SqlConnectionSource.DataSource);
+                }
+                catch
+                {
+                    connection.Dispose();
+                    throw;
+                }
+                return query;
+            }
+            var binder = GetResourceBinder(query);
+            binder.BindExternalConnection(unitOfWork.Database.GetDbConnection(), SqlConnectionSource.EntityFrameworkCore);
+            binder.BindExternalTransactionResolver(() => unitOfWork.Database.CurrentTransaction?.GetDbTransaction());
             return query;
         }
-        query.SetConnection(unitOfWork.Database.GetDbConnection());
-        var externalContext = GetExternalContext(query);
-        externalContext.SetConnectionSource(SqlConnectionSource.EntityFrameworkCore);
-        externalContext.SetExternalTransactionResolver(() => unitOfWork.Database.CurrentTransaction?.GetDbTransaction());
-        return query;
+        catch
+        {
+            query.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -141,9 +154,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <param name="unitOfWork">工作单元</param>
     private void BindEntityMetadata(ISqlQuery query, UnitOfWorkBase unitOfWork)
     {
-        var externalContext = GetExternalContext(query);
-        externalContext.SetEntityMetadata(unitOfWork);
-        externalContext.SetEntityMappingResolver(new DefaultEntityMappingResolver(unitOfWork,
+        GetMetadataBinder(query).BindEntityMetadata(unitOfWork, new DefaultEntityMappingResolver(unitOfWork,
             _databaseContextAccessor, _metadataOptions, _typeConverterResolver));
     }
 
@@ -256,10 +267,20 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     }
 
     /// <summary>
-    /// 获取 Query 外部上下文
+    /// 获取 SQL 查询内部执行资源绑定器。
     /// </summary>
-    /// <param name="query">SQL 查询对象</param>
-    /// <returns>Query 外部上下文</returns>
-    private static ISqlQueryExternalContext GetExternalContext(ISqlQuery query) => query as ISqlQueryExternalContext ??
-        throw new InvalidOperationException("SQL 查询对象未实现 ISqlQueryExternalContext，无法绑定 EF Core 上下文。");
+    /// <param name="query">SQL 查询对象。</param>
+    /// <returns>执行资源绑定器。</returns>
+    private static ISqlExecutionResourceBinder GetResourceBinder(ISqlQuery query) =>
+        query as ISqlExecutionResourceBinder ??
+        throw new InvalidOperationException("SQL 查询对象未实现内部执行资源绑定器，无法绑定 EF Core 上下文。");
+
+    /// <summary>
+    /// 获取 SQL 查询内部元数据绑定器。
+    /// </summary>
+    /// <param name="query">SQL 查询对象。</param>
+    /// <returns>实体元数据绑定器。</returns>
+    private static ISqlQueryMetadataBinder GetMetadataBinder(ISqlQuery query) =>
+        query as ISqlQueryMetadataBinder ??
+        throw new InvalidOperationException("SQL 查询对象未实现内部元数据绑定器，无法绑定 EF Core 上下文。");
 }

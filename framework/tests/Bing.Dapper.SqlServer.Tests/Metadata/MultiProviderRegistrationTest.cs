@@ -76,6 +76,37 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
+    /// 测试 - 仅注册各 Provider 执行器时，连接工厂解析器仍应创建对应连接。
+    /// </summary>
+    [Fact]
+    public void ConnectionFactoryResolver_WhenOnlyExecutorsRegistered_ShouldCreateProviderConnections()
+    {
+        // Arrange
+        using var provider = CreateExecutorOnlyProvider();
+        var resolver = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>();
+        var registrations = new[]
+        {
+            (DatabaseType.MySql, "Server=mysql;Database=test;", "MySqlConnection"),
+            (DatabaseType.PgSql, "Host=pgsql;Database=test;", "NpgsqlConnection"),
+            (DatabaseType.SqlServer, "Server=sqlserver;Database=test;", "SqlConnection"),
+            (DatabaseType.Sqlite, "Data Source=executor-only.db", "SqliteConnection"),
+            (DatabaseType.Oracle, "User Id=bing;Password=secret;Data Source=oracle-test", "OracleConnection")
+        };
+
+        // Act
+        var connections = registrations.Select(registration => resolver.Create(registration.Item1, registration.Item2))
+            .ToList();
+
+        // Assert
+        for (var index = 0; index < registrations.Length; index++)
+        {
+            using var connection = connections[index];
+            Assert.Equal(registrations[index].Item3, connection.GetType().Name);
+            Assert.Equal(registrations[index].Item2, connection.ConnectionString);
+        }
+    }
+
+    /// <summary>
     /// 创建同时注册多个 Provider 的服务提供程序。
     /// </summary>
     /// <returns>服务提供程序。</returns>
@@ -100,6 +131,22 @@ public class MultiProviderRegistrationTest
                 source.MappingProfile = "doris";
                 source.SupportsTransactions = false;
             });
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建仅注册执行器的服务提供程序。
+    /// </summary>
+    /// <returns>服务提供程序。</returns>
+    private static ServiceProvider CreateExecutorOnlyProvider()
+    {
+        var services = new ServiceCollection();
+        services.AddDatabase<TestDatabase>();
+        services.AddMySqlExecutor("Server=mysql;Database=test;");
+        services.AddPostgreSqlExecutor("Host=pgsql;Database=test;");
+        services.AddSqlServerSqlExecutor("Server=sqlserver;Database=test;");
+        services.AddSqliteSqlExecutor("Data Source=executor-only.db");
+        services.AddOracleSqlExecutor("User Id=bing;Password=secret;Data Source=oracle-test");
         return services.BuildServiceProvider();
     }
 

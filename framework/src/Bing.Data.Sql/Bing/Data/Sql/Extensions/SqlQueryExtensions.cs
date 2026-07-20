@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.ComponentModel;
 using Bing.Data.Sql.Database;
 using Bing.Extensions;
 
@@ -17,6 +18,8 @@ public static partial class SqlQueryExtensions
     /// </summary>
     /// <param name="source">源</param>
     /// <returns>IDbConnection 或者 null</returns>
+    [Obsolete("连接管理已内部化，请使用 ISqlTransactionScope。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static IDbConnection GetConnection(this ISqlQuery source)
     {
         source.CheckNull(nameof(source));
@@ -34,6 +37,8 @@ public static partial class SqlQueryExtensions
     /// </summary>
     /// <param name="source">源</param>
     /// <param name="connection">数据库连接</param>
+    [Obsolete("连接绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static ISqlQuery SetConnection(this ISqlQuery source, IDbConnection connection)
     {
         source.CheckNull(nameof(source));
@@ -79,6 +84,8 @@ public static partial class SqlQueryExtensions
     /// </summary>
     /// <param name="source">源</param>
     /// <param name="transaction">数据库事务</param>
+    [Obsolete("事务绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static ISqlQuery SetTransaction(this ISqlQuery source, IDbTransaction transaction)
     {
         source.CheckNull(nameof(source));

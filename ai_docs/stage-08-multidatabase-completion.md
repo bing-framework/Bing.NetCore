@@ -98,3 +98,11 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 | `Bing.EntityFrameworkCore.Tests` | 23 | 23 | 0 | net6.0，含自定义身份贡献器的 Shared 比较 |
 
 剩余风险：Oracle TNS 别名和复杂描述符刻意不做连接探测或别名展开，因此会拒绝 Shared；严格单地址 TCP TNS 可比较，但同时指定 Service Name 与 SID 的普通主机或 EZConnect 仍会拒绝 Shared。需要该能力的应用应使用 Independent 模式，或提供唯一的可比较目标。外部 Provider 集成测试仍由门控变量和受保护 CI 环境负责，且不使用生产连接。
+
+## 2026-07-20 连接 API 收敛补充
+
+- Dapper 默认连接创建统一为 `DatabaseType -> ISqlDbConnectionFactoryResolver -> IDbConnection`。五个 Provider 的 Provider、Query 与 Executor 注册均提供对应连接工厂。
+- `IDatabaseConnectionAccessor` 承担跨 ORM 的只读连接访问；`IDatabase` 保持兼容继承关系，不并入事务 Scope。
+- `IDatabaseFactory`、五个 `XxxDatabaseFactory` 及 Provider 基类的 `CreateDatabaseFactory` 为隐藏废弃兼容入口。Dapper 新生产路径不再使用它们创建连接。
+- 外部连接身份校验覆盖内联及命名连接字符串；校验在释放旧 Owned 连接之前完成，拒绝绑定不会破坏原 Query 状态。
+- EF Core Shared 每次执行前刷新当前外部事务，事务完成后不会缓存失效对象；Independent 继续使用自有连接。

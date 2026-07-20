@@ -1,10 +1,13 @@
 ﻿using System.Data;
+using System.ComponentModel;
 
 namespace Bing.Data.Sql.Database;
 
 /// <summary>
 /// 数据库连接管理器
 /// </summary>
+[Obsolete("连接管理已内部化，请使用 ISqlQueryFactory 或 ISqlTransactionScope。")]
+[EditorBrowsable(EditorBrowsableState.Never)]
 public interface IDbConnectionManager
 {
     /// <summary>

@@ -35,7 +35,7 @@ public abstract partial class SqlQueryBase
             TenantId = Options.IncludeTenantIdInDiagnostics ? context?.TenantId : null,
             Parameters = parameters,
             Connection = connectionInfo,
-            Transaction = CreateTransactionDiagnosticInfo(GetTransaction()),
+            Transaction = CreateTransactionDiagnosticInfo(GetExecutionTransaction()),
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute
         };

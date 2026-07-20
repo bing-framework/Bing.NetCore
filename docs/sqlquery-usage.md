@@ -338,12 +338,36 @@ Shared 模式在绑定 EF 连接前会比较最终数据源与 `DbContext` 的�
 
 ### 6. 连接和事务所有权
 
-- `SetConnection(connection)`：外部连接，Query/Executor 不负责关闭或释放。
-- `SetTransaction(transaction)`：外部事务，Query/Executor 不提交、不回滚、不释放，也不会关闭事务连接。
-- `BeginTransaction()`：内部事务，Query/Executor 负责提交、回滚和释放。
-- Dapper 执行器默认不会为单条 SQL 自动开启事务；异常时只回滚内部拥有的事务。
+`ISqlTransactionScope` 是业务代码唯一推荐的事务生命周期入口。Scope 固定一个数据库上下文、连接和事务；它创建的 Query 与 Executor 共享这些资源，Ambient `dbKey` 后续变化不会影响 Scope。
 
-需要让多个 Query / Executor 共享一个独立事务时，可使用 `ISqlTransactionScopeFactory`：
+```csharp
+await using var scope = await transactionScopeFactory.BeginAsync("reporting");
+
+var executor = scope.CreateExecutor();
+await executor.ExecuteSqlAsync(
+    "update users set name=@name where id=@id",
+    new { name = "Tom", id = 1 });
+
+var query = scope.CreateQuery();
+var user = await query.From<User>().Where<User>(x => x.Id, 1).ToEntityAsync<User>();
+
+await scope.CommitAsync();
+```
+
+`ISqlTransactionContext` 提供 Scope 的只读事务信息：`TransactionId`、`DbKey`、数据库类型、数据库上下文快照、连接、事务和隔离级别。`DatabaseContext` 每次返回独立快照，调用方不能修改 Scope 内部固定上下文。
+
+| 资源来源 | 所有者 | Query/Executor 行为 |
+| --- | --- | --- |
+| `ISqlTransactionScope` | Scope | 统一提交、回滚和释放；完成后子对象立即失效。 |
+| EF Core Shared | `DbContext` / EF Core | Query 不关闭连接，不提交、回滚或释放 EF 事务。 |
+| EF Core Independent | 框架 | 通过 `ISqlDbConnectionFactoryResolver` 创建独立连接，可交给 Scope 管理。 |
+| `PrimaryReadStrategy.Transaction` | Query 内部 | 仅用于内部短事务；流式 API 不支持该策略。 |
+
+旧的 `SetConnection(connection)`、`SetTransaction(transaction)`、`BeginTransaction()`、`CommitTransaction()`、`RollbackTransaction()`、`IDbConnectionManager` 和 `IDbTransactionManager` 已标记为废弃并从 IntelliSense 隐藏。它们只保留一个主版本的兼容转发，禁止在新业务代码中使用。
+
+外部连接或事务绑定属于框架内部能力。绑定时会校验事务连接、固定 `DatabaseContext`、数据库类型和脱敏物理数据库身份；不一致、不可安全比较或试图覆盖自有事务时会立即拒绝。Query 不会接管外部连接或外部事务的提交、回滚、关闭和释放。
+
+需要让多个 Query / Executor 共享一个独立事务时，使用 `ISqlTransactionScopeFactory`：
 
 ```csharp
 using var scope = transactionScopeFactory.Begin("reporting");
@@ -357,13 +381,19 @@ var user = query.From<User>().Where<User>(x => x.Id, 1).ToEntity<User>();
 scope.Commit();
 ```
 
-作用域拥有连接和事务。作用域创建的 Query / Executor 会绑定外部事务，不能自行提交或回滚；如果作用域释放前未调用 `Commit()` 或 `Rollback()`，会自动回滚。
+作用域拥有连接和事务。作用域创建的 Query / Executor 会绑定外部事务，不能自行提交或回滚；如果作用域释放前未调用 `Commit()` 或 `Rollback()`，会自动回滚。提交失败时框架会尝试回滚；仅提交失败时保留原始提交异常，提交和回滚都失败时抛出聚合异常。
 
 `Commit()`、`Rollback()` 或 Scope `Dispose()` 后，不得继续使用此前通过 Scope 创建的 Query / Executor。它们会立即拒绝获取连接、事务或执行 SQL，防止在已结束的事务之外重新建连执行。需要继续访问数据库时，请创建新的 Scope 或通过工厂创建新的 Query / Executor。
 
 `BeginAsync()`、`CommitAsync()` 和 `RollbackAsync()` 会优先调用 Provider 公开的原生异步成员；只有成员不存在时才同步回退。开始事务失败时，框架仍会释放 Owner Query；若释放也失败，会同时保留开始失败和清理失败信息。
 
 如果未来启用主库读取策略，`PrimaryReadStrategy.Transaction` 只适合短查询。当前实现对 `StreamQuery` / `StreamQueryAsync` 会在创建读取器前直接抛出异常，避免在流式场景里静默退回到短事务策略。
+
+### 6.1 Dapper 连接创建与跨 ORM 兼容
+
+Dapper 的默认连接创建路径为 `DatabaseType -> ISqlDbConnectionFactoryResolver -> IDbConnection`。每个 Provider 的 `Add*Provider`、`Add*Query` 和 `Add*Executor` 都注册对应连接工厂，因此仅注册 Executor 的场景同样可以解析独立连接。
+
+`IDatabaseConnectionAccessor` 是跨 ORM 的只读连接访问契约。`Bing.Data.IDatabase` 继续继承该接口以保持 EF Core、FreeSQL 等历史集成的兼容，不与事务 Scope 合并。`IDatabaseFactory` 和各 Provider `XxxDatabaseFactory` 已废弃并隐藏；它们仅作为一个主版本的兼容扩展点保留，Dapper 新路径不再依赖它们。
 
 ### 7. 显式实体映射
 

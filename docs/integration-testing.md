@@ -46,3 +46,14 @@ SQLite 无需外部服务，除双文件路由、事务和流式资源释放外�
 事务替身测试还覆盖 Provider 原生异步提交和回滚不会再同步重复执行，以及开始失败与 owner Query 清理失败的异常聚合。外部 Provider 集成项目仍须通过门控变量启用，且不得使用生产连接字符串。
 
 命名共享内存数据库必须保持至少一个打开连接，直到测试完成；普通 `:memory:` 连接彼此独占，不能用于跨连接或 EF Core Shared 测试。两种场景均无需外部数据库服务。
+
+## SQL 事务与连接回归
+
+事务和连接 API 收敛的无外部依赖回归包括：
+
+- `Bing.Data.Sql.Tests`：只读事务上下文、Scope API、内部资源 Accessor/Binder、旧 Manager 与外部上下文的废弃契约；
+- `Bing.Dapper.SqlServer.Tests`：替身 ADO.NET 连接上的外部资源一致性、连接替换、提交失败回滚、Scope lease 和五个 Provider 的连接工厂注册；
+- `Bing.Dapper.Sqlite.Tests` 与 `Bing.Dapper.Sqlite.Tests.Integration`：真实 SQLite 文件上的连接所有权、Scope 提交/回滚和多数据库上下文固定；
+- `Bing.EntityFrameworkCore.Tests`：Shared 外部连接/事务不接管、顺序事务刷新，以及 Independent 连接工厂路径。
+
+本地执行命令和外部 Provider 门控见 [数据库集成测试说明](testing/database-integration-tests.md)。

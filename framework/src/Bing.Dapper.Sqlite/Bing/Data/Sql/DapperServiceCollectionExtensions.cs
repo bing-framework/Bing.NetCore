@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Dapper;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -28,8 +29,7 @@ public static class SqliteServiceCollectionExtensions
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite,
-            connection => new SqliteDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<ISqlQuery, SqliteSqlQuery>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<ISqlExecutor, SqliteSqlExecutor>(DatabaseType.Sqlite);
@@ -105,7 +105,7 @@ public static class SqliteServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -180,6 +180,7 @@ public static class SqliteServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

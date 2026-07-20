@@ -39,7 +39,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(param, sql);
@@ -80,7 +80,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(param, sql);
@@ -121,7 +121,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, procedure);
             var parameterMetadata = GetSqlParameterDiagnostics(param, procedure);
@@ -162,7 +162,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, procedure);
             var parameterMetadata = GetSqlParameterDiagnostics(param, procedure);

@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -28,8 +29,7 @@ public static class SqlServerServiceCollectionExtensions
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.SqlServer,
-            connection => new SqlServerDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlConnection(connection));
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<ISqlQuery, SqlServerSqlQuery>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<ISqlExecutor, SqlServerSqlExecutor>(DatabaseType.SqlServer);
@@ -105,7 +105,7 @@ public static class SqlServerServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlServerDatabaseFactory().Create(connection).GetConnection());
+        services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlConnection(connection));
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -180,6 +180,7 @@ public static class SqlServerServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlConnection(connection));
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

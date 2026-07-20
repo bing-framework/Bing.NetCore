@@ -1,43 +1,10 @@
-using System.Data;
-using Bing.Data.Enums;
-
 namespace Bing.Data.Sql;
 
 /// <summary>
 /// SQL 事务作用域
 /// </summary>
-public interface ISqlTransactionScope : IDisposable, IAsyncDisposable
+public interface ISqlTransactionScope : ISqlTransactionContext, IDisposable, IAsyncDisposable
 {
-    /// <summary>
-    /// 事务标识
-    /// </summary>
-    string TransactionId { get; }
-
-    /// <summary>
-    /// 数据库键
-    /// </summary>
-    string DbKey { get; }
-
-    /// <summary>
-    /// 数据库类型
-    /// </summary>
-    DatabaseType DatabaseType { get; }
-
-    /// <summary>
-    /// 当前事务隔离级别
-    /// </summary>
-    IsolationLevel IsolationLevel { get; }
-
-    /// <summary>
-    /// 作用域拥有的数据库连接
-    /// </summary>
-    IDbConnection Connection { get; }
-
-    /// <summary>
-    /// 作用域拥有的数据库事务
-    /// </summary>
-    IDbTransaction Transaction { get; }
-
     /// <summary>
     /// 是否已完成提交或回滚
     /// </summary>

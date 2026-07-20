@@ -1,4 +1,6 @@
-﻿using Bing.Data.Sql.Builders;
+﻿using System.ComponentModel;
+using System.Runtime.ExceptionServices;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -17,7 +19,9 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql查询对象基类
 /// </summary>
-public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager
+#pragma warning disable CS0618
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor, ICteAccessor, IDbConnectionManager, IDbTransactionManager, ISqlExecutionResourceAccessor, ISqlExecutionResourceBinder, ISqlQueryMetadataBinder
+#pragma warning restore CS0618
 {
     #region 字段
 
@@ -55,6 +59,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// 事务作用域执行租约。
     /// </summary>
     private SqlTransactionScopeLease _transactionScopeLease;
+
+    /// <summary>
+    /// 是否已释放事务作用域创建的子查询对象。
+    /// </summary>
+    private bool _isTransactionScopeChildDisposed;
 
     /// <summary>
     /// 是否已为主库读取创建内部事务。
@@ -286,15 +295,18 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
         var connectionString = ResolveConnectionString();
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new InvalidOperationException("数据库连接字符串不能为空");
-        var factory = CreateDatabaseFactory();
-        if (factory == null)
-            throw new InvalidOperationException("数据库工厂不能为空");
-        return factory.Create(connectionString);
+        var resolver = ServiceProvider.GetService<ISqlDbConnectionFactoryResolver>();
+        if (resolver == null)
+            throw new InvalidOperationException("未注册 SQL 数据库连接工厂解析器。");
+        var databaseType = GetDatabaseType();
+        return new DefaultDatabase(resolver.Create(databaseType, connectionString));
     }
 
     /// <summary>
     /// 创建数据库工厂
     /// </summary>
+    [System.Obsolete("Dapper 连接创建已迁移至 ISqlDbConnectionFactoryResolver。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     protected abstract IDatabaseFactory CreateDatabaseFactory();
 
     /// <summary>
@@ -367,12 +379,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// 设置数据库连接
     /// </summary>
     /// <param name="connection">数据库连接</param>
+    [Obsolete("连接绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetConnection(IDbConnection connection)
     {
-        if (connection == null)
-            return;
-        _connection = connection;
-        _connectionOwnership = SqlResourceOwnership.External;
+        BindConnection(connection, SqlResourceOwnership.External, SqlConnectionSource.External);
     }
 
     #endregion
@@ -382,9 +393,28 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// <summary>
     /// 获取数据库连接
     /// </summary>
+    [Obsolete("连接管理已内部化，请使用 ISqlTransactionScope。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IDbConnection GetConnection()
     {
+        return GetExecutionConnection();
+    }
+
+    /// <summary>
+    /// 获取或创建内部执行连接。
+    /// </summary>
+    /// <returns>执行使用的数据库连接。</returns>
+    protected IDbConnection GetExecutionConnection() =>
+        ((ISqlExecutionResourceAccessor)this).GetOrCreateConnection();
+
+    /// <summary>
+    /// 获取或创建执行连接。
+    /// </summary>
+    /// <returns>执行使用的数据库连接。</returns>
+    IDbConnection ISqlExecutionResourceAccessor.GetOrCreateConnection()
+    {
         _transactionScopeLease?.EnsureActive();
+        ThrowIfTransactionScopeChildDisposed();
         if (_connection != null)
             return _connection;
         var dataSource = Options.GetDatabaseContext()?.DataSource;
@@ -410,25 +440,167 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     public void Config(Action<SqlOptions> configAction) => configAction?.Invoke(Options);
 
     /// <inheritdoc />
-    public void SetEntityMetadata(IEntityMetadata metadata) => _entityMetadata = metadata;
+    public void SetEntityMetadata(IEntityMetadata metadata) => BindEntityMetadata(metadata, _entityMappingResolver);
 
     /// <inheritdoc />
-    public void SetEntityMappingResolver(IEntityMappingResolver resolver) => _entityMappingResolver = resolver;
+    public void SetEntityMappingResolver(IEntityMappingResolver resolver) => BindEntityMetadata(_entityMetadata, resolver);
 
     /// <inheritdoc />
+    [Obsolete("连接绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetOwnedConnection(IDbConnection connection)
     {
-        if (connection == null)
-            return;
-        _connection = connection;
-        _connectionOwnership = SqlResourceOwnership.Owned;
+        BindConnection(connection, SqlResourceOwnership.Owned, SqlConnectionSource.DataSource);
     }
 
     /// <inheritdoc />
-    public void SetExternalTransactionResolver(Func<IDbTransaction> resolver) => _externalTransactionResolver = resolver;
+    [Obsolete("事务绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void SetExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+        ((ISqlExecutionResourceBinder)this).BindExternalTransactionResolver(resolver);
 
     /// <inheritdoc />
+    [Obsolete("连接绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetConnectionSource(SqlConnectionSource source) => _connectionSource = source;
+
+    /// <summary>
+    /// 绑定执行连接。
+    /// </summary>
+    /// <param name="connection">数据库连接。</param>
+    /// <param name="ownership">连接所有权。</param>
+    /// <param name="source">连接来源。</param>
+    private void BindConnection(IDbConnection connection, SqlResourceOwnership ownership, SqlConnectionSource source)
+    {
+        if (connection == null)
+            throw new ArgumentNullException(nameof(connection));
+        EnsureConnectionCanBeReplaced(connection);
+        ValidateExternalConnectionDatabaseIdentity(connection);
+        if (_connection != null && ReferenceEquals(_connection, connection))
+        {
+            _connectionOwnership = ownership;
+            _connectionSource = source;
+            return;
+        }
+        if (_connection != null && _connectionOwnership == SqlResourceOwnership.External)
+            throw new InvalidOperationException("当前 Query 已绑定其他外部连接，不能静默替换连接资源。");
+        ReleaseOwnedConnectionBeforeReplacement();
+        _connection = connection;
+        _connectionOwnership = ownership;
+        _connectionSource = source;
+    }
+
+    /// <summary>
+    /// 确保当前连接可以被替换。
+    /// </summary>
+    /// <param name="connection">待绑定连接。</param>
+    private void EnsureConnectionCanBeReplaced(IDbConnection connection)
+    {
+        if (_transaction == null)
+            return;
+        if (ReferenceEquals(_transaction.Connection, connection))
+            return;
+        throw new InvalidOperationException("当前 Query 存在活动事务，不能替换数据库连接。");
+    }
+
+    /// <summary>
+    /// 在替换连接前释放原有自有连接。
+    /// </summary>
+    private void ReleaseOwnedConnectionBeforeReplacement()
+    {
+        if (_connection == null || _connectionOwnership != SqlResourceOwnership.Owned)
+            return;
+        var connection = _connection;
+        Exception closeException = null;
+        try
+        {
+            if (connection.State != ConnectionState.Closed)
+                connection.Close();
+        }
+        catch (Exception exception)
+        {
+            closeException = exception;
+        }
+        try
+        {
+            connection.Dispose();
+        }
+        catch (Exception exception)
+        {
+            if (closeException != null)
+                throw new AggregateException(closeException, exception);
+            throw;
+        }
+        if (closeException != null)
+            ExceptionDispatchInfo.Capture(closeException).Throw();
+        _connection = null;
+        _connectionOwnership = SqlResourceOwnership.Owned;
+        _connectionSource = SqlConnectionSource.Unknown;
+    }
+
+    /// <summary>
+    /// 一次性绑定外部实体元数据与映射解析器。
+    /// </summary>
+    /// <param name="metadata">实体元数据。</param>
+    /// <param name="resolver">实体映射解析器。</param>
+    private void BindEntityMetadata(IEntityMetadata metadata, IEntityMappingResolver resolver)
+    {
+        _entityMetadata = metadata;
+        _entityMappingResolver = resolver;
+    }
+
+    /// <summary>
+    /// 绑定实体元数据及其映射解析器。
+    /// </summary>
+    /// <param name="metadata">实体元数据。</param>
+    /// <param name="resolver">实体映射解析器。</param>
+    void ISqlQueryMetadataBinder.BindEntityMetadata(IEntityMetadata metadata, IEntityMappingResolver resolver) =>
+        BindEntityMetadata(metadata, resolver);
+
+    /// <summary>
+    /// 校验外部连接与当前固定数据库上下文的物理身份。
+    /// </summary>
+    /// <param name="connection">外部数据库连接。</param>
+    private void ValidateExternalConnectionDatabaseIdentity(IDbConnection connection)
+    {
+        var context = Options.GetDatabaseContext();
+        var dataSource = context?.DataSource;
+        if (dataSource == null ||
+            (string.IsNullOrWhiteSpace(dataSource.ConnectionString) &&
+             string.IsNullOrWhiteSpace(dataSource.ConnectionStringName)))
+            return;
+        if (string.IsNullOrWhiteSpace(connection.ConnectionString))
+            throw new InvalidOperationException("外部连接缺少用于校验数据库身份的连接字符串。");
+        var resolver = ServiceProvider.GetService<ISqlDatabaseIdentityResolver>();
+        if (resolver == null)
+            throw new InvalidOperationException("未注册 SQL 数据库身份解析器，无法校验外部连接。");
+        var connectionStringResolver = ServiceProvider.GetService<ISqlConnectionStringResolver>() ??
+                                       new DefaultSqlConnectionStringResolver(
+                                           ServiceProvider.GetService<ConnectionStringCollection>());
+        var expectedConnectionString = connectionStringResolver.Resolve(dataSource);
+        var databaseType = dataSource.DatabaseType == default ? Options.DatabaseType : dataSource.DatabaseType;
+        var queryIdentity = resolver.Resolve(databaseType, expectedConnectionString);
+        var externalIdentity = resolver.Resolve(databaseType, connection.ConnectionString);
+        if (queryIdentity.IsComparable && externalIdentity.IsComparable && queryIdentity.Equals(externalIdentity))
+            return;
+        throw new InvalidOperationException(
+            $"外部连接数据库身份与 Query 上下文不一致。Query DbKey={context?.DbKey ?? "<default>"}; " +
+            $"Query DatabaseType={databaseType}; ExternalIdentity={FormatDatabaseIdentity(externalIdentity)}; " +
+            $"QueryIdentity={FormatDatabaseIdentity(queryIdentity)}。");
+    }
+
+    /// <summary>
+    /// 格式化不含凭据的数据库物理身份。
+    /// </summary>
+    /// <param name="identity">数据库物理身份。</param>
+    /// <returns>诊断使用的脱敏身份文本。</returns>
+    private static string FormatDatabaseIdentity(SqlDatabaseIdentity identity)
+    {
+        if (identity == null)
+            return "<null>";
+        return $"Type={identity.DatabaseType};Server={identity.Server};Port={identity.Port};Database={identity.Database};" +
+               $"FilePath={identity.FilePath};ServiceName={identity.ServiceName};Sid={identity.Sid};Alias={identity.OracleAlias}";
+    }
 
     #endregion
 
@@ -558,7 +730,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
         {
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
-            var conn = GetConnection();
+            var conn = GetExecutionConnection();
             var dbParameters = GetDbParameters(builder);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
             var transaction = GetQueryTransaction();
@@ -625,7 +797,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
         {
             var builder = GetCountBuilder();
             var sql = builder.ToSql();
-            var conn = GetConnection();
+            var conn = GetExecutionConnection();
             var dbParameters = GetDbParameters(builder);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
             var transaction = GetQueryTransaction();
@@ -744,8 +916,25 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryExternalContext
     /// </summary>
     public void Dispose()
     {
-        ReleaseTransaction();
-        ReleaseConnection();
+        try
+        {
+            ReleaseTransaction();
+            ReleaseConnection();
+        }
+        finally
+        {
+            if (_transactionScopeLease != null)
+                _isTransactionScopeChildDisposed = true;
+        }
+    }
+
+    /// <summary>
+    /// 确保未继续使用已释放的事务作用域子对象。
+    /// </summary>
+    private void ThrowIfTransactionScopeChildDisposed()
+    {
+        if (_isTransactionScopeChildDisposed)
+            throw new ObjectDisposedException(nameof(SqlQueryBase), "事务作用域创建的 Query 或 Executor 已释放，不能继续使用。");
     }
 
     /// <summary>

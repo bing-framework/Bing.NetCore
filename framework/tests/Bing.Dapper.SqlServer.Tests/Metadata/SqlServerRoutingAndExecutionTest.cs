@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Reflection;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
@@ -534,6 +535,260 @@ public class SqlServerRoutingAndExecutionTest
         connection.State.ShouldBe(ConnectionState.Open);
     }
 
+    #pragma warning disable CS0618
+    /// <summary>
+    /// 测试 - 自有连接替换为外部连接时应释放原连接且不接管新连接。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenReplacingOwnedConnection_ShouldDisposePreviousConnectionAndKeepExternalConnection()
+    {
+        // Arrange
+        var ownedConnection = new CaptureDbConnection();
+        var externalConnection = new CaptureDbConnection();
+        var query = CreateOwnedQuery(ownedConnection);
+        query.GetConnection();
+
+        // Act
+        query.SetConnection(externalConnection);
+        var boundConnection = query.GetConnection();
+        query.Dispose();
+
+        // Assert
+        ownedConnection.DisposeCount.ShouldBe(1);
+        boundConnection.ShouldBeSameAs(externalConnection);
+        externalConnection.DisposeCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试 - 相同外部连接重复绑定应保持幂等且不释放调用方资源。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenBindingSameExternalConnection_ShouldBeIdempotent()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var query = CreateQuery(connection);
+
+        // Act
+        query.SetConnection(connection);
+        query.SetConnection(connection);
+        var boundConnection = query.GetConnection();
+        query.Dispose();
+
+        // Assert
+        connection.DisposeCount.ShouldBe(0);
+        boundConnection.ShouldBeSameAs(connection);
+    }
+
+    /// <summary>
+    /// 测试 - 不同外部连接不应被静默替换。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenReplacingExternalConnection_ShouldRejectAndKeepOriginalConnection()
+    {
+        // Arrange
+        var firstConnection = new CaptureDbConnection();
+        var secondConnection = new CaptureDbConnection();
+        var query = CreateQuery(firstConnection);
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => query.SetConnection(secondConnection));
+
+        // Assert
+        exception.Message.ShouldContain("其他外部连接");
+        query.GetConnection().ShouldBeSameAs(firstConnection);
+        firstConnection.DisposeCount.ShouldBe(0);
+        secondConnection.DisposeCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试 - 活动外部事务期间不应允许替换连接。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenExternalTransactionIsActive_ShouldRejectReplacement()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var replacementConnection = new CaptureDbConnection();
+        var executor = CreateExecutor(connection);
+        executor.SetTransaction(new CaptureDbTransaction(connection));
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => executor.SetConnection(replacementConnection));
+
+        // Assert
+        exception.Message.ShouldContain("活动事务");
+        executor.GetConnection().ShouldBeSameAs(connection);
+    }
+
+    /// <summary>
+    /// 测试 - 外部事务连接与当前 Query 连接不一致时应拒绝绑定。
+    /// </summary>
+    [Fact]
+    public void SetTransaction_WhenConnectionDiffersFromQuery_ShouldRejectBinding()
+    {
+        // Arrange
+        var queryConnection = new CaptureDbConnection();
+        var transactionConnection = new CaptureDbConnection();
+        var executor = CreateExecutor(queryConnection);
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            executor.SetTransaction(new CaptureDbTransaction(transactionConnection)));
+
+        // Assert
+        exception.Message.ShouldContain("连接不一致");
+        executor.GetConnection().ShouldBeSameAs(queryConnection);
+    }
+
+    /// <summary>
+    /// 测试 - 旧事务生命周期成员不应提交或回滚外部事务。
+    /// </summary>
+    [Fact]
+    public void LegacyTransactionMethods_WhenTransactionIsExternal_ShouldRejectOwnerOperations()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var transaction = new CaptureDbTransaction(connection);
+        var executor = CreateExecutor(connection);
+        executor.SetTransaction(transaction);
+
+        // Act
+        var commitException = Should.Throw<InvalidOperationException>(() => executor.CommitTransaction());
+        var rollbackException = Should.Throw<InvalidOperationException>(() => executor.RollbackTransaction());
+
+        // Assert
+        commitException.Message.ShouldContain("外部所有者");
+        rollbackException.Message.ShouldContain("外部所有者");
+        transaction.CommitCount.ShouldBe(0);
+        transaction.RollbackCount.ShouldBe(0);
+        transaction.DisposeCount.ShouldBe(0);
+    }
+    #pragma warning restore CS0618
+
+    /// <summary>
+    /// 测试目的：外部连接身份不一致时，拒绝绑定不得释放当前 Query 自有连接。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenExternalIdentityDiffers_ShouldKeepOwnedConnection()
+    {
+        // Arrange
+        var ownedConnection = new CaptureDbConnection
+        {
+            ConnectionString = "Server=expected;Database=target;User Id=sa;Password=owned-secret;"
+        };
+        var query = CreateOwnedQuery(ownedConnection);
+        query.GetConnection();
+        query.Config(options => options.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "target",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "target",
+                DatabaseType = DatabaseType.SqlServer,
+                ConnectionString = "Server=expected;Database=target;User Id=sa;Password=expected-secret;"
+            }
+        }));
+        var externalConnection = new CaptureDbConnection
+        {
+            ConnectionString = "Server=external;Database=other;User Id=sa;Password=external-secret;"
+        };
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => query.SetConnection(externalConnection));
+
+        // Assert
+        exception.Message.ShouldNotContain("expected-secret");
+        exception.Message.ShouldNotContain("external-secret");
+        ownedConnection.DisposeCount.ShouldBe(0);
+        query.GetConnection().ShouldBeSameAs(ownedConnection);
+        query.Dispose();
+    }
+
+    /// <summary>
+    /// 测试目的：同一连接实例重新绑定时，也必须校验固定数据源的物理身份。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenSameInstanceIdentityChanges_ShouldRejectBinding()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ConnectionString = "Server=expected;Database=target;User Id=sa;Password=initial-secret;"
+        };
+        var query = CreateOwnedQuery(connection);
+        query.GetConnection();
+        query.Config(options => options.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "target",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "target",
+                DatabaseType = DatabaseType.SqlServer,
+                ConnectionString = "Server=expected;Database=target;User Id=sa;Password=expected-secret;"
+            }
+        }));
+        connection.ConnectionString = "Server=external;Database=other;User Id=sa;Password=changed-secret;";
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => query.SetConnection(connection));
+
+        // Assert
+        exception.Message.ShouldNotContain("expected-secret");
+        exception.Message.ShouldNotContain("changed-secret");
+        connection.DisposeCount.ShouldBe(0);
+        query.GetConnection().ShouldBeSameAs(connection);
+        query.Dispose();
+    }
+
+    /// <summary>
+    /// 测试目的：使用命名连接字符串的数据源应按解析后的连接字符串校验外部连接身份。
+    /// </summary>
+    [Fact]
+    public void SetConnection_WhenNamedDataSourceIdentityDiffers_ShouldRejectBinding()
+    {
+        // Arrange
+        var ownedConnection = new CaptureDbConnection
+        {
+            ConnectionString = "Server=expected;Database=target;User Id=sa;Password=owned-secret;"
+        };
+        var services = CreateServices();
+        services.AddSingleton(new ConnectionStringCollection
+        {
+            ["TargetConnection"] = "Server=expected;Database=target;User Id=sa;Password=expected-secret;"
+        });
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.ConnectionString("Server=default;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<SqlOptions<InspectableSqlServerQuery>>();
+        var query = new InspectableSqlServerQuery(provider, options, new ConnectionDatabase(ownedConnection));
+        query.GetConnection();
+        query.Config(config => config.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "target",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "target",
+                DatabaseType = DatabaseType.SqlServer,
+                ConnectionStringName = "TargetConnection"
+            }
+        }));
+        var externalConnection = new CaptureDbConnection
+        {
+            ConnectionString = "Server=external;Database=other;User Id=sa;Password=external-secret;"
+        };
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => query.SetConnection(externalConnection));
+
+        // Assert
+        exception.Message.ShouldNotContain("expected-secret");
+        exception.Message.ShouldNotContain("external-secret");
+        ownedConnection.DisposeCount.ShouldBe(0);
+        query.GetConnection().ShouldBeSameAs(ownedConnection);
+        query.Dispose();
+    }
+
     /// <summary>
     /// 测试目的：主库短事务策略执行成功后应提交内部事务并关闭内部连接。
     /// </summary>
@@ -706,6 +961,36 @@ public class SqlServerRoutingAndExecutionTest
         connection.LastTransaction.ShouldNotBeNull();
         connection.LastTransaction.CommitCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：子 Query 绑定事务作用域失败时，应释放子对象且不影响作用域提交自身事务。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_CreateQuery_WhenBindingFails_ShouldDisposeChildAndKeepScopeUsable()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var invalidChild = DispatchProxy.Create<ISqlQuery, DisposeTrackingSqlQueryProxy>();
+        var trackingProxy = (DisposeTrackingSqlQueryProxy)(object)invalidChild;
+        var queryFactory = new BindingFailureSqlQueryFactory(provider.GetRequiredService<ISqlQueryFactory>(), invalidChild);
+        var scopeFactory = new SqlTransactionScopeFactory(queryFactory,
+            provider.GetRequiredService<ISqlExecutorFactory>());
+
+        // Act
+        using var scope = scopeFactory.Begin();
+        var exception = Should.Throw<InvalidOperationException>(() => scope.CreateQuery());
+        scope.Commit();
+
+        // Assert
+        exception.Message.ShouldContain("内部执行资源绑定器");
+        trackingProxy.DisposeCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
     /// <summary>
@@ -979,6 +1264,80 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试 - Scope提交失败时应尝试回滚，并保留原始提交异常。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenCommitFails_ShouldRollbackAndPreserveCommitException()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        connection.LastTransaction.ThrowOnCommit = true;
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() => scope.Commit());
+
+        // Assert
+        exception.Message.ShouldBe("commit failed");
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - Scope提交和回滚同时失败时应聚合两个异常。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenCommitAndRollbackFail_ShouldAggregateExceptions()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        connection.LastTransaction.ThrowOnCommit = true;
+        connection.LastTransaction.ThrowOnRollback = true;
+
+        // Act
+        var exception = Should.Throw<AggregateException>(() => scope.Commit());
+
+        // Assert
+        exception.Flatten().InnerExceptions.Select(item => item.Message)
+            .ShouldBe(new[] { "commit failed", "rollback failed" }, ignoreOrder: true);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试 - Scope异步提交失败时应通过原生异步回滚并保留提交异常。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenCommitAsyncFails_ShouldRollbackAsyncAndPreserveCommitException()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+        connection.LastTransaction.ThrowOnCommit = true;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => scope.CommitAsync());
+
+        // Assert
+        exception.Message.ShouldBe("commit failed");
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
+    }
+
+    /// <summary>
     /// 测试 - 异步事务开始失败且 Owner Query 清理失败时，应聚合保留两个失败原因。
     /// </summary>
     [Fact]
@@ -1105,6 +1464,62 @@ public class SqlServerRoutingAndExecutionTest
 
         connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
+
+    /// <summary>
+    /// 测试目的：事务 Scope 的子 Query 释放不应关闭 Scope 连接，且 Scope 完成后子 Query 必须失效。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenChildQueryIsDisposed_ShouldKeepOwnerConnectionAndInvalidateAfterCompletion()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        var query = scope.CreateQuery();
+
+        // Act
+        query.Dispose();
+        scope.Rollback();
+
+        // Assert
+        connection.State.ShouldBe(ConnectionState.Open);
+        Should.Throw<InvalidOperationException>(() => query.GetConnection());
+    }
+
+    #pragma warning disable CS0618
+    /// <summary>
+    /// 测试 - Scope处于活动状态时已释放子对象不应重新创建独立资源或脱离事务执行。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenChildIsDisposedWhileActive_ShouldRejectFurtherResourceAccessAndExecution()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        var query = scope.CreateQuery();
+        var executor = scope.CreateExecutor();
+
+        // Act
+        query.Dispose();
+        executor.Dispose();
+
+        // Assert
+        Should.Throw<ObjectDisposedException>(() => query.GetConnection());
+        Should.Throw<ObjectDisposedException>(() => ((IDbTransactionManager)query).GetTransaction());
+        Should.Throw<ObjectDisposedException>(() => executor.ExecuteSql("Update [Users] Set [Name]=@name",
+            new { name = "after-dispose" }));
+        connection.State.ShouldBe(ConnectionState.Open);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+    #pragma warning restore CS0618
 
     /// <summary>
     /// 测试 - 异步 Count 应使用增强参数而不是旧字典参数。
@@ -1748,6 +2163,62 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 首次创建正常事务所有者、后续创建缺少内部资源绑定器子对象的测试查询工厂。
+    /// </summary>
+    private sealed class BindingFailureSqlQueryFactory : ISqlQueryFactory
+    {
+        private readonly ISqlQueryFactory _innerFactory;
+        private readonly ISqlQuery _invalidChild;
+        private bool _ownerCreated;
+
+        /// <summary>
+        /// 初始化一个<see cref="BindingFailureSqlQueryFactory"/>类型的实例。
+        /// </summary>
+        /// <param name="innerFactory">实际查询工厂。</param>
+        /// <param name="invalidChild">不实现内部绑定器的子查询。</param>
+        public BindingFailureSqlQueryFactory(ISqlQueryFactory innerFactory, ISqlQuery invalidChild)
+        {
+            _innerFactory = innerFactory;
+            _invalidChild = invalidChild;
+        }
+
+        /// <inheritdoc />
+        public TQuery Create<TQuery>() where TQuery : class, ISqlQuery => Create<TQuery>(null);
+
+        /// <inheritdoc />
+        public TQuery Create<TQuery>(string dbKey) where TQuery : class, ISqlQuery
+        {
+            if (_ownerCreated == false)
+            {
+                _ownerCreated = true;
+                return _innerFactory.Create<TQuery>(dbKey);
+            }
+            return _invalidChild as TQuery;
+        }
+    }
+
+    /// <summary>
+    /// 记录 Dispose 调用的查询代理。
+    /// </summary>
+    private class DisposeTrackingSqlQueryProxy : DispatchProxy
+    {
+        /// <summary>
+        /// Dispose 调用次数。
+        /// </summary>
+        public int DisposeCount { get; private set; }
+
+        /// <inheritdoc />
+        protected override object Invoke(MethodInfo targetMethod, object[] args)
+        {
+            if (targetMethod.Name == nameof(IDisposable.Dispose))
+                DisposeCount++;
+            return targetMethod.ReturnType == typeof(void)
+                ? null
+                : targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
+        }
+    }
+
+    /// <summary>
     /// 测试执行器
     /// </summary>
     private sealed class InspectableSqlServerExecutor : SqlServerSqlExecutorBase
@@ -2212,23 +2683,41 @@ public class SqlServerRoutingAndExecutionTest
 
         public bool ThrowOnDispose { get; set; }
 
+        public bool ThrowOnCommit { get; set; }
+
+        public bool ThrowOnRollback { get; set; }
+
         public override IsolationLevel IsolationLevel => _isolationLevel;
 
         protected override DbConnection DbConnection => _connection;
 
-        public override void Commit() => CommitCount++;
+        public override void Commit()
+        {
+            CommitCount++;
+            if (ThrowOnCommit)
+                throw new InvalidOperationException("commit failed");
+        }
 
         public override Task CommitAsync(CancellationToken cancellationToken = default)
         {
             AsyncCommitCount++;
+            if (ThrowOnCommit)
+                return Task.FromException(new InvalidOperationException("commit failed"));
             return Task.CompletedTask;
         }
 
-        public override void Rollback() => RollbackCount++;
+        public override void Rollback()
+        {
+            RollbackCount++;
+            if (ThrowOnRollback)
+                throw new InvalidOperationException("rollback failed");
+        }
 
         public override Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             AsyncRollbackCount++;
+            if (ThrowOnRollback)
+                return Task.FromException(new InvalidOperationException("rollback failed"));
             return Task.CompletedTask;
         }
 

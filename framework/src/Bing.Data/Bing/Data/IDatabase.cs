@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Bing.Aspects;
+﻿using Bing.Aspects;
 
 namespace Bing.Data;
 
@@ -7,10 +6,6 @@ namespace Bing.Data;
 /// 数据库
 /// </summary>
 [IgnoreAspect]
-public interface IDatabase
+public interface IDatabase : IDatabaseConnectionAccessor
 {
-    /// <summary>
-    /// 获取数据库连接
-    /// </summary>
-    IDbConnection GetConnection();
 }

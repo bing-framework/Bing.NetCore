@@ -31,7 +31,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         try
         {
             EnsureTransactionsSupported(context);
-            var connection = query.GetConnection();
+            var connection = GetResourceAccessor(query).GetOrCreateConnection();
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
             var transaction = connection.BeginTransaction(isolationLevel);
@@ -57,7 +57,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         try
         {
             EnsureTransactionsSupported(context);
-            var connection = query.GetConnection();
+            var connection = GetResourceAccessor(query).GetOrCreateConnection();
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
             var transaction = await SqlTransactionAsyncAdapter.BeginAsync(connection, isolationLevel, cancellationToken)
@@ -92,6 +92,15 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 
     private SqlTransactionScope CreateScope(DatabaseContext context, ISqlQuery query, IDbConnection connection,
         IDbTransaction transaction) => new(context, query, connection, _queryFactory, _executorFactory, transaction);
+
+    /// <summary>
+    /// 获取 SQL 查询内部执行资源访问器。
+    /// </summary>
+    /// <param name="query">SQL 查询对象。</param>
+    /// <returns>执行资源访问器。</returns>
+    private static ISqlExecutionResourceAccessor GetResourceAccessor(ISqlQuery query) =>
+        query as ISqlExecutionResourceAccessor ??
+        throw new InvalidOperationException("事务查询对象未实现内部执行资源访问器。");
 
     private static void EnsureTransactionsSupported(DatabaseContext context)
     {
@@ -143,6 +152,8 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 
         public string DbKey => _context.DbKey;
         public DatabaseType DatabaseType => _context.DataSource?.DatabaseType ?? default;
+        /// <inheritdoc />
+        public DatabaseContext DatabaseContext => DatabaseContextSnapshot.Create(_context);
         public IsolationLevel IsolationLevel => _transaction.IsolationLevel;
         public IDbConnection Connection => _connection;
         public IDbTransaction Transaction => _transaction;
@@ -154,12 +165,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         public TQuery CreateQuery<TQuery>() where TQuery : class, ISqlQuery
         {
             ThrowIfInactive();
-            var query = _queryFactory is SqlQueryFactory factory
+            return CreateAndBindChild(() => _queryFactory is SqlQueryFactory factory
                 ? factory.CreateForTransaction<TQuery>(_context)
-                : _queryFactory.Create<TQuery>(DbKey);
-            BindTransactionContext(query);
-            _children.Add(query);
-            return query;
+                : _queryFactory.Create<TQuery>(DbKey));
         }
 
         public ISqlExecutor CreateExecutor() => CreateExecutor<ISqlExecutor>();
@@ -167,12 +175,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         public TExecutor CreateExecutor<TExecutor>() where TExecutor : class, ISqlExecutor
         {
             ThrowIfInactive();
-            var executor = _executorFactory is SqlExecutorFactory factory
+            return CreateAndBindChild(() => _executorFactory is SqlExecutorFactory factory
                 ? factory.CreateForTransaction<TExecutor>(_context)
-                : _executorFactory.Create<TExecutor>(DbKey);
-            BindTransactionContext(executor);
-            _children.Add(executor);
-            return executor;
+                : _executorFactory.Create<TExecutor>(DbKey));
         }
 
         public void Commit()
@@ -190,7 +195,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
             catch (Exception exception)
             {
-                operationException = exception;
+                operationException = TryRollbackAfterCommitFailure(exception);
                 _state = SqlTransactionScopeState.Faulted;
             }
             ThrowAfterCleanup(operationException);
@@ -212,7 +217,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
             catch (Exception exception)
             {
-                operationException = exception;
+                operationException = await TryRollbackAfterCommitFailureAsync(exception).ConfigureAwait(false);
                 _state = SqlTransactionScopeState.Faulted;
             }
             await ThrowAfterCleanupAsync(operationException).ConfigureAwait(false);
@@ -343,14 +348,82 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 throw new InvalidOperationException("SQL 事务作用域已结束，不能继续创建 Query 或 Executor。");
         }
 
+        /// <summary>
+        /// 创建并原子绑定事务作用域子对象。
+        /// </summary>
+        /// <typeparam name="TService">子对象类型。</typeparam>
+        /// <param name="creator">子对象创建委托。</param>
+        /// <returns>已绑定事务资源的子对象。</returns>
+        private TService CreateAndBindChild<TService>(Func<TService> creator) where TService : class, ISqlQuery
+        {
+            TService child = null;
+            try
+            {
+                child = creator();
+                BindTransactionContext(child);
+                _children.Add(child);
+                return child;
+            }
+            catch (Exception bindException)
+            {
+                if (child == null)
+                    ExceptionDispatchInfo.Capture(bindException).Throw();
+                try
+                {
+                    child.Dispose();
+                }
+                catch (Exception cleanupException)
+                {
+                    throw new AggregateException(bindException, cleanupException);
+                }
+
+                ExceptionDispatchInfo.Capture(bindException).Throw();
+                throw;
+            }
+        }
+
         private void BindTransactionContext(ISqlQuery query)
         {
-            if (query is SqlQueryBase sqlQuery)
+            var binder = query as ISqlExecutionResourceBinder;
+            if (binder == null)
+                throw new InvalidOperationException("事务作用域创建的 Query 或 Executor 必须实现内部执行资源绑定器，才能保证其生命周期受事务作用域管理。");
+            binder.BindTransactionScope(_context, _connection, _transaction, _lease);
+        }
+
+        /// <summary>
+        /// 提交失败后尝试回滚事务。
+        /// </summary>
+        /// <param name="commitException">提交异常。</param>
+        /// <returns>保留提交异常或聚合提交、回滚异常。</returns>
+        private Exception TryRollbackAfterCommitFailure(Exception commitException)
+        {
+            try
             {
-                sqlQuery.SetTransactionContext(_context, _connection, _transaction, _lease);
-                return;
+                _transaction.Rollback();
+                return commitException;
             }
-            throw new InvalidOperationException("事务作用域创建的 Query 或 Executor 必须继承 SqlQueryBase，才能保证其生命周期受事务作用域管理。");
+            catch (Exception rollbackException)
+            {
+                return new AggregateException(commitException, rollbackException);
+            }
+        }
+
+        /// <summary>
+        /// 异步提交失败后尝试回滚事务。
+        /// </summary>
+        /// <param name="commitException">提交异常。</param>
+        /// <returns>保留提交异常或聚合提交、回滚异常。</returns>
+        private async Task<Exception> TryRollbackAfterCommitFailureAsync(Exception commitException)
+        {
+            try
+            {
+                await SqlTransactionAsyncAdapter.RollbackAsync(_transaction, CancellationToken.None).ConfigureAwait(false);
+                return commitException;
+            }
+            catch (Exception rollbackException)
+            {
+                return new AggregateException(commitException, rollbackException);
+            }
         }
 
         private void ThrowAfterCleanup(Exception operationException)

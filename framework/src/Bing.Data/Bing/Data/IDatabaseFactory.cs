@@ -1,8 +1,12 @@
-﻿namespace Bing.Data;
+﻿using System.ComponentModel;
+
+namespace Bing.Data;
 
 /// <summary>
 /// 数据库工厂
 /// </summary>
+[System.Obsolete("Dapper 连接创建已迁移至 ISqlDbConnectionFactoryResolver。")]
+[EditorBrowsable(EditorBrowsableState.Never)]
 public interface IDatabaseFactory
 {
     /// <summary>

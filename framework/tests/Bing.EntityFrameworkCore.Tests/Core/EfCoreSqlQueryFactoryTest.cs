@@ -3,6 +3,7 @@ using Bing.Data.Sql.Configs;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
 using System.Data.Common;
+using System.Reflection;
 
 namespace Bing.EntityFrameworkCore.Tests.Core;
 
@@ -16,6 +17,27 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     private const string SharedMemoryConnectionString =
         "Data Source=file:ef-core-query-factory?mode=memory&cache=shared";
+
+    /// <summary>
+    /// 测试 - EF共享模式应通过内部元数据绑定器绑定模型，不应恢复旧外部上下文依赖。
+    /// </summary>
+    [Fact]
+    public void Create_ShouldUseInternalMetadataBinderInsteadOfLegacyExternalContext()
+    {
+        // Arrange
+        var factoryType = typeof(EfCoreSqlQueryFactory);
+
+        // Act
+        var metadataBinder = factoryType.GetMethod("GetMetadataBinder",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        var legacyExternalContext = factoryType.GetMethod("GetExternalContext",
+            BindingFlags.NonPublic | BindingFlags.Static);
+
+        // Assert
+        Assert.NotNull(metadataBinder);
+        Assert.Equal("ISqlQueryMetadataBinder", metadataBinder.ReturnType.Name);
+        Assert.Null(legacyExternalContext);
+    }
 
     /// <summary>
     /// 测试目的：Shared 模式应复用 DbContext 连接，并使用 EF Core 模型映射生成 SQL。
@@ -61,6 +83,38 @@ public class EfCoreSqlQueryFactoryTest
 
         // Assert
         Assert.Same(transaction.GetDbTransaction(), transactionManager.GetTransaction());
+    }
+
+    /// <summary>
+    /// 测试目的：Shared Query 应在 EF Core 事务完成后清除缓存，并解析后续新事务且不释放 EF 连接。
+    /// </summary>
+    [Fact]
+    public void Create_WhenEfTransactionsChange_ShouldRefreshCurrentTransactionWithoutOwningEfResources()
+    {
+        // Arrange
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider();
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var factory = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+        var query = factory.Create(unitOfWork);
+        var transactionManager = (IDbTransactionManager)query;
+
+        // Act
+        using (var firstTransaction = unitOfWork.Database.BeginTransaction())
+        {
+            Assert.Same(firstTransaction.GetDbTransaction(), transactionManager.GetTransaction());
+            firstTransaction.Commit();
+        }
+        var transactionAfterFirstCompletion = transactionManager.GetTransaction();
+        using var secondTransaction = unitOfWork.Database.BeginTransaction();
+        var resolvedSecondTransaction = transactionManager.GetTransaction();
+        query.Dispose();
+
+        // Assert
+        Assert.Null(transactionAfterFirstCompletion);
+        Assert.Same(secondTransaction.GetDbTransaction(), resolvedSecondTransaction);
+        Assert.Equal(ConnectionState.Open, connection.State);
     }
 
     /// <summary>

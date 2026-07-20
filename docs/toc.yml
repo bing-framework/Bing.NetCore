@@ -6,5 +6,7 @@
   href: ReleaseNotes.md
 - name: 数据库集成测试
   href: integration-testing.md
+- name: SQL事务集成测试
+  href: testing/database-integration-tests.md
 - name: Github
   href: https://github.com/bing-framework/Bing.NetCore

@@ -1,4 +1,6 @@
-﻿using Bing.Extensions;
+﻿using System.ComponentModel;
+using System.Runtime.ExceptionServices;
+using Bing.Extensions;
 
 namespace Bing.Data.Sql;
 
@@ -14,7 +16,7 @@ public abstract partial class SqlQueryBase
     /// <param name="connection">事务连接。</param>
     /// <param name="transaction">事务。</param>
     /// <param name="lease">事务作用域执行租约。</param>
-    internal void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
+    private void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
         SqlTransactionScopeLease lease)
     {
         if (context == null)
@@ -25,13 +27,24 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(transaction));
         if (lease == null)
             throw new ArgumentNullException(nameof(lease));
-        if (transaction.Connection != null && ReferenceEquals(transaction.Connection, connection) == false)
-            throw new InvalidOperationException("事务连接与固定事务执行上下文不一致");
-        Options.DatabaseType = context.DataSource?.DatabaseType ?? Options.DatabaseType;
-        Options.SetDatabaseContext(context);
-        SetConnection(connection);
+        if (transaction.Connection == null)
+            throw new InvalidOperationException("事务作用域事务必须关联数据库连接。");
+        if (ReferenceEquals(transaction.Connection, connection) == false)
+            throw new InvalidOperationException("事务作用域连接与事务连接不一致。");
+        if (_transaction != null && ReferenceEquals(_transaction, transaction) == false)
+            throw new InvalidOperationException("当前 Query 已绑定其他事务，不能覆盖事务资源。");
+        EnsureConnectionCanBeReplaced(connection);
+        ValidateExternalConnectionDatabaseIdentity(connection);
+
+        var contextSnapshot = DatabaseContextSnapshot.Create(context);
+        BindConnection(connection, SqlResourceOwnership.External, SqlConnectionSource.DataSource);
+        Options.DatabaseType = contextSnapshot.DataSource?.DatabaseType ?? Options.DatabaseType;
+        Options.SetDatabaseContext(contextSnapshot);
         _transactionScopeLease = lease;
-        SetTransaction(transaction, lease.TransactionId);
+        _isTransactionScopeChildDisposed = false;
+        _transaction = transaction;
+        _transactionId = lease.TransactionId;
+        _transactionOwnership = SqlResourceOwnership.External;
     }
 
     #region SetTransaction(设置数据库事务)
@@ -40,9 +53,11 @@ public abstract partial class SqlQueryBase
     /// 设置数据库事务
     /// </summary>
     /// <param name="transaction">数据库事务</param>
+    [Obsolete("事务绑定已内部化，请使用 ISqlTransactionScope 或框架集成 API。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetTransaction(IDbTransaction transaction)
     {
-        SetTransaction(transaction, null);
+        ((ISqlExecutionResourceBinder)this).BindExternalTransaction(transaction);
     }
 
     /// <summary>
@@ -50,18 +65,24 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="transaction">数据库事务。</param>
     /// <param name="transactionId">诊断事务标识。</param>
-    private void SetTransaction(IDbTransaction transaction, string transactionId)
+    private void BindExternalTransaction(IDbTransaction transaction, string transactionId)
     {
         if (transaction == null)
-            return;
+            throw new ArgumentNullException(nameof(transaction));
+        var transactionConnection = transaction.Connection ??
+                                  throw new InvalidOperationException("外部事务必须关联数据库连接。");
+        if (_transaction != null && _transactionOwnership == SqlResourceOwnership.Owned)
+            throw new InvalidOperationException("当前 Query 已存在自有事务，不能绑定外部事务。");
+        if (_transaction != null && ReferenceEquals(_transaction, transaction) == false)
+            throw new InvalidOperationException("当前 Query 已绑定其他事务，不能覆盖事务资源。");
+        if (_connection != null && ReferenceEquals(_connection, transactionConnection) == false)
+            throw new InvalidOperationException("外部事务连接与 Query 连接不一致。");
+        if (_connection == null)
+            BindConnection(transactionConnection, SqlResourceOwnership.External, SqlConnectionSource.External);
+        ValidateExternalConnectionDatabaseIdentity(transactionConnection);
         _transaction = transaction;
         _transactionId = transactionId ?? Guid.NewGuid().ToString("N");
         _transactionOwnership = SqlResourceOwnership.External;
-        if (transaction.Connection != null)
-        {
-            _connection = transaction.Connection;
-            _connectionOwnership = SqlResourceOwnership.External;
-        }
     }
 
     #endregion
@@ -71,10 +92,43 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 获取数据库事务
     /// </summary>
+    [Obsolete("事务管理已内部化，请使用 ISqlTransactionScope。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IDbTransaction GetTransaction()
     {
+        return GetExecutionTransaction();
+    }
+
+    /// <summary>
+    /// 获取内部执行事务。
+    /// </summary>
+    /// <returns>当前事务，不存在时返回 null。</returns>
+    protected IDbTransaction GetExecutionTransaction() =>
+        ((ISqlExecutionResourceAccessor)this).GetCurrentTransaction();
+
+    /// <summary>
+    /// 获取当前执行事务。
+    /// </summary>
+    /// <returns>当前事务，不存在时返回 null。</returns>
+    IDbTransaction ISqlExecutionResourceAccessor.GetCurrentTransaction()
+    {
         _transactionScopeLease?.EnsureActive();
-        return _transaction ?? _externalTransactionResolver?.Invoke();
+        ThrowIfTransactionScopeChildDisposed();
+        if (_externalTransactionResolver != null)
+        {
+            var transaction = _externalTransactionResolver.Invoke();
+            if (ReferenceEquals(_transaction, transaction))
+                return _transaction;
+            if (_transaction != null && _transactionOwnership == SqlResourceOwnership.External)
+                ReleaseTransaction();
+            if (transaction == null)
+                return _transaction;
+            BindExternalTransaction(transaction, null);
+            return _transaction;
+        }
+        if (_transaction != null)
+            return _transaction;
+        return null;
     }
 
     /// <summary>
@@ -83,7 +137,7 @@ public abstract partial class SqlQueryBase
     protected IDbTransaction GetQueryTransaction()
     {
         _transactionScopeLease?.EnsureActive();
-        var transaction = GetTransaction();
+        var transaction = GetExecutionTransaction();
         if (transaction != null)
             return transaction;
         var context = Options.GetDatabaseContext();
@@ -91,7 +145,7 @@ public abstract partial class SqlQueryBase
             return null;
         if (context.DataSource?.PrimaryReadStrategy != PrimaryReadStrategy.Transaction)
             return null;
-        var primaryReadTransaction = BeginTransaction();
+        var primaryReadTransaction = BeginOwnedTransaction();
         _primaryReadTransactionStarted = true;
         return primaryReadTransaction;
     }
@@ -105,7 +159,7 @@ public abstract partial class SqlQueryBase
             return;
         try
         {
-            CommitTransaction();
+            CommitOwnedTransaction();
         }
         finally
         {
@@ -137,13 +191,25 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 开始事务
     /// </summary>
-    public IDbTransaction BeginTransaction() => BeginTransactionImpl(null);
+    [Obsolete("请使用 ISqlTransactionScopeFactory 创建事务作用域。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IDbTransaction BeginTransaction() => BeginOwnedTransaction();
 
     /// <summary>
     /// 开始事务
     /// </summary>
     /// <param name="isolationLevel">事务隔离级别</param>
-    public IDbTransaction BeginTransaction(IsolationLevel isolationLevel) => BeginTransactionImpl(isolationLevel);
+    [Obsolete("请使用 ISqlTransactionScopeFactory 创建事务作用域。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IDbTransaction BeginTransaction(IsolationLevel isolationLevel) => BeginOwnedTransaction(isolationLevel);
+
+    /// <summary>
+    /// 开始 Query 内部拥有的事务。
+    /// </summary>
+    /// <param name="isolationLevel">事务隔离级别。</param>
+    /// <returns>内部拥有的数据库事务。</returns>
+    private IDbTransaction BeginOwnedTransaction(IsolationLevel? isolationLevel = null) =>
+        BeginTransactionImpl(isolationLevel);
 
     /// <summary>
     /// 开始事务
@@ -154,9 +220,12 @@ public abstract partial class SqlQueryBase
         try
         {
             if (_transaction != null)
+            {
+                EnsureOwnedTransaction("开始");
                 return _transaction;
+            }
             EnsureTransactionsSupported();
-            var connection = GetConnection();
+            var connection = GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
             _transaction = isolationLevel == null
@@ -193,20 +262,36 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 提交事务
     /// </summary>
+    [Obsolete("请使用 ISqlTransactionScope 提交事务。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void CommitTransaction()
+    {
+        CommitOwnedTransaction();
+    }
+
+    /// <summary>
+    /// 提交 Query 内部拥有的事务。
+    /// </summary>
+    private void CommitOwnedTransaction()
     {
         if (_transaction == null)
             return;
-        if (_transactionOwnership == SqlResourceOwnership.External)
-            return;
+        EnsureOwnedTransaction("提交");
         try
         {
             _transaction.Commit();
         }
-        catch
+        catch (Exception commitException)
         {
-            _transaction.Rollback();
-            throw;
+            try
+            {
+                _transaction.Rollback();
+            }
+            catch (Exception rollbackException)
+            {
+                throw new AggregateException(commitException, rollbackException);
+            }
+            ExceptionDispatchInfo.Capture(commitException).Throw();
         }
         finally
         {
@@ -222,12 +307,21 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 回滚事务
     /// </summary>
+    [Obsolete("请使用 ISqlTransactionScope 回滚事务。")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void RollbackTransaction()
+    {
+        RollbackOwnedTransaction();
+    }
+
+    /// <summary>
+    /// 回滚内部拥有的事务
+    /// </summary>
+    protected void RollbackOwnedTransaction()
     {
         if (_transaction == null)
             return;
-        if (_transactionOwnership == SqlResourceOwnership.External)
-            return;
+        EnsureOwnedTransaction("回滚");
         try
         {
             if (_connection?.State != ConnectionState.Closed)
@@ -241,14 +335,66 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 回滚内部拥有的事务
+    /// 获取当前事务诊断标识。
     /// </summary>
-    protected void RollbackOwnedTransaction()
+    /// <returns>当前事务标识，不存在时返回 null。</returns>
+    string ISqlExecutionResourceAccessor.GetCurrentTransactionId()
     {
-        if (_transactionOwnership != SqlResourceOwnership.Owned)
-            return;
-        RollbackTransaction();
+        _transactionScopeLease?.EnsureActive();
+        ThrowIfTransactionScopeChildDisposed();
+        return _transactionId;
     }
+
+    /// <summary>
+    /// 确保当前事务由 Query 或事务作用域拥有。
+    /// </summary>
+    /// <param name="operation">尝试执行的事务操作。</param>
+    private void EnsureOwnedTransaction(string operation)
+    {
+        if (_transactionOwnership == SqlResourceOwnership.External)
+            throw new InvalidOperationException($"当前事务由外部所有者管理，Query 不能{operation}该事务。");
+    }
+
+    /// <summary>
+    /// 绑定框架自有连接。
+    /// </summary>
+    /// <param name="connection">数据库连接。</param>
+    /// <param name="source">连接来源。</param>
+    void ISqlExecutionResourceBinder.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
+        BindConnection(connection, SqlResourceOwnership.Owned, source);
+
+    /// <summary>
+    /// 绑定外部连接。
+    /// </summary>
+    /// <param name="connection">数据库连接。</param>
+    /// <param name="source">连接来源。</param>
+    void ISqlExecutionResourceBinder.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
+        BindConnection(connection, SqlResourceOwnership.External, source);
+
+    /// <summary>
+    /// 绑定外部事务。
+    /// </summary>
+    /// <param name="transaction">数据库事务。</param>
+    /// <param name="transactionId">诊断事务标识。</param>
+    void ISqlExecutionResourceBinder.BindExternalTransaction(IDbTransaction transaction, string transactionId) =>
+        BindExternalTransaction(transaction, transactionId);
+
+    /// <summary>
+    /// 绑定外部事务延迟解析器。
+    /// </summary>
+    /// <param name="resolver">外部事务解析器。</param>
+    void ISqlExecutionResourceBinder.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+        _externalTransactionResolver = resolver;
+
+    /// <summary>
+    /// 绑定事务作用域上下文。
+    /// </summary>
+    /// <param name="context">固定数据库上下文。</param>
+    /// <param name="connection">事务连接。</param>
+    /// <param name="transaction">事务对象。</param>
+    /// <param name="lease">事务作用域执行租约。</param>
+    void ISqlExecutionResourceBinder.BindTransactionScope(DatabaseContext context, IDbConnection connection,
+        IDbTransaction transaction, SqlTransactionScopeLease lease) => SetTransactionContext(context, connection, transaction, lease);
 
     #endregion
 }

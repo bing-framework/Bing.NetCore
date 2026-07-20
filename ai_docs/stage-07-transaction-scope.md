@@ -44,3 +44,10 @@
 - 提交或回滚后保留完成态，重复同一完成操作保持幂等且不会重复释放资源；交叉提交/回滚会抛出明确异常。
 - 显式 `Dispose` 或 `DisposeAsync` 后，后续提交、回滚及创建子对象会抛出 `ObjectDisposedException`。
 - `Bing.Dapper.SqlServer.Tests` 已覆盖同步和异步完成态；SQLite 真实集成测试验证完成后子对象创建仍遵循释放语义。
+
+## 2026-07-20 API 收敛补充
+
+- `ISqlTransactionScope` 是唯一推荐的公开事务生命周期入口；`ISqlTransactionContext` 集中公开事务标识、固定上下文快照、连接、事务与隔离级别。
+- Query 执行资源读取与绑定分别收敛为内部 `ISqlExecutionResourceAccessor`、`ISqlExecutionResourceBinder`；旧连接、事务 Manager 和外部上下文成员仅保留隐藏的兼容入口。
+- Scope 提交失败后会尽力回滚：回滚成功时保留提交异常，两个操作均失败时聚合异常；同步和原生异步路径语义一致。
+- Scope 子对象在 Scope 完成时因 lease 失效而拒绝再次访问；释放子对象不会释放 Scope owner 的连接或事务。
