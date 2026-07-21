@@ -154,8 +154,9 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <param name="unitOfWork">工作单元</param>
     private void BindEntityMetadata(ISqlQuery query, UnitOfWorkBase unitOfWork)
     {
-        GetMetadataBinder(query).BindEntityMetadata(unitOfWork, new DefaultEntityMappingResolver(unitOfWork,
-            _databaseContextAccessor, _metadataOptions, _typeConverterResolver));
+        GetMetadataBinder(query).BindEntityMappingResolver(new DefaultEntityMappingResolver(
+            databaseContextAccessor: _databaseContextAccessor, options: _metadataOptions,
+            typeConverterResolver: _typeConverterResolver, entityModelMetadataProvider: unitOfWork));
     }
 
     /// <summary>

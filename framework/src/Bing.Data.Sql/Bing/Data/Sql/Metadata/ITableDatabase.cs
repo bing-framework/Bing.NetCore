@@ -3,7 +3,7 @@
 /// <summary>
 /// 表数据库兼容接口。
 /// </summary>
-[Obsolete("请使用 ISqlTableReferenceResolver 解析结构化表引用。")]
+[Obsolete("类型化查询请使用 IEntityMappingResolver 解析结构化表引用。")]
 public interface ITableDatabase
 {
     /// <summary>

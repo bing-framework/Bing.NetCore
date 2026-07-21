@@ -19,16 +19,13 @@ public abstract class SqliteSqlQueryBase : SqlQueryBase
 
     /// <inheritdoc />
     protected override ISqlBuilder CreateSqlBuilder() => new SqliteBuilder(
-        EntityMetadata,
-        ServiceProvider.GetService<ITableDatabase>(),
-        null,
-        EntityMappingResolver,
-        ServiceProvider.GetService<IDatabaseContextAccessor>(),
-        ServiceProvider.GetService<ISqlParameterFactory>(),
-        ServiceProvider.GetService<SqlMetadataOptions>(),
-        Options,
-        ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
-        ServiceProvider.GetService<ISqlTableReferenceResolver>(),
-        ServiceProvider.GetService<ISqlObjectNameFormatter>(),
-        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>());
+        entityMappingResolver: EntityMappingResolver,
+        databaseContextAccessor: ServiceProvider.GetService<IDatabaseContextAccessor>(),
+        sqlParameterFactory: ServiceProvider.GetService<ISqlParameterFactory>(),
+        metadataOptions: ServiceProvider.GetService<SqlMetadataOptions>(),
+        options: Options,
+        databaseContextResolver: ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
+        objectNameFormatter: ServiceProvider.GetService<ISqlObjectNameFormatter>(),
+        crossDatabaseQueryValidator: ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(),
+        tableReferenceValidator: ServiceProvider.GetService<ISqlTableReferenceValidator>());
 }

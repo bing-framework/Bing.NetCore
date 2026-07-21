@@ -62,6 +62,25 @@ public class PostgreSqlRoutingAndMappingTest
         Assert.Contains("\"reports\".\"users_reporting\"", builder.ToSql());
     }
 
+    /// <summary>
+    /// 测试 - PostgreSqlBuilder缺少数据库上下文时应使用PostgreSql数据库类型。
+    /// </summary>
+    [Fact]
+    public void Builder_WithoutDatabaseContext_ShouldUsePostgreSqlDatabaseType()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+        metadataOptions.EntityMappings[0].DbKey = null;
+        var builder = new PostgreSqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+            metadataOptions: metadataOptions);
+
+        // Act
+        builder.From<RoutingSample>();
+
+        // Assert
+        Assert.Equal("From \"users_reporting\"", builder.FromClause.ToSql());
+    }
+
     private static SqlOptions CreateSqlOptions() => new SqlOptions().SetDatabaseContext(new DatabaseContext
     {
         DbKey = "reporting",

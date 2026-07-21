@@ -15,11 +15,6 @@ namespace Bing.Data.Sql.Builders.Core;
 public class EntityResolver : IEntityResolver
 {
     /// <summary>
-    /// 实体元数据
-    /// </summary>
-    private readonly IEntityMetadata _matedata;
-
-    /// <summary>
     /// 实体模型元数据提供器。
     /// </summary>
     private readonly IEntityModelMetadataProvider _entityModelMetadataProvider;
@@ -52,26 +47,36 @@ public class EntityResolver : IEntityResolver
     /// <summary>
     /// 初始化一个<see cref="EntityResolver"/>类型的实例
     /// </summary>
-    /// <param name="matedata">实体元数据</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="sqlOptions">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
-    public EntityResolver(IEntityMetadata matedata = null, IEntityMappingResolver entityMappingResolver = null,
+    public EntityResolver(IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, SqlMetadataOptions options = null,
         SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null,
         IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
-        _matedata = matedata;
-        _entityModelMetadataProvider = entityModelMetadataProvider ?? new EntityModelMetadataProviderAdapter(matedata);
-        _entityMappingResolver = entityMappingResolver;
+        _entityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityMetadata();
+        _entityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
+            databaseContextAccessor: databaseContextAccessor, options: options,
+            entityModelMetadataProvider: _entityModelMetadataProvider);
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
         _sqlOptions = sqlOptions;
         _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             _options);
+    }
+
+    /// <summary>
+    /// 使用旧实体元数据初始化实体解析器。
+    /// </summary>
+    /// <param name="metadata">旧实体元数据。</param>
+    [Obsolete("请使用 IEntityModelMetadataProvider 或 IEntityMappingResolver 初始化实体解析器。")]
+    public EntityResolver(IEntityMetadata metadata)
+        : this(entityModelMetadataProvider: new EntityModelMetadataProviderAdapter(metadata))
+    {
     }
 
     /// <summary>
@@ -83,8 +88,6 @@ public class EntityResolver : IEntityResolver
         var mapping = GetMapping(entity);
         if (string.IsNullOrWhiteSpace(mapping?.TableName) == false)
             return mapping.TableName;
-        if (_matedata == null)
-            return entity.Name;
         var result = _entityModelMetadataProvider.GetTableName(entity);
         return string.IsNullOrWhiteSpace(result) ? entity.Name : result;
     }
@@ -157,7 +160,7 @@ public class EntityResolver : IEntityResolver
     public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias)
     {
         var names = Lambdas.GetLastNames(columns);
-        return _matedata == null ? names.Join() : GetColumns<TEntity>(names, propertyAsAlias);
+        return GetColumns<TEntity>(names, propertyAsAlias);
     }
 
     /// <summary>
@@ -230,7 +233,7 @@ public class EntityResolver : IEntityResolver
     private string GetDictionaryColumns<TEntity>(ListInitExpression expression)
     {
         var dictionary = GetDictionaryByListInitExpression(expression);
-        return _matedata == null ? GetColumns(dictionary) : GetColumnsByMatedata<TEntity>(dictionary);
+        return GetColumnsByMatedata<TEntity>(dictionary);
     }
 
     /// <summary>
@@ -345,9 +348,9 @@ public class EntityResolver : IEntityResolver
                 return mappedColumn.ColumnName;
         }
 
-        if (_matedata == null || entityType == null)
+        if (entityType == null)
             return propertyOrColumnName;
-        return _matedata.GetColumn(entityType, propertyOrColumnName) ?? propertyOrColumnName;
+        return _entityModelMetadataProvider.GetColumnName(entityType, propertyOrColumnName) ?? propertyOrColumnName;
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Bing.Data.Sql.Configs;
 
 namespace Bing.Dapper.Tests.Infrastructure;
 
@@ -52,6 +53,17 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
 
         var services = new ServiceCollection();
         services.AddSqlCore();
+        services.ConfigureSqlMetadata(options => options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(SqliteStructuredTableSample),
+            TableName = "samples"
+        }));
+        services.ConfigureSqlMetadata(options => options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(SqliteAttachedTableSample),
+            TableName = "samples",
+            AttachedAlias = "archive"
+        }));
         services.AddSqlDataSource("default", DatabaseType.Sqlite, FirstConnectionString);
         services.AddSqlDataSource(FirstDatabaseKey, DatabaseType.Sqlite, FirstConnectionString,
             setupAction: descriptor => descriptor.MappingProfile = "first-profile");
@@ -80,6 +92,31 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// <returns>SQL 查询对象。</returns>
     public ISqlQuery CreateQuery(string dbKey = FirstDatabaseKey)
         => ServiceProvider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>(dbKey);
+
+    /// <summary>
+    /// 创建绑定到指定外部 SQLite 连接的查询对象。
+    /// </summary>
+    /// <param name="connection">已打开的 SQLite 连接。</param>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <returns>绑定外部连接的 SQL 查询对象。</returns>
+    public ISqlQuery CreateAttachedQuery(SqliteConnection connection, string dbKey = FirstDatabaseKey)
+    {
+        if (connection == null)
+            throw new ArgumentNullException(nameof(connection));
+        var dataSource = new SqlDataSourceDescriptor
+        {
+            Key = dbKey,
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = GetConnectionString(dbKey)
+        };
+        var options = new SqlOptions<SqliteSqlQuery>
+        {
+            Connection = connection,
+            DatabaseType = DatabaseType.Sqlite
+        };
+        options.SetDatabaseContext(new DatabaseContext { DbKey = dbKey, DataSource = dataSource });
+        return new SqliteSqlQuery(ServiceProvider, options);
+    }
 
     /// <summary>
     /// 创建指定数据源的 SQL 执行对象。

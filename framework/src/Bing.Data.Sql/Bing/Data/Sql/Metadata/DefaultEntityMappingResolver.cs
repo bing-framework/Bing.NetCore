@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -46,11 +47,6 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     private readonly ITypeConverterResolver _typeConverterResolver;
 
     /// <summary>
-    /// 数据库方言适配器
-    /// </summary>
-    private readonly IDatabaseDialectAdapter _dialectAdapter;
-
-    /// <summary>
     /// 表命名策略
     /// </summary>
     private readonly ITableNamingStrategy _tableNamingStrategy;
@@ -62,14 +58,12 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="typeConverterResolver">数据类型转换器解析器</param>
-    /// <param name="dialectAdapter">数据库方言适配器</param>
     /// <param name="tableNamingStrategy">表命名策略</param>
     /// <param name="entityModelMetadataProvider">实体模型元数据提供器</param>
     public DefaultEntityMappingResolver(IEntityMetadata entityMetadata = null,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions options = null,
         ITypeConverterResolver typeConverterResolver = null,
-        IDatabaseDialectAdapter dialectAdapter = null,
         ITableNamingStrategy tableNamingStrategy = null,
         IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
@@ -78,7 +72,6 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
         _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
-        _dialectAdapter = dialectAdapter ?? new DefaultDatabaseDialectAdapter();
         _tableNamingStrategy = tableNamingStrategy ?? new DefaultTableNamingStrategy();
     }
 
@@ -106,26 +99,24 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             throw new ArgumentNullException(nameof(entityType));
         var context = GetDatabaseContext(databaseContext);
         var mappingOptions = ResolveEntityMappingOptions(entityType, context);
-        var schema = GetSchema(entityType, mappingOptions, context);
         var physicalSchema = GetPhysicalSchema(entityType, mappingOptions, context);
         var logicalSchema = GetLogicalSchema(entityType, mappingOptions, context);
         var tableName = GetTableName(entityType, mappingOptions);
         var cacheKey = new EntityMappingCacheKey(
-            entityType,
-            context.DbKey,
-            GetMappingProfile(context, mappingOptions),
-            schema,
-            GetTableRouteKey(context, mappingOptions),
+            entityType.TypeHandle,
+            NormalizeCacheValue(context.DbKey),
+            NormalizeCacheValue(GetMappingProfile(context, mappingOptions)),
+            GetCacheTableRouteKey(mappingOptions),
             GetDatabaseType(context),
-            mappingOptions?.Catalog ?? string.Empty,
-            physicalSchema,
-            logicalSchema,
+            NormalizeCacheValue(mappingOptions?.Catalog),
+            NormalizeCacheValue(physicalSchema),
+            NormalizeCacheValue(logicalSchema),
             mappingOptions?.NamingMode ?? LogicalTableNamingMode.Prefix,
             mappingOptions?.SchemaCompatibilityMode ?? SchemaCompatibilityMode.Auto,
-            mappingOptions?.DatabaseLink ?? string.Empty,
-            mappingOptions?.AttachedAlias ?? string.Empty);
+            NormalizeCacheValue(mappingOptions?.DatabaseLink),
+            NormalizeCacheValue(mappingOptions?.AttachedAlias));
         return _mappingCache.GetOrAdd(cacheKey,
-            _ => CreateMapping(entityType, context, schema, tableName, mappingOptions));
+            _ => CreateMapping(entityType, context, physicalSchema, tableName, mappingOptions));
     }
 
     /// <summary>
@@ -294,10 +285,10 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         string tableName, EntityMappingOptions mappingOptions)
     {
         var descriptor = GetDescriptor(entityType);
-        var columns = descriptor.Properties.ToDictionary(
+        var columns = new ReadOnlyDictionary<string, ColumnMappingMetadata>(descriptor.Properties.ToDictionary(
             t => t.Name,
             t => CreateColumnMetadata(entityType, t, GetColumnMappingOptions(mappingOptions, t), databaseContext),
-            StringComparer.OrdinalIgnoreCase);
+            StringComparer.OrdinalIgnoreCase));
         var databaseType = GetDatabaseType(databaseContext);
         var physicalSchema = GetPhysicalSchema(entityType, mappingOptions, databaseContext);
         var logicalSchema = GetLogicalSchema(entityType, mappingOptions, databaseContext);
@@ -306,7 +297,6 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         if (mappingOptions?.NamingMode == LogicalTableNamingMode.PhysicalSchema &&
             string.IsNullOrWhiteSpace(logicalSchema) == false && string.IsNullOrWhiteSpace(physicalSchema))
             physicalSchema = logicalSchema;
-        var table = new TableIdentifier(physicalSchema, resolvedTableName);
         var tableReference = new SqlTableReference
         {
             EntityType = entityType,
@@ -333,12 +323,26 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             TableName = tableName,
             ResolvedTableName = resolvedTableName,
             FullTableName = string.IsNullOrWhiteSpace(physicalSchema) ? resolvedTableName : $"{physicalSchema}.{resolvedTableName}",
-            Table = table,
             TableReference = tableReference,
-            TableRouteKey = GetTableRouteKey(databaseContext, mappingOptions),
+            TableRouteKey = GetCacheTableRouteKey(mappingOptions),
             Columns = columns
         };
     }
+
+    /// <summary>
+    /// 规范化映射缓存键中的可选字符串。
+    /// </summary>
+    /// <param name="value">原始值。</param>
+    /// <returns>规范化后的缓存键值。</returns>
+    private static string NormalizeCacheValue(string value) => string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+
+    /// <summary>
+    /// 获取不包含租户标识的映射缓存路由键。
+    /// </summary>
+    /// <param name="mappingOptions">已匹配的实体映射配置。</param>
+    /// <returns>可安全写入缓存的路由键。</returns>
+    private static string GetCacheTableRouteKey(EntityMappingOptions mappingOptions) =>
+        NormalizeCacheValue(mappingOptions?.TableRouteKey);
 
     /// <summary>
     /// 判断旧 Schema 是否应解释为物理架构。

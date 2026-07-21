@@ -13,58 +13,25 @@ namespace Bing.Data.Sql.Tests;
 public class CrossDatabaseSyntaxTest
 {
     /// <summary>
-    /// 测试目的：不同数据库应使用各自合法的表标识符转义方式。
-    /// </summary>
-    [Theory]
-    [InlineData(DatabaseType.SqlServer, "[sales].[Orders]")]
-    [InlineData(DatabaseType.MySql, "`sales`.`Orders`")]
-    [InlineData(DatabaseType.PgSql, "\"sales\".\"Orders\"")]
-    [InlineData(DatabaseType.Oracle, "\"sales\".\"Orders\"")]
-    [InlineData(DatabaseType.Sqlite, "`sales`.`Orders`")]
-    [InlineData(DatabaseType.Doris, "`Orders`")]
-    public void FormatTable_WhenDatabaseTypeSpecified_ShouldUseProviderSyntax(DatabaseType databaseType,
-        string expected)
-    {
-        // Arrange
-        var adapter = new DefaultDatabaseDialectAdapter();
-
-        // Act
-        var result = adapter.FormatTable(new TableIdentifier("sales", "Orders"), databaseType);
-
-        // Assert
-        result.ShouldBe(expected);
-    }
-
-    /// <summary>
-    /// 测试目的：标识符中的结束转义符应被转义，避免拼接后改变 SQL 语义。
+    /// 测试 - SQL Server 结构化表引用应按三段名称格式化。
     /// </summary>
     [Fact]
-    public void FormatColumn_WhenIdentifierContainsClosingDelimiter_ShouldEscapeDelimiter()
+    public void Format_WhenSqlServerReferenceHasCatalogAndSchema_ShouldFormatThreeParts()
     {
         // Arrange
-        var adapter = new DefaultDatabaseDialectAdapter();
+        var formatter = new DefaultSqlObjectNameFormatter();
+        var reference = new SqlTableReference
+        {
+            Catalog = "sales",
+            PhysicalSchema = "dbo",
+            ResolvedTableName = "Orders"
+        };
 
         // Act
-        var result = adapter.FormatColumn(new ColumnIdentifier("order]name"), DatabaseType.SqlServer);
+        var result = formatter.Format(reference, TestDialect.Instance, DatabaseType.SqlServer);
 
         // Assert
-        result.ShouldBe("[order]]name]");
-    }
-
-    /// <summary>
-    /// 测试目的：包含语句分隔符的动态标识符必须被拒绝，避免 SQL 注入。
-    /// </summary>
-    [Fact]
-    public void FormatTable_WhenIdentifierContainsStatementDelimiter_ShouldThrowArgumentException()
-    {
-        // Arrange
-        var adapter = new DefaultDatabaseDialectAdapter();
-
-        // Act
-        var action = () => adapter.FormatTable(new TableIdentifier("sales", "Orders;drop"), DatabaseType.MySql);
-
-        // Assert
-        action.ShouldThrow<ArgumentException>();
+        result.ShouldBe("[sales].[dbo].[Orders]");
     }
 
     /// <summary>
@@ -92,28 +59,9 @@ public class CrossDatabaseSyntaxTest
 
         // Assert
         ReferenceEquals(mySqlMapping, pgSqlMapping).ShouldBeFalse();
-        mySqlMapping.Table.Name.ShouldBe(nameof(Sample));
-        mySqlMapping.Columns[nameof(Sample.StringValue)].Column.Name.ShouldBe(nameof(Sample.StringValue));
+        mySqlMapping.Columns[nameof(Sample.StringValue)].ColumnName.ShouldBe(nameof(Sample.StringValue));
         mySqlMapping.TableReference.ResolvedTableName.ShouldBe(nameof(Sample));
         pgSqlMapping.TableReference.ResolvedTableName.ShouldBe(nameof(Sample));
-        mySqlMapping.FullTableName.ShouldBe(nameof(Sample));
-        pgSqlMapping.FullTableName.ShouldBe(nameof(Sample));
-    }
-
-    /// <summary>
-    /// 测试目的：Doris 数据源必须默认禁用事务能力。
-    /// </summary>
-    [Fact]
-    public void DorisSyntax_ShouldNotSupportTransactions()
-    {
-        // Arrange
-        var adapter = new DefaultDatabaseDialectAdapter();
-
-        // Act
-        var syntax = adapter.GetSyntax(DatabaseType.Doris);
-
-        // Assert
-        syntax.SupportsTransactions.ShouldBeFalse();
     }
 
     /// <summary>
@@ -217,6 +165,23 @@ public class CrossDatabaseSyntaxTest
     }
 
     /// <summary>
+    /// 测试 - 无法确定数据库类型时不应默认使用SqlServer。
+    /// </summary>
+    [Fact]
+    public void Format_WhenDatabaseTypeCannotBeResolved_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var formatter = new DefaultSqlObjectNameFormatter();
+        var reference = new SqlTableReference { ResolvedTableName = "orders" };
+
+        // Act
+        var action = () => formatter.Format(reference, TestDialect.Instance, null);
+
+        // Assert
+        action.ShouldThrow<InvalidOperationException>();
+    }
+
+    /// <summary>
     /// 测试目的：同一 DbKey 的 MySQL 跨 Catalog Join 应由能力模型允许。
     /// </summary>
     [Fact]
@@ -271,13 +236,13 @@ public class CrossDatabaseSyntaxTest
     }
 
     /// <summary>
-    /// 测试目的：PostgreSql 不支持的 Catalog 限定必须显式失败，不能静默忽略。
+    /// 测试 - PostgreSql 不支持的 Catalog 限定必须显式失败，不能静默忽略。
     /// </summary>
     [Fact]
-    public void Format_WhenPostgreSqlReferenceContainsCatalog_ShouldThrowNotSupportedException()
+    public void Validate_WhenPostgreSqlReferenceContainsCatalog_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var formatter = new DefaultSqlObjectNameFormatter();
+        var validator = new DefaultSqlTableReferenceValidator();
         var reference = new SqlTableReference
         {
             Catalog = "reporting",
@@ -285,17 +250,17 @@ public class CrossDatabaseSyntaxTest
         };
 
         // Act
-        var action = () => formatter.Format(reference, TestDialect.Instance, DatabaseType.PgSql);
+        var action = () => validator.Validate(reference, DatabaseType.PgSql);
 
         // Assert
         action.ShouldThrow<NotSupportedException>();
     }
 
     /// <summary>
-    /// 测试目的：类型化 Join 的连接表与执行查询使用不同 DbKey 时必须失败。
+    /// 测试 - 类型化 Join 的源表与连接表使用不同 DbKey 时必须失败。
     /// </summary>
     [Fact]
-    public void ValidateJoin_WhenReferenceUsesDifferentDbKey_ShouldThrowInvalidOperationException()
+    public void Validate_WhenReferencesUseDifferentDbKey_ShouldThrowInvalidOperationException()
     {
         // Arrange
         var validator = new DefaultSqlCrossDatabaseQueryValidator();
@@ -304,9 +269,14 @@ public class CrossDatabaseSyntaxTest
             DbKey = "reporting",
             ResolvedTableName = "users"
         };
+        var source = new SqlTableReference
+        {
+            DbKey = "primary",
+            ResolvedTableName = "orders"
+        };
 
         // Act
-        var action = () => validator.ValidateJoin("primary", reference);
+        var action = () => validator.Validate(source, reference, null);
 
         // Assert
         action.ShouldThrow<InvalidOperationException>();

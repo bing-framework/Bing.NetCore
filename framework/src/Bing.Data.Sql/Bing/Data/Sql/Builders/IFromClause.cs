@@ -1,4 +1,6 @@
-﻿namespace Bing.Data.Sql.Builders;
+﻿using Bing.Data.Sql.Metadata;
+
+namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// From子句
@@ -18,6 +20,12 @@ public interface IFromClause
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     void From(string table, string alias = null);
+
+    /// <summary>
+    /// 设置结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    void From(SqlTableReference reference);
 
     /// <summary>
     /// 设置表名

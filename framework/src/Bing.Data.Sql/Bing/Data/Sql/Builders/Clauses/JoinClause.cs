@@ -61,11 +61,6 @@ public class JoinClause : IJoinClause
     private readonly IParameterManager _parameterManager;
 
     /// <summary>
-    /// 表数据库
-    /// </summary>
-    protected ITableDatabase TableDatabase;
-
-    /// <summary>
     /// 辅助操作
     /// </summary>
     private readonly Helper _helper;
@@ -111,6 +106,11 @@ public class JoinClause : IJoinClause
     private readonly ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator;
 
     /// <summary>
+    /// SQL 表引用验证器。
+    /// </summary>
+    private readonly ISqlTableReferenceValidator _tableReferenceValidator;
+
+    /// <summary>
     /// 连接参数
     /// </summary>
     private readonly List<JoinItem> _params;
@@ -127,7 +127,6 @@ public class JoinClause : IJoinClause
     /// <param name="resolver">实体解析器</param>
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
-    /// <param name="tableDatabase">表数据库</param>
     /// <param name="joinItems">连接参数列表</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -137,12 +136,12 @@ public class JoinClause : IJoinClause
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
     /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
+    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
     public JoinClause(ISqlBuilder sqlBuilder
         , IDialect dialect
         , IEntityResolver resolver
         , IEntityAliasRegister register
         , IParameterManager parameterManager
-        , ITableDatabase tableDatabase
         , List<JoinItem> joinItems = null
         , IEntityMappingResolver entityMappingResolver = null
         , IDatabaseContextAccessor databaseContextAccessor = null
@@ -151,14 +150,14 @@ public class JoinClause : IJoinClause
         , SqlOptions sqlOptions = null
         , ISqlDatabaseContextResolver databaseContextResolver = null
         , ISqlObjectNameFormatter objectNameFormatter = null
-        , ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null)
+        , ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null
+        , ISqlTableReferenceValidator tableReferenceValidator = null)
     {
         _sqlBuilder = sqlBuilder;
         _dialect = dialect;
         _resolver = resolver;
         _register = register;
         _parameterManager = parameterManager;
-        TableDatabase = tableDatabase;
         _entityMappingResolver = entityMappingResolver;
         _databaseContextAccessor = databaseContextAccessor;
         _sqlParameterFactory = sqlParameterFactory;
@@ -167,6 +166,7 @@ public class JoinClause : IJoinClause
         _databaseContextResolver = databaseContextResolver;
         _objectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
         _crossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
+        _tableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
         _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
             databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver);
         _params = joinItems ?? new List<JoinItem>();
@@ -186,10 +186,10 @@ public class JoinClause : IJoinClause
     {
         var helper = new Helper(_dialect, _resolver, register, parameterManager, _entityMappingResolver,
             _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
-        return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager, TableDatabase,
+        return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager,
             _params.Select(t => t.Clone(helper)).ToList(), _entityMappingResolver, _databaseContextAccessor,
             _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _objectNameFormatter,
-            _crossDatabaseQueryValidator);
+            _crossDatabaseQueryValidator, _tableReferenceValidator);
     }
 
     #endregion
@@ -214,6 +214,12 @@ public class JoinClause : IJoinClause
     public void Join(string table, string alias = null) => Join(JoinKey, table, alias);
 
     /// <summary>
+    /// 内连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    public void Join(SqlTableReference reference) => Join(JoinKey, reference);
+
+    /// <summary>
     /// 表连接
     /// </summary>
     /// <param name="joinType">连接类型</param>
@@ -223,6 +229,22 @@ public class JoinClause : IJoinClause
     {
         var item = CreateJoinItem(joinType, table, null, alias);
         AddItem(item);
+    }
+
+    /// <summary>
+    /// 添加结构化表引用连接项。
+    /// </summary>
+    /// <param name="joinType">连接类型。</param>
+    /// <param name="reference">结构化表引用。</param>
+    private void Join(string joinType, SqlTableReference reference)
+    {
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        var databaseContext = GetCurrentDatabaseContext();
+        var sourceReference = GetSourceReference(databaseContext);
+        AddItem(CreateStructuredJoinItem(joinType, reference, reference.EntityType, sourceReference, databaseContext));
+        if (reference.EntityType != null)
+            _register.Register(reference.EntityType, _resolver.GetAlias(reference.EntityType, reference.Alias));
     }
 
     /// <summary>
@@ -265,15 +287,10 @@ public class JoinClause : IJoinClause
     private void Join<TEntity>(string joinType, string alias, string schema)
     {
         var type = typeof(TEntity);
-        var reference = _resolver.GetTableReference(type).WithAlias(alias);
+        var reference = _resolver.GetTableReference(type).WithAlias(alias) with { EntityType = type };
         if (string.IsNullOrWhiteSpace(schema) == false)
             reference = reference.WithPhysicalSchema(schema);
-        var databaseContext = GetCurrentDatabaseContext();
-        var sourceReference = GetSourceReference(databaseContext);
-        _crossDatabaseQueryValidator.Validate(sourceReference, reference, databaseContext);
-        var item = CreateStructuredJoinItem(joinType, reference, type, sourceReference, databaseContext);
-        AddItem(item);
-        _register.Register(type, _resolver.GetAlias(type, alias));
+        Join(joinType, reference);
     }
 
     /// <summary>
@@ -288,6 +305,7 @@ public class JoinClause : IJoinClause
         SqlTableReference sourceReference, DatabaseContext databaseContext)
     {
         return new JoinItem(joinType, new StructuredSqlItem(reference, _objectNameFormatter, databaseContext,
+            (_sqlBuilder as SqlBuilderBase)?.ResolveProviderDatabaseType(reference), _tableReferenceValidator,
             _crossDatabaseQueryValidator, sourceReference), type, null);
     }
 
@@ -583,7 +601,7 @@ public class JoinClause : IJoinClause
     public string ToSql()
     {
         var result = new StringBuilder();
-        _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect, TableDatabase)} "));
+        _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect)} "));
         return result.ToString().Trim();
     }
 

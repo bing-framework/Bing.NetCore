@@ -174,7 +174,6 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <summary>
     /// 初始化一个<see cref="DefaultSqlParameterBinder"/>类型的实例
     /// </summary>
-    /// <param name="entityMetadata">实体元数据解析器</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="sqlParameterFactory">Sql 参数工厂</param>
@@ -182,8 +181,8 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="parameterResolver">SQL 参数解析器</param>
     /// <param name="dbParameterCustomizers">数据库参数定制器集合</param>
-    public DefaultSqlParameterBinder(IEntityMetadata entityMetadata = null,
-        IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
+    public DefaultSqlParameterBinder(IEntityMappingResolver entityMappingResolver = null,
+        IDatabaseContextAccessor databaseContextAccessor = null,
         ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions options = null,
         ISqlDatabaseContextResolver databaseContextResolver = null, ISqlParameterResolver parameterResolver = null,
         IEnumerable<ISqlDbParameterCustomizer> dbParameterCustomizers = null)
@@ -192,8 +191,8 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
         _databaseContextAccessor = databaseContextAccessor;
         _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             _options);
-        _entityMappingResolver = entityMappingResolver ??
-            new DefaultEntityMappingResolver(entityMetadata, databaseContextAccessor, _options);
+        _entityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
+            databaseContextAccessor: databaseContextAccessor, options: _options);
         _sqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, _options), databaseContextAccessor, _options);
         _parameterResolver = parameterResolver ?? new DefaultSqlParameterResolver();

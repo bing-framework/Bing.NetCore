@@ -21,9 +21,9 @@ public class SqlContext
     public IEntityAliasRegister EntityAliasRegister { get; }
 
     /// <summary>
-    /// 实体元数据解析器
+    /// 实体模型原始元数据提供器
     /// </summary>
-    public IEntityMetadata Metadata { get; }
+    public IEntityModelMetadataProvider EntityModelMetadataProvider { get; }
 
     /// <summary>
     /// 参数管理器
@@ -72,7 +72,6 @@ public class SqlContext
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="entityAliasRegister">实体别名注册器</param>
-    /// <param name="metadata">实体原始数据解析器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="clause">Sql子句访问器</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
@@ -80,22 +79,26 @@ public class SqlContext
     /// <param name="metadataOptions">Sql元数据配置</param>
     /// <param name="options">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IEntityMetadata metadata,
-        IParameterManager parameterManager, ISqlPartAccessor clause,
+    /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
+    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IParameterManager parameterManager,
+        ISqlPartAccessor clause,
         IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         SqlOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null)
+        ISqlDatabaseContextResolver databaseContextResolver = null,
+        IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
         EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
-        Metadata = metadata ?? new DefaultEntityMetadata();
+        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityMetadata();
         Dialect = dialect;
         ParameterManager = parameterManager;
         ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));
-        EntityMappingResolver = entityMappingResolver;
-        DatabaseContextAccessor = databaseContextAccessor;
         MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
+        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
+            databaseContextAccessor: databaseContextAccessor, options: MetadataOptions,
+            entityModelMetadataProvider: EntityModelMetadataProvider);
+        DatabaseContextAccessor = databaseContextAccessor;
         Options = options;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             MetadataOptions);

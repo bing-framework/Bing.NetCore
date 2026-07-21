@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders;
 
@@ -28,6 +29,12 @@ public interface IJoinClause
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     void Join(string table, string alias = null);
+
+    /// <summary>
+    /// 内连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    void Join(SqlTableReference reference);
 
     /// <summary>
     /// 内连接

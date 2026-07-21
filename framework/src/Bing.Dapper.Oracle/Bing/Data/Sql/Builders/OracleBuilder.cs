@@ -1,4 +1,5 @@
 ﻿using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
@@ -12,11 +13,12 @@ namespace Bing.Data.Sql.Builders;
 /// </summary>
 public class OracleBuilder : SqlBuilderBase
 {
+    /// <inheritdoc />
+    protected override DatabaseType ProviderDatabaseType => DatabaseType.Oracle;
+
     /// <summary>
     /// 初始化一个<see cref="OracleBuilder"/>类型的实例
     /// </summary>
-    /// <param name="metadata">实体元数据解析器</param>
-    /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -24,20 +26,21 @@ public class OracleBuilder : SqlBuilderBase
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <param name="options">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="tableReferenceResolver">SQL 表引用解析器</param>
     /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
     /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
-    public OracleBuilder(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
-        IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
+    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
+    /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
+    public OracleBuilder(IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
         ISqlDatabaseContextResolver databaseContextResolver = null,
-        ISqlTableReferenceResolver tableReferenceResolver = null,
         ISqlObjectNameFormatter objectNameFormatter = null,
-        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null)
-        : base(metadata, tableDatabase, parameterManager, entityMappingResolver, databaseContextAccessor,
-            sqlParameterFactory, metadataOptions, options, databaseContextResolver, tableReferenceResolver,
-            objectNameFormatter, crossDatabaseQueryValidator)
+        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
+        ISqlTableReferenceValidator tableReferenceValidator = null,
+        IEntityModelMetadataProvider entityModelMetadataProvider = null)
+        : base(parameterManager, entityMappingResolver, databaseContextAccessor,
+            sqlParameterFactory, metadataOptions, options, databaseContextResolver,
+            objectNameFormatter, crossDatabaseQueryValidator, tableReferenceValidator, entityModelMetadataProvider)
     {
     }
 
@@ -53,19 +56,19 @@ public class OracleBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
-    public override ISqlBuilder New() => new OracleBuilder(EntityMetadata, TableDatabase, ParameterManager,
-        EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options,
-        DatabaseContextResolver, TableReferenceResolver, ObjectNameFormatter, CrossDatabaseQueryValidator);
+    public override ISqlBuilder New() => new OracleBuilder(ParameterManager, EntityMappingResolver,
+        DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options, DatabaseContextResolver,
+        ObjectNameFormatter, CrossDatabaseQueryValidator, TableReferenceValidator, EntityModelMetadataProvider);
 
     /// <inheritdoc />
     protected override string CreateLimitSql() => $"Limit {GetLimitParam()} OFFSET {GetOffsetParam()}";
 
     /// <inheritdoc />
     protected override IFromClause CreateFromClause() => new OracleFromClause(this, GetDialect(), EntityResolver,
-        AliasRegister, TableDatabase, null, ObjectNameFormatter);
+        AliasRegister, null, ObjectNameFormatter, ProviderDatabaseType, TableReferenceValidator);
 
     /// <inheritdoc />
     protected override IJoinClause CreateJoinClause() => new OracleJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
-        TableDatabase, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options,
-        DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator);
+        EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options,
+        DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator, TableReferenceValidator);
 }

@@ -1,6 +1,7 @@
 ﻿using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Tests.Samples;
+using Bing.Data.Enums;
 
 namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
@@ -19,7 +20,8 @@ public class FromClauseTest
     /// </summary>
     public FromClauseTest()
     {
-        _clause = new FromClause(null, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), null);
+        _clause = new FromClause(null, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), null,
+            providerDatabaseType: DatabaseType.SqlServer);
     }
 
     /// <summary>
@@ -172,7 +174,7 @@ public class FromClauseTest
     public void Test_From_13()
     {
         _clause = new FromClause(null, TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister(),
-            null);
+            null, providerDatabaseType: DatabaseType.SqlServer);
         _clause.From<Sample>();
         var result = _clause.ToSql();
         Assert.Equal("From [s].[t_Sample]", result);
@@ -185,7 +187,7 @@ public class FromClauseTest
     public void Test_From_14()
     {
         _clause = new FromClause(null, TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister(),
-            null);
+            null, providerDatabaseType: DatabaseType.SqlServer);
         _clause.From<Sample>("a");
         var result = _clause.ToSql();
         Assert.Equal("From [s].[t_Sample] As [a]", result);

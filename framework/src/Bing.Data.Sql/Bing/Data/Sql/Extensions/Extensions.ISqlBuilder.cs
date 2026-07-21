@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Metadata;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Data.Sql;
@@ -202,6 +203,21 @@ public static partial class Extensions
         return source;
     }
 
+    /// <summary>
+    /// 设置结构化表引用。
+    /// </summary>
+    /// <param name="source">Sql生成器。</param>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>Sql生成器。</returns>
+    public static ISqlBuilder From(this ISqlBuilder source, SqlTableReference reference)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            accessor.FromClause.From(reference);
+        return source;
+    }
+
     #endregion
 
     #region Join子句
@@ -220,6 +236,21 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
             accessor.JoinClause.Join<TEntity>(alias, schema);
+        return source;
+    }
+
+    /// <summary>
+    /// 内连接结构化表引用。
+    /// </summary>
+    /// <param name="source">Sql生成器。</param>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>Sql生成器。</returns>
+    public static ISqlBuilder Join(this ISqlBuilder source, SqlTableReference reference)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            accessor.JoinClause.Join(reference);
         return source;
     }
 

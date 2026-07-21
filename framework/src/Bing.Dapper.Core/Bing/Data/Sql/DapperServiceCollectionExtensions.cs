@@ -25,7 +25,6 @@ public static class DapperCoreServiceCollectionExtensions
     /// </remarks>
     public static IServiceCollection AddSqlCore(this IServiceCollection services)
     {
-        services.TryAddScoped<ITableDatabase, DefaultTableDatabase>();
         services.TryAddSingleton(provider =>
         {
             var options = new SqlMetadataOptions();
@@ -42,7 +41,6 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
-        services.TryAddSingleton<IDatabaseDialectAdapter, DefaultDatabaseDialectAdapter>();
         services.TryAddSingleton<ITableNamingStrategy, DefaultTableNamingStrategy>();
         services.TryAddSingleton<IEntityModelMetadataProvider>(provider =>
         {
@@ -51,9 +49,9 @@ public static class DapperCoreServiceCollectionExtensions
         });
         services.TryAddSingleton<ISqlObjectNameFormatter, DefaultSqlObjectNameFormatter>();
         services.TryAddSingleton<ISqlObjectNameCapabilityProvider, DefaultSqlObjectNameCapabilityProvider>();
+        services.TryAddSingleton<ISqlTableReferenceValidator, DefaultSqlTableReferenceValidator>();
         services.TryAddSingleton<ISqlCrossDatabaseQueryValidator, DefaultSqlCrossDatabaseQueryValidator>();
         services.TryAddSingleton<IEntityMappingResolver, DefaultEntityMappingResolver>();
-        services.TryAddSingleton<ISqlTableReferenceResolver, DefaultSqlTableReferenceResolver>();
         services.TryAddSingleton<IFieldValueConverter, DefaultFieldValueConverter>();
         services.TryAddSingleton<IFieldValueConverterSelector, DefaultFieldValueConverterSelector>();
         services.TryAddSingleton<ISqlParameterFactory, DefaultSqlParameterFactory>();
@@ -115,7 +113,7 @@ public static class DapperCoreServiceCollectionExtensions
             descriptor.Key = dataSourceKey;
             descriptor.DatabaseType = databaseType;
             if (databaseType == DatabaseType.Doris)
-                descriptor.SupportsTransactions = CrossDatabaseSyntax.Doris.SupportsTransactions;
+                descriptor.SupportsTransactions = false;
             if (string.IsNullOrWhiteSpace(connectionString) == false)
                 descriptor.ConnectionString = connectionString;
             if (string.IsNullOrWhiteSpace(connectionStringName) == false)

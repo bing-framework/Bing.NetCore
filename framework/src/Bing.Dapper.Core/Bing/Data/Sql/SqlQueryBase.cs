@@ -78,11 +78,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     private ISqlParameterBinder _sqlParameterBinder;
 
     /// <summary>
-    /// 外部实体元数据
-    /// </summary>
-    private IEntityMetadata _entityMetadata;
-
-    /// <summary>
     /// 外部实体映射解析器
     /// </summary>
     private IEntityMappingResolver _entityMappingResolver;
@@ -154,11 +149,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// Sql配置
     /// </summary>
     protected SqlOptions Options { get; set; }
-
-    /// <summary>
-    /// 实体元数据
-    /// </summary>
-    protected IEntityMetadata EntityMetadata => _entityMetadata ?? ServiceProvider.GetService<IEntityMetadata>();
 
     /// <summary>
     /// 实体映射解析器
@@ -283,7 +273,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <returns>Sql 参数绑定器</returns>
     protected virtual ISqlParameterBinder CreateSqlParameterBinder() =>
         ServiceProvider.GetService<ISqlParameterBinder>() ?? new DefaultSqlParameterBinder(
-            EntityMetadata,
             EntityMappingResolver,
             ServiceProvider.GetService<IDatabaseContextAccessor>(),
             ServiceProvider.GetService<ISqlParameterFactory>(),
@@ -449,23 +438,20 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     }
 
     /// <summary>
-    /// 一次性绑定外部实体元数据与映射解析器。
+    /// 一次性绑定外部实体映射解析器。
     /// </summary>
-    /// <param name="metadata">实体元数据。</param>
     /// <param name="resolver">实体映射解析器。</param>
-    private void BindEntityMetadata(IEntityMetadata metadata, IEntityMappingResolver resolver)
+    private void BindEntityMappingResolver(IEntityMappingResolver resolver)
     {
-        _entityMetadata = metadata;
         _entityMappingResolver = resolver;
     }
 
     /// <summary>
-    /// 绑定实体元数据及其映射解析器。
+    /// 绑定实体映射解析器。
     /// </summary>
-    /// <param name="metadata">实体元数据。</param>
     /// <param name="resolver">实体映射解析器。</param>
-    void ISqlQueryMetadataBinder.BindEntityMetadata(IEntityMetadata metadata, IEntityMappingResolver resolver) =>
-        BindEntityMetadata(metadata, resolver);
+    void ISqlQueryMetadataBinder.BindEntityMappingResolver(IEntityMappingResolver resolver) =>
+        BindEntityMappingResolver(resolver);
 
     /// <summary>
     /// 校验外部连接与当前固定数据库上下文的物理身份。

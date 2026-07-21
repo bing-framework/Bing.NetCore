@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Params;
@@ -77,24 +78,14 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     #region 属性
 
     /// <summary>
-    /// 实体元数据解析器
-    /// </summary>
-    protected IEntityMetadata EntityMetadata { get; private set; }
-
-    /// <summary>
-    /// 表数据库
-    /// </summary>
-    protected ITableDatabase TableDatabase { get; private set; }
-
-    /// <summary>
     /// 实体映射解析器
     /// </summary>
     protected IEntityMappingResolver EntityMappingResolver { get; private set; }
 
     /// <summary>
-    /// SQL 表引用解析器。
+    /// 实体模型原始元数据提供器。
     /// </summary>
-    protected ISqlTableReferenceResolver TableReferenceResolver { get; private set; }
+    protected IEntityModelMetadataProvider EntityModelMetadataProvider { get; private set; }
 
     /// <summary>
     /// SQL 对象名称格式化器。
@@ -105,6 +96,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 跨数据库查询校验器。
     /// </summary>
     protected ISqlCrossDatabaseQueryValidator CrossDatabaseQueryValidator { get; private set; }
+
+    /// <summary>
+    /// SQL 表引用验证器。
+    /// </summary>
+    protected ISqlTableReferenceValidator TableReferenceValidator { get; private set; }
 
     /// <summary>
     /// 数据库上下文访问器
@@ -140,6 +136,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 实体别名注册器
     /// </summary>
     protected IEntityAliasRegister AliasRegister { get; private set; }
+
+    /// <summary>
+    /// 获取当前 Builder 对应的数据库类型。
+    /// </summary>
+    protected abstract DatabaseType ProviderDatabaseType { get; }
 
     /// <summary>
     /// 参数管理器
@@ -233,8 +234,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 初始化一个<see cref="SqlBuilderBase"/>类型的实例
     /// </summary>
-    /// <param name="metadata">实体元数据解析器</param>
-    /// <param name="tableDatabase">表数据库</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -242,35 +241,36 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <param name="options">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="tableReferenceResolver">SQL 表引用解析器</param>
     /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
     /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
-    protected SqlBuilderBase(IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
-        IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
+    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
+    /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
+    protected SqlBuilderBase(IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
         ISqlDatabaseContextResolver databaseContextResolver = null,
-        ISqlTableReferenceResolver tableReferenceResolver = null,
         ISqlObjectNameFormatter objectNameFormatter = null,
-        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null)
+        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
+        ISqlTableReferenceValidator tableReferenceValidator = null,
+        IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
-        EntityMetadata = metadata;
-        TableDatabase = tableDatabase;
         _parameterManager = parameterManager;
         MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
         Options = options;
         DatabaseContextAccessor = databaseContextAccessor;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             MetadataOptions);
-        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(metadata, databaseContextAccessor,
-            MetadataOptions);
-        TableReferenceResolver = tableReferenceResolver ?? new DefaultSqlTableReferenceResolver(EntityMappingResolver);
+        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityMetadata();
+        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
+            databaseContextAccessor: databaseContextAccessor, options: MetadataOptions,
+            entityModelMetadataProvider: EntityModelMetadataProvider);
         ObjectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
         CrossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
+        TableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
         SqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, MetadataOptions), databaseContextAccessor, MetadataOptions);
-        EntityResolver = new EntityResolver(metadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions,
-            Options, DatabaseContextResolver);
+        EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
+            DatabaseContextResolver, EntityModelMetadataProvider);
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
@@ -301,14 +301,16 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 创建From子句
     /// </summary>
     protected virtual IFromClause CreateFromClause() =>
-        new FromClause(this, Dialect, EntityResolver, AliasRegister, TableDatabase, null, ObjectNameFormatter);
+        new FromClause(this, Dialect, EntityResolver, AliasRegister, null, ObjectNameFormatter,
+            ProviderDatabaseType, TableReferenceValidator);
 
     /// <summary>
     /// 创建Join子句
     /// </summary>
     protected virtual IJoinClause CreateJoinClause() => new JoinClause(this, Dialect, EntityResolver, AliasRegister,
-        ParameterManager, TableDatabase, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory,
-        MetadataOptions, Options, DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator);
+        ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory,
+        MetadataOptions, Options, DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator,
+        TableReferenceValidator);
 
     /// <summary>
     /// 创建Where子句
@@ -350,21 +352,20 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         if (sqlBuilder == null)
             throw new ArgumentNullException(nameof(sqlBuilder));
 
-        EntityMetadata = sqlBuilder.EntityMetadata;
-        TableDatabase = sqlBuilder.TableDatabase;
         _parameterManager = sqlBuilder._parameterManager?.Clone();
         MetadataOptions = sqlBuilder.MetadataOptions;
         Options = sqlBuilder.Options;
         DatabaseContextAccessor = sqlBuilder.DatabaseContextAccessor;
         DatabaseContextResolver = sqlBuilder.DatabaseContextResolver;
         EntityMappingResolver = sqlBuilder.EntityMappingResolver;
-        TableReferenceResolver = sqlBuilder.TableReferenceResolver;
+        EntityModelMetadataProvider = sqlBuilder.EntityModelMetadataProvider;
         ObjectNameFormatter = sqlBuilder.ObjectNameFormatter;
         CrossDatabaseQueryValidator = sqlBuilder.CrossDatabaseQueryValidator;
+        TableReferenceValidator = sqlBuilder.TableReferenceValidator;
         SqlParameterFactory = sqlBuilder.SqlParameterFactory;
         EntityResolver = sqlBuilder.EntityResolver ??
-            new EntityResolver(EntityMetadata, EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
-                DatabaseContextResolver);
+            new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
+                DatabaseContextResolver, EntityModelMetadataProvider);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
 
         // 克隆各子句
@@ -393,6 +394,17 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     internal virtual DatabaseContext GetDatabaseContext() =>
         DatabaseContextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ??
         MetadataOptions?.DefaultDatabaseContext;
+
+    /// <summary>
+    /// 解析结构化对象名称使用的数据库类型。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>数据库类型。</returns>
+    internal DatabaseType ResolveProviderDatabaseType(SqlTableReference reference = null)
+    {
+        var databaseType = GetDatabaseContext()?.DataSource?.DatabaseType ?? reference?.DatabaseType;
+        return databaseType ?? ProviderDatabaseType;
+    }
 
     /// <summary>
     /// 获取当前类型化 From 的结构化表引用。
@@ -746,8 +758,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             return;
 
         _isAddFilters = true;
-        var context = new SqlContext(Dialect, AliasRegister, EntityMetadata, ParameterManager, this,
-            EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver);
+        var context = new SqlContext(Dialect, AliasRegister, ParameterManager, this, EntityMappingResolver,
+            DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver, EntityModelMetadataProvider);
         foreach (var filter in SqlFilterCollection.Filters)
         {
             if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))

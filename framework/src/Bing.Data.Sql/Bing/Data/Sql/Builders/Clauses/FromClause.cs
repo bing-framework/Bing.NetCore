@@ -2,6 +2,7 @@
 using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Enums;
 using Bing.Properties;
 
 namespace Bing.Data.Sql.Builders.Clauses;
@@ -37,14 +38,19 @@ public class FromClause : IFromClause
     protected readonly ISqlBuilder Builder;
 
     /// <summary>
-    /// 表数据库
-    /// </summary>
-    protected ITableDatabase TableDatabase;
-
-    /// <summary>
     /// SQL 对象名称格式化器。
     /// </summary>
     protected readonly ISqlObjectNameFormatter ObjectNameFormatter;
+
+    /// <summary>
+    /// 独立子句使用的固定数据库类型。
+    /// </summary>
+    protected readonly DatabaseType? ProviderDatabaseType;
+
+    /// <summary>
+    /// SQL 表引用验证器。
+    /// </summary>
+    protected readonly ISqlTableReferenceValidator TableReferenceValidator;
 
     /// <summary>
     /// 初始化一个<see cref="FromClause"/>类型的实例
@@ -53,24 +59,27 @@ public class FromClause : IFromClause
     /// <param name="dialect">Sql方言</param>
     /// <param name="resolver">实体解析器</param>
     /// <param name="register">实体别名注册器</param>
-    /// <param name="tableDatabase">表数据库</param>
     /// <param name="table">表</param>
     /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
+    /// <param name="providerDatabaseType">独立子句使用的固定数据库类型</param>
+    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
     public FromClause(ISqlBuilder builder
         , IDialect dialect
         , IEntityResolver resolver
         , IEntityAliasRegister register
-        , ITableDatabase tableDatabase
         , SqlItem table = null
-        , ISqlObjectNameFormatter objectNameFormatter = null)
+        , ISqlObjectNameFormatter objectNameFormatter = null
+        , DatabaseType? providerDatabaseType = null
+        , ISqlTableReferenceValidator tableReferenceValidator = null)
     {
         Builder = builder;
         Dialect = dialect;
         Resolver = resolver;
         Register = register;
-        TableDatabase = tableDatabase;
         Table = table;
         ObjectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
+        ProviderDatabaseType = providerDatabaseType;
+        TableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
     }
 
     /// <summary>
@@ -82,7 +91,8 @@ public class FromClause : IFromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new FromClause(builder, Dialect, Resolver, register, TableDatabase, Table, ObjectNameFormatter);
+        return new FromClause(builder, Dialect, Resolver, register, Table, ObjectNameFormatter,
+            ProviderDatabaseType, TableReferenceValidator);
     }
 
     /// <summary>
@@ -91,6 +101,21 @@ public class FromClause : IFromClause
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     public void From(string table, string alias = null) => Table = CreateSqlItem(table, null, alias);
+
+    /// <summary>
+    /// 设置结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    public void From(SqlTableReference reference)
+    {
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        Table = CreateStructuredSqlItem(reference);
+        if (reference.EntityType == null)
+            return;
+        Register.Register(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
+        Register.FromType = reference.EntityType;
+    }
 
     /// <summary>
     /// 创建Sql项
@@ -110,12 +135,10 @@ public class FromClause : IFromClause
     public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
         var type = typeof(TEntity);
-        var reference = Resolver.GetTableReference(type).WithAlias(alias);
+        var reference = Resolver.GetTableReference(type).WithAlias(alias) with { EntityType = type };
         if (string.IsNullOrWhiteSpace(schema) == false)
             reference = reference.WithPhysicalSchema(schema);
-        Table = CreateStructuredSqlItem(reference);
-        Register.Register(type, Resolver.GetAlias(type, alias));
-        Register.FromType = type;
+        From(reference);
     }
 
     /// <summary>
@@ -124,7 +147,11 @@ public class FromClause : IFromClause
     /// <param name="reference">结构化表引用</param>
     protected virtual SqlItem CreateStructuredSqlItem(SqlTableReference reference)
     {
-        return new StructuredSqlItem(reference, ObjectNameFormatter);
+        var sqlBuilder = Builder as SqlBuilderBase;
+        var databaseContext = sqlBuilder?.GetDatabaseContext();
+        var databaseType = sqlBuilder?.ResolveProviderDatabaseType(reference) ?? ProviderDatabaseType;
+        return new StructuredSqlItem(reference, ObjectNameFormatter, databaseContext, databaseType,
+            TableReferenceValidator);
     }
 
     /// <summary>
@@ -193,7 +220,7 @@ public class FromClause : IFromClause
     /// </summary>
     public string ToSql()
     {
-        var table = Table?.ToSql(Dialect, TableDatabase);
+        var table = Table?.ToSql(Dialect);
         return string.IsNullOrWhiteSpace(table) ? null : $"From {table}";
     }
 }

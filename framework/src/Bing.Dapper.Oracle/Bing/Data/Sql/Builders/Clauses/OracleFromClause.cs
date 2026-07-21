@@ -14,10 +14,12 @@ public class OracleFromClause : FromClause
         IDialect dialect,
         IEntityResolver resolver,
         IEntityAliasRegister register,
-        ITableDatabase tableDatabase,
         SqlItem table = null,
-        ISqlObjectNameFormatter objectNameFormatter = null)
-        : base(builder, dialect, resolver, register, tableDatabase, table, objectNameFormatter)
+        ISqlObjectNameFormatter objectNameFormatter = null,
+        Bing.Data.Enums.DatabaseType? providerDatabaseType = null,
+        ISqlTableReferenceValidator tableReferenceValidator = null)
+        : base(builder, dialect, resolver, register, table, objectNameFormatter, providerDatabaseType,
+            tableReferenceValidator)
     {
     }
 
@@ -26,6 +28,7 @@ public class OracleFromClause : FromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new OracleFromClause(builder, Dialect, Resolver, register, TableDatabase, Table, ObjectNameFormatter);
+        return new OracleFromClause(builder, Dialect, Resolver, register, Table, ObjectNameFormatter,
+            ProviderDatabaseType, TableReferenceValidator);
     }
 }

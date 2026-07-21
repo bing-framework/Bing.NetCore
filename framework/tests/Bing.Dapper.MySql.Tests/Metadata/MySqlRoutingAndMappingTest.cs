@@ -65,6 +65,25 @@ public class MySqlRoutingAndMappingTest
         Assert.Contains("`order_orderinfo`", builder.ToSql());
     }
 
+    /// <summary>
+    /// 测试 - MySqlBuilder缺少数据库上下文时应使用MySql数据库类型。
+    /// </summary>
+    [Fact]
+    public void Builder_WithoutDatabaseContext_ShouldUseMySqlDatabaseType()
+    {
+        // Arrange
+        var metadataOptions = CreateMetadataOptions();
+        metadataOptions.EntityMappings[0].DbKey = null;
+        var builder = new MySqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+            metadataOptions: metadataOptions);
+
+        // Act
+        builder.From<RoutingSample>();
+
+        // Assert
+        Assert.Equal("From `users_reporting`", builder.FromClause.ToSql());
+    }
+
     private static SqlOptions CreateSqlOptions(DatabaseType databaseType) => new SqlOptions().SetDatabaseContext(
         new DatabaseContext
         {

@@ -62,6 +62,6 @@ public class IsDeletedFilter : ISqlFilter
                 return mappedColumn.ColumnName;
         }
 
-        return context.Metadata.GetColumn(type, propertyName);
+        return context.EntityModelMetadataProvider.GetColumnName(type, propertyName) ?? propertyName;
     }
 }

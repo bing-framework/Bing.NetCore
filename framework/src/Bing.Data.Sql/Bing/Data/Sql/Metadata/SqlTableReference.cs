@@ -5,7 +5,7 @@ namespace Bing.Data.Sql.Metadata;
 /// <summary>
 /// 结构化 SQL 表引用
 /// </summary>
-public sealed class SqlTableReference
+public sealed record SqlTableReference
 {
     /// <summary>
     /// 实体类型。
@@ -66,37 +66,14 @@ public sealed class SqlTableReference
     /// 返回带别名的引用副本
     /// </summary>
     /// <param name="alias">表别名</param>
-    public SqlTableReference WithAlias(string alias) => new()
-    {
-        EntityType = EntityType,
-        DbKey = DbKey,
-        DatabaseType = DatabaseType,
-        Catalog = Catalog,
-        PhysicalSchema = PhysicalSchema,
-        LogicalSchema = LogicalSchema,
-        TableName = TableName,
-        ResolvedTableName = ResolvedTableName,
-        DatabaseLink = DatabaseLink,
-        AttachedAlias = AttachedAlias,
-        Alias = alias
-    };
+    public SqlTableReference WithAlias(string alias) => this with { Alias = alias };
 
     /// <summary>
     /// 返回带物理架构的引用副本
     /// </summary>
     /// <param name="physicalSchema">物理架构</param>
-    public SqlTableReference WithPhysicalSchema(string physicalSchema) => new()
+    public SqlTableReference WithPhysicalSchema(string physicalSchema) => this with
     {
-        EntityType = EntityType,
-        DbKey = DbKey,
-        DatabaseType = DatabaseType,
-        Catalog = Catalog,
-        PhysicalSchema = physicalSchema,
-        LogicalSchema = LogicalSchema,
-        TableName = TableName,
-        ResolvedTableName = ResolvedTableName,
-        DatabaseLink = DatabaseLink,
-        AttachedAlias = AttachedAlias,
-        Alias = Alias
+        PhysicalSchema = physicalSchema
     };
 }

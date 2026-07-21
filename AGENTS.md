@@ -9,6 +9,16 @@
 - 所有命令、脚本、文件读写、日志导出、Markdown 生成，都必须优先考虑 Windows + VS Code + PowerShell 环境下的中文乱码问题。
 - 默认编码统一使用 UTF-8。
 
+## SQL 元数据测试覆盖门槛
+
+- 修改 `Bing.Data.Sql` 的实体映射、表引用、Provider 解析或 SQL 格式化逻辑时，必须新增或更新职责级单元测试。
+- SQL 输出测试必须断言完整 SQL 字符串，不得仅使用 `Contains` 断言片段。
+- 涉及数据库 Provider、连接、执行器或查询工厂路径时，必须运行 SQLite 本地集成测试；外部数据库测试必须继续通过 `RUN_INTEGRATION_TESTS` 或 Provider 专用环境变量门控，且不得使用生产数据库。
+- 修改映射缓存、格式化热路径或 Builder 克隆逻辑时，必须更新 `Bing.Data.Sql.Benchmarks` 的基线场景或说明不适用原因。
+- 涉及 `IEntityMappingResolver`、`IEntityModelMetadataProvider`、表命名策略、架构解析器、对象名格式化器、单表或跨库校验器时，必须为接口契约、默认实现和每个受影响 Provider 分支补充直接单元测试。
+- 映射缓存键、Query/Executor 创建链或 Builder 延迟渲染发生变化时，测试必须覆盖命中与未命中、执行上下文优先级及重复渲染行为。
+- 提交前必须维护“最终生产符号 -> 测试方法”的可追溯映射；映射中应包含关键行为、对应测试项目和方法名。
+
 ## UTF-8 规则（强制）
 
 - 所有文本文件读取必须显式指定 `UTF-8`。
