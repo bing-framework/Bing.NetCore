@@ -39,19 +39,12 @@ public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValida
     /// <param name="capabilities">对象名称能力。</param>
     private static void ValidateCapabilities(SqlTableReference table, SqlObjectNameCapabilities capabilities)
     {
-        if (string.IsNullOrWhiteSpace(table.ResolvedTableName))
-            throw new ArgumentException("解析后的表名不能为空。", nameof(table));
-        if (HasValue(table.Catalog) && capabilities.SupportsCatalog == false)
-            throw new NotSupportedException("当前数据库 Provider 不支持 Catalog 限定。");
-        if (HasValue(table.PhysicalSchema) && capabilities.SupportsPhysicalSchema == false)
-            throw new NotSupportedException("当前数据库 Provider 不支持 PhysicalSchema 限定。");
-        if (HasValue(table.DatabaseLink) && capabilities.SupportsDatabaseLink == false)
-            throw new NotSupportedException("当前数据库 Provider 不支持 DatabaseLink 限定。");
-        if (HasValue(table.AttachedAlias) && capabilities.SupportsAttachedAlias == false)
-            throw new NotSupportedException("当前数据库 Provider 不支持已附加数据库别名。");
-        if (HasValue(table.Catalog) && HasValue(table.AttachedAlias) &&
-            string.Equals(table.Catalog, table.AttachedAlias, StringComparison.OrdinalIgnoreCase) == false)
-            throw new ArgumentException("Catalog 与已附加数据库别名必须一致。", nameof(table));
+        if (string.IsNullOrWhiteSpace(table.TableName))
+            throw new ArgumentException("表名不能为空。", nameof(table));
+        if (HasValue(table.Database) && capabilities.SupportsDatabase == false)
+            throw new NotSupportedException("当前数据库 Provider 不支持 Database 限定。");
+        if (HasValue(table.Schema) && capabilities.SupportsSchema == false)
+            throw new NotSupportedException("当前数据库 Provider 不支持 Schema 限定。");
     }
 
     /// <summary>
@@ -62,9 +55,9 @@ public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValida
     private static void ValidateNameParts(SqlTableReference table, SqlObjectNameCapabilities capabilities)
     {
         var nameParts = 1;
-        if (HasValue(table.Catalog) || HasValue(table.AttachedAlias))
+        if (HasValue(table.Database))
             nameParts++;
-        if (HasValue(table.PhysicalSchema))
+        if (HasValue(table.Schema))
             nameParts++;
         if (capabilities.MaximumNameParts > 0 && nameParts > capabilities.MaximumNameParts)
             throw new InvalidOperationException("SQL 对象名称段数超过当前数据库 Provider 支持的上限。");
@@ -76,11 +69,9 @@ public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValida
     /// <param name="table">结构化表引用。</param>
     private static void ValidateIdentifiers(SqlTableReference table)
     {
-        ValidateIdentifier(table.Catalog);
-        ValidateIdentifier(table.PhysicalSchema);
-        ValidateIdentifier(table.ResolvedTableName);
-        ValidateIdentifier(table.DatabaseLink);
-        ValidateIdentifier(table.AttachedAlias);
+        ValidateIdentifier(table.Database);
+        ValidateIdentifier(table.Schema);
+        ValidateIdentifier(table.TableName);
         ValidateIdentifier(table.Alias);
     }
 

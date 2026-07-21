@@ -61,10 +61,15 @@ public class SqlContext
     public ISqlDatabaseContextResolver DatabaseContextResolver { get; }
 
     /// <summary>
+    /// Builder 生命周期内固定的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _databaseContext;
+
+    /// <summary>
     /// 当前数据库上下文
     /// </summary>
     public DatabaseContext DatabaseContext =>
-        DatabaseContextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ??
+        _databaseContext ?? DatabaseContextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ??
         MetadataOptions?.DefaultDatabaseContext;
 
     /// <summary>
@@ -80,6 +85,7 @@ public class SqlContext
     /// <param name="options">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
+    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
     public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IParameterManager parameterManager,
         ISqlPartAccessor clause,
         IEntityMappingResolver entityMappingResolver = null,
@@ -87,10 +93,10 @@ public class SqlContext
         SqlMetadataOptions metadataOptions = null,
         SqlOptions options = null,
         ISqlDatabaseContextResolver databaseContextResolver = null,
-        IEntityModelMetadataProvider entityModelMetadataProvider = null)
+        IEntityModelMetadataProvider entityModelMetadataProvider = null, DatabaseContext databaseContext = null)
     {
         EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
-        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityMetadata();
+        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
         Dialect = dialect;
         ParameterManager = parameterManager;
         ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));
@@ -102,5 +108,6 @@ public class SqlContext
         Options = options;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             MetadataOptions);
+        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
     }
 }

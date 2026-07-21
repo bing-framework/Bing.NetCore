@@ -66,11 +66,10 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 
 ## 结构化表引用收敛
 
-- 已完成：实体映射缓存以实体、DbKey、Mapping Profile、Catalog、物理/逻辑架构、命名模式、兼容模式、链接和附加别名隔离，避免不同数据源复用错误表名。
-- 已完成：类型化 `From` / `Join` 在最终 SQL 渲染阶段按 Provider 格式化并复核跨库约束；旧字符串 API 继续保持原始片段语义。
-- 已完成：同一 DbKey 的跨 Catalog 查询由 Provider 能力决定；不同 DbKey 在 Join 阶段明确拒绝，不改变既有连接和事务生命周期。
+- 已完成：实体映射缓存以实体、DbKey、Mapping Profile、Database、Schema、TableName 和表路由键隔离，避免不同映射复用错误对象名称。
+- 已完成：类型化 `From` / `Join` 在最终 SQL 渲染阶段按 Provider 格式化 `Database`、`Schema`、`TableName` 和可选 `Alias`；旧字符串 API 继续保持原始片段语义。
+- 已完成：对象名称模型不再承载连接路由、跨数据库链接或 SQLite 附加别名；这些场景由应用在原生 SQL 与连接所有权边界内显式处理。
 - 已完成：MySQL/Doris、SQL Server、PostgreSQL、Oracle 和 SQLite 的对象名称限定规则集中在能力模型中，未知已声明 Provider 失败关闭。
-- 待真实环境验证：外部 MySQL、PostgreSQL、SQL Server 与 Oracle 的跨 Catalog/Link 行为继续受集成测试门控保护；SQLite ATTACH 使用临时文件数据库验证。
 
 ## 2026-07-17 验收补充
 

@@ -44,15 +44,14 @@ public class OracleRoutingAndMappingTest
     }
 
     /// <summary>
-    /// 测试目的：Oracle 类型化 From 应仅通过显式 DatabaseLink 输出远端限定符。
+    /// 测试目的：Oracle 类型化 From 应将 Schema 与表名逐段输出。
     /// </summary>
     [Fact]
-    public void Builder_WhenDatabaseLinkConfigured_ShouldRenderDatabaseLink()
+    public void Builder_WhenSchemaConfigured_ShouldRenderSchemaAndTable()
     {
         // Arrange
         var metadataOptions = CreateMetadataOptions();
-        metadataOptions.EntityMappings[0].PhysicalSchema = "SCOTT";
-        metadataOptions.EntityMappings[0].DatabaseLink = "REMOTE";
+        metadataOptions.EntityMappings[0].Schema = "SCOTT";
         var builder = new OracleBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions, options: CreateSqlOptions());
 
@@ -60,7 +59,7 @@ public class OracleRoutingAndMappingTest
         builder.From<RoutingSample>();
 
         // Assert
-        Assert.Contains("\"SCOTT\".\"users_reporting\"@\"REMOTE\"", builder.ToSql());
+        Assert.Contains("\"SCOTT\".\"users_reporting\"", builder.ToSql());
     }
 
     private static SqlOptions CreateSqlOptions() => new SqlOptions().SetDatabaseContext(new DatabaseContext

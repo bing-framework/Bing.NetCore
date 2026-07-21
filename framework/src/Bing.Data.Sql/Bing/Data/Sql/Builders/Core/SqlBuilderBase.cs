@@ -128,6 +128,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     protected ISqlDatabaseContextResolver DatabaseContextResolver { get; private set; }
 
     /// <summary>
+    /// Builder 生命周期内固定的执行上下文。
+    /// </summary>
+    internal SqlBuilderExecutionContext ExecutionContext { get; private set; }
+
+    /// <summary>
     /// 实体解析器
     /// </summary>
     protected IEntityResolver EntityResolver { get; private set; }
@@ -260,7 +265,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         DatabaseContextAccessor = databaseContextAccessor;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             MetadataOptions);
-        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityMetadata();
+        ExecutionContext = new SqlBuilderExecutionContext(DatabaseContextResolver.Resolve(Options) ??
+            Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ?? MetadataOptions.DefaultDatabaseContext);
+        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
         EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
             databaseContextAccessor: databaseContextAccessor, options: MetadataOptions,
             entityModelMetadataProvider: EntityModelMetadataProvider);
@@ -270,7 +277,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         SqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, MetadataOptions), databaseContextAccessor, MetadataOptions);
         EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
-            DatabaseContextResolver, EntityModelMetadataProvider);
+            DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
@@ -310,14 +317,14 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     protected virtual IJoinClause CreateJoinClause() => new JoinClause(this, Dialect, EntityResolver, AliasRegister,
         ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory,
         MetadataOptions, Options, DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator,
-        TableReferenceValidator);
+        TableReferenceValidator, ExecutionContext.DatabaseContext);
 
     /// <summary>
     /// 创建Where子句
     /// </summary>
     protected virtual IWhereClause CreateWhereClause() => new WhereClause(this, Dialect, EntityResolver, AliasRegister,
         ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions,
-        Options, DatabaseContextResolver);
+        Options, DatabaseContextResolver, ExecutionContext.DatabaseContext);
 
     /// <summary>
     /// 创建分组子句
@@ -357,6 +364,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         Options = sqlBuilder.Options;
         DatabaseContextAccessor = sqlBuilder.DatabaseContextAccessor;
         DatabaseContextResolver = sqlBuilder.DatabaseContextResolver;
+        ExecutionContext = sqlBuilder.ExecutionContext;
         EntityMappingResolver = sqlBuilder.EntityMappingResolver;
         EntityModelMetadataProvider = sqlBuilder.EntityModelMetadataProvider;
         ObjectNameFormatter = sqlBuilder.ObjectNameFormatter;
@@ -365,7 +373,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         SqlParameterFactory = sqlBuilder.SqlParameterFactory;
         EntityResolver = sqlBuilder.EntityResolver ??
             new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
-                DatabaseContextResolver, EntityModelMetadataProvider);
+                DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
 
         // 克隆各子句
@@ -377,23 +385,23 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
 
         // 克隆分页信息
-        Pager = sqlBuilder.Pager;
+        Pager = new Pager(sqlBuilder.Pager.Page, sqlBuilder.Pager.PageSize, sqlBuilder.Pager.TotalCount,
+            sqlBuilder.Pager.Order);
         OffsetParam = sqlBuilder.OffsetParam;
         LimitParam = sqlBuilder.LimitParam;
+        _isAddFilters = sqlBuilder._isAddFilters;
 
         // 克隆集合
         UnionItems = sqlBuilder.UnionItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
         CteItems = sqlBuilder.CteItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
-        _excludedFilters = sqlBuilder._excludedFilters;
+        _excludedFilters = new List<Type>(sqlBuilder._excludedFilters);
     }
 
     /// <summary>
     /// 获取当前数据库上下文
     /// </summary>
     /// <returns>数据库上下文</returns>
-    internal virtual DatabaseContext GetDatabaseContext() =>
-        DatabaseContextResolver?.Resolve(Options) ?? Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ??
-        MetadataOptions?.DefaultDatabaseContext;
+    internal virtual DatabaseContext GetDatabaseContext() => ExecutionContext.DatabaseContext;
 
     /// <summary>
     /// 解析结构化对象名称使用的数据库类型。
@@ -402,8 +410,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <returns>数据库类型。</returns>
     internal DatabaseType ResolveProviderDatabaseType(SqlTableReference reference = null)
     {
-        var databaseType = GetDatabaseContext()?.DataSource?.DatabaseType ?? reference?.DatabaseType;
-        return databaseType ?? ProviderDatabaseType;
+        return ExecutionContext.DatabaseType ?? ProviderDatabaseType;
     }
 
     /// <summary>
@@ -759,7 +766,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
 
         _isAddFilters = true;
         var context = new SqlContext(Dialect, AliasRegister, ParameterManager, this, EntityMappingResolver,
-            DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver, EntityModelMetadataProvider);
+            DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver, EntityModelMetadataProvider,
+            ExecutionContext.DatabaseContext);
         foreach (var filter in SqlFilterCollection.Filters)
         {
             if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))

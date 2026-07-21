@@ -25,8 +25,7 @@ public class TestSqlBuilder : SqlBuilderBase
     /// 初始化Sql生成器
     /// </summary>
     /// <param name="dialect">Sql 方言</param>
-    /// <param name="metadata">实体元数据解析器</param>
-    /// <param name="tableDatabase">表数据库</param>
+    /// <param name="entityModelMetadataProvider">实体模型元数据提供器</param>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -37,7 +36,7 @@ public class TestSqlBuilder : SqlBuilderBase
     /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
     /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
     /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
-    public TestSqlBuilder(IDialect dialect = null, IEntityMetadata metadata = null, ITableDatabase tableDatabase = null,
+    public TestSqlBuilder(IDialect dialect = null, IEntityModelMetadataProvider entityModelMetadataProvider = null,
         IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
@@ -47,7 +46,7 @@ public class TestSqlBuilder : SqlBuilderBase
         ISqlTableReferenceValidator tableReferenceValidator = null)
         : base(parameterManager, entityMappingResolver, databaseContextAccessor, sqlParameterFactory, metadataOptions,
             options, databaseContextResolver, objectNameFormatter, crossDatabaseQueryValidator,
-            tableReferenceValidator, metadata as IEntityModelMetadataProvider ?? new EntityModelMetadataProviderAdapter(metadata))
+            tableReferenceValidator, entityModelMetadataProvider)
     {
         _dialect = dialect;
     }

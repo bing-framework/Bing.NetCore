@@ -41,12 +41,7 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
-        services.TryAddSingleton<ITableNamingStrategy, DefaultTableNamingStrategy>();
-        services.TryAddSingleton<IEntityModelMetadataProvider>(provider =>
-        {
-            var metadata = provider.GetService<IEntityMetadata>();
-            return metadata as IEntityModelMetadataProvider ?? new EntityModelMetadataProviderAdapter(metadata);
-        });
+        services.TryAddSingleton<IEntityModelMetadataProvider, DefaultEntityModelMetadataProvider>();
         services.TryAddSingleton<ISqlObjectNameFormatter, DefaultSqlObjectNameFormatter>();
         services.TryAddSingleton<ISqlObjectNameCapabilityProvider, DefaultSqlObjectNameCapabilityProvider>();
         services.TryAddSingleton<ISqlTableReferenceValidator, DefaultSqlTableReferenceValidator>();
@@ -142,24 +137,24 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册实体元数据
+    /// 注册实体模型元数据提供器
     /// </summary>
     /// <typeparam name="TEntityMetadata">实体元数据类型</typeparam>
     /// <param name="services">服务集合</param>
-    public static IServiceCollection AddEntityMetadata<TEntityMetadata>(this IServiceCollection services)
-        where TEntityMetadata : class, IEntityMetadata
+    public static IServiceCollection AddEntityModelMetadataProvider<TEntityMetadata>(this IServiceCollection services)
+        where TEntityMetadata : class, IEntityModelMetadataProvider
     {
-        return services.AddEntityMetadata<IEntityMetadata, TEntityMetadata>();
+        return services.AddEntityModelMetadataProvider<IEntityModelMetadataProvider, TEntityMetadata>();
     }
 
     /// <summary>
-    /// 注册实体元数据
+    /// 注册实体模型元数据提供器
     /// </summary>
     /// <typeparam name="TInterface">接口类型</typeparam>
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
-    public static IServiceCollection AddEntityMetadata<TInterface, TImplementation>(this IServiceCollection services)
-        where TInterface : IEntityMetadata
+    public static IServiceCollection AddEntityModelMetadataProvider<TInterface, TImplementation>(this IServiceCollection services)
+        where TInterface : IEntityModelMetadataProvider
         where TImplementation : class, TInterface
     {
         services.TryAddSingleton(typeof(TInterface), typeof(TImplementation));

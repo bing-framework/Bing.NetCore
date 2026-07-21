@@ -133,23 +133,21 @@ ISqlQuery RightJoin<TEntity>(string alias = null, string schema = null);
 - `columns`：一组列表达式，如 `x => new object[] { x.Id, x.Name }`。
 - `alias` / `schema`：表别名与架构名。
 
-### 结构化表引用与跨 Catalog Join
+### 结构化表引用
 
-实体类型 `From<TEntity>`、`Join<TEntity>` 不再直接将旧 `Schema` 与表名拼接为字符串。框架先解析 `SqlTableReference`，再在生成 SQL 时按当前 Provider 渲染。该引用分别保存数据源 `DbKey`、`Catalog`、物理架构、逻辑架构、原始表名和最终物理表名，避免把业务逻辑架构误当成数据库架构。
+实体类型 `From<TEntity>`、`Join<TEntity>` 先解析最终 `SqlTableReference`，再在生成 SQL 时按当前 Provider 渲染。表引用只保存 `Database`、`Schema`、`TableName` 和可选 `Alias`；映射解析不再对 Schema 或表名执行 Provider 特定的兼容转换。
 
-默认命名仍兼容 MySQL 旧模式：实体映射的 `Schema = "order"` 与 `TableName = "orderinfo"` 在逻辑前缀模式下生成 `` `order_orderinfo` ``。新代码应通过 `EntityMappingOptions` 明确设置 `Catalog`、`PhysicalSchema`、`LogicalSchema` 和 `LogicalTableNamingMode`，不应再依赖旧 `Schema` 的 Provider 推断。
-
-同一 `DbKey` 下可以连接不同 `Catalog` 的表。不同 `DbKey` 的 `Join` 会在生成 SQL 时被拒绝，因为它们可能需要不同连接、事务和 Provider。显式字符串 `From("...")`、`Join("...")` 被视为原始 SQL 片段，框架不会猜测或重写其数据库限定符；包含外部输入时必须使用参数化条件而非字符串拼接。
+显式字符串 `From("...")`、`Join("...")` 是受控对象名入口，不接受原始 SQL。它们支持一个可选别名，并拒绝分号、控制字符、空名称段和超出 Provider 上限的限定段。原始 SQL 仅可通过 `AppendFrom`、`AppendJoin`、`AppendLeftJoin` 或 `AppendRightJoin` 追加；外部输入不得用于任何对象名字符串。
 
 各 Provider 的限定名规则如下：
 
 | Provider | 支持的限定部分 |
 | --- | --- |
-| MySQL / Doris | `Catalog.Table` |
-| SQL Server | `Catalog.PhysicalSchema.Table` |
-| PostgreSQL | `PhysicalSchema.Table`，不支持 `Catalog` |
-| Oracle | `PhysicalSchema.Table@DatabaseLink` |
-| SQLite | `AttachedAlias.Table`，不支持物理架构 |
+| MySQL / Doris | `Schema.Table` |
+| SQL Server | `Database.Schema.Table` |
+| PostgreSQL | `Schema.Table` |
+| Oracle | `Schema.Table` |
+| SQLite | `Table`，或受控连接中 `AttachedAlias.Table` |
 
 详细说明见 [结构化表引用与跨数据库查询](sql-table-reference-and-cross-database-query.md)。
 
@@ -452,7 +450,7 @@ options.EntityMappings.Add(new EntityMappingOptions
 });
 ```
 
-映射解析顺序为：显式 `EntityMappings` -> 现有 `IEntityMetadata` -> CLR 类型回退。
+映射解析顺序为：显式 `EntityMappings` -> `IEntityModelMetadataProvider` -> CLR 类型回退。
 
 ---
 

@@ -11,7 +11,7 @@ namespace Bing.Data.Sql.Tests;
 public class StructuredTableReferenceBuilderTest
 {
     /// <summary>
-    /// 测试 - 结构化 From 应输出完整的 SQL Server 三段表名和别名。
+    /// 测试目的：结构化 From 应输出完整的 SQL Server 三段表名和别名。
     /// </summary>
     [Fact]
     public void From_WhenUsingStructuredReference_ShouldRenderCompleteSql()
@@ -20,10 +20,9 @@ public class StructuredTableReferenceBuilderTest
         var builder = new TestSqlBuilder();
         var reference = new SqlTableReference
         {
-            DatabaseType = DatabaseType.SqlServer,
-            Catalog = "sales",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "orders",
+            Database = "sales",
+            Schema = "dbo",
+            TableName = "orders",
             Alias = "o"
         };
 
@@ -35,42 +34,10 @@ public class StructuredTableReferenceBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 结构化 Join 应输出完整的 SQL Server 三段表名和别名。
+    /// 测试目的：执行上下文数据库类型应决定结构化表引用的渲染方言。
     /// </summary>
     [Fact]
-    public void Join_WhenUsingStructuredReference_ShouldRenderCompleteSql()
-    {
-        // Arrange
-        var builder = new TestSqlBuilder();
-        builder.FromClause.From(new SqlTableReference
-        {
-            DatabaseType = DatabaseType.SqlServer,
-            Catalog = "sales",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "orders",
-            Alias = "o"
-        });
-        var reference = new SqlTableReference
-        {
-            DatabaseType = DatabaseType.SqlServer,
-            Catalog = "sales",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "customers",
-            Alias = "c"
-        };
-
-        // Act
-        builder.JoinClause.Join(reference);
-
-        // Assert
-        Assert.Equal("Join [sales].[dbo].[customers] As [c]", builder.JoinClause.ToSql());
-    }
-
-    /// <summary>
-    /// 测试 - 执行上下文数据库类型应优先于表引用数据库类型。
-    /// </summary>
-    [Fact]
-    public void From_WhenExecutionContextHasDatabaseType_ShouldPreferExecutionContext()
+    public void From_WhenExecutionContextHasDatabaseType_ShouldUseExecutionContext()
     {
         // Arrange
         var context = new DatabaseContext
@@ -78,64 +45,12 @@ public class StructuredTableReferenceBuilderTest
             DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
         };
         var builder = new TestSqlBuilder(options: new SqlOptions().SetDatabaseContext(context));
-        var reference = new SqlTableReference
-        {
-            DatabaseType = DatabaseType.PgSql,
-            Catalog = "sales",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "orders"
-        };
+        var reference = new SqlTableReference { Database = "sales", Schema = "dbo", TableName = "orders" };
 
         // Act
         builder.FromClause.From(reference);
 
         // Assert
         Assert.Equal("From [sales].[dbo].[orders]", builder.FromClause.ToSql());
-    }
-
-    /// <summary>
-    /// 测试 - 单次 Join 渲染应只执行一次跨库校验。
-    /// </summary>
-    [Fact]
-    public void Join_WhenRenderingRepeatedly_ShouldValidateCrossDatabaseOnce()
-    {
-        // Arrange
-        var validator = new CountingCrossDatabaseQueryValidator();
-        var builder = new TestSqlBuilder(crossDatabaseQueryValidator: validator);
-        builder.FromClause.From(new SqlTableReference
-        {
-            DatabaseType = DatabaseType.SqlServer,
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "orders"
-        });
-        builder.JoinClause.Join(new SqlTableReference
-        {
-            DatabaseType = DatabaseType.SqlServer,
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "customers"
-        });
-
-        // Act
-        var first = builder.JoinClause.ToSql();
-        var second = builder.JoinClause.ToSql();
-
-        // Assert
-        Assert.Equal("Join [dbo].[customers]", first);
-        Assert.Equal(first, second);
-        Assert.Equal(1, validator.Count);
-    }
-
-    /// <summary>
-    /// 计数型跨数据库查询校验器。
-    /// </summary>
-    private sealed class CountingCrossDatabaseQueryValidator : ISqlCrossDatabaseQueryValidator
-    {
-        /// <summary>
-        /// 调用次数。
-        /// </summary>
-        public int Count { get; private set; }
-
-        /// <inheritdoc />
-        public void Validate(SqlTableReference source, SqlTableReference target, DatabaseContext executionContext) => Count++;
     }
 }

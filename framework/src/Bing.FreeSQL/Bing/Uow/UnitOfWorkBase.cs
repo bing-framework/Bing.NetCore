@@ -17,7 +17,7 @@ namespace Bing.Uow;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityMetadata, IEntityModelMetadataProvider
+public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityModelMetadataProvider
 {
     #region 字段
 
@@ -300,12 +300,6 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     /// <inheritdoc />
     public string GetTableName(Type entityType) => GetTable(entityType);
-
-    /// <inheritdoc />
-    public string GetPhysicalSchema(Type entityType) => GetSchema(entityType);
-
-    /// <inheritdoc />
-    public string GetLogicalSchema(Type entityType) => null;
 
     /// <inheritdoc />
     public string GetColumnName(Type entityType, string propertyName) => GetColumn(entityType, propertyName);

@@ -107,11 +107,10 @@ public class NameItem
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="prefix">前缀</param>
-    /// <param name="tableDatabase">表数据库</param>
-    public string ToSql(IDialect dialect, string prefix = null, ITableDatabase tableDatabase = null)
+    public string ToSql(IDialect dialect, string prefix = null)
     {
         var name = GetName(dialect, prefix);
-        var database = GetDatabase(dialect, tableDatabase, prefix);
+        var database = GetDatabase(dialect);
         return string.IsNullOrWhiteSpace(database) ? name : $"{database}.{name}";
     }
 
@@ -125,13 +124,11 @@ public class NameItem
     /// 获取前缀
     /// </summary>
     /// <param name="dialect">Sql方言</param>
-    /// <param name="tableDatabase">表数据库</param>
-    /// <param name="prefix">前缀</param>
-    private string GetDatabase(IDialect dialect, ITableDatabase tableDatabase, string prefix)
+    private string GetDatabase(IDialect dialect)
     {
         if (string.IsNullOrWhiteSpace(DatabaseName) == false)
             return dialect.SafeName(DatabaseName);
-        return tableDatabase == null ? null : dialect.SafeName(tableDatabase.GetDatabase(GetName(prefix)));
+        return null;
     }
 
     /// <summary>

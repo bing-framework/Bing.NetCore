@@ -29,7 +29,7 @@ namespace Bing.Datas.EntityFramework.Core;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntityMetadata, IEntityModelMetadataProvider
+public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntityModelMetadataProvider
 {
     #region 字段
 
@@ -636,12 +636,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
 
     /// <inheritdoc />
     public string GetTableName(Type entityType) => GetTable(entityType);
-
-    /// <inheritdoc />
-    public string GetPhysicalSchema(Type entityType) => GetSchema(entityType);
-
-    /// <inheritdoc />
-    public string GetLogicalSchema(Type entityType) => null;
 
     /// <inheritdoc />
     public string GetColumnName(Type entityType, string propertyName) => GetColumn(entityType, propertyName);

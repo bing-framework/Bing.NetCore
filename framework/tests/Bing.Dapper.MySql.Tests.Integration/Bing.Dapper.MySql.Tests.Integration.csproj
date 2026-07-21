@@ -23,4 +23,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.mysql.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 </Project>

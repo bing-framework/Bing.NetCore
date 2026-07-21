@@ -3,33 +3,32 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql.Tests;
 
 /// <summary>
-/// 结构化 SQL 表引用测试。
+/// SQL 表引用测试。
 /// </summary>
 public class SqlTableReferenceTest
 {
     /// <summary>
-    /// 测试 - 修改表引用副本不应影响原始表引用。
+    /// 测试目的：表引用副本应保持原始名称段不变，同时允许指定别名。
     /// </summary>
     [Fact]
-    public void WithAlias_WhenCreatingCopy_ShouldNotChangeOriginalReference()
+    public void Copy_WhenAliasChanged_ShouldKeepOriginalNameParts()
     {
         // Arrange
         var reference = new SqlTableReference
         {
-            Catalog = "erp",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "orders"
+            Database = "erp",
+            Schema = "dbo",
+            TableName = "orders"
         };
 
         // Act
-        var copy = reference.WithAlias("o").WithPhysicalSchema("reporting");
+        var copy = reference with { Alias = "o" };
 
         // Assert
         Assert.Null(reference.Alias);
-        Assert.Equal("dbo", reference.PhysicalSchema);
+        Assert.Equal("erp", copy.Database);
+        Assert.Equal("dbo", copy.Schema);
+        Assert.Equal("orders", copy.TableName);
         Assert.Equal("o", copy.Alias);
-        Assert.Equal("reporting", copy.PhysicalSchema);
-        Assert.Equal("erp", copy.Catalog);
-        Assert.Equal("orders", copy.ResolvedTableName);
     }
 }

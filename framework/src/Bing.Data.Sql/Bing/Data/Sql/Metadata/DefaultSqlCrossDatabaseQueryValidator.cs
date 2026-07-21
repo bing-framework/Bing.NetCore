@@ -22,55 +22,66 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 	}
 
 	/// <inheritdoc />
-	public void Validate(SqlTableReference source, SqlTableReference target, DatabaseContext executionContext)
+	public void Validate(DatabaseContext executionContext, SqlTableReference source, SqlTableReference target)
 	{
 		if (target == null)
 			throw new ArgumentNullException(nameof(target));
-		var executionDbKey = Normalize(executionContext?.DbKey);
-		var sourceDbKey = Normalize(source?.DbKey) ?? executionDbKey;
-		var targetDbKey = Normalize(target.DbKey) ?? executionDbKey;
-		ValidateDbKey(sourceDbKey, targetDbKey);
-		if (string.IsNullOrWhiteSpace(source?.Catalog) || string.IsNullOrWhiteSpace(target.Catalog) ||
-			string.Equals(source.Catalog, target.Catalog, StringComparison.OrdinalIgnoreCase))
+		if (source == null)
+		{
+			ValidateTarget(executionContext, target);
 			return;
-		var databaseType = ResolveDatabaseType(executionContext, source, target);
-		if (_capabilityProvider.GetCapabilities(databaseType).SupportsCrossCatalogQuery == false)
-			throw new NotSupportedException("当前数据库 Provider 不支持同一连接中的跨 Catalog 查询。");
+		}
+		ValidateCrossDatabase(executionContext, source, target);
 	}
 
 	/// <summary>
-	/// 验证源表和目标表的数据源标识。
-	/// </summary>
-	/// <param name="sourceDbKey">源数据源标识。</param>
-	/// <param name="targetDbKey">目标数据源标识。</param>
-	private static void ValidateDbKey(string sourceDbKey, string targetDbKey)
-	{
-		if (string.IsNullOrWhiteSpace(sourceDbKey) || string.IsNullOrWhiteSpace(targetDbKey))
-			return;
-		if (string.Equals(sourceDbKey, targetDbKey, StringComparison.OrdinalIgnoreCase) == false)
-			throw new InvalidOperationException("不同 DbKey 的表不能直接执行 Join 查询。");
-	}
-
-	/// <summary>
-	/// 解析跨 Catalog 校验使用的数据库类型。
+	/// 验证原始字符串 From 的结构化 Join 目标。
 	/// </summary>
 	/// <param name="executionContext">执行数据库上下文。</param>
-	/// <param name="source">源表引用。</param>
 	/// <param name="target">目标表引用。</param>
-	/// <returns>数据库类型。</returns>
-	private static DatabaseType ResolveDatabaseType(DatabaseContext executionContext, SqlTableReference source,
-		SqlTableReference target)
+	public void ValidateTarget(DatabaseContext executionContext, SqlTableReference target)
 	{
-		var databaseType = executionContext?.DataSource?.DatabaseType ?? source?.DatabaseType ?? target.DatabaseType;
+		if (target == null)
+			throw new ArgumentNullException(nameof(target));
+		var databaseType = ResolveDatabaseType(executionContext);
 		if (databaseType == null)
-			throw new InvalidOperationException("无法确定跨 Catalog 查询的数据库类型。");
-		return databaseType.Value;
+			return;
+		if (databaseType == DatabaseType.PgSql && HasValue(target.Database))
+			throw new NotSupportedException("PostgreSQL 不支持普通跨 Database 查询。");
+		if (databaseType == DatabaseType.Oracle && HasValue(target.Database))
+			throw new NotSupportedException("Oracle 不支持普通跨 Database 查询。");
 	}
 
 	/// <summary>
-	/// 规范化数据源标识。
+	/// 验证同一连接中两个结构化表的关系。
 	/// </summary>
-	/// <param name="dbKey">数据源标识。</param>
-	/// <returns>规范化后的数据源标识。</returns>
-	private static string Normalize(string dbKey) => string.IsNullOrWhiteSpace(dbKey) ? null : dbKey.Trim();
+	private void ValidateCrossDatabase(DatabaseContext executionContext, SqlTableReference source,
+		SqlTableReference target)
+	{
+		var databaseType = ResolveDatabaseType(executionContext);
+		if (databaseType == null)
+			return;
+		if (databaseType == DatabaseType.PgSql &&
+			(HasValue(source.Database) || HasValue(target.Database)))
+			throw new NotSupportedException("PostgreSQL 不支持普通跨 Database 查询。");
+		if (databaseType == DatabaseType.Oracle &&
+			(HasValue(source.Database) || HasValue(target.Database)))
+			throw new NotSupportedException("Oracle 不支持普通跨 Database 查询。");
+		if (databaseType == DatabaseType.Sqlite &&
+			(HasValue(source.Database) || HasValue(target.Database) || HasValue(source.Schema) || HasValue(target.Schema)))
+			throw new NotSupportedException("SQLite 核心映射不支持跨数据库结构化 Join。");
+	}
+
+	/// <summary>
+	/// 解析跨数据库校验使用的数据库类型。
+	/// </summary>
+	private static DatabaseType? ResolveDatabaseType(DatabaseContext executionContext)
+	{
+		return executionContext?.DataSource?.DatabaseType;
+	}
+
+	/// <summary>
+	/// 判断字符串是否包含有效值。
+	/// </summary>
+	private static bool HasValue(string value) => string.IsNullOrWhiteSpace(value) == false;
 }

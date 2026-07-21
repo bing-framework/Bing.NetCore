@@ -93,6 +93,33 @@ public class FromClauseTest
     }
 
     /// <summary>
+    /// 测试目的：字符串表名包含 SQL 语句分隔符时应被拒绝。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableContainsStatementSeparator_ShouldThrowArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _clause.From("a;DropTable"));
+    }
+
+    /// <summary>
+    /// 测试目的：SQL Server 字符串表名超过三段时应被拒绝。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableHasTooManyParts_ShouldThrowInvalidOperationException()
+    {
+        Assert.Throws<InvalidOperationException>(() => _clause.From("a.b.c.d"));
+    }
+
+    /// <summary>
+    /// 测试目的：字符串表名存在空名称段时应被拒绝。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableHasEmptyPart_ShouldThrowArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _clause.From("a..b"));
+    }
+
+    /// <summary>
     /// 设置表 - 泛型实体
     /// </summary>
     [Fact]

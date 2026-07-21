@@ -1,5 +1,4 @@
 ﻿using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders.Core;
@@ -10,19 +9,6 @@ namespace Bing.Data.Sql.Tests.Builders.Core;
 public class NameItemTest
 {
     /// <summary>
-    /// 表数据库
-    /// </summary>
-    private readonly ITableDatabase _database;
-
-    /// <summary>
-    /// 测试初始化
-    /// </summary>
-    public NameItemTest()
-    {
-        _database = new TestTableDatabase();
-    }
-
-    /// <summary>
     /// 不带前缀
     /// </summary>
     [Fact]
@@ -32,7 +18,6 @@ public class NameItemTest
         Assert.Equal("a", item.Name);
         Assert.Empty(item.Prefix);
         Assert.Equal("[b].[a]", item.ToSql(TestDialect.Instance, "b"));
-        Assert.Equal("[test].[b].[a]", item.ToSql(TestDialect.Instance, "b", _database));
     }
 
     /// <summary>
@@ -88,7 +73,6 @@ public class NameItemTest
         var item = new NameItem("a.b");
         Assert.Equal("b", item.Name);
         Assert.Equal("a", item.Prefix);
-        Assert.Equal("[test].[a].[b]", item.ToSql(TestDialect.Instance, "f", _database));
     }
 
     /// <summary>
@@ -134,7 +118,6 @@ public class NameItemTest
         Assert.Equal("[c]", item.Name);
         Assert.Equal("[a.b]", item.Prefix);
     }
-
     /// <summary>
     /// 带前缀 - 名称和前缀带双引号 - 前缀包含.
     /// </summary>
@@ -178,7 +161,7 @@ public class NameItemTest
         Assert.Equal("c", item.Name);
         Assert.Equal("b", item.Prefix);
         Assert.Equal("a", item.DatabaseName);
-        Assert.Equal("[a].[b].[c]", item.ToSql(TestDialect.Instance, "f", _database));
+        Assert.Equal("[a].[b].[c]", item.ToSql(TestDialect.Instance, "f"));
     }
 
     /// <summary>

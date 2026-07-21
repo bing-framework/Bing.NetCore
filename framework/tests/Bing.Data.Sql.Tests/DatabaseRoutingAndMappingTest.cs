@@ -88,9 +88,9 @@ public class DatabaseRoutingAndMappingTest
         });
 
         // Assert
-        defaultMapping.TableName.ShouldBe("users");
+        defaultMapping.Table.TableName.ShouldBe("users");
         defaultMapping.Columns[nameof(Sample.StringValue)].ColumnName.ShouldBe("status");
-        reportingMapping.TableName.ShouldBe("users_reporting");
+        reportingMapping.Table.TableName.ShouldBe("users_reporting");
         reportingMapping.Columns[nameof(Sample.StringValue)].ColumnName.ShouldBe("status_code");
     }
 
@@ -165,8 +165,8 @@ public class DatabaseRoutingAndMappingTest
         var writeMapping = resolver.Resolve(typeof(Sample), writeContext);
 
         // Assert
-        readMapping.TableName.ShouldBe("users_read");
-        writeMapping.TableName.ShouldBe("users_write");
+        readMapping.Table.TableName.ShouldBe("users_read");
+        writeMapping.Table.TableName.ShouldBe("users_write");
         ReferenceEquals(readMapping, writeMapping).ShouldBeFalse();
     }
 
@@ -237,6 +237,39 @@ public class DatabaseRoutingAndMappingTest
 
         // Assert
         builder.GetCondition().ShouldBe("[status_code]=@_p_0");
+    }
+
+    /// <summary>
+    /// 测试 - Builder 构建过程中数据库上下文变化不应影响已冻结的表名和列名映射。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenAmbientDatabaseContextChanges_ShouldKeepInitialMapping()
+    {
+        // Arrange
+        var metadata = new TestEntityMetadata();
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var options = CreateMetadataOptions();
+        var resolver = new DefaultEntityMappingResolver(metadata, accessor, options);
+        accessor.Current = new DatabaseContext
+        {
+            DbKey = "default",
+            DataSource = CreateDataSource("default", DatabaseType.MySql)
+        };
+        var builder = new TestSqlBuilder(TestDialect.Instance, metadata, entityMappingResolver: resolver,
+            databaseContextAccessor: accessor, metadataOptions: options);
+
+        // Act
+        accessor.Current = new DatabaseContext
+        {
+            DbKey = "reporting",
+            DataSource = CreateDataSource("reporting", DatabaseType.PgSql)
+        };
+        builder.From<Sample>();
+        builder.Where<Sample>(t => t.StringValue, "abc");
+
+        // Assert
+        builder.FromClause.ToSql().ShouldBe("From [as_Sample].[users]");
+        builder.GetCondition().ShouldBe("[users].[status]=@_p_0");
     }
 
     /// <summary>

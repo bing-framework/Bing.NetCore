@@ -16,7 +16,6 @@ public class SqlMetadataBenchmarks
 {
     private DefaultEntityMappingResolver _mappingResolver;
     private readonly DefaultSqlObjectNameFormatter _formatter = new();
-    private readonly DefaultTableNamingStrategy _namingStrategy = new();
     private readonly BenchmarkDialect _dialect = new();
     private readonly DatabaseContext _databaseContext = new()
     {
@@ -25,17 +24,15 @@ public class SqlMetadataBenchmarks
     };
     private readonly SqlTableReference _reference = new()
     {
-        DatabaseType = DatabaseType.SqlServer,
-        Catalog = "benchmark",
-        PhysicalSchema = "dbo",
-        ResolvedTableName = "orders",
+        Database = "benchmark",
+        Schema = "dbo",
+        TableName = "orders",
         Alias = "o"
     };
     private readonly SqlTableReference _mySqlReference = new()
     {
-        DatabaseType = DatabaseType.MySql,
-        Catalog = "benchmark",
-        ResolvedTableName = "orders",
+        Schema = "benchmark",
+        TableName = "orders",
         Alias = "o"
     };
     private BenchmarkBuilder _builder;
@@ -79,16 +76,19 @@ public class SqlMetadataBenchmarks
     /// </summary>
     /// <returns>实体映射元数据。</returns>
     [Benchmark]
-    public EntityMappingMetadata ResolveMappingCold() =>
-        new DefaultEntityMappingResolver().Resolve(typeof(BenchmarkEntity), _databaseContext);
-
-    /// <summary>
-    /// 测量逻辑架构前缀表命名性能。
-    /// </summary>
-    /// <returns>解析后的表名。</returns>
-    [Benchmark]
-    public string ResolveLogicalTableName() =>
-        _namingStrategy.Resolve("orders", "tenant", LogicalTableNamingMode.Prefix);
+    public EntityMappingMetadata ResolveMappingCold()
+    {
+        var metadataOptions = new SqlMetadataOptions();
+        for (var index = 0; index < MappingConfigurationCount; index++)
+            metadataOptions.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(BenchmarkEntity),
+                MappingProfile = $"profile-{index}",
+                TableName = $"orders_{index}"
+            });
+        return new DefaultEntityMappingResolver(options: metadataOptions).Resolve(typeof(BenchmarkEntity),
+            _databaseContext);
+    }
 
     /// <summary>
     /// 测量结构化表对象名称格式化性能。
@@ -124,10 +124,9 @@ public class SqlMetadataBenchmarks
         builder.FromClause.From(_reference);
         builder.JoinClause.Join(new SqlTableReference
         {
-            DatabaseType = DatabaseType.SqlServer,
-            Catalog = "benchmark",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "customers",
+            Database = "benchmark",
+            Schema = "dbo",
+            TableName = "customers",
             Alias = "c"
         });
         return $"{builder.FromClause.ToSql()} {builder.JoinClause.ToSql()}";

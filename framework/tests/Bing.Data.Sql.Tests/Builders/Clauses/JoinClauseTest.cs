@@ -431,6 +431,15 @@ public class JoinClauseTest
     }
 
     /// <summary>
+    /// 测试目的：Join 字符串表名包含控制字符时应被拒绝。
+    /// </summary>
+    [Fact]
+    public void Join_WhenTableContainsControlCharacter_ShouldThrowArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _clause.Join("a\nb"));
+    }
+
+    /// <summary>
     /// 测试 - 内连接 - 泛型实体
     /// </summary>
     [Fact]

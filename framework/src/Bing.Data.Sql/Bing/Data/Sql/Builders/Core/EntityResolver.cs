@@ -45,6 +45,11 @@ public class EntityResolver : IEntityResolver
     private readonly ISqlDatabaseContextResolver _databaseContextResolver;
 
     /// <summary>
+    /// Builder 生命周期内固定的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _databaseContext;
+
+    /// <summary>
     /// 初始化一个<see cref="EntityResolver"/>类型的实例
     /// </summary>
     /// <param name="entityMappingResolver">实体映射解析器</param>
@@ -53,12 +58,13 @@ public class EntityResolver : IEntityResolver
     /// <param name="sqlOptions">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
+    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
     public EntityResolver(IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, SqlMetadataOptions options = null,
         SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null,
-        IEntityModelMetadataProvider entityModelMetadataProvider = null)
+        IEntityModelMetadataProvider entityModelMetadataProvider = null, DatabaseContext databaseContext = null)
     {
-        _entityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityMetadata();
+        _entityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
         _entityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
             databaseContextAccessor: databaseContextAccessor, options: options,
             entityModelMetadataProvider: _entityModelMetadataProvider);
@@ -67,15 +73,15 @@ public class EntityResolver : IEntityResolver
         _sqlOptions = sqlOptions;
         _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             _options);
+        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
     }
 
     /// <summary>
-    /// 使用旧实体元数据初始化实体解析器。
+    /// 使用实体模型元数据提供器初始化实体解析器。
     /// </summary>
-    /// <param name="metadata">旧实体元数据。</param>
-    [Obsolete("请使用 IEntityModelMetadataProvider 或 IEntityMappingResolver 初始化实体解析器。")]
-    public EntityResolver(IEntityMetadata metadata)
-        : this(entityModelMetadataProvider: new EntityModelMetadataProviderAdapter(metadata))
+    /// <param name="entityModelMetadataProvider">实体模型元数据提供器。</param>
+    public EntityResolver(IEntityModelMetadataProvider entityModelMetadataProvider)
+        : this(null, null, null, null, null, entityModelMetadataProvider)
     {
     }
 
@@ -86,10 +92,7 @@ public class EntityResolver : IEntityResolver
     public string GetTable(Type entity)
     {
         var mapping = GetMapping(entity);
-        if (string.IsNullOrWhiteSpace(mapping?.TableName) == false)
-            return mapping.TableName;
-        var result = _entityModelMetadataProvider.GetTableName(entity);
-        return string.IsNullOrWhiteSpace(result) ? entity.Name : result;
+        return mapping?.Table?.TableName;
     }
 
     /// <summary>
@@ -99,14 +102,7 @@ public class EntityResolver : IEntityResolver
     public SqlTableReference GetTableReference(Type entity)
     {
         var mapping = GetMapping(entity);
-        if (mapping?.TableReference != null)
-            return mapping.TableReference;
-        return new SqlTableReference
-        {
-            TableName = GetTable(entity),
-            ResolvedTableName = GetTable(entity),
-            PhysicalSchema = GetSchema(entity)
-        };
+        return mapping?.Table;
     }
 
     /// <summary>
@@ -116,9 +112,7 @@ public class EntityResolver : IEntityResolver
     public string GetSchema(Type entity)
     {
         var mapping = GetMapping(entity);
-        if (string.IsNullOrWhiteSpace(mapping?.Schema) == false)
-            return mapping.Schema;
-        return _entityModelMetadataProvider.GetPhysicalSchema(entity);
+        return mapping?.Table?.Schema;
     }
 
     /// <summary>
@@ -323,7 +317,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <returns>数据库上下文</returns>
     private DatabaseContext GetDatabaseContext() =>
-        _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
+        _databaseContext ?? _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
         _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
 
     /// <summary>
@@ -348,9 +342,7 @@ public class EntityResolver : IEntityResolver
                 return mappedColumn.ColumnName;
         }
 
-        if (entityType == null)
-            return propertyOrColumnName;
-        return _entityModelMetadataProvider.GetColumnName(entityType, propertyOrColumnName) ?? propertyOrColumnName;
+        return propertyOrColumnName;
     }
 
     /// <summary>

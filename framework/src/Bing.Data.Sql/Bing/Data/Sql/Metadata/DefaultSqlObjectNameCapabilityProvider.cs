@@ -12,8 +12,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     /// </summary>
     private static readonly SqlObjectNameCapabilities MySqlCapabilities = new()
     {
-        SupportsCatalog = true,
-        SupportsCrossCatalogQuery = true,
+        SupportsSchema = true,
         MaximumNameParts = 2
     };
 
@@ -22,9 +21,8 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     /// </summary>
     private static readonly SqlObjectNameCapabilities SqlServerCapabilities = new()
     {
-        SupportsCatalog = true,
-        SupportsPhysicalSchema = true,
-        SupportsCrossCatalogQuery = true,
+        SupportsDatabase = true,
+        SupportsSchema = true,
         MaximumNameParts = 3
     };
 
@@ -33,7 +31,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     /// </summary>
     private static readonly SqlObjectNameCapabilities PostgreSqlCapabilities = new()
     {
-        SupportsPhysicalSchema = true,
+        SupportsSchema = true,
         MaximumNameParts = 2
     };
 
@@ -42,8 +40,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     /// </summary>
     private static readonly SqlObjectNameCapabilities OracleCapabilities = new()
     {
-        SupportsPhysicalSchema = true,
-        SupportsDatabaseLink = true,
+        SupportsSchema = true,
         MaximumNameParts = 2
     };
 
@@ -52,10 +49,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     /// </summary>
     private static readonly SqlObjectNameCapabilities SqliteCapabilities = new()
     {
-        SupportsCatalog = true,
-        SupportsCrossCatalogQuery = true,
-        SupportsAttachedAlias = true,
-        MaximumNameParts = 2
+        MaximumNameParts = 1
     };
 
     /// <inheritdoc />

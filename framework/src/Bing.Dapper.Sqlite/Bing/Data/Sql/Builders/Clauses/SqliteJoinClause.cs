@@ -34,5 +34,5 @@ public class SqliteJoinClause : JoinClause
 
     /// <inheritdoc />
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
-        new JoinItem(joinType, table, schema, alias, false, false, type);
+        new JoinItem(joinType, table, schema, alias, type: type);
 }

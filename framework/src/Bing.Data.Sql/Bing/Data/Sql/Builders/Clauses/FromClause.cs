@@ -91,7 +91,7 @@ public class FromClause : IFromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new FromClause(builder, Dialect, Resolver, register, Table, ObjectNameFormatter,
+        return new FromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
             ProviderDatabaseType, TableReferenceValidator);
     }
 
@@ -100,7 +100,17 @@ public class FromClause : IFromClause
     /// </summary>
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
-    public void From(string table, string alias = null) => Table = CreateSqlItem(table, null, alias);
+    public void From(string table, string alias = null)
+    {
+        SqlTableNameParser.Validate(table, alias, ResolveProviderDatabaseType());
+        Table = CreateSqlItem(table, null, alias);
+    }
+
+    /// <summary>
+    /// 解析字符串对象名使用的数据库类型。
+    /// </summary>
+    private DatabaseType? ResolveProviderDatabaseType() =>
+        (Builder as SqlBuilderBase)?.ResolveProviderDatabaseType() ?? ProviderDatabaseType;
 
     /// <summary>
     /// 设置结构化表引用。
@@ -135,9 +145,9 @@ public class FromClause : IFromClause
     public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
         var type = typeof(TEntity);
-        var reference = Resolver.GetTableReference(type).WithAlias(alias) with { EntityType = type };
+        var reference = Resolver.GetTableReference(type) with { Alias = alias, EntityType = type };
         if (string.IsNullOrWhiteSpace(schema) == false)
-            reference = reference.WithPhysicalSchema(schema);
+            reference = reference with { Schema = schema };
         From(reference);
     }
 

@@ -50,7 +50,9 @@ public class ParameterManager : IAdvancedParameterManager
         Dialect = parameterManager.Dialect;
         _paramIndex = parameterManager._paramIndex;
         _params = new Dictionary<string, object>(parameterManager._params);
-        _sqlParams = new Dictionary<string, SqlParam>(parameterManager._sqlParams);
+        _sqlParams = new Dictionary<string, SqlParam>();
+        foreach (var parameter in parameterManager._sqlParams)
+            _sqlParams.Add(parameter.Key, CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value));
     }
 
     #endregion

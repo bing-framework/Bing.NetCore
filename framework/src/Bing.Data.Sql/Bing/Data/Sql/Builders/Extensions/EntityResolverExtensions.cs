@@ -23,8 +23,7 @@ public static class EntityResolverExtensions
         return new SqlTableReference
         {
             TableName = table,
-            ResolvedTableName = table,
-            PhysicalSchema = resolver.GetSchema(entity)
+            Schema = resolver.GetSchema(entity)
         };
     }
 

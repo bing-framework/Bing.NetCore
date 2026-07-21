@@ -69,6 +69,11 @@ public class Helper
     private readonly ISqlDatabaseContextResolver _databaseContextResolver;
 
     /// <summary>
+    /// Builder 生命周期内固定的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _databaseContext;
+
+    /// <summary>
     /// 初始化一个<see cref="Helper"/>类型的实例
     /// </summary>
     /// <param name="dialect">Sql方言</param>
@@ -81,11 +86,12 @@ public class Helper
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="sqlOptions">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
     public Helper(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
         IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions options = null, SqlOptions sqlOptions = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null)
+        ISqlDatabaseContextResolver databaseContextResolver = null, DatabaseContext databaseContext = null)
     {
         _dialect = dialect;
         _resolver = resolver;
@@ -98,6 +104,7 @@ public class Helper
         _sqlOptions = sqlOptions;
         _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             _options);
+        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
     }
 
     /// <summary>
@@ -352,7 +359,7 @@ public class Helper
     /// </summary>
     /// <returns>数据库上下文</returns>
     private DatabaseContext GetDatabaseContext() =>
-        _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
+        _databaseContext ?? _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
         _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
 
     /// <summary>

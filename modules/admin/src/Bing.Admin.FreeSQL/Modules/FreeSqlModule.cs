@@ -58,7 +58,7 @@ namespace Bing.Admin.Modules
                     t.IsClearAfterExecution = true;
                 })
                 .AddSqlCore()
-                .AddEntityMetadata<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>();
+                .AddEntityModelMetadataProvider<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>();
             // 注册SqlExecutor
             services.AddMySqlExecutor();
             return services;

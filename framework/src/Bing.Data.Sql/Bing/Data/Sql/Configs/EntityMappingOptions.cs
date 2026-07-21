@@ -1,4 +1,4 @@
-using Bing.Data.Sql.Metadata;
+using Bing.Data.Enums;
 
 namespace Bing.Data.Sql.Configs;
 
@@ -18,53 +18,27 @@ public sealed class EntityMappingOptions
     public string DbKey { get; set; }
 
     /// <summary>
-    /// 实体映射配置名称
+    /// 数据库类型，仅用于选择映射配置。
+    /// </summary>
+    public DatabaseType? DatabaseType { get; set; }
+
+    /// <summary>
+    /// 实体映射配置名称。
     /// </summary>
     public string MappingProfile { get; set; }
 
     /// <summary>
-    /// 同连接数据库目录
+    /// SQL Server 数据库名称。
     /// </summary>
-    public string Catalog { get; set; }
+    public string Database { get; set; }
 
     /// <summary>
-    /// 物理架构
+    /// 数据库架构。MySQL 和 Doris 中表示数据库名称。
     /// </summary>
-    public string PhysicalSchema { get; set; }
-
-    /// <summary>
-    /// 逻辑架构
-    /// </summary>
-    public string LogicalSchema { get; set; }
-
-    /// <summary>
-    /// 架构
-    /// </summary>
-    [Obsolete("请改用 LogicalSchema 或 PhysicalSchema。旧 Schema 默认按逻辑架构处理。")]
     public string Schema { get; set; }
 
     /// <summary>
-    /// 旧 Schema 兼容方式
-    /// </summary>
-    public SchemaCompatibilityMode SchemaCompatibilityMode { get; set; } = SchemaCompatibilityMode.Auto;
-
-    /// <summary>
-    /// 逻辑架构命名方式
-    /// </summary>
-    public LogicalTableNamingMode NamingMode { get; set; } = LogicalTableNamingMode.Prefix;
-
-    /// <summary>
-    /// Oracle 数据库链接
-    /// </summary>
-    public string DatabaseLink { get; set; }
-
-    /// <summary>
-    /// SQLite 已附加数据库别名
-    /// </summary>
-    public string AttachedAlias { get; set; }
-
-    /// <summary>
-    /// 表名
+    /// 最终物理表名。
     /// </summary>
     public string TableName { get; set; }
 

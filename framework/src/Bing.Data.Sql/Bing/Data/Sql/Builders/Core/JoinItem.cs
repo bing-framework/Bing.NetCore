@@ -162,7 +162,7 @@ public class JoinItem : IJoinOn
     /// </summary>
     public JoinItem Clone(Helper helper)
     {
-        var result = new JoinItem(JoinType, Table, Type, new SqlCondition(Condition?.GetCondition()));
+        var result = new JoinItem(JoinType, Table?.Clone(), Type, new SqlCondition(Condition?.GetCondition()));
         result.SetDependency(helper);
         return result;
     }
@@ -175,10 +175,9 @@ public class JoinItem : IJoinOn
     /// 获取Join语句
     /// </summary>
     /// <param name="dialect">Sql方言</param>
-    /// <param name="tableDatabase">表数据表</param>
-    public string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null)
+    public string ToSql(IDialect dialect = null)
     {
-        var table = Table.ToSql(dialect, tableDatabase);
+        var table = Table.ToSql(dialect);
         return $"{JoinType} {table}{GetOn()}";
     }
 

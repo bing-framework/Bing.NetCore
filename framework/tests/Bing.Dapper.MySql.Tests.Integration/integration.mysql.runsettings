@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <RUN_INTEGRATION_TESTS>true</RUN_INTEGRATION_TESTS>
+      <RUN_MYSQL_INTEGRATION_TESTS>true</RUN_MYSQL_INTEGRATION_TESTS>
+      <ConnectionStrings__MySqlConnection>Server=127.0.0.1;Port=3306;Database=bing_dapper_test;User Id=root;Password=bing2019.00;</ConnectionStrings__MySqlConnection>
+      <ALLOW_DATABASE_RESET_FOR_TESTS>false</ALLOW_DATABASE_RESET_FOR_TESTS>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>

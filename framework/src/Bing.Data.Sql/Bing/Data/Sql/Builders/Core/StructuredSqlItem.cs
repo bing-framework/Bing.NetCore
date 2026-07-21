@@ -67,7 +67,7 @@ public sealed class StructuredSqlItem : SqlItem
         ISqlTableReferenceValidator tableReferenceValidator = null,
         ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
         SqlTableReference sourceReference = null)
-        : base(reference?.ResolvedTableName)
+        : base(reference?.TableName)
     {
         Reference = reference ?? throw new ArgumentNullException(nameof(reference));
         _objectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
@@ -79,11 +79,11 @@ public sealed class StructuredSqlItem : SqlItem
     }
 
     /// <inheritdoc />
-    public override string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null)
+    public override string ToSql(IDialect dialect = null)
     {
         if (dialect == null)
             throw new ArgumentNullException(nameof(dialect));
-        var databaseType = _databaseContext?.DataSource?.DatabaseType ?? Reference.DatabaseType ?? _providerDatabaseType;
+        var databaseType = _databaseContext?.DataSource?.DatabaseType ?? _providerDatabaseType;
         if (databaseType == null)
             throw new InvalidOperationException("无法确定结构化表引用的数据库类型。");
         _tableReferenceValidator.Validate(Reference, databaseType.Value);
@@ -100,7 +100,11 @@ public sealed class StructuredSqlItem : SqlItem
     {
         if (_isCrossDatabaseValidated || _crossDatabaseQueryValidator == null || _sourceReference == null)
             return;
-        _crossDatabaseQueryValidator.Validate(_sourceReference, Reference, _databaseContext);
+        _crossDatabaseQueryValidator.Validate(_databaseContext, _sourceReference, Reference);
         _isCrossDatabaseValidated = true;
     }
+
+    /// <inheritdoc />
+    public override SqlItem Clone() => new StructuredSqlItem(Reference, _objectNameFormatter, _databaseContext,
+        _providerDatabaseType, _tableReferenceValidator, _crossDatabaseQueryValidator, _sourceReference);
 }

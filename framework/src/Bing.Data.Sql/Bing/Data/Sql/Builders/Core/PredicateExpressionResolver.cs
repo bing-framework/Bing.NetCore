@@ -31,13 +31,14 @@ public class PredicateExpressionResolver
     /// <param name="options">Sql 元数据配置</param>
     /// <param name="sqlOptions">Sql 配置</param>
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
+    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
     public PredicateExpressionResolver(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
         IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
         SqlMetadataOptions options = null, SqlOptions sqlOptions = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null) =>
+        ISqlDatabaseContextResolver databaseContextResolver = null, DatabaseContext databaseContext = null) =>
         _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, options, sqlOptions, databaseContextResolver);
+            databaseContextAccessor, sqlParameterFactory, options, sqlOptions, databaseContextResolver, databaseContext);
 
     /// <summary>
     /// 解析谓词表达式

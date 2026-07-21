@@ -603,7 +603,7 @@ public partial class SqlBuilderTest
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new TestSqlBuilder(metadata: new DefaultEntityMetadata());
+        _builder = new TestSqlBuilder(entityModelMetadataProvider: new DefaultEntityModelMetadataProvider());
         _builder.Select<Sample3>().From<Sample3>("s");
 
         //验证
@@ -622,7 +622,7 @@ public partial class SqlBuilderTest
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new TestSqlBuilder(metadata: new DefaultEntityMetadata());
+        _builder = new TestSqlBuilder(entityModelMetadataProvider: new DefaultEntityModelMetadataProvider());
         _builder.Select<Sample3>()
             .Select<Sample3>(t => t.StringValue, "a")
             .From<Sample3>("s");
@@ -643,7 +643,7 @@ public partial class SqlBuilderTest
         result.Append("From [Sample2] As [s]");
 
         //执行
-        _builder = new TestSqlBuilder(metadata: new DefaultEntityMetadata());
+        _builder = new TestSqlBuilder(entityModelMetadataProvider: new DefaultEntityModelMetadataProvider());
         _builder.Select<Sample2>()
             .RemoveSelect<Sample2>(x => x.Display)
             .From<Sample2>("s");

@@ -50,7 +50,7 @@ public class MySqlFromClause : FromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new MySqlFromClause(builder, Dialect, Resolver, register, Table, ObjectNameFormatter,
+        return new MySqlFromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
             ProviderDatabaseType, TableReferenceValidator);
     }
 }

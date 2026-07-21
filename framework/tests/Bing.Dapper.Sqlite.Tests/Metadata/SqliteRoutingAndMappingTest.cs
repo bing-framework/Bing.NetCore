@@ -44,15 +44,13 @@ public class SqliteRoutingAndMappingTest
     }
 
     /// <summary>
-    /// 测试目的：Sqlite 类型化 From 应使用显式已附加数据库别名。
+    /// 测试目的：Sqlite 类型化 From 应仅使用最终表名。
     /// </summary>
     [Fact]
-    public void Builder_WhenAttachedAliasConfigured_ShouldRenderAttachedAlias()
+    public void Builder_WhenMappingConfigured_ShouldRenderTableName()
     {
         // Arrange
         var metadataOptions = CreateMetadataOptions();
-        metadataOptions.EntityMappings[0].Catalog = "archive";
-        metadataOptions.EntityMappings[0].AttachedAlias = "archive";
         var builder = new SqliteBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions, options: CreateSqlOptions());
 
@@ -60,7 +58,7 @@ public class SqliteRoutingAndMappingTest
         builder.From<RoutingSample>();
 
         // Assert
-        Assert.Contains("`archive`.`users_reporting`", builder.ToSql());
+        Assert.Contains("`users_reporting`", builder.ToSql());
     }
 
     private static SqlOptions CreateSqlOptions() => new SqlOptions().SetDatabaseContext(new DatabaseContext

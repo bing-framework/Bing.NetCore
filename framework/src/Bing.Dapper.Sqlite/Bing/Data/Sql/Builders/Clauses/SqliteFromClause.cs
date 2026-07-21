@@ -25,14 +25,14 @@ public class SqliteFromClause : FromClause
 
     /// <inheritdoc />
     protected override SqlItem CreateSqlItem(string table, string schema, string alias) =>
-        new SqlItem(table, schema, alias, false, false);
+        new SqlItem(table, schema, alias);
 
     /// <inheritdoc />
     public override IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new SqliteFromClause(builder, Dialect, Resolver, register, Table, ObjectNameFormatter,
+        return new SqliteFromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
             ProviderDatabaseType, TableReferenceValidator);
     }
 }

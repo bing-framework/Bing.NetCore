@@ -24,7 +24,11 @@ public class EntityAliasRegister : IEntityAliasRegister
     /// <summary>
     /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
     /// </summary>
-    public EntityAliasRegister(IDictionary<Type, string> data = null, Type fromType = null) => Data = data ?? new Dictionary<Type, string>();
+    public EntityAliasRegister(IDictionary<Type, string> data = null, Type fromType = null)
+    {
+        Data = data ?? new Dictionary<Type, string>();
+        FromType = fromType;
+    }
 
     #endregion
 
@@ -74,7 +78,7 @@ public class EntityAliasRegister : IEntityAliasRegister
     /// <summary>
     /// 克隆
     /// </summary>
-    public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(Data));
+    public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(Data), FromType);
 
     #endregion
 }

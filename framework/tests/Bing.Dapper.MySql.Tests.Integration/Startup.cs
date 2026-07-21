@@ -32,7 +32,7 @@ public class Startup
         services.AddMySqlUnitOfWork<ITestUnitOfWork, MySqlUnitOfWork>(connectionString);
         services.AddMySqlQuery(connectionString);
         services.AddMySqlExecutor(connectionString);
-        services.AddEntityMetadata<MySqlUnitOfWork>();
+        services.AddEntityModelMetadataProvider<MySqlUnitOfWork>();
         services.AddLogging();
         services.EnableAop();
         services.AddBing();

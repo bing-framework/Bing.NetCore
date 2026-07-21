@@ -77,10 +77,10 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
-    /// 测试目的：SQL Server Provider 应将 Catalog、架构和表名逐段格式化。
+    /// 测试目的：SQL Server Provider 应将 Database、Schema 和表名逐段格式化。
     /// </summary>
     [Fact]
-    public void Formatter_WhenSqlServerReferenceContainsCatalogAndSchema_ShouldFormatThreeParts()
+    public void Formatter_WhenSqlServerReferenceContainsDatabaseAndSchema_ShouldFormatThreeParts()
     {
         // Arrange
         using var provider = CreateProvider();
@@ -88,9 +88,9 @@ public class MultiProviderRegistrationTest
         using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlserver");
         var reference = new SqlTableReference
         {
-            Catalog = "reporting",
-            PhysicalSchema = "dbo",
-            ResolvedTableName = "users"
+            Database = "reporting",
+            Schema = "dbo",
+            TableName = "users"
         };
 
         // Act

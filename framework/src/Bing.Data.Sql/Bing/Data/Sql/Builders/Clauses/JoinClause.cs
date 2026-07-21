@@ -96,6 +96,11 @@ public class JoinClause : IJoinClause
     private readonly ISqlDatabaseContextResolver _databaseContextResolver;
 
     /// <summary>
+    /// Builder 生命周期内固定的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _databaseContext;
+
+    /// <summary>
     /// SQL 对象名格式化器
     /// </summary>
     private readonly ISqlObjectNameFormatter _objectNameFormatter;
@@ -137,6 +142,7 @@ public class JoinClause : IJoinClause
     /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
     /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
     /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
+    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
     public JoinClause(ISqlBuilder sqlBuilder
         , IDialect dialect
         , IEntityResolver resolver
@@ -151,7 +157,8 @@ public class JoinClause : IJoinClause
         , ISqlDatabaseContextResolver databaseContextResolver = null
         , ISqlObjectNameFormatter objectNameFormatter = null
         , ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null
-        , ISqlTableReferenceValidator tableReferenceValidator = null)
+        , ISqlTableReferenceValidator tableReferenceValidator = null
+        , DatabaseContext databaseContext = null)
     {
         _sqlBuilder = sqlBuilder;
         _dialect = dialect;
@@ -164,11 +171,13 @@ public class JoinClause : IJoinClause
         _metadataOptions = metadataOptions;
         _sqlOptions = sqlOptions;
         _databaseContextResolver = databaseContextResolver;
+        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
         _objectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
         _crossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
         _tableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
         _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver);
+            databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver,
+            _databaseContext);
         _params = joinItems ?? new List<JoinItem>();
     }
 
@@ -185,11 +194,12 @@ public class JoinClause : IJoinClause
     public IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager)
     {
         var helper = new Helper(_dialect, _resolver, register, parameterManager, _entityMappingResolver,
-            _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver);
+            _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver,
+            _databaseContext);
         return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager,
             _params.Select(t => t.Clone(helper)).ToList(), _entityMappingResolver, _databaseContextAccessor,
             _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _objectNameFormatter,
-            _crossDatabaseQueryValidator, _tableReferenceValidator);
+            _crossDatabaseQueryValidator, _tableReferenceValidator, _databaseContext);
     }
 
     #endregion
@@ -227,6 +237,7 @@ public class JoinClause : IJoinClause
     /// <param name="alias">别名</param>
     private void Join(string joinType, string table, string alias)
     {
+        SqlTableNameParser.Validate(table, alias, (_sqlBuilder as SqlBuilderBase)?.ResolveProviderDatabaseType());
         var item = CreateJoinItem(joinType, table, null, alias);
         AddItem(item);
     }
@@ -287,9 +298,9 @@ public class JoinClause : IJoinClause
     private void Join<TEntity>(string joinType, string alias, string schema)
     {
         var type = typeof(TEntity);
-        var reference = _resolver.GetTableReference(type).WithAlias(alias) with { EntityType = type };
+        var reference = _resolver.GetTableReference(type) with { Alias = alias, EntityType = type };
         if (string.IsNullOrWhiteSpace(schema) == false)
-            reference = reference.WithPhysicalSchema(schema);
+            reference = reference with { Schema = schema };
         Join(joinType, reference);
     }
 
@@ -322,21 +333,19 @@ public class JoinClause : IJoinClause
             if (reference != null)
                 return reference;
         }
-        return new SqlTableReference
-        {
-            DbKey = databaseContext?.DbKey,
-            DatabaseType = databaseContext?.DataSource?.DatabaseType,
-            TableName = "__execution__",
-            ResolvedTableName = "__execution__"
-        };
+        return null;
     }
 
     /// <summary>
     /// 获取当前数据库上下文
     /// </summary>
-    private DatabaseContext GetCurrentDatabaseContext() =>
-        _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
-        _databaseContextAccessor?.Current ?? _metadataOptions?.DefaultDatabaseContext;
+    private DatabaseContext GetCurrentDatabaseContext()
+    {
+        if (_sqlBuilder is SqlBuilderBase builder)
+            return builder.GetDatabaseContext();
+        return _databaseContext ?? _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
+            _databaseContextAccessor?.Current ?? _metadataOptions?.DefaultDatabaseContext;
+    }
 
     /// <summary>
     /// 内连接子查询

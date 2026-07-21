@@ -20,5 +20,5 @@ public sealed class FormattedSqlItem : SqlItem
         : base("structured_reference") => _sql = sql;
 
     /// <inheritdoc />
-    public override string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null) => _sql;
+    public override string ToSql(IDialect dialect = null) => _sql;
 }

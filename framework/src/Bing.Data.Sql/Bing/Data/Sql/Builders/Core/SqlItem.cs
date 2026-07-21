@@ -148,7 +148,7 @@ public class SqlItem
     /// <summary>
     /// 克隆
     /// </summary>
-    public SqlItem Clone() => new SqlItem(Name, Prefix, Alias, Raw, false);
+    public virtual SqlItem Clone() => new SqlItem(Name, Prefix, Alias, Raw, false, false, AggregationFunc);
 
     #endregion
 
@@ -158,16 +158,15 @@ public class SqlItem
     /// 获取Sql
     /// </summary>
     /// <param name="dialect">Sql方言</param>
-    /// <param name="tableDatabase">表数据库</param>
-    public virtual string ToSql(IDialect dialect = null, ITableDatabase tableDatabase = null)
+    public virtual string ToSql(IDialect dialect = null)
     {
         if (string.IsNullOrWhiteSpace(Name))
             return null;
         if (Raw)
             return Name;
         var column = string.IsNullOrWhiteSpace(AggregationFunc)
-            ? GetColumn(dialect, tableDatabase)
-            : $"{AggregationFunc}({GetColumn(dialect, tableDatabase)})";
+            ? GetColumn(dialect)
+            : $"{AggregationFunc}({GetColumn(dialect)})";
         var columnAlias = GetSafeName(dialect, Alias);
         return dialect.GetColumn(column, columnAlias);
     }
@@ -176,13 +175,10 @@ public class SqlItem
     /// 获取列
     /// </summary>
     /// <param name="dialect">Sql方言</param>
-    /// <param name="tableDatabase">表数据库</param>
-    protected string GetColumn(IDialect dialect, ITableDatabase tableDatabase)
+    protected string GetColumn(IDialect dialect)
     {
         var result = new StringBuilder();
         var database = DatabaseName;
-        if (string.IsNullOrWhiteSpace(DatabaseName) && tableDatabase != null)
-            database = tableDatabase.GetDatabase(GetName());
         if (string.IsNullOrWhiteSpace(database) == false)
             result.Append($"{GetSafeName(dialect, database)}.");
         if (string.IsNullOrWhiteSpace(Prefix) == false)

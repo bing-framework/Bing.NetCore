@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using Bing.Dapper.Tests.Infrastructure;
-using Bing.Data.Enums;
 using Bing.Data.Sql.Diagnostics;
-using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -61,31 +59,21 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (var executor = _fixture.CreateExecutor("second"))
             await executor.ExecuteSqlAsync("Insert Into samples(Name, Amount) Values (@name, @amount)",
                 new { name = "attached", amount = 1m });
-        await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
-        await connection.OpenAsync();
 
         // Act
-        await using (var attachCommand = connection.CreateCommand())
+        using (var scope = _fixture.GetTransactionScopeFactory().Begin("first"))
+        using (var executor = scope.CreateExecutor())
+        using (var query = scope.CreateQuery())
         {
-            attachCommand.CommandText = "Attach Database $path As reporting";
-            attachCommand.Parameters.AddWithValue("$path", _fixture.SecondDatabasePath);
-            await attachCommand.ExecuteNonQueryAsync();
-        }
+            await executor.ExecuteSqlAsync("Attach Database @path As reporting",
+                new { path = _fixture.SecondDatabasePath });
+            query.AppendSelect("Name").From("reporting.samples");
 
-        try
-        {
-            await using var queryCommand = connection.CreateCommand();
-            queryCommand.CommandText = "Select Name From reporting.samples";
-            var result = Convert.ToString(await queryCommand.ExecuteScalarAsync());
+            var result = query.ExecuteScalar<string>();
 
             // Assert
             Assert.Equal("attached", result);
-        }
-        finally
-        {
-            await using var detachCommand = connection.CreateCommand();
-            detachCommand.CommandText = "Detach Database reporting";
-            await detachCommand.ExecuteNonQueryAsync();
+            scope.Commit();
         }
     }
 
@@ -225,119 +213,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal("typed-from", result);
-    }
-
-    /// <summary>
-    /// 测试 - SQLite结构化表引用应查询附加数据库。
-    /// </summary>
-    [Fact]
-    public async Task ExecuteQuery_WhenUsingStructuredAttachedReference_ShouldQueryAttachedDatabase()
-    {
-        // Arrange
-        using (var executor = _fixture.CreateExecutor("second"))
-            await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "archive-row" });
-        await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
-        await connection.OpenAsync();
-        await AttachArchiveDatabaseAsync(connection);
-
-        try
-        {
-            using var query = _fixture.CreateAttachedQuery(connection);
-            query.GetBuilder().AppendSelect("Name").From<SqliteAttachedTableSample>();
-
-            // Act
-            var result = query.ExecuteScalar<string>();
-
-            // Assert
-            Assert.Equal("archive-row", result);
-        }
-        finally
-        {
-            await DetachArchiveDatabaseAsync(connection);
-        }
-    }
-
-    /// <summary>
-    /// 测试 - SQLite结构化跨库Join应返回正确结果。
-    /// </summary>
-    [Fact]
-    public async Task ExecuteQuery_WhenUsingStructuredAttachedJoin_ShouldReturnMatchingRow()
-    {
-        // Arrange
-        await InsertAsync("matched-row");
-        using (var executor = _fixture.CreateExecutor("second"))
-            await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "matched-row" });
-        await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
-        await connection.OpenAsync();
-        await AttachArchiveDatabaseAsync(connection);
-
-        try
-        {
-            using var query = _fixture.CreateAttachedQuery(connection);
-            query.GetBuilder().AppendSelect("m.Name")
-                .From<SqliteStructuredTableSample>("m")
-                .Join<SqliteAttachedTableSample>("a")
-                .On<SqliteStructuredTableSample, SqliteAttachedTableSample>((main, archive) => main.Name == archive.Name);
-
-            // Act
-            var result = query.ExecuteScalar<string>();
-
-            // Assert
-            Assert.Equal("matched-row", result);
-        }
-        finally
-        {
-            await DetachArchiveDatabaseAsync(connection);
-        }
-    }
-
-    /// <summary>
-    /// 测试 - SQLite不同DbKey不应直接生成Join。
-    /// </summary>
-    [Fact]
-    public void ToSql_WhenStructuredJoinUsesDifferentDbKey_ShouldThrowInvalidOperationException()
-    {
-        // Arrange
-        using var query = _fixture.CreateQuery("first");
-        var builder = query.GetBuilder();
-        builder.AppendSelect("1").From<SqliteStructuredTableSample>();
-        builder.Join(new SqlTableReference
-        {
-            DbKey = "second",
-            DatabaseType = DatabaseType.Sqlite,
-            ResolvedTableName = "samples"
-        });
-
-        // Act
-        var action = () => builder.ToSql();
-
-        // Assert
-        Assert.Throws<InvalidOperationException>(action);
-    }
-
-    /// <summary>
-    /// 测试 - SQLite附加数据库别名不存在时应执行失败。
-    /// </summary>
-    [Fact]
-    public async Task ExecuteQuery_WhenAttachedAliasDoesNotExist_ShouldFail()
-    {
-        // Arrange
-        await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
-        await connection.OpenAsync();
-        using var query = _fixture.CreateAttachedQuery(connection);
-        query.GetBuilder().AppendSelect("Name").From(new SqlTableReference
-        {
-            DbKey = "first",
-            DatabaseType = DatabaseType.Sqlite,
-            AttachedAlias = "missing",
-            ResolvedTableName = "samples"
-        });
-
-        // Act
-        var action = () => query.ExecuteScalar<string>();
-
-        // Assert
-        Assert.ThrowsAny<Exception>(action);
     }
 
     /// <summary>
@@ -893,31 +768,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (manager.Use(dbKey))
         using (var executor = _fixture.CreateExecutor(dbKey))
             await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name });
-    }
-
-    /// <summary>
-    /// 将第二个测试数据库以 archive 别名附加到当前连接。
-    /// </summary>
-    /// <param name="connection">已打开的 SQLite 连接。</param>
-    /// <returns>附加任务。</returns>
-    private async Task AttachArchiveDatabaseAsync(SqliteConnection connection)
-    {
-        await using var command = connection.CreateCommand();
-        command.CommandText = "Attach Database @databasePath As [archive]";
-        command.Parameters.AddWithValue("@databasePath", _fixture.SecondDatabasePath);
-        await command.ExecuteNonQueryAsync();
-    }
-
-    /// <summary>
-    /// 从当前连接卸载 archive 附加数据库。
-    /// </summary>
-    /// <param name="connection">已打开的 SQLite 连接。</param>
-    /// <returns>卸载任务。</returns>
-    private static async Task DetachArchiveDatabaseAsync(SqliteConnection connection)
-    {
-        await using var command = connection.CreateCommand();
-        command.CommandText = "Detach Database [archive]";
-        await command.ExecuteNonQueryAsync();
     }
 
     /// <summary>

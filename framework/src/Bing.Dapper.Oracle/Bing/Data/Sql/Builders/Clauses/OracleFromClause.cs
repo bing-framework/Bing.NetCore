@@ -28,7 +28,7 @@ public class OracleFromClause : FromClause
     {
         if (register != null)
             register.FromType = Register.FromType;
-        return new OracleFromClause(builder, Dialect, Resolver, register, Table, ObjectNameFormatter,
+        return new OracleFromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
             ProviderDatabaseType, TableReferenceValidator);
     }
 }
