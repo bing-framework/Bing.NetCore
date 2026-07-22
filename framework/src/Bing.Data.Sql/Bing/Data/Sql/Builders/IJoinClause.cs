@@ -59,9 +59,10 @@ public interface IJoinClause
     void Join(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 添加到内连接子句
+    /// 追加原始内连接 SQL。
+    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
     void AppendJoin(string sql);
 
     /// <summary>
@@ -94,9 +95,10 @@ public interface IJoinClause
     void LeftJoin(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 添加到左外连接子句
+    /// 追加原始左连接 SQL。
+    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
     void AppendLeftJoin(string sql);
 
     /// <summary>
@@ -129,9 +131,10 @@ public interface IJoinClause
     void RightJoin(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 添加到右外连接子句
+    /// 追加原始右连接 SQL。
+    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
     void AppendRightJoin(string sql);
 
     /// <summary>

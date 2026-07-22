@@ -28,7 +28,7 @@ public partial class MySqlQueryTest
             .ExecuteQuery<Product>();
 
         Assert.Equal(2, result.Count);
-        Assert.Equal(new[] { firstId, secondId }, result.Select(product => product.Id).OrderBy(id => id));
+        Assert.Equal(new[] { firstId, secondId }.OrderBy(id => id), result.Select(product => product.Id).OrderBy(id => id));
     }
 
     /// <summary>

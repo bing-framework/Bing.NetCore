@@ -18,7 +18,8 @@ public class SqliteFromClause : FromClause
         ISqlObjectNameFormatter objectNameFormatter = null,
         Bing.Data.Enums.DatabaseType? providerDatabaseType = null,
         ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(builder, dialect, resolver, register, table, objectNameFormatter, providerDatabaseType,
+        : base(builder, dialect, resolver, register, table, objectNameFormatter,
+            providerDatabaseType ?? Bing.Data.Enums.DatabaseType.Sqlite,
             tableReferenceValidator)
     {
     }

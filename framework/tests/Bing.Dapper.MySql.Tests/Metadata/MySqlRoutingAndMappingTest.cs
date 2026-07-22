@@ -82,6 +82,83 @@ public class MySqlRoutingAndMappingTest
         Assert.Equal("From `users_reporting`", builder.FromClause.ToSql());
     }
 
+    /// <summary>
+    /// 测试目的：MySQL Builder 服务 Doris 时，普通字符串表名应保留 Doris 的分段语义。
+    /// </summary>
+    [Fact]
+    public void ProviderStringTableNameCompatibilityTest()
+    {
+        // Arrange
+        var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+
+        // Act
+        var sql = builder.Select("Id").From("Merchants.Company").Join("Audit.Log").ToSql();
+
+        // Assert
+        Assert.Equal("Select `Id` \r\nFrom `Merchants`.`Company` \r\nJoin `Audit`.`Log`", sql);
+    }
+
+    /// <summary>
+    /// 测试 - Doris 共享 MySQL Builder 时原始 Append 文本不得应用方言转换。
+    /// </summary>
+    [Fact]
+    public void DorisBuilder_WhenAppendingRawSql_ShouldPreserveText()
+    {
+        // Arrange
+        var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+
+        // Act
+        var sql = builder.Select("c.Id")
+            .AppendFrom("[Merchants.Company] c /* @tenant */")
+            .AppendJoin("\"Audit.Log\" a On a.CompanyId=c.Id")
+            .AppendLeftJoin("`Order.Log` l On l.CompanyId=c.Id")
+            .AppendRightJoin("Payments p On p.CompanyId=c.Id")
+            .ToSql();
+
+        // Assert
+        Assert.Equal("Select `c`.`Id` \r\nFrom [Merchants.Company] c /* @tenant */ \r\nJoin \"Audit.Log\" a On a.CompanyId=c.Id \r\nLeft Join `Order.Log` l On l.CompanyId=c.Id \r\nRight Join Payments p On p.CompanyId=c.Id", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：MySQL 类型化 From 和 Join 必须将带点物理表名作为原子标识符，并允许 schema 临时覆盖。
+    /// </summary>
+    [Fact]
+    public void TypedTables_WhenPhysicalTableNamesContainDots_ShouldRemainAtomicAcrossRenderings()
+    {
+        // Arrange
+        var metadataOptions = CreateDottedTableMetadataOptions();
+        var builder = new MySqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+            metadataOptions: metadataOptions, options: CreateSqlOptions(DatabaseType.MySql));
+
+        // Act
+        builder.Select("c.Id,m.CompanyId")
+            .From<RoutingSample>("c")
+            .Join<RoutingJoinSample>("m", "archive_db")
+            .On<RoutingSample, RoutingJoinSample>(left => left.Id, right => right.CompanyId)
+            .Where<RoutingSample>(entity => entity.Name, "active")
+            .OrderBy("c.Id")
+            .Page(new Pager(3, 10, "c.Id"));
+        var firstSql = builder.ToSql();
+        var secondSql = builder.ToSql();
+        var cloneSql = builder.Clone().ToSql();
+        var newBuilder = builder.New();
+        newBuilder.Select("c.Id,m.CompanyId")
+            .From<RoutingSample>("c")
+            .Join<RoutingJoinSample>("m")
+            .On<RoutingSample, RoutingJoinSample>(left => left.Id, right => right.CompanyId);
+        var newSql = newBuilder.ToSql();
+
+        // Assert
+        Assert.Equal("Select `c`.`Id`,`m`.`CompanyId` \r\nFrom `Merchants.Company` As `c` \r\nJoin `archive_db`.`Merchants.Merchant` As `m` On `c`.`Id`=`m`.`CompanyId` \r\nWhere `c`.`Name`=@_p_0 \r\nOrder By `c`.`Id` \r\nLimit @_p_2 OFFSET @_p_1", firstSql);
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(firstSql, cloneSql);
+        Assert.Equal("Select `c`.`Id`,`m`.`CompanyId` \r\nFrom `Merchants.Company` As `c` \r\nJoin `Merchants.Merchant` As `m` On `c`.`Id`=`m`.`CompanyId`", newSql);
+        Assert.Equal(3, builder.GetParams().Count);
+        Assert.Equal("active", builder.GetParam("_p_0"));
+        Assert.Equal(20, builder.GetParam("_p_1"));
+        Assert.Equal(10, builder.GetParam("_p_2"));
+    }
+
     private static SqlOptions CreateSqlOptions(DatabaseType databaseType) => new SqlOptions().SetDatabaseContext(
         new DatabaseContext
         {
@@ -114,13 +191,71 @@ public class MySqlRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 创建带点物理表名的元数据配置。
+    /// </summary>
+    private static SqlMetadataOptions CreateDottedTableMetadataOptions()
+    {
+        var options = new SqlMetadataOptions();
+        options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(RoutingSample),
+            DbKey = "reporting",
+            TableName = "Merchants.Company",
+            Columns =
+            {
+                [nameof(RoutingSample.Id)] = new ColumnMappingOptions
+                {
+                    PropertyName = nameof(RoutingSample.Id),
+                    ColumnName = "Id"
+                },
+                [nameof(RoutingSample.Name)] = new ColumnMappingOptions
+                {
+                    PropertyName = nameof(RoutingSample.Name),
+                    ColumnName = "Name"
+                }
+            }
+        });
+        options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(RoutingJoinSample),
+            DbKey = "reporting",
+            TableName = "Merchants.Merchant",
+            Columns =
+            {
+                [nameof(RoutingJoinSample.CompanyId)] = new ColumnMappingOptions
+                {
+                    PropertyName = nameof(RoutingJoinSample.CompanyId),
+                    ColumnName = "CompanyId"
+                }
+            }
+        });
+        return options;
+    }
+
+    /// <summary>
     /// 路由测试样例
     /// </summary>
     private sealed class RoutingSample
     {
         /// <summary>
+        /// 标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// 名称
         /// </summary>
         public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// 路由连接测试样例。
+    /// </summary>
+    private sealed class RoutingJoinSample
+    {
+        /// <summary>
+        /// 公司标识。
+        /// </summary>
+        public int CompanyId { get; set; }
     }
 }

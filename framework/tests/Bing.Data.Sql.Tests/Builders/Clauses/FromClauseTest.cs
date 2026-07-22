@@ -63,7 +63,7 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 设置表 - 别名 - 架构
+    /// 测试目的：独立 schema 应由结构化表引用格式化。
     /// </summary>
     [Fact]
     public void Test_From_3()
@@ -73,22 +73,22 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 设置表 - 带方括号
+    /// 测试目的：SQL Server 字符串表名应按既有规则拆分限定段。
     /// </summary>
     [Fact]
     public void Test_From_4()
     {
-        _clause.From("[c].[a]", "b");
+        _clause.From("c.a", "b");
         Assert.Equal("From [c].[a] As [b]", GetSql());
     }
 
     /// <summary>
-    /// 设置表 - 表名包含别名
+    /// 测试目的：字符串中的别名应按既有规则解析。
     /// </summary>
     [Fact]
     public void Test_From_5()
     {
-        _clause.From("a.b as t", "c");
+        _clause.From("a.b as t");
         Assert.Equal("From [a].[b] As [t]", GetSql());
     }
 
@@ -102,21 +102,51 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 测试目的：SQL Server 字符串表名超过三段时应被拒绝。
+    /// 测试目的：SQL Server 多段字符串表名应按既有规则拆分。
     /// </summary>
     [Fact]
-    public void From_WhenTableHasTooManyParts_ShouldThrowInvalidOperationException()
+    public void From_WhenTableContainsMultipleDots_ShouldFormatAsAtomicIdentifier()
     {
-        Assert.Throws<InvalidOperationException>(() => _clause.From("a.b.c.d"));
+        _clause.From("profile.api.Event");
+        Assert.Equal("From [profile].[api].[Event]", GetSql());
     }
 
     /// <summary>
-    /// 测试目的：字符串表名存在空名称段时应被拒绝。
+    /// 测试目的：字符串表名包含函数结构时应被拒绝。
     /// </summary>
     [Fact]
-    public void From_WhenTableHasEmptyPart_ShouldThrowArgumentException()
+    public void From_WhenTableContainsFunctionStructure_ShouldThrowArgumentException()
     {
-        Assert.Throws<ArgumentException>(() => _clause.From("a..b"));
+        Assert.Throws<ArgumentException>(() => _clause.From("a(b)"));
+    }
+
+    /// <summary>
+    /// 测试目的：复合预加引号限定名必须被拒绝，调用方应改用独立 schema 参数。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableContainsQualifiedQuotedIdentifier_ShouldThrowArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _clause.From("[archive].[Order.Log2025]"));
+    }
+
+    /// <summary>
+    /// 测试目的：字符串内的别名与显式别名冲突时应被拒绝，避免隐式覆盖。
+    /// </summary>
+    [Fact]
+    public void From_WhenEmbeddedAliasConflictsWithExplicitAlias_ShouldThrowInvalidOperationException()
+    {
+        Assert.Throws<InvalidOperationException>(() => _clause.From("Order.Log2025 as log", "other"));
+    }
+
+    /// <summary>
+    /// 测试目的：AppendFrom 原始 SQL 表达式应绕过结构化表名解析。
+    /// </summary>
+    [Fact]
+    public void AppendFrom_ShouldPreserveSqlExpression()
+    {
+        _clause.AppendSql("(Select 1) As source");
+
+        Assert.Equal("From (Select 1) As source", GetSql());
     }
 
     /// <summary>
@@ -184,7 +214,7 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 设置表 - 多次设置AppendSql，会拼到一起
+    /// 追加原始表表达式应保持调用方提供的内容。
     /// </summary>
     [Fact]
     public void Test_From_12()

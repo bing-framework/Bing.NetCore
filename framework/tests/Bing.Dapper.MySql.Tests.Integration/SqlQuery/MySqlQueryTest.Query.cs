@@ -13,7 +13,7 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 测试 - 获取实体集合
     /// </summary>
-    [IntegrationFact]
+    [IntegrationFact("MySql")]
     public async Task Test_ExecuteQuery_1()
     {
         // 插入2条数据
@@ -46,6 +46,16 @@ public partial class MySqlQueryTest
         var sql = "Insert Product(ProductId,Code) Values(@ProductId,@Code)";
         await _sqlExecutor.ExecuteSqlAsync(sql, new { ProductId = id, Code = code });
     }
+
+    /// <summary>
+    /// 初始化带点物理表名测试数据。
+    /// </summary>
+    /// <param name="id">公司标识。</param>
+    /// <param name="name">公司名称。</param>
+    /// <returns>表示异步写入操作的任务。</returns>
+    private Task InitDottedCompanyDataAsync(Guid id, string name) => _sqlExecutor.ExecuteSqlAsync(
+        "Insert Into `Merchants.Company`(CompanyId,Name) Values(@CompanyId,@Name)",
+        new { CompanyId = id, Name = name });
 
     #endregion
 }

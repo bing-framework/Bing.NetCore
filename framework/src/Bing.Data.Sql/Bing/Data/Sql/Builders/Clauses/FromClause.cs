@@ -102,15 +102,22 @@ public class FromClause : IFromClause
     /// <param name="alias">别名</param>
     public void From(string table, string alias = null)
     {
-        SqlTableNameParser.Validate(table, alias, ResolveProviderDatabaseType());
-        Table = CreateSqlItem(table, null, alias);
+        var parsedTable = ParseTableName(table, alias);
+        Register?.RegisterAlias(parsedTable.Alias);
+        Table = CreateSqlItem(parsedTable.TableName, parsedTable.Schema, parsedTable.Alias);
     }
 
     /// <summary>
-    /// 解析字符串对象名使用的数据库类型。
+    /// 解析字符串表名及别名。
     /// </summary>
-    private DatabaseType? ResolveProviderDatabaseType() =>
-        (Builder as SqlBuilderBase)?.ResolveProviderDatabaseType() ?? ProviderDatabaseType;
+    /// <param name="table">表名。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>表名、别名和架构名。</returns>
+    protected virtual (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
+    {
+        var parsedTable = SqlTableNameParser.Parse(table, alias);
+        return (parsedTable.TableName, parsedTable.Alias, parsedTable.Schema);
+    }
 
     /// <summary>
     /// 设置结构化表引用。
@@ -120,11 +127,15 @@ public class FromClause : IFromClause
     {
         if (reference == null)
             throw new ArgumentNullException(nameof(reference));
+        if (reference.EntityType == null)
+            Register?.RegisterAlias(reference.Alias);
+        else
+            Register?.Replace(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
         Table = CreateStructuredSqlItem(reference);
         if (reference.EntityType == null)
             return;
-        Register.Register(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
-        Register.FromType = reference.EntityType;
+        if (Register != null)
+            Register.FromType = reference.EntityType;
     }
 
     /// <summary>
@@ -179,10 +190,9 @@ public class FromClause : IFromClause
     {
         if (builder == null)
             return;
-        var result = builder.ToSql();
-        if (string.IsNullOrWhiteSpace(alias) == false)
-            result = $"({result}) As {Dialect.SafeName(alias)}";
-        AppendSql(result);
+        var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
+        Register?.RegisterAlias(alias);
+        Table = new SqlItem($"({result}) As {Dialect.SafeName(alias)}", raw: true);
     }
 
     /// <summary>
@@ -200,14 +210,13 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 添加到From子句
+    /// 添加原始 From SQL。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">原始 SQL。</param>
     public void AppendSql(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        sql = Helper.ResolveSql(sql, Dialect);
         if (Table != null && Table.Raw)
         {
             Table = new SqlItem($"{Table.Name}{sql}", raw: true);

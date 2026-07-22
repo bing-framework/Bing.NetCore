@@ -59,7 +59,30 @@ public class PostgreSqlRoutingAndMappingTest
         builder.From<RoutingSample>();
 
         // Assert
-        Assert.Contains("\"reports\".\"users_reporting\"", builder.ToSql());
+        Assert.Equal("Select * \r\nFrom \"reports\".\"users_reporting\"", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL 结构化表引用包含 Database 段时应拒绝普通跨数据库查询。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenDatabaseIsConfigured_ShouldRejectCrossDatabaseReference()
+    {
+        // Arrange
+        var validator = new DefaultSqlCrossDatabaseQueryValidator();
+        var context = CreateSqlOptions().GetDatabaseContext();
+        var reference = new SqlTableReference
+        {
+            Database = "analytics",
+            Schema = "reports",
+            TableName = "users"
+        };
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => validator.ValidateTarget(context, reference));
+
+        // Assert
+        Assert.Contains("PostgreSQL", exception.Message);
     }
 
     /// <summary>

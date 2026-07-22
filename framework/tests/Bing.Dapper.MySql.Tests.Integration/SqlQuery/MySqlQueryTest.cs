@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql;
+using Bing.Dapper.Tests.Infrastructure;
 using Bing.Tests.Models;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -6,8 +7,14 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// <summary>
 /// MySql Sql查询对象测试
 /// </summary>
-public partial class MySqlQueryTest
+[Collection(MySqlIntegrationDatabaseCollection.Name)]
+public partial class MySqlQueryTest : IAsyncLifetime
 {
+    /// <summary>
+    /// MySQL 集成测试数据库固定装置。
+    /// </summary>
+    private readonly MySqlIntegrationDatabaseFixture _fixture;
+
     /// <summary>
     /// Sql执行器
     /// </summary>
@@ -31,19 +38,34 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public MySqlQueryTest(ISqlExecutor sqlExecutor, ISqlQuery sqlQuery, ISqlQueryFactory sqlQueryFactory,
-        ISqlTransactionScopeFactory transactionScopeFactory)
+    public MySqlQueryTest(MySqlIntegrationDatabaseFixture fixture)
     {
-        _sqlExecutor = sqlExecutor;
-        _sqlQuery = sqlQuery;
-        _sqlQueryFactory = sqlQueryFactory;
-        _transactionScopeFactory = transactionScopeFactory;
+        _fixture = fixture;
+        _sqlExecutor = fixture.CreateExecutor();
+        _sqlQuery = fixture.CreateQuery();
+        _sqlQueryFactory = fixture.GetQueryFactory();
+        _transactionScopeFactory = fixture.GetTransactionScopeFactory();
+    }
+
+    /// <summary>
+    /// 在每个测试类开始前清理测试数据。
+    /// </summary>
+    public Task InitializeAsync() => _fixture.ResetAsync();
+
+    /// <summary>
+    /// 释放当前测试类创建的 SQL 对象。
+    /// </summary>
+    public Task DisposeAsync()
+    {
+        _sqlQuery?.Dispose();
+        _sqlExecutor?.Dispose();
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// 测试 - 临时禁用调试日志
     /// </summary>
-    [IntegrationFact]
+    [IntegrationFact("MySql")]
     public async Task Test_DisableDebugLog()
     {
         // 插入2条数据

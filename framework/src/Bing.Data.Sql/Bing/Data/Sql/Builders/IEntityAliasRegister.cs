@@ -13,7 +13,7 @@ public interface IEntityAliasRegister
     /// <summary>
     /// 实体别名
     /// </summary>
-    IDictionary<Type, string> Data { get; }
+    IReadOnlyDictionary<Type, string> Data { get; }
 
     /// <summary>
     /// 注册实体别名
@@ -21,6 +21,19 @@ public interface IEntityAliasRegister
     /// <param name="entity">实体类型</param>
     /// <param name="alias">别名</param>
     void Register(Type entity, string alias);
+
+    /// <summary>
+    /// 替换 From 实体的表别名。
+    /// </summary>
+    /// <param name="entity">实体类型。</param>
+    /// <param name="alias">表别名。</param>
+    void Replace(Type entity, string alias);
+
+    /// <summary>
+    /// 注册查询范围内的表别名。
+    /// </summary>
+    /// <param name="alias">表别名。</param>
+    void RegisterAlias(string alias);
 
     /// <summary>
     /// 是否包含实体

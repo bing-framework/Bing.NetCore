@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>Bing.Dapper.Tests</RootNamespace>
     <XunitStartupFullName>Bing.Dapper.Tests.Startup</XunitStartupFullName>
+    <TestTfmsInParallel>false</TestTfmsInParallel>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,5 +20,9 @@
       <DependentUpon>appsettings.json</DependentUpon>
     </Content>
   </ItemGroup>
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 
 </Project>

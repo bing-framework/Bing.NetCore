@@ -223,7 +223,7 @@ public class SelectClause : ISelectClause
     {
         if (builder == null)
             return;
-        var result = builder.ToSql();
+        var result = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         if (string.IsNullOrWhiteSpace(columnAlias) == false)
             result = $"({result})";
         AppendSql(result, columnAlias);

@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql;
+using Bing.Dapper.Tests.Infrastructure;
 using Xunit.Abstractions;
 
 namespace Bing.Dapper.Tests.SqlExecutor;
@@ -6,8 +7,14 @@ namespace Bing.Dapper.Tests.SqlExecutor;
 /// <summary>
 /// MySql Sql执行器测试
 /// </summary>
-public partial class MySqlExecutorTest
+[Collection(MySqlIntegrationDatabaseCollection.Name)]
+public partial class MySqlExecutorTest : IAsyncLifetime
 {
+    /// <summary>
+    /// MySQL 集成测试数据库固定装置。
+    /// </summary>
+    private readonly MySqlIntegrationDatabaseFixture _fixture;
+
     /// <summary>
     /// 测试输出工具
     /// </summary>
@@ -24,10 +31,26 @@ public partial class MySqlExecutorTest
     /// <summary>
     /// 测试初始化
     /// </summary>
-    public MySqlExecutorTest(ITestOutputHelper output, ISqlExecutor sqlExecutor, ISqlExecutor sqlExecutor2)
+    public MySqlExecutorTest(ITestOutputHelper output, MySqlIntegrationDatabaseFixture fixture)
     {
         _output = output;
-        _sqlExecutor = sqlExecutor;
-        _sqlExecutor2 = sqlExecutor2;
+        _fixture = fixture;
+        _sqlExecutor = fixture.CreateExecutor();
+        _sqlExecutor2 = fixture.CreateExecutor();
+    }
+
+    /// <summary>
+    /// 在每个测试类开始前清理测试数据。
+    /// </summary>
+    public Task InitializeAsync() => _fixture.ResetAsync();
+
+    /// <summary>
+    /// 释放当前测试类创建的 SQL 执行器。
+    /// </summary>
+    public Task DisposeAsync()
+    {
+        _sqlExecutor?.Dispose();
+        _sqlExecutor2?.Dispose();
+        return Task.CompletedTask;
     }
 }

@@ -14,9 +14,10 @@ namespace Bing.Dapper.Tests;
 /// <summary>
 /// 集成测试启动配置。
 /// 连接字符串通过以下任一方式提供（优先级从高到低）：
-/// 1. 环境变量：ConnectionStrings__DefaultConnection
-/// 2. appsettings.Development.json（本地开发，不提交到 Git）
-/// 3. appsettings.json（默认为空，确保无硬编码凭据）
+/// 1. 环境变量：ConnectionStrings__PostgreSqlConnection
+/// 2. 环境变量：ConnectionStrings__DefaultConnection
+/// 3. appsettings.Development.json（本地开发，不提交到 Git）
+/// 4. appsettings.json（默认为空，确保无硬编码凭据）
 /// 前置条件：
 /// - PostgreSQL 实例可访问
 /// - 数据库账号有 CREATE / DROP / DML 权限
@@ -44,9 +45,18 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
     {
-        var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-        services.AddPostgreSqlQuery(connectionString ?? string.Empty);
-        services.AddPostgreSqlExecutor(connectionString ?? string.Empty);
+        var connectionString = context.Configuration.GetConnectionString("PostgreSqlConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+        services.AddSqlCore();
+        services.AddPostgreSqlQuery(options =>
+        {
+            options.ConnectionString(connectionString ?? string.Empty);
+        });
+        services.AddPostgreSqlExecutor(options =>
+        {
+            options.ConnectionString(connectionString ?? string.Empty);
+        });
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
         services.AddBing();
     }

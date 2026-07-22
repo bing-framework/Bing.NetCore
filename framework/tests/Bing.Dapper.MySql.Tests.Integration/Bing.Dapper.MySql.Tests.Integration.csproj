@@ -2,7 +2,8 @@
   <Import Project="..\..\..\framework.tests.props" />
   <PropertyGroup>
     <RootNamespace>Bing.Dapper.Tests</RootNamespace>
-    <XunitStartupFullName>Bing.Dapper.Tests.Startup</XunitStartupFullName>
+    <EnableDITestPackages>false</EnableDITestPackages>
+    <TestTfmsInParallel>false</TestTfmsInParallel>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,20 +12,8 @@
     <ProjectReference Include="..\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="appsettings.*.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>appsettings.json</DependentUpon>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
   <PropertyGroup>
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.mysql.runsettings</RunSettingsFilePath>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings</RunSettingsFilePath>
   </PropertyGroup>
+
 </Project>

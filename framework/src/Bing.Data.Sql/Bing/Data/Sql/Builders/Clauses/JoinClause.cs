@@ -38,87 +38,87 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// Sql生成器
     /// </summary>
-    private readonly ISqlBuilder _sqlBuilder;
+    protected readonly ISqlBuilder _sqlBuilder;
 
     /// <summary>
     /// Sql方言
     /// </summary>
-    private readonly IDialect _dialect;
+    protected readonly IDialect _dialect;
 
     /// <summary>
     /// 实体解析器
     /// </summary>
-    private readonly IEntityResolver _resolver;
+    protected readonly IEntityResolver _resolver;
 
     /// <summary>
     /// 实体别名注册器
     /// </summary>
-    private readonly IEntityAliasRegister _register;
+    protected readonly IEntityAliasRegister _register;
 
     /// <summary>
     /// 参数管理器
     /// </summary>
-    private readonly IParameterManager _parameterManager;
+    protected readonly IParameterManager _parameterManager;
 
     /// <summary>
     /// 辅助操作
     /// </summary>
-    private readonly Helper _helper;
+    protected readonly Helper _helper;
 
     /// <summary>
     /// 实体映射解析器
     /// </summary>
-    private readonly IEntityMappingResolver _entityMappingResolver;
+    protected readonly IEntityMappingResolver _entityMappingResolver;
 
     /// <summary>
     /// 数据库上下文访问器
     /// </summary>
-    private readonly IDatabaseContextAccessor _databaseContextAccessor;
+    protected readonly IDatabaseContextAccessor _databaseContextAccessor;
 
     /// <summary>
     /// Sql 参数工厂
     /// </summary>
-    private readonly ISqlParameterFactory _sqlParameterFactory;
+    protected readonly ISqlParameterFactory _sqlParameterFactory;
 
     /// <summary>
     /// Sql 元数据配置
     /// </summary>
-    private readonly SqlMetadataOptions _metadataOptions;
+    protected readonly SqlMetadataOptions _metadataOptions;
 
     /// <summary>
     /// Sql 配置
     /// </summary>
-    private readonly SqlOptions _sqlOptions;
+    protected readonly SqlOptions _sqlOptions;
 
     /// <summary>
     /// SQL 数据库上下文解析器
     /// </summary>
-    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
+    protected readonly ISqlDatabaseContextResolver _databaseContextResolver;
 
     /// <summary>
     /// Builder 生命周期内固定的数据库上下文。
     /// </summary>
-    private readonly DatabaseContext _databaseContext;
+    protected readonly DatabaseContext _databaseContext;
 
     /// <summary>
     /// SQL 对象名格式化器
     /// </summary>
-    private readonly ISqlObjectNameFormatter _objectNameFormatter;
+    protected readonly ISqlObjectNameFormatter _objectNameFormatter;
 
     /// <summary>
     /// 跨数据库查询校验器
     /// </summary>
-    private readonly ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator;
+    protected readonly ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator;
 
     /// <summary>
     /// SQL 表引用验证器。
     /// </summary>
-    private readonly ISqlTableReferenceValidator _tableReferenceValidator;
+    protected readonly ISqlTableReferenceValidator _tableReferenceValidator;
 
     /// <summary>
     /// 连接参数
     /// </summary>
-    private readonly List<JoinItem> _params;
+    protected readonly List<JoinItem> _params;
 
     #endregion
 
@@ -191,15 +191,26 @@ public class JoinClause : IJoinClause
     /// <param name="sqlBuilder">Sql生成器</param>
     /// <param name="register">实体别名注册器</param>
     /// <param name="parameterManager">参数管理器</param>
-    public IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager)
+    public virtual IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager)
+    {
+        return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager,
+            CloneItems(register, parameterManager), _entityMappingResolver, _databaseContextAccessor,
+            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _objectNameFormatter,
+            _crossDatabaseQueryValidator, _tableReferenceValidator, _databaseContext);
+    }
+
+    /// <summary>
+    /// 克隆连接项。
+    /// </summary>
+    /// <param name="register">实体别名注册器。</param>
+    /// <param name="parameterManager">参数管理器。</param>
+    /// <returns>独立的连接项列表。</returns>
+    protected List<JoinItem> CloneItems(IEntityAliasRegister register, IParameterManager parameterManager)
     {
         var helper = new Helper(_dialect, _resolver, register, parameterManager, _entityMappingResolver,
             _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver,
             _databaseContext);
-        return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager,
-            _params.Select(t => t.Clone(helper)).ToList(), _entityMappingResolver, _databaseContextAccessor,
-            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _objectNameFormatter,
-            _crossDatabaseQueryValidator, _tableReferenceValidator, _databaseContext);
+        return _params.Select(item => item.Clone(helper)).ToList();
     }
 
     #endregion
@@ -237,9 +248,21 @@ public class JoinClause : IJoinClause
     /// <param name="alias">别名</param>
     private void Join(string joinType, string table, string alias)
     {
-        SqlTableNameParser.Validate(table, alias, (_sqlBuilder as SqlBuilderBase)?.ResolveProviderDatabaseType());
-        var item = CreateJoinItem(joinType, table, null, alias);
-        AddItem(item);
+        var parsedTable = ParseTableName(table, alias);
+        _register?.RegisterAlias(parsedTable.Alias);
+        AddItem(CreateJoinItem(joinType, parsedTable.TableName, parsedTable.Schema, parsedTable.Alias));
+    }
+
+    /// <summary>
+    /// 解析字符串表名及别名。
+    /// </summary>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>表名、别名和架构名。</returns>
+    protected virtual (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
+    {
+        var parsedTable = SqlTableNameParser.Parse(table, alias);
+        return (parsedTable.TableName, parsedTable.Alias, parsedTable.Schema);
     }
 
     /// <summary>
@@ -251,11 +274,13 @@ public class JoinClause : IJoinClause
     {
         if (reference == null)
             throw new ArgumentNullException(nameof(reference));
+        if (reference.EntityType == null)
+            _register?.RegisterAlias(reference.Alias);
         var databaseContext = GetCurrentDatabaseContext();
         var sourceReference = GetSourceReference(databaseContext);
         AddItem(CreateStructuredJoinItem(joinType, reference, reference.EntityType, sourceReference, databaseContext));
         if (reference.EntityType != null)
-            _register.Register(reference.EntityType, _resolver.GetAlias(reference.EntityType, reference.Alias));
+            _register?.Register(reference.EntityType, _resolver.GetAlias(reference.EntityType, reference.Alias));
     }
 
     /// <summary>
@@ -352,7 +377,7 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">表别名</param>
-    public void Join(ISqlBuilder builder, string alias) => AppendJoin(JoinKey, builder, alias);
+    public void Join(ISqlBuilder builder, string alias) => JoinSubquery(JoinKey, builder, alias);
 
     /// <summary>
     /// 添加到连接子句
@@ -360,15 +385,21 @@ public class JoinClause : IJoinClause
     /// <param name="joinType">连接类型</param>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">表别名</param>
-    private void AppendJoin(string joinType, ISqlBuilder builder, string alias) =>
-        AppendJoin(joinType, $"({builder.ToSql()}) As {_dialect.SafeName(alias)}");
+    private void JoinSubquery(string joinType, ISqlBuilder builder, string alias)
+    {
+        if (builder == null)
+            return;
+        _register?.RegisterAlias(alias);
+        var sql = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
+        AddItem(new JoinItem(joinType, $"({sql}) As {_dialect.SafeName(alias)}", raw: true));
+    }
 
     /// <summary>
     /// 内连接子查询
     /// </summary>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">表别名</param>
-    public void Join(Action<ISqlBuilder> action, string alias) => AppendJoin(JoinKey, action, alias);
+    public void Join(Action<ISqlBuilder> action, string alias) => JoinSubquery(JoinKey, action, alias);
 
     /// <summary>
     /// 添加到连接子句
@@ -376,40 +407,34 @@ public class JoinClause : IJoinClause
     /// <param name="joinType">连接类型</param>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">表别名</param>
-    private void AppendJoin(string joinType, Action<ISqlBuilder> action, string alias)
+    private void JoinSubquery(string joinType, Action<ISqlBuilder> action, string alias)
     {
         if (action == null)
             return;
         var builder = _sqlBuilder.New();
         action(builder);
-        AppendJoin(joinType, builder, alias);
+        JoinSubquery(joinType, builder, alias);
     }
 
     #endregion
 
-    #region AppendJoin(添加到内连接子句)
-
     /// <summary>
-    /// 添加到内连接子句
+    /// 添加原始连接 SQL。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
-    public void AppendJoin(string sql) => AppendJoin(JoinKey, sql);
-
-    /// <summary>
-    /// 添加到连接子句
-    /// </summary>
-    /// <param name="joinType">连接类型</param>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="joinType">连接类型。</param>
+    /// <param name="sql">原始 SQL。</param>
     private void AppendJoin(string joinType, string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        sql = Helper.ResolveSql(sql, _dialect);
-        var item = new JoinItem(joinType, sql, raw: true);
-        AddItem(item);
+        AddItem(new JoinItem(joinType, sql, raw: true));
     }
 
-    #endregion
+    /// <summary>
+    /// 添加原始内连接 SQL。
+    /// </summary>
+    /// <param name="sql">原始 SQL。</param>
+    public void AppendJoin(string sql) => AppendJoin(JoinKey, sql);
 
     #region LeftJoin(左外连接)
 
@@ -434,23 +459,19 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">表别名</param>
-    public void LeftJoin(ISqlBuilder builder, string alias) => AppendJoin(LeftJoinKey, builder, alias);
+    public void LeftJoin(ISqlBuilder builder, string alias) => JoinSubquery(LeftJoinKey, builder, alias);
 
     /// <summary>
     /// 左外连接子查询
     /// </summary>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">表别名</param>
-    public void LeftJoin(Action<ISqlBuilder> action, string alias) => AppendJoin(LeftJoinKey, action, alias);
-
-    #endregion
-
-    #region AppendLeftJoin(添加到左外连接子句)
+    public void LeftJoin(Action<ISqlBuilder> action, string alias) => JoinSubquery(LeftJoinKey, action, alias);
 
     /// <summary>
-    /// 添加到左外连接子句
+    /// 添加原始左连接 SQL。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">原始 SQL。</param>
     public void AppendLeftJoin(string sql) => AppendJoin(LeftJoinKey, sql);
 
     #endregion
@@ -478,23 +499,19 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">表别名</param>
-    public void RightJoin(ISqlBuilder builder, string alias) => AppendJoin(RightJoinKey, builder, alias);
+    public void RightJoin(ISqlBuilder builder, string alias) => JoinSubquery(RightJoinKey, builder, alias);
 
     /// <summary>
     /// 右外连接子查询
     /// </summary>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">表别名</param>
-    public void RightJoin(Action<ISqlBuilder> action, string alias) => AppendJoin(RightJoinKey, action, alias);
-
-    #endregion
-
-    #region AppendRightJoin(添加到右外连接子句)
+    public void RightJoin(Action<ISqlBuilder> action, string alias) => JoinSubquery(RightJoinKey, action, alias);
 
     /// <summary>
-    /// 添加到右外连接子句
+    /// 添加原始右连接 SQL。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">原始 SQL。</param>
     public void AppendRightJoin(string sql) => AppendJoin(RightJoinKey, sql);
 
     #endregion

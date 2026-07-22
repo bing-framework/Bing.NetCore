@@ -28,7 +28,8 @@ public class MySqlFromClause : FromClause
         ISqlObjectNameFormatter objectNameFormatter = null,
         Bing.Data.Enums.DatabaseType? providerDatabaseType = null,
         ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(builder, dialect, resolver, register, table, objectNameFormatter, providerDatabaseType,
+        : base(builder, dialect, resolver, register, table, objectNameFormatter,
+            providerDatabaseType ?? Bing.Data.Enums.DatabaseType.MySql,
             tableReferenceValidator)
     {
     }
@@ -39,7 +40,22 @@ public class MySqlFromClause : FromClause
     /// <param name="table">表名</param>
     /// <param name="schema">架构名</param>
     /// <param name="alias">别名</param>
-    protected override SqlItem CreateSqlItem(string table, string schema, string alias) => new SqlItem(table, schema, alias, false, false);
+    protected override SqlItem CreateSqlItem(string table, string schema, string alias) =>
+        new SqlItem(table, schema, alias, false, ProviderDatabaseType != Bing.Data.Enums.DatabaseType.MySql);
+
+    /// <summary>
+    /// 解析实际 MySQL 的反引号字符串表名。
+    /// </summary>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>表名、别名和架构名。</returns>
+    protected override (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
+    {
+        if (ProviderDatabaseType != Bing.Data.Enums.DatabaseType.MySql)
+            return base.ParseTableName(table, alias);
+        var parsedTable = MySqlTableNameParser.Parse(table, alias);
+        return (parsedTable.TableName, parsedTable.Alias, parsedTable.Schema);
+    }
 
     /// <summary>
     /// 克隆

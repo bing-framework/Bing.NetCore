@@ -70,11 +70,12 @@ public class MySqlBuilder : SqlBuilderBase
     /// <inheritdoc />
     protected override IFromClause CreateFromClause() => 
         new MySqlFromClause(this, GetDialect(), EntityResolver, AliasRegister, null, ObjectNameFormatter,
-            ProviderDatabaseType, TableReferenceValidator);
+            ExecutionProviderDatabaseType, TableReferenceValidator);
 
     /// <inheritdoc />
     protected override IJoinClause CreateJoinClause() =>
         new MySqlJoinClause(this, GetDialect(), EntityResolver, AliasRegister, ParameterManager,
             EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions, Options,
-            DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator, TableReferenceValidator);
+            DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator, TableReferenceValidator,
+            ExecutionProviderDatabaseType != DatabaseType.MySql);
 }

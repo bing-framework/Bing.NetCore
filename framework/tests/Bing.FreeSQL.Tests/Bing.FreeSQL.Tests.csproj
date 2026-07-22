@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Bing.FreeSQL.Tests</RootNamespace>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.FreeSQL\Bing.FreeSQL.csproj" />
+    <ProjectReference Include="..\..\src\Bing.FreeSQL.MySql\Bing.FreeSQL.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+  </ItemGroup>
+</Project>

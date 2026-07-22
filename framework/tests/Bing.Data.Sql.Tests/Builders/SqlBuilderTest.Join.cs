@@ -76,6 +76,60 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：独立子查询与外层查询生成相同参数名时，应重命名子查询参数并保留两侧参数值。
+    /// </summary>
+    [Fact]
+    public void Join_WhenExternalSubqueryParameterConflicts_ShouldRenameSubqueryParameter()
+    {
+        // Arrange
+        var subquery = new TestSqlBuilder().From("Test2").Where("Name", "child");
+        var expected = new StringBuilder();
+        expected.AppendLine("Select * ");
+        expected.AppendLine("From [Test] ");
+        expected.AppendLine("Join (Select * ");
+        expected.AppendLine("From [Test2] ");
+        expected.AppendLine("Where [Name]=@_p_1) As [t] ");
+        expected.Append("Where [Age]=@_p_0");
+
+        // Act
+        _builder.From("Test").Where("Age", 1).Join(subquery, "t");
+
+        // Assert
+        Assert.Equal(expected.ToString(), _builder.ToSql());
+        Assert.Equal(2, _builder.GetParams().Count);
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("child", _builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
+    /// 测试目的：结构化 From 和 Join 在同一查询范围内使用重复 alias 时应立即失败。
+    /// </summary>
+    [Fact]
+    public void Join_WhenAliasDuplicatesFromAlias_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        _builder.From("Orders", "o");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => _builder.Join("OrderItems", "o"));
+
+        // Assert
+        Assert.Equal("查询中已存在表别名 \"o\"。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Append 原始 SQL 不应参与别名冲突校验。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_WhenSqlContainsAlias_ShouldNotRegisterAlias()
+    {
+        _builder.AppendFrom("(Select 1) As source");
+        _builder.AppendJoin("(Select 2) As source");
+
+        Assert.Contains("Join (Select 2) As source", _builder.ToSql());
+    }
+
+    /// <summary>
     /// 添加Join子查询 - 委托
     /// </summary>
     [Fact]
@@ -116,28 +170,6 @@ public partial class SqlBuilderTest
         _builder.Select("a")
             .From("b")
             .AppendJoin("c");
-
-        //验证
-        Assert.Equal(result.ToString(), _builder.ToSql());
-    }
-
-    /// <summary>
-    /// 内连接 - 添加原始Sql - 条件
-    /// </summary>
-    [Fact]
-    public void Test_Join_6()
-    {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [a] ");
-        result.AppendLine("From [b] ");
-        result.Append("Join c");
-
-        //执行
-        _builder.Select("a")
-            .From("b")
-            .AppendJoin("d", false)
-            .AppendJoin("c", true);
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
@@ -252,28 +284,6 @@ public partial class SqlBuilderTest
         _builder.Select("a")
             .From("b")
             .AppendLeftJoin("c");
-
-        //验证
-        Assert.Equal(result.ToString(), _builder.ToSql());
-    }
-
-    /// <summary>
-    /// 左外连接 - 添加原始Sql - 条件
-    /// </summary>
-    [Fact]
-    public void Test_LeftJoin_6()
-    {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [a] ");
-        result.AppendLine("From [b] ");
-        result.Append("Left Join c");
-
-        //执行
-        _builder.Select("a")
-            .From("b")
-            .AppendLeftJoin("d", false)
-            .AppendLeftJoin("c", true);
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
@@ -410,28 +420,6 @@ public partial class SqlBuilderTest
         _builder.Select("a")
             .From("b")
             .AppendRightJoin("c");
-
-        //验证
-        Assert.Equal(result.ToString(), _builder.ToSql());
-    }
-
-    /// <summary>
-    /// 右外连接 - 添加原始Sql - 条件
-    /// </summary>
-    [Fact]
-    public void Test_RightJoin_6()
-    {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [a] ");
-        result.AppendLine("From [b] ");
-        result.Append("Right Join c");
-
-        //执行
-        _builder.Select("a")
-            .From("b")
-            .AppendRightJoin("d", false)
-            .AppendRightJoin("c", true);
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());

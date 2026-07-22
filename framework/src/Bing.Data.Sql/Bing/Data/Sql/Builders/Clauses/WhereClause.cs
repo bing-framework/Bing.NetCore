@@ -146,6 +146,13 @@ public class WhereClause : IWhereClause
             new SqlCondition(_condition?.GetCondition()), _entityMappingResolver, _databaseContextAccessor,
             _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _databaseContext);
 
+    /// <summary>
+    /// 获取合并参数上下文后的子查询 SQL。
+    /// </summary>
+    /// <param name="builder">子查询生成器。</param>
+    private string GetSubquerySql(ISqlBuilder builder) =>
+        Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
+
     #endregion
 
     #region 条件连接
@@ -267,7 +274,7 @@ public class WhereClause : IWhereClause
         if (builder == null)
             return;
         column = _helper.GetColumn(column);
-        var sql = $"({builder.ToSql()})";
+        var sql = $"({GetSubquerySql(builder)})";
         And(SqlConditionFactory.Create(column, sql, @operator));
     }
 
@@ -562,7 +569,7 @@ public class WhereClause : IWhereClause
     {
         if (string.IsNullOrWhiteSpace(column) || builder == null)
             return;
-        var result = $"{_helper.GetColumn(column)} {operation} ({builder.ToSql()})";
+        var result = $"{_helper.GetColumn(column)} {operation} ({GetSubquerySql(builder)})";
         AppendSql(result);
     }
 
@@ -578,7 +585,7 @@ public class WhereClause : IWhereClause
     {
         if (builder == null)
             return;
-        var result = $"Exists ({builder.ToSql()})";
+        var result = $"Exists ({GetSubquerySql(builder)})";
         AppendSql(result);
     }
 
@@ -603,7 +610,7 @@ public class WhereClause : IWhereClause
     {
         if (builder == null)
             return;
-        var result = $"Not Exists ({builder.ToSql()})";
+        var result = $"Not Exists ({GetSubquerySql(builder)})";
         AppendSql(result);
     }
 

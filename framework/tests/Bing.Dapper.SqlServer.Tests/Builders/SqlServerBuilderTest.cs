@@ -61,6 +61,34 @@ public class SqlServerBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：带点物理表名必须作为单个 SQL Server 标识符渲染。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableNameContainsDot_ShouldFormatAsQualifiedIdentifier()
+    {
+        var builder = NewBuilder();
+
+        builder.Select("*").From("Order.Log2025", "o");
+
+        Assert.Equal("Select * \r\nFrom [Order].[Log2025] As [o]", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：SQL Server 三段字符串表名必须保持既有分段格式化与分页语法。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableNameHasThreeSegments_ShouldFormatEachSegmentAndPage()
+    {
+        var builder = NewBuilder();
+
+        builder.Select("*").From("ERP.dbo.Users", "u").OrderBy("u.Id").Page(new Bing.Data.Pager(2, 10, "u.Id"));
+
+        Assert.Equal("Select * \r\nFrom [ERP].[dbo].[Users] As [u] \r\nOrder By [u].[Id] \r\nOffset @_p_0 Rows Fetch Next @_p_1 Rows Only", builder.ToSql());
+        Assert.Equal(10, builder.GetParam("_p_0"));
+        Assert.Equal(10, builder.GetParam("_p_1"));
+    }
+
+    /// <summary>
     /// 测试目的：Select 多列时，各列均应被方括号包裹。
     /// </summary>
     [Fact]

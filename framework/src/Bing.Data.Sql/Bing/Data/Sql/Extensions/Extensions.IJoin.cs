@@ -25,6 +25,32 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 追加原始内连接 SQL。
+    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
+    public static T AppendJoin<T>(this T source, string sql) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            accessor.JoinClause.AppendJoin(sql);
+        return source;
+    }
+
+    /// <summary>
+    /// 按条件追加原始内连接 SQL。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="sql">原始连接文本。</param>
+    /// <param name="condition">是否添加。</param>
+    public static T AppendJoin<T>(this T source, string sql, bool condition) where T : IJoin =>
+        condition ? AppendJoin(source, sql) : source;
+
+    /// <summary>
     /// 内连接
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
@@ -57,30 +83,6 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加到内连接子句
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-    public static T AppendJoin<T>(this T source, string sql) where T : IJoin
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
-            accessor.JoinClause.AppendJoin(sql);
-        return source;
-    }
-
-    /// <summary>
-    /// 添加到内连接子句
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-    /// <param name="condition">该值为true时添加Sql，否则忽略</param>
-    public static T AppendJoin<T>(this T source, string sql, bool condition) where T : IJoin => condition ? AppendJoin(source, sql) : source;
-
-    /// <summary>
     /// 左外连接
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
@@ -95,6 +97,32 @@ public static partial class Extensions
             accessor.JoinClause.LeftJoin(table, alias);
         return source;
     }
+
+    /// <summary>
+    /// 追加原始左连接 SQL。
+    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
+    public static T AppendLeftJoin<T>(this T source, string sql) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            accessor.JoinClause.AppendLeftJoin(sql);
+        return source;
+    }
+
+    /// <summary>
+    /// 按条件追加原始左连接 SQL。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="sql">原始连接文本。</param>
+    /// <param name="condition">是否添加。</param>
+    public static T AppendLeftJoin<T>(this T source, string sql, bool condition) where T : IJoin =>
+        condition ? AppendLeftJoin(source, sql) : source;
 
     /// <summary>
     /// 左外连接
@@ -129,30 +157,6 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加到左外连接子句
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-    public static T AppendLeftJoin<T>(this T source, string sql) where T : IJoin
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
-            accessor.JoinClause.AppendLeftJoin(sql);
-        return source;
-    }
-
-    /// <summary>
-    /// 添加到左外连接子句
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-    /// <param name="condition">该值为true时添加Sql，否则忽略</param>
-    public static T AppendLeftJoin<T>(this T source, string sql, bool condition) where T : IJoin => condition ? AppendLeftJoin(source, sql) : source;
-
-    /// <summary>
     /// 右外连接
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
@@ -167,6 +171,32 @@ public static partial class Extensions
             accessor.JoinClause.RightJoin(table, alias);
         return source;
     }
+
+    /// <summary>
+    /// 追加原始右连接 SQL。
+    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
+    public static T AppendRightJoin<T>(this T source, string sql) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            accessor.JoinClause.AppendRightJoin(sql);
+        return source;
+    }
+
+    /// <summary>
+    /// 按条件追加原始右连接 SQL。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="sql">原始连接文本。</param>
+    /// <param name="condition">是否添加。</param>
+    public static T AppendRightJoin<T>(this T source, string sql, bool condition) where T : IJoin =>
+        condition ? AppendRightJoin(source, sql) : source;
 
     /// <summary>
     /// 右外连接
@@ -199,30 +229,6 @@ public static partial class Extensions
             accessor.JoinClause.RightJoin(action, alias);
         return source;
     }
-
-    /// <summary>
-    /// 添加到右外连接子句
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-    public static T AppendRightJoin<T>(this T source, string sql) where T : IJoin
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
-            accessor.JoinClause.AppendRightJoin(sql);
-        return source;
-    }
-
-    /// <summary>
-    /// 添加到右外连接子句
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
-    /// <param name="condition">该值为true时添加Sql，否则忽略</param>
-    public static T AppendRightJoin<T>(this T source, string sql, bool condition) where T : IJoin => condition ? AppendRightJoin(source, sql) : source;
 
     /// <summary>
     /// 设置连接条件

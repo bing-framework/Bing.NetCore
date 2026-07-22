@@ -2,6 +2,7 @@ using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
+using Bing.Data.Sql.Builders;
 using System.Data.Common;
 using System.Reflection;
 
@@ -454,6 +455,32 @@ public class EfCoreSqlQueryFactoryTest
     }
 
     /// <summary>
+    /// 测试 - EF Core 元数据中的带点物理表名应由 MySQL Builder 作为原子标识符渲染。
+    /// </summary>
+    [Fact]
+    public void MetadataProvider_WhenEfTableNameContainsDot_ShouldKeepAtomicNameForMySqlBuilder()
+    {
+        // Arrange
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider();
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        var builder = new MySqlBuilder(entityModelMetadataProvider: unitOfWork);
+
+        // Act
+        var tableName = unitOfWork.GetTableName(typeof(DottedTableEntity));
+        var schema = unitOfWork.GetSchema(typeof(DottedTableEntity));
+        var columnName = unitOfWork.GetColumnName(typeof(DottedTableEntity), nameof(DottedTableEntity.DisplayName));
+        var sql = builder.Select("*").From<DottedTableEntity>("c").ToSql();
+
+        // Assert
+        Assert.Equal("Merchants.Company", tableName);
+        Assert.Empty(schema);
+        Assert.Equal("display_name", columnName);
+        Assert.Equal("Select * \r\nFrom `Merchants.Company` As `c`", sql);
+    }
+
+    /// <summary>
     /// 断言 Query 可通过其内部绑定资源执行 SQLite 查询。
     /// </summary>
     /// <param name="query">待验证的查询对象。</param>
@@ -631,6 +658,12 @@ public class EfCoreSqlQueryFactoryTest
                 builder.HasKey(entity => entity.Id);
                 builder.Property(entity => entity.DisplayName).HasColumnName("display_name");
             });
+            modelBuilder.Entity<DottedTableEntity>(builder =>
+            {
+                builder.ToTable("Merchants.Company");
+                builder.HasKey(entity => entity.Id);
+                builder.Property(entity => entity.DisplayName).HasColumnName("display_name");
+            });
         }
     }
 
@@ -680,6 +713,22 @@ public class EfCoreSqlQueryFactoryTest
 
         /// <summary>
         /// 显示名称
+        /// </summary>
+        public string DisplayName { get; set; }
+    }
+
+    /// <summary>
+    /// 带点物理表名测试实体。
+    /// </summary>
+    private sealed class DottedTableEntity
+    {
+        /// <summary>
+        /// 标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 显示名称。
         /// </summary>
         public string DisplayName { get; set; }
     }

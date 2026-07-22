@@ -65,4 +65,26 @@ public class FromClauseTest
         _clause.From("a.b", "c");
         Assert.Equal("From \"a\".\"b\" \"c\"", GetSql());
     }
+
+    /// <summary>
+    /// 测试目的：带点物理表名必须作为单个 Oracle 标识符渲染。
+    /// </summary>
+    [Fact]
+    public void From_WhenTableNameContainsDot_ShouldFormatAsQualifiedIdentifier()
+    {
+        _clause.From("Order.Log2025", "o");
+
+        Assert.Equal("From \"Order\".\"Log2025\" \"o\"", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Oracle 字符串限定表名应继续按句点分段渲染。
+    /// </summary>
+    [Fact]
+    public void From_WhenSchemaAndTableAreProvided_ShouldFormatEachIdentifier()
+    {
+        _clause.From("SCOTT.USERS", "u");
+
+        Assert.Equal("From \"SCOTT\".\"USERS\" \"u\"", GetSql());
+    }
 }

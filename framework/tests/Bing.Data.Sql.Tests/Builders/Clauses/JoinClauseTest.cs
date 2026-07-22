@@ -401,7 +401,7 @@ public class JoinClauseTest
     }
 
     /// <summary>
-    /// 测试 - 内连接 - 架构
+    /// 测试目的：独立 schema 应与表名分别格式化。
     /// </summary>
     [Fact]
     public void Test_Join_2()
@@ -411,7 +411,7 @@ public class JoinClauseTest
     }
 
     /// <summary>
-    /// 测试 - 内连接 - 架构 - 别名
+    /// 测试目的：SQL Server 字符串表名应按既有规则拆分限定段。
     /// </summary>
     [Fact]
     public void Test_Join_3()
@@ -421,13 +421,24 @@ public class JoinClauseTest
     }
 
     /// <summary>
-    /// 测试 - 内连接 - 架构 - 别名
+    /// 测试目的：SQL Server 字符串表名和显式别名应按既有规则渲染。
     /// </summary>
     [Fact]
     public void Test_Join_4()
     {
         _clause.Join("a.b", "c");
         Assert.Equal("Join [a].[b] As [c]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：AppendJoin 原始表达式应绕过结构化表名解析。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_ShouldPreserveSqlExpression()
+    {
+        _clause.AppendJoin("(Select 1 As Id) As source");
+
+        Assert.Equal("Join (Select 1 As Id) As source", GetSql());
     }
 
     /// <summary>

@@ -247,9 +247,8 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
             return null;
         try
         {
-            var dbName = Orm.CodeFirst.GetTableByEntity(entity)?.DbName;
-            var names = (Orm.Select<object>() as Select0Provider)._commonUtils.SplitTableName(dbName);
-            return names.Length == 2 ? names[1] : dbName;
+            var tableName = Orm.CodeFirst.GetTableByEntity(entity)?.DbName;
+            return string.IsNullOrWhiteSpace(tableName) ? entity.Name : tableName;
         }
         catch
         {
@@ -265,16 +264,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     {
         if (entity == null)
             return null;
-        try
-        {
-            var dbName = Orm.CodeFirst.GetTableByEntity(entity)?.DbName;
-            var names = (Orm.Select<object>() as Select0Provider)._commonUtils.SplitTableName(dbName);
-            return names.Length == 2 ? names[0] : null;
-        }
-        catch
-        {
-            return null;
-        }
+        return null;
     }
 
     /// <summary>

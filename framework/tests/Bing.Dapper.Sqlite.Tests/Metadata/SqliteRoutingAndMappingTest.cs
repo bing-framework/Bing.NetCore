@@ -61,6 +61,22 @@ public class SqliteRoutingAndMappingTest
         Assert.Contains("`users_reporting`", builder.ToSql());
     }
 
+    /// <summary>
+    /// 测试目的：Sqlite 字符串 From 和 Join 应继续按句点分段渲染。
+    /// </summary>
+    [Fact]
+    public void StringQualifiedTables_ShouldKeepSqliteSegmentedFormatting()
+    {
+        var builder = new SqliteBuilder();
+
+        var sql = builder.Select("u.Id")
+            .From("main.Users", "u")
+            .Join("audit.Roles", "r")
+            .ToSql();
+
+        Assert.Equal("Select `u`.`Id` \r\nFrom `main`.`Users` As `u` \r\nJoin `audit`.`Roles` As `r`", sql);
+    }
+
     private static SqlOptions CreateSqlOptions() => new SqlOptions().SetDatabaseContext(new DatabaseContext
     {
         DbKey = "reporting",

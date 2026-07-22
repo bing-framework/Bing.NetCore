@@ -24,8 +24,8 @@ public static class PostgreSqlServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
-        var queryOptions = new SqlOptions<PostgreSqlQuery>();
-        var executorOptions = new SqlOptions<PostgreSqlExecutor>();
+        var queryOptions = new SqlOptions<PostgreSqlQuery> { DatabaseType = DatabaseType.PgSql };
+        var executorOptions = new SqlOptions<PostgreSqlExecutor> { DatabaseType = DatabaseType.PgSql };
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
@@ -100,7 +100,7 @@ public static class PostgreSqlServiceCollectionExtensions
         where TInterface : ISqlQuery
         where TImplementation : PostgreSqlQueryBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.PgSql };
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
@@ -175,7 +175,7 @@ public static class PostgreSqlServiceCollectionExtensions
         where TInterface : ISqlExecutor
         where TImplementation : PostgreSqlExecutorBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.PgSql };
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);

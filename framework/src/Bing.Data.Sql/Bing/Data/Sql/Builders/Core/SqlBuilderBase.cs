@@ -148,6 +148,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     protected abstract DatabaseType ProviderDatabaseType { get; }
 
     /// <summary>
+    /// 获取当前执行上下文解析后的数据库类型。
+    /// </summary>
+    protected DatabaseType ExecutionProviderDatabaseType => ExecutionContext.DatabaseType ?? ProviderDatabaseType;
+
+    /// <summary>
     /// 参数管理器
     /// </summary>
     public IParameterManager ParameterManager => _parameterManager ??= CreateParameterManager();
@@ -402,6 +407,62 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// </summary>
     /// <returns>数据库上下文</returns>
     internal virtual DatabaseContext GetDatabaseContext() => ExecutionContext.DatabaseContext;
+
+    /// <summary>
+    /// 渲染子查询并合并独立参数上下文。
+    /// </summary>
+    /// <param name="builder">子查询生成器。</param>
+    internal string RenderSubquery(ISqlBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        var sql = builder.ToSql();
+        if (builder is not ISqlPartAccessor accessor || ReferenceEquals(ParameterManager, accessor.ParameterManager))
+            return sql;
+
+        var sourceParameters = accessor.ParameterManager.GetParams();
+        var sourceSqlParameters = (accessor.ParameterManager as IAdvancedParameterManager)?.GetSqlParams();
+        foreach (var parameter in sourceParameters)
+        {
+            var targetName = parameter.Key;
+            if (ParameterManager.Contains(parameter.Key) && Equals(ParameterManager.GetValue(parameter.Key), parameter.Value) == false)
+                targetName = ParameterManager.GenerateName();
+            if (ParameterManager.Contains(targetName))
+                continue;
+            if (sourceSqlParameters != null && sourceSqlParameters.TryGetValue(parameter.Key, out var sqlParameter) &&
+                ParameterManager is IAdvancedParameterManager advancedParameterManager)
+                advancedParameterManager.Add(CloneSqlParameter(sqlParameter, targetName));
+            else
+                ParameterManager.Add(targetName, parameter.Value);
+            if (string.Equals(parameter.Key, targetName, StringComparison.Ordinal) == false)
+                sql = Regex.Replace(sql, $@"(?<![\w]){Regex.Escape(parameter.Key)}(?![\w])", targetName);
+        }
+        return sql;
+    }
+
+    /// <summary>
+    /// 克隆增强 SQL 参数并替换参数名。
+    /// </summary>
+    /// <param name="parameter">源参数。</param>
+    /// <param name="name">目标参数名。</param>
+    private static SqlParam CloneSqlParameter(SqlParam parameter, string name)
+    {
+        return new SqlParam(name, parameter.Value, parameter.DbType, parameter.Direction, parameter.Size,
+            parameter.Precision, parameter.Scale)
+        {
+            OriginalValue = parameter.OriginalValue,
+            EntityType = parameter.EntityType,
+            PropertyName = parameter.PropertyName,
+            ColumnName = parameter.ColumnName,
+            DatabaseType = parameter.DatabaseType,
+            ProviderTypeName = parameter.ProviderTypeName,
+            Source = parameter.Source,
+            MetadataLevel = parameter.MetadataLevel,
+            StorageKind = parameter.StorageKind,
+            ConverterKind = parameter.ConverterKind,
+            CustomConverterName = parameter.CustomConverterName
+        };
+    }
 
     /// <summary>
     /// 解析结构化对象名称使用的数据库类型。
@@ -667,7 +728,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         {
             var item = CteItems[i];
             cte.AppendLine($"{Dialect.SafeName(item.Name)} ");
-            cte.Append($"As ({item.Builder.ToSql()})");
+            cte.Append($"As ({RenderSubquery(item.Builder)})");
 
             if (i < CteItems.Count - 1)
                 cte.AppendLine(",");
@@ -697,7 +758,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         foreach (var operation in UnionItems)
         {
             AppendSql(result, operation.Name);
-            AppendSql(result, $"({operation.Builder.ToSql()}");
+            AppendSql(result, $"({RenderSubquery(operation.Builder)}");
             AppendSql(result, ")");
         }
 

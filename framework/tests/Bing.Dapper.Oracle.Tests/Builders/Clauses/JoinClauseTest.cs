@@ -218,10 +218,10 @@ public class OracleJoinClauseTest
     // ── AppendJoin ────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：AppendJoin 追加原始 SQL 片段，输出应原样保留。
+    /// 测试目的：AppendJoin 原始 SQL 表达式应原样保留。
     /// </summary>
     [Fact]
-    public void Test_AppendJoin_Raw()
+    public void AppendJoin_ShouldPreserveSqlExpression()
     {
         // Act
         _clause.AppendJoin("\"raw_table\" On 1=1");

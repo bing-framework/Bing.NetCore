@@ -162,7 +162,8 @@ public class JoinItem : IJoinOn
     /// </summary>
     public JoinItem Clone(Helper helper)
     {
-        var result = new JoinItem(JoinType, Table?.Clone(), Type, new SqlCondition(Condition?.GetCondition()));
+        var condition = Condition == null ? null : new SqlCondition(Condition.GetCondition());
+        var result = new JoinItem(JoinType, Table?.Clone(), Type, condition);
         result.SetDependency(helper);
         return result;
     }

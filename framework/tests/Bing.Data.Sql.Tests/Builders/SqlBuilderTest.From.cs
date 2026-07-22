@@ -117,23 +117,4 @@ public partial class SqlBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
-    /// <summary>
-    /// 设置表 - 原始sql - 条件
-    /// </summary>
-    [Fact]
-    public void Test_From_6()
-    {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [c] ");
-        result.Append("From b");
-
-        //执行
-        _builder.Select("c")
-            .AppendFrom("a", false)
-            .AppendFrom("b", true);
-
-        //验证
-        Assert.Equal(result.ToString(), _builder.ToSql());
-    }
 }

@@ -30,6 +30,51 @@ public partial class MySqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：AppendJoin 不应将调用方指定的方括号转换为 MySQL 标识符引号。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_ShouldNotApplyDialectFormatting()
+    {
+        _builder.Select("a")
+            .From("source")
+            .AppendJoin("[archive].[Order.Log2025] As raw_order");
+
+        Assert.Equal("Select `a` \r\nFrom `source` \r\nJoin [archive].[Order.Log2025] As raw_order",
+            _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：MySQL 的各类字符串 Join 都应识别反引号 schema 和带点物理表名。
+    /// </summary>
+    [Fact]
+    public void Join_WhenUsingQuotedSchemaAndDottedPhysicalTable_ShouldRenderAllJoinTypes()
+    {
+        var sql = _builder.Select("o.Id")
+            .From("Orders", "o")
+            .Join("`archive_db`.`Merchants.Company`", "merchant")
+            .LeftJoin("`archive_db`.`Order.Log2025`", "audit")
+            .RightJoin("`archive_db`.`Payment.Record`", "payment")
+            .ToSql();
+
+        Assert.Equal("Select `o`.`Id` \r\nFrom `Orders` As `o` \r\nJoin `archive_db`.`Merchants.Company` As `merchant` \r\nLeft Join `archive_db`.`Order.Log2025` As `audit` \r\nRight Join `archive_db`.`Payment.Record` As `payment`", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：克隆后的 MySQL Join 子句必须继续将带点物理表名作为原子标识符。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenJoinUsesDottedPhysicalTable_ShouldPreserveMySqlStringTableStrategy()
+    {
+        _builder.Select("*").From("Orders").Join("Order.Log2025", "audit");
+
+        var clone = _builder.Clone();
+        clone.Join("Audit.Log2026", "history");
+
+        Assert.Equal("Select * \r\nFrom `Orders` \r\nJoin `Order.Log2025` As `audit` \r\nJoin `Audit.Log2026` As `history`",
+            clone.ToSql());
+    }
+
+    /// <summary>
     /// 测试 - 连接条件 - 属性表达式
     /// </summary>
     [Fact]
