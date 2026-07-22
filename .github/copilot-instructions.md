@@ -78,7 +78,7 @@
 示例：
 ```csharp
 /// <summary>
-/// 测试目的：当租户标识缺失时，解析器应返回 null，避免抛异常影响上游管道。
+/// 测试 - 当租户标识缺失时，解析器应返回 null，避免抛异常影响上游管道。
 /// </summary>
 [Fact]
 public void Resolve_WhenTenantIdMissing_ShouldReturnNull()
