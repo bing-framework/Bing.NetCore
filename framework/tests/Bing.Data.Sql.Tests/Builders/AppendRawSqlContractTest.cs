@@ -82,6 +82,24 @@ public class AppendRawSqlContractTest
     }
 
     /// <summary>
+    /// 测试 - 连续原始 From 追加不应自动插入分隔符。
+    /// </summary>
+    [Fact]
+    public void AppendFrom_WhenCalledRepeatedly_ShouldNotInsertSeparator()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        var separatedSql = builder.AppendFrom("Orders o").AppendFrom(", Customers c").ToSql();
+        var unseparatedSql = new TestSqlBuilder().AppendFrom("Orders o").AppendFrom("Customers c").ToSql();
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom Orders o, Customers c", separatedSql);
+        Assert.Equal("Select * \r\nFrom Orders oCustomers c", unseparatedSql);
+    }
+
+    /// <summary>
     /// 测试 - 原始 Append 在 Clone、New、Clear 与重复渲染后应保持独立且稳定。
     /// </summary>
     [Fact]

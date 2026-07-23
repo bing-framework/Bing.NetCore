@@ -59,8 +59,9 @@ public interface IJoinClause
     void Join(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 追加原始内连接 SQL。
-    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
+    /// 追加原始内连接表表达式。
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <see cref="AppendOn"/> 向最后一个连接继续添加条件。
+    /// 调用方负责 SQL 安全性及显式提供占位符参数。
     /// </summary>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
     void AppendJoin(string sql);
@@ -95,8 +96,9 @@ public interface IJoinClause
     void LeftJoin(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 追加原始左连接 SQL。
-    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
+    /// 追加原始左连接表表达式。
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <see cref="AppendOn"/> 向最后一个连接继续添加条件。
+    /// 调用方负责 SQL 安全性及显式提供占位符参数。
     /// </summary>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
     void AppendLeftJoin(string sql);
@@ -131,8 +133,9 @@ public interface IJoinClause
     void RightJoin(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 追加原始右连接 SQL。
-    /// 原始文本不会经过标识符解析、方言格式化或别名注册，调用方负责 SQL 安全性和连接条件。
+    /// 追加原始右连接表表达式。
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <see cref="AppendOn"/> 向最后一个连接继续添加条件。
+    /// 调用方负责 SQL 安全性及显式提供占位符参数。
     /// </summary>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
     void AppendRightJoin(string sql);
@@ -172,9 +175,10 @@ public interface IJoinClause
         where TLeft : class where TRight : class;
 
     /// <summary>
-    /// 添加到On子句
+    /// 向最后一个连接添加 On 原始条件。
+    /// 没有连接时此调用会被忽略，条件不会保存并应用到后续连接。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <param name="sql">On 条件文本；方括号标识符会按当前方言解析。</param>
     void AppendOn(string sql);
 
     /// <summary>

@@ -9,23 +9,56 @@ namespace Bing.Dapper.Tests.Builders;
 public class AppendRawSqlTest
 {
     /// <summary>
-    /// 测试 - PostgreSQL 原始 Append 文本应保留异方言引号、Lateral、注释和占位符。
+    /// 测试 - PostgreSQL 原始 From 应保留 ONLY 和参数占位符。
     /// </summary>
     [Fact]
-    public void AppendRawSql_ShouldPreserveAllText()
+    public void AppendFrom_ShouldPreserveRawSql()
     {
         // Arrange
         var builder = new PostgreSqlBuilder();
 
         // Act
         var sql = builder.Select("u.Id")
-            .AppendFrom("[public].[users] u ONLY /* @tenant */")
-            .AppendJoin("Lateral (Select 1 As Id) a On true /* ? {0} */")
-            .AppendLeftJoin("`Audit.Log` l On l.UserId=u.Id")
-            .AppendRightJoin("\"Payments.Log\" p On p.UserId=u.Id")
+            .AppendFrom("[public].[users] u ONLY /* @TenantId */")
             .ToSql();
 
         // Assert
-        Assert.Equal("Select \"u\".\"Id\" \r\nFrom [public].[users] u ONLY /* @tenant */ \r\nJoin Lateral (Select 1 As Id) a On true /* ? {0} */ \r\nLeft Join `Audit.Log` l On l.UserId=u.Id \r\nRight Join \"Payments.Log\" p On p.UserId=u.Id", sql);
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom [public].[users] u ONLY /* @TenantId */", sql);
+    }
+
+    /// <summary>
+    /// 测试 - PostgreSQL 原始 Join 应保留 LATERAL、JSON 操作符和位置参数。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_ShouldPreserveRawSql()
+    {
+        var sql = new PostgreSqlBuilder().Select("u.Id").AppendFrom("users u")
+            .AppendJoin("Lateral (Select payload->>'name' As Name Where Id=$1) a On true").ToSql();
+
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom users u \r\nJoin Lateral (Select payload->>'name' As Name Where Id=$1) a On true", sql);
+    }
+
+    /// <summary>
+    /// 测试 - PostgreSQL 原始左连接应保留反引号表名。
+    /// </summary>
+    [Fact]
+    public void AppendLeftJoin_ShouldPreserveRawSql()
+    {
+        var sql = new PostgreSqlBuilder().Select("u.Id").AppendFrom("users u")
+            .AppendLeftJoin("`Audit.Log` l On l.UserId=u.Id").ToSql();
+
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom users u \r\nLeft Join `Audit.Log` l On l.UserId=u.Id", sql);
+    }
+
+    /// <summary>
+    /// 测试 - PostgreSQL 原始右连接应保留双引号带点表名。
+    /// </summary>
+    [Fact]
+    public void AppendRightJoin_ShouldPreserveRawSql()
+    {
+        var sql = new PostgreSqlBuilder().Select("u.Id").AppendFrom("users u")
+            .AppendRightJoin("\"Payments.Log\" p On p.UserId=u.Id").ToSql();
+
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom users u \r\nRight Join \"Payments.Log\" p On p.UserId=u.Id", sql);
     }
 }

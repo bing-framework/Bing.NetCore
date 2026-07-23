@@ -83,26 +83,26 @@ public class MySqlRoutingAndMappingTest
     }
 
     /// <summary>
-    /// 测试目的：MySQL Builder 服务 Doris 时，普通字符串表名应保留 Doris 的分段语义。
+    /// 测试 - Doris 结构化 From 应保留带点名称的分段语义。
     /// </summary>
     [Fact]
-    public void ProviderStringTableNameCompatibilityTest()
+    public void Doris_StructuredFrom_ShouldKeepSegmentedName()
     {
         // Arrange
         var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
 
         // Act
-        var sql = builder.Select("Id").From("Merchants.Company").Join("Audit.Log").ToSql();
+        var sql = builder.Select("Id").From("Merchants.Company").ToSql();
 
         // Assert
-        Assert.Equal("Select `Id` \r\nFrom `Merchants`.`Company` \r\nJoin `Audit`.`Log`", sql);
+        Assert.Equal("Select `Id` \r\nFrom `Merchants`.`Company`", sql);
     }
 
     /// <summary>
-    /// 测试 - Doris 共享 MySQL Builder 时原始 Append 文本不得应用方言转换。
+    /// 测试 - Doris 原始 AppendFrom 文本不得应用方言转换。
     /// </summary>
     [Fact]
-    public void DorisBuilder_WhenAppendingRawSql_ShouldPreserveText()
+    public void Doris_AppendFrom_ShouldPreserveRawSql()
     {
         // Arrange
         var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
@@ -110,13 +110,29 @@ public class MySqlRoutingAndMappingTest
         // Act
         var sql = builder.Select("c.Id")
             .AppendFrom("[Merchants.Company] c /* @tenant */")
-            .AppendJoin("\"Audit.Log\" a On a.CompanyId=c.Id")
-            .AppendLeftJoin("`Order.Log` l On l.CompanyId=c.Id")
-            .AppendRightJoin("Payments p On p.CompanyId=c.Id")
             .ToSql();
 
         // Assert
-        Assert.Equal("Select `c`.`Id` \r\nFrom [Merchants.Company] c /* @tenant */ \r\nJoin \"Audit.Log\" a On a.CompanyId=c.Id \r\nLeft Join `Order.Log` l On l.CompanyId=c.Id \r\nRight Join Payments p On p.CompanyId=c.Id", sql);
+        Assert.Equal("Select `c`.`Id` \r\nFrom [Merchants.Company] c /* @tenant */", sql);
+    }
+
+    /// <summary>
+    /// 测试 - Doris 原始 AppendJoin 文本不得应用方言转换。
+    /// </summary>
+    [Fact]
+    public void Doris_AppendJoin_ShouldPreserveRawSql()
+    {
+        // Arrange
+        var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+
+        // Act
+        var sql = builder.Select("c.Id")
+            .AppendFrom("Orders c")
+            .AppendJoin("\"Audit.Log\" a On a.CompanyId=c.Id /* @tenant */")
+            .ToSql();
+
+        // Assert
+        Assert.Equal("Select `c`.`Id` \r\nFrom Orders c \r\nJoin \"Audit.Log\" a On a.CompanyId=c.Id /* @tenant */", sql);
     }
 
     /// <summary>

@@ -178,6 +178,11 @@ Create Table If Not Exists samples(
     Name Text Null,
     Amount Decimal Null,
     SecretText Text Null
+);
+Create Table If Not Exists Orders(
+    Id Integer Not Null,
+    TenantId Text Null,
+    Name Text Null
 );";
         await command.ExecuteNonQueryAsync();
     }
@@ -192,7 +197,7 @@ Create Table If Not Exists samples(
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
         await using var command = connection.CreateCommand();
-        command.CommandText = "Delete From samples";
+        command.CommandText = "Delete From Orders; Delete From samples;";
         await command.ExecuteNonQueryAsync();
     }
 

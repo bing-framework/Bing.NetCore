@@ -3,10 +3,12 @@
   <PropertyGroup>
     <RootNamespace>Bing.Caching.CSRedis.Tests</RootNamespace>
     <XunitStartupFullName>Bing.Caching.CSRedis.Tests.Startup</XunitStartupFullName>
+    <TestTfmsInParallel>false</TestTfmsInParallel>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
   </ItemGroup>
 
 </Project>

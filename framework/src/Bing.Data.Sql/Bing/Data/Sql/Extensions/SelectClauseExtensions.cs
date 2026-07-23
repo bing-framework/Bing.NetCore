@@ -63,11 +63,11 @@ public static class SelectClauseExtensions
     #region AppendSelect(添加到Select子句)
 
     /// <summary>
-    /// 添加到Select子句
+    /// 添加到 Select 子句。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
+    /// <param name="sql">SQL 文本；方括号标识符会按当前方言解析。</param>
     public static T AppendSelect<T>(this T source, string sql) where T : ISelect
     {
         if (source == null)
@@ -78,11 +78,11 @@ public static class SelectClauseExtensions
     }
 
     /// <summary>
-    /// 添加到Select子句
+    /// 按条件添加到 Select 子句。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
+    /// <param name="sql">SQL 文本；方括号标识符会按当前方言解析。</param>
     /// <param name="condition">该值为true时添加Sql，否则忽略</param>
     public static T AppendSelect<T>(this T source, string sql, bool condition) where T : ISelect => condition ? AppendSelect(source, sql) : source;
 

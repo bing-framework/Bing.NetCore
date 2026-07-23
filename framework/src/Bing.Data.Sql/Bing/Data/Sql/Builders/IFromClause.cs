@@ -50,9 +50,9 @@ public interface IFromClause
     void From(Action<ISqlBuilder> action, string alias);
 
     /// <summary>
-    /// 追加原始 From SQL。
-    /// 原始文本不会经过标识符解析、方言格式化或别名注册；调用方负责 SQL 安全性和分隔符。
-    /// 首次追加会替换当前结构化 From，后续原始文本按调用顺序直接拼接。
+    /// 设置或追加完整原始 From 表达式。
+    /// 首次追加时，如果存在结构化 From，将替换原 From；后续追加仅按调用顺序直接拼接，不会自动添加空格、逗号或其他分隔符。
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；调用方负责 SQL 安全性及显式提供占位符参数。
     /// </summary>
     /// <param name="sql">原始 From 文本；空白文本将被忽略。</param>
     void AppendSql(string sql);

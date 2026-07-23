@@ -25,11 +25,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加到GroupBy子句
+    /// 添加到 GroupBy 子句。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
+    /// <param name="sql">SQL 文本；方括号标识符会按当前方言解析。</param>
     public static T AppendGroupBy<T>(this T source, string sql) where T : IGroupBy
     {
         if (source == null)
@@ -40,11 +40,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加到GroupBy子句
+    /// 按条件添加到 GroupBy 子句。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：将会原样添加到Sql中，不会进行任何处理</param>
+    /// <param name="sql">SQL 文本；方括号标识符会按当前方言解析。</param>
     /// <param name="condition">该值为true时添加Sql，否则忽略</param>
     public static T AppendGroupBy<T>(this T source, string sql, bool condition) where T : IGroupBy => condition ? AppendGroupBy(source, sql) : source;
 }

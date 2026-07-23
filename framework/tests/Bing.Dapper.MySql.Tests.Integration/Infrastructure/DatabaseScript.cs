@@ -18,6 +18,7 @@ public class DatabaseScript
             throw new ArgumentNullException(nameof(connection));
         await ExecuteAsync(connection, "Drop Procedure If Exists Proc_GetProductCode_Output;");
         await ExecuteAsync(connection, "Drop Procedure If Exists Proc_AppendProductCode_InputOutput;");
+        await ExecuteAsync(connection, "Drop Table If Exists `Merchants.Merchant`;");
         await ExecuteAsync(connection, "Drop Table If Exists `Merchants.Company`;");
         await ExecuteAsync(connection, "Drop Table If Exists ParameterSample;");
         await ExecuteAsync(connection, "Drop Table If Exists Product;");
@@ -47,8 +48,14 @@ Create Table ParameterSample(
     DateTimeValue datetime Null
 );");
         await ExecuteAsync(connection, @"
+Create Table `Merchants.Merchant`(
+    MerchantId char(36) Not Null Primary Key,
+    Name varchar(100) Null
+);");
+        await ExecuteAsync(connection, @"
     Create Table `Merchants.Company`(
     CompanyId char(36) Not Null Primary Key,
+    MerchantId char(36) Null,
     Name varchar(200) Not Null
 );");
         await ExecuteAsync(connection, @"
@@ -73,6 +80,7 @@ End;");
         if (connection == null)
             throw new ArgumentNullException(nameof(connection));
         await ExecuteAsync(connection, "Delete From `Merchants.Company`;");
+        await ExecuteAsync(connection, "Delete From `Merchants.Merchant`;");
         await ExecuteAsync(connection, "Delete From ParameterSample;");
         await ExecuteAsync(connection, "Delete From Product;");
     }

@@ -9,10 +9,10 @@ namespace Bing.Dapper.Tests.Builders;
 public class AppendRawSqlTest
 {
     /// <summary>
-    /// 测试 - Oracle 原始 Append 文本应保留异方言引号、Hint、数据库链接和占位符。
+    /// 测试 - Oracle 原始 From 应保留双引号和 Hint。
     /// </summary>
     [Fact]
-    public void AppendRawSql_ShouldPreserveAllText()
+    public void AppendFrom_ShouldPreserveRawSql()
     {
         // Arrange
         var builder = new OracleBuilder();
@@ -20,12 +20,45 @@ public class AppendRawSqlTest
         // Act
         var sql = builder.Select("u.Id")
             .AppendFrom("[SCOTT].[USERS] u /*+ INDEX(u IX_USERS) */")
-            .AppendJoin("`AUDIT.LOG`@REPORTING a On a.UserId=u.Id /* @tenant */")
-            .AppendLeftJoin("Users l On l.Id=u.Id")
-            .AppendRightJoin("\"PAYMENTS.LOG\" p On p.UserId=u.Id")
             .ToSql();
 
         // Assert
-        Assert.Equal("Select \"u\".\"Id\" \r\nFrom [SCOTT].[USERS] u /*+ INDEX(u IX_USERS) */ \r\nJoin `AUDIT.LOG`@REPORTING a On a.UserId=u.Id /* @tenant */ \r\nLeft Join Users l On l.Id=u.Id \r\nRight Join \"PAYMENTS.LOG\" p On p.UserId=u.Id", sql);
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom [SCOTT].[USERS] u /*+ INDEX(u IX_USERS) */", sql);
+    }
+
+    /// <summary>
+    /// 测试 - Oracle 原始 Join 应保留数据库链接且不将 @REMOTE_DB 识别为参数。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_ShouldPreserveRawSql()
+    {
+        var sql = new OracleBuilder().Select("u.Id").AppendFrom("Users u")
+            .AppendJoin("`AUDIT.LOG`@REMOTE_DB a On a.UserId=u.Id And a.TenantId=:TenantId").ToSql();
+
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom Users u \r\nJoin `AUDIT.LOG`@REMOTE_DB a On a.UserId=u.Id And a.TenantId=:TenantId", sql);
+    }
+
+    /// <summary>
+    /// 测试 - Oracle 原始左连接应保留调用方提供的文本。
+    /// </summary>
+    [Fact]
+    public void AppendLeftJoin_ShouldPreserveRawSql()
+    {
+        var sql = new OracleBuilder().Select("u.Id").AppendFrom("Users u")
+            .AppendLeftJoin("Users l On l.Id=u.Id").ToSql();
+
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom Users u \r\nLeft Join Users l On l.Id=u.Id", sql);
+    }
+
+    /// <summary>
+    /// 测试 - Oracle 原始右连接应保留双引号带点表名。
+    /// </summary>
+    [Fact]
+    public void AppendRightJoin_ShouldPreserveRawSql()
+    {
+        var sql = new OracleBuilder().Select("u.Id").AppendFrom("Users u")
+            .AppendRightJoin("\"PAYMENTS.LOG\" p On p.UserId=u.Id").ToSql();
+
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom Users u \r\nRight Join \"PAYMENTS.LOG\" p On p.UserId=u.Id", sql);
     }
 }

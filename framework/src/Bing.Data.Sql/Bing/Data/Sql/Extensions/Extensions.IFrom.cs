@@ -25,9 +25,9 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 追加原始 From SQL。
-    /// 原始文本不会经过标识符解析、方言格式化或别名注册；调用方负责 SQL 安全性及多次追加时的分隔符。
-    /// 首次追加会替换当前结构化 From，后续原始文本按调用顺序直接拼接。
+    /// 设置或追加完整原始 From 表达式。
+    /// 首次追加时，如果存在结构化 From，将替换原 From；后续追加仅按调用顺序直接拼接，不会自动添加空格、逗号或其他分隔符。
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>

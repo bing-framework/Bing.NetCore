@@ -139,6 +139,33 @@ ISqlQuery RightJoin<TEntity>(string alias = null, string schema = null);
 
 显式字符串 `From("...")`、`Join("...")` 是受控对象名入口，不接受原始 SQL。它们支持一个可选别名，并拒绝分号、控制字符、空名称段和超出 Provider 上限的限定段。原始 SQL 仅可通过 `AppendFrom`、`AppendJoin`、`AppendLeftJoin` 或 `AppendRightJoin` 追加；外部输入不得用于任何对象名字符串。
 
+### 原始 Append 约束
+
+`AppendFrom`、`AppendJoin`、`AppendLeftJoin` 和 `AppendRightJoin` 接受调用方控制的完整原始 SQL。它们不格式化标识符、不解析 Schema、不注册别名，也不会从占位符中自动创建参数；参数必须通过 `AddParam` 显式提供。
+
+第一次 `AppendFrom` 会替换已有的结构化 `From`。连续调用只拼接传入文本，不会补充空格、逗号或 Join 关键字：
+
+```csharp
+// 正确：调用方提供逗号和空格。
+query.AppendFrom("Orders o").AppendFrom(", Customers c");
+
+// 错误：结果为 From Orders oCustomers c。
+query.AppendFrom("Orders o").AppendFrom("Customers c");
+```
+
+原始 Join 可完整提供 `On`，也可先添加表表达式再对最后一个 Join 调用 `AppendOn`：
+
+```csharp
+query.AppendFrom("Orders o")
+    .AppendLeftJoin("Items i")
+    .AppendOn("i.OrderId=o.Id")
+    .AddParam("TenantId", tenantId);
+```
+
+没有 Join 时调用 `AppendOn` 是无操作，条件不会保存到后续 Join。原始 Join 已包含 `On` 时，后续 `AppendOn` 会以 `And` 追加到同一 Join。
+
+`AppendSelect`、`AppendWhere`、`AppendGroupBy`、`AppendOrderBy` 与 `AppendOn` 不属于完全字节原样的 API：其中的方括号标识符会按当前方言转换。它们的参数同样必须显式 `AddParam`。
+
 各 Provider 的限定名规则如下：
 
 | Provider | 支持的限定部分 |

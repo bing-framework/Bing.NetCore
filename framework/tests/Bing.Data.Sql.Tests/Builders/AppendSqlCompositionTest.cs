@@ -8,10 +8,10 @@ namespace Bing.Data.Sql.Tests.Builders;
 public class AppendSqlCompositionTest
 {
     /// <summary>
-    /// 测试目的：结构化 From 与原始 Append Join 可以组合，且 Append 内容保持原样。
+    /// 测试 - 结构化 From 与原始 Append Join 可以组合且保持调用方文本。
     /// </summary>
     [Fact]
-    public void StructuredAndAppendSqlCompositionTest()
+    public void AppendJoin_WhenStructuredFromExists_ShouldComposeSql()
     {
         var builder = new TestSqlBuilder();
 
@@ -25,10 +25,10 @@ public class AppendSqlCompositionTest
     }
 
     /// <summary>
-    /// 测试目的：Append SQL 中的文本别名不得写入结构化别名注册表。
+    /// 测试 - Append SQL 中的文本别名不得写入结构化别名注册表。
     /// </summary>
     [Fact]
-    public void AliasRegistrationBoundaryTest()
+    public void AppendSql_WhenTextContainsAlias_ShouldNotRegisterAlias()
     {
         var builder = new TestSqlBuilder();
 

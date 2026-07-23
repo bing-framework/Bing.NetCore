@@ -198,6 +198,74 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试 - SQLite 应执行 AppendFrom 原始子查询并绑定显式参数。
+    /// </summary>
+    [Fact]
+    public async Task AppendFrom_WithRawParameter_ShouldExecuteSuccessfully()
+    {
+        // Arrange
+        using (var executor = _fixture.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id, TenantId, Name) Values (@id, @tenantId, @name)",
+                new { id = 1, tenantId = "tenant-1", name = "first" });
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id, TenantId, Name) Values (@id, @tenantId, @name)",
+                new { id = 2, tenantId = "tenant-2", name = "second" });
+        }
+        using var query = _fixture.CreateQuery();
+        query.Select("o.Id,o.Name")
+            .AppendFrom("(Select * From Orders Where TenantId=@TenantId) o")
+            .AddParam("TenantId", "tenant-1");
+
+        // Act
+        var firstSql = query.GetBuilder().ToSql();
+        var secondSql = query.GetBuilder().ToSql();
+
+        // Assert
+        Assert.Equal("Select `o`.`Id`,`o`.`Name` \r\nFrom (Select * From Orders Where TenantId=@TenantId) o", firstSql);
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(new[] { "@TenantId" }, query.GetParams().Keys);
+        Assert.Equal("tenant-1", query.GetParam("TenantId"));
+
+        // Act
+        var result = query.ExecuteQuery<OrderSample>();
+
+        // Assert
+        var order = Assert.Single(result);
+        Assert.Equal(1, order.Id);
+        Assert.Equal("first", order.Name);
+    }
+
+    /// <summary>
+    /// 测试 - SQLite 原始子查询参数应与结构化 Where 参数共同真实执行。
+    /// </summary>
+    [Fact]
+    public async Task AppendFrom_WithRawAndStructuredParameters_ShouldExecuteSuccessfully()
+    {
+        // Arrange
+        using (var executor = _fixture.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id, TenantId, Name) Values (@id, @tenantId, @name)",
+                new { id = 1, tenantId = "tenant-1", name = "first" });
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id, TenantId, Name) Values (@id, @tenantId, @name)",
+                new { id = 2, tenantId = "tenant-1", name = "second" });
+        }
+        using var query = _fixture.CreateQuery();
+        query.Select("o.Id,o.Name")
+            .AppendFrom("(Select * From Orders Where TenantId=@TenantId) o")
+            .AddParam("TenantId", "tenant-1")
+            .Where("o.Name", "second");
+
+        // Act
+        var sql = query.GetBuilder().ToSql();
+        var result = query.ExecuteSingle<OrderSample>();
+
+        // Assert
+        Assert.Equal("Select `o`.`Id`,`o`.`Name` \r\nFrom (Select * From Orders Where TenantId=@TenantId) o \r\nWhere `o`.`Name`=@_p_0", sql);
+        Assert.Equal(2, result.Id);
+        Assert.Equal("second", result.Name);
+    }
+
+    /// <summary>
     /// 测试 - SQLite 类型化 From 应经由实体映射和结构化表引用执行查询。
     /// </summary>
     [Fact]
@@ -853,5 +921,21 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             _listenerSubscription?.Dispose();
             _allSubscription.Dispose();
         }
+    }
+
+    /// <summary>
+    /// SQLite 原始子查询结果实体。
+    /// </summary>
+    private sealed class OrderSample
+    {
+        /// <summary>
+        /// 订单标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 订单名称。
+        /// </summary>
+        public string Name { get; set; }
     }
 }

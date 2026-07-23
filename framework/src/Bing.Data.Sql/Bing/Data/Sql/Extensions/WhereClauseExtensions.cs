@@ -697,11 +697,11 @@ public static class WhereClauseExtensions
     #region AppendWhere
 
     /// <summary>
-    /// 添加到Where子句
+    /// 添加到 Where 子句。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：原样添加到Sql中，不会进行任何处理</param>
+    /// <param name="sql">SQL 条件文本；方括号标识符会按当前方言解析，参数须由调用方显式提供。</param>
     public static T AppendWhere<T>(this T source, string sql)
         where T : IWhere
     {
@@ -713,11 +713,11 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 添加到Where子句
+    /// 按条件添加到 Where 子句。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
-    /// <param name="sql">Sql语句。说明：原样添加到Sql中，不会进行任何处理</param>
+    /// <param name="sql">SQL 条件文本；方括号标识符会按当前方言解析，参数须由调用方显式提供。</param>
     /// <param name="condition">该值为true时添加Sql，否则忽略</param>
     public static T AppendWhere<T>(this T source, string sql, bool condition) where T : IWhere => condition ? AppendWhere(source, sql) : source;
 

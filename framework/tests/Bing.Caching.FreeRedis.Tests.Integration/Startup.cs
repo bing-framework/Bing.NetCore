@@ -6,6 +6,7 @@ using Xunit.DependencyInjection.Logging;
 using Xunit.DependencyInjection;
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
+using Bing.Test.Shared;
 
 namespace Bing.Caching.FreeRedis.Tests;
 
@@ -29,10 +30,15 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
+        if (IntegrationTestGate.IsProviderEnabled() == false)
+            return;
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__RedisConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Redis 集成测试要求设置 ConnectionStrings__RedisConnection。");
         // 注入到IServiceCollection中
         services.AddSingleton(x =>
         {
-            var redisClient = new RedisClient("127.0.0.1:6379,database=0,idleTimeout=10000");
+            var redisClient = new RedisClient(connectionString);
             // 配置默认使用Newtonsoft.Json作为序列化工具
             redisClient.Serialize = JsonConvert.SerializeObject;
             redisClient.Deserialize = JsonConvert.DeserializeObject;

@@ -183,9 +183,24 @@ public class JoinItem : IJoinOn
     }
 
     /// <summary>
-    /// 获取On语句
+    /// 获取 On 语句。
     /// </summary>
-    private string GetOn() => Condition == null ? null : $" On {Condition.GetCondition()}";
+    private string GetOn()
+    {
+        if (Condition == null)
+            return null;
+        return HasRawOnCondition() ? $" And {Condition.GetCondition()}" : $" On {Condition.GetCondition()}";
+    }
+
+    /// <summary>
+    /// 是否已在原始 Join 文本中提供 On 条件。
+    /// </summary>
+    private bool HasRawOnCondition()
+    {
+        if (Table?.Raw != true || string.IsNullOrWhiteSpace(Table.Name))
+            return false;
+        return Table.Name.IndexOf(" On ", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
 
     #endregion
 }

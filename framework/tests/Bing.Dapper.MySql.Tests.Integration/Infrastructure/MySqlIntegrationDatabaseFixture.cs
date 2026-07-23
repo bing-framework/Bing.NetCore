@@ -119,6 +119,16 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Product>().Property(entity => entity.Id).HasColumnName("ProductId");
+            modelBuilder.Entity<MySqlDottedCompany>(entity =>
+            {
+                entity.ToTable("Merchants.Company");
+                entity.HasKey(item => item.CompanyId);
+            });
+            modelBuilder.Entity<MySqlDottedMerchant>(entity =>
+            {
+                entity.ToTable("Merchants.Merchant");
+                entity.HasKey(item => item.MerchantId);
+            });
         }
     }
 

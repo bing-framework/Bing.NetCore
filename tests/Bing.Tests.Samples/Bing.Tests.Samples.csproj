@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\common.tests.props" />
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <AssemblyName>Bing.Tests.Samples</AssemblyName>
     <RootNamespace/>
   </PropertyGroup>

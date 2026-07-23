@@ -5,6 +5,7 @@ using Xunit.DependencyInjection;
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using CSRedis;
+using Bing.Test.Shared;
 
 namespace Bing.Caching.CSRedis.Tests;
 
@@ -28,7 +29,12 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        RedisHelper.Initialization(new CSRedisClient("127.0.0.1:6379,database=0,idleTimeout=10000"));
+        if (IntegrationTestGate.IsProviderEnabled() == false)
+            return;
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__RedisConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Redis 集成测试要求设置 ConnectionStrings__RedisConnection。");
+        RedisHelper.Initialization(new CSRedisClient(connectionString));
         services.AddScoped<ICache, CSRedisCacheManager>();
         // 日志
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());

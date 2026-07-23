@@ -9,23 +9,56 @@ namespace Bing.Dapper.Tests.Builders;
 public class AppendRawSqlTest
 {
     /// <summary>
-    /// 测试 - MySQL 原始 Append 文本应保留异方言引号、Hint、注释和占位符。
+    /// 测试 - MySQL 原始 From 应保留方括号、Hint 和参数占位符。
     /// </summary>
     [Fact]
-    public void AppendRawSql_ShouldPreserveAllText()
+    public void AppendFrom_ShouldPreserveRawSql()
     {
         // Arrange
         var builder = new MySqlBuilder();
 
         // Act
         var sql = builder.Select("o.Id")
-            .AppendFrom("[archive].[Order.Log2025] o FORCE INDEX (IX_Order) /* @tenant */")
-            .AppendJoin("\"Audit.Log\" a On a.OrderId=o.Id /* ? {0} */")
-            .AppendLeftJoin("Orders l On l.Id=o.Id")
-            .AppendRightJoin("`Payments.Log` p On p.OrderId=o.Id")
+            .AppendFrom("[archive].[Order.Log2025] o FORCE INDEX (IX_Order) /* @TenantId ? */")
             .ToSql();
 
         // Assert
-        Assert.Equal("Select `o`.`Id` \r\nFrom [archive].[Order.Log2025] o FORCE INDEX (IX_Order) /* @tenant */ \r\nJoin \"Audit.Log\" a On a.OrderId=o.Id /* ? {0} */ \r\nLeft Join Orders l On l.Id=o.Id \r\nRight Join `Payments.Log` p On p.OrderId=o.Id", sql);
+        Assert.Equal("Select `o`.`Id` \r\nFrom [archive].[Order.Log2025] o FORCE INDEX (IX_Order) /* @TenantId ? */", sql);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL 原始 Join 应保留双引号和参数占位符。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_ShouldPreserveRawSql()
+    {
+        var sql = new MySqlBuilder().Select("o.Id").AppendFrom("Orders o")
+            .AppendJoin("\"Audit.Log\" a On a.OrderId=o.Id /* ? */").ToSql();
+
+        Assert.Equal("Select `o`.`Id` \r\nFrom Orders o \r\nJoin \"Audit.Log\" a On a.OrderId=o.Id /* ? */", sql);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL 原始左连接应保留调用方提供的文本。
+    /// </summary>
+    [Fact]
+    public void AppendLeftJoin_ShouldPreserveRawSql()
+    {
+        var sql = new MySqlBuilder().Select("o.Id").AppendFrom("Orders o")
+            .AppendLeftJoin("Orders l On l.Id=o.Id").ToSql();
+
+        Assert.Equal("Select `o`.`Id` \r\nFrom Orders o \r\nLeft Join Orders l On l.Id=o.Id", sql);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL 原始右连接应保留反引号带点物理表名。
+    /// </summary>
+    [Fact]
+    public void AppendRightJoin_ShouldPreserveRawSql()
+    {
+        var sql = new MySqlBuilder().Select("o.Id").AppendFrom("Orders o")
+            .AppendRightJoin("`Payments.Log` p On p.OrderId=o.Id").ToSql();
+
+        Assert.Equal("Select `o`.`Id` \r\nFrom Orders o \r\nRight Join `Payments.Log` p On p.OrderId=o.Id", sql);
     }
 }
