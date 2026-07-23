@@ -1398,6 +1398,233 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：Trace 启用时，异步列表查询应复用执行 SQL 生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteQueryAsync_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-trace" })
+        };
+        using var query = CreateCountingQuery(connection, true);
+        query.Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
+
+        // Act
+        var result = await query.ExecuteQueryAsync<MappedSample>();
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
+        Assert.Equal("Select [Id],[Name] \r\nFrom [Users] \r\nWhere [Name]='async-trace'", query.TraceDebugSql);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时，同步和异步 Count 均应复用各自的执行 SQL 生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public async Task GetCount_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql()
+    {
+        // Arrange
+        var syncConnection = new CaptureDbConnection();
+        using var syncQuery = CreateCountingQuery(syncConnection, true);
+        syncQuery.From("[Users]").Where("[Enabled]", true);
+
+        // Act
+        var syncResult = syncQuery.InvokeCount();
+
+        // Assert
+        Assert.Equal(1, syncResult);
+        Assert.Equal(1, syncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(1, syncQuery.Counters.ToDebugSqlCallCount);
+        Assert.Equal(syncQuery.TraceSql, syncQuery.Counters.LastDebugSqlInput);
+
+        // Arrange
+        var asyncConnection = new CaptureDbConnection();
+        using var asyncQuery = CreateCountingQuery(asyncConnection, true);
+        asyncQuery.From("[Users]").Where("[Enabled]", true);
+
+        // Act
+        var asyncResult = await asyncQuery.InvokeCountAsync();
+
+        // Assert
+        Assert.Equal(1, asyncResult);
+        Assert.Equal(1, asyncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(1, asyncQuery.Counters.ToDebugSqlCallCount);
+        Assert.Equal(asyncQuery.TraceSql, asyncQuery.Counters.LastDebugSqlInput);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时，同步和异步流式查询应复用执行 SQL 生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public async Task StreamQuery_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql()
+    {
+        // Arrange
+        var syncConnection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-stream" })
+        };
+        using var syncQuery = CreateCountingQuery(syncConnection, true);
+        syncQuery.Select("Id,Name").From("[Users]");
+
+        // Act
+        var syncResult = syncQuery.StreamQuery<MappedSample>().ToList();
+
+        // Assert
+        Assert.Single(syncResult);
+        Assert.Equal(1, syncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(1, syncQuery.Counters.ToDebugSqlCallCount);
+        Assert.Equal(syncQuery.TraceSql, syncQuery.Counters.LastDebugSqlInput);
+
+        // Arrange
+        var asyncConnection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" })
+        };
+        using var asyncQuery = CreateCountingQuery(asyncConnection, true);
+        asyncQuery.Select("Id,Name").From("[Users]");
+
+        // Act
+        var asyncResult = new List<MappedSample>();
+        await foreach (var item in asyncQuery.StreamQueryAsync<MappedSample>())
+            asyncResult.Add(item);
+
+        // Assert
+        Assert.Single(asyncResult);
+        Assert.Equal(1, asyncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(1, asyncQuery.Counters.ToDebugSqlCallCount);
+        Assert.Equal(asyncQuery.TraceSql, asyncQuery.Counters.LastDebugSqlInput);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时，同步和异步分页应分别复用 Count 与列表查询的执行 SQL。
+    /// </summary>
+    [Fact]
+    public async Task PagerQuery_WhenTraceIsEnabled_ShouldReuseExecutedSqlForCountAndData()
+    {
+        // Arrange
+        var syncConnection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-page" })
+        };
+        using var syncQuery = CreateCountingQuery(syncConnection, true);
+        syncQuery.Select("Id,Name").From("[Users]");
+
+        // Act
+        var syncResult = syncQuery.PagerQuery(() => syncQuery.ExecuteQuery<MappedSample>(), new Pager(1, 20, "Id"));
+
+        // Assert
+        Assert.Single(syncResult.Data);
+        Assert.Equal(2, syncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(2, syncQuery.Counters.ToDebugSqlCallCount);
+        Assert.Equal(syncQuery.TraceSql, syncQuery.Counters.LastDebugSqlInput);
+
+        // Arrange
+        var asyncConnection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-page" })
+        };
+        using var asyncQuery = CreateCountingQuery(asyncConnection, true);
+        asyncQuery.Select("Id,Name").From("[Users]");
+
+        // Act
+        var asyncResult = await asyncQuery.PagerQueryAsync(() => asyncQuery.ExecuteQueryAsync<MappedSample>(),
+            new Pager(1, 20, "Id"));
+
+        // Assert
+        Assert.Single(asyncResult.Data);
+        Assert.Equal(2, asyncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(2, asyncQuery.Counters.ToDebugSqlCallCount);
+        Assert.Equal(asyncQuery.TraceSql, asyncQuery.Counters.LastDebugSqlInput);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时，同步标量执行失败仍应保留单次渲染并发布错误诊断。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenExecutionFails_ShouldRenderSqlOnceAndPublishError()
+    {
+        // Arrange
+        DiagnosticsMessage errorMessage = null;
+        using var observer = new SqlDiagnosticObserver(item => errorMessage = item,
+            name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
+        using var query = CreateCountingQuery(connection, true);
+        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.ExecuteScalar<int>());
+
+        // Assert
+        Assert.Equal("execute failed", exception.Message);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
+        Assert.Same(exception, errorMessage.Exception);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时，异步标量执行失败仍应保留单次渲染并发布错误诊断。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteScalarAsync_WhenExecutionFails_ShouldRenderSqlOnceAndPublishError()
+    {
+        // Arrange
+        DiagnosticsMessage errorMessage = null;
+        using var observer = new SqlDiagnosticObserver(item => errorMessage = item,
+            name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
+        using var query = CreateCountingQuery(connection, true);
+        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => query.ExecuteScalarAsync<int>());
+
+        // Assert
+        Assert.Equal("execute failed", exception.Message);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
+        Assert.Same(exception, errorMessage.Exception);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时，异步流式命令执行失败仍应保留单次渲染并发布错误诊断。
+    /// </summary>
+    [Fact]
+    public async Task StreamQueryAsync_WhenExecutionFails_ShouldRenderSqlOnceAndPublishError()
+    {
+        // Arrange
+        DiagnosticsMessage errorMessage = null;
+        using var observer = new SqlDiagnosticObserver(item => errorMessage = item,
+            name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var connection = new CaptureDbConnection { ThrowOnExecute = true };
+        using var query = CreateCountingQuery(connection, true);
+        query.Select("Id,Name").From("[Users]");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var _ in query.StreamQueryAsync<MappedSample>())
+            {
+            }
+        });
+
+        // Assert
+        Assert.Equal("execute failed", exception.Message);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
+        Assert.Same(exception, errorMessage.Exception);
+        Assert.Equal(0, connection.ReaderCreateCount);
+        Assert.Equal(0, connection.ReaderDisposeCount);
+    }
+
+    /// <summary>
     /// 测试 - 存储过程标量执行应使用 StoredProcedure 命令类型并保留增强参数元数据。
     /// </summary>
     [Fact]
@@ -2319,6 +2546,11 @@ public class SqlServerRoutingAndExecutionTest
         public bool ThrowOnExecute { get; set; }
 
         /// <summary>
+        /// 是否在标量执行时抛出异常。
+        /// </summary>
+        public bool ThrowOnScalarExecute { get; set; }
+
+        /// <summary>
         /// 是否在原生异步开始事务时抛出异常。
         /// </summary>
         public bool ThrowOnAsyncBegin { get; set; }
@@ -2451,6 +2683,8 @@ public class SqlServerRoutingAndExecutionTest
 
         public override object ExecuteScalar()
         {
+            if (_connection.ThrowOnScalarExecute)
+                throw new InvalidOperationException("execute failed");
             _connection.SetCommand(CommandText, CommandType, _parameters.Items);
             return _connection.ScalarResult;
         }
@@ -2477,6 +2711,8 @@ public class SqlServerRoutingAndExecutionTest
 
         public override Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
+            if (_connection.ThrowOnScalarExecute)
+                throw new InvalidOperationException("execute failed");
             _connection.SetCommand(CommandText, CommandType, _parameters.Items);
             return Task.FromResult(_connection.ScalarResult);
         }

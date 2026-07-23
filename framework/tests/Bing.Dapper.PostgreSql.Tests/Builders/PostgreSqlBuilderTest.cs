@@ -7,7 +7,7 @@ namespace Bing.Dapper.Tests.Builders;
 /// <summary>
 /// PgSql Sql生成器测试
 /// </summary>
-public class PostgreSqlBuilderTest
+public partial class PostgreSqlBuilderTest
 {
     /// <summary>
     /// PgSql Sql生成器

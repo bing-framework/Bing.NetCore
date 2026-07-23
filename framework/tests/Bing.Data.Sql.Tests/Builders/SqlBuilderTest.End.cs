@@ -106,6 +106,28 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：调试渲染应区分前缀参数，并且不得替换嵌入标识符中的参数文本。
+    /// </summary>
+    [Fact]
+    public void ToDebugSql_WhenParametersHavePrefixes_ShouldReplaceOnlyStandaloneParameters()
+    {
+        // Arrange
+        var builder = _builder.AppendSelect("*").AppendFrom("[Test]")
+            .AppendWhere("[Code]=x@p And [P]=@p And [P1]=@p1 And [P10]=@p10 And [Tenant]=@Tenant And [TenantId]=@TenantId")
+            .AddParam("p", 1)
+            .AddParam("p1", 11)
+            .AddParam("p10", 110)
+            .AddParam("Tenant", "tenant")
+            .AddParam("TenantId", "tenant-id");
+
+        // Act
+        var result = builder.ToDebugSql(builder.ToSql());
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Test] \r\nWhere [Code]=x@p And [P]=1 And [P1]=11 And [P10]=110 And [Tenant]='tenant' And [TenantId]='tenant-id'", result);
+    }
+
+    /// <summary>
     /// 测试目的：传入空 SQL 时应明确拒绝，避免调试渲染出现不可诊断的空引用异常。
     /// </summary>
     [Fact]

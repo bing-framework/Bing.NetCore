@@ -601,6 +601,50 @@ public class SqlDebugRenderingBenchmarks
 }
 
 /// <summary>
+/// MySQL 大参数调试 SQL 渲染性能基线。
+/// </summary>
+[MemoryDiagnoser]
+[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class SqlDebugRenderingLargeParameterBenchmarks
+{
+    private MySqlBuilder _builder;
+    private string _sql;
+
+    /// <summary>
+    /// 调试 SQL 中的参数数量。
+    /// </summary>
+    [Params(10, 50, 100)]
+    public int ParameterCount { get; set; }
+
+    /// <summary>
+    /// 初始化含参数前缀关系的稳定 MySQL Builder 状态。
+    /// </summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        _builder = new MySqlBuilder();
+        _builder.Select("c.CompanyId,c.Name").From("Merchants.Company", "c");
+        for (var index = 0; index < ParameterCount; index++)
+            _builder.Where($"c.Parameter{index}", index);
+        _sql = _builder.ToSql();
+    }
+
+    /// <summary>
+    /// 测量无参调试 SQL 渲染，其中会再次生成执行 SQL。
+    /// </summary>
+    /// <returns>调试 SQL。</returns>
+    [Benchmark(Baseline = true)]
+    public string RenderDebugSqlWithSecondRender() => _builder.ToDebugSql();
+
+    /// <summary>
+    /// 测量复用已生成 SQL 的大参数调试 SQL 渲染。
+    /// </summary>
+    /// <returns>调试 SQL。</returns>
+    [Benchmark]
+    public string RenderDebugSqlWithExistingSql() => _builder.ToDebugSql(_sql);
+}
+
+/// <summary>
 /// SQL 查询执行准备性能基线。
 /// </summary>
 [MemoryDiagnoser]

@@ -17,6 +17,9 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql查询对象基类
 /// </summary>
+/// <remarks>
+/// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
+/// </remarks>
 public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor,
     ICteAccessor, ISqlExecutionResourceAccessor, ISqlExecutionResourceBinder, ISqlQueryMetadataBinder
 {

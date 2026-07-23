@@ -664,7 +664,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         foreach (var parameter in parameters)
         {
             var literal = ParamLiteralsResolver.GetParamLiterals(parameter.Value);
-            sql = Regex.Replace(sql, $@"{Regex.Escape(parameter.Key)}\b", _ => literal);
+            sql = Regex.Replace(sql, $@"(?<![\w]){Regex.Escape(parameter.Key)}(?![\w])", _ => literal);
         }
         return sql;
     }

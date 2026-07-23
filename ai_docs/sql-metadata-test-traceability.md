@@ -22,6 +22,8 @@
 | `MySqlIntegrationDatabaseFixture.DisposeAsync` | Disposes the unique root service provider and clears MySQL connection pools after gated integration execution. | Gated MySQL integration suite; execution requires `RUN_MYSQL_INTEGRATION_TESTS=true`, `ConnectionStrings__MySqlConnection`, and `ALLOW_DATABASE_RESET_FOR_TESTS=true`. |
 | `DatabaseScript.InitializeAsync` / `DatabaseScript.ResetAsync` / `MySqlFromClause.ParseTableName` | Creates and clears the `` `Merchants.Company` `` and `` `Merchants.Merchant` `` physical tables; structured, typed and raw Join paths execute against atomic dotted identifiers. | `MySqlQueryTest.ExecuteScalar_WhenStructuredFromUsesDottedPhysicalTable_ShouldReturnRowCount`; `MySqlQueryTest.ExecuteScalar_WhenAppendFromUsesDottedPhysicalTable_ShouldReturnRowCount`; `MySqlQueryTest.LeftJoin_WithDottedPhysicalTables_ShouldExecuteSuccessfully`; `MySqlQueryTest.LeftJoin_WithTypedDottedPhysicalTables_ShouldExecuteSuccessfully`; `MySqlQueryTest.AppendLeftJoin_WithDottedPhysicalTables_ShouldExecuteSuccessfully`; `MySqlQueryTest.LeftJoin_WhenDottedMerchantDoesNotMatch_ShouldReturnCompanyWithNullMerchant` (gated MySQL integration) |
 | `SqlBuilderBase.RenderSubquery` | Merges external subquery parameters and renames collisions without overwriting outer parameters. | `SqlBuilderTest.Join_WhenExternalSubqueryParameterConflicts_ShouldRenameSubqueryParameter` |
+| `SelectClause` / `FromClause` / `JoinClause` / `SqlBuilderBase.RenderSubquery` | PostgreSQL structured select, aggregate, qualified source, raw join condition and subquery parameter propagation retain PostgreSQL identifier formatting and parameter order. | `PostgreSqlBuilderTest.Select_WhenColumnsHaveTableAlias_ShouldRenderQuotedColumns`; `Select_WhenDistinctAndAggregateAreConfigured_ShouldRenderExpectedSql`; `Select_WhenSubqueryColumnIsConfigured_ShouldMergeParameters`; `From_WhenSchemaAndAliasAreConfigured_ShouldRenderQualifiedTable`; `From_WhenSubqueryIsConfigured_ShouldRenderSubqueryAndParameters`; `Join_WhenRawOnConditionIsConfigured_ShouldRenderExpectedSql` |
+| `WhereClause` / `GroupByClause` / `OrderByClause` / `SqlBuilderBase.Skip` / `SqlBuilderBase.Take` / `Extensions.UnionAll` | PostgreSQL and MySQL retain dialect-specific identifiers while rendering composed conditions, grouping, parameterized limit/offset pagination, and collision-safe union parameters. | `PostgreSqlBuilderTest.Where_WhenMultipleConditionTypesAreConfigured_ShouldRenderExpectedSql`; `GroupBy_WhenHavingAndOrderByAreConfigured_ShouldRenderExpectedSql`; `Page_WhenSkipAndTakeAreConfigured_ShouldRenderLimitOffset`; `UnionAll_WhenBothQueriesHaveParameters_ShouldRenderAllParameters`; `MySqlBuilderTest.Where_WhenMultipleConditionTypesAreConfigured_ShouldRenderExpectedSql`; `GroupBy_WhenHavingAndOrderByAreConfigured_ShouldRenderExpectedSql`; `Page_WhenSkipAndTakeAreConfigured_ShouldRenderLimitOffset`; `UnionAll_WhenBothQueriesHaveParameters_ShouldRenderAllParameters` |
 | `Bing.Datas.EntityFramework.Core.UnitOfWorkBase.GetTableName` / `GetSchema` / `GetColumnName` | Preserves EF Core's physical dotted table name and column metadata when supplied to `MySqlBuilder`. | `EfCoreSqlQueryFactoryTest.MetadataProvider_WhenEfTableNameContainsDot_ShouldKeepAtomicNameForMySqlBuilder` |
 | `Bing.Uow.UnitOfWorkBase.GetTable` / `GetSchema` / `GetTableName` / `GetColumnName` | Treats FreeSQL `DbName` as an atomic table name, does not infer schema from dots, and supplies the same metadata to `MySqlBuilder`. | `FreeSqlEntityModelMetadataProviderTest.MetadataProvider_WhenTableNameContainsDot_ShouldKeepAtomicNameForMySqlBuilder` |
 
@@ -64,12 +66,15 @@
 
 本轮未修改生产热路径：基线没有显示超过验收门槛的异常增长或明显平方级分配；“优化后”结果不适用。所有基准场景由 `MySqlTableNameParserBenchmarks`、`MySqlBuilderBenchmarks`、`MySqlRepeatedRenderBenchmarks` 和 `MySqlAppendBenchmarks` 提供，源文件为 `framework/tests/Bing.Data.Sql.Benchmarks/SqlMetadataBenchmarks.cs`。
 
+本次仅新增 PostgreSQL 与 MySQL 生成器单元测试，未修改映射缓存、格式化热路径或 Builder 克隆逻辑，因此现有基准场景和报告无需更新。
+
 ## SQL Builder 执行准备与跨库闭环追溯
 
 | 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
 | --- | --- | --- | --- | --- |
-| `ISqlBuilder.ToDebugSql(string)` / `SqlBuilderBase.ToDebugSql(string)` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `ToDebugSql_WhenSqlIsProvided_ShouldReuseSqlAndPreserveOutput`; `ToDebugSql_WhenParameterNameOrValueContainsRegexCharacters_ShouldPreserveLiteralValue`; `ToDebugSql_WhenSqlIsNull_ShouldThrowArgumentNullException` | Unit |
-| `SqlQueryBase.WriteTraceLog(ISqlBuilder, string)` / `InternalQuery` / `InternalQueryAsync` / `StreamQueryIterator` / `StreamQueryAsync` / `GetCount` / `GetCountAsync` | `Bing.Dapper.SqlServer.Tests` | `SqlServerRoutingAndExecutionTest` | `ExecuteScalar_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `ExecuteScalarAsync_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `StreamQuery_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `StreamQueryAsync_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `GetCount_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `ExecuteScalar_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql`; `ExecuteScalar_WhenDebugLogIsDisabled_ShouldNotRenderDebugSql` | Unit with capture connection |
+| `ISqlBuilder.ToDebugSql(string)` / `SqlBuilderBase.ToDebugSql(string)` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `ToDebugSql_WhenSqlIsProvided_ShouldReuseSqlAndPreserveOutput`; `ToDebugSql_WhenParameterNameOrValueContainsRegexCharacters_ShouldPreserveLiteralValue`; `ToDebugSql_WhenParametersHavePrefixes_ShouldReplaceOnlyStandaloneParameters`; `ToDebugSql_WhenSqlIsNull_ShouldThrowArgumentNullException` | Unit; verifies `@p/@p1/@p10` and `@Tenant/@TenantId` prefix isolation and prevents replacement inside `x@p`. |
+| `ISqlQuery` / `SqlQueryBase` | N/A | N/A | XML `<remarks>` declares that mutable Builder, connection and transaction state makes an instance unsuitable for concurrent sharing. | Documentation-only public contract; no runtime behavior changed, so no executable test applies. |
+| `SqlQueryBase.WriteTraceLog(ISqlBuilder, string)` / `InternalQuery` / `InternalQueryAsync` / `StreamQueryIterator` / `StreamQueryAsync` / `GetCount` / `GetCountAsync` / `PagerQuery` / `PagerQueryAsync` | `Bing.Dapper.SqlServer.Tests` | `SqlServerRoutingAndExecutionTest` | `ExecuteScalar_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `ExecuteScalarAsync_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `StreamQuery_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `StreamQueryAsync_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `GetCount_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql`; `ExecuteScalar_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql`; `ExecuteQueryAsync_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql`; `GetCount_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql`; `StreamQuery_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql`; `PagerQuery_WhenTraceIsEnabled_ShouldReuseExecutedSqlForCountAndData`; `ExecuteScalar_WhenDebugLogIsDisabled_ShouldNotRenderDebugSql`; `ExecuteScalar_WhenExecutionFails_ShouldRenderSqlOnceAndPublishError`; `ExecuteScalarAsync_WhenExecutionFails_ShouldRenderSqlOnceAndPublishError`; `StreamQueryAsync_WhenExecutionFails_ShouldRenderSqlOnceAndPublishError` | Unit with capture connection; verifies the expected `ToSql` count per execution (two independent executions for paging), zero or one `ToDebugSql(string)` per execution, matching executed/debug SQL, Error diagnostics and command-failure resource behavior. |
 | `MySqlFromClause.ParseTableName` / `MySqlJoinClause.ParseTableName` through public string APIs | `Bing.Dapper.MySql.Tests.Integration` | `MySqlCrossDatabaseQueryTest` | `From_WhenUsingQualifiedDottedPhysicalTable_ShouldExecuteQuery`; `Join_WhenUsingQualifiedDottedPhysicalTable_ShouldExecuteQuery`; `LeftJoin_WhenUsingQualifiedDottedPhysicalTable_ShouldPreserveUnmatchedRow` | Opt-in MySQL Integration: uses only the precreated dedicated cross database, creates/drops tables in `finally`, and deletes only generated primary-database rows |
 
 ### 最终执行准备性能验收
@@ -83,3 +88,27 @@
 | `SqlQueryExecutionPreparationBenchmarks` Trace 关闭 | 不适用 | 1.424 us，10.75 KB，Ratio 0.41（相对 Trace 二次渲染） | Trace 关闭不再生成 Debug SQL。 | `BenchmarkDotNet.Artifacts/results/Bing.Data.Sql.Benchmarks.SqlQueryExecutionPreparationBenchmarks-report-github.md` |
 
 `MySqlBuilderConstructionBenchmarks` 和 `MySqlBuilderCloneBenchmarks` 已纳入相同 `FormalHost` Job，覆盖仅 From、1/5/20 Join、10/50 参数、raw/structured 混合场景。它们用于后续识别 Builder 构建或 Clone 热点；本轮数据只证明执行准备重复渲染是明确热点，因此未对 parser、Join 渲染或 Clone 增加无数据支撑的微优化。
+
+### Debug SQL 大参数性能验收
+
+`SqlDebugRenderingLargeParameterBenchmarks` 使用真实 `MySqlBuilder` 生成 `@_p_0` 至 `@_p_n` 的参数前缀场景，并与无参 `ToDebugSql()` 的二次 SQL 渲染做同 Job 对比。本轮正式运行仍使用 `.NET 8.0.27`、BenchmarkDotNet `0.14.0`、`FormalHost`（1 launch、6 warmup、15 iteration）。
+
+| 参数数量 | 二次渲染基线 | 复用已生成 SQL | 时间 Ratio | 分配 Ratio | 结论 |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| 10 | 3.555 us，18.91 KB | 2.406 us，10.13 KB | 0.68 | 0.54 | SQL 复用减少约 32% 时间和 46% 分配。 |
+| 50 | 65.229 us，360.71 KB | 62.866 us，336.07 KB | 0.96 | 0.93 | 参数字面量替换成为主要成本，复用仍减少约 4% 时间和 7% 分配。 |
+| 100 | 142.501 us，980.74 KB | 137.672 us，936.27 KB | 0.97 | 0.95 | 参数字面量替换成为主要成本，复用仍减少约 3% 时间和 5% 分配。 |
+
+报告：`BenchmarkDotNet.Artifacts/results/Bing.Data.Sql.Benchmarks.SqlDebugRenderingLargeParameterBenchmarks-report-github.md`。50/100 参数的收益低于引入新替换算法的行为风险阈值，因此本轮不做无数据支撑的热路径重构。
+
+### 最终验收执行证据
+
+2026-07-23 在 Windows 10、.NET SDK `10.0.300`、.NET 6.0.36/.NET 8.0.27 环境执行：
+
+| 验收项 | 命令范围 | 结果 |
+| --- | --- | --- |
+| Release 编译 | `dotnet build .\Bing.All.sln -c Release -nologo -v minimal` | 成功；125 条警告。 |
+| SQL/Provider 单元回归 | `Bing.Data.Sql.Tests`、MySql、SqlServer、PostgreSql、Oracle、Sqlite、EntityFrameworkCore、FreeSQL | 2142 项通过，0 失败。 |
+| SQLite 集成 | `Bing.Dapper.Sqlite.Tests.Integration` | 82 项通过，0 失败。 |
+| MySQL 真实集成 | 项目现有受控 runsettings，双 TFM 串行 | 86 项通过，0 失败；涵盖公开字符串 From/Join/LeftJoin 跨库带点物理表名。 |
+| 大参数性能 | `SqlDebugRenderingLargeParameterBenchmarks`，固定 `FormalHost` Job | 6 个正式基准完成；产物路径见上。 |

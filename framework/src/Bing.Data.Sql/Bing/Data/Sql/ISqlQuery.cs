@@ -6,6 +6,9 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql查询对象
 /// </summary>
+/// <remarks>
+/// 实例包含可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
+/// </remarks>
 public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposable
 {
     /// <summary>
