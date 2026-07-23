@@ -9,12 +9,14 @@ using System.Reflection;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Dapper.Tests.Metadata;
 
@@ -1234,6 +1236,168 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：Trace 未启用时，同步查询只应渲染一次执行 SQL，不应生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateCountingQuery(connection, false);
+        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+
+        // Act
+        var result = query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
+        Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 未启用时，异步查询只应渲染一次执行 SQL，不应生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteScalarAsync_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateCountingQuery(connection, false);
+        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+
+        // Act
+        var result = await query.ExecuteScalarAsync<int>();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
+        Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 未启用时，同步流式查询只应渲染一次执行 SQL，不应生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" }) };
+        using var query = CreateCountingQuery(connection, false);
+        query.Select("Id,Name").From("[Users]");
+
+        // Act
+        var result = query.StreamQuery<MappedSample>().ToList();
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
+        Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 未启用时，异步流式查询只应渲染一次执行 SQL，不应生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public async Task StreamQueryAsync_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" }) };
+        using var query = CreateCountingQuery(connection, false);
+        query.Select("Id,Name").From("[Users]");
+
+        // Act
+        var result = new List<MappedSample>();
+        await foreach (var item in query.StreamQueryAsync<MappedSample>())
+            result.Add(item);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
+        Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 未启用时，同步和异步 Count 查询都不应生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public async Task GetCount_WhenTraceIsDisabled_ShouldRenderSqlOnceWithoutDebugSql()
+    {
+        // Arrange
+        var syncConnection = new CaptureDbConnection();
+        using var syncQuery = CreateCountingQuery(syncConnection, false);
+        syncQuery.From("[Users]");
+
+        // Act
+        var syncResult = syncQuery.InvokeCount();
+
+        // Assert
+        Assert.Equal(1, syncResult);
+        Assert.Equal(1, syncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(0, syncQuery.Counters.ToDebugSqlCallCount);
+
+        // Arrange
+        var asyncConnection = new CaptureDbConnection();
+        using var asyncQuery = CreateCountingQuery(asyncConnection, false);
+        asyncQuery.From("[Users]");
+
+        // Act
+        var asyncResult = await asyncQuery.InvokeCountAsync();
+
+        // Assert
+        Assert.Equal(1, asyncResult);
+        Assert.Equal(1, asyncQuery.Counters.ToSqlCallCount);
+        Assert.Equal(0, asyncQuery.Counters.ToDebugSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 启用时应复用执行 SQL 生成调试 SQL，而不是再次调用 ToSql。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenTraceIsEnabled_ShouldReuseExecutedSqlForDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateCountingQuery(connection, true);
+        query.AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[Name]=@name").AddParam("name", "trace");
+
+        // Act
+        var result = query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
+        Assert.Equal("Select Count(*) \r\nFrom [Users] \r\nWhere [Name]='trace'", query.TraceDebugSql);
+    }
+
+    /// <summary>
+    /// 测试目的：显式禁用调试日志时，即使 Trace 启用也不应生成调试 SQL。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenDebugLogIsDisabled_ShouldNotRenderDebugSql()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateCountingQuery(connection, true);
+        query.AppendSelect("Count(*)").AppendFrom("[Users]").DisableDebugLog();
+
+        // Act
+        var result = query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToSqlCallCount);
+        Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
+        Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
     /// 测试 - 存储过程标量执行应使用 StoredProcedure 命令类型并保留增强参数元数据。
     /// </summary>
     [Fact]
@@ -1672,6 +1836,22 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建用于验证 SQL 渲染次数的查询对象。
+    /// </summary>
+    /// <param name="connection">数据库连接。</param>
+    /// <param name="traceEnabled">是否启用 Trace 日志。</param>
+    /// <returns>可计数 SQL Server 查询对象。</returns>
+    private static CountingSqlServerQuery CreateCountingQuery(CaptureDbConnection connection, bool traceEnabled)
+    {
+        var services = CreateServices();
+        services.AddSingleton<ILoggerFactory>(new TraceLoggerFactory(traceEnabled));
+        services.AddSqlServerSqlQuery<CountingSqlServerQuery, CountingSqlServerQuery>(options =>
+            options.Connection(connection));
+        var provider = services.BuildServiceProvider();
+        return provider.GetRequiredService<CountingSqlServerQuery>();
+    }
+
+    /// <summary>
     /// 创建拥有连接的查询对象
     /// </summary>
     /// <param name="connection">数据库连接</param>
@@ -1793,6 +1973,181 @@ public class SqlServerRoutingAndExecutionTest
             LastQueryCommandFlags = command.Flags;
             return command;
         }
+    }
+
+    /// <summary>
+    /// 用于验证 SQL 渲染次数的 SQL Server 查询对象。
+    /// </summary>
+    private sealed class CountingSqlServerQuery : SqlServerSqlQueryBase
+    {
+        /// <summary>
+        /// 初始化一个<see cref="CountingSqlServerQuery"/>类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
+        public CountingSqlServerQuery(IServiceProvider serviceProvider, SqlOptions<CountingSqlServerQuery> options)
+            : base(serviceProvider, options)
+        {
+        }
+
+        /// <summary>
+        /// SQL 渲染计数器。
+        /// </summary>
+        public SqlRenderCounters Counters { get; } = new();
+
+        /// <summary>
+        /// 捕获的原始 SQL。
+        /// </summary>
+        public string TraceSql { get; private set; }
+
+        /// <summary>
+        /// 捕获的调试 SQL。
+        /// </summary>
+        public string TraceDebugSql { get; private set; }
+
+        /// <summary>
+        /// 调用受保护的同步 Count 查询。
+        /// </summary>
+        /// <returns>查询结果。</returns>
+        public int InvokeCount() => GetCount();
+
+        /// <summary>
+        /// 调用受保护的异步 Count 查询。
+        /// </summary>
+        /// <returns>查询结果。</returns>
+        public Task<int> InvokeCountAsync() => GetCountAsync();
+
+        /// <inheritdoc />
+        protected override ISqlBuilder CreateSqlBuilder() => new CountingSqlServerBuilder(Counters);
+
+        /// <inheritdoc />
+        protected override void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
+        {
+            TraceSql = sql;
+            TraceDebugSql = debugSql;
+        }
+    }
+
+    /// <summary>
+    /// SQL 渲染调用计数器。
+    /// </summary>
+    private sealed class SqlRenderCounters
+    {
+        /// <summary>
+        /// ToSql 调用次数。
+        /// </summary>
+        public int ToSqlCallCount { get; set; }
+
+        /// <summary>
+        /// ToDebugSql 调用次数。
+        /// </summary>
+        public int ToDebugSqlCallCount { get; set; }
+
+        /// <summary>
+        /// 最后一次调试渲染的 SQL 输入。
+        /// </summary>
+        public string LastDebugSqlInput { get; set; }
+    }
+
+    /// <summary>
+    /// 可计数 SQL Server Builder。
+    /// </summary>
+    private sealed class CountingSqlServerBuilder : SqlServerBuilder
+    {
+        private readonly SqlRenderCounters _counters;
+
+        /// <summary>
+        /// 初始化一个<see cref="CountingSqlServerBuilder"/>类型的实例。
+        /// </summary>
+        /// <param name="counters">SQL 渲染计数器。</param>
+        public CountingSqlServerBuilder(SqlRenderCounters counters) => _counters = counters;
+
+        /// <inheritdoc />
+        public override string ToSql()
+        {
+            _counters.ToSqlCallCount++;
+            return base.ToSql();
+        }
+
+        /// <inheritdoc />
+        public override string ToDebugSql(string sql)
+        {
+            _counters.ToDebugSqlCallCount++;
+            _counters.LastDebugSqlInput = sql;
+            return base.ToDebugSql(sql);
+        }
+
+        /// <inheritdoc />
+        public override ISqlBuilder Clone()
+        {
+            var builder = new CountingSqlServerBuilder(_counters);
+            builder.Clone(this);
+            return builder;
+        }
+
+        /// <inheritdoc />
+        public override ISqlBuilder New() => new CountingSqlServerBuilder(_counters);
+    }
+
+    /// <summary>
+    /// 固定日志级别的测试日志工厂。
+    /// </summary>
+    private sealed class TraceLoggerFactory : ILoggerFactory
+    {
+        private readonly bool _traceEnabled;
+
+        /// <summary>
+        /// 初始化一个<see cref="TraceLoggerFactory"/>类型的实例。
+        /// </summary>
+        /// <param name="traceEnabled">是否启用 Trace 日志。</param>
+        public TraceLoggerFactory(bool traceEnabled) => _traceEnabled = traceEnabled;
+
+        /// <inheritdoc />
+        public ILogger CreateLogger(string categoryName) => new TraceLogger(_traceEnabled);
+
+        /// <inheritdoc />
+        public void AddProvider(ILoggerProvider provider) { }
+
+        /// <inheritdoc />
+        public void Dispose() { }
+    }
+
+    /// <summary>
+    /// 固定日志级别的测试日志器。
+    /// </summary>
+    private sealed class TraceLogger : ILogger
+    {
+        private readonly bool _traceEnabled;
+
+        /// <summary>
+        /// 初始化一个<see cref="TraceLogger"/>类型的实例。
+        /// </summary>
+        /// <param name="traceEnabled">是否启用 Trace 日志。</param>
+        public TraceLogger(bool traceEnabled) => _traceEnabled = traceEnabled;
+
+        /// <inheritdoc />
+        public IDisposable BeginScope<TState>(TState state) => EmptyScope.Instance;
+
+        /// <inheritdoc />
+        public bool IsEnabled(LogLevel logLevel) => _traceEnabled && logLevel == LogLevel.Trace;
+
+        /// <inheritdoc />
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
+            Func<TState, Exception, string> formatter) { }
+    }
+
+    /// <summary>
+    /// 空释放作用域。
+    /// </summary>
+    private sealed class EmptyScope : IDisposable
+    {
+        /// <summary>
+        /// 空释放作用域实例。
+        /// </summary>
+        public static EmptyScope Instance { get; } = new();
+
+        /// <inheritdoc />
+        public void Dispose() { }
     }
 
     /// <summary>

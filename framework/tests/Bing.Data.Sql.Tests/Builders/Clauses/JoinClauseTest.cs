@@ -58,13 +58,16 @@ public class JoinClauseTest
     #region On
 
     /// <summary>
-    /// 测试 - 表连接条件 - 未设置join返回空
+    /// 测试 - 表连接条件 - 未设置 Join 时应抛出异常且不创建参数。
     /// </summary>
     [Fact]
     public void Test_On_1()
     {
-        _clause.On("a.id", "b");
+        var exception = Assert.Throws<InvalidOperationException>(() => _clause.On("a.id", "b"));
+
+        Assert.Equal("当前不存在可追加 On 条件的 Join。", exception.Message);
         Assert.Empty(GetSql());
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>

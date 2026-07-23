@@ -24,6 +24,12 @@ public interface ISqlBuilder : ICondition, ISqlContent, ISqlOperation
     string ToDebugSql();
 
     /// <summary>
+    /// 根据已生成的Sql语句生成调试Sql语句，Sql语句中的参数被替换为参数值
+    /// </summary>
+    /// <param name="sql">已生成的Sql语句</param>
+    string ToDebugSql(string sql);
+
+    /// <summary>
     /// 生成Sql语句
     /// </summary>
     string ToSql();

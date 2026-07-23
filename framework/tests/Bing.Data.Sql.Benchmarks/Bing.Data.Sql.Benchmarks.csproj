@@ -10,5 +10,6 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
   </ItemGroup>
 </Project>

@@ -50,6 +50,30 @@ public class AppendRawParameterBindingTest
     }
 
     /// <summary>
+    /// 测试 - 原始 AppendOn 占位符应保留且重复渲染不重复注册参数。
+    /// </summary>
+    [Fact]
+    public void AppendOn_WithParameter_ShouldPreserveSqlAndKeepParameterStableAcrossRepeatedRendering()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder()
+            .AppendFrom("Orders o")
+            .AppendJoin("Items i")
+            .AppendOn("i.OrderId=o.Id And i.TenantId=@TenantId")
+            .AddParam("TenantId", "tenant-1");
+
+        // Act
+        var firstSql = builder.ToSql();
+        var secondSql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom Orders o \r\nJoin Items i On i.OrderId=o.Id And i.TenantId=@TenantId", firstSql);
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(new[] { "@TenantId" }, builder.GetParams().Keys);
+        Assert.Equal("tenant-1", builder.GetParam("TenantId"));
+    }
+
+    /// <summary>
     /// 测试 - 多个原始参数应保持调用顺序、名称和值。
     /// </summary>
     [Fact]

@@ -44,7 +44,7 @@ public abstract partial class SqlQueryBase
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
             var transaction = GetQueryTransaction();
             message = ExecuteBefore(sql, Params, connection, parameterMetadata);
-            WriteTraceLog(sql, Params, GetDebugSql());
+            WriteTraceLog(SqlBuilder, sql);
             enumerator = connection.Query<TEntity>(sql, dbParameters, transaction, false, timeout).GetEnumerator();
         }
         catch (Exception e)
@@ -120,7 +120,7 @@ public abstract partial class SqlQueryBase
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
             var transaction = GetQueryTransaction();
             message = ExecuteBefore(sql, Params, connection, parameterMetadata);
-            WriteTraceLog(sql, Params, GetDebugSql());
+            WriteTraceLog(SqlBuilder, sql);
             reader = await connection.ExecuteReaderAsync(new CommandDefinition(sql, dbParameters, transaction,
                 timeout, cancellationToken: cancellationToken));
             parser = reader.GetRowParser<TEntity>();

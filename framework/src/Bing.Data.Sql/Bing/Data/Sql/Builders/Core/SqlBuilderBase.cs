@@ -650,17 +650,22 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
     /// </summary>
-    public virtual string ToDebugSql() => GetDebugSql(ToSql());
+    public virtual string ToDebugSql() => ToDebugSql(ToSql());
 
     /// <summary>
-    /// 获取调试Sql
+    /// 根据已生成的Sql语句生成调试Sql语句，Sql语句中的参数被替换为参数值
     /// </summary>
     /// <param name="sql">Sql语句</param>
-    private string GetDebugSql(string sql)
+    public virtual string ToDebugSql(string sql)
     {
+        if (sql == null)
+            throw new ArgumentNullException(nameof(sql));
         var parameters = ParameterManager.GetParams();
         foreach (var parameter in parameters)
-            sql = Regex.Replace(sql, $@"{parameter.Key}\b", ParamLiteralsResolver.GetParamLiterals(parameter.Value));
+        {
+            var literal = ParamLiteralsResolver.GetParamLiterals(parameter.Value);
+            sql = Regex.Replace(sql, $@"{Regex.Escape(parameter.Key)}\b", _ => literal);
+        }
         return sql;
     }
 

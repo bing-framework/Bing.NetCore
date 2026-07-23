@@ -168,21 +168,75 @@ public class AppendJoinAndOnCompositionTest
     }
 
     /// <summary>
-    /// 测试 - 没有连接时追加 On 条件应保持无操作且不会延迟应用到后续连接。
+    /// 测试 - 没有连接时追加非空 On 条件应抛出异常且不会延迟应用到后续连接。
     /// </summary>
     [Fact]
-    public void AppendOn_WhenNoJoinExists_ShouldBeIgnored()
+    public void AppendOn_WhenNoJoinExists_ShouldThrowWithoutChangingFollowingJoin()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        builder.AppendFrom("Orders o");
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.AppendOn("o.Id=i.OrderId"));
+        var sql = builder.AppendJoin("Items i").ToSql();
+
+        // Assert
+        Assert.Equal("当前不存在可追加 On 条件的 Join。", exception.Message);
+        Assert.Equal("Select * \r\nFrom Orders o \r\nJoin Items i", sql);
+    }
+
+    /// <summary>
+    /// 测试 - 没有连接时追加空白 On 条件应保持无操作。
+    /// </summary>
+    [Fact]
+    public void AppendOn_WhenNoJoinExistsAndSqlIsWhitespace_ShouldDoNothing()
     {
         // Arrange
         var builder = new TestSqlBuilder();
 
         // Act
         var sql = builder.AppendFrom("Orders o")
-            .AppendOn("o.Id=i.OrderId")
-            .AppendJoin("Items i")
+            .AppendOn("  ")
             .ToSql();
 
         // Assert
-        Assert.Equal("Select * \r\nFrom Orders o \r\nJoin Items i", sql);
+        Assert.Equal("Select * \r\nFrom Orders o", sql);
+        Assert.Empty(builder.GetParams());
+    }
+
+    /// <summary>
+    /// 测试 - 没有连接时结构化值 On 条件应先抛出异常且不创建参数。
+    /// </summary>
+    [Fact]
+    public void OnValue_WhenNoJoinExists_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.On("o.Enabled", true));
+
+        // Assert
+        Assert.Equal("当前不存在可追加 On 条件的 Join。", exception.Message);
+        Assert.Empty(builder.GetParams());
+    }
+
+    /// <summary>
+    /// 测试 - 没有连接时表达式 On 条件应先抛出异常且不创建参数。
+    /// </summary>
+    [Fact]
+    public void OnExpression_WhenNoJoinExists_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.On<Sample, Sample2>((left, right) => left.IntValue == right.IntValue));
+
+        // Assert
+        Assert.Equal("当前不存在可追加 On 条件的 Join。", exception.Message);
+        Assert.Empty(builder.GetParams());
     }
 }

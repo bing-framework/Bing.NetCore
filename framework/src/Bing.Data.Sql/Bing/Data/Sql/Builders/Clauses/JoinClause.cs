@@ -446,6 +446,12 @@ public class JoinClause : IJoinClause
     public void LeftJoin(string table, string alias = null) => Join(LeftJoinKey, table, alias);
 
     /// <summary>
+    /// 左外连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    public void LeftJoin(SqlTableReference reference) => Join(LeftJoinKey, reference);
+
+    /// <summary>
     /// 左外连接
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
@@ -522,7 +528,7 @@ public class JoinClause : IJoinClause
     /// 设置连接条件
     /// </summary>
     /// <param name="condition">连接条件</param>
-    public void On(ICondition condition) => _params.LastOrDefault()?.On(condition);
+    public void On(ICondition condition) => GetLastJoinOrThrow().On(condition);
 
     /// <summary>
     /// 设置连接条件
@@ -531,7 +537,7 @@ public class JoinClause : IJoinClause
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
     public void On(string column, object value, Operator @operator = Operator.Equal) =>
-        _params.LastOrDefault()?.On(column, value, @operator);
+        GetLastJoinOrThrow().On(column, value, @operator);
 
     /// <summary>
     /// 设置连接条件
@@ -543,10 +549,11 @@ public class JoinClause : IJoinClause
     /// <param name="operator">条件运算符</param>
     public void On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal) where TLeft : class where TRight : class
     {
+        var join = GetLastJoinOrThrow();
         var leftColumn = new SqlItem(GetColumn(left)).ToSql(_dialect);
         var rightColumn = new SqlItem(GetColumn(right)).ToSql(_dialect);
         var condition = SqlConditionFactory.Create(leftColumn, rightColumn, @operator);
-        AppendOn(condition.GetCondition());
+        join.AppendOn(condition.GetCondition(), _dialect);
     }
 
     /// <summary>
@@ -574,9 +581,10 @@ public class JoinClause : IJoinClause
     {
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
+        var join = GetLastJoinOrThrow();
         var expressions = Lambdas.GetGroupPredicates(expression);
         var items = expressions.Select(GetOnItems).ToList();
-        _params.LastOrDefault()?.On(items, _dialect);
+        join.On(items, _dialect);
     }
 
     /// <summary>
@@ -615,7 +623,28 @@ public class JoinClause : IJoinClause
     /// 添加到On子句
     /// </summary>
     /// <param name="sql">Sql语句</param>
-    public void AppendOn(string sql) => _params.LastOrDefault()?.AppendOn(sql, _dialect);
+    public void AppendOn(string sql)
+    {
+        if (string.IsNullOrWhiteSpace(sql))
+            return;
+        GetLastJoinOrThrow().AppendOn(sql, _dialect);
+    }
+
+    #endregion
+
+    #region 辅助方法
+
+    /// <summary>
+    /// 获取最后一个连接项。
+    /// </summary>
+    /// <exception cref="InvalidOperationException">不存在可追加 On 条件的连接项。</exception>
+    private JoinItem GetLastJoinOrThrow()
+    {
+        var join = _params.LastOrDefault();
+        if (join == null)
+            throw new InvalidOperationException("当前不存在可追加 On 条件的 Join。");
+        return join;
+    }
 
     #endregion
 

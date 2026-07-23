@@ -53,4 +53,50 @@ public class StructuredTableReferenceBuilderTest
         // Assert
         Assert.Equal("From [sales].[dbo].[orders]", builder.FromClause.ToSql());
     }
+
+    /// <summary>
+    /// 测试目的：结构化 Join 应输出完整的 SQL Server 三段表名和别名。
+    /// </summary>
+    [Fact]
+    public void Join_WhenUsingStructuredReference_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        var reference = new SqlTableReference
+        {
+            Database = "sales",
+            Schema = "dbo",
+            TableName = "customers",
+            Alias = "c"
+        };
+
+        // Act
+        builder.JoinClause.Join(reference);
+
+        // Assert
+        Assert.Equal("Join [sales].[dbo].[customers] As [c]", builder.JoinClause.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：结构化 LeftJoin 应输出完整的 SQL Server 三段表名和别名。
+    /// </summary>
+    [Fact]
+    public void LeftJoin_WhenUsingStructuredReference_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        var reference = new SqlTableReference
+        {
+            Database = "sales",
+            Schema = "dbo",
+            TableName = "customers",
+            Alias = "c"
+        };
+
+        // Act
+        builder.JoinClause.LeftJoin(reference);
+
+        // Assert
+        Assert.Equal("Left Join [sales].[dbo].[customers] As [c]", builder.JoinClause.ToSql());
+    }
 }

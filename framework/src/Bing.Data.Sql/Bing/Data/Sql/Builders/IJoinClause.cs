@@ -74,6 +74,12 @@ public interface IJoinClause
     void LeftJoin(string table, string alias = null);
 
     /// <summary>
+    /// 左外连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    void LeftJoin(SqlTableReference reference);
+
+    /// <summary>
     /// 左外连接
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>

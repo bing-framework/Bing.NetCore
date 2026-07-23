@@ -289,7 +289,7 @@ public abstract partial class SqlQueryBase
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
             var transaction = GetQueryTransaction();
             message = ExecuteBefore(sql, Params, connection, parameterMetadata);
-            WriteTraceLog(sql, Params, GetDebugSql());
+            WriteTraceLog(SqlBuilder, sql);
             result = func(connection, sql, dbParameters, transaction);
             CompleteQueryTransaction();
             ExecuteAfter(message);
@@ -326,7 +326,7 @@ public abstract partial class SqlQueryBase
             var parameterMetadata = GetSqlParameterDiagnostics(SqlBuilder);
             var transaction = GetQueryTransaction();
             message = ExecuteBefore(sql, Params, connection, parameterMetadata);
-            WriteTraceLog(sql, Params, GetDebugSql());
+            WriteTraceLog(SqlBuilder, sql);
             result = await func(connection, sql, dbParameters, transaction);
             CompleteQueryTransaction();
             ExecuteAfter(message);

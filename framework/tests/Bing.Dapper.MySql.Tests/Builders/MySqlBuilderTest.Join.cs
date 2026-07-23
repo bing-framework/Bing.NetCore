@@ -75,6 +75,19 @@ public partial class MySqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：MySQL Join 必须拒绝 schema 与物理表名混合使用反引号的字符串引用。
+    /// </summary>
+    [Theory]
+    [InlineData("`archive_db`.orders")]
+    [InlineData("archive_db.`orders`")]
+    [InlineData("`archive_db`.Merchants.Company")]
+    [InlineData("archive_db.`Merchants.Company`")]
+    public void Join_WhenTableNameUsesMixedQuotes_ShouldThrowArgumentException(string table)
+    {
+        Assert.Throws<ArgumentException>(() => _builder.Select("o.Id").From("Orders", "o").Join(table, "merchant"));
+    }
+
+    /// <summary>
     /// 测试 - 连接条件 - 属性表达式
     /// </summary>
     [Fact]

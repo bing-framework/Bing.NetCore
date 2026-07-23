@@ -82,16 +82,18 @@ public class OracleJoinClauseTest
     }
 
     /// <summary>
-    /// 测试目的：On 中未先设置 Join，ToSql 应返回空（条件被忽略）。
+    /// 测试目的：On 中未先设置 Join 时应抛出异常且不创建参数。
     /// </summary>
     [Fact]
-    public void Test_On_WithoutJoin_ShouldBeEmpty()
+    public void Test_On_WithoutJoin_ShouldThrowWithoutAddingParameter()
     {
         // Act
-        _clause.On("a.id", "b");
+        var exception = Assert.Throws<InvalidOperationException>(() => _clause.On("a.id", "b"));
 
         // Assert
+        Assert.Equal("当前不存在可追加 On 条件的 Join。", exception.Message);
         Assert.Empty(GetSql());
+        Assert.Empty(_parameterManager.GetParams());
     }
 
     /// <summary>

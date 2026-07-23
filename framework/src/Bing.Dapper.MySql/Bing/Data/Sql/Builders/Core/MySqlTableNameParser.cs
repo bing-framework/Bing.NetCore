@@ -27,6 +27,7 @@ internal static class MySqlTableNameParser
         ValidateReservedKeyword(alias, nameof(alias));
         ValidateAliasConflict(alias, embeddedAlias);
 
+        ValidateQuoteConsistency(components, nameof(table));
         if (components.Count > 2 && components.Any(component => component.Quoted))
             throw new ArgumentException("MySQL 完整表名仅支持架构名和表名两个反引号标识符。", nameof(table));
         var hasQuotedSchemaAndTable = components.Count == 2 && components[0].Quoted && components[1].Quoted;
@@ -35,6 +36,18 @@ internal static class MySqlTableNameParser
             ? components[1].Value
             : string.Join(".", components.Select(component => component.Value));
         return new MySqlTableName(tableName, string.IsNullOrWhiteSpace(alias) ? embeddedAlias : alias, schema);
+    }
+
+    /// <summary>
+    /// 验证限定表名中的标识符引用方式一致。
+    /// </summary>
+    private static void ValidateQuoteConsistency(IReadOnlyCollection<MySqlIdentifierComponent> components,
+        string parameterName)
+    {
+        if (components.Count < 2 || components.All(component => component.Quoted) ||
+            components.All(component => component.Quoted == false))
+            return;
+        throw new ArgumentException("MySQL 限定表名的架构名和表名必须同时使用反引号。", parameterName);
     }
 
     /// <summary>

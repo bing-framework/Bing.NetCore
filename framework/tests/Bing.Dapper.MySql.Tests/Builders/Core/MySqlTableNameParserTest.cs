@@ -62,6 +62,10 @@ public class MySqlTableNameParserTest
     [InlineData("orders UNION")]
     [InlineData("orders JOIN users")]
     [InlineData("`archive_db`.`orders`.`history`")]
+    [InlineData("`archive_db`.orders")]
+    [InlineData("archive_db.`orders`")]
+    [InlineData("`archive_db`.Merchants.Company")]
+    [InlineData("archive_db.`Merchants.Company`")]
     public void Parse_WhenTableNameIsInvalid_ShouldThrowArgumentException(string table)
     {
         Assert.Throws<ArgumentException>(() => MySqlTableNameParser.Parse(table));

@@ -90,6 +90,10 @@ public partial class MySqlBuilderTest
     [InlineData("`archive_db`.`Merchants.Company")]
     [InlineData("`archive_db`..`Merchants.Company`")]
     [InlineData("`archive_db`.`Merchants.Company`;Drop Table Users")]
+    [InlineData("`archive_db`.orders")]
+    [InlineData("archive_db.`orders`")]
+    [InlineData("`archive_db`.Merchants.Company")]
+    [InlineData("archive_db.`Merchants.Company`")]
     public void From_WhenQuotedTableNameIsInvalid_ShouldThrowArgumentException(string table)
     {
         Assert.Throws<ArgumentException>(() => _builder.Select("c").From(table));

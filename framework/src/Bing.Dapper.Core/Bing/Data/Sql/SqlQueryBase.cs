@@ -632,7 +632,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var transaction = GetQueryTransaction();
             message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
 
-            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
+            WriteTraceLog(builder, sql);
             var result = conn.ExecuteScalar(sql, dbParameters, transaction, timeout);
 
             CompleteQueryTransaction();
@@ -699,7 +699,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             var transaction = GetQueryTransaction();
             message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
 
-            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql());
+            WriteTraceLog(builder, sql);
             var result = await conn.ExecuteScalarAsync(sql, dbParameters, transaction, timeout);
 
             CompleteQueryTransaction();
@@ -731,6 +731,18 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             message.AppendLine($"    {param.Key} : {ParamLiteralsResolver.GetParamLiterals(param.Value)} : {param.Value?.GetType()},");
         var result = message.ToString().RemoveEnd($",{Common.Line}");
         Logger.LogTrace("原始Sql:\r\n{Sql}\r\n调试Sql:\r\n{DebugSql}\r\nSql参数:\r\n{SqlParam}\r\n", sql, debugSql, result);
+    }
+
+    /// <summary>
+    /// 写查询跟踪日志。
+    /// </summary>
+    /// <param name="builder">Sql生成器。</param>
+    /// <param name="sql">已生成的Sql语句。</param>
+    private void WriteTraceLog(ISqlBuilder builder, string sql)
+    {
+        if (Logger.IsEnabled(LogLevel.Trace) == false || EnabledDebugSql == false)
+            return;
+        WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
     }
 
     /// <summary>

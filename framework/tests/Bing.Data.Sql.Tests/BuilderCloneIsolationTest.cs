@@ -67,4 +67,31 @@ public class BuilderCloneIsolationTest
         Assert.Equal(2, clone.GetParams().Count);
         Assert.Equal(18, clone.GetParam("@_p_1"));
     }
+
+    /// <summary>
+    /// 测试 - Clear 应清理原始 From、Join、Where、参数、分页和别名状态。
+    /// </summary>
+    [Fact]
+    public void Clear_WhenBuilderContainsRawSqlAndPagination_ShouldRemoveAllPreviousState()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        builder.AppendFrom("Orders o")
+            .AppendJoin("Items i")
+            .AppendOn("i.OrderId=o.Id")
+            .Where("o.Status", 2)
+            .Take(5);
+
+        // Act
+        var sql = builder.Clear()
+            .Select("n.Id")
+            .AppendFrom("NewOrders n")
+            .ToSql();
+
+        // Assert
+        Assert.Equal("Select [n].[Id] \r\nFrom NewOrders n", sql);
+        Assert.Empty(builder.GetParams());
+        Assert.Equal(20, builder.Pager.PageSize);
+        Assert.Equal(string.Empty, builder.JoinClause.ToSql());
+    }
 }
