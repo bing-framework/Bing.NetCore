@@ -61,4 +61,28 @@ public class AppendRawSqlTest
 
         Assert.Equal("Select \"u\".\"Id\" \r\nFrom users u \r\nRight Join \"Payments.Log\" p On p.UserId=u.Id", sql);
     }
+
+    /// <summary>
+    /// 测试 - PostgreSQL 原始 SQL 应保留 JSONB 运算符、锁提示、位置参数与注释。
+    /// </summary>
+    [Fact]
+    public void AppendRawSql_ShouldPreserveJsonbLockHintsCommentsAndPositionalParameter()
+    {
+        // Arrange
+        const string expected = "Select \"j\".\"Id\" \r\nFrom ONLY public.jobs j /* block @> $1 */ \r\nJoin Lateral (Select q.Id From queue q FOR UPDATE SKIP LOCKED NOWAIT -- row $1\r\n) c On true \r\nLeft Join audit.events e On e.payload @> @Jsonb";
+
+        // Act
+        var builder = new PostgreSqlBuilder();
+        var sql = builder.Select("j.Id")
+            .AppendFrom("ONLY public.jobs j /* block @> $1 */")
+            .AppendJoin("Lateral (Select q.Id From queue q FOR UPDATE SKIP LOCKED NOWAIT -- row $1\r\n) c On true")
+            .AppendLeftJoin("audit.events e On e.payload @> @Jsonb")
+            .AddParam("Jsonb", "{\"kind\":\"ready\"}")
+            .ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+        Assert.Single(builder.GetParams());
+        Assert.Equal("{\"kind\":\"ready\"}", builder.GetParam("@Jsonb"));
+    }
 }

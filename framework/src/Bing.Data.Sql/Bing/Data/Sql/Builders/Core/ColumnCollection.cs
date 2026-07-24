@@ -146,6 +146,22 @@ public class ColumnCollection
     }
 
     /// <summary>
+    /// 添加字符串列聚合。
+    /// </summary>
+    /// <param name="aggregationFunc">聚合函数名称。</param>
+    /// <param name="column">列名，可包含表别名限定符。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    public void AddAggregationColumn(string aggregationFunc, string column, string columnAlias)
+    {
+        if (column.IsEmpty())
+            return;
+        var item = new SqlItem(column);
+        AddColumn(new ColumnItem(item.Name, item.Prefix,
+            string.IsNullOrEmpty(columnAlias) ? column : columnAlias, isAggregation: true,
+            aggregationFunc: aggregationFunc));
+    }
+
+    /// <summary>
     /// 添加聚合列
     /// </summary>
     /// <param name="aggregationFunc">聚合函数</param>

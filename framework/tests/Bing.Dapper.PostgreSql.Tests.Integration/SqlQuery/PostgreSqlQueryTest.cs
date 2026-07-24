@@ -15,7 +15,7 @@ namespace Bing.Dapper.Tests.SqlQuery;
 [Collection(PostgreSqlIntegrationDatabaseCollection.Name)]
 [Trait("Category", "Integration")]
 [Trait("Database", "PostgreSql")]
-public sealed class PostgreSqlQueryTest : IAsyncLifetime
+public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
 {
     /// <summary>
     /// PostgreSQL 集成测试数据库固定装置。

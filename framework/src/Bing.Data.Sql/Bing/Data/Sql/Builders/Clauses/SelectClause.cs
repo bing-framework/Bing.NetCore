@@ -47,14 +47,16 @@ public class SelectClause : ISelectClause
     /// <param name="resolver">实体解析器</param>
     /// <param name="register">实体别名注册器</param>
     /// <param name="columns">列名集合</param>
+    /// <param name="distinct">是否排除重复记录</param>
     public SelectClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
-        IEntityAliasRegister register, ColumnCollection columns = null)
+        IEntityAliasRegister register, ColumnCollection columns = null, bool distinct = false)
     {
         _columns = columns ?? new ColumnCollection();
         _sqlBuilder = sqlBuilder;
         _dialect = dialect;
         _resolver = resolver;
         _register = register;
+        _distinct = distinct;
     }
 
     /// <summary>
@@ -62,7 +64,8 @@ public class SelectClause : ISelectClause
     /// </summary>
     /// <param name="builder">Sql生成器</param>
     /// <param name="register">实体别名注册器</param>
-    public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register) => new SelectClause(builder, _dialect, _resolver, register, _columns.Clone());
+    public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register) =>
+        new SelectClause(builder, _dialect, _resolver, register, _columns.Clone(), _distinct);
 
     /// <summary>
     /// 过滤重复记录
@@ -110,8 +113,8 @@ public class SelectClause : ISelectClause
     /// <param name="func">函数名</param>
     /// <param name="column">列名</param>
     /// <param name="columnAlias">列别名</param>
-    private void Aggregate(string func, string column, string columnAlias) => Aggregate(
-        $"{func}({_dialect.SafeName(column)})", string.IsNullOrWhiteSpace(columnAlias) ? column : columnAlias);
+    private void Aggregate(string func, string column, string columnAlias) =>
+        _columns.AddAggregationColumn(func, column, columnAlias);
 
     /// <summary>
     /// 聚合

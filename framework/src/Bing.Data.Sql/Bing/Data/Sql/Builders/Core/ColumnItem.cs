@@ -85,5 +85,5 @@ public class ColumnItem
     /// <summary>
     /// 克隆
     /// </summary>
-    public ColumnItem Clone() => new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, IsAggregation);
+    public ColumnItem Clone() => new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, IsAggregation, AggregationFunc);
 }

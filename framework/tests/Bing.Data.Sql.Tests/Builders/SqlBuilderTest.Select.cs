@@ -29,6 +29,23 @@ public partial class SqlBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    /// <summary>
+    /// 测试 - 克隆后应保留 Distinct 状态。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenDistinctIsConfigured_ShouldPreserveDistinct()
+    {
+        // Arrange
+        const string expected = "Select Distinct [a] \r\nFrom [b]";
+        _builder.Distinct().Select("a").From("b");
+
+        // Act
+        var sql = _builder.Clone().ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
     #endregion
 
     #region Count

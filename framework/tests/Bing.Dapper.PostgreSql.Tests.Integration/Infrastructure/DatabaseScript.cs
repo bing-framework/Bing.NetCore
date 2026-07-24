@@ -28,6 +28,16 @@ Create Table If Not Exists public.integration_products(
     payload jsonb Null
 );");
         await ExecuteAsync(connection, @"
+Create Table If Not Exists public.integration_product_items(
+    item_id uuid Primary Key,
+    product_id uuid Not Null,
+    sku text Not Null,
+    quantity integer Not Null,
+    enabled boolean Not Null Default true
+);");
+        await ExecuteAsync(connection,
+            "Create Index If Not Exists ix_integration_product_items_product_id On public.integration_product_items(product_id);");
+        await ExecuteAsync(connection, @"
 Create Table If Not Exists integration_primary.integration_samples(
     id integer Generated Always As Identity Primary Key,
     name text Not Null
@@ -49,7 +59,7 @@ Create Table If Not Exists integration_reporting.integration_samples(
         if (connection == null)
             throw new ArgumentNullException(nameof(connection));
         await ExecuteAsync(connection,
-            "Truncate Table public.integration_products, integration_primary.integration_samples, integration_reporting.integration_samples Restart Identity;");
+            "Truncate Table public.integration_product_items, public.integration_products, integration_primary.integration_samples, integration_reporting.integration_samples Restart Identity;");
     }
 
     /// <summary>

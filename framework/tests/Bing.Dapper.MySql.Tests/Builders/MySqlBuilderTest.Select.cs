@@ -8,6 +8,61 @@ namespace Bing.Dapper.Tests.Builders;
 public partial class MySqlBuilderTest
 {
     /// <summary>
+    /// 测试 - 限定列 Count 应分别引用表别名和列名。
+    /// </summary>
+    [Theory]
+    [InlineData("u.Id")]
+    [InlineData("\"u\".\"Id\"")]
+    [InlineData("`u`.`Id`")]
+    public void Count_WithQualifiedColumn_ShouldFormatEachIdentifierSegment(string column)
+    {
+        // Arrange
+        const string expected = "Select Count(`u`.`Id`) As `Count` \r\nFrom `users` As `u`";
+
+        // Act
+        var sql = _builder.Count(column, "Count").From("users", "u").ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
+    /// 测试 - 限定列 Sum 应分别引用表别名和列名。
+    /// </summary>
+    [Theory]
+    [InlineData("u.Amount")]
+    [InlineData("\"u\".\"Amount\"")]
+    [InlineData("`u`.`Amount`")]
+    public void Sum_WithQualifiedColumn_ShouldFormatEachIdentifierSegment(string column)
+    {
+        // Arrange
+        const string expected = "Select Sum(`u`.`Amount`) As `Total` \r\nFrom `users` As `u`";
+
+        // Act
+        var sql = _builder.Sum(column, "Total").From("users", "u").ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
+    /// 测试 - 克隆后的限定列 Count 应保留聚合函数与分段引用。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenCountUsesQualifiedColumn_ShouldPreserveAggregation()
+    {
+        // Arrange
+        const string expected = "Select Count(`u`.`Id`) As `Count` \r\nFrom `users` As `u`";
+        _builder.Count("u.Id", "Count").From("users", "u");
+
+        // Act
+        var sql = _builder.Clone().ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
     /// 查询
     /// </summary>
     [Fact]

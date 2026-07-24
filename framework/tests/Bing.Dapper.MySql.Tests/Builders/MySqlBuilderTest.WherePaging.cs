@@ -31,6 +31,26 @@ public partial class MySqlBuilderTest
     }
 
     /// <summary>
+    /// 测试 - 空 In 与 Not In 集合应忽略条件且不生成参数。
+    /// </summary>
+    [Fact]
+    public void InAndNotIn_WhenValuesAreEmpty_ShouldOmitConditionsAndKeepParametersEmpty()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom `users`";
+
+        // Act
+        var inBuilder = _builder.New().From("users").In("Id", Array.Empty<object>());
+        var notInBuilder = _builder.New().From("users").NotIn("Id", Array.Empty<object>());
+
+        // Assert
+        Assert.Equal(expected, inBuilder.ToSql());
+        Assert.Equal(expected, notInBuilder.ToSql());
+        Assert.Empty(inBuilder.GetParams());
+        Assert.Empty(notInBuilder.GetParams());
+    }
+
+    /// <summary>
     /// 测试 - Group By、Having 与多列排序应使用 MySql 引用格式。
     /// </summary>
     [Fact]
@@ -45,6 +65,25 @@ public partial class MySqlBuilderTest
 
         // Assert
         Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
+    /// 测试 - 聚合、分组、排序和分页组合时应保持 MySQL 子句顺序与分页参数。
+    /// </summary>
+    [Fact]
+    public void GroupBy_WhenAggregateOrderAndPageAreCombined_ShouldKeepClauseAndParameterOrder()
+    {
+        // Arrange
+        const string expected = "Select `Region`,Sum(`Amount`) As `Total` \r\nFrom `sales` \r\nGroup By `Region` Having Sum(Amount)>100 \r\nOrder By `Total` Desc \r\nLimit @_p_1 OFFSET @_p_0";
+
+        // Act
+        var sql = _builder.Select("Region").Sum("Amount", "Total").From("sales")
+            .GroupBy("Region", "Sum(Amount)>100").OrderBy("Total desc").Skip(50).Take(25).ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+        Assert.Equal(50, _builder.GetParam("@_p_0"));
+        Assert.Equal(25, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>

@@ -21,6 +21,7 @@ public class DatabaseScript
         await ExecuteAsync(connection, "Drop Table If Exists `Merchants.Merchant`;");
         await ExecuteAsync(connection, "Drop Table If Exists `Merchants.Company`;");
         await ExecuteAsync(connection, "Drop Table If Exists ParameterSample;");
+        await ExecuteAsync(connection, "Drop Table If Exists ProductItem;");
         await ExecuteAsync(connection, "Drop Table If Exists Product;");
         await ExecuteAsync(connection, @"
     Create Table Product(
@@ -39,6 +40,15 @@ public class DatabaseScript
     LastModifierId varchar(36) Null,
     IsDeleted bit Not Null Default 0,
     Version binary(8) Null
+);");
+    await ExecuteAsync(connection, @"
+Create Table ProductItem(
+    ProductItemId char(36) Not Null Primary Key,
+    ProductId char(36) Not Null,
+    Sku varchar(50) Not Null,
+    Quantity int Not Null,
+    Enabled bit Not Null Default 1,
+    Index IX_ProductItem_ProductId(ProductId)
 );");
         await ExecuteAsync(connection, @"
 Create Table ParameterSample(
@@ -82,6 +92,7 @@ End;");
         await ExecuteAsync(connection, "Delete From `Merchants.Company`;");
         await ExecuteAsync(connection, "Delete From `Merchants.Merchant`;");
         await ExecuteAsync(connection, "Delete From ParameterSample;");
+        await ExecuteAsync(connection, "Delete From ProductItem;");
         await ExecuteAsync(connection, "Delete From Product;");
     }
 

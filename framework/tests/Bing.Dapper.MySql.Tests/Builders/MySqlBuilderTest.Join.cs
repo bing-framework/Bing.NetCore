@@ -30,6 +30,25 @@ public partial class MySqlBuilderTest
     }
 
     /// <summary>
+    /// 测试 - 普通 Inner Join 的 On 条件应绑定到最后一个 Join 并生成单个参数。
+    /// </summary>
+    [Fact]
+    public void Join_WhenNormalTableValueOnConfigured_ShouldRenderSqlAndParameter()
+    {
+        // Arrange
+        const string expected = "Select `o`.`Id`,`i`.`Id` \r\nFrom `orders` As `o` \r\nJoin `order_items` As `i` On `i`.`OrderId`=@_p_0";
+
+        // Act
+        var sql = _builder.Select("o.Id,i.Id").From("orders", "o")
+            .Join("order_items", "i").On("i.OrderId", 42).ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+        Assert.Single(_builder.GetParams());
+        Assert.Equal(42, _builder.GetParam("@_p_0"));
+    }
+
+    /// <summary>
     /// 测试目的：AppendJoin 不应将调用方指定的方括号转换为 MySQL 标识符引号。
     /// </summary>
     [Fact]
