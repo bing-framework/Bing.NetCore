@@ -1,5 +1,7 @@
 ﻿using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -14,6 +16,41 @@ namespace Bing.Dapper;
 /// </summary>
 public static class DapperCoreServiceCollectionExtensions
 {
+    /// <summary>
+    /// 注册 SQL Provider 及其 Builder 创建委托。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="provider">SQL Provider。</param>
+    /// <param name="creator">使用查询级共享服务创建 Builder 的委托。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlBuilderProvider(this IServiceCollection services, ISqlProvider provider,
+        Func<SqlBuilderServices, ISqlBuilder> creator)
+    {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        if (provider == null)
+            throw new ArgumentNullException(nameof(provider));
+        if (creator == null)
+            throw new ArgumentNullException(nameof(creator));
+        var providerKey = provider.Key?.Trim();
+        if (string.IsNullOrWhiteSpace(providerKey))
+            throw new ArgumentException("SQL Provider Key 不能为空。", nameof(provider));
+        foreach (var descriptor in services)
+        {
+            if (descriptor.ServiceType != typeof(ISqlProvider) || descriptor.ImplementationInstance is not ISqlProvider registeredProvider)
+                continue;
+            if (string.Equals(registeredProvider.Key?.Trim(), providerKey, StringComparison.OrdinalIgnoreCase))
+            {
+                if (ReferenceEquals(registeredProvider, provider))
+                    return services;
+                throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 已注册。");
+            }
+        }
+        services.AddSingleton<ISqlProvider>(provider);
+        services.AddSingleton(new SqlBuilderFactoryRegistration(provider, creator));
+        return services;
+    }
+
     /// <summary>
     /// 注册 Dapper SQL 核心服务。
     /// </summary>
@@ -52,6 +89,7 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlParameterFactory, DefaultSqlParameterFactory>();
         services.TryAddSingleton<IDapperParameterBinder, DefaultSqlParameterBinder>();
         services.TryAddSingleton<ISqlParameterBinder>(provider => provider.GetRequiredService<IDapperParameterBinder>());
+        services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
         services.TryAddSingleton<SqlImplementationTypeOptions>();
         services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();

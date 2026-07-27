@@ -194,6 +194,37 @@
 
 ### 生命周期与 Clone 性能基准
 
+## Provider SPI 收敛追溯
+
+| 生产符号 | 关键行为 | 验证 |
+| --- | --- | --- |
+| `ISqlProvider.Key` / `SqlBuilderFactory.Create(string)` | Provider Key 是大小写不敏感、去除首尾空白的正式查找键；未知 Key 明确失败。 | `CustomProviderBuilderTest.Factory_WhenProviderKeyUsesDifferentCaseAndWhitespace_ShouldCreateExpectedBuilder`; `Factory_WhenProviderKeyIsUnknownOrDuplicated_ShouldThrowWithKey` |
+| `SqlBuilderFactory` / `SqlBuilderFactoryRegistration` | 不同 Key 可共享同一 `DatabaseType`；兼容的 `DatabaseType` 查找保留首个注册项。 | `CustomProviderBuilderTest.Factory_WhenDifferentProviderKeysShareDatabaseType_ShouldAllowRegistration` |
+| `SqlBuilderFactory.Create(ISqlProvider, SqlBuilderServices)` | Factory 原样传递查询级服务，避免把 Query 选项或数据库上下文提升为静态状态。 | `CustomProviderBuilderTest.Factory_WhenQueryServicesAreProvided_ShouldPassSameInstanceToBuilder` |
+| `SqlQueryBase.CreateSqlBuilder` / `AddSqlBuilderProvider` | 五个 Dapper Provider 的 Query/Executor 通过 DI Factory 创建 Builder，便捷注册和多 Provider 注册均注册映射。 | `Bing.Dapper.SqlServer.Tests`、`Bing.Dapper.MySql.Tests`、`Bing.Dapper.PostgreSql.Tests`、`Bing.Dapper.Oracle.Tests`、`Bing.Dapper.Sqlite.Tests`、`Bing.EntityFrameworkCore.Tests` Release 回归 |
+| `SqlServerSqlProvider.MaxParameterCount` | SQL Server 参数数上限固定为 2100；其他官方 Provider 显式声明无上限。 | `OfficialProviderInstanceTest.Provider_WhenParameterLimitIsRequested_ShouldReturnOfficialContract`; `CustomProviderBuilderTest.ParameterLimit_WhenLimitReached_ShouldRejectNewParameterAndAllowReplacement` |
+| `OraclePaginationRenderer` | Oracle 目标版本为 12c+，分页渲染为 `Offset ... Rows Fetch Next ... Rows Only`，Clone/New 保持参数隔离。 | `OracleBuilderTest.Page_WhenSkipAndTakeAreSet_ShouldRenderOracleOffsetFetchSyntax`; `Clone_WhenPageIsConfigured_ShouldKeepOracleOffsetFetchSyntaxAndParameters`; `New_WhenPageIsConfigured_ShouldUseNewOraclePaginationParameters` |
+| `SqlIdentifierPathParser` / `SqlAggregateArgumentValidator` / `SqlTableNameParser` | 严格解析结构化标识符，拒绝不完整路径与语句分隔符；聚合通配符仅允许 `Count(*)`。 | `SqlInternalParserTest.IdentifierPathParser_WhenQuotedThreePartPathIsProvided_ShouldReturnLogicalSegments`; `IdentifierPathParser_WhenPathIsInvalid_ShouldReturnFalse`; `AggregateArgumentValidator_WhenWildcardContractIsViolated_ShouldThrow`; `TableNameParser_WhenValidAliasOrUnsafeInputIsProvided_ShouldParseOrReject` |
+
+已删除兼容符号：`LegacySqlProvider`、`SqlClauseContext.Create(...)`、`SqlItem.AggregationFunc`、`ColumnItem.AggregationFunc`、`ColumnItem.IsAggregation`。聚合状态仅由 `SqlAggregateFunction` 与 `SqlAggregateDescriptor` 表示。
+
+### Provider SPI 发布前性能验收
+
+2026-07-27 在 Windows 10、Intel Core Ultra 7 270K Plus、.NET SDK `10.0.300`、.NET runtime `8.0.27` 上完成 90 个场景的 BenchmarkDotNet `0.14.0` 正式运行。所有基准统一使用 `FormalHost`：3 次启动、6 次预热、15 次迭代。
+
+| 场景 | Mean | Allocated | 结论 |
+| --- | ---: | ---: | --- |
+| MySQL 复杂 Builder 渲染 | 1.723 us | 12.27 KB | Provider Clause、分页和参数渲染维持稳定。 |
+| MySQL 复杂 Builder Clone | 482.2 ns | 3.72 KB | Provider Builder 的 Clone 保持低于 0.5 us。 |
+| `NewEmptyBuilder` | 335.3 ns | 4.62 KB | New 生命周期创建独立状态，不共享参数集合。 |
+| 20 Join Clone | 684.3 ns | 5.38 KB | Join 状态复制随规模线性增长，无异常退化。 |
+| 50 参数 Clone | 2.086 us | 18.42 KB | 参数复制为预期主要成本。 |
+| 100 映射配置缓存命中 | 293.0 ns | 64 B | 映射缓存命中未随 Provider SPI 变更失效。 |
+| Trace 关闭执行准备 | 1.301 us | 10.04 KB | 不生成 Debug SQL 的路径保持最低开销。 |
+| Trace 使用已生成 SQL | 1.944 us | 11.86 KB | 相比二次渲染 3.355 us / 21.90 KB，时间约降低 42%，分配约降低 46%。 |
+
+全部产物位于 `BenchmarkDotNet.Artifacts/pre-release-final/results/`，包含 MySQL 表名解析、Builder 渲染/构造/Clone、重复渲染、Append、聚合、Debug SQL、执行准备和元数据缓存报告。
+
 `MySqlBuilderConstructionBenchmarks` 与 `MySqlBuilderCloneBenchmarks` 使用与执行准备基准相同的 BenchmarkDotNet `0.14.0` `FormalHost` Job（1 launch、6 warmup、15 iteration），覆盖仅 From、1/5/20 Join、10/50 参数以及 raw/structured 混合场景。基准源为 `framework/tests/Bing.Data.Sql.Benchmarks/SqlMetadataBenchmarks.cs`。
 
 | 场景 | 覆盖范围 | 基线结论 |

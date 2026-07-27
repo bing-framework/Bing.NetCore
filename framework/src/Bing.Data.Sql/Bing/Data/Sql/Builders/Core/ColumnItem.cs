@@ -8,11 +8,6 @@ namespace Bing.Data.Sql.Builders.Core;
 public class ColumnItem
 {
     /// <summary>
-    /// 旧版字符串聚合函数名称。
-    /// </summary>
-    private readonly string _aggregationFunc;
-
-    /// <summary>
     /// 结构化聚合描述。
     /// </summary>
     private readonly SqlAggregateDescriptor _aggregate;
@@ -43,18 +38,6 @@ public class ColumnItem
     public Type TableType { get; }
 
     /// <summary>
-    /// 是否聚合函数。
-    /// </summary>
-    [Obsolete("标准聚合请使用 AggregateFunction。该属性仅用于兼容旧版字符串聚合。")]
-    public bool IsAggregation => AggregateFunction.HasValue || string.IsNullOrWhiteSpace(_aggregationFunc) == false;
-
-    /// <summary>
-    /// 旧版字符串聚合函数。标准聚合请使用 <see cref="AggregateFunction"/>。
-    /// </summary>
-    [Obsolete("标准聚合请使用 AggregateFunction。该属性仅用于兼容旧版字符串聚合。")]
-    public string AggregationFunc => _aggregationFunc;
-
-    /// <summary>
     /// 结构化聚合函数。
     /// </summary>
     public SqlAggregateFunction? AggregateFunction => _aggregate?.Function;
@@ -73,44 +56,6 @@ public class ColumnItem
     /// 是否将聚合参数作为已解析的 SQL 片段。
     /// </summary>
     public bool AggregateArgumentRaw => _aggregate?.ArgumentKind is SqlAggregateArgumentKind.Expression or SqlAggregateArgumentKind.Raw;
-
-    /// <summary>
-    /// 初始化一个<see cref="ColumnItem"/>类型的实例
-    /// </summary>
-    /// <param name="name">列名</param>
-    /// <param name="tableAlias">表别名</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="tableType">表类型</param>
-    /// <param name="raw">是否使用原始值</param>
-    /// <param name="isAggregation">已废弃的兼容参数，不影响聚合状态。</param>
-    /// <param name="aggregationFunc">旧版字符串聚合函数名称。</param>
-    /// <param name="aggregateFunction">结构化聚合函数。</param>
-    /// <param name="aggregateDistinct">是否对聚合参数去重。</param>
-    /// <param name="aggregateWildcard">是否使用聚合通配符参数。</param>
-    /// <param name="aggregateArgumentRaw">是否将聚合参数作为已解析的 SQL 片段。</param>
-    /// <param name="aggregateDatabaseName">结构化聚合列的数据库名称。</param>
-    private ColumnItem(string name, string tableAlias = null, string columnAlias = null, Type tableType = null,
-        bool raw = false, bool isAggregation = false, string aggregationFunc = null,
-        SqlAggregateFunction? aggregateFunction = null, bool aggregateDistinct = false,
-        bool aggregateWildcard = false, bool aggregateArgumentRaw = false, string aggregateDatabaseName = null)
-    {
-        Name = name;
-        TableAlias = tableAlias;
-        ColumnAlias = columnAlias;
-        TableType = tableType;
-        Raw = raw;
-        _aggregationFunc = aggregationFunc;
-        _aggregate = aggregateFunction.HasValue
-            ? new SqlAggregateDescriptor
-            {
-                Function = aggregateFunction.Value,
-                Distinct = aggregateDistinct,
-                ArgumentKind = aggregateWildcard ? SqlAggregateArgumentKind.Wildcard :
-                    aggregateArgumentRaw ? SqlAggregateArgumentKind.Expression : SqlAggregateArgumentKind.Column,
-                DatabaseName = aggregateDatabaseName
-            }
-            : null;
-    }
 
     /// <summary>
     /// 使用结构化聚合描述初始化列。
@@ -221,8 +166,7 @@ public class ColumnItem
             return GetAggregateSql(dialect, register);
         if (Raw)
             return dialect.GetColumn(Name, dialect.GetSafeName(ColumnAlias));
-        var result = new SqlItem(Name, GetTableAlias(register), ColumnAlias, isResolve: false,
-            aggregationFunc: _aggregationFunc);
+        var result = new SqlItem(Name, GetTableAlias(register), ColumnAlias, isResolve: false);
         return result.ToSql(dialect);
     }
 
@@ -284,8 +228,6 @@ public class ColumnItem
     /// </summary>
     public ColumnItem Clone()
     {
-        if (_aggregate != null)
-            return new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, _aggregate);
-        return new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, aggregationFunc: _aggregationFunc);
+        return new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, _aggregate);
     }
 }

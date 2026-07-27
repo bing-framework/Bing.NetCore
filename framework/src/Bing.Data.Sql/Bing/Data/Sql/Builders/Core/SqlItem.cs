@@ -28,11 +28,6 @@ public class SqlItem
     /// </summary>
     private string _alias;
 
-    /// <summary>
-    /// 旧版字符串聚合函数名称。
-    /// </summary>
-    private readonly string _aggregationFunc;
-
     #endregion
 
     #region 属性
@@ -61,12 +56,6 @@ public class SqlItem
     /// 数据库名称
     /// </summary>
     public string DatabaseName { get; private set; }
-
-    /// <summary>
-    /// 聚合函数
-    /// </summary>
-    [Obsolete("标准聚合请使用 SqlAggregateFunction。该属性仅用于兼容旧版字符串聚合。")]
-    public string AggregationFunc => _aggregationFunc;
 
     #endregion
 
@@ -122,16 +111,14 @@ public class SqlItem
     /// <param name="raw">是否使用原始值</param>
     /// <param name="isSplit">是否用句点分割名称</param>
     /// <param name="isResolve">是否解析名称</param>
-    /// <param name="aggregationFunc">聚合函数</param>
     internal SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true,
-        bool isResolve = true, string aggregationFunc = null)
+        bool isResolve = true)
     {
         if (string.IsNullOrWhiteSpace(name))
             return;
         _prefix = prefix;
         _alias = alias;
         IsRaw = raw;
-        _aggregationFunc = aggregationFunc;
         if (raw)
         {
             _name = name;
@@ -198,7 +185,7 @@ public class SqlItem
     /// </summary>
     public virtual SqlItem Clone()
     {
-        var result = new SqlItem(Name, Prefix, Alias, IsRaw, false, false, _aggregationFunc)
+        var result = new SqlItem(Name, Prefix, Alias, IsRaw, false, false)
         {
             DatabaseName = DatabaseName
         };
@@ -219,9 +206,7 @@ public class SqlItem
             return null;
         if (IsRaw)
             return Name;
-        var column = string.IsNullOrWhiteSpace(_aggregationFunc)
-            ? GetColumn(dialect)
-            : $"{_aggregationFunc}({GetColumn(dialect)})";
+        var column = GetColumn(dialect);
         var columnAlias = GetSafeName(dialect, Alias);
         return dialect.GetColumn(column, columnAlias);
     }

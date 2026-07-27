@@ -2,6 +2,7 @@
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using MySqlConnector;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public static class MySqlServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
         var queryOptions = new SqlOptions<MySqlQuery>();
         var executorOptions = new SqlOptions<MySqlExecutor>();
         queryOptions.RegisterStringTypeHandler();
@@ -105,6 +107,7 @@ public static class MySqlServiceCollectionExtensions
         where TImplementation : MySqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation>();
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
@@ -180,6 +183,7 @@ public static class MySqlServiceCollectionExtensions
         where TImplementation : MySqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation>();
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);

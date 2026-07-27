@@ -46,6 +46,9 @@ internal sealed class CustomSqlProvider : ISqlProvider
     }
 
     /// <inheritdoc />
+    public string Key => "custom.test";
+
+    /// <inheritdoc />
     public DatabaseType DatabaseType => DatabaseType.Sqlite;
 
     /// <inheritdoc />
@@ -158,6 +161,9 @@ internal sealed class LimitedCustomSqlProvider : ISqlProvider, ISqlParameterLimi
     }
 
     /// <inheritdoc />
+    public string Key => "custom.limited";
+
+    /// <inheritdoc />
     public DatabaseType DatabaseType => DatabaseType.MySql;
 
     /// <inheritdoc />
@@ -180,4 +186,43 @@ internal sealed class LimitedCustomSqlProvider : ISqlProvider, ISqlParameterLimi
 
     /// <inheritdoc />
     public int? MaxParameterCount => 1;
+}
+
+/// <summary>
+/// 复用 SQLite 数据库类型的外部 Provider 验收用别名。
+/// </summary>
+internal sealed class CustomSqliteAliasProvider : ISqlProvider
+{
+    /// <summary>
+    /// Provider 单例。
+    /// </summary>
+    public static CustomSqliteAliasProvider Instance { get; } = new();
+
+    private CustomSqliteAliasProvider()
+    {
+    }
+
+    /// <inheritdoc />
+    public string Key => "custom.sqlite-alias";
+
+    /// <inheritdoc />
+    public DatabaseType DatabaseType => DatabaseType.Sqlite;
+
+    /// <inheritdoc />
+    public IDialect Dialect => CustomSqlProvider.Instance.Dialect;
+
+    /// <inheritdoc />
+    public ISqlClauseFactory ClauseFactory => CustomSqlProvider.Instance.ClauseFactory;
+
+    /// <inheritdoc />
+    public ISqlTableReferenceParser TableReferenceParser => CustomSqlProvider.Instance.TableReferenceParser;
+
+    /// <inheritdoc />
+    public ISqlPaginationRenderer PaginationRenderer => CustomSqlProvider.Instance.PaginationRenderer;
+
+    /// <inheritdoc />
+    public IParameterManagerFactory ParameterManagerFactory => CustomSqlProvider.Instance.ParameterManagerFactory;
+
+    /// <inheritdoc />
+    public IParamLiteralsResolver ParamLiteralsResolver => CustomSqlProvider.Instance.ParamLiteralsResolver;
 }

@@ -3,6 +3,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using Oracle.ManagedDataAccess.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,7 @@ public static class OracleServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
         var queryOptions = new SqlOptions<OracleSqlQuery>();
         var executorOptions = new SqlOptions<OracleSqlExecutor>();
         queryOptions.RegisterStringTypeHandler();
@@ -104,6 +106,7 @@ public static class OracleServiceCollectionExtensions
         where TImplementation : OracleSqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation>();
+        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         sqlOptions.RegisterGuidTypeHandler();
@@ -180,6 +183,7 @@ public static class OracleServiceCollectionExtensions
         where TImplementation : OracleSqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation>();
+        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);

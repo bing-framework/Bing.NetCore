@@ -266,6 +266,37 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     protected abstract ISqlBuilder CreateSqlBuilder();
 
     /// <summary>
+    /// 根据当前查询状态创建 SQL Builder。
+    /// </summary>
+    /// <param name="provider">SQL 提供程序。</param>
+    /// <returns>SQL Builder。</returns>
+    protected ISqlBuilder CreateSqlBuilder(ISqlProvider provider)
+    {
+        var factory = ServiceProvider.GetService<ISqlBuilderFactory>();
+        if (factory == null)
+            throw new InvalidOperationException("未注册 SQL Builder 工厂。");
+        return factory.Create(provider, CreateSqlBuilderServices());
+    }
+
+    /// <summary>
+    /// 创建当前查询专属的 Builder 共享服务。
+    /// </summary>
+    /// <remarks>
+    /// 服务包可由同一 Builder 的 New 和 Clone 共享，但不得跨 Query 复用，避免泄漏 <see cref="SqlOptions"/>。
+    /// </remarks>
+    protected virtual SqlBuilderServices CreateSqlBuilderServices() => new(
+        EntityMappingResolver,
+        ServiceProvider.GetService<IDatabaseContextAccessor>(),
+        ServiceProvider.GetService<ISqlParameterFactory>(),
+        ServiceProvider.GetService<SqlMetadataOptions>(),
+        Options,
+        ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
+        ServiceProvider.GetService<ISqlObjectNameFormatter>(),
+        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(),
+        ServiceProvider.GetService<ISqlTableReferenceValidator>(),
+        ServiceProvider.GetService<IEntityModelMetadataProvider>());
+
+    /// <summary>
     /// 创建参数字面值解析器
     /// </summary>
     protected virtual IParamLiteralsResolver CreateParamLiteralsResolver() => new ParamLiteralsResolver();

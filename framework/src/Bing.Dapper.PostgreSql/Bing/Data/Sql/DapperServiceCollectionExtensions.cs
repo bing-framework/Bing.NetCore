@@ -2,6 +2,7 @@
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using Npgsql;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public static class PostgreSqlServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+        services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
         var queryOptions = new SqlOptions<PostgreSqlQuery> { DatabaseType = DatabaseType.PgSql };
         var executorOptions = new SqlOptions<PostgreSqlExecutor> { DatabaseType = DatabaseType.PgSql };
         queryOptions.RegisterStringTypeHandler();
@@ -101,6 +103,7 @@ public static class PostgreSqlServiceCollectionExtensions
         where TImplementation : PostgreSqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.PgSql };
+        services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
@@ -176,6 +179,7 @@ public static class PostgreSqlServiceCollectionExtensions
         where TImplementation : PostgreSqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.PgSql };
+        services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);

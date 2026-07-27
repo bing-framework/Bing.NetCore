@@ -218,16 +218,16 @@ public class PostgreSqlParamLiteralsResolverTest
     }
 
     /// <summary>
-    /// 测试目的：Instance 每次返回新实例（非单例设计），两次访问引用不等。
+    /// 测试目的：Instance 应返回可安全共享的同一无状态解析器实例。
     /// </summary>
     [Fact]
-    public void Instance_CalledTwice_ShouldReturnDifferentInstances()
+    public void Instance_CalledTwice_ShouldReturnSameInstance()
     {
         // Arrange & Act
         var first = PostgreSqlParamLiteralsResolver.Instance;
         var second = PostgreSqlParamLiteralsResolver.Instance;
 
-        // Assert：构造函数封闭，但 Instance 每次 new 一个
-        ReferenceEquals(first, second).ShouldBeFalse();
+        // Assert
+        ReferenceEquals(first, second).ShouldBeTrue();
     }
 }

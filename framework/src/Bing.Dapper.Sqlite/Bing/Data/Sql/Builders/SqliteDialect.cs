@@ -5,7 +5,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// Sqlite方言
 /// </summary>
-public class SqliteDialect : DialectBase
+public sealed class SqliteDialect : DialectBase
 {
     /// <summary>
     /// 封闭构造函数
@@ -15,7 +15,7 @@ public class SqliteDialect : DialectBase
     /// <summary>
     /// Sqlite方言实例
     /// </summary>
-    public static IDialect Instance => new SqliteDialect();
+    public static SqliteDialect Instance { get; } = new();
 
     /// <inheritdoc />
     public override char OpeningIdentifier => '`';

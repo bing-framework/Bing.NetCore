@@ -48,10 +48,14 @@ public class TestSqlBuilder : SqlBuilderBase
         ISqlDatabaseContextResolver databaseContextResolver = null)
     {
         dialect ??= TestDialect.Instance;
-        return SqlClauseContext.Create(builder ?? new TestSqlBuilder(dialect), dialect,
+        var services = new SqlBuilderServices(entityMappingResolver, databaseContextAccessor, parameterFactory,
+            metadataOptions, options, databaseContextResolver);
+        var databaseContext = services.DatabaseContextResolver.Resolve(services.Options) ??
+            services.Options.GetDatabaseContext() ?? services.DatabaseContextAccessor?.Current ??
+            services.MetadataOptions.DefaultDatabaseContext;
+        return new SqlClauseContext(builder ?? new TestSqlBuilder(services, dialect), new TestSqlProvider(dialect),
             entityResolver ?? new EntityResolver(), aliasRegister ?? new EntityAliasRegister(),
-            parameterManager ?? new ParameterManager(dialect), entityMappingResolver, databaseContextAccessor,
-            parameterFactory, metadataOptions, options, databaseContextResolver);
+            parameterManager ?? new ParameterManager(dialect), new SqlBuilderExecutionContext(databaseContext), services);
     }
 
     /// <summary>
@@ -97,6 +101,8 @@ public class TestSqlBuilder : SqlBuilderBase
 
     private sealed class TestSqlProvider : ISqlProvider
     {
+        public string Key => "test.sqlserver";
+
         public TestSqlProvider(IDialect dialect) => Dialect = dialect;
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
         public IDialect Dialect { get; }

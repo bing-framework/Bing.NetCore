@@ -1,6 +1,7 @@
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Enums;
 using Bing.Data.Sql.CustomProvider.Tests.Samples;
 using Xunit;
 
@@ -95,6 +96,88 @@ public class CustomProviderBuilderTest
         // Assert
         Assert.IsType<CustomSqlBuilder>(byProvider);
         Assert.IsType<CustomSqlBuilder>(byDatabaseType);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider Key 应为大小写不敏感的正式创建入口，并接受首尾空白。
+    /// </summary>
+    [Fact]
+    public void Factory_WhenProviderKeyUsesDifferentCaseAndWhitespace_ShouldCreateExpectedBuilder()
+    {
+        // Arrange
+        var factory = new SqlBuilderFactory(new[]
+        {
+            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder())
+        });
+
+        // Act
+        var builder = factory.Create("  CUSTOM.TEST  ");
+
+        // Assert
+        Assert.IsType<CustomSqlBuilder>(builder);
+    }
+
+    /// <summary>
+    /// 测试目的：Factory 应将调用方提供的查询级共享服务原样传递给外部 Builder。
+    /// </summary>
+    [Fact]
+    public void Factory_WhenQueryServicesAreProvided_ShouldPassSameInstanceToBuilder()
+    {
+        // Arrange
+        var services = new SqlBuilderServices();
+        var factory = new SqlBuilderFactory(new[]
+        {
+            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, builderServices => new CustomSqlBuilder(builderServices))
+        });
+
+        // Act
+        var builder = Assert.IsType<CustomSqlBuilder>(factory.Create(CustomSqlProvider.Instance, services));
+
+        // Assert
+        Assert.Same(services, builder.SharedServices);
+    }
+
+    /// <summary>
+    /// 测试目的：不同 Key 的外部 Provider 应可复用同一个 DatabaseType，兼容入口保留首个官方映射。
+    /// </summary>
+    [Fact]
+    public void Factory_WhenDifferentProviderKeysShareDatabaseType_ShouldAllowRegistration()
+    {
+        // Arrange
+        var factory = new SqlBuilderFactory(new[]
+        {
+            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder()),
+            new SqlBuilderFactoryRegistration(CustomSqliteAliasProvider.Instance, () => new CustomSqlBuilder())
+        });
+
+        // Act
+        var first = factory.Create(CustomSqlProvider.Instance.Key);
+        var alias = factory.Create(CustomSqliteAliasProvider.Instance.Key);
+        var compatibility = factory.Create(DatabaseType.Sqlite);
+
+        // Assert
+        Assert.IsType<CustomSqlBuilder>(first);
+        Assert.IsType<CustomSqlBuilder>(alias);
+        Assert.IsType<CustomSqlBuilder>(compatibility);
+    }
+
+    /// <summary>
+    /// 测试目的：未知和重复 Provider Key 应返回包含 Key 的明确异常。
+    /// </summary>
+    [Fact]
+    public void Factory_WhenProviderKeyIsUnknownOrDuplicated_ShouldThrowWithKey()
+    {
+        // Arrange
+        var registration = new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder());
+        var factory = new SqlBuilderFactory(new[] { registration });
+
+        // Act
+        var unknown = Assert.Throws<NotSupportedException>(() => factory.Create("custom.missing"));
+        var duplicated = Assert.Throws<ArgumentException>(() => new SqlBuilderFactory(new[] { registration, registration }));
+
+        // Assert
+        Assert.Contains("custom.missing", unknown.Message);
+        Assert.Contains("custom.test", duplicated.Message);
     }
 
     /// <summary>

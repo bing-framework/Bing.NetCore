@@ -14,7 +14,7 @@ namespace Bing.Data.Sql.Benchmarks;
 /// SQL 元数据与结构化表引用性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlMetadataBenchmarks
 {
     private DefaultEntityMappingResolver _mappingResolver;
@@ -161,6 +161,7 @@ public class SqlMetadataBenchmarks
     private sealed class BenchmarkSqlProvider : ISqlProvider
     {
         public static BenchmarkSqlProvider Instance { get; } = new();
+        public string Key => "benchmark.sqlserver";
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
         public IDialect Dialect { get; } = new BenchmarkDialect();
         public ISqlClauseFactory ClauseFactory { get; } = new DefaultSqlClauseFactory();
@@ -195,7 +196,7 @@ internal static class Program
 /// MySQL 表名解析性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlTableNameParserBenchmarks
 {
     /// <summary>
@@ -235,7 +236,7 @@ public class MySqlTableNameParserBenchmarks
 /// MySQL Builder 真实 Provider 渲染性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlBuilderBenchmarks
 {
     private MySqlBuilder _simpleBuilder;
@@ -309,7 +310,7 @@ public class MySqlBuilderBenchmarks
 /// MySQL Builder 重复渲染性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlRepeatedRenderBenchmarks
 {
     private MySqlBuilder _builder;
@@ -365,7 +366,7 @@ public class MySqlRepeatedRenderBenchmarks
 /// MySQL 原始 Append 构建性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlAppendBenchmarks
 {
     /// <summary>
@@ -406,7 +407,7 @@ public class MySqlAppendBenchmarks
 /// MySQL Builder 构建性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlBuilderConstructionBenchmarks
 {
     /// <summary>
@@ -479,7 +480,7 @@ public class MySqlBuilderConstructionBenchmarks
 /// MySQL Builder Clone 性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlBuilderCloneBenchmarks
 {
     private ContextExposingMySqlBuilder _fromOnlyBuilder;
@@ -619,7 +620,7 @@ public class MySqlBuilderCloneBenchmarks
 /// MySQL 调试 SQL 渲染性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlDebugRenderingBenchmarks
 {
     private MySqlBuilder _builder;
@@ -659,7 +660,7 @@ public class SqlDebugRenderingBenchmarks
 /// MySQL 大参数调试 SQL 渲染性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlDebugRenderingLargeParameterBenchmarks
 {
     private MySqlBuilder _builder;
@@ -703,7 +704,7 @@ public class SqlDebugRenderingLargeParameterBenchmarks
 /// SQL 查询执行准备性能基线。
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(launchCount: 1, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlQueryExecutionPreparationBenchmarks
 {
     private MySqlBuilder _builder;

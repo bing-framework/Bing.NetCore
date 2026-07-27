@@ -7,7 +7,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// PostgreSql参数字面值解析器
 /// </summary>
-public class PostgreSqlParamLiteralsResolver : IParamLiteralsResolver
+public sealed class PostgreSqlParamLiteralsResolver : IParamLiteralsResolver
 {
     /// <summary>
     /// 封闭构造函数
@@ -17,7 +17,7 @@ public class PostgreSqlParamLiteralsResolver : IParamLiteralsResolver
     /// <summary>
     /// PostgreSql参数字面值解析器实例
     /// </summary>
-    public static IParamLiteralsResolver Instance => new PostgreSqlParamLiteralsResolver();
+    public static PostgreSqlParamLiteralsResolver Instance { get; } = new();
 
     /// <inheritdoc />
     public string GetParamLiterals(object value)

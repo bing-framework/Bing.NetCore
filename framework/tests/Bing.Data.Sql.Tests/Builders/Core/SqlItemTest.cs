@@ -10,23 +10,6 @@ namespace Bing.Data.Sql.Tests.Builders.Core;
 public class SqlItemTest
 {
     /// <summary>
-    /// 测试 - 旧字符串聚合应保持渲染和 Clone 兼容，供升级期间的既有调用方使用。
-    /// </summary>
-    [Fact]
-    public void LegacyAggregationFunction_WhenCloned_ShouldPreserveRendering()
-    {
-        // Arrange
-        var item = new SqlItem("a", alias: "Total", aggregationFunc: "Sum");
-
-        // Act
-        var clone = item.Clone();
-
-        // Assert
-        Assert.Equal("Sum([a]) As [Total]", item.ToSql(TestDialect.Instance));
-        Assert.Equal("Sum([a]) As [Total]", clone.ToSql(TestDialect.Instance));
-    }
-
-    /// <summary>
     /// 只设置名称
     /// </summary>
     [Fact]

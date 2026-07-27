@@ -5,7 +5,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// MySql方言
 /// </summary>
-public class MySqlDialect : DialectBase
+public sealed class MySqlDialect : DialectBase
 {
     /// <summary>
     /// 封闭构造函数
@@ -15,7 +15,7 @@ public class MySqlDialect : DialectBase
     /// <summary>
     /// MySql方言实例
     /// </summary>
-    public static IDialect Instance => new MySqlDialect();
+    public static MySqlDialect Instance { get; } = new();
 
     /// <inheritdoc />
     public override char OpeningIdentifier => '`';

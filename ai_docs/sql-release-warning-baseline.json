@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "configuration": "Release",
+  "command": "dotnet build .\\Bing.All.sln -c Release --no-restore -nologo -v minimal",
+  "generatedAtUtc": "2026-07-27",
+  "totalWarnings": 66,
+  "allowedCategories": [
+    { "code": "NU1902", "count": 25, "scope": "existing dependency advisory" },
+    { "code": "NU1903", "count": 14, "scope": "existing dependency advisory" },
+    { "code": "NU1904", "count": 1, "scope": "existing dependency advisory" },
+    { "code": "NETSDK1138", "count": 4, "scope": "net6.0 end-of-support projects" },
+    { "code": "CS0108", "count": 4, "scope": "existing member hiding" },
+    { "code": "CS0114", "count": 3, "scope": "existing member hiding" },
+    { "code": "CS0618", "count": 1, "scope": "existing obsolete API use" },
+    { "code": "CS8632", "count": 14, "scope": "existing nullable annotation configuration" }
+  ],
+  "notes": "Release build completed successfully. SQL Provider SPI、兼容 API 清理和目录治理未引入新的编译器或 XML 文档警告。"
+}

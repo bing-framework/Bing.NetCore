@@ -2,6 +2,7 @@
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public static class SqliteServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
         var queryOptions = new SqlOptions<SqliteSqlQuery>();
         var executorOptions = new SqlOptions<SqliteSqlExecutor>();
         queryOptions.RegisterStringTypeHandler();
@@ -101,6 +103,7 @@ public static class SqliteServiceCollectionExtensions
         where TImplementation : SqliteSqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation>();
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
@@ -176,6 +179,7 @@ public static class SqliteServiceCollectionExtensions
         where TImplementation : SqliteSqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation>();
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);

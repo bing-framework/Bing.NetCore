@@ -2,6 +2,7 @@
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public static class SqlServerServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
         var queryOptions = new SqlOptions<SqlServerSqlQuery>();
         var executorOptions = new SqlOptions<SqlServerSqlExecutor>();
         queryOptions.RegisterStringTypeHandler();
@@ -100,6 +102,7 @@ public static class SqlServerServiceCollectionExtensions
         where TInterface : ISqlQuery
         where TImplementation : SqlServerSqlQueryBase, TInterface
     {
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
@@ -175,6 +178,7 @@ public static class SqlServerServiceCollectionExtensions
         where TInterface : ISqlExecutor
         where TImplementation : SqlServerSqlExecutorBase, TInterface
     {
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();

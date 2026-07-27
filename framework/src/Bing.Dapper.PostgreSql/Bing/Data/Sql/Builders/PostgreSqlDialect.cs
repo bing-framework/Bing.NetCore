@@ -5,7 +5,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// PostgreSql方言
 /// </summary>
-public class PostgreSqlDialect : DialectBase
+public sealed class PostgreSqlDialect : DialectBase
 {
     /// <summary>
     /// 封闭构造函数
@@ -15,7 +15,7 @@ public class PostgreSqlDialect : DialectBase
     /// <summary>
     /// PostgreSql方言实例
     /// </summary>
-    public static IDialect Instance => new PostgreSqlDialect();
+    public static PostgreSqlDialect Instance { get; } = new();
 
     /// <inheritdoc />
     public override char OpeningIdentifier => '"';

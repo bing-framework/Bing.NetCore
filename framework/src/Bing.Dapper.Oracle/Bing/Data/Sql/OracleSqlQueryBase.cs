@@ -20,9 +20,5 @@ public abstract class OracleSqlQueryBase : SqlQueryBase
     }
 
     /// <inheritdoc />
-    protected override ISqlBuilder CreateSqlBuilder() => new OracleBuilder(new SqlBuilderServices(
-        EntityMappingResolver, ServiceProvider.GetService<IDatabaseContextAccessor>(),
-        ServiceProvider.GetService<ISqlParameterFactory>(), ServiceProvider.GetService<SqlMetadataOptions>(), Options,
-        ServiceProvider.GetService<ISqlDatabaseContextResolver>(), ServiceProvider.GetService<ISqlObjectNameFormatter>(),
-        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(), ServiceProvider.GetService<ISqlTableReferenceValidator>()));
+    protected override ISqlBuilder CreateSqlBuilder() => CreateSqlBuilder(OracleSqlProvider.Instance);
 }

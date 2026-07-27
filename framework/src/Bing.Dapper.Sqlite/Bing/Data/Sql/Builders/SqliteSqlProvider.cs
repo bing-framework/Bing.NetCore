@@ -6,17 +6,22 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>SQLite SQL 提供程序。</summary>
-public sealed class SqliteSqlProvider : ISqlProvider
+public sealed class SqliteSqlProvider : ISqlProvider, ISqlParameterLimitProvider
 {
     public static SqliteSqlProvider Instance { get; } = new();
     private SqliteSqlProvider() { }
+    /// <inheritdoc />
+    public string Key => "bing.sqlite";
     public DatabaseType DatabaseType => DatabaseType.Sqlite;
-    public IDialect Dialect => SqliteDialect.Instance;
+    public IDialect Dialect { get; } = SqliteDialect.Instance;
     public ISqlClauseFactory ClauseFactory { get; } = new SqliteClauseFactory();
     public ISqlTableReferenceParser TableReferenceParser => DefaultSqlTableReferenceParser.Instance;
     public ISqlPaginationRenderer PaginationRenderer { get; } = new SqlitePaginationRenderer();
     public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
-    public IParamLiteralsResolver ParamLiteralsResolver => new ParamLiteralsResolver();
+    public IParamLiteralsResolver ParamLiteralsResolver { get; } =
+        global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
+    /// <inheritdoc />
+    public int? MaxParameterCount => null;
 
     private sealed class SqliteClauseFactory : ISqlClauseFactory
     {

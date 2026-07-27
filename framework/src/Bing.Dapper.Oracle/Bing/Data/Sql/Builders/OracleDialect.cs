@@ -7,7 +7,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// Oracle方言
 /// </summary>
-public class OracleDialect : DialectBase
+public sealed class OracleDialect : DialectBase
 {
     /// <summary>
     /// 封闭构造方法
@@ -17,7 +17,7 @@ public class OracleDialect : DialectBase
     /// <summary>
     /// Oracle方言实例
     /// </summary>
-    public static IDialect Instance => new OracleDialect();
+    public static OracleDialect Instance { get; } = new();
 
     /// <inheritdoc />
     public override char OpeningIdentifier => '"';

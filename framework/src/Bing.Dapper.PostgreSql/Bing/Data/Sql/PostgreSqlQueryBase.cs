@@ -19,9 +19,5 @@ public abstract class PostgreSqlQueryBase : SqlQueryBase
     }
 
     /// <inheritdoc />
-    protected override ISqlBuilder CreateSqlBuilder() => new PostgreSqlBuilder(new SqlBuilderServices(
-        EntityMappingResolver, ServiceProvider.GetService<IDatabaseContextAccessor>(),
-        ServiceProvider.GetService<ISqlParameterFactory>(), ServiceProvider.GetService<SqlMetadataOptions>(), Options,
-        ServiceProvider.GetService<ISqlDatabaseContextResolver>(), ServiceProvider.GetService<ISqlObjectNameFormatter>(),
-        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(), ServiceProvider.GetService<ISqlTableReferenceValidator>()));
+    protected override ISqlBuilder CreateSqlBuilder() => CreateSqlBuilder(PostgreSqlSqlProvider.Instance);
 }
