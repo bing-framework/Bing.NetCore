@@ -11,5 +11,5 @@ public interface ISqlFilter
     /// 过滤
     /// </summary>
     /// <param name="context">Sql查询执行上下文</param>
-    void Filter(SqlContext context);
+    void Filter(SqlFilterContext context);
 }

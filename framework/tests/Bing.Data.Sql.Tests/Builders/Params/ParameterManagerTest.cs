@@ -36,6 +36,22 @@ public class ParameterManagerTest
     }
 
     /// <summary>
+    /// 测试 - 自动参数名应跳过已由子查询合并或调用方显式添加的名称。
+    /// </summary>
+    [Fact]
+    public void GenerateName_WhenGeneratedNameAlreadyExists_ShouldSkipExistingName()
+    {
+        // Arrange
+        _manager.Add("@_p_0", 1);
+
+        // Act
+        var name = _manager.GenerateName();
+
+        // Assert
+        Assert.Equal("@_p_1", name);
+    }
+
+    /// <summary>
     /// 测试 - 是否包含参数
     /// </summary>
     [Fact]

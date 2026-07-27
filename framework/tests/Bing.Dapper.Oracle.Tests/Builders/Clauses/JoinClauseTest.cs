@@ -17,15 +17,10 @@ public class OracleJoinClauseTest
 
     public OracleJoinClauseTest()
     {
-        _parameterManager = new ParameterManager(OracleDialect.Instance);
         var builder = new OracleBuilder();
-        _clause = new OracleJoinClause(
-            builder,
-            OracleDialect.Instance,
-            new EntityResolver(),
-            new EntityAliasRegister(),
-            _parameterManager,
-            null);
+        var parts = (ISqlPartAccessor)builder;
+        _parameterManager = parts.ParameterManager;
+        _clause = (OracleJoinClause)parts.JoinClause;
     }
 
     private string GetSql() => _clause.ToSql();

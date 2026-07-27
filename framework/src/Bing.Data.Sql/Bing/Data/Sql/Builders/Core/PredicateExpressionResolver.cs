@@ -19,26 +19,18 @@ public class PredicateExpressionResolver
     private readonly Helper _helper;
 
     /// <summary>
-    /// 初始化一个<see cref="PredicateExpressionResolver"/>类型的实例
+    /// 使用子句运行上下文初始化谓词表达式解析器。
     /// </summary>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="entityMappingResolver">实体映射解析器</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
-    /// <param name="options">Sql 元数据配置</param>
-    /// <param name="sqlOptions">Sql 配置</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
-    public PredicateExpressionResolver(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
-        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions options = null, SqlOptions sqlOptions = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null, DatabaseContext databaseContext = null) =>
-        _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, options, sqlOptions, databaseContextResolver, databaseContext);
+    /// <param name="context">子句运行上下文。</param>
+    public PredicateExpressionResolver(SqlClauseContext context) : this(context, null) { }
+
+    /// <summary>
+    /// 使用子句运行上下文和已创建的辅助操作初始化谓词表达式解析器。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="helper">可复用的辅助操作。</param>
+    internal PredicateExpressionResolver(SqlClauseContext context, Helper helper) =>
+        _helper = helper ?? new Helper(context);
 
     /// <summary>
     /// 解析谓词表达式

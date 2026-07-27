@@ -49,17 +49,16 @@ public class GroupByClause : IGroupByClause
     /// <summary>
     /// 初始化一个<see cref="GroupByClause"/>类型的实例
     /// </summary>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
+    /// <param name="context">子句运行上下文。</param>
     /// <param name="group">分组字段</param>
     /// <param name="having">分组条件</param>
-    public GroupByClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        List<SqlItem> group = null, string having = null)
+    public GroupByClause(SqlClauseContext context, List<SqlItem> group = null, string having = null)
     {
-        _dialect = dialect;
-        _resolver = resolver;
-        _register = register;
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
+        _dialect = context.Dialect;
+        _resolver = context.EntityResolver;
+        _register = context.AliasRegister;
         _group = group ?? new List<SqlItem>();
         _having = having;
     }
@@ -67,8 +66,9 @@ public class GroupByClause : IGroupByClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="register">实体别名注册器</param>
-    public virtual IGroupByClause Clone(IEntityAliasRegister register) => new GroupByClause(_dialect, _resolver, register, new List<SqlItem>(_group), _having);
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    public virtual IGroupByClause Clone(SqlClauseContext context) => new GroupByClause(context,
+        _group.Select(item => item.Clone()).ToList(), _having);
 
     /// <summary>
     /// 分组

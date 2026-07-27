@@ -1,4 +1,5 @@
 using Bing.Data;
+using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql.Tests;
 
@@ -27,26 +28,43 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试 - Query执行资源接口不应作为普通业务API公开。
+    /// 测试 - Query 执行资源仅通过公开窄 SPI 提供给执行实现。
     /// </summary>
     [Fact]
-    public void ExecutionResourceContracts_ShouldNotBePublic()
+    public void ExecutionResourceContracts_ShouldBePublicNarrowSpis()
     {
         // Arrange
-        var assembly = typeof(ISqlTransactionScope).Assembly;
-
-        // Act
-        var accessor = assembly.GetType("Bing.Data.Sql.ISqlExecutionResourceAccessor");
-        var binder = assembly.GetType("Bing.Data.Sql.ISqlExecutionResourceBinder");
-        var metadataBinder = assembly.GetType("Bing.Data.Sql.ISqlQueryMetadataBinder");
+        var accessor = typeof(ISqlQueryExecutionResourceAccessor);
+        var binder = typeof(ISqlQueryResourceBinder);
+        var metadataBinder = typeof(ISqlQueryMetadataBinder);
+        var scopeBinder = typeof(ISqlTransactionScopeResourceBinder);
 
         // Assert
-        Assert.NotNull(accessor);
-        Assert.NotNull(binder);
-        Assert.NotNull(metadataBinder);
-        Assert.False(accessor.IsPublic);
-        Assert.False(binder.IsPublic);
-        Assert.False(metadataBinder.IsPublic);
+        Assert.True(accessor.IsPublic);
+        Assert.True(binder.IsPublic);
+        Assert.True(metadataBinder.IsPublic);
+        Assert.True(scopeBinder.IsPublic);
+    }
+
+    /// <summary>
+    /// 测试目的：SQL Item 必须仅通过语义工厂公开创建，避免布尔参数表达原始或解析状态。
+    /// </summary>
+    [Fact]
+    public void SqlItemFactories_ShouldReplacePublicBooleanConstructors()
+    {
+        // Arrange
+        var itemTypes = new[] { typeof(SqlItem), typeof(ColumnItem), typeof(JoinItem) };
+
+        // Act
+        var rawFactory = typeof(SqlItem).GetMethod(nameof(SqlItem.Raw));
+        var tableFactory = typeof(JoinItem).GetMethod(nameof(JoinItem.CreateTable));
+        var atomicFactory = typeof(JoinItem).GetMethod(nameof(JoinItem.CreateAtomicTable));
+
+        // Assert
+        Assert.All(itemTypes, type => Assert.Empty(type.GetConstructors()));
+        Assert.NotNull(rawFactory);
+        Assert.NotNull(tableFactory);
+        Assert.NotNull(atomicFactory);
     }
 
     /// <summary>

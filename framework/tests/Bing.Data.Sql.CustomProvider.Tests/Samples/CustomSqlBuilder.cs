@@ -1,0 +1,183 @@
+using Bing.Data.Enums;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
+
+namespace Bing.Data.Sql.CustomProvider.Tests.Samples;
+
+/// <summary>
+/// 外部 Provider 验收用 SQL Builder。
+/// </summary>
+internal sealed class CustomSqlBuilder : SqlBuilderBase
+{
+    /// <summary>
+    /// 初始化外部 Provider SQL Builder。
+    /// </summary>
+    /// <param name="services">共享服务。</param>
+    /// <param name="parameterManager">参数管理器。</param>
+    public CustomSqlBuilder(SqlBuilderServices services = null, IParameterManager parameterManager = null)
+        : base(CustomSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager)
+    {
+    }
+
+    /// <summary>
+    /// 获取共享服务，用于验证 New 与 Clone 的继承边界。
+    /// </summary>
+    public SqlBuilderServices SharedServices => Services;
+
+    /// <inheritdoc />
+    protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
+        new CustomSqlBuilder(Services, parameterManager);
+}
+
+/// <summary>
+/// 外部 Provider 验收用 SQL Provider。
+/// </summary>
+internal sealed class CustomSqlProvider : ISqlProvider
+{
+    /// <summary>
+    /// Provider 单例。
+    /// </summary>
+    public static CustomSqlProvider Instance { get; } = new();
+
+    private CustomSqlProvider()
+    {
+    }
+
+    /// <inheritdoc />
+    public DatabaseType DatabaseType => DatabaseType.Sqlite;
+
+    /// <inheritdoc />
+    public IDialect Dialect { get; } = new CustomDialect();
+
+    /// <inheritdoc />
+    public ISqlClauseFactory ClauseFactory { get; } = new CustomClauseFactory();
+
+    /// <inheritdoc />
+    public ISqlTableReferenceParser TableReferenceParser { get; } = new CustomTableReferenceParser();
+
+    /// <inheritdoc />
+    public ISqlPaginationRenderer PaginationRenderer { get; } = new CustomPaginationRenderer();
+
+    /// <inheritdoc />
+    public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
+
+    /// <inheritdoc />
+    public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
+}
+
+/// <summary>
+/// 外部 Provider 验收用子句工厂。
+/// </summary>
+internal sealed class CustomClauseFactory : ISqlClauseFactory
+{
+    /// <inheritdoc />
+    public ISelectClause CreateSelect(SqlClauseContext context) => new SelectClause(context);
+
+    /// <inheritdoc />
+    public IFromClause CreateFrom(SqlClauseContext context) => new FromClause(context);
+
+    /// <inheritdoc />
+    public IJoinClause CreateJoin(SqlClauseContext context) => new JoinClause(context);
+
+    /// <inheritdoc />
+    public IWhereClause CreateWhere(SqlClauseContext context) => new WhereClause(context);
+
+    /// <inheritdoc />
+    public IGroupByClause CreateGroupBy(SqlClauseContext context) => new GroupByClause(context);
+
+    /// <inheritdoc />
+    public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
+}
+
+/// <summary>
+/// 外部 Provider 验收用方言。
+/// </summary>
+internal sealed class CustomDialect : DialectBase
+{
+}
+
+/// <summary>
+/// 外部 Provider 验收用分页渲染器。
+/// </summary>
+internal sealed class CustomPaginationRenderer : ISqlPaginationRenderer
+{
+    /// <inheritdoc />
+    public string Render(string offsetParameterName, string limitParameterName) =>
+        $"Limit {limitParameterName} Offset {offsetParameterName}";
+}
+
+/// <summary>
+/// 外部 Provider 验收用表引用解析器。
+/// </summary>
+internal sealed class CustomTableReferenceParser : ISqlTableReferenceParser
+{
+    /// <inheritdoc />
+    public SqlTableName Parse(string table, string alias = null, string schema = null)
+    {
+        if (string.Equals(table, "custom:users", StringComparison.OrdinalIgnoreCase))
+            return new SqlTableName("ParsedUsers", alias ?? "parsed_users", schema);
+        if (string.Equals(table, "custom:orders", StringComparison.OrdinalIgnoreCase))
+            return new SqlTableName("ParsedOrders", alias ?? "parsed_orders", schema);
+        return DefaultSqlTableReferenceParser.Instance.Parse(table, alias, schema);
+    }
+}
+
+/// <summary>
+/// 外部 Provider 参数数量上限验收用 SQL Builder。
+/// </summary>
+internal sealed class LimitedCustomSqlBuilder : SqlBuilderBase
+{
+    /// <summary>
+    /// 初始化外部 Provider 参数数量上限验收 Builder。
+    /// </summary>
+    /// <param name="parameterManager">参数管理器。</param>
+    public LimitedCustomSqlBuilder(IParameterManager parameterManager = null)
+        : base(LimitedCustomSqlProvider.Instance, SqlBuilderServices.CreateDefault(), parameterManager)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
+        new LimitedCustomSqlBuilder(parameterManager);
+}
+
+/// <summary>
+/// 外部 Provider 参数数量上限验收用 SQL Provider。
+/// </summary>
+internal sealed class LimitedCustomSqlProvider : ISqlProvider, ISqlParameterLimitProvider
+{
+    /// <summary>
+    /// Provider 单例。
+    /// </summary>
+    public static LimitedCustomSqlProvider Instance { get; } = new();
+
+    private LimitedCustomSqlProvider()
+    {
+    }
+
+    /// <inheritdoc />
+    public DatabaseType DatabaseType => DatabaseType.MySql;
+
+    /// <inheritdoc />
+    public IDialect Dialect => CustomSqlProvider.Instance.Dialect;
+
+    /// <inheritdoc />
+    public ISqlClauseFactory ClauseFactory => CustomSqlProvider.Instance.ClauseFactory;
+
+    /// <inheritdoc />
+    public ISqlTableReferenceParser TableReferenceParser => CustomSqlProvider.Instance.TableReferenceParser;
+
+    /// <inheritdoc />
+    public ISqlPaginationRenderer PaginationRenderer => CustomSqlProvider.Instance.PaginationRenderer;
+
+    /// <inheritdoc />
+    public IParameterManagerFactory ParameterManagerFactory => CustomSqlProvider.Instance.ParameterManagerFactory;
+
+    /// <inheritdoc />
+    public IParamLiteralsResolver ParamLiteralsResolver => CustomSqlProvider.Instance.ParamLiteralsResolver;
+
+    /// <inheritdoc />
+    public int? MaxParameterCount => 1;
+}

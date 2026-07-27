@@ -12,11 +12,9 @@ public interface IWhereClause : ICondition
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <returns></returns>
-    IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager);
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    /// <returns>独立的 Where 子句。</returns>
+    IWhereClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// And连接条件

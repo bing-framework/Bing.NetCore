@@ -30,6 +30,69 @@
 | `Bing.Datas.EntityFramework.Core.UnitOfWorkBase.GetTableName` / `GetSchema` / `GetColumnName` | Preserves EF Core's physical dotted table name and column metadata when supplied to `MySqlBuilder`. | `EfCoreSqlQueryFactoryTest.MetadataProvider_WhenEfTableNameContainsDot_ShouldKeepAtomicNameForMySqlBuilder` |
 | `Bing.Uow.UnitOfWorkBase.GetTable` / `GetSchema` / `GetTableName` / `GetColumnName` | Treats FreeSQL `DbName` as an atomic table name, does not infer schema from dots, and supplies the same metadata to `MySqlBuilder`. | `FreeSqlEntityModelMetadataProviderTest.MetadataProvider_WhenTableNameContainsDot_ShouldKeepAtomicNameForMySqlBuilder` |
 
+## 统一聚合与 AppendTo 追溯
+
+| 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
+| --- | --- | --- | --- | --- |
+| `SqlAggregateFunction` / `SqlAggregateArgumentValidator.ValidateFunction` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `Aggregate_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException`; `AggregateRaw_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException`; `AggregateExpression_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException` | Unit |
+| `SqlIdentifierPathParser` / `SqlAggregateArgumentValidator.ParseStructuredColumn` / `ColumnCollection.AddStructuredAggregationColumn` | `Bing.Data.Sql.Tests`; all five Dapper Provider unit projects | `SqlBuilderTest`; each Provider `*BuilderAggregateTest` | `Aggregate_WhenColumnIsStructuredIdentifier_ShouldRenderColumn`; `Aggregate_WhenColumnContainsQuotedSpacesAndEscapedClosingQuote_ShouldRenderStructuredIdentifier`; `Aggregate_WhenColumnIsNotSingleStructuredIdentifier_ShouldThrowWithoutChangingBuilder`; `AggregateExpressionAndStructuredIdentifier_WhenComplexContextsAreConfigured_ShouldRender*Sql` | Unit; supports one to three segments, quoted spaces and doubled closing delimiters, then applies target dialect escaping. |
+| `SqlAggregateArgumentValidator.ValidateWildcard` / `SelectClause.AggregateRaw` / `SelectClause.AggregateExpression` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `AggregateRawAndExpression_WhenNonCountFunctionUsesWildcard_ShouldThrowWithoutChangingBuilder`; `Count_WhenDistinctWildcardIsRequested_ShouldThrowArgumentException` | Unit |
+| `SelectClause.AggregateRaw` / `Extensions.AggregateRaw` | `Bing.Data.Sql.Tests`; `Bing.Dapper.MySql.Tests` | `SqlBuilderTest`; `MySqlBuilderTest` | `AggregateRaw_WhenSqlContainsJsonPath_ShouldPreserveBrackets`; `AggregateRaw_WhenSqlContainsStringBrackets_ShouldPreserveText`; `AggregateRaw_WhenCountWildcardContainsWhitespace_ShouldPreserveText`; `AggregateRaw_WhenJsonPathAndStringBracketsAreConfigured_ShouldPreserveText` | Unit |
+| `SqlExpressionIdentifierResolver` / `SelectClause.AggregateExpression` / `Extensions.AggregateExpression` | `Bing.Data.Sql.Tests`; all five Dapper Provider unit projects; Doris unit tests | `SqlBuilderTest`; each Provider `*BuilderAggregateTest`; `MySqlRoutingAndMappingTest` | `AggregateExpression_WhenSqlContainsStringsAndComments_ShouldPreserveTheirBrackets`; `AggregateExpression_WhenSqlContainsLineComment_ShouldPreserveCommentBrackets`; `AggregateExpression_WhenSqlContextIsUnclosed_ShouldThrowWithoutChangingBuilder`; each Provider `AggregateExpressionAndStructuredIdentifier_WhenComplexContextsAreConfigured_ShouldRender*Sql`; `Doris_AggregateExpression_ShouldProtectStringAndCommentContexts` | Unit; only normal SQL context converts `[]`; JSON Path, quoted text, escaped quotes and comments remain byte-for-byte text. |
+| `SelectClause.CountAll` / `SelectClause.CountColumn` / `Extensions.CountAll` / `Extensions.CountColumn` | `Bing.Data.Sql.Tests`; `Bing.Dapper.MySql.Tests` | `SqlBuilderTest`; `MySqlBuilderTest`; `MySqlRoutingAndMappingTest` | `CountAll_WhenAliasIsConfigured_ShouldRenderCountWildcard`; `CountColumn_WhenDistinctIsConfigured_ShouldRenderDistinctColumnCount`; `LegacyCount_WhenSingleStringIsConfigured_ShouldTreatStringAsAlias`; `CountAllAndCountColumn_WhenConfigured_ShouldRenderMySqlSql`; `Doris_AggregateApis_ShouldPreserveRawAndRenderQualifiedExpressions` | Unit |
+| `SelectClause.AggregateLegacy` / `SelectClause.Aggregate` / `ColumnCollection.AddStructuredAggregationColumn` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `AggregateApis_WhenAliasIsNotConfigured_ShouldNotRenderAlias`; `LegacyAggregateApis_WhenAliasIsNotConfigured_ShouldUseLeafColumnAlias` | Unit; legacy `Count`/`Sum`/`Avg`/`Max`/`Min` retain a leaf-column Alias, while `CountAll`/`CountColumn`/`Aggregate`/`AggregateRaw`/`AggregateExpression` omit `As` when Alias is null. |
+| `SqlBuilderBase.RenderSubquery` / explicit aggregate Raw and Expression parameters | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `AggregateRawAndExpression_WhenParametersAreExplicit_ShouldBindAndRenderStably`; `Cte_WhenAggregateExpressionParametersConflict_ShouldRenameCteParameter`; `Union_WhenAggregateExpressionParametersHavePrefixNames_ShouldKeepTokenBoundaries`; `Subquery_WhenAggregateExpressionParametersConflict_ShouldRenameEachExactToken` | Unit; verifies exact SQL, parameter order/value, Debug SQL, repeat rendering, `@p/@p1/@p10` and `@Min/@MinAmount` token boundaries. |
+| `ColumnItem.AggregateFunction` / `ColumnItem.Clone` / `SelectClause.Clone` / `SqlBuilderBase.New` / `SqlBuilderBase.ClearSelect` / `SqlBuilderBase.CreateCte` / `SqlBuilderBase.CreateSqlByUnion` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `Clone_WhenRawAndExpressionAggregatesExist_ShouldPreserveAndIsolateState`; `New_WhenSourceHasAggregate_ShouldNotShareAggregateState`; `Cte_WhenDistinctAggregateIsConfigured_ShouldRenderExpectedSql`; `Union_WhenDistinctAggregateIsConfigured_ShouldMergeCorrectly`; `Subquery_WhenAggregateExpressionHasParameters_ShouldMergeParametersAndRemainStable`; `AppendTo_WhenAggregateExpressionIsConfigured_ShouldRemainStableAcrossRepeatedCalls`; `ClearSelect_WhenDistinctAggregateExists_ShouldRemoveAllSelectState` | Unit |
+| `ColumnItem.AggregationFunc` / `ColumnItem.IsAggregation` / `SqlItem.AggregationFunc` | `Bing.Data.Sql.Tests` | `SqlItemTest` | `LegacyAggregationFunction_WhenCloned_ShouldPreserveRendering` | Unit; public compatibility members are obsolete, while standard aggregation uses `SqlAggregateFunction` only |
+| `SqlBuilderBase.AppendTo` / `SqlBuilderBase.ToSql` | `Bing.Data.Sql.Tests` | `SqlBuilderAppendToTest` | `AppendTo_WhenBuilderIsEmpty_ShouldRenderSameSqlAsToSql`; `AppendTo_WhenBuilderContainsPrefix_ShouldAppendWithoutClearing`; `AppendTo_WhenCalledTwice_ShouldAppendTwice`; `AppendTo_WhenArgumentIsNull_ShouldThrowArgumentNullException`; `AppendTo_WhenSubqueryHasParameters_ShouldMergeParametersAndRenderExpectedSql` | Unit |
+| `DatabaseScript` aggregate test schema and unified aggregate execution path | `Bing.Dapper.MySql.Tests.Integration`; `Bing.Dapper.PostgreSql.Tests.Integration`; `Bing.Dapper.Sqlite.Tests.Integration` | `MySqlQueryTest`; `PostgreSqlQueryTest`; `SqliteExecutionIntegrationTest` | `Count_WhenAggregateDataContainsNull_ShouldReturnNonNullCount`; `CountDistinct_WhenAggregateDataContainsDuplicates_ShouldReturnDistinctCount`; `SumAndAvg_WhenAggregateDataContainsDuplicates_ShouldReturnExpectedValues`; `MaxAndMin_WhenDistinctIsConfigured_ShouldReturnExtremes`; `QualifiedDistinctAggregate_WhenUserIdsRepeat_ShouldExecuteSuccessfully`; `AggregateExpression_WhenCaseAndArithmeticAreConfigured_ShouldExecuteSuccessfully`; `Aggregate_WhenAliasesAreConfigured_ShouldMapToDto`; `Aggregate_WhenDuplicateAndNullValuesExist_ShouldReturnExpectedCountsAndExtremes`; `AggregateRawAndExpression_WhenConfigured_ShouldExecuteAndMapAliases` | Gated MySQL/PostgreSQL integration; local SQLite integration |
+| `SqlServerIntegrationDatabaseFixture` / SQL Server aggregate `DatabaseScript` | `Bing.Dapper.SqlServer.Tests.Integration` | `SqlServerQueryAggregateTest` | `AggregateApis_WhenAggregateDataIsSeeded_ShouldExecuteExpectedValues` | Opt-in integration; creates and clears only `dbo.BingSqlAggregateIntegration`, requires `RUN_SQLSERVER_INTEGRATION_TESTS=true`, a safe test database connection and `ALLOW_DATABASE_RESET_FOR_TESTS=true`. Current environment: safely skipped, not counted as execution pass. |
+| `IntegrationTestGate` Oracle branch | `Bing.Test.Shared` | `IntegrationTestGateTest` | `GetSkipReason_ShouldEnableOnlyOracleWhenOracleSwitchIsEnabled`; `GetSkipReason_ShouldDescribeOracleSwitchWhenOracleIsDisabled` | Unit; Oracle keeps independent Skip evidence. No Oracle DDL/DML aggregate fixture exists because a safe schema/user/table-prefix reset contract has not been established. |
+
+### 最终功能验收
+
+- 统一模型支持 `Count(*)`、`CountAll`、`CountColumn`、`Count(Distinct column)`、五种标准聚合及其单参数 `Distinct`、实体 Lambda、Raw 参数、可转换 Expression 以及别名映射。
+- `Select Distinct Count(...)` 由 `SelectClause.Distinct()` 管理，`Select Count(Distinct ...)` 由聚合参数 `distinct: true` 管理；两种状态可同时存在，且测试分别断言完整 SQL。
+- `Count(string columnAlias = null)` 保留既有兼容语义，即 `Count(*) As alias`；新调用应使用 `CountAll` 或 `CountColumn` 消除歧义。`Count(Distinct *)` 与非 Count 的 `*` 明确拒绝，避免生成不可移植 SQL。
+- 结构化聚合只接受一个一至三段标识符路径，支持引用段中的空格和双写结束符；函数、Case、运算、注释、分号和多列输入均被拒绝。`AggregateRaw` 对受信任 SQL 完全原样，不转换 JSON Path 或字符串中的方括号；`AggregateExpression` 只转换普通 SQL 上下文中的 `[]`，字符串、转义引用与注释保持原文，未闭合上下文在状态写入前抛出 `ArgumentException`。
+- 旧便捷 `Count`/`Sum`/`Avg`/`Max`/`Min` 未指定 Alias 时保留逻辑叶子名称；新统一 `CountAll`/`CountColumn`/`Aggregate`/`AggregateRaw`/`AggregateExpression` 未指定 Alias 时不输出 `As`。Raw 与 Expression 参数必须通过 `AddParam` 显式绑定。
+- MySQL、PostgreSQL 与 SQLite 真实集成覆盖重复值、null、限定列、Raw、Expression、Case、Max/Min Distinct 和 DTO 映射；Avg 精度按 Provider 实际数值类型结果断言。
+- `AppendTo(StringBuilder)` 现在执行完整初始化、验证和 SQL 生成流程，只去除本次追加片段尾部空白，不清空调用方内容；`ToSql()` 复用此路径并保持历史输出。
+
+### 最终性能验收
+
+环境：Windows 10、Intel Core Ultra 7 270K Plus、.NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）。基准源为 `framework/tests/Bing.Data.Sql.Benchmarks/SqlAggregateAndAppendToBenchmarks.cs`。
+
+| 场景 | Mean | Allocated | 相对十常规聚合 | 结论 |
+| --- | ---: | ---: | ---: | --- |
+| 十个普通/Distinct 聚合 `RenderTenAggregates` | 3.680 us | 24.08 KB | 1.00x / 1.00x | 三启动正式结果；相对旧 4.042 us / 25.17 KB 分别改善约 9.0% / 4.3%。 |
+| Expression JSON Path 字符串解析 `AggregateExpression_JsonPathString` | 929.1 ns | 6.49 KB | 不适用 | 三启动正式结果；验证字符串感知扫描，无 Gen2。 |
+| 十个普通/Distinct 聚合 `AppendTenAggregates` | 3.983 us | 24.16 KB | 0.99x / 0.96x | `AppendTo` 仍保留约 4% 分配收益。 |
+| Raw JSON Path `AggregateRaw_JsonPath` | 446.4 ns | 3.56 KB | 0.11x / 0.14x | Raw 原样语义无额外转换成本。 |
+| Expression 算术 `AggregateExpression_Arithmetic` | 464.8 ns | 3.55 KB | 0.12x / 0.14x | 方括号标识符转换由构建期完成。 |
+| Expression Case `AggregateExpression_Case` | 482.6 ns | 4.05 KB | 0.12x / 0.16x | 覆盖 Case 与参数级 Distinct。 |
+| `CountColumn_Distinct` | 627.3 ns | 4.48 KB | 0.16x / 0.18x | 明确列 Count API 的渲染成本。 |
+| 十个 Expression 聚合 `TenAggregateExpressions` | 2.170 us | 15.66 KB | 0.54x / 0.62x | 预转换表达式减少重复的列结构化解析。 |
+| `Clone_TenAggregateExpressions` | 483.4 ns | 4.82 KB | 0.12x / 0.19x | 覆盖完整结构化聚合状态复制。 |
+
+曾试验 Select/Column Clause 直接写入最终 `StringBuilder`，但未达到“复杂查询与十聚合分配均下降至少 20%，且 Mean 不回退超过 10%”的保留条件，已撤回该实验路径。本轮未重启该改造；最终仅保留 `SqlBuilderBase.AppendTo` 合同修复，不在 Clause 中长期持有可变 `StringBuilder`。本轮报告为 `BenchmarkDotNet.Artifacts/results/Bing.Data.Sql.Benchmarks.SqlAggregateRenderingBenchmarks-report-github.md`。
+
+### 最终执行结果
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release -nologo -v minimal` | 成功，84 条既有警告：68 条 `NU1902`/`NU1903`/`NU1904` 依赖包漏洞、8 条 `NETSDK1138` .NET 6 EOL、7 条 `CS0108`/`CS0114` 成员隐藏、1 条 `CS0618` 过时 API；无 nullable、XML 或 analyzer 警告，未发现聚合改动引入的警告。 |
+| `Bing.Data.Sql.Tests` | 1350 passed，0 failed，0 skipped。 |
+| MySQL、PostgreSQL、SQL Server、Oracle、SQLite Provider 单元测试 | 1042 passed，0 failed，0 skipped。 |
+| SQLite、本地 MySQL、PostgreSQL 集成测试 | 264 passed，0 failed，0 skipped。 |
+| `Bing.Test.Shared` Gate 单元测试 | 78 passed，0 failed，0 skipped。 |
+| 本轮已执行范围合计 | 2734 passed，0 failed，8 skipped。 |
+| SQL Server 集成测试 | 6 skipped，0 failed；新受控 fixture 已编译并验证门控关闭原因，未配置安全外部数据库，未计入通过。 |
+| Oracle 集成测试 | 仅 Gate/Skip 合同已单测；本轮不建立 DDL/DML reset，未计入真实聚合执行通过。 |
+| Git 操作 | 未执行 commit 或 push。 |
+
+依赖包漏洞告警位于未修改的 `Bing.TextTemplating.Scriban`、`Bing.AutoMapper`、`Bing.MailKit` 和 `Bing.Tests.Samples` 依赖链。本轮未进行跨模块依赖升级；这些告警不来自聚合实现，仍应单独规划兼容性验证后的升级。
+
 ## Append SQL 本轮追溯
 
 | 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
@@ -58,7 +121,7 @@
 
 ## MySQL Provider 性能基线
 
-基准工程直接引用真实 `Bing.Dapper.MySql` Provider，并通过 `InternalsVisibleTo` 测量 `MySqlTableNameParser`。本次基准使用 `.NET 8.0.27`、BenchmarkDotNet `0.14.0` 的 `ShortRun`，为首次同源基线；未将历史自定义方言报告用于对比。
+基准工程直接引用真实 `Bing.Dapper.MySql` Provider，并通过 `InternalsVisibleTo` 测量 `MySqlTableNameParser`。本次基准使用 `.NET 8.0.27`、BenchmarkDotNet `0.14.0` 的 `FormalHost`（1 launch、6 warmup、15 iteration），为首次同源基线；未将历史自定义方言报告用于对比。
 
 | 场景 | 基线结论 | 报告 |
 | --- | --- | --- |
@@ -115,3 +178,30 @@
 | SQLite 集成 | `Bing.Dapper.Sqlite.Tests.Integration` | 82 项通过，0 失败。 |
 | MySQL 真实集成 | 项目现有受控 runsettings，双 TFM 串行 | 86 项通过，0 失败；涵盖公开字符串 From/Join/LeftJoin 跨库带点物理表名。 |
 | 大参数性能 | `SqlDebugRenderingLargeParameterBenchmarks`，固定 `FormalHost` Job | 6 个正式基准完成；产物路径见上。 |
+
+## SQL Builder 生命周期、Context、Provider Clone 与 Item 模型追溯
+
+| 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
+| --- | --- | --- | --- | --- |
+| `SqlBuilderBase.New` / `SqlBuilderBase.Clone` / `SqlBuilderBase.Clear` / `SqlBuilderBase.ClearSelect` / `SqlBuilderBase.ClearFrom` / `SqlBuilderBase.ClearJoin` | `Bing.Data.Sql.Tests`; `Bing.Dapper.MySql.Tests` | `SqlBuilderTest`; `AppendRawSqlContractTest`; `MySqlBuilderTest` | `New_WhenSourceHasAggregate_ShouldNotShareAggregateState`; `Clone_WhenRawAndExpressionAggregatesExist_ShouldPreserveAndIsolateState`; `ClearSelect_WhenDistinctAggregateExists_ShouldRemoveAllSelectState`; `AppendRawSql_ShouldRemainStableAcrossCloneNewClearAndRepeatedRendering`; `CloneAndClear_WhenNormalTableStateExists_ShouldKeepInstancesIsolated` | Unit; verifies New and Clone isolation, Clear lifecycle reset, repeated rendering stability, and retention of documented provider state. |
+| `SqlBuilderDependencies` / `SqlClauseContext` / `SqlBuilderBase.CreateClauseContext` | `Bing.Data.Sql.Tests` | `SqlClauseContextTest`; `BuilderNewLifecycleTest` | `Rebind_ShouldReplaceRuntimeStateAndPreserveSharedDependencies`; `New_ShouldShareDependenciesAndUseIndependentRuntimeState`; `New_WhenSourceContainsParameters_ShouldReturnEmptyParameters`; `New_ShouldReturnSameBuilderType` | Unit; immutable共享服务依赖可复用，Builder、别名、实体解析器和参数管理器等运行状态在 Rebind/New 后独立。 |
+| `MySqlBuilder.Clone` / `MySqlFromClause.Clone` / `MySqlJoinClause.Clone` | `Bing.Dapper.MySql.Tests` | `MySqlBuilderTest` | `Clone_WhenJoinUsesDottedPhysicalTable_ShouldPreserveMySqlStringTableStrategy`; `CloneAndClear_WhenNormalTableStateExists_ShouldKeepInstancesIsolated`; `Clone_WhenCountUsesQualifiedColumn_ShouldPreserveAggregation` | Unit; preserves MySQL quote-aware string-table parsing strategy, dotted physical-table behavior, aggregate state and independent mutable state after cloning. |
+| `SqlServerBuilder.Clone` / `PostgreSqlBuilder.Clone` / `OracleBuilder.Clone` / `SqliteBuilder.Clone` | `Bing.Dapper.SqlServer.Tests`; `Bing.Dapper.PostgreSql.Tests`; `Bing.Dapper.Oracle.Tests`; `Bing.Dapper.Sqlite.Tests` | Provider `*BuilderTest` | Provider Clone, qualified-name rendering, aggregate and repeated-render regression cases | Unit; provider builders retain their dialect formatter, clause model and parameter behavior after Clone without sharing source-builder mutations. |
+| `SqlItem.Clone` / `ColumnItem.Clone` / `JoinItem.Clone` / `StructuredSqlItem.Clone` | `Bing.Data.Sql.Tests`; `Bing.Dapper.MySql.Tests`; `Bing.Dapper.PostgreSql.Tests` | `SqlItemTest`; `SqlBuilderTest`; `MySqlBuilderTest`; `PostgreSqlBuilderTest` | `LegacyAggregationFunction_WhenCloned_ShouldPreserveRendering`; `Clone_WhenRawAndExpressionAggregatesExist_ShouldPreserveAndIsolateState`; `Clone_WhenJoinUsesDottedPhysicalTable_ShouldPreserveMySqlStringTableStrategy`; `Clone_WhenCountUsesQualifiedColumn_ShouldPreserveAggregation` | Unit; item models copy structured/raw SQL, aggregation metadata, aliases, join conditions and provider-specific table-reference state without retaining shared mutable collections. |
+| `ColumnItem.AggregateFunction` / `ColumnItem.AggregationFunc` / `ColumnItem.IsAggregation` / `SqlItem.AggregationFunc` | `Bing.Data.Sql.Tests` | `SqlItemTest`; `SqlBuilderTest` | `LegacyAggregationFunction_WhenCloned_ShouldPreserveRendering`; `Clone_WhenRawAndExpressionAggregatesExist_ShouldPreserveAndIsolateState` | Unit; obsolete compatibility members retain rendering behavior, while new aggregation state is represented by `SqlAggregateFunction`. |
+| `ColumnItem.CreateColumn` / `CreateAggregate` / `CreateAggregateExpression` / `CreateAggregateRaw` / `ColumnItem.Clone` | `Bing.Data.Sql.Tests` | `ColumnItemFactoryTest` | `CreateColumn_ShouldCreateNormalColumn`; `CreateAggregate_WhenCloned_ShouldPreserveStructuredDescriptor`; `CreateAggregateExpressionAndRaw_ShouldPreserveArgumentText` | Unit; structured normal、聚合、表达式与 raw 列构造路径保留完整 SQL 语义和 Clone 描述符。 |
+| `ParameterManager.GenerateName` / `SqlBuilderBase.MergeSubqueryParameters` / `WhereClause.And` / `WhereClause.Or` | `Bing.Data.Sql.Tests` | `ParameterManagerTest`; `SqlBuilderTest` | `GenerateName_WhenGeneratedNameAlreadyExists_ShouldSkipExistingName`; `TestAnd_2`; `TestOr_3`; `TestIn_3`; `Test_Union_1` | Unit; independent New Builder 的参数会在组合时完整合并，名称冲突稳定重命名，重复渲染不覆盖已有参数。 |
+
+### 生命周期与 Clone 性能基准
+
+`MySqlBuilderConstructionBenchmarks` 与 `MySqlBuilderCloneBenchmarks` 使用与执行准备基准相同的 BenchmarkDotNet `0.14.0` `FormalHost` Job（1 launch、6 warmup、15 iteration），覆盖仅 From、1/5/20 Join、10/50 参数以及 raw/structured 混合场景。基准源为 `framework/tests/Bing.Data.Sql.Benchmarks/SqlMetadataBenchmarks.cs`。
+
+| 场景 | 覆盖范围 | 基线结论 |
+| --- | --- | --- |
+| `MySqlBuilderConstructionBenchmarks` | Builder 创建、结构化 From、raw/structured Join 组合及参数注册。 | 用于识别 Context、Clause 和 Item 组装成本；本轮未观察到需要改变生产热路径的异常增长。 |
+| `MySqlBuilderCloneBenchmarks` | Clone 仅 From、1/5/20 Join、10/50 参数及 raw/structured 混合 Builder。 | 用于验证 Provider Clone 与 Item 状态复制成本；本轮未引入无数据支撑的 Clone 微优化。 |
+| `MySqlRepeatedRenderBenchmarks` | 同一 Builder 的 1/10/100 次 `ToSql`。 | 1.828 us、18.058 us、181.137 us，保持线性增长，未观察到 Context 或 Item 状态导致的平方级增长。 |
+| `SqlDebugRenderingBenchmarks` / `SqlQueryExecutionPreparationBenchmarks` | 已生成 SQL 的 Debug/Trace 复用。 | 复用执行 SQL 降低重复渲染成本；生命周期调整不改变已验证的 SQL、参数和 Debug 输出合同。 |
+| `NewEmptyBuilder` | 空 MySQL Builder 的 New 生命周期。 | Mean 326.9 ns，Allocated 4.64 KB，Gen0 0.2522，Gen1 0.0033，无 Gen2。 |
+| `CloneTenAggregates` | 十个结构化聚合列的 Provider Builder Clone。 | Mean 496.2 ns，Allocated 5.25 KB，Gen0 0.2851，Gen1 0.0038，无 Gen2。 |
+| `RebindClauseContext` | Context 对新 Builder、AliasRegister、ParameterManager 的重绑定。 | Mean 260.3 ns，Allocated 3.75 KB，Gen0 0.2036，Gen1 0.0024，无 Gen2。 |

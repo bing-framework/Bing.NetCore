@@ -12,27 +12,26 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class SqliteJoinClause : JoinClause
 {
     /// <inheritdoc />
-    public SqliteJoinClause(ISqlBuilder sqlBuilder
-        , IDialect dialect
-        , IEntityResolver resolver
-        , IEntityAliasRegister register
-        , IParameterManager parameterManager
-        , IEntityMappingResolver entityMappingResolver = null
-        , IDatabaseContextAccessor databaseContextAccessor = null
-        , ISqlParameterFactory sqlParameterFactory = null
-        , SqlMetadataOptions metadataOptions = null
-        , SqlOptions options = null
-        , ISqlDatabaseContextResolver databaseContextResolver = null
-        , ISqlObjectNameFormatter objectNameFormatter = null
-        , ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null
-        , ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(sqlBuilder, dialect, resolver, register, parameterManager, null, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver,
-            objectNameFormatter, crossDatabaseQueryValidator, tableReferenceValidator)
+    public SqliteJoinClause(SqlClauseContext context)
+        : this(context, null)
+    {
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 SQLite 表连接子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="joinItems">已克隆的连接项。</param>
+    protected SqliteJoinClause(SqlClauseContext context, List<JoinItem> joinItems)
+        : base(context, joinItems)
     {
     }
 
     /// <inheritdoc />
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
-        new JoinItem(joinType, table, schema, alias, type: type);
+        JoinItem.CreateTable(joinType, table, schema, alias, type);
+
+    /// <inheritdoc />
+    protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
+        new SqliteJoinClause(context, joinItems);
 }

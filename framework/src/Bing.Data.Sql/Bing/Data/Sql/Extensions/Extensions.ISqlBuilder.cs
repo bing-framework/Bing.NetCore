@@ -20,13 +20,35 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlBuilder Count<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null) where TEntity : class
+        string columnAlias = null, bool distinct = false) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Count(expression, columnAlias);
+            accessor.SelectClause.Count(expression, columnAlias, distinct);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加实体表达式聚合列。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="expression">列名表达式。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder Aggregate<TEntity>(this ISqlBuilder source, SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> expression, string columnAlias = null, bool distinct = false)
+        where TEntity : class
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlPartAccessor accessor)
+            accessor.SelectClause.Aggregate(function, expression, columnAlias, distinct);
         return source;
     }
 
@@ -37,13 +59,14 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlBuilder Sum<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null) where TEntity : class
+        string columnAlias = null, bool distinct = false) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Sum(expression, columnAlias);
+            accessor.SelectClause.Sum(expression, columnAlias, distinct);
         return source;
     }
 
@@ -54,13 +77,14 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlBuilder Avg<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null) where TEntity : class
+        string columnAlias = null, bool distinct = false) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Avg(expression, columnAlias);
+            accessor.SelectClause.Avg(expression, columnAlias, distinct);
         return source;
     }
 
@@ -71,13 +95,14 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlBuilder Max<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null) where TEntity : class
+        string columnAlias = null, bool distinct = false) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Max(expression, columnAlias);
+            accessor.SelectClause.Max(expression, columnAlias, distinct);
         return source;
     }
 
@@ -88,13 +113,14 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlBuilder Min<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null) where TEntity : class
+        string columnAlias = null, bool distinct = false) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Min(expression, columnAlias);
+            accessor.SelectClause.Min(expression, columnAlias, distinct);
         return source;
     }
 

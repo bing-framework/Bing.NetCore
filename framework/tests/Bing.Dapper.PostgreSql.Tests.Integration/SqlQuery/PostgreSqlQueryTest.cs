@@ -527,13 +527,13 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// <param name="occurredAt">发生时间。</param>
     /// <param name="payload">JSONB 载荷。</param>
     /// <returns>异步写入任务。</returns>
-    private async Task InsertProductAsync(Guid id, string code, string name = "name", decimal amount = 1m,
-        DateTime? occurredAt = null, string payload = null)
+    private async Task InsertProductAsync(Guid id, string code, string name = "name", decimal? amount = 1m,
+        DateTime? occurredAt = null, string payload = null, string userId = null)
     {
         using var executor = _fixture.CreateExecutor();
         await executor.ExecuteSqlAsync(
-            "Insert Into public.integration_products(id,code,name,amount,occurred_at,payload) Values(@id,@code,@name,@amount,@occurredAt,@payload)",
-            CreateProductParameters(id, code, name, amount, occurredAt ?? new DateTime(2026, 7, 22), payload));
+            "Insert Into public.integration_products(id,code,user_id,name,amount,occurred_at,payload) Values(@id,@code,@userId,@name,@amount,@occurredAt,@payload)",
+            CreateProductParameters(id, code, name, amount, occurredAt ?? new DateTime(2026, 7, 22), payload, userId));
     }
 
     /// <summary>
@@ -546,11 +546,12 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// <param name="occurredAt">发生时间。</param>
     /// <param name="payload">JSONB 载荷。</param>
     /// <returns>产品参数集合。</returns>
-    private static SqlParam[] CreateProductParameters(Guid id, string code, string name, decimal amount,
-        DateTime occurredAt, string payload = null) =>
+    private static SqlParam[] CreateProductParameters(Guid id, string code, string name, decimal? amount,
+        DateTime occurredAt, string payload = null, string userId = null) =>
     [
         new SqlParam("id", id, DbType.Guid) { ProviderTypeName = "Uuid" },
         new SqlParam("code", code, DbType.String) { ProviderTypeName = "Text" },
+        new SqlParam("userId", userId, DbType.String) { ProviderTypeName = "Text" },
         new SqlParam("name", name, DbType.String) { ProviderTypeName = "Text" },
         new SqlParam("amount", amount, DbType.Decimal) { ProviderTypeName = "Numeric" },
         new SqlParam("occurredAt", occurredAt, DbType.DateTime) { ProviderTypeName = "Timestamp" },

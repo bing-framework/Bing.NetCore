@@ -682,7 +682,7 @@ public class SqlServerRoutingAndExecutionTest
         scope.Commit();
 
         // Assert
-        exception.Message.ShouldContain("内部执行资源绑定器");
+        exception.Message.ShouldContain("事务作用域资源绑定器", Case.Insensitive);
         trackingProxy.DisposeCount.ShouldBe(1);
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
@@ -712,6 +712,64 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         exception.Message.ShouldContain("事务作用域已结束");
         connection.LastTransaction.CommitCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：事务作用域资源绑定器应绑定固定事务上下文，并在租约失效后拒绝资源访问。
+    /// </summary>
+    [Fact]
+    public void TransactionScopeResourceBinder_WhenLeaseExpires_ShouldRejectBoundResourceAccess()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var query = provider.GetRequiredService<ISqlQuery>();
+        var transaction = connection.BeginTransaction();
+        var lease = new TestTransactionScopeLease("scope-1");
+        var context = new DatabaseContext
+        {
+            DbKey = "reporting",
+            DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = DatabaseType.SqlServer }
+        };
+
+        // Act
+        ((ISqlTransactionScopeResourceBinder)query).BindTransactionScope(context, connection, transaction, lease);
+        var accessor = (ISqlQueryExecutionResourceAccessor)query;
+        var boundTransaction = accessor.GetCurrentTransaction();
+        var transactionId = accessor.GetCurrentTransactionId();
+        lease.IsActive = false;
+        var exception = Should.Throw<InvalidOperationException>(() => accessor.GetCurrentTransaction());
+
+        // Assert
+        boundTransaction.ShouldBeSameAs(transaction);
+        transactionId.ShouldBe("scope-1");
+        exception.Message.ShouldBe("事务作用域租约已失效。");
+    }
+
+    /// <summary>
+    /// 测试目的：外部事务绑定器必须拒绝与 Query 外部连接不匹配的事务连接。
+    /// </summary>
+    [Fact]
+    public void QueryResourceBinder_WhenTransactionConnectionDiffers_ShouldThrow()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var otherConnection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var query = provider.GetRequiredService<ISqlQuery>();
+        var binder = (ISqlQueryResourceBinder)query;
+        binder.BindExternalConnection(connection, SqlConnectionSource.External);
+
+        // Act
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            binder.BindExternalTransaction(otherConnection.BeginTransaction(), "external-1"));
+
+        // Assert
+        exception.Message.ShouldBe("外部事务连接与 Query 连接不一致。");
     }
 
     /// <summary>
@@ -1981,6 +2039,24 @@ public class SqlServerRoutingAndExecutionTest
             services.AddSingleton(metadataOptions);
         services.AddSqlCore();
         return services;
+    }
+
+    /// <summary>
+    /// 可控事务作用域租约。
+    /// </summary>
+    private sealed class TestTransactionScopeLease : ISqlTransactionScopeLease
+    {
+        public TestTransactionScopeLease(string transactionId) => TransactionId = transactionId;
+
+        public string TransactionId { get; }
+
+        public bool IsActive { get; set; } = true;
+
+        public void EnsureActive()
+        {
+            if (IsActive == false)
+                throw new InvalidOperationException("事务作用域租约已失效。");
+        }
     }
 
     /// <summary>

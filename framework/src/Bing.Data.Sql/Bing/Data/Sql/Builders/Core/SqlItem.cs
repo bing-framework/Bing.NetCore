@@ -28,6 +28,11 @@ public class SqlItem
     /// </summary>
     private string _alias;
 
+    /// <summary>
+    /// 旧版字符串聚合函数名称。
+    /// </summary>
+    private readonly string _aggregationFunc;
+
     #endregion
 
     #region 属性
@@ -35,7 +40,7 @@ public class SqlItem
     /// <summary>
     /// 是否使用原始值
     /// </summary>
-    public bool Raw { get; }
+    public bool IsRaw { get; }
 
     /// <summary>
     /// 前缀，范例：t.a As b，值为 t
@@ -45,7 +50,7 @@ public class SqlItem
     /// <summary>
     /// 名称，范例：t.a As b，值为 a
     /// </summary>
-    public string Name => Raw ? _name : _name.SafeString();
+    public string Name => IsRaw ? _name : _name.SafeString();
 
     /// <summary>
     /// 别名，范例：t.a As b，值为 b
@@ -60,7 +65,49 @@ public class SqlItem
     /// <summary>
     /// 聚合函数
     /// </summary>
-    public string AggregationFunc { get; private set; }
+    [Obsolete("标准聚合请使用 SqlAggregateFunction。该属性仅用于兼容旧版字符串聚合。")]
+    public string AggregationFunc => _aggregationFunc;
+
+    #endregion
+
+    #region 工厂方法
+
+    /// <summary>
+    /// 解析包含别名或限定段的结构化 SQL 项。
+    /// </summary>
+    /// <param name="name">名称。</param>
+    /// <param name="prefix">前缀。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>已解析的 SQL 项。</returns>
+    public static SqlItem Parse(string name, string prefix = null, string alias = null) => new(name, prefix, alias);
+
+    /// <summary>
+    /// 创建不拆分句点的原子 SQL 标识符项。
+    /// </summary>
+    /// <param name="name">名称。</param>
+    /// <param name="prefix">前缀。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>原子 SQL 项。</returns>
+    public static SqlItem Atomic(string name, string prefix = null, string alias = null) =>
+        new(name, prefix, alias, isSplit: false);
+
+    /// <summary>
+    /// 创建不进行标识符解析的原始 SQL 项。
+    /// </summary>
+    /// <param name="sql">原始 SQL。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>原始 SQL 项。</returns>
+    public static SqlItem Raw(string sql, string alias = null) => new(sql, alias: alias, raw: true);
+
+    /// <summary>
+    /// 创建保留调用方名称文本的未解析 SQL 项。
+    /// </summary>
+    /// <param name="name">名称。</param>
+    /// <param name="prefix">前缀。</param>
+    /// <param name="alias">别名。</param>
+    /// <returns>未解析 SQL 项。</returns>
+    public static SqlItem Unresolved(string name, string prefix = null, string alias = null) =>
+        new(name, prefix, alias, isSplit: false, isResolve: false);
 
     #endregion
 
@@ -76,14 +123,15 @@ public class SqlItem
     /// <param name="isSplit">是否用句点分割名称</param>
     /// <param name="isResolve">是否解析名称</param>
     /// <param name="aggregationFunc">聚合函数</param>
-    public SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true, bool isResolve = true, string aggregationFunc = null)
+    internal SqlItem(string name, string prefix = null, string alias = null, bool raw = false, bool isSplit = true,
+        bool isResolve = true, string aggregationFunc = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             return;
         _prefix = prefix;
         _alias = alias;
-        Raw = raw;
-        AggregationFunc = aggregationFunc;
+        IsRaw = raw;
+        _aggregationFunc = aggregationFunc;
         if (raw)
         {
             _name = name;
@@ -148,7 +196,14 @@ public class SqlItem
     /// <summary>
     /// 克隆
     /// </summary>
-    public virtual SqlItem Clone() => new SqlItem(Name, Prefix, Alias, Raw, false, false, AggregationFunc);
+    public virtual SqlItem Clone()
+    {
+        var result = new SqlItem(Name, Prefix, Alias, IsRaw, false, false, _aggregationFunc)
+        {
+            DatabaseName = DatabaseName
+        };
+        return result;
+    }
 
     #endregion
 
@@ -162,11 +217,11 @@ public class SqlItem
     {
         if (string.IsNullOrWhiteSpace(Name))
             return null;
-        if (Raw)
+        if (IsRaw)
             return Name;
-        var column = string.IsNullOrWhiteSpace(AggregationFunc)
+        var column = string.IsNullOrWhiteSpace(_aggregationFunc)
             ? GetColumn(dialect)
-            : $"{AggregationFunc}({GetColumn(dialect)})";
+            : $"{_aggregationFunc}({GetColumn(dialect)})";
         var columnAlias = GetSafeName(dialect, Alias);
         return dialect.GetColumn(column, columnAlias);
     }

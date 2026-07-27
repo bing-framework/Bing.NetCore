@@ -33,7 +33,7 @@ public partial class PostgreSqlBuilderTest
     public void UnionAll_WhenBothQueriesHaveParameters_ShouldRenderAllParameters()
     {
         // Arrange
-        const string expected = "(Select \"Id\" \r\nFrom \"users\" \r\nWhere \"Status\"=@_p_1 \r\n) \r\nUnion All \r\n(Select \"Id\" \r\nFrom \"archived_users\" \r\nWhere \"Status\"=@_p_0 \r\n)";
+        const string expected = "(Select \"Id\" \r\nFrom \"users\" \r\nWhere \"Status\"=@_p_0 \r\n) \r\nUnion All \r\n(Select \"Id\" \r\nFrom \"archived_users\" \r\nWhere \"Status\"=@_p_1 \r\n)";
         var archived = _builder.New().Select("Id").From("archived_users").Where("Status", "archived");
 
         // Act
@@ -41,8 +41,8 @@ public partial class PostgreSqlBuilderTest
 
         // Assert
         Assert.Equal(expected, sql);
-        Assert.Equal("archived", _builder.GetParam("@_p_0"));
-        Assert.Equal("active", _builder.GetParam("@_p_1"));
+        Assert.Equal("active", _builder.GetParam("@_p_0"));
+        Assert.Equal("archived", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ public class GroupByClauseTest
     /// </summary>
     public GroupByClauseTest()
     {
-        _clause = new GroupByClause(TestDialect.Instance, new EntityResolver(), new EntityAliasRegister());
+        _clause = new GroupByClause(TestSqlBuilder.CreateTestClauseContext());
     }
 
     /// <summary>
@@ -95,7 +95,8 @@ public class GroupByClauseTest
     [Fact]
     public void Test_GroupBy_6()
     {
-        _clause = new GroupByClause(TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister());
+        _clause = new GroupByClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new TestEntityResolver(), aliasRegister: new TestEntityAliasRegister()));
         _clause.GroupBy<Sample>(t => t.Email, "b");
         Assert.Equal("Group By [as_Sample].[t_Email] Having b", GetSql());
     }

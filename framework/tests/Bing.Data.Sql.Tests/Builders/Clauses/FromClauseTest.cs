@@ -20,8 +20,7 @@ public class FromClauseTest
     /// </summary>
     public FromClauseTest()
     {
-        _clause = new FromClause(null, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), null,
-            providerDatabaseType: DatabaseType.SqlServer);
+        _clause = new FromClause(TestSqlBuilder.CreateTestClauseContext());
     }
 
     /// <summary>
@@ -230,8 +229,8 @@ public class FromClauseTest
     [Fact]
     public void Test_From_13()
     {
-        _clause = new FromClause(null, TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister(),
-            null, providerDatabaseType: DatabaseType.SqlServer);
+        _clause = new FromClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new TestEntityResolver()));
         _clause.From<Sample>();
         var result = _clause.ToSql();
         Assert.Equal("From [s].[t_Sample]", result);
@@ -243,8 +242,8 @@ public class FromClauseTest
     [Fact]
     public void Test_From_14()
     {
-        _clause = new FromClause(null, TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister(),
-            null, providerDatabaseType: DatabaseType.SqlServer);
+        _clause = new FromClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new TestEntityResolver()));
         _clause.From<Sample>("a");
         var result = _clause.ToSql();
         Assert.Equal("From [s].[t_Sample] As [a]", result);
@@ -257,7 +256,7 @@ public class FromClauseTest
     public void Test_Clone()
     {
         _clause.From("a", "b");
-        var copy = _clause.Clone(null, null);
+        var copy = _clause.Clone(TestSqlBuilder.CreateTestClauseContext());
         Assert.Equal("From [a] As [b]", GetSql());
         Assert.Equal("From [a] As [b]", copy.ToSql());
 

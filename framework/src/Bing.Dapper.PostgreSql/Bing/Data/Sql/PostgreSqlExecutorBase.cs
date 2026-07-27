@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -22,14 +23,9 @@ public abstract class PostgreSqlExecutorBase : SqlExecutorBase
     }
 
     /// <inheritdoc />
-    protected override ISqlBuilder CreateSqlBuilder() => new PostgreSqlBuilder(
-        entityMappingResolver: ServiceProvider.GetService<IEntityMappingResolver>(),
-        databaseContextAccessor: ServiceProvider.GetService<IDatabaseContextAccessor>(),
-        sqlParameterFactory: ServiceProvider.GetService<ISqlParameterFactory>(),
-        metadataOptions: ServiceProvider.GetService<SqlMetadataOptions>(),
-        options: Options,
-        databaseContextResolver: ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
-        objectNameFormatter: ServiceProvider.GetService<ISqlObjectNameFormatter>(),
-        crossDatabaseQueryValidator: ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(),
-        tableReferenceValidator: ServiceProvider.GetService<ISqlTableReferenceValidator>());
+    protected override ISqlBuilder CreateSqlBuilder() => new PostgreSqlBuilder(new SqlBuilderServices(
+        ServiceProvider.GetService<IEntityMappingResolver>(), ServiceProvider.GetService<IDatabaseContextAccessor>(),
+        ServiceProvider.GetService<ISqlParameterFactory>(), ServiceProvider.GetService<SqlMetadataOptions>(), Options,
+        ServiceProvider.GetService<ISqlDatabaseContextResolver>(), ServiceProvider.GetService<ISqlObjectNameFormatter>(),
+        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(), ServiceProvider.GetService<ISqlTableReferenceValidator>()));
 }

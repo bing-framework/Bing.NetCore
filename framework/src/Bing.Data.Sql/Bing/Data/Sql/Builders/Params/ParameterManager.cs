@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Params;
 /// <summary>
 /// 参数管理器
 /// </summary>
-public class ParameterManager : IAdvancedParameterManager
+public class ParameterManager : IAdvancedParameterManager, IParameterManagerLifecycle
 {
     #region 字段
 
@@ -71,8 +71,12 @@ public class ParameterManager : IAdvancedParameterManager
     /// <inheritdoc />
     public virtual string GenerateName()
     {
-        var result = Dialect.GenerateName(_paramIndex);
-        _paramIndex += 1;
+        string result;
+        do
+        {
+            result = Dialect.GenerateName(_paramIndex);
+            _paramIndex += 1;
+        } while (_params.ContainsKey(result) || _sqlParams.ContainsKey(result));
         return result;
     }
 
@@ -267,7 +271,13 @@ public class ParameterManager : IAdvancedParameterManager
     /// <summary>
     /// 克隆
     /// </summary>
-    public IParameterManager Clone() => new ParameterManager(this);
+    public virtual IParameterManager Clone() => new ParameterManager(this);
+
+    /// <summary>
+    /// 创建保留当前方言配置的空参数管理器。
+    /// </summary>
+    /// <returns>不包含参数和值的独立参数管理器。</returns>
+    public virtual IParameterManager CreateEmpty() => new ParameterManager(Dialect);
 
     #endregion
 }

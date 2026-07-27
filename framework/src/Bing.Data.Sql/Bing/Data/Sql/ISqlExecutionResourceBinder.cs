@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 执行资源绑定器。
 /// </summary>
-internal interface ISqlExecutionResourceBinder
+public interface ISqlQueryResourceBinder
 {
     /// <summary>
     /// 绑定框架自有连接。
@@ -34,6 +34,13 @@ internal interface ISqlExecutionResourceBinder
     /// <param name="resolver">外部事务解析器。</param>
     void BindExternalTransactionResolver(Func<IDbTransaction> resolver);
 
+}
+
+/// <summary>
+/// SQL 事务作用域资源绑定器。
+/// </summary>
+public interface ISqlTransactionScopeResourceBinder : ISqlQueryResourceBinder
+{
     /// <summary>
     /// 绑定事务作用域上下文。
     /// </summary>
@@ -42,5 +49,21 @@ internal interface ISqlExecutionResourceBinder
     /// <param name="transaction">事务对象。</param>
     /// <param name="lease">事务作用域执行租约。</param>
     void BindTransactionScope(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
-        SqlTransactionScopeLease lease);
+        ISqlTransactionScopeLease lease);
+}
+
+/// <summary>
+/// SQL 事务作用域执行租约。
+/// </summary>
+public interface ISqlTransactionScopeLease
+{
+    /// <summary>
+    /// 事务作用域标识。
+    /// </summary>
+    string TransactionId { get; }
+
+    /// <summary>
+    /// 确保作用域仍处于活动状态。
+    /// </summary>
+    void EnsureActive();
 }

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>Bing.Dapper.Tests</RootNamespace>
     <XunitStartupFullName>Bing.Dapper.Tests.Startup</XunitStartupFullName>
+    <TestTfmsInParallel>false</TestTfmsInParallel>
   </PropertyGroup>
 
   <ItemGroup>

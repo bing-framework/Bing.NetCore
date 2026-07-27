@@ -268,20 +268,20 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     }
 
     /// <summary>
-    /// 获取 SQL 查询内部执行资源绑定器。
+    /// 获取 SQL 查询外部资源绑定器。
     /// </summary>
     /// <param name="query">SQL 查询对象。</param>
     /// <returns>执行资源绑定器。</returns>
-    private static ISqlExecutionResourceBinder GetResourceBinder(ISqlQuery query) =>
-        query as ISqlExecutionResourceBinder ??
-        throw new InvalidOperationException("SQL 查询对象未实现内部执行资源绑定器，无法绑定 EF Core 上下文。");
+    private static ISqlQueryResourceBinder GetResourceBinder(ISqlQuery query) =>
+        query as ISqlQueryResourceBinder ??
+        throw new InvalidOperationException("SQL 查询对象未实现外部资源绑定器，无法绑定 EF Core 上下文。");
 
     /// <summary>
-    /// 获取 SQL 查询内部元数据绑定器。
+    /// 获取 SQL 查询元数据绑定器。
     /// </summary>
     /// <param name="query">SQL 查询对象。</param>
     /// <returns>实体元数据绑定器。</returns>
     private static ISqlQueryMetadataBinder GetMetadataBinder(ISqlQuery query) =>
         query as ISqlQueryMetadataBinder ??
-        throw new InvalidOperationException("SQL 查询对象未实现内部元数据绑定器，无法绑定 EF Core 上下文。");
+        throw new InvalidOperationException("SQL 查询对象未实现元数据绑定器，无法绑定 EF Core 上下文。");
 }

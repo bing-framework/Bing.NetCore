@@ -19,93 +19,70 @@ namespace Bing.Data.Sql.Builders.Internal;
 public class Helper
 {
     /// <summary>
-    /// Sql方言
+    /// 子句运行上下文。
     /// </summary>
-    private readonly IDialect _dialect;
+    private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// 实体解析器
+    /// SQL 方言。
     /// </summary>
-    private readonly IEntityResolver _resolver;
+    private IDialect _dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体别名注册器
+    /// 实体解析器。
     /// </summary>
-    private readonly IEntityAliasRegister _register;
+    private IEntityResolver _resolver => _context.EntityResolver;
 
     /// <summary>
-    /// 参数管理器
+    /// 实体别名注册器。
     /// </summary>
-    private readonly IParameterManager _parameterManager;
+    private IEntityAliasRegister _register => _context.AliasRegister;
 
     /// <summary>
-    /// 实体映射解析器
+    /// 参数管理器。
     /// </summary>
-    private readonly IEntityMappingResolver _entityMappingResolver;
+    private IParameterManager _parameterManager => _context.ParameterManager;
 
     /// <summary>
-    /// 数据库上下文访问器
+    /// 实体映射解析器。
     /// </summary>
-    private readonly IDatabaseContextAccessor _databaseContextAccessor;
+    private IEntityMappingResolver _entityMappingResolver => _context.Services.EntityMappingResolver;
 
     /// <summary>
-    /// Sql 参数工厂
+    /// 数据库上下文访问器。
     /// </summary>
-    private readonly ISqlParameterFactory _sqlParameterFactory;
+    private IDatabaseContextAccessor _databaseContextAccessor => _context.Services.DatabaseContextAccessor;
 
     /// <summary>
-    /// Sql 元数据配置
+    /// SQL 参数工厂。
     /// </summary>
-    private readonly SqlMetadataOptions _options;
+    private ISqlParameterFactory _sqlParameterFactory => _context.Services.ParameterFactory;
 
     /// <summary>
-    /// Sql 配置
+    /// SQL 元数据配置。
     /// </summary>
-    private readonly SqlOptions _sqlOptions;
+    private SqlMetadataOptions _options => _context.Services.MetadataOptions;
 
     /// <summary>
-    /// SQL 数据库上下文解析器
+    /// SQL 配置。
     /// </summary>
-    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
+    private SqlOptions _sqlOptions => _context.Services.Options;
+
+    /// <summary>
+    /// SQL 数据库上下文解析器。
+    /// </summary>
+    private ISqlDatabaseContextResolver _databaseContextResolver => _context.Services.DatabaseContextResolver;
 
     /// <summary>
     /// Builder 生命周期内固定的数据库上下文。
     /// </summary>
-    private readonly DatabaseContext _databaseContext;
+    private DatabaseContext _databaseContext => _context.ExecutionContext.DatabaseContext;
 
     /// <summary>
-    /// 初始化一个<see cref="Helper"/>类型的实例
+    /// 使用已绑定的子句运行上下文初始化辅助操作。
     /// </summary>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="entityMappingResolver">实体映射解析器</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
-    /// <param name="options">Sql 元数据配置</param>
-    /// <param name="sqlOptions">Sql 配置</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
-    public Helper(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        IParameterManager parameterManager, IEntityMappingResolver entityMappingResolver = null,
-        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions options = null, SqlOptions sqlOptions = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null, DatabaseContext databaseContext = null)
-    {
-        _dialect = dialect;
-        _resolver = resolver;
-        _register = register;
-        _parameterManager = parameterManager;
-        _entityMappingResolver = entityMappingResolver;
-        _databaseContextAccessor = databaseContextAccessor;
-        _sqlParameterFactory = sqlParameterFactory;
-        _options = options ?? new SqlMetadataOptions();
-        _sqlOptions = sqlOptions;
-        _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
-            _options);
-        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
-    }
+    /// <param name="context">子句运行上下文。</param>
+    public Helper(SqlClauseContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
     /// <summary>
     /// 获取处理后的列名

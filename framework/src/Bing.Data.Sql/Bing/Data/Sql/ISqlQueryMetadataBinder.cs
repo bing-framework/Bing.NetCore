@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 查询元数据绑定器。
 /// </summary>
-internal interface ISqlQueryMetadataBinder
+public interface ISqlQueryMetadataBinder
 {
     /// <summary>
     /// 绑定实体映射解析器。

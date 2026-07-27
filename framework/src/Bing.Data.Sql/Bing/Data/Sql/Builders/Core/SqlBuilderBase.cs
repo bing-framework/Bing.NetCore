@@ -24,11 +24,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     private IParameterManager _parameterManager;
 
     /// <summary>
-    /// 方言
-    /// </summary>
-    private IDialect _dialect;
-
-    /// <summary>
     /// Select子句
     /// </summary>
     private ISelectClause _selectClause;
@@ -73,6 +68,12 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// </summary>
     private List<Type> _excludedFilters;
 
+    /// <summary>
+    /// 子查询参数重命名映射，确保重复渲染使用同一参数名称。
+    /// </summary>
+    private readonly Dictionary<ISqlBuilder, Dictionary<string, string>> _subqueryParameterNames =
+        new(ReferenceComparer<ISqlBuilder>.Instance);
+
     #endregion
 
     #region 属性
@@ -81,6 +82,16 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 实体映射解析器
     /// </summary>
     protected IEntityMappingResolver EntityMappingResolver { get; private set; }
+
+    /// <summary>
+    /// SQL 提供程序。
+    /// </summary>
+    public ISqlProvider Provider { get; }
+
+    /// <summary>
+    /// SQL Builder 可共享服务。
+    /// </summary>
+    protected SqlBuilderServices Services { get; private set; }
 
     /// <summary>
     /// 实体模型原始元数据提供器。
@@ -143,14 +154,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     protected IEntityAliasRegister AliasRegister { get; private set; }
 
     /// <summary>
-    /// 获取当前 Builder 对应的数据库类型。
-    /// </summary>
-    protected abstract DatabaseType ProviderDatabaseType { get; }
-
-    /// <summary>
     /// 获取当前执行上下文解析后的数据库类型。
     /// </summary>
-    protected DatabaseType ExecutionProviderDatabaseType => ExecutionContext.DatabaseType ?? ProviderDatabaseType;
+    protected DatabaseType ExecutionProviderDatabaseType => ExecutionContext.DatabaseType ?? Provider.DatabaseType;
 
     /// <summary>
     /// 参数管理器
@@ -160,7 +166,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// Sql方言
     /// </summary>
-    public IDialect Dialect => _dialect ??= GetDialect();
+    public IDialect Dialect => Provider.Dialect;
 
     /// <summary>
     /// Select子句
@@ -242,45 +248,29 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="SqlBuilderBase"/>类型的实例
+    /// 使用 SQL 提供程序和共享服务初始化 SQL Builder。
     /// </summary>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="entityMappingResolver">实体映射解析器</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
-    /// <param name="metadataOptions">Sql 元数据配置</param>
-    /// <param name="options">Sql 配置</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
-    /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
-    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
-    /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
-    protected SqlBuilderBase(IParameterManager parameterManager = null, IEntityMappingResolver entityMappingResolver = null,
-        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null,
-        ISqlObjectNameFormatter objectNameFormatter = null,
-        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
-        ISqlTableReferenceValidator tableReferenceValidator = null,
-        IEntityModelMetadataProvider entityModelMetadataProvider = null)
+    /// <param name="provider">SQL 提供程序。</param>
+    /// <param name="services">可共享服务。</param>
+    /// <param name="parameterManager">当前 Builder 的参数管理器。</param>
+    protected SqlBuilderBase(ISqlProvider provider, SqlBuilderServices services,
+        IParameterManager parameterManager = null)
     {
+        Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         _parameterManager = parameterManager;
-        MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
-        Options = options;
-        DatabaseContextAccessor = databaseContextAccessor;
-        DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
-            MetadataOptions);
+        Services = services ?? throw new ArgumentNullException(nameof(services));
+        MetadataOptions = Services.MetadataOptions;
+        Options = Services.Options;
+        DatabaseContextAccessor = Services.DatabaseContextAccessor;
+        DatabaseContextResolver = Services.DatabaseContextResolver;
         ExecutionContext = new SqlBuilderExecutionContext(DatabaseContextResolver.Resolve(Options) ??
             Options.GetDatabaseContext() ?? DatabaseContextAccessor?.Current ?? MetadataOptions.DefaultDatabaseContext);
-        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
-        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
-            databaseContextAccessor: databaseContextAccessor, options: MetadataOptions,
-            entityModelMetadataProvider: EntityModelMetadataProvider);
-        ObjectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
-        CrossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
-        TableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
-        SqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
-            new DefaultFieldValueConverterSelector(null, MetadataOptions), databaseContextAccessor, MetadataOptions);
+        EntityModelMetadataProvider = Services.EntityModelMetadataProvider;
+        EntityMappingResolver = Services.EntityMappingResolver;
+        ObjectNameFormatter = Services.ObjectNameFormatter;
+        CrossDatabaseQueryValidator = Services.CrossDatabaseQueryValidator;
+        TableReferenceValidator = Services.TableReferenceValidator;
+        SqlParameterFactory = Services.ParameterFactory;
         EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
             DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
         AliasRegister = new EntityAliasRegister();
@@ -297,54 +287,79 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 创建参数管理器
     /// </summary>
-    protected virtual IParameterManager CreateParameterManager() => new ParameterManager(Dialect);
+    protected virtual IParameterManager CreateParameterManager()
+    {
+        var parameterManager = Provider.ParameterManagerFactory.Create(Dialect);
+        if (parameterManager == null)
+            throw new InvalidOperationException("SQL Provider 的参数管理器工厂返回了 null。");
+        if (Provider is not ISqlParameterLimitProvider { MaxParameterCount: int maxParameterCount })
+            return parameterManager;
+        return parameterManager is IAdvancedParameterManager advancedParameterManager
+            ? new AdvancedParameterLimitManager(advancedParameterManager, maxParameterCount)
+            : new ParameterLimitManager(parameterManager, maxParameterCount);
+    }
 
     /// <summary>
-    /// 获取Sql方言
+    /// 创建与当前 Builder 参数管理器配置一致的空实例。
     /// </summary>
-    protected abstract IDialect GetDialect();
+    /// <remarks>
+    /// 支持 <see cref="IParameterManagerLifecycle"/> 的自定义实现可直接创建同类型空实例；
+    /// 旧实现通过 Clone 后 Clear 保持二进制兼容。两条路径都禁止返回当前实例，避免 New 清空来源参数。
+    /// </remarks>
+    /// <returns>不含参数和值且序号已重置的独立参数管理器。</returns>
+    protected IParameterManager CreateEmptyParameterManager()
+    {
+        var source = ParameterManager;
+        var result = source is IParameterManagerLifecycle lifecycle ? lifecycle.CreateEmpty() : source.Clone();
+        if (result == null)
+            throw new InvalidOperationException("参数管理器创建空实例时返回了 null。");
+        if (ReferenceEquals(source, result))
+            throw new InvalidOperationException("参数管理器创建空实例时不能返回当前实例。");
+        result.Clear();
+        return result;
+    }
+
+    /// <summary>
+    /// 创建绑定到当前 Builder 运行状态的子句上下文。
+    /// </summary>
+    /// <returns>当前运行依赖的子句上下文。</returns>
+    protected SqlClauseContext CreateClauseContext() => new(this, Provider, EntityResolver, AliasRegister,
+        ParameterManager, ExecutionContext, Services);
 
     /// <summary>
     /// 创建Select子句
     /// </summary>
-    protected virtual ISelectClause CreateSelectClause() => new SelectClause(this, Dialect, EntityResolver, AliasRegister);
+    protected virtual ISelectClause CreateSelectClause() => Provider.ClauseFactory.CreateSelect(CreateClauseContext());
 
     /// <summary>
     /// 创建From子句
     /// </summary>
-    protected virtual IFromClause CreateFromClause() =>
-        new FromClause(this, Dialect, EntityResolver, AliasRegister, null, ObjectNameFormatter,
-            ProviderDatabaseType, TableReferenceValidator);
+    protected virtual IFromClause CreateFromClause() => Provider.ClauseFactory.CreateFrom(CreateClauseContext());
 
     /// <summary>
     /// 创建Join子句
     /// </summary>
-    protected virtual IJoinClause CreateJoinClause() => new JoinClause(this, Dialect, EntityResolver, AliasRegister,
-        ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory,
-        MetadataOptions, Options, DatabaseContextResolver, ObjectNameFormatter, CrossDatabaseQueryValidator,
-        TableReferenceValidator, ExecutionContext.DatabaseContext);
+    protected virtual IJoinClause CreateJoinClause() => Provider.ClauseFactory.CreateJoin(CreateClauseContext());
 
     /// <summary>
     /// 创建Where子句
     /// </summary>
-    protected virtual IWhereClause CreateWhereClause() => new WhereClause(this, Dialect, EntityResolver, AliasRegister,
-        ParameterManager, null, EntityMappingResolver, DatabaseContextAccessor, SqlParameterFactory, MetadataOptions,
-        Options, DatabaseContextResolver, ExecutionContext.DatabaseContext);
+    protected virtual IWhereClause CreateWhereClause() => Provider.ClauseFactory.CreateWhere(CreateClauseContext());
 
     /// <summary>
     /// 创建分组子句
     /// </summary>
-    protected virtual IGroupByClause CreateGroupByClause() => new GroupByClause(Dialect, EntityResolver, AliasRegister);
+    protected virtual IGroupByClause CreateGroupByClause() => Provider.ClauseFactory.CreateGroupBy(CreateClauseContext());
 
     /// <summary>
     /// 创建排序子句
     /// </summary>
-    protected virtual IOrderByClause CreateOrderByClause() => new OrderByClause(Dialect, EntityResolver, AliasRegister);
+    protected virtual IOrderByClause CreateOrderByClause() => Provider.ClauseFactory.CreateOrderBy(CreateClauseContext());
 
     /// <summary>
     /// 获取参数字面值解析器
     /// </summary>
-    protected virtual IParamLiteralsResolver GetParamLiteralsResolver() => new ParamLiteralsResolver();
+    protected virtual IParamLiteralsResolver GetParamLiteralsResolver() => Provider.ParamLiteralsResolver;
 
     #endregion
 
@@ -353,7 +368,19 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 克隆
     /// </summary>
-    public abstract ISqlBuilder Clone();
+    public virtual ISqlBuilder Clone()
+    {
+        var result = CreateBuilder(null);
+        result.Clone(this);
+        return result;
+    }
+
+    /// <summary>
+    /// 创建与当前 Builder 使用相同 Provider 和服务的新实例。
+    /// </summary>
+    /// <param name="parameterManager">新 Builder 的参数管理器。</param>
+    /// <returns>新的 Builder 实例。</returns>
+    protected abstract SqlBuilderBase CreateBuilder(IParameterManager parameterManager);
 
     /// <summary>
     /// 克隆
@@ -365,29 +392,30 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             throw new ArgumentNullException(nameof(sqlBuilder));
 
         _parameterManager = sqlBuilder._parameterManager?.Clone();
-        MetadataOptions = sqlBuilder.MetadataOptions;
-        Options = sqlBuilder.Options;
-        DatabaseContextAccessor = sqlBuilder.DatabaseContextAccessor;
-        DatabaseContextResolver = sqlBuilder.DatabaseContextResolver;
+        Services = sqlBuilder.Services;
+        MetadataOptions = Services.MetadataOptions;
+        Options = Services.Options;
+        DatabaseContextAccessor = Services.DatabaseContextAccessor;
+        DatabaseContextResolver = Services.DatabaseContextResolver;
         ExecutionContext = sqlBuilder.ExecutionContext;
-        EntityMappingResolver = sqlBuilder.EntityMappingResolver;
-        EntityModelMetadataProvider = sqlBuilder.EntityModelMetadataProvider;
-        ObjectNameFormatter = sqlBuilder.ObjectNameFormatter;
-        CrossDatabaseQueryValidator = sqlBuilder.CrossDatabaseQueryValidator;
-        TableReferenceValidator = sqlBuilder.TableReferenceValidator;
-        SqlParameterFactory = sqlBuilder.SqlParameterFactory;
-        EntityResolver = sqlBuilder.EntityResolver ??
-            new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
-                DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
+        EntityMappingResolver = Services.EntityMappingResolver;
+        EntityModelMetadataProvider = Services.EntityModelMetadataProvider;
+        ObjectNameFormatter = Services.ObjectNameFormatter;
+        CrossDatabaseQueryValidator = Services.CrossDatabaseQueryValidator;
+        TableReferenceValidator = Services.TableReferenceValidator;
+        SqlParameterFactory = Services.ParameterFactory;
+        EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
+            DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
+        var clonedContext = CreateClauseContext();
 
         // 克隆各子句
-        _selectClause = sqlBuilder._selectClause?.Clone(this, AliasRegister);
-        _fromClause = sqlBuilder._fromClause?.Clone(this, AliasRegister);
-        _joinClause = sqlBuilder._joinClause?.Clone(this, AliasRegister, _parameterManager);
-        _whereClause = sqlBuilder._whereClause?.Clone(this, AliasRegister, _parameterManager);
-        _groupByClause = sqlBuilder._groupByClause?.Clone(AliasRegister);
-        _orderByClause = sqlBuilder._orderByClause?.Clone(AliasRegister);
+        _selectClause = sqlBuilder._selectClause?.Clone(clonedContext);
+        _fromClause = sqlBuilder._fromClause?.Clone(clonedContext);
+        _joinClause = sqlBuilder._joinClause?.Clone(clonedContext);
+        _whereClause = sqlBuilder._whereClause?.Clone(clonedContext);
+        _groupByClause = sqlBuilder._groupByClause?.Clone(clonedContext);
+        _orderByClause = sqlBuilder._orderByClause?.Clone(clonedContext);
 
         // 克隆分页信息
         Pager = new Pager(sqlBuilder.Pager.Page, sqlBuilder.Pager.PageSize, sqlBuilder.Pager.TotalCount,
@@ -417,23 +445,46 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
         var sql = builder.ToSql();
+        return MergeSubqueryParameters(builder, sql);
+    }
+
+    /// <summary>
+    /// 合并独立子查询参数，并在名称冲突时保持重命名结果稳定。
+    /// </summary>
+    /// <param name="builder">子查询生成器。</param>
+    /// <param name="sql">已经生成的子查询 SQL 或条件 SQL。</param>
+    /// <returns>参数名称已合并后的 SQL。</returns>
+    internal string MergeSubqueryParameters(ISqlBuilder builder, string sql)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
         if (builder is not ISqlPartAccessor accessor || ReferenceEquals(ParameterManager, accessor.ParameterManager))
             return sql;
 
         var sourceParameters = accessor.ParameterManager.GetParams();
         var sourceSqlParameters = (accessor.ParameterManager as IAdvancedParameterManager)?.GetSqlParams();
+        if (_subqueryParameterNames.TryGetValue(builder, out var nameMap) == false)
+        {
+            nameMap = new Dictionary<string, string>();
+            _subqueryParameterNames[builder] = nameMap;
+        }
         foreach (var parameter in sourceParameters)
         {
-            var targetName = parameter.Key;
-            if (ParameterManager.Contains(parameter.Key) && Equals(ParameterManager.GetValue(parameter.Key), parameter.Value) == false)
-                targetName = ParameterManager.GenerateName();
-            if (ParameterManager.Contains(targetName))
-                continue;
-            if (sourceSqlParameters != null && sourceSqlParameters.TryGetValue(parameter.Key, out var sqlParameter) &&
-                ParameterManager is IAdvancedParameterManager advancedParameterManager)
-                advancedParameterManager.Add(CloneSqlParameter(sqlParameter, targetName));
-            else
-                ParameterManager.Add(targetName, parameter.Value);
+            if (nameMap.TryGetValue(parameter.Key, out var targetName) == false)
+            {
+                targetName = parameter.Key;
+                if (ParameterManager.Contains(parameter.Key) && Equals(ParameterManager.GetValue(parameter.Key), parameter.Value) == false)
+                    targetName = ParameterManager.GenerateName();
+                nameMap[parameter.Key] = targetName;
+            }
+            if (ParameterManager.Contains(targetName) == false)
+            {
+                if (sourceSqlParameters != null && sourceSqlParameters.TryGetValue(parameter.Key, out var sqlParameter) &&
+                    ParameterManager is IAdvancedParameterManager advancedParameterManager)
+                    advancedParameterManager.Add(CloneSqlParameter(sqlParameter, targetName));
+                else
+                    ParameterManager.Add(targetName, parameter.Value);
+            }
             if (string.Equals(parameter.Key, targetName, StringComparison.Ordinal) == false)
                 sql = Regex.Replace(sql, $@"(?<![\w]){Regex.Escape(parameter.Key)}(?![\w])", targetName);
         }
@@ -471,7 +522,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <returns>数据库类型。</returns>
     internal DatabaseType ResolveProviderDatabaseType(SqlTableReference reference = null)
     {
-        return ExecutionContext.DatabaseType ?? ProviderDatabaseType;
+        return ExecutionContext.DatabaseType ?? Provider.DatabaseType;
     }
 
     /// <summary>
@@ -641,7 +692,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 创建Sql生成器
     /// </summary>
-    public abstract ISqlBuilder New();
+    public virtual ISqlBuilder New() => CreateBuilder(CreateEmptyParameterManager());
 
     #endregion
 
@@ -678,11 +729,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// </summary>
     public virtual string ToSql()
     {
-        Init();
-        Validate();
-        var result = new StringBuilder();
-        CreateSql(result);
-        return result.ToString().Trim();
+        var result = new StringBuilder(256);
+        AppendTo(result);
+        return result.ToString();
     }
 
     /// <summary>
@@ -831,7 +880,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             return;
 
         _isAddFilters = true;
-        var context = new SqlContext(Dialect, AliasRegister, ParameterManager, this, EntityMappingResolver,
+        var context = new SqlFilterContext(Dialect, AliasRegister, ParameterManager, this, EntityMappingResolver,
             DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver, EntityModelMetadataProvider,
             ExecutionContext.DatabaseContext);
         foreach (var filter in SqlFilterCollection.Filters)
@@ -855,7 +904,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <summary>
     /// 创建分页Sql
     /// </summary>
-    protected abstract string CreateLimitSql();
+    protected virtual string CreateLimitSql() => Provider.PaginationRenderer.Render(GetOffsetParam(), GetLimitParam());
 
     #endregion
 
@@ -947,6 +996,25 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     public void AppendTo(StringBuilder builder)
     {
         builder.CheckNull(nameof(builder));
+        var startIndex = builder.Length;
+        Init();
+        Validate();
+        CreateSql(builder);
+        TrimAppendedWhitespace(builder, startIndex);
+    }
+
+    /// <summary>
+    /// 移除本次 SQL 渲染追加片段末尾的空白字符。
+    /// </summary>
+    /// <param name="builder">字符串生成器。</param>
+    /// <param name="startIndex">本次追加前的起始位置。</param>
+    private static void TrimAppendedWhitespace(StringBuilder builder, int startIndex)
+    {
+        var length = builder.Length;
+        while (length > startIndex && char.IsWhiteSpace(builder[length - 1]))
+            length--;
+        if (length < builder.Length)
+            builder.Remove(length, builder.Length - length);
     }
 
     /// <summary>
@@ -963,4 +1031,22 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         content.AppendTo(builder);
         builder.AppendLine(" ");
     }
+}
+
+/// <summary>
+/// 按对象实例比较引用的比较器。
+/// </summary>
+/// <typeparam name="T">引用类型。</typeparam>
+internal sealed class ReferenceComparer<T> : IEqualityComparer<T> where T : class
+{
+    /// <summary>
+    /// 比较器实例。
+    /// </summary>
+    public static ReferenceComparer<T> Instance { get; } = new();
+
+    /// <inheritdoc />
+    public bool Equals(T x, T y) => ReferenceEquals(x, y);
+
+    /// <inheritdoc />
+    public int GetHashCode(T obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
 }

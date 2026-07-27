@@ -34,7 +34,8 @@ public class WhereClauseTest
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
         var builder = new TestSqlBuilder(TestDialect.Instance);
-        _clause = new WhereClause(builder, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), _parameterManager);
+        _clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(
+            parameterManager: _parameterManager, builder: builder));
     }
 
     /// <summary>
@@ -160,7 +161,8 @@ public class WhereClauseTest
     public void Test_Where_WithLambda_2()
     {
         var manager = new ParameterManager(TestDialect.Instance);
-        _clause = new WhereClause(null, TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister(), manager);
+        _clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(entityResolver: new TestEntityResolver(),
+            aliasRegister: new TestEntityAliasRegister(), parameterManager: manager));
         _clause.Where<Sample>(t => t.Email, "a");
         Assert.Equal("Where [as_Sample].[t_Email]=@_p_0", GetSql());
         Assert.Equal("a", manager.GetValue("@_p_0"));
@@ -184,7 +186,8 @@ public class WhereClauseTest
     public void Test_Where_WithLambda_WithOperatorResolve_2()
     {
         var manager = new ParameterManager(TestDialect.Instance);
-        _clause = new WhereClause(null, TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister(), manager);
+        _clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(entityResolver: new TestEntityResolver(),
+            aliasRegister: new TestEntityAliasRegister(), parameterManager: manager));
         _clause.Where<Sample>(t => t.Email == "a");
         Assert.Equal("Where [as_Sample].[t_Email]=@_p_0", GetSql());
         Assert.Equal("a", manager.GetValue("@_p_0"));
@@ -1221,7 +1224,8 @@ public class WhereClauseTest
         _clause.Where("Name", "a");
 
         //复制副本
-        var copy = _clause.Clone(null, null, _parameterManager.Clone());
+        var copy = _clause.Clone(TestSqlBuilder.CreateTestClauseContext(
+            parameterManager: _parameterManager.Clone()));
         Assert.Equal("Where [Name]=@_p_0", GetSql());
         Assert.Equal("Where [Name]=@_p_0", copy.ToSql());
 

@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Core;
 /// <summary>
 /// Sql执行上下文
 /// </summary>
-public class SqlContext
+public class SqlFilterContext
 {
     /// <summary>
     /// Sql方言
@@ -73,7 +73,7 @@ public class SqlContext
         MetadataOptions?.DefaultDatabaseContext;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlContext"/>类型的实例
+    /// 初始化一个<see cref="SqlFilterContext"/>类型的实例
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="entityAliasRegister">实体别名注册器</param>
@@ -86,7 +86,7 @@ public class SqlContext
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器</param>
     /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
-    public SqlContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IParameterManager parameterManager,
+    public SqlFilterContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IParameterManager parameterManager,
         ISqlPartAccessor clause,
         IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null,

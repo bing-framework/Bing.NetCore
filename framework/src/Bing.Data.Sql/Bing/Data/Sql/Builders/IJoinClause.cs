@@ -12,10 +12,8 @@ public interface IJoinClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="sqlBuilder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager);
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    IJoinClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 查找连接项

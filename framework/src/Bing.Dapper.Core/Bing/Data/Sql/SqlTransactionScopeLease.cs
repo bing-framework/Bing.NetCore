@@ -1,34 +1,27 @@
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// SQL 事务作用域执行租约。
+/// Dapper SQL 事务作用域执行租约。
 /// </summary>
-internal sealed class SqlTransactionScopeLease
+internal sealed class SqlTransactionScopeLease : ISqlTransactionScopeLease
 {
-    /// <summary>
-    /// 是否仍允许执行。
-    /// </summary>
     private int _isActive = 1;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlTransactionScopeLease"/>类型的实例。
+    /// 初始化一个 <see cref="SqlTransactionScopeLease"/> 类型的实例。
     /// </summary>
     /// <param name="transactionId">事务作用域标识。</param>
     public SqlTransactionScopeLease(string transactionId) => TransactionId = transactionId;
 
-    /// <summary>
-    /// 事务作用域标识。
-    /// </summary>
+    /// <inheritdoc />
     public string TransactionId { get; }
 
     /// <summary>
-    /// 使事务作用域租约失效。
+    /// 使租约失效。
     /// </summary>
     public void Invalidate() => Interlocked.Exchange(ref _isActive, 0);
 
-    /// <summary>
-    /// 确保事务作用域仍允许执行。
-    /// </summary>
+    /// <inheritdoc />
     public void EnsureActive()
     {
         if (Volatile.Read(ref _isActive) == 0)

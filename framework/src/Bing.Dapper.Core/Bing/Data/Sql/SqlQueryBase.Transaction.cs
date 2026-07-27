@@ -16,7 +16,7 @@ public abstract partial class SqlQueryBase
     /// <param name="transaction">事务。</param>
     /// <param name="lease">事务作用域执行租约。</param>
     private void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
-        SqlTransactionScopeLease lease)
+        ISqlTransactionScopeLease lease)
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
@@ -76,13 +76,13 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <returns>当前事务，不存在时返回 null。</returns>
     protected IDbTransaction GetExecutionTransaction() =>
-        ((ISqlExecutionResourceAccessor)this).GetCurrentTransaction();
+        ((ISqlQueryExecutionResourceAccessor)this).GetCurrentTransaction();
 
     /// <summary>
     /// 获取当前执行事务。
     /// </summary>
     /// <returns>当前事务，不存在时返回 null。</returns>
-    IDbTransaction ISqlExecutionResourceAccessor.GetCurrentTransaction()
+    IDbTransaction ISqlQueryExecutionResourceAccessor.GetCurrentTransaction()
     {
         _transactionScopeLease?.EnsureActive();
         ThrowIfTransactionScopeChildDisposed();
@@ -263,7 +263,7 @@ public abstract partial class SqlQueryBase
     /// 获取当前事务诊断标识。
     /// </summary>
     /// <returns>当前事务标识，不存在时返回 null。</returns>
-    string ISqlExecutionResourceAccessor.GetCurrentTransactionId()
+    string ISqlQueryExecutionResourceAccessor.GetCurrentTransactionId()
     {
         _transactionScopeLease?.EnsureActive();
         ThrowIfTransactionScopeChildDisposed();
@@ -285,7 +285,7 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="connection">数据库连接。</param>
     /// <param name="source">连接来源。</param>
-    void ISqlExecutionResourceBinder.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
+    void ISqlQueryResourceBinder.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
         BindConnection(connection, SqlResourceOwnership.Owned, source);
 
     /// <summary>
@@ -293,7 +293,7 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="connection">数据库连接。</param>
     /// <param name="source">连接来源。</param>
-    void ISqlExecutionResourceBinder.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
+    void ISqlQueryResourceBinder.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
         BindConnection(connection, SqlResourceOwnership.External, source);
 
     /// <summary>
@@ -301,14 +301,14 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="transaction">数据库事务。</param>
     /// <param name="transactionId">诊断事务标识。</param>
-    void ISqlExecutionResourceBinder.BindExternalTransaction(IDbTransaction transaction, string transactionId) =>
+    void ISqlQueryResourceBinder.BindExternalTransaction(IDbTransaction transaction, string transactionId) =>
         BindExternalTransaction(transaction, transactionId);
 
     /// <summary>
     /// 绑定外部事务延迟解析器。
     /// </summary>
     /// <param name="resolver">外部事务解析器。</param>
-    void ISqlExecutionResourceBinder.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+    void ISqlQueryResourceBinder.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
         _externalTransactionResolver = resolver;
 
     /// <summary>
@@ -318,7 +318,7 @@ public abstract partial class SqlQueryBase
     /// <param name="connection">事务连接。</param>
     /// <param name="transaction">事务对象。</param>
     /// <param name="lease">事务作用域执行租约。</param>
-    void ISqlExecutionResourceBinder.BindTransactionScope(DatabaseContext context, IDbConnection connection,
-        IDbTransaction transaction, SqlTransactionScopeLease lease) => SetTransactionContext(context, connection, transaction, lease);
+    void ISqlTransactionScopeResourceBinder.BindTransactionScope(DatabaseContext context, IDbConnection connection,
+        IDbTransaction transaction, ISqlTransactionScopeLease lease) => SetTransactionContext(context, connection, transaction, lease);
 
 }

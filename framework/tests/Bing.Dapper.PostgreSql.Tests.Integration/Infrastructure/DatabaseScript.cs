@@ -22,11 +22,16 @@ public static class DatabaseScript
 Create Table If Not Exists public.integration_products(
     id uuid Primary Key,
     code text Not Null,
+    user_id text Null,
     name text Null,
-    amount numeric(24,6) Not Null,
+    amount numeric(24,6) Null,
     occurred_at timestamp without time zone Not Null,
     payload jsonb Null
 );");
+        await ExecuteAsync(connection,
+            "Alter Table public.integration_products Add Column If Not Exists user_id text Null;");
+        await ExecuteAsync(connection,
+            "Alter Table public.integration_products Alter Column amount Drop Not Null;");
         await ExecuteAsync(connection, @"
 Create Table If Not Exists public.integration_product_items(
     item_id uuid Primary Key,

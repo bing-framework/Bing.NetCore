@@ -21,7 +21,7 @@ public class JoinItemTest
     [Fact]
     public void Test_1()
     {
-        var item = new JoinItem("join", "b");
+        var item = JoinItem.CreateTable("join", "b");
         item.On(SqlConditionFactory.Create("a.A", "b.B", Operator.Equal));
 
         //复制一份

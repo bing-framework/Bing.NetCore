@@ -68,16 +68,11 @@ public class MetadataAwareParameterTest
         // Arrange
         var metadata = new TestEntityMetadata();
         var parameterManager = new ParameterManager(TestDialect.Instance);
-        var clause = new WhereClause(
-            new TestSqlBuilder(TestDialect.Instance, metadata),
-            TestDialect.Instance,
-            new EntityResolver(metadata),
-            new EntityAliasRegister(),
-            parameterManager,
-            null,
-            new DefaultEntityMappingResolver(metadata),
-            null,
-            new DefaultSqlParameterFactory(new DefaultFieldValueConverterSelector()));
+        var clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new EntityResolver(metadata), aliasRegister: new EntityAliasRegister(),
+            parameterManager: parameterManager, builder: new TestSqlBuilder(TestDialect.Instance, metadata),
+            entityMappingResolver: new DefaultEntityMappingResolver(metadata),
+            parameterFactory: new DefaultSqlParameterFactory(new DefaultFieldValueConverterSelector())));
 
         // Act
         clause.Where<Sample>(t => t.StringValue, "abc");

@@ -20,8 +20,8 @@ public interface IGroupByClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="register">实体别名注册器</param>
-    IGroupByClause Clone(IEntityAliasRegister register);
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    IGroupByClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 分组

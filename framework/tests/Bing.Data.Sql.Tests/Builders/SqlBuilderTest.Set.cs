@@ -17,12 +17,12 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("(Select [a],[b] ");
         result.AppendLine("From [Test] ");
-        result.AppendLine("Where [c]=@_p_1 ");
+        result.AppendLine("Where [c]=@_p_0 ");
         result.AppendLine(") ");
         result.AppendLine("Union ");
         result.AppendLine("(Select [a],[b] ");
         result.AppendLine("From [Test2] ");
-        result.AppendLine("Where [c]=@_p_0 ");
+        result.AppendLine("Where [c]=@_p_1 ");
         result.Append(")");
 
         //执行
@@ -34,8 +34,8 @@ public partial class SqlBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(1, _builder.GetParam("@_p_0"));
-        Assert.Equal(2, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -48,12 +48,12 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("(Select [a],[b] ");
         result.AppendLine("From [Test] ");
-        result.AppendLine("Where [c]=@_p_1 ");
+        result.AppendLine("Where [c]=@_p_0 ");
         result.AppendLine(") ");
         result.AppendLine("Union ");
         result.AppendLine("(Select [a],[b] ");
         result.AppendLine("From [Test2] ");
-        result.AppendLine("Where [c]=@_p_0 ");
+        result.AppendLine("Where [c]=@_p_1 ");
         result.AppendLine(") ");
         result.Append("Order By [a]");
 
@@ -63,8 +63,8 @@ public partial class SqlBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(1, _builder.GetParam("@_p_0"));
-        Assert.Equal(2, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -77,12 +77,12 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("(Select [a],[b] ");
         result.AppendLine("From [Test] ");
-        result.AppendLine("Where [c]=@_p_1 ");
+        result.AppendLine("Where [c]=@_p_0 ");
         result.AppendLine(") ");
         result.AppendLine("Union ");
         result.AppendLine("(Select [a],[b] ");
         result.AppendLine("From [Test2] ");
-        result.AppendLine("Where [c]=@_p_0 ");
+        result.AppendLine("Where [c]=@_p_1 ");
         result.AppendLine(") ");
         result.Append("Order By [a]");
 
@@ -92,8 +92,8 @@ public partial class SqlBuilderTest
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
-        Assert.Equal(1, _builder.GetParam("@_p_0"));
-        Assert.Equal(2, _builder.GetParam("@_p_1"));
+        Assert.Equal(2, _builder.GetParam("@_p_0"));
+        Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
 

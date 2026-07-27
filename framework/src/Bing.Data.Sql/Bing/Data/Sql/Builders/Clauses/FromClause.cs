@@ -18,29 +18,34 @@ public class FromClause : IFromClause
     protected SqlItem Table;
 
     /// <summary>
-    /// Sql方言
+    /// 子句运行上下文。
     /// </summary>
-    protected readonly IDialect Dialect;
+    private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// 实体解析器
+    /// SQL 方言。
     /// </summary>
-    protected readonly IEntityResolver Resolver;
+    protected IDialect Dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体别名注册器
+    /// 实体解析器。
     /// </summary>
-    protected readonly IEntityAliasRegister Register;
+    protected IEntityResolver Resolver => _context.EntityResolver;
 
     /// <summary>
-    /// Sql生成器
+    /// 实体别名注册器。
     /// </summary>
-    protected readonly ISqlBuilder Builder;
+    protected IEntityAliasRegister Register => _context.AliasRegister;
+
+    /// <summary>
+    /// SQL 生成器。
+    /// </summary>
+    protected ISqlBuilder Builder => _context.Builder;
 
     /// <summary>
     /// SQL 对象名称格式化器。
     /// </summary>
-    protected readonly ISqlObjectNameFormatter ObjectNameFormatter;
+    protected ISqlObjectNameFormatter ObjectNameFormatter => _context.Services.ObjectNameFormatter;
 
     /// <summary>
     /// 独立子句使用的固定数据库类型。
@@ -50,50 +55,55 @@ public class FromClause : IFromClause
     /// <summary>
     /// SQL 表引用验证器。
     /// </summary>
-    protected readonly ISqlTableReferenceValidator TableReferenceValidator;
+    protected ISqlTableReferenceValidator TableReferenceValidator => _context.Services.TableReferenceValidator;
+
+    /// <summary>
+    /// SQL 字符串表引用解析器。
+    /// </summary>
+    protected ISqlTableReferenceParser TableReferenceParser => _context.Provider.TableReferenceParser;
 
     /// <summary>
     /// 初始化一个<see cref="FromClause"/>类型的实例
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="table">表</param>
-    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
-    /// <param name="providerDatabaseType">独立子句使用的固定数据库类型</param>
-    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
-    public FromClause(ISqlBuilder builder
-        , IDialect dialect
-        , IEntityResolver resolver
-        , IEntityAliasRegister register
-        , SqlItem table = null
-        , ISqlObjectNameFormatter objectNameFormatter = null
-        , DatabaseType? providerDatabaseType = null
-        , ISqlTableReferenceValidator tableReferenceValidator = null)
+    /// <param name="context">子句运行上下文。</param>
+    public FromClause(SqlClauseContext context)
+        : this(context, null, context?.Provider.DatabaseType)
     {
-        Builder = builder;
-        Dialect = dialect;
-        Resolver = resolver;
-        Register = register;
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 From 子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="table">表。</param>
+    /// <param name="providerDatabaseType">独立子句使用的固定数据库类型。</param>
+    protected FromClause(SqlClauseContext context, SqlItem table, DatabaseType? providerDatabaseType)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
         Table = table;
-        ObjectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
         ProviderDatabaseType = providerDatabaseType;
-        TableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
     }
 
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    public virtual IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <returns>独立的 From 子句。</returns>
+    public virtual IFromClause Clone(SqlClauseContext context)
     {
-        if (register != null)
-            register.FromType = Register.FromType;
-        return new FromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
-            ProviderDatabaseType, TableReferenceValidator);
+        if (context.AliasRegister != null)
+            context.AliasRegister.FromType = Register.FromType;
+        return CreateClone(context, Table?.Clone());
     }
+
+    /// <summary>
+    /// 创建克隆后的 From 子句。
+    /// </summary>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <param name="table">已复制的表项。</param>
+    /// <returns>保留 Provider 子类类型的 From 子句。</returns>
+    protected virtual FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
+        new FromClause(context, table, ProviderDatabaseType);
 
     /// <summary>
     /// 设置表名
@@ -115,7 +125,7 @@ public class FromClause : IFromClause
     /// <returns>表名、别名和架构名。</returns>
     protected virtual (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
     {
-        var parsedTable = SqlTableNameParser.Parse(table, alias);
+        var parsedTable = TableReferenceParser.Parse(table, alias);
         return (parsedTable.TableName, parsedTable.Alias, parsedTable.Schema);
     }
 
@@ -145,7 +155,7 @@ public class FromClause : IFromClause
     /// <param name="schema">架构名</param>
     /// <param name="alias">别名</param>
     protected virtual SqlItem CreateSqlItem(string table, string schema, string alias) =>
-        new SqlItem(table, schema, alias);
+        SqlItem.Parse(table, schema, alias);
 
     /// <summary>
     /// 设置表名
@@ -192,7 +202,7 @@ public class FromClause : IFromClause
             return;
         var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         Register?.RegisterAlias(alias);
-        Table = new SqlItem($"({result}) As {Dialect.SafeName(alias)}", raw: true);
+        Table = SqlItem.Raw($"({result}) As {Dialect.SafeName(alias)}");
     }
 
     /// <summary>
@@ -217,12 +227,12 @@ public class FromClause : IFromClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        if (Table != null && Table.Raw)
+        if (Table != null && Table.IsRaw)
         {
-            Table = new SqlItem($"{Table.Name}{sql}", raw: true);
+            Table = SqlItem.Raw($"{Table.Name}{sql}");
             return;
         }
-        Table = new SqlItem(sql, raw: true);
+        Table = SqlItem.Raw(sql);
     }
 
     /// <summary>

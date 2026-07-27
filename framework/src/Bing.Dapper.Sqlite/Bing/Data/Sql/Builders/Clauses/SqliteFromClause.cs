@@ -9,31 +9,28 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class SqliteFromClause : FromClause
 {
     /// <inheritdoc />
-    public SqliteFromClause(
-        ISqlBuilder builder,
-        IDialect dialect,
-        IEntityResolver resolver,
-        IEntityAliasRegister register,
-        SqlItem table = null,
-        ISqlObjectNameFormatter objectNameFormatter = null,
-        Bing.Data.Enums.DatabaseType? providerDatabaseType = null,
-        ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(builder, dialect, resolver, register, table, objectNameFormatter,
-            providerDatabaseType ?? Bing.Data.Enums.DatabaseType.Sqlite,
-            tableReferenceValidator)
+    public SqliteFromClause(SqlClauseContext context)
+        : this(context, null, Bing.Data.Enums.DatabaseType.Sqlite)
+    {
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 SQLite From 子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="table">表。</param>
+    /// <param name="providerDatabaseType">固定数据库类型。</param>
+    protected SqliteFromClause(SqlClauseContext context, SqlItem table,
+        Bing.Data.Enums.DatabaseType? providerDatabaseType = null)
+        : base(context, table, providerDatabaseType ?? Bing.Data.Enums.DatabaseType.Sqlite)
     {
     }
 
     /// <inheritdoc />
     protected override SqlItem CreateSqlItem(string table, string schema, string alias) =>
-        new SqlItem(table, schema, alias);
+        SqlItem.Parse(table, schema, alias);
 
     /// <inheritdoc />
-    public override IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
-    {
-        if (register != null)
-            register.FromType = Register.FromType;
-        return new SqliteFromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
-            ProviderDatabaseType, TableReferenceValidator);
-    }
+    protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
+        new SqliteFromClause(context, table, ProviderDatabaseType);
 }

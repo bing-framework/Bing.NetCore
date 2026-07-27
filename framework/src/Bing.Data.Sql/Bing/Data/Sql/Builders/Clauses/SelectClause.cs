@@ -10,24 +10,29 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class SelectClause : ISelectClause
 {
     /// <summary>
-    /// Sql生成器
+    /// 子句运行上下文。
     /// </summary>
-    private readonly ISqlBuilder _sqlBuilder;
+    private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// Sql方言
+    /// SQL 生成器。
     /// </summary>
-    private readonly IDialect _dialect;
+    private ISqlBuilder _sqlBuilder => _context.Builder;
 
     /// <summary>
-    /// 实体解析器
+    /// SQL 方言。
     /// </summary>
-    private readonly IEntityResolver _resolver;
+    private IDialect _dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体别名注册器
+    /// 实体解析器。
     /// </summary>
-    private readonly IEntityAliasRegister _register;
+    private IEntityResolver _resolver => _context.EntityResolver;
+
+    /// <summary>
+    /// 实体别名注册器。
+    /// </summary>
+    private IEntityAliasRegister _register => _context.AliasRegister;
 
     /// <summary>
     /// 列集合
@@ -42,87 +47,140 @@ public class SelectClause : ISelectClause
     /// <summary>
     /// 初始化一个<see cref="SelectClause"/>类型的实例
     /// </summary>
-    /// <param name="sqlBuilder">Sql生成器</param>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="columns">列名集合</param>
-    /// <param name="distinct">是否排除重复记录</param>
-    public SelectClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
-        IEntityAliasRegister register, ColumnCollection columns = null, bool distinct = false)
+    /// <param name="context">子句运行上下文。</param>
+    public SelectClause(SqlClauseContext context)
+        : this(context, null, false)
     {
+    }
+
+    /// <summary>
+    /// 使用运行上下文和克隆状态初始化 Select 子句。
+    /// </summary>
+    protected SelectClause(SqlClauseContext context, ColumnCollection columns, bool distinct)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
         _columns = columns ?? new ColumnCollection();
-        _sqlBuilder = sqlBuilder;
-        _dialect = dialect;
-        _resolver = resolver;
-        _register = register;
         _distinct = distinct;
     }
 
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    public virtual ISelectClause Clone(ISqlBuilder builder, IEntityAliasRegister register) =>
-        new SelectClause(builder, _dialect, _resolver, register, _columns.Clone(), _distinct);
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <returns>独立的 Select 子句。</returns>
+    public virtual ISelectClause Clone(SqlClauseContext context) =>
+        new SelectClause(context, _columns.Clone(), _distinct);
 
     /// <summary>
     /// 过滤重复记录
     /// </summary>
     public void Distinct() => _distinct = true;
 
-    /// <summary>
-    /// 求总行数
-    /// </summary>
-    /// <param name="columnAlias">列别名</param>
-    public void Count(string columnAlias = null) => Aggregate("Count(*)", columnAlias);
+    /// <inheritdoc />
+    public void Count(string columnAlias = null) => CountAll(columnAlias);
+
+    /// <inheritdoc />
+    public void CountAll(string columnAlias = null) => _columns.AddAggregationColumn(SqlAggregateFunction.Count,
+        null, columnAlias, wildcard: true);
+
+    /// <inheritdoc />
+    public void CountColumn(string column, string columnAlias = null, bool distinct = false) =>
+        Aggregate(SqlAggregateFunction.Count, column, columnAlias, distinct);
 
     /// <summary>
     /// 求总行数
     /// </summary>
     /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名</param>
-    public void Count(string column, string columnAlias) => Aggregate("Count", column, columnAlias);
+    /// <param name="columnAlias">列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Count(string column, string columnAlias, bool distinct = false) =>
+        AggregateLegacy(SqlAggregateFunction.Count, column, columnAlias, distinct);
 
     /// <summary>
     /// 求总行数
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
-    public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Count", expression, columnAlias);
+    /// <param name="columnAlias">列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class =>
+        AggregateLegacy(SqlAggregateFunction.Count, expression, columnAlias, distinct);
 
     /// <summary>
-    /// 聚合
+    /// 添加结构化聚合列。
     /// </summary>
-    /// <param name="sql">Sql语句</param>
-    /// <param name="columnAlias">列别名</param>
-    private void Aggregate(string sql, string columnAlias) => _columns.AddAggregationColumn(sql, columnAlias);
+    /// <param name="function">聚合函数。</param>
+    /// <param name="column">列名。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Aggregate(SqlAggregateFunction function, string column, string columnAlias = null,
+        bool distinct = false)
+    {
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        if (SqlAggregateArgumentValidator.ValidateWildcard(function, column, distinct, nameof(column)))
+        {
+            _columns.AddAggregationColumn(function, null, columnAlias, distinct, wildcard: true);
+            return;
+        }
+        _columns.AddStructuredAggregationColumn(function, SqlAggregateArgumentValidator.ParseStructuredColumn(column),
+            columnAlias, distinct, useDefaultAlias: false);
+    }
+
+    /// <summary>
+    /// 添加实体表达式聚合列。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="expression">列名表达式。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Aggregate<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false) where TEntity : class
+    {
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        _columns.AddStructuredAggregationColumn(function,
+            SqlAggregateArgumentValidator.ParseStructuredColumn(_resolver.GetColumn(expression)), columnAlias,
+            distinct, typeof(TEntity), useDefaultAlias: false);
+    }
+
+    /// <summary>
+    /// 添加原始聚合参数。
+    /// </summary>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="argumentSql">聚合参数 SQL。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void AggregateRaw(SqlAggregateFunction function, string argumentSql, string columnAlias = null,
+        bool distinct = false)
+    {
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        argumentSql = SqlAggregateArgumentValidator.ValidateExpression(argumentSql, nameof(argumentSql));
+        SqlAggregateArgumentValidator.ValidateWildcard(function, argumentSql, distinct, nameof(argumentSql));
+        _columns.AddAggregationColumn(function, argumentSql, columnAlias, distinct, argumentRaw: true);
+    }
+
+    /// <inheritdoc />
+    public void AggregateExpression(SqlAggregateFunction function, string expressionSql, string columnAlias = null,
+        bool distinct = false)
+    {
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        expressionSql = SqlAggregateArgumentValidator.ValidateExpression(expressionSql, nameof(expressionSql));
+        SqlAggregateArgumentValidator.ValidateWildcard(function, expressionSql, distinct, nameof(expressionSql));
+        _columns.AddAggregationColumn(function, SqlExpressionIdentifierResolver.Resolve(expressionSql, _dialect), columnAlias, distinct,
+            argumentRaw: true);
+    }
 
     /// <summary>
     /// 求和
     /// </summary>
     /// <param name="column">列</param>
     /// <param name="columnAlias">列别名</param>
-    public void Sum(string column, string columnAlias = null) => Aggregate("Sum", column, columnAlias);
-
-    /// <summary>
-    /// 聚合
-    /// </summary>
-    /// <param name="func">函数名</param>
-    /// <param name="column">列名</param>
-    /// <param name="columnAlias">列别名</param>
-    private void Aggregate(string func, string column, string columnAlias) =>
-        _columns.AddAggregationColumn(func, column, columnAlias);
-
-    /// <summary>
-    /// 聚合
-    /// </summary>
-    /// <param name="func">函数名</param>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
-    private void Aggregate<TEntity>(string func, Expression<Func<TEntity, object>> expression, string columnAlias) => _columns.AddAggregationColumn(func, _resolver.GetColumn(expression), typeof(TEntity), columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Sum(string column, string columnAlias = null, bool distinct = false) =>
+        AggregateLegacy(SqlAggregateFunction.Sum, column, columnAlias, distinct);
 
     /// <summary>
     /// 求和
@@ -130,14 +188,19 @@ public class SelectClause : ISelectClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Sum", expression, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class =>
+        AggregateLegacy(SqlAggregateFunction.Sum, expression, columnAlias, distinct);
 
     /// <summary>
     /// 求平均值
     /// </summary>
     /// <param name="column">列</param>
     /// <param name="columnAlias">列别名</param>
-    public void Avg(string column, string columnAlias = null) => Aggregate("Avg", column, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Avg(string column, string columnAlias = null, bool distinct = false) =>
+        AggregateLegacy(SqlAggregateFunction.Avg, column, columnAlias, distinct);
 
     /// <summary>
     /// 求平均值
@@ -145,14 +208,19 @@ public class SelectClause : ISelectClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Avg", expression, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class =>
+        AggregateLegacy(SqlAggregateFunction.Avg, expression, columnAlias, distinct);
 
     /// <summary>
     /// 求最大值
     /// </summary>
     /// <param name="column">列</param>
     /// <param name="columnAlias">列别名</param>
-    public void Max(string column, string columnAlias = null) => Aggregate("Max", column, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Max(string column, string columnAlias = null, bool distinct = false) =>
+        AggregateLegacy(SqlAggregateFunction.Max, column, columnAlias, distinct);
 
     /// <summary>
     /// 求最大值
@@ -160,14 +228,19 @@ public class SelectClause : ISelectClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Max", expression, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class =>
+        AggregateLegacy(SqlAggregateFunction.Max, expression, columnAlias, distinct);
 
     /// <summary>
     /// 求最小值
     /// </summary>
     /// <param name="column">列</param>
     /// <param name="columnAlias">列别名</param>
-    public void Min(string column, string columnAlias = null) => Aggregate("Min", column, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Min(string column, string columnAlias = null, bool distinct = false) =>
+        AggregateLegacy(SqlAggregateFunction.Min, column, columnAlias, distinct);
 
     /// <summary>
     /// 求最小值
@@ -175,7 +248,48 @@ public class SelectClause : ISelectClause
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class => Aggregate("Min", expression, columnAlias);
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class =>
+        AggregateLegacy(SqlAggregateFunction.Min, expression, columnAlias, distinct);
+
+    /// <summary>
+    /// 添加保留自动叶子列 Alias 的旧便捷结构化聚合列。
+    /// </summary>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="column">列名。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    private void AggregateLegacy(SqlAggregateFunction function, string column, string columnAlias, bool distinct)
+    {
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        if (SqlAggregateArgumentValidator.ValidateWildcard(function, column, distinct, nameof(column)))
+        {
+            _columns.AddAggregationColumn(function, null, columnAlias, distinct, wildcard: true);
+            return;
+        }
+        _columns.AddStructuredAggregationColumn(function, SqlAggregateArgumentValidator.ParseStructuredColumn(column),
+            columnAlias, distinct, useDefaultAlias: true);
+    }
+
+    /// <summary>
+    /// 添加保留自动叶子列 Alias 的旧便捷实体表达式聚合列。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="expression">列名表达式。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    private void AggregateLegacy<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
+        string columnAlias, bool distinct) where TEntity : class
+    {
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        _columns.AddStructuredAggregationColumn(function,
+            SqlAggregateArgumentValidator.ParseStructuredColumn(_resolver.GetColumn(expression)), columnAlias,
+            distinct, typeof(TEntity), useDefaultAlias: true);
+    }
 
     /// <summary>
     /// 设置列名

@@ -29,7 +29,8 @@ public class PredicateExpressionResolverTest
     public PredicateExpressionResolverTest()
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
-        _resolver = new PredicateExpressionResolver(TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), _parameterManager);
+        _resolver = new PredicateExpressionResolver(TestSqlBuilder.CreateTestClauseContext(
+            parameterManager: _parameterManager));
     }
 
     #endregion

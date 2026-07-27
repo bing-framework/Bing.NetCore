@@ -81,6 +81,30 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
+    /// 测试 - Oracle 开关应仅启用 Oracle 集成测试，不启用其他 Provider。
+    /// </summary>
+    [Fact]
+    public void GetSkipReason_ShouldEnableOnlyOracleWhenOracleSwitchIsEnabled()
+    {
+        SetEnvironmentVariable(OracleVariable, "true");
+
+        Assert.Null(IntegrationTestGate.GetSkipReason("Oracle"));
+        Assert.NotNull(IntegrationTestGate.GetSkipReason("SqlServer"));
+    }
+
+    /// <summary>
+    /// 测试 - Oracle 开关缺失时跳过原因应包含全局和 Oracle 专属配置名称。
+    /// </summary>
+    [Fact]
+    public void GetSkipReason_ShouldDescribeOracleSwitchWhenOracleIsDisabled()
+    {
+        var result = IntegrationTestGate.GetSkipReason("Oracle");
+
+        Assert.Contains(IntegrationTestGate.GlobalEnvironmentVariable, result);
+        Assert.Contains(OracleVariable, result);
+    }
+
+    /// <summary>
     /// 测试 - 环境变量值比较应忽略大小写。
     /// </summary>
     [Fact]

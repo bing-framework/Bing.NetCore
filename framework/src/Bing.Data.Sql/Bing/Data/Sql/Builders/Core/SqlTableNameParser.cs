@@ -91,9 +91,9 @@ internal static class SqlTableNameParser
 }
 
 /// <summary>
-/// 已验证的字符串表引用组成部分。
+/// 已解析的 SQL 字符串表引用名称。
 /// </summary>
-/// <param name="TableName">完整物理表名。</param>
-/// <param name="Alias">可选表别名。</param>
-/// <param name="Schema">可选独立架构名。</param>
-internal sealed record SqlTableName(string TableName, string Alias, string Schema);
+/// <param name="TableName">表名。</param>
+/// <param name="Alias">别名。</param>
+/// <param name="Schema">架构名。</param>
+public sealed record SqlTableName(string TableName, string Alias, string Schema);

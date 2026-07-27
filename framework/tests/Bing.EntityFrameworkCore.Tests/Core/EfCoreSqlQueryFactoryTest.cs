@@ -1,5 +1,6 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
 using Bing.Data.Sql.Builders;
@@ -465,7 +466,7 @@ public class EfCoreSqlQueryFactoryTest
         connection.Open();
         using var serviceProvider = CreateServiceProvider();
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
-        var builder = new MySqlBuilder(entityModelMetadataProvider: unitOfWork);
+        var builder = new MySqlBuilder(new SqlBuilderServices(entityModelMetadataProvider: unitOfWork));
 
         // Act
         var tableName = unitOfWork.GetTableName(typeof(DottedTableEntity));

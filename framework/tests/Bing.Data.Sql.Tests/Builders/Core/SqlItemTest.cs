@@ -10,6 +10,23 @@ namespace Bing.Data.Sql.Tests.Builders.Core;
 public class SqlItemTest
 {
     /// <summary>
+    /// 测试 - 旧字符串聚合应保持渲染和 Clone 兼容，供升级期间的既有调用方使用。
+    /// </summary>
+    [Fact]
+    public void LegacyAggregationFunction_WhenCloned_ShouldPreserveRendering()
+    {
+        // Arrange
+        var item = new SqlItem("a", alias: "Total", aggregationFunc: "Sum");
+
+        // Act
+        var clone = item.Clone();
+
+        // Assert
+        Assert.Equal("Sum([a]) As [Total]", item.ToSql(TestDialect.Instance));
+        Assert.Equal("Sum([a]) As [Total]", clone.ToSql(TestDialect.Instance));
+    }
+
+    /// <summary>
     /// 只设置名称
     /// </summary>
     [Fact]
@@ -221,5 +238,24 @@ public class SqlItemTest
         Assert.Equal("[a].[b].[c]", item.ToSql(TestDialect.Instance));
         //Assert.Equal("\"a\".\"b\".\"c\"", item.ToSql(new PgSqlDialect()));
         //Assert.Equal("`a`.`b`.`c`", item.ToSql(new MySqlDialect()));
+    }
+
+    /// <summary>
+    /// 测试 - Clone 应保留三段对象名中的数据库名称。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenItemHasDatabaseName_ShouldPreserveAllIdentifierSegments()
+    {
+        // Arrange
+        var item = new SqlItem("archive.Users.Id");
+
+        // Act
+        var clone = item.Clone();
+
+        // Assert
+        Assert.Equal("archive", clone.DatabaseName);
+        Assert.Equal("Users", clone.Prefix);
+        Assert.Equal("Id", clone.Name);
+        Assert.Equal("[archive].[Users].[Id]", clone.ToSql(TestDialect.Instance));
     }
 }

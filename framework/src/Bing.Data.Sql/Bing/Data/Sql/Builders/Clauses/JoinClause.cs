@@ -36,29 +36,34 @@ public class JoinClause : IJoinClause
     private const string RightJoinKey = "Right Join";
 
     /// <summary>
-    /// Sql生成器
+    /// 子句运行上下文。
     /// </summary>
-    protected readonly ISqlBuilder _sqlBuilder;
+    private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// Sql方言
+    /// SQL 生成器。
     /// </summary>
-    protected readonly IDialect _dialect;
+    protected ISqlBuilder _sqlBuilder => _context.Builder;
 
     /// <summary>
-    /// 实体解析器
+    /// SQL 方言。
     /// </summary>
-    protected readonly IEntityResolver _resolver;
+    protected IDialect _dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体别名注册器
+    /// 实体解析器。
     /// </summary>
-    protected readonly IEntityAliasRegister _register;
+    protected IEntityResolver _resolver => _context.EntityResolver;
 
     /// <summary>
-    /// 参数管理器
+    /// 实体别名注册器。
     /// </summary>
-    protected readonly IParameterManager _parameterManager;
+    protected IEntityAliasRegister _register => _context.AliasRegister;
+
+    /// <summary>
+    /// 参数管理器。
+    /// </summary>
+    protected IParameterManager _parameterManager => _context.ParameterManager;
 
     /// <summary>
     /// 辅助操作
@@ -66,54 +71,60 @@ public class JoinClause : IJoinClause
     protected readonly Helper _helper;
 
     /// <summary>
-    /// 实体映射解析器
+    /// 实体映射解析器。
     /// </summary>
-    protected readonly IEntityMappingResolver _entityMappingResolver;
+    protected IEntityMappingResolver _entityMappingResolver => _context.Services.EntityMappingResolver;
 
     /// <summary>
-    /// 数据库上下文访问器
+    /// 数据库上下文访问器。
     /// </summary>
-    protected readonly IDatabaseContextAccessor _databaseContextAccessor;
+    protected IDatabaseContextAccessor _databaseContextAccessor => _context.Services.DatabaseContextAccessor;
 
     /// <summary>
-    /// Sql 参数工厂
+    /// SQL 参数工厂。
     /// </summary>
-    protected readonly ISqlParameterFactory _sqlParameterFactory;
+    protected ISqlParameterFactory _sqlParameterFactory => _context.Services.ParameterFactory;
 
     /// <summary>
-    /// Sql 元数据配置
+    /// SQL 元数据配置。
     /// </summary>
-    protected readonly SqlMetadataOptions _metadataOptions;
+    protected SqlMetadataOptions _metadataOptions => _context.Services.MetadataOptions;
 
     /// <summary>
-    /// Sql 配置
+    /// SQL 配置。
     /// </summary>
-    protected readonly SqlOptions _sqlOptions;
+    protected SqlOptions _sqlOptions => _context.Services.Options;
 
     /// <summary>
-    /// SQL 数据库上下文解析器
+    /// SQL 数据库上下文解析器。
     /// </summary>
-    protected readonly ISqlDatabaseContextResolver _databaseContextResolver;
+    protected ISqlDatabaseContextResolver _databaseContextResolver => _context.Services.DatabaseContextResolver;
 
     /// <summary>
     /// Builder 生命周期内固定的数据库上下文。
     /// </summary>
-    protected readonly DatabaseContext _databaseContext;
+    protected DatabaseContext _databaseContext => _context.ExecutionContext.DatabaseContext;
 
     /// <summary>
-    /// SQL 对象名格式化器
+    /// SQL 对象名称格式化器。
     /// </summary>
-    protected readonly ISqlObjectNameFormatter _objectNameFormatter;
+    protected ISqlObjectNameFormatter _objectNameFormatter => _context.Services.ObjectNameFormatter;
 
     /// <summary>
-    /// 跨数据库查询校验器
+    /// 跨数据库查询校验器。
     /// </summary>
-    protected readonly ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator;
+    protected ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator =>
+        _context.Services.CrossDatabaseQueryValidator;
 
     /// <summary>
     /// SQL 表引用验证器。
     /// </summary>
-    protected readonly ISqlTableReferenceValidator _tableReferenceValidator;
+    protected ISqlTableReferenceValidator _tableReferenceValidator => _context.Services.TableReferenceValidator;
+
+    /// <summary>
+    /// SQL 字符串表引用解析器。
+    /// </summary>
+    protected ISqlTableReferenceParser _tableReferenceParser => _context.Provider.TableReferenceParser;
 
     /// <summary>
     /// 连接参数
@@ -127,57 +138,21 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 初始化一个<see cref="JoinClause"/>类型的实例
     /// </summary>
-    /// <param name="sqlBuilder">Sql生成器</param>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="joinItems">连接参数列表</param>
-    /// <param name="entityMappingResolver">实体映射解析器</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
-    /// <param name="metadataOptions">Sql 元数据配置</param>
-    /// <param name="sqlOptions">Sql 配置</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
-    /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
-    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
-    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
-    public JoinClause(ISqlBuilder sqlBuilder
-        , IDialect dialect
-        , IEntityResolver resolver
-        , IEntityAliasRegister register
-        , IParameterManager parameterManager
-        , List<JoinItem> joinItems = null
-        , IEntityMappingResolver entityMappingResolver = null
-        , IDatabaseContextAccessor databaseContextAccessor = null
-        , ISqlParameterFactory sqlParameterFactory = null
-        , SqlMetadataOptions metadataOptions = null
-        , SqlOptions sqlOptions = null
-        , ISqlDatabaseContextResolver databaseContextResolver = null
-        , ISqlObjectNameFormatter objectNameFormatter = null
-        , ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null
-        , ISqlTableReferenceValidator tableReferenceValidator = null
-        , DatabaseContext databaseContext = null)
+    /// <param name="context">子句运行上下文。</param>
+    public JoinClause(SqlClauseContext context)
+        : this(context, null)
     {
-        _sqlBuilder = sqlBuilder;
-        _dialect = dialect;
-        _resolver = resolver;
-        _register = register;
-        _parameterManager = parameterManager;
-        _entityMappingResolver = entityMappingResolver;
-        _databaseContextAccessor = databaseContextAccessor;
-        _sqlParameterFactory = sqlParameterFactory;
-        _metadataOptions = metadataOptions;
-        _sqlOptions = sqlOptions;
-        _databaseContextResolver = databaseContextResolver;
-        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
-        _objectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
-        _crossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
-        _tableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();
-        _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver,
-            _databaseContext);
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化表连接子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="joinItems">连接参数列表。</param>
+    protected JoinClause(SqlClauseContext context, List<JoinItem> joinItems)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _helper = new Helper(context);
         _params = joinItems ?? new List<JoinItem>();
     }
 
@@ -188,28 +163,27 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="sqlBuilder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    public virtual IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register, IParameterManager parameterManager)
-    {
-        return new JoinClause(sqlBuilder, _dialect, _resolver, register, parameterManager,
-            CloneItems(register, parameterManager), _entityMappingResolver, _databaseContextAccessor,
-            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _objectNameFormatter,
-            _crossDatabaseQueryValidator, _tableReferenceValidator, _databaseContext);
-    }
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <returns>独立的连接子句。</returns>
+    public virtual IJoinClause Clone(SqlClauseContext context) => CreateClone(context, CloneItems(context));
+
+    /// <summary>
+    /// 创建克隆后的连接子句。
+    /// </summary>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <param name="joinItems">已深复制的连接项。</param>
+    /// <returns>保留 Provider 子类类型的连接子句。</returns>
+    protected virtual JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
+        new JoinClause(context, joinItems);
 
     /// <summary>
     /// 克隆连接项。
     /// </summary>
-    /// <param name="register">实体别名注册器。</param>
-    /// <param name="parameterManager">参数管理器。</param>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
     /// <returns>独立的连接项列表。</returns>
-    protected List<JoinItem> CloneItems(IEntityAliasRegister register, IParameterManager parameterManager)
+    private List<JoinItem> CloneItems(SqlClauseContext context)
     {
-        var helper = new Helper(_dialect, _resolver, register, parameterManager, _entityMappingResolver,
-            _databaseContextAccessor, _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver,
-            _databaseContext);
+        var helper = new Helper(context);
         return _params.Select(item => item.Clone(helper)).ToList();
     }
 
@@ -261,7 +235,7 @@ public class JoinClause : IJoinClause
     /// <returns>表名、别名和架构名。</returns>
     protected virtual (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
     {
-        var parsedTable = SqlTableNameParser.Parse(table, alias);
+        var parsedTable = _tableReferenceParser.Parse(table, alias);
         return (parsedTable.TableName, parsedTable.Alias, parsedTable.Schema);
     }
 
@@ -292,7 +266,7 @@ public class JoinClause : IJoinClause
     /// <param name="alias">别名</param>
     /// <param name="type">类型</param>
     protected virtual JoinItem CreateJoinItem(string joinType, string table, string schema, string alias,
-        Type type = null) => new JoinItem(joinType, table, schema, alias, type: type);
+        Type type = null) => JoinItem.CreateTable(joinType, table, schema, alias, type);
 
     /// <summary>
     /// 添加连接项
@@ -340,9 +314,9 @@ public class JoinClause : IJoinClause
     protected virtual JoinItem CreateStructuredJoinItem(string joinType, SqlTableReference reference, Type type,
         SqlTableReference sourceReference, DatabaseContext databaseContext)
     {
-        return new JoinItem(joinType, new StructuredSqlItem(reference, _objectNameFormatter, databaseContext,
+        return JoinItem.Create(joinType, new StructuredSqlItem(reference, _objectNameFormatter, databaseContext,
             (_sqlBuilder as SqlBuilderBase)?.ResolveProviderDatabaseType(reference), _tableReferenceValidator,
-            _crossDatabaseQueryValidator, sourceReference), type, null);
+            _crossDatabaseQueryValidator, sourceReference), type);
     }
 
     /// <summary>
@@ -391,7 +365,7 @@ public class JoinClause : IJoinClause
             return;
         _register?.RegisterAlias(alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
-        AddItem(new JoinItem(joinType, $"({sql}) As {_dialect.SafeName(alias)}", raw: true));
+        AddItem(JoinItem.CreateRaw(joinType, $"({sql}) As {_dialect.SafeName(alias)}"));
     }
 
     /// <summary>
@@ -427,7 +401,7 @@ public class JoinClause : IJoinClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        AddItem(new JoinItem(joinType, sql, raw: true));
+        AddItem(JoinItem.CreateRaw(joinType, sql));
     }
 
     /// <summary>

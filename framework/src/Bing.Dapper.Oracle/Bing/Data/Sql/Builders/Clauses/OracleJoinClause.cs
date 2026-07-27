@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Bing.Data;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
@@ -13,28 +14,26 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class OracleJoinClause : JoinClause
 {
     /// <inheritdoc />
-    public OracleJoinClause(
-        ISqlBuilder sqlBuilder,
-        IDialect dialect,
-        IEntityResolver resolver,
-        IEntityAliasRegister register,
-        IParameterManager parameterManager,
-        IEntityMappingResolver entityMappingResolver = null,
-        IDatabaseContextAccessor databaseContextAccessor = null,
-        ISqlParameterFactory sqlParameterFactory = null,
-        SqlMetadataOptions metadataOptions = null,
-        SqlOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null,
-        ISqlObjectNameFormatter objectNameFormatter = null,
-        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
-        ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(sqlBuilder, dialect, resolver, register, parameterManager, null, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver,
-            objectNameFormatter, crossDatabaseQueryValidator, tableReferenceValidator)
+    public OracleJoinClause(SqlClauseContext context)
+        : this(context, null)
+    {
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 Oracle 表连接子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="joinItems">已克隆的连接项。</param>
+    protected OracleJoinClause(SqlClauseContext context, List<JoinItem> joinItems)
+        : base(context, joinItems)
     {
     }
 
     /// <inheritdoc />
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
-        new JoinItem(joinType, table, schema, alias, false, false, type);
+        JoinItem.CreateAtomicTable(joinType, table, schema, alias, type);
+
+    /// <inheritdoc />
+    protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
+        new OracleJoinClause(context, joinItems);
 }

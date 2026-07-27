@@ -19,44 +19,31 @@ public class MySqlJoinClause : JoinClause
     /// <summary>
     /// 初始化一个<see cref="MySqlJoinClause"/>类型的实例
     /// </summary>
-    /// <param name="sqlBuilder">Sql生成器</param>
-    /// <param name="dialect">方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="entityMappingResolver">实体映射解析器</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
-    /// <param name="metadataOptions">Sql 元数据配置</param>
-    /// <param name="options">Sql 配置</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="objectNameFormatter">SQL 对象名称格式化器</param>
-    /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器</param>
-    /// <param name="tableReferenceValidator">SQL 表引用验证器</param>
-    /// <param name="splitStringTableName">是否拆分字符串表名中的句点</param>
+    /// <param name="context">子句运行上下文。</param>
+    public MySqlJoinClause(SqlClauseContext context)
+        : this(context, (context?.ExecutionContext.DatabaseType ?? Bing.Data.Enums.DatabaseType.MySql) !=
+            Bing.Data.Enums.DatabaseType.MySql, null)
+    {
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 MySQL 表连接子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="splitStringTableName">是否拆分字符串表名中的句点。</param>
     /// <param name="joinItems">已克隆的连接项。</param>
-    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文。</param>
-    public MySqlJoinClause(ISqlBuilder sqlBuilder, IDialect dialect, IEntityResolver resolver,
-        IEntityAliasRegister register, IParameterManager parameterManager,
-        IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
-        ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions metadataOptions = null,
-        SqlOptions options = null, ISqlDatabaseContextResolver databaseContextResolver = null,
-        ISqlObjectNameFormatter objectNameFormatter = null,
-        ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
-        ISqlTableReferenceValidator tableReferenceValidator = null,
-        bool splitStringTableName = false,
-        List<JoinItem> joinItems = null,
-        DatabaseContext databaseContext = null)
-        : base(sqlBuilder, dialect, resolver, register, parameterManager, joinItems, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, options, databaseContextResolver,
-            objectNameFormatter, crossDatabaseQueryValidator, tableReferenceValidator, databaseContext)
+    protected MySqlJoinClause(SqlClauseContext context, bool splitStringTableName,
+        List<JoinItem> joinItems = null)
+        : base(context, joinItems)
     {
         _splitStringTableName = splitStringTableName;
     }
 
     /// <inheritdoc />
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
-        new JoinItem(joinType, table, schema, alias, false, _splitStringTableName, type);
+        _splitStringTableName
+            ? JoinItem.CreateTable(joinType, table, schema, alias, type)
+            : JoinItem.CreateAtomicTable(joinType, table, schema, alias, type);
 
     /// <summary>
     /// 解析实际 MySQL 的反引号字符串表名。
@@ -73,9 +60,6 @@ public class MySqlJoinClause : JoinClause
     }
 
     /// <inheritdoc />
-    public override IJoinClause Clone(ISqlBuilder sqlBuilder, IEntityAliasRegister register,
-        IParameterManager parameterManager) => new MySqlJoinClause(sqlBuilder, _dialect, _resolver, register,
-        parameterManager, _entityMappingResolver, _databaseContextAccessor, _sqlParameterFactory, _metadataOptions,
-        _sqlOptions, _databaseContextResolver, _objectNameFormatter, _crossDatabaseQueryValidator,
-        _tableReferenceValidator, _splitStringTableName, CloneItems(register, parameterManager), _databaseContext);
+    protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
+        new MySqlJoinClause(context, _splitStringTableName, joinItems);
 }

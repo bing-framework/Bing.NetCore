@@ -65,7 +65,7 @@ public class ColumnCollection
     private ColumnItem CreateItem(string column, string tableAlias)
     {
         var item = new SqlItem(column, tableAlias);
-        return new ColumnItem(item.Name, item.Prefix, item.Alias);
+        return ColumnItem.CreateColumn(item.Name, item.Prefix, item.Alias);
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class ColumnCollection
     private ColumnItem CreateItem(string column, Type tableType, string columnAlias = null)
     {
         var item = new SqlItem(column, alias: columnAlias);
-        return new ColumnItem(item.Name, columnAlias: item.Alias, tableType: tableType);
+        return ColumnItem.CreateColumn(item.Name, columnAlias: item.Alias, tableType: tableType);
     }
 
     #endregion
@@ -126,7 +126,7 @@ public class ColumnCollection
     {
         if (sql.IsEmpty())
             return;
-        AddColumn(new ColumnItem(sql, columnAlias: columnAlias, raw: true));
+        AddColumn(ColumnItem.CreateRaw(sql, columnAlias));
     }
 
     #endregion
@@ -134,45 +134,58 @@ public class ColumnCollection
     #region AddAggregationColumn(添加聚合列)
 
     /// <summary>
-    /// 添加聚合列
+    /// 添加结构化聚合列。
     /// </summary>
-    /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名</param>
-    public void AddAggregationColumn(string column, string columnAlias)
-    {
-        if (column.IsEmpty())
-            return;
-        AddColumn(new ColumnItem(column, columnAlias: columnAlias, isAggregation: true));
-    }
-
-    /// <summary>
-    /// 添加字符串列聚合。
-    /// </summary>
-    /// <param name="aggregationFunc">聚合函数名称。</param>
+    /// <param name="function">聚合函数。</param>
     /// <param name="column">列名，可包含表别名限定符。</param>
     /// <param name="columnAlias">聚合结果列别名。</param>
-    public void AddAggregationColumn(string aggregationFunc, string column, string columnAlias)
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <param name="tableType">实体类型。</param>
+    /// <param name="wildcard">是否使用通配符参数。</param>
+    /// <param name="argumentRaw">是否将参数作为已解析 SQL 片段。</param>
+    public void AddAggregationColumn(SqlAggregateFunction function, string column, string columnAlias = null,
+        bool distinct = false, Type tableType = null, bool wildcard = false, bool argumentRaw = false)
     {
-        if (column.IsEmpty())
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        if (wildcard && function != SqlAggregateFunction.Count)
+            throw new ArgumentException("仅 Count 聚合支持通配符参数。", nameof(function));
+        if (wildcard && distinct)
+            throw new ArgumentException("Count(*) 不支持 Distinct 聚合参数。", nameof(distinct));
+
+        if (wildcard)
+        {
+            AddColumn(ColumnItem.CreateAggregateWildcard(function, columnAlias));
             return;
-        var item = new SqlItem(column);
-        AddColumn(new ColumnItem(item.Name, item.Prefix,
-            string.IsNullOrEmpty(columnAlias) ? column : columnAlias, isAggregation: true,
-            aggregationFunc: aggregationFunc));
+        }
+
+        if (argumentRaw)
+        {
+            SqlAggregateArgumentValidator.ValidateExpression(column, nameof(column));
+            AddColumn(ColumnItem.CreateAggregateExpression(function, column, columnAlias, distinct));
+            return;
+        }
+
+        AddStructuredAggregationColumn(function, SqlAggregateArgumentValidator.ParseStructuredColumn(column),
+            columnAlias, distinct, tableType);
     }
 
     /// <summary>
-    /// 添加聚合列
+    /// 添加已解析路径的结构化聚合列。
     /// </summary>
-    /// <param name="aggregationFunc">聚合函数</param>
-    /// <param name="column">列</param>
-    /// <param name="tableType">表类型</param>
-    /// <param name="columnAlias">列别名</param>
-    public void AddAggregationColumn(string aggregationFunc, string column, Type tableType, string columnAlias)
+    /// <param name="function">聚合函数。</param>
+    /// <param name="column">已解析的结构化列路径。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <param name="tableType">实体类型。</param>
+    /// <param name="useDefaultAlias">未指定 Alias 时是否使用列路径的叶子名称。</param>
+    internal void AddStructuredAggregationColumn(SqlAggregateFunction function, SqlIdentifierPath column,
+        string columnAlias = null, bool distinct = false, Type tableType = null, bool useDefaultAlias = true)
     {
-        if (column.IsEmpty())
-            return;
-        AddColumn(new ColumnItem(column, columnAlias: string.IsNullOrEmpty(columnAlias) ? column : columnAlias, isAggregation: true, tableType: tableType, aggregationFunc: aggregationFunc));
+        if (column == null)
+            throw new ArgumentNullException(nameof(column));
+        AddColumn(ColumnItem.CreateAggregate(function, column.Name, column.Prefix,
+            string.IsNullOrEmpty(columnAlias) && useDefaultAlias ? column.LeafName : columnAlias, distinct,
+            column.DatabaseName, tableType));
     }
 
     #endregion

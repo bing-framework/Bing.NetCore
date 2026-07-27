@@ -98,9 +98,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// </summary>
     /// <param name="query">SQL 查询对象。</param>
     /// <returns>执行资源访问器。</returns>
-    private static ISqlExecutionResourceAccessor GetResourceAccessor(ISqlQuery query) =>
-        query as ISqlExecutionResourceAccessor ??
-        throw new InvalidOperationException("事务查询对象未实现内部执行资源访问器。");
+    private static ISqlQueryExecutionResourceAccessor GetResourceAccessor(ISqlQuery query) =>
+        query as ISqlQueryExecutionResourceAccessor ??
+        throw new InvalidOperationException("事务查询对象未实现执行资源访问器。");
 
     private static void EnsureTransactionsSupported(DatabaseContext context)
     {
@@ -384,9 +384,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 
         private void BindTransactionContext(ISqlQuery query)
         {
-            var binder = query as ISqlExecutionResourceBinder;
+            var binder = query as ISqlTransactionScopeResourceBinder;
             if (binder == null)
-                throw new InvalidOperationException("事务作用域创建的 Query 或 Executor 必须实现内部执行资源绑定器，才能保证其生命周期受事务作用域管理。");
+                throw new InvalidOperationException("事务作用域创建的 Query 或 Executor 必须实现事务作用域资源绑定器，才能保证其生命周期受事务作用域管理。");
             binder.BindTransactionScope(_context, _connection, _transaction, _lease);
         }
 

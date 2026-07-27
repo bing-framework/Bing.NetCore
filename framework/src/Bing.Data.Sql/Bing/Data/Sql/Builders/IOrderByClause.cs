@@ -10,8 +10,8 @@ public interface IOrderByClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="register">实体别名注册器</param>
-    IOrderByClause Clone(IEntityAliasRegister register);
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    IOrderByClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 排序

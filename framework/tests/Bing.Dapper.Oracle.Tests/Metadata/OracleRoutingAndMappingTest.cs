@@ -2,6 +2,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
@@ -31,7 +32,7 @@ public class OracleRoutingAndMappingTest
             }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
-        var builder = new OracleBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
+        var builder = CreateBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
             options: sqlOptions);
 
         // Act
@@ -52,7 +53,7 @@ public class OracleRoutingAndMappingTest
         // Arrange
         var metadataOptions = CreateMetadataOptions();
         metadataOptions.EntityMappings[0].Schema = "SCOTT";
-        var builder = new OracleBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+        var builder = CreateBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions, options: CreateSqlOptions());
 
         // Act
@@ -67,6 +68,14 @@ public class OracleRoutingAndMappingTest
         DbKey = "reporting",
         DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = DatabaseType.Oracle }
     });
+
+    /// <summary>
+    /// 使用公开共享服务创建 Oracle Builder。
+    /// </summary>
+    private static OracleBuilder CreateBuilder(IEntityMappingResolver entityMappingResolver = null,
+        SqlMetadataOptions metadataOptions = null, SqlOptions options = null) =>
+        new(new SqlBuilderServices(entityMappingResolver: entityMappingResolver,
+            metadataOptions: metadataOptions, options: options));
 
     /// <summary>
     /// 创建 Sql 元数据配置

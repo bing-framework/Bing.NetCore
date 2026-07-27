@@ -43,7 +43,7 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
-        result.Append("Where [Age]=@_p_2 And [Name]=@_p_0 And [Code]=@_p_1");
+        result.Append("Where [Age]=@_p_0 And [Name]=@_p_1 And [Code]=@_p_2");
 
         //执行
         var builder1 = _builder.New().Where("Name", "a");
@@ -53,9 +53,9 @@ public partial class SqlBuilderTest
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(3, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
-        Assert.Equal(1, _builder.GetParam("@_p_2"));
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("a", _builder.GetParam("@_p_1"));
+        Assert.Equal("b", _builder.GetParam("@_p_2"));
     }
 
     #endregion
@@ -115,7 +115,7 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select * ");
         result.AppendLine("From [Test] ");
-        result.Append("Where (([Age]=@_p_2 Or [Name]=@_p_0) Or [Code]=@_p_1)");
+        result.Append("Where (([Age]=@_p_0 Or [Name]=@_p_1) Or [Code]=@_p_2)");
 
         //执行
         var builder1 = _builder.New().Where("Name", "a");
@@ -125,9 +125,9 @@ public partial class SqlBuilderTest
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(3, _builder.GetParams().Count);
-        Assert.Equal("a", _builder.GetParam("@_p_0"));
-        Assert.Equal("b", _builder.GetParam("@_p_1"));
-        Assert.Equal(1, _builder.GetParam("@_p_2"));
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("a", _builder.GetParam("@_p_1"));
+        Assert.Equal("b", _builder.GetParam("@_p_2"));
     }
 
     /// <summary>
@@ -1619,11 +1619,11 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
-        result.Append("Where [a].[Name]=@_p_1 And ");
+        result.Append("Where [a].[Name]=@_p_0 And ");
         result.Append("[a].[Email] In (");
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
-        result.Append("Where [b].[Url]=@_p_0");
+        result.Append("Where [b].[Url]=@_p_1");
         result.Append(")");
 
         //执行
@@ -1636,8 +1636,8 @@ public partial class SqlBuilderTest
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("u", _builder.GetParam("@_p_0"));
-        Assert.Equal("n", _builder.GetParam("@_p_1"));
+        Assert.Equal("n", _builder.GetParam("@_p_0"));
+        Assert.Equal("u", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -1650,11 +1650,11 @@ public partial class SqlBuilderTest
         var result = new StringBuilder();
         result.AppendLine("Select [a].[Email] ");
         result.AppendLine("From [Sample] As [a] ");
-        result.Append("Where [a].[Name]=@_p_1 And ");
+        result.Append("Where [a].[Name]=@_p_0 And ");
         result.Append("[a].[Email] In (");
         result.AppendLine("Select [a] ");
         result.AppendLine("From [b] ");
-        result.Append("Where [b].[Url]=@_p_0");
+        result.Append("Where [b].[Url]=@_p_1");
         result.Append(")");
 
         //执行
@@ -1667,8 +1667,8 @@ public partial class SqlBuilderTest
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
         Assert.Equal(2, _builder.GetParams().Count);
-        Assert.Equal("u", _builder.GetParam("@_p_0"));
-        Assert.Equal("n", _builder.GetParam("@_p_1"));
+        Assert.Equal("n", _builder.GetParam("@_p_0"));
+        Assert.Equal("u", _builder.GetParam("@_p_1"));
     }
 
     /// <summary>

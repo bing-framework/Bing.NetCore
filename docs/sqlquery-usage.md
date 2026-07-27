@@ -221,6 +221,43 @@ ISqlQuery Min<TEntity>(Expression<Func<TEntity, object>> expression, string colu
 
 用途：在 `SELECT` 子句中添加聚合列，例如 `COUNT(o.Id) AS TotalCount`、`SUM(o.Amount)` 等。
 
+统一聚合 API 将结构化列、原始 SQL 参数和可转换表达式分开处理：
+
+```csharp
+// 旧便捷 API 保留自动 Alias；限定列使用叶子名称而非 o.Amount。
+builder.Sum("o.Amount");
+
+// 新统一 API 未提供 Alias 时不输出 AS。
+builder.CountAll();
+builder.CountColumn("o.UserId", distinct: true);
+builder.Aggregate(SqlAggregateFunction.Sum, "o.Amount");
+
+// 显式 Alias 适用于 DTO 映射等结果契约。
+builder.Sum("o.Amount", "Total");
+
+builder.AggregateExpression(
+    SqlAggregateFunction.Sum,
+    "[o].[Quantity] * [o].[Price]",
+    "Total");
+
+// AggregateRaw 完全保留参数 SQL，包括 JSON Path 和字符串方括号。
+builder.AggregateRaw(
+    SqlAggregateFunction.Count,
+    "JsonExtract(o.Data, '$[0]')",
+    "JsonCount");
+
+// AggregateExpression 仅转换普通 SQL 上下文的 [] 标识符；字符串和注释保持原文。
+builder.AggregateExpression(
+        SqlAggregateFunction.Sum,
+        "Case When [o].[Amount] > @MinAmount Then [o].[Amount] Else 0 End",
+        "Total")
+    .AddParam("MinAmount", 100);
+```
+
+`Aggregate` 和 `CountColumn` 只接受一个结构化列路径，支持一至三段普通或引用标识符；表达式、函数、注释、分号和多列输入应改用 `AggregateExpression` 或 `AggregateRaw`。引用标识符可包含空格和双写的结束引用符，例如 `[Sales Order].[Order]]Name]`。
+
+`AggregateRaw` 与 `AggregateExpression` 不会自动发现或创建 SQL 参数。调用方必须通过 `AddParam` 显式绑定；未绑定占位符会原样保留，并由数据库执行阶段报告错误。组合 CTE、Union 或子查询时，Builder 会合并显式参数，并仅在同名异值冲突时重命名完整参数 Token。
+
 ---
 
 ## 运行期控制与清理

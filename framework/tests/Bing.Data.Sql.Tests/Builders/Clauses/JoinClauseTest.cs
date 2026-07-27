@@ -29,7 +29,8 @@ public class JoinClauseTest
     {
         _parameterManager = new ParameterManager(TestDialect.Instance);
         var builder = new TestSqlBuilder(TestDialect.Instance);
-        _clause = new JoinClause(builder, TestDialect.Instance, new EntityResolver(), new EntityAliasRegister(), _parameterManager, null);
+        _clause = new JoinClause(TestSqlBuilder.CreateTestClauseContext(
+            parameterManager: _parameterManager, builder: builder));
     }
 
     /// <summary>
@@ -750,7 +751,8 @@ public class JoinClauseTest
         _clause.On("a.A", "c");
 
         //复制副本
-        var copy = _clause.Clone(null, null, _parameterManager.Clone());
+        var copy = _clause.Clone(TestSqlBuilder.CreateTestClauseContext(
+            parameterManager: _parameterManager.Clone()));
         Assert.Equal("Join [b] On [a].[A]=@_p_0", GetSql());
         Assert.Equal("Join [b] On [a].[A]=@_p_0", copy.ToSql());
 

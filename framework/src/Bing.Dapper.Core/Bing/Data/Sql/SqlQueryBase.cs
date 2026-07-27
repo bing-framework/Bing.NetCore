@@ -21,7 +21,7 @@ namespace Bing.Data.Sql;
 /// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
 /// </remarks>
 public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor,
-    ICteAccessor, ISqlExecutionResourceAccessor, ISqlExecutionResourceBinder, ISqlQueryMetadataBinder
+    ICteAccessor, ISqlQueryExecutionResourceAccessor, ISqlTransactionScopeResourceBinder, ISqlQueryMetadataBinder
 {
     #region 字段
 
@@ -53,7 +53,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <summary>
     /// 事务作用域执行租约。
     /// </summary>
-    private SqlTransactionScopeLease _transactionScopeLease;
+    private ISqlTransactionScopeLease _transactionScopeLease;
 
     /// <summary>
     /// 是否已释放事务作用域创建的子查询对象。
@@ -333,13 +333,13 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     /// <returns>执行使用的数据库连接。</returns>
     protected IDbConnection GetExecutionConnection() =>
-        ((ISqlExecutionResourceAccessor)this).GetOrCreateConnection();
+        ((ISqlQueryExecutionResourceAccessor)this).GetOrCreateConnection();
 
     /// <summary>
     /// 获取或创建执行连接。
     /// </summary>
     /// <returns>执行使用的数据库连接。</returns>
-    IDbConnection ISqlExecutionResourceAccessor.GetOrCreateConnection()
+    IDbConnection ISqlQueryExecutionResourceAccessor.GetOrCreateConnection()
     {
         _transactionScopeLease?.EnsureActive();
         ThrowIfTransactionScopeChildDisposed();

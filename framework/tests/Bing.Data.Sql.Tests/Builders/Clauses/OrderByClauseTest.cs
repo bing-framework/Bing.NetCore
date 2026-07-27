@@ -19,7 +19,7 @@ public class OrderByClauseTest
     /// </summary>
     public OrderByClauseTest()
     {
-        _clause = new OrderByClause(TestDialect.Instance, new EntityResolver(), new EntityAliasRegister());
+        _clause = new OrderByClause(TestSqlBuilder.CreateTestClauseContext());
     }
 
     /// <summary>
@@ -125,7 +125,8 @@ public class OrderByClauseTest
     [Fact]
     public void Test_OrderBy_9()
     {
-        _clause = new OrderByClause(TestDialect.Instance, new TestEntityResolver(), new EntityAliasRegister());
+        _clause = new OrderByClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new TestEntityResolver()));
         _clause.OrderBy<Sample>(t => t.Email, true);
         Assert.Equal("Order By [t_Email] Desc", GetSql());
     }
@@ -136,7 +137,8 @@ public class OrderByClauseTest
     [Fact]
     public void Test_OrderBy_10()
     {
-        _clause = new OrderByClause(TestDialect.Instance, new TestEntityResolver(), new TestEntityAliasRegister());
+        _clause = new OrderByClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new TestEntityResolver(), aliasRegister: new TestEntityAliasRegister()));
         _clause.OrderBy<Sample>(t => t.Email, true);
         Assert.Equal("Order By [as_Sample].[t_Email] Desc", GetSql());
     }

@@ -2,6 +2,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
@@ -31,7 +32,7 @@ public class SqliteRoutingAndMappingTest
             }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
-        var builder = new SqliteBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
+        var builder = CreateBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
             options: sqlOptions);
 
         // Act
@@ -51,7 +52,7 @@ public class SqliteRoutingAndMappingTest
     {
         // Arrange
         var metadataOptions = CreateMetadataOptions();
-        var builder = new SqliteBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+        var builder = CreateBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions, options: CreateSqlOptions());
 
         // Act
@@ -82,6 +83,14 @@ public class SqliteRoutingAndMappingTest
         DbKey = "reporting",
         DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = DatabaseType.Sqlite }
     });
+
+    /// <summary>
+    /// 使用公开共享服务创建 SQLite Builder。
+    /// </summary>
+    private static SqliteBuilder CreateBuilder(IEntityMappingResolver entityMappingResolver = null,
+        SqlMetadataOptions metadataOptions = null, SqlOptions options = null) =>
+        new(new SqlBuilderServices(entityMappingResolver: entityMappingResolver,
+            metadataOptions: metadataOptions, options: options));
 
     /// <summary>
     /// 创建 Sql 元数据配置

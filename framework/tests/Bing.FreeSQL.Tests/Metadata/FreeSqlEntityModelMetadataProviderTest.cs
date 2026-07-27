@@ -1,5 +1,6 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.FreeSQL;
 using Bing.Uow;
 using FreeSql;
@@ -25,7 +26,7 @@ public class FreeSqlEntityModelMetadataProviderTest
             .UseConnectionFactory(DataType.MySql, () => new MySqlConnection())
             .Build();
         using var unitOfWork = new MetadataUnitOfWork(new FreeSqlWrapper { Orm = orm });
-        var builder = new MySqlBuilder(entityModelMetadataProvider: unitOfWork);
+        var builder = new MySqlBuilder(new SqlBuilderServices(entityModelMetadataProvider: unitOfWork));
 
         // Act
         var tableName = unitOfWork.GetTable(typeof(DottedCompany));

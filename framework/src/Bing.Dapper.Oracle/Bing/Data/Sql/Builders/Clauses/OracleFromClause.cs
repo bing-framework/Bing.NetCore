@@ -9,27 +9,24 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class OracleFromClause : FromClause
 {
     /// <inheritdoc />
-    public OracleFromClause(
-        ISqlBuilder builder,
-        IDialect dialect,
-        IEntityResolver resolver,
-        IEntityAliasRegister register,
-        SqlItem table = null,
-        ISqlObjectNameFormatter objectNameFormatter = null,
-        Bing.Data.Enums.DatabaseType? providerDatabaseType = null,
-        ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(builder, dialect, resolver, register, table, objectNameFormatter,
-            providerDatabaseType ?? Bing.Data.Enums.DatabaseType.Oracle,
-            tableReferenceValidator)
+    public OracleFromClause(SqlClauseContext context)
+        : this(context, null, Bing.Data.Enums.DatabaseType.Oracle)
+    {
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 Oracle From 子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="table">表。</param>
+    /// <param name="providerDatabaseType">固定数据库类型。</param>
+    protected OracleFromClause(SqlClauseContext context, SqlItem table,
+        Bing.Data.Enums.DatabaseType? providerDatabaseType = null)
+        : base(context, table, providerDatabaseType ?? Bing.Data.Enums.DatabaseType.Oracle)
     {
     }
 
     /// <inheritdoc />
-    public override IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register)
-    {
-        if (register != null)
-            register.FromType = Register.FromType;
-        return new OracleFromClause(builder, Dialect, Resolver, register, Table?.Clone(), ObjectNameFormatter,
-            ProviderDatabaseType, TableReferenceValidator);
-    }
+    protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
+        new OracleFromClause(context, table, ProviderDatabaseType);
 }

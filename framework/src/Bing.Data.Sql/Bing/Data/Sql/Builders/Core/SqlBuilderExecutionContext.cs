@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Core;
 /// <remarks>
 /// 该上下文只保存路由和数据源描述快照，不持有数据库连接、事务或其它执行资源。
 /// </remarks>
-internal sealed record SqlBuilderExecutionContext
+public sealed record SqlBuilderExecutionContext
 {
     /// <summary>
     /// 固定的数据库上下文快照。

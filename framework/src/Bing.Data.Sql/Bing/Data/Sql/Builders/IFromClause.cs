@@ -10,9 +10,8 @@ public interface IFromClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    IFromClause Clone(ISqlBuilder builder, IEntityAliasRegister register);
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    IFromClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 设置表名

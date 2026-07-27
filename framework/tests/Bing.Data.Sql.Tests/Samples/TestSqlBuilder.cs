@@ -13,13 +13,46 @@ namespace Bing.Data.Sql.Tests.Samples;
 /// </summary>
 public class TestSqlBuilder : SqlBuilderBase
 {
-    /// <inheritdoc />
-    protected override DatabaseType ProviderDatabaseType => DatabaseType.SqlServer;
+    /// <summary>
+    /// 获取当前 Builder 的共享服务。
+    /// </summary>
+    public SqlBuilderServices SharedServices => Services;
 
     /// <summary>
-    /// Sql方言
+    /// 创建当前 Builder 的 Clause 运行上下文。
     /// </summary>
-    private readonly IDialect _dialect;
+    /// <returns>Clause 运行上下文。</returns>
+    public SqlClauseContext CreateCurrentClauseContext() => CreateClauseContext();
+
+    /// <summary>
+    /// 为独立 Clause 测试创建运行上下文。
+    /// </summary>
+    /// <param name="dialect">SQL 方言。</param>
+    /// <param name="entityResolver">实体解析器。</param>
+    /// <param name="aliasRegister">实体别名注册器。</param>
+    /// <param name="parameterManager">参数管理器。</param>
+    /// <param name="builder">SQL Builder。</param>
+    /// <param name="entityMappingResolver">实体映射解析器。</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
+    /// <param name="parameterFactory">SQL 参数工厂。</param>
+    /// <param name="metadataOptions">SQL 元数据配置。</param>
+    /// <param name="options">SQL 配置。</param>
+    /// <param name="databaseContextResolver">数据库上下文解析器。</param>
+    /// <returns>Clause 运行上下文。</returns>
+    public static SqlClauseContext CreateTestClauseContext(IDialect dialect = null,
+        IEntityResolver entityResolver = null, IEntityAliasRegister aliasRegister = null,
+        IParameterManager parameterManager = null, ISqlBuilder builder = null,
+        IEntityMappingResolver entityMappingResolver = null,
+        IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory parameterFactory = null,
+        SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
+        ISqlDatabaseContextResolver databaseContextResolver = null)
+    {
+        dialect ??= TestDialect.Instance;
+        return SqlClauseContext.Create(builder ?? new TestSqlBuilder(dialect), dialect,
+            entityResolver ?? new EntityResolver(), aliasRegister ?? new EntityAliasRegister(),
+            parameterManager ?? new ParameterManager(dialect), entityMappingResolver, databaseContextAccessor,
+            parameterFactory, metadataOptions, options, databaseContextResolver);
+    }
 
     /// <summary>
     /// 初始化Sql生成器
@@ -44,39 +77,39 @@ public class TestSqlBuilder : SqlBuilderBase
         ISqlObjectNameFormatter objectNameFormatter = null,
         ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
         ISqlTableReferenceValidator tableReferenceValidator = null)
-        : base(parameterManager, entityMappingResolver, databaseContextAccessor, sqlParameterFactory, metadataOptions,
-            options, databaseContextResolver, objectNameFormatter, crossDatabaseQueryValidator,
-            tableReferenceValidator, entityModelMetadataProvider)
-    {
-        _dialect = dialect;
-    }
+        : this(new SqlBuilderServices(entityMappingResolver, databaseContextAccessor, sqlParameterFactory,
+            metadataOptions, options, databaseContextResolver, objectNameFormatter, crossDatabaseQueryValidator,
+            tableReferenceValidator, entityModelMetadataProvider), dialect, parameterManager) { }
+
+    /// <summary>
+    /// 使用共享依赖初始化测试 SQL Builder。
+    /// </summary>
+    /// <param name="services">可共享服务依赖。</param>
+    /// <param name="dialect">SQL 方言。</param>
+    /// <param name="parameterManager">参数管理器。</param>
+    internal TestSqlBuilder(SqlBuilderServices services, IDialect dialect,
+        IParameterManager parameterManager = null)
+        : base(new TestSqlProvider(dialect ?? TestDialect.Instance), services, parameterManager) { }
 
     /// <inheritdoc />
-    protected override IDialect GetDialect()
+    protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
+        new TestSqlBuilder(Services, Dialect, parameterManager);
+
+    private sealed class TestSqlProvider : ISqlProvider
     {
-        if (_dialect != null)
-            return _dialect;
-        return TestDialect.Instance;
+        public TestSqlProvider(IDialect dialect) => Dialect = dialect;
+        public DatabaseType DatabaseType => DatabaseType.SqlServer;
+        public IDialect Dialect { get; }
+        public ISqlClauseFactory ClauseFactory { get; } = new DefaultSqlClauseFactory();
+        public ISqlTableReferenceParser TableReferenceParser => DefaultSqlTableReferenceParser.Instance;
+        public ISqlPaginationRenderer PaginationRenderer { get; } = new TestPaginationRenderer();
+        public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
+        public IParamLiteralsResolver ParamLiteralsResolver => new ParamLiteralsResolver();
     }
 
-    /// <inheritdoc />
-    public override ISqlBuilder Clone()
+    private sealed class TestPaginationRenderer : ISqlPaginationRenderer
     {
-        var result = new TestSqlBuilder();
-        result.Clone(this);
-        return result;
+        public string Render(string offsetParameterName, string limitParameterName) =>
+            $"Offset {offsetParameterName} Rows Fetch Next {limitParameterName} Rows Only";
     }
-
-    /// <inheritdoc />
-    public override ISqlBuilder New()
-    {
-        return new TestSqlBuilder(Dialect, parameterManager: ParameterManager,
-            entityMappingResolver: EntityMappingResolver, databaseContextAccessor: DatabaseContextAccessor,
-            sqlParameterFactory: SqlParameterFactory, metadataOptions: MetadataOptions, options: Options,
-            databaseContextResolver: DatabaseContextResolver, objectNameFormatter: ObjectNameFormatter,
-            crossDatabaseQueryValidator: CrossDatabaseQueryValidator, tableReferenceValidator: TableReferenceValidator);
-    }
-
-    /// <inheritdoc />
-    protected override string CreateLimitSql() => $"Offset {GetOffsetParam()} Rows Fetch Next {GetLimitParam()} Rows Only";
 }

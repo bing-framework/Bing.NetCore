@@ -21,9 +21,14 @@ public class WhereClause : IWhereClause
     #region 字段
 
     /// <summary>
-    /// Sql生成器
+    /// 子句运行上下文。
     /// </summary>
-    protected readonly ISqlBuilder Builder;
+    private readonly SqlClauseContext Context;
+
+    /// <summary>
+    /// SQL 生成器。
+    /// </summary>
+    protected ISqlBuilder Builder => Context.Builder;
 
     /// <summary>
     /// 辅助操作
@@ -36,54 +41,19 @@ public class WhereClause : IWhereClause
     private readonly PredicateExpressionResolver _expressionResolver;
 
     /// <summary>
-    /// 方言
+    /// SQL 方言。
     /// </summary>
-    private readonly IDialect _dialect;
+    private IDialect _dialect => Context.Dialect;
 
     /// <summary>
-    /// 实体解析器
+    /// 实体解析器。
     /// </summary>
-    private readonly IEntityResolver _resolver;
+    private IEntityResolver _resolver => Context.EntityResolver;
 
     /// <summary>
     /// 查询条件
     /// </summary>
     private ICondition _condition;
-
-    /// <summary>
-    /// 实体映射解析器
-    /// </summary>
-    private readonly IEntityMappingResolver _entityMappingResolver;
-
-    /// <summary>
-    /// 数据库上下文访问器
-    /// </summary>
-    private readonly IDatabaseContextAccessor _databaseContextAccessor;
-
-    /// <summary>
-    /// Sql 参数工厂
-    /// </summary>
-    private readonly ISqlParameterFactory _sqlParameterFactory;
-
-    /// <summary>
-    /// Sql 元数据配置
-    /// </summary>
-    private readonly SqlMetadataOptions _metadataOptions;
-
-    /// <summary>
-    /// Sql 配置
-    /// </summary>
-    private readonly SqlOptions _sqlOptions;
-
-    /// <summary>
-    /// SQL 数据库上下文解析器
-    /// </summary>
-    private readonly ISqlDatabaseContextResolver _databaseContextResolver;
-
-    /// <summary>
-    /// Builder 生命周期内固定的数据库上下文。
-    /// </summary>
-    private readonly DatabaseContext _databaseContext;
 
     #endregion
 
@@ -92,43 +62,23 @@ public class WhereClause : IWhereClause
     /// <summary>
     /// 初始化一个<see cref="WhereClause"/>类型的实例
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="condition">查询条件</param>
-    /// <param name="entityMappingResolver">实体映射解析器</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
-    /// <param name="sqlParameterFactory">Sql 参数工厂</param>
-    /// <param name="metadataOptions">Sql 元数据配置</param>
-    /// <param name="sqlOptions">Sql 配置</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
-    /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文</param>
-    public WhereClause(ISqlBuilder builder, IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        IParameterManager parameterManager, ICondition condition = null,
-        IEntityMappingResolver entityMappingResolver = null, IDatabaseContextAccessor databaseContextAccessor = null,
-        ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions metadataOptions = null,
-        SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null,
-        DatabaseContext databaseContext = null)
+    /// <param name="context">子句运行上下文。</param>
+    public WhereClause(SqlClauseContext context)
+        : this(context, null)
     {
-        Builder = builder;
-        _dialect = dialect;
-        _resolver = resolver;
+    }
+
+    /// <summary>
+    /// 使用运行上下文初始化 Where 子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="condition">查询条件。</param>
+    protected WhereClause(SqlClauseContext context, ICondition condition)
+    {
+        Context = context ?? throw new ArgumentNullException(nameof(context));
         _condition = condition;
-        _entityMappingResolver = entityMappingResolver;
-        _databaseContextAccessor = databaseContextAccessor;
-        _sqlParameterFactory = sqlParameterFactory;
-        _metadataOptions = metadataOptions;
-        _sqlOptions = sqlOptions;
-        _databaseContextResolver = databaseContextResolver;
-        _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
-        _helper = new Helper(dialect, resolver, register, parameterManager, entityMappingResolver,
-            databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions, databaseContextResolver,
-            _databaseContext);
-        _expressionResolver = new PredicateExpressionResolver(dialect, resolver, register, parameterManager,
-            entityMappingResolver, databaseContextAccessor, sqlParameterFactory, metadataOptions, sqlOptions,
-            databaseContextResolver, _databaseContext);
+        _helper = new Helper(Context);
+        _expressionResolver = new PredicateExpressionResolver(Context, _helper);
     }
 
     #endregion
@@ -138,13 +88,10 @@ public class WhereClause : IWhereClause
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="register">实体别名注册器</param>
-    /// <param name="parameterManager">参数管理器</param>
-    public virtual IWhereClause Clone(ISqlBuilder builder, IEntityAliasRegister register, IParameterManager parameterManager) =>
-        new WhereClause(builder, _dialect, _resolver, register, parameterManager,
-            new SqlCondition(_condition?.GetCondition()), _entityMappingResolver, _databaseContextAccessor,
-            _sqlParameterFactory, _metadataOptions, _sqlOptions, _databaseContextResolver, _databaseContext);
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <returns>独立的 Where 子句。</returns>
+    public virtual IWhereClause Clone(SqlClauseContext context) =>
+        new WhereClause(context, new SqlCondition(_condition?.GetCondition()));
 
     /// <summary>
     /// 获取合并参数上下文后的子查询 SQL。
@@ -161,13 +108,25 @@ public class WhereClause : IWhereClause
     /// And连接条件
     /// </summary>
     /// <param name="condition">查询条件</param>
-    public void And(ICondition condition) => _condition = new AndCondition(_condition, condition);
+    public void And(ICondition condition) => _condition = new AndCondition(_condition, MergeBuilderCondition(condition));
 
     /// <summary>
     /// Or连接条件
     /// </summary>
     /// <param name="condition">查询条件</param>
-    public void Or(ICondition condition) => _condition = new OrCondition(_condition, condition);
+    public void Or(ICondition condition) => _condition = new OrCondition(_condition, MergeBuilderCondition(condition));
+
+    /// <summary>
+    /// 合并作为条件使用的独立 Builder 参数。
+    /// </summary>
+    /// <param name="condition">查询条件。</param>
+    /// <returns>可安全组合的查询条件。</returns>
+    private ICondition MergeBuilderCondition(ICondition condition)
+    {
+        if (condition is not ISqlBuilder builder || Builder is not SqlBuilderBase sqlBuilder)
+            return condition;
+        return new SqlCondition(sqlBuilder.MergeSubqueryParameters(builder, builder.GetCondition()));
+    }
 
     /// <summary>
     /// Or连接条件

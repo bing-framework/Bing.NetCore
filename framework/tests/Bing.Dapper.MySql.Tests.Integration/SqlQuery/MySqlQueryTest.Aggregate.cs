@@ -1,4 +1,5 @@
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper.Tests.Infrastructure;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -8,6 +9,164 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// </summary>
 public partial class MySqlQueryTest
 {
+    /// <summary>
+    /// 测试 - MySQL Count 应忽略 null 聚合参数并返回非空行数。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task Count_WhenAggregateDataContainsNull_ShouldReturnNonNullCount()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+        using var query = CreateAggregateQuery();
+        query.Count("p.Price", "Count");
+
+        // Act
+        var result = query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(3, result);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL Count Distinct 应去除重复金额并忽略 null。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task CountDistinct_WhenAggregateDataContainsDuplicates_ShouldReturnDistinctCount()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+        using var query = CreateAggregateQuery();
+        query.Count("p.Price", "Count", distinct: true);
+
+        // Act
+        var result = query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(2, result);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL Sum、Sum Distinct、Avg 与 Avg Distinct 应返回数据库聚合结果。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task SumAndAvg_WhenAggregateDataContainsDuplicates_ShouldReturnExpectedValues()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+
+        // Act
+        using var sumQuery = CreateAggregateQuery();
+        var sum = sumQuery.Sum("p.Price", "Total").ExecuteScalar<decimal>();
+        using var distinctSumQuery = CreateAggregateQuery();
+        var distinctSum = distinctSumQuery.Sum("p.Price", "Total", distinct: true).ExecuteScalar<decimal>();
+        using var averageQuery = CreateAggregateQuery();
+        var average = averageQuery.Avg("p.Price", "Average").ExecuteScalar<decimal>();
+        using var distinctAverageQuery = CreateAggregateQuery();
+        var distinctAverage = distinctAverageQuery.Avg("p.Price", "Average", distinct: true)
+            .ExecuteScalar<decimal>();
+
+        // Assert
+        Assert.Equal(40m, sum);
+        Assert.Equal(30m, distinctSum);
+        Assert.Equal(13.333333m, average);
+        Assert.Equal(15m, distinctAverage);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL Max 与 Min 的 Distinct 参数应能真实执行且返回边界值。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task MaxAndMin_WhenDistinctIsConfigured_ShouldReturnExtremes()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+
+        // Act
+        using var maximumQuery = CreateAggregateQuery();
+        var maximum = maximumQuery.Max("p.Price", "Maximum", distinct: true).ExecuteScalar<decimal>();
+        using var minimumQuery = CreateAggregateQuery();
+        var minimum = minimumQuery.Min("p.Price", "Minimum", distinct: true).ExecuteScalar<decimal>();
+
+        // Assert
+        Assert.Equal(20m, maximum);
+        Assert.Equal(10m, minimum);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL 限定列 Distinct 聚合应使用正确 SQL 并真实执行。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task QualifiedDistinctAggregate_WhenUserIdsRepeat_ShouldExecuteSuccessfully()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+        using var query = CreateAggregateQuery();
+        query.Count("p.UserId", "UserCount", distinct: true);
+
+        // Act
+        var result = query.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(2, result);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL Raw 聚合表达式应保持表达式语义并真实执行。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task AggregateExpression_WhenCaseAndArithmeticAreConfigured_ShouldExecuteSuccessfully()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+        using var sumQuery = CreateAggregateQuery();
+        sumQuery.AggregateExpression(SqlAggregateFunction.Sum, "[p].[Price] * 2", "DoubleTotal");
+        using var countQuery = CreateAggregateQuery();
+        countQuery.AggregateExpression(SqlAggregateFunction.Count,
+            "Case When [p].[Enabled]=1 Then [p].[UserId] End", "EnabledUsers", distinct: true);
+
+        // Act
+        var sum = sumQuery.ExecuteScalar<decimal>();
+        var count = countQuery.ExecuteScalar<int>();
+
+        // Assert
+        Assert.Equal(80m, sum);
+        Assert.Equal(2, count);
+    }
+
+    /// <summary>
+    /// 测试 - MySQL 聚合结果别名应映射到 DTO 属性。
+    /// </summary>
+    [IntegrationFact("MySql")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "MySql")]
+    public async Task Aggregate_WhenAliasesAreConfigured_ShouldMapToDto()
+    {
+        // Arrange
+        await SeedAggregateDataAsync();
+        using var query = CreateAggregateQuery();
+        query.Count("p.UserId", "UserCount", distinct: true)
+            .Sum("p.Price", "DistinctAmount", distinct: true);
+
+        // Act
+        var result = query.ExecuteSingle<MySqlAggregateResult>();
+
+        // Assert
+        Assert.Equal(2, result.UserCount);
+        Assert.Equal(30m, result.DistinctAmount);
+    }
+
     /// <summary>
     /// 测试 - MySQL 限定列 Count 应真实执行成功。
     /// </summary>
@@ -53,4 +212,49 @@ public partial class MySqlQueryTest
         // Assert
         Assert.Equal(20m, result);
     }
+
+    /// <summary>
+    /// 创建聚合测试查询。
+    /// </summary>
+    /// <returns>包含 Product 表别名的 SQL 查询。</returns>
+    private ISqlQuery CreateAggregateQuery() => _fixture.CreateQuery().From("Product", "p");
+
+    /// <summary>
+    /// 写入包含重复值与 null 的聚合测试数据。
+    /// </summary>
+    /// <returns>异步写入任务。</returns>
+    private async Task SeedAggregateDataAsync()
+    {
+        await InsertAggregateProductAsync("aggregate-1", "A", 10m);
+        await InsertAggregateProductAsync("aggregate-2", "A", 10m);
+        await InsertAggregateProductAsync("aggregate-3", "B", 20m);
+        await InsertAggregateProductAsync("aggregate-4", null, null);
+    }
+
+    /// <summary>
+    /// 写入一条聚合测试产品记录。
+    /// </summary>
+    /// <param name="code">产品编码。</param>
+    /// <param name="userId">用户标识。</param>
+    /// <param name="price">产品金额。</param>
+    /// <returns>异步写入任务。</returns>
+    private Task InsertAggregateProductAsync(string code, string userId, decimal? price) => _sqlExecutor.ExecuteSqlAsync(
+        "Insert Product(ProductId,Code,UserId,Price) Values(@productId,@code,@userId,@price)",
+        new { productId = Guid.NewGuid(), code, userId, price });
+}
+
+/// <summary>
+/// MySQL 聚合结果映射模型。
+/// </summary>
+public sealed class MySqlAggregateResult
+{
+    /// <summary>
+    /// 去重后的用户数量。
+    /// </summary>
+    public int UserCount { get; set; }
+
+    /// <summary>
+    /// 去重后的金额合计。
+    /// </summary>
+    public decimal DistinctAmount { get; set; }
 }

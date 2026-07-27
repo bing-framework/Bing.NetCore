@@ -2,6 +2,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
@@ -31,7 +32,7 @@ public class MySqlRoutingAndMappingTest
             }
         });
         var resolver = new DefaultEntityMappingResolver(null, null, metadataOptions);
-        var builder = new MySqlBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
+        var builder = CreateBuilder(entityMappingResolver: resolver, metadataOptions: metadataOptions,
             options: sqlOptions);
 
         // Act
@@ -53,7 +54,7 @@ public class MySqlRoutingAndMappingTest
         var metadataOptions = CreateMetadataOptions();
         metadataOptions.EntityMappings[0].Schema = "order";
         metadataOptions.EntityMappings[0].TableName = "orderinfo";
-        var builder = new MySqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+        var builder = CreateBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions, options: CreateSqlOptions(DatabaseType.MySql));
 
         // Act
@@ -72,7 +73,7 @@ public class MySqlRoutingAndMappingTest
         // Arrange
         var metadataOptions = CreateMetadataOptions();
         metadataOptions.EntityMappings[0].DbKey = null;
-        var builder = new MySqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+        var builder = CreateBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions);
 
         // Act
@@ -89,7 +90,7 @@ public class MySqlRoutingAndMappingTest
     public void Doris_StructuredFrom_ShouldKeepSegmentedName()
     {
         // Arrange
-        var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+        var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
 
         // Act
         var sql = builder.Select("Id").From("Merchants.Company").ToSql();
@@ -99,13 +100,72 @@ public class MySqlRoutingAndMappingTest
     }
 
     /// <summary>
+    /// 测试 - Doris 使用 MySQL Builder 时，Distinct 聚合应保留限定列逐段引用。
+    /// </summary>
+    [Fact]
+    public void Doris_DistinctAggregate_ShouldRenderQualifiedColumnWithoutMySqlPhysicalTableFallback()
+    {
+        // Arrange
+        const string expected = "Select Count(Distinct `c`.`Id`) As `CompanyCount` \r\nFrom `Merchants`.`Company` As `c`";
+        var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+
+        // Act
+        var sql = builder.Count("c.Id", "CompanyCount", distinct: true).From("Merchants.Company", "c").ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
+    /// 测试 - Doris 聚合 API 应保留原始 JSON Path，并将 Expression 标识符按 MySQL 方言转换。
+    /// </summary>
+    [Fact]
+    public void Doris_AggregateApis_ShouldPreserveRawAndRenderQualifiedExpressions()
+    {
+        // Arrange
+        const string expected = "Select Count(Distinct `c`.`Id`) As `CompanyCount`,Sum(Distinct `c`.`Amount`) As `Amount`,Count(JsonExtract(c.Data, '$[0]')) As `JsonCount`,Sum(`c`.`Amount` * 2) As `DoubleAmount` \r\nFrom `Merchants`.`Company` As `c`";
+        var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+
+        // Act
+        var sql = builder.CountColumn("c.Id", "CompanyCount", distinct: true)
+            .Sum("c.Amount", "Amount", distinct: true)
+            .AggregateRaw(SqlAggregateFunction.Count, "JsonExtract(c.Data, '$[0]')", "JsonCount")
+            .AggregateExpression(SqlAggregateFunction.Sum, "[c].[Amount] * 2", "DoubleAmount")
+            .From("Merchants.Company", "c")
+            .ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
+    /// 测试 - Doris 聚合表达式应保护字符串和注释，并保留带点物理表的既有引用规则。
+    /// </summary>
+    [Fact]
+    public void Doris_AggregateExpression_ShouldProtectStringAndCommentContexts()
+    {
+        // Arrange
+        const string expected = "Select Sum(JsonExtract(`c`.`Data`, '$[0]') + `c`.`Amount` /* [comment] */) \r\nFrom `Merchants`.`Company` As `c`";
+        var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+
+        // Act
+        var sql = builder.AggregateExpression(SqlAggregateFunction.Sum,
+                "JsonExtract([c].[Data], '$[0]') + [c].[Amount] /* [comment] */")
+            .From("Merchants.Company", "c")
+            .ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+    }
+
+    /// <summary>
     /// 测试 - Doris 原始 AppendFrom 文本不得应用方言转换。
     /// </summary>
     [Fact]
     public void Doris_AppendFrom_ShouldPreserveRawSql()
     {
         // Arrange
-        var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+        var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
 
         // Act
         var sql = builder.Select("c.Id")
@@ -123,7 +183,7 @@ public class MySqlRoutingAndMappingTest
     public void Doris_AppendJoin_ShouldPreserveRawSql()
     {
         // Arrange
-        var builder = new MySqlBuilder(options: CreateSqlOptions(DatabaseType.Doris));
+        var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
 
         // Act
         var sql = builder.Select("c.Id")
@@ -143,7 +203,7 @@ public class MySqlRoutingAndMappingTest
     {
         // Arrange
         var metadataOptions = CreateDottedTableMetadataOptions();
-        var builder = new MySqlBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
+        var builder = CreateBuilder(entityMappingResolver: new DefaultEntityMappingResolver(options: metadataOptions),
             metadataOptions: metadataOptions, options: CreateSqlOptions(DatabaseType.MySql));
 
         // Act
@@ -181,6 +241,14 @@ public class MySqlRoutingAndMappingTest
             DbKey = "reporting",
             DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = databaseType }
         });
+
+    /// <summary>
+    /// 使用公开共享服务创建 MySQL Builder。
+    /// </summary>
+    private static MySqlBuilder CreateBuilder(IEntityMappingResolver entityMappingResolver = null,
+        SqlMetadataOptions metadataOptions = null, SqlOptions options = null) =>
+        new(new SqlBuilderServices(entityMappingResolver: entityMappingResolver,
+            metadataOptions: metadataOptions, options: options));
 
     /// <summary>
     /// 创建 Sql 元数据配置

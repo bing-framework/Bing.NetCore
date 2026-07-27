@@ -12,7 +12,7 @@ public class IsDeletedFilter : ISqlFilter
     /// 过滤
     /// </summary>
     /// <param name="context">Sql查询执行上下文</param>
-    public void Filter(SqlContext context)
+    public void Filter(SqlFilterContext context)
     {
         foreach (var item in context.EntityAliasRegister.Data)
             Filter(context, item.Key, item.Value);
@@ -24,7 +24,7 @@ public class IsDeletedFilter : ISqlFilter
     /// <param name="context">Sql查询执行上下文</param>
     /// <param name="type">类型</param>
     /// <param name="alias">表别名</param>
-    private void Filter(SqlContext context, Type type, string alias)
+    private void Filter(SqlFilterContext context, Type type, string alias)
     {
         if (type == null)
             return;
@@ -49,7 +49,7 @@ public class IsDeletedFilter : ISqlFilter
     /// <param name="type">实体类型</param>
     /// <param name="propertyName">属性名</param>
     /// <returns>列名</returns>
-    private static string ResolveColumn(SqlContext context, Type type, string propertyName)
+    private static string ResolveColumn(SqlFilterContext context, Type type, string propertyName)
     {
         var mapping = context.EntityMappingResolver?.Resolve(type, context.DatabaseContext);
         if (mapping?.Columns != null)

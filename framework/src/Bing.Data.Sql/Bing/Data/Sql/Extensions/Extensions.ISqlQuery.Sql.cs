@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Queries;
+using Bing.Data.Sql.Builders;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Data.Sql;
@@ -18,11 +19,32 @@ public static partial class Extensions
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public static ISqlQuery Count<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression, string columnAlias = null)
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public static ISqlQuery Count<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false)
         where TEntity : class
     {
         var builder = sqlQuery.GetBuilder();
-        builder.Count(expression, columnAlias);
+        builder.Count(expression, columnAlias, distinct);
+        return sqlQuery;
+    }
+
+    /// <summary>
+    /// 添加实体表达式聚合列。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="sqlQuery">SQL 查询对象。</param>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="expression">列名表达式。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>SQL 查询对象。</returns>
+    public static ISqlQuery Aggregate<TEntity>(this ISqlQuery sqlQuery, SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> expression, string columnAlias = null, bool distinct = false)
+        where TEntity : class
+    {
+        var builder = sqlQuery.GetBuilder();
+        builder.Aggregate(function, expression, columnAlias, distinct);
         return sqlQuery;
     }
 
@@ -37,11 +59,13 @@ public static partial class Extensions
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public static ISqlQuery Sum<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression, string columnAlias = null)
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public static ISqlQuery Sum<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false)
         where TEntity : class
     {
         var builder = sqlQuery.GetBuilder();
-        builder.Sum(expression, columnAlias);
+        builder.Sum(expression, columnAlias, distinct);
         return sqlQuery;
     }
 
@@ -56,11 +80,13 @@ public static partial class Extensions
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public static ISqlQuery Avg<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression, string columnAlias = null)
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public static ISqlQuery Avg<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false)
         where TEntity : class
     {
         var builder = sqlQuery.GetBuilder();
-        builder.Avg(expression, columnAlias);
+        builder.Avg(expression, columnAlias, distinct);
         return sqlQuery;
     }
 
@@ -75,11 +101,13 @@ public static partial class Extensions
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public static ISqlQuery Max<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression, string columnAlias = null)
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public static ISqlQuery Max<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false)
         where TEntity : class
     {
         var builder = sqlQuery.GetBuilder();
-        builder.Max(expression, columnAlias);
+        builder.Max(expression, columnAlias, distinct);
         return sqlQuery;
     }
 
@@ -94,11 +122,13 @@ public static partial class Extensions
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
-    public static ISqlQuery Min<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression, string columnAlias = null)
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    public static ISqlQuery Min<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false)
         where TEntity : class
     {
         var builder = sqlQuery.GetBuilder();
-        builder.Min(expression, columnAlias);
+        builder.Min(expression, columnAlias, distinct);
         return sqlQuery;
     }
 

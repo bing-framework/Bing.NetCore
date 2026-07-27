@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Bing.Dapper.Tests.Infrastructure;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Diagnostics;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -804,6 +805,85 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(new[] { "executor-factory" }, await _fixture.ReadNamesAsync("second"));
     }
 
+    /// <summary>
+    /// 测试 - SQLite 应真实执行统一 CountAll、列计数和 Distinct 聚合。
+    /// </summary>
+    [Fact]
+    public async Task Aggregate_WhenDuplicateAndNullValuesExist_ShouldReturnExpectedCountsAndExtremes()
+    {
+        // Arrange
+        await SeedAggregateSamplesAsync();
+
+        // Act
+        using var countAllQuery = _fixture.CreateQuery();
+        var countAll = countAllQuery.CountAll("Total").From("samples", "s").ExecuteScalar<int>();
+        using var countColumnQuery = _fixture.CreateQuery();
+        var countColumn = countColumnQuery.CountColumn("s.Amount", "AmountCount").From("samples", "s")
+            .ExecuteScalar<int>();
+        using var distinctCountQuery = _fixture.CreateQuery();
+        var distinctCount = distinctCountQuery.CountColumn("s.Name", "NameCount", distinct: true)
+            .From("samples", "s")
+            .ExecuteScalar<int>();
+        using var sumQuery = _fixture.CreateQuery();
+        var sum = sumQuery.Sum("s.Amount", "Total").From("samples", "s").ExecuteScalar<decimal>();
+        using var averageQuery = _fixture.CreateQuery();
+        var average = averageQuery.Avg("s.Amount", "Average", distinct: true).From("samples", "s")
+            .ExecuteScalar<decimal>();
+        using var maximumQuery = _fixture.CreateQuery();
+        var maximum = maximumQuery.Max("s.Amount", "Maximum", distinct: true).From("samples", "s")
+            .ExecuteScalar<decimal>();
+        using var minimumQuery = _fixture.CreateQuery();
+        var minimum = minimumQuery.Min("s.Amount", "Minimum", distinct: true).From("samples", "s")
+            .ExecuteScalar<decimal>();
+
+        // Assert
+        Assert.Equal(4, countAll);
+        Assert.Equal(3, countColumn);
+        Assert.Equal(2, distinctCount);
+        Assert.Equal(40m, sum);
+        Assert.Equal(15m, average);
+        Assert.Equal(20m, maximum);
+        Assert.Equal(10m, minimum);
+    }
+
+    /// <summary>
+    /// 测试 - SQLite 应真实执行 Raw、可转换表达式和聚合别名映射。
+    /// </summary>
+    [Fact]
+    public async Task AggregateRawAndExpression_WhenConfigured_ShouldExecuteAndMapAliases()
+    {
+        // Arrange
+        await SeedAggregateSamplesAsync();
+
+        // Act
+        using var rawQuery = _fixture.CreateQuery();
+        var rawTotal = rawQuery.AggregateRaw(SqlAggregateFunction.Sum, "Amount * 2", "DoubleTotal")
+            .From("samples")
+            .ExecuteScalar<decimal>();
+        using var expressionQuery = _fixture.CreateQuery();
+        var expressionTotal = expressionQuery.AggregateExpression(SqlAggregateFunction.Sum, "[s].[Amount] * 2",
+                "DoubleTotal")
+            .From("samples", "s")
+            .ExecuteScalar<decimal>();
+        using var caseQuery = _fixture.CreateQuery();
+        var caseCount = caseQuery.AggregateExpression(SqlAggregateFunction.Count,
+                "Case When [s].[Amount] Is Not Null Then [s].[Name] End", "NamedCount", distinct: true)
+            .From("samples", "s")
+            .ExecuteScalar<int>();
+        using var dtoQuery = _fixture.CreateQuery();
+        var result = dtoQuery.CountColumn("s.Name", "DistinctNameCount", distinct: true)
+            .Sum("s.Amount", "DistinctAmount", distinct: true)
+            .From("samples", "s")
+            .ExecuteSingle<AggregateResult>();
+
+        // Assert
+        Assert.Equal(80m, rawTotal);
+        Assert.Equal(80m, expressionTotal);
+        Assert.Equal(2, caseCount);
+        Assert.Equal(2, result.DistinctNameCount);
+        Assert.Equal(30m, result.DistinctAmount);
+    }
+
     /// <inheritdoc />
     public async Task InitializeAsync()
     {
@@ -836,6 +916,30 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (manager.Use(dbKey))
         using (var executor = _fixture.CreateExecutor(dbKey))
             await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name });
+    }
+
+    /// <summary>
+    /// 写入聚合测试样例记录。
+    /// </summary>
+    /// <param name="name">样例名称。</param>
+    /// <param name="amount">样例金额。</param>
+    /// <returns>写入任务。</returns>
+    private async Task InsertAggregateSampleAsync(string name, decimal? amount)
+    {
+        using var executor = _fixture.CreateExecutor();
+        await executor.ExecuteSqlAsync("Insert Into samples(Name, Amount) Values (@name, @amount)", new { name, amount });
+    }
+
+    /// <summary>
+    /// 写入包含重复值和空值的聚合测试数据。
+    /// </summary>
+    /// <returns>写入任务。</returns>
+    private async Task SeedAggregateSamplesAsync()
+    {
+        await InsertAggregateSampleAsync("A", 10m);
+        await InsertAggregateSampleAsync("A", 10m);
+        await InsertAggregateSampleAsync("B", 20m);
+        await InsertAggregateSampleAsync(null, null);
     }
 
     /// <summary>
@@ -882,6 +986,22 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         /// 金额。
         /// </summary>
         public decimal? Amount { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 聚合结果映射模型。
+    /// </summary>
+    private sealed class AggregateResult
+    {
+        /// <summary>
+        /// 去重后的非空名称数量。
+        /// </summary>
+        public int DistinctNameCount { get; set; }
+
+        /// <summary>
+        /// 去重后的非空金额总和。
+        /// </summary>
+        public decimal DistinctAmount { get; set; }
     }
 
     /// <summary>

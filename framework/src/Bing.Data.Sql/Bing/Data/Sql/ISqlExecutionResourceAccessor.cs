@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 执行资源访问器。
 /// </summary>
-internal interface ISqlExecutionResourceAccessor
+public interface ISqlQueryExecutionResourceAccessor
 {
     /// <summary>
     /// 获取或创建执行连接。

@@ -45,22 +45,49 @@ public class JoinItem : IJoinOn
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="JoinItem"/>类型的实例
+    /// 创建连接项。
     /// </summary>
     /// <param name="joinType">连接类型</param>
-    /// <param name="table">表名</param>
-    /// <param name="schema">架构名</param>
-    /// <param name="alias">别名</param>
-    /// <param name="raw">是否使用原始值</param>
-    /// <param name="isSplit">是否用句点分割表名</param>
-    /// <param name="type">表实体类型</param>
-    public JoinItem(string joinType, string table, string schema = null, string alias = null, bool raw = false,
-        bool isSplit = true, Type type = null)
-    {
-        JoinType = joinType;
-        Table = new SqlItem(table, schema, alias, raw, isSplit);
-        Type = type;
-    }
+    /// <param name="table">表项。</param>
+    /// <param name="type">表实体类型。</param>
+    /// <param name="condition">连接条件。</param>
+    public static JoinItem Create(string joinType, SqlItem table, Type type = null, ICondition condition = null) =>
+        new(joinType, table, type, condition);
+
+    /// <summary>
+    /// 创建结构化表连接项。
+    /// </summary>
+    /// <param name="joinType">连接类型。</param>
+    /// <param name="table">表名。</param>
+    /// <param name="schema">架构名。</param>
+    /// <param name="alias">别名。</param>
+    /// <param name="type">表实体类型。</param>
+    /// <returns>结构化表连接项。</returns>
+    public static JoinItem CreateTable(string joinType, string table, string schema = null, string alias = null,
+        Type type = null) => Create(joinType, SqlItem.Parse(table, schema, alias), type);
+
+    /// <summary>
+    /// 创建原子表名连接项。
+    /// </summary>
+    /// <param name="joinType">连接类型。</param>
+    /// <param name="table">表名。</param>
+    /// <param name="schema">架构名。</param>
+    /// <param name="alias">别名。</param>
+    /// <param name="type">表实体类型。</param>
+    /// <returns>原子表名连接项。</returns>
+    public static JoinItem CreateAtomicTable(string joinType, string table, string schema = null, string alias = null,
+        Type type = null) => Create(joinType, SqlItem.Atomic(table, schema, alias), type);
+
+    /// <summary>
+    /// 创建原始 SQL 连接项。
+    /// </summary>
+    /// <param name="joinType">连接类型。</param>
+    /// <param name="sql">原始 SQL。</param>
+    /// <param name="alias">别名。</param>
+    /// <param name="type">表实体类型。</param>
+    /// <returns>原始 SQL 连接项。</returns>
+    public static JoinItem CreateRaw(string joinType, string sql, string alias = null, Type type = null) =>
+        Create(joinType, SqlItem.Raw(sql, alias), type);
 
     /// <summary>
     /// 初始化一个<see cref="JoinItem"/>类型的实例
@@ -69,7 +96,7 @@ public class JoinItem : IJoinOn
     /// <param name="table">表</param>
     /// <param name="type">表实体类型</param>
     /// <param name="condition">连接条件列表</param>
-    public JoinItem(string joinType, SqlItem table, Type type, ICondition condition)
+    private JoinItem(string joinType, SqlItem table, Type type, ICondition condition)
     {
         JoinType = joinType;
         Table = table;
@@ -163,7 +190,7 @@ public class JoinItem : IJoinOn
     public JoinItem Clone(Helper helper)
     {
         var condition = Condition == null ? null : new SqlCondition(Condition.GetCondition());
-        var result = new JoinItem(JoinType, Table?.Clone(), Type, condition);
+        var result = Create(JoinType, Table?.Clone(), Type, condition);
         result.SetDependency(helper);
         return result;
     }
@@ -197,7 +224,7 @@ public class JoinItem : IJoinOn
     /// </summary>
     private bool HasRawOnCondition()
     {
-        if (Table?.Raw != true || string.IsNullOrWhiteSpace(Table.Name))
+        if (Table?.IsRaw != true || string.IsNullOrWhiteSpace(Table.Name))
             return false;
         return Table.Name.IndexOf(" On ", StringComparison.OrdinalIgnoreCase) >= 0;
     }

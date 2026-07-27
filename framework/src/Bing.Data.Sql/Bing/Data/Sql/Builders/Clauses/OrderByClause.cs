@@ -34,24 +34,24 @@ public class OrderByClause : IOrderByClause
     /// <summary>
     /// 初始化一个<see cref="OrderByClause"/>类型的实例
     /// </summary>
-    /// <param name="dialect">Sql方言</param>
-    /// <param name="resolver">实体解析器</param>
-    /// <param name="register">实体别名注册器</param>
+    /// <param name="context">子句运行上下文。</param>
     /// <param name="items">排序项列表</param>
-    public OrderByClause(IDialect dialect, IEntityResolver resolver, IEntityAliasRegister register,
-        List<OrderByItem> items = null)
+    public OrderByClause(SqlClauseContext context, List<OrderByItem> items = null)
     {
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
         _items = items ?? new List<OrderByItem>();
-        _dialect = dialect;
-        _resolver = resolver;
-        _register = register;
+        _dialect = context.Dialect;
+        _resolver = context.EntityResolver;
+        _register = context.AliasRegister;
     }
 
     /// <summary>
     /// 克隆
     /// </summary>
-    /// <param name="register">实体别名注册器</param>
-    public virtual IOrderByClause Clone(IEntityAliasRegister register) => new OrderByClause(_dialect, _resolver, register, new List<OrderByItem>(_items));
+    /// <param name="context">重绑定后的子句运行上下文。</param>
+    public virtual IOrderByClause Clone(SqlClauseContext context) => new OrderByClause(context,
+        new List<OrderByItem>(_items));
 
     /// <summary>
     /// 排序

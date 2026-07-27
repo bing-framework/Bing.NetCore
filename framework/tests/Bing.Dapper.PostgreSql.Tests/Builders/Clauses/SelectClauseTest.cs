@@ -20,7 +20,7 @@ public class SelectClauseTest
     /// </summary>
     public SelectClauseTest(ITestOutputHelper output)
     {
-        _clause = new SelectClause(null, PostgreSqlDialect.Instance, new EntityResolver(), new EntityAliasRegister());
+        _clause = (SelectClause)((ISqlPartAccessor)new PostgreSqlBuilder()).SelectClause;
     }
 
     /// <summary>

@@ -27,8 +27,9 @@ public class DatabaseScript
     Create Table Product(
     ProductId char(36) Not Null Primary Key,
     Code varchar(50) Not Null,
+    UserId varchar(50) Null,
     Name varchar(200) Null,
-    Price decimal(12,2) Not Null Default 0,
+    Price decimal(12,2) Null Default 0,
     IntPrice int Not Null Default 0,
     LongPrice bigint Not Null Default 0,
     FloatPrice float Not Null Default 0,
