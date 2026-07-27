@@ -3,31 +3,35 @@
 namespace Bing.Data.Filters;
 
 /// <summary>
-/// 数据过滤器 管理器
+/// 当前作用域的数据过滤器管理器。
 /// </summary>
 public interface IFilterManager : IFilterSwitch, IScopedDependency
 {
     /// <summary>
-    /// 获取过滤器
+    /// 按过滤器类型获取已注册的过滤器。
     /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
+    /// <typeparam name="TFilterType">过滤器实现类型。</typeparam>
+    /// <returns>指定类型的过滤器实例；未注册时返回 null。</returns>
     IFilter GetFilter<TFilterType>() where TFilterType : class;
 
     /// <summary>
-    /// 获取过滤器
+    /// 按运行时类型获取已注册的过滤器。
     /// </summary>
-    /// <param name="filterType">过滤器类型</param>
+    /// <param name="filterType">过滤器实现类型。</param>
+    /// <returns>指定类型的过滤器实例；未注册时返回 null。</returns>
     IFilter GetFilter(Type filterType);
 
     /// <summary>
-    /// 实体是否启用过滤器
+    /// 判断指定实体类型是否有启用的过滤器。
     /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <typeparam name="TEntity">待判断的实体类型。</typeparam>
+    /// <returns>至少有一个过滤器对该实体类型启用时返回 true；否则返回 false。</returns>
     bool IsEntityEnabled<TEntity>();
 
     /// <summary>
-    /// 过滤器是否启用
+    /// 判断指定类型的过滤器当前是否启用。
     /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
+    /// <typeparam name="TFilterType">过滤器实现类型。</typeparam>
+    /// <returns>过滤器存在且已启用时返回 true；否则返回 false。</returns>
     bool IsEnabled<TFilterType>() where TFilterType : class;
 }

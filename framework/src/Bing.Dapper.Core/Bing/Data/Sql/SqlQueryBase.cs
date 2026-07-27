@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql查询对象基类
+/// Dapper SQL 查询对象的可变执行状态基类。
 /// </summary>
 /// <remarks>
 /// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
@@ -116,8 +116,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     }
 
     /// <summary>
-    /// 创建日志
+    /// 创建当前查询类型使用的日志记录器。
     /// </summary>
+    /// <returns>已注册日志工厂创建的记录器；未注册时返回空记录器。</returns>
     private ILogger CreateLogger()
     {
         var loggerFactory = ServiceProvider.GetService<ILoggerFactory>();
@@ -165,8 +166,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     protected SqlConnectionSource ConnectionSource => _connectionSource;
 
     /// <summary>
-    /// 当前查询解析后的数据库类型
+    /// 当前查询解析后的数据库类型。
     /// </summary>
+    /// <returns>数据库上下文中的数据源类型；上下文未解析时返回选项中的数据库类型。</returns>
     internal DatabaseType GetDatabaseType() => Options.GetDatabaseContext()?.DataSource?.DatabaseType ??
                                                Options.DatabaseType;
 
@@ -261,8 +263,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     #region 工厂方法
 
     /// <summary>
-    /// 创建Sql生成器
+    /// 创建绑定到当前查询状态的 SQL Builder。
     /// </summary>
+    /// <returns>由当前 Provider 配置的 SQL Builder。</returns>
     protected abstract ISqlBuilder CreateSqlBuilder();
 
     /// <summary>
@@ -284,6 +287,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <remarks>
     /// 服务包可由同一 Builder 的 New 和 Clone 共享，但不得跨 Query 复用，避免泄漏 <see cref="SqlOptions"/>。
     /// </remarks>
+    /// <returns>仅可在当前查询及其 Builder 派生实例间共享的服务包。</returns>
     protected virtual SqlBuilderServices CreateSqlBuilderServices() => new(
         EntityMappingResolver,
         ServiceProvider.GetService<IDatabaseContextAccessor>(),
@@ -297,8 +301,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         ServiceProvider.GetService<IEntityModelMetadataProvider>());
 
     /// <summary>
-    /// 创建参数字面值解析器
+    /// 创建用于诊断 SQL 的参数字面值解析器。
     /// </summary>
+    /// <returns>当前 Provider 适用的参数字面值解析器。</returns>
     protected virtual IParamLiteralsResolver CreateParamLiteralsResolver() => new ParamLiteralsResolver();
 
     /// <summary>

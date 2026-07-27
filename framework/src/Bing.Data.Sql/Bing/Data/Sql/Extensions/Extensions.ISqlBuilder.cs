@@ -487,7 +487,7 @@ public static partial class Extensions
     /// <param name="value">值</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
     /// <param name="operator">运算符</param>
-    /// <returns></returns>
+    /// <returns>条件成立时已追加条件的原 Builder；否则返回原 Builder。</returns>
     public static ISqlBuilder WhereIf<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value, bool condition, Operator @operator = Operator.Equal)
         where TEntity : class =>
         condition ? source.Where(expression, value, @operator) : source;
@@ -526,7 +526,7 @@ public static partial class Extensions
     /// <param name="action">子查询操作</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
     /// <param name="operator">运算符</param>
-    /// <returns></returns>
+    /// <returns>条件成立时已追加子查询条件的原 Builder；否则返回原 Builder。</returns>
     public static ISqlBuilder WhereIf<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action,
         bool condition, Operator @operator = Operator.Equal)
         where TEntity : class =>

@@ -8,12 +8,12 @@ using Bing.Properties;
 namespace Bing.Data.Sql.Builders.Clauses;
 
 /// <summary>
-/// From子句
+/// 默认 SQL Provider 的 From 子句实现。
 /// </summary>
 public class FromClause : IFromClause
 {
     /// <summary>
-    /// Sql项
+    /// 当前查询源的 SQL 项，可能是字符串表、结构化表或子查询。
     /// </summary>
     protected SqlItem Table;
 
@@ -48,7 +48,7 @@ public class FromClause : IFromClause
     protected ISqlObjectNameFormatter ObjectNameFormatter => _context.Services.ObjectNameFormatter;
 
     /// <summary>
-    /// 独立子句使用的固定数据库类型。
+    /// 独立子句渲染结构化表引用时使用的固定数据库类型。
     /// </summary>
     protected readonly DatabaseType? ProviderDatabaseType;
 
@@ -63,7 +63,7 @@ public class FromClause : IFromClause
     protected ISqlTableReferenceParser TableReferenceParser => _context.Provider.TableReferenceParser;
 
     /// <summary>
-    /// 初始化一个<see cref="FromClause"/>类型的实例
+    /// 初始化绑定到指定运行上下文的 From 子句。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public FromClause(SqlClauseContext context)
@@ -85,10 +85,8 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 克隆
+    /// <inheritdoc />
     /// </summary>
-    /// <param name="context">克隆 Builder 的运行上下文。</param>
-    /// <returns>独立的 From 子句。</returns>
     public virtual IFromClause Clone(SqlClauseContext context)
     {
         if (context.AliasRegister != null)
@@ -106,10 +104,8 @@ public class FromClause : IFromClause
         new FromClause(context, table, ProviderDatabaseType);
 
     /// <summary>
-    /// 设置表名
+    /// <inheritdoc />
     /// </summary>
-    /// <param name="table">表名</param>
-    /// <param name="alias">别名</param>
     public void From(string table, string alias = null)
     {
         var parsedTable = ParseTableName(table, alias);
@@ -130,9 +126,8 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 设置结构化表引用。
+    /// <inheritdoc />
     /// </summary>
-    /// <param name="reference">结构化表引用。</param>
     public void From(SqlTableReference reference)
     {
         if (reference == null)
@@ -149,20 +144,18 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 创建Sql项
+    /// 创建保存字符串表引用的 SQL 项。
     /// </summary>
-    /// <param name="table">表名</param>
-    /// <param name="schema">架构名</param>
-    /// <param name="alias">别名</param>
+    /// <param name="table">已解析的表名。</param>
+    /// <param name="schema">已解析的架构名。</param>
+    /// <param name="alias">已解析的表别名。</param>
+    /// <returns>用于默认方言渲染的 SQL 表项。</returns>
     protected virtual SqlItem CreateSqlItem(string table, string schema, string alias) =>
         SqlItem.Parse(table, schema, alias);
 
     /// <summary>
-    /// 设置表名
+    /// <inheritdoc />
     /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="alias">别名</param>
-    /// <param name="schema">架构名</param>
     public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
         var type = typeof(TEntity);
@@ -173,9 +166,10 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 创建结构化表引用 Sql 项
+    /// 创建用于延迟格式化和校验的结构化表引用 SQL 项。
     /// </summary>
-    /// <param name="reference">结构化表引用</param>
+    /// <param name="reference">待渲染的结构化表引用。</param>
+    /// <returns>绑定当前 Builder 服务和数据库上下文的结构化 SQL 项。</returns>
     protected virtual SqlItem CreateStructuredSqlItem(SqlTableReference reference)
     {
         var sqlBuilder = Builder as SqlBuilderBase;
@@ -192,10 +186,8 @@ public class FromClause : IFromClause
     internal SqlTableReference GetStructuredReference() => (Table as StructuredSqlItem)?.Reference;
 
     /// <summary>
-    /// 设置子查询表
+    /// <inheritdoc />
     /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="alias">表别名</param>
     public void From(ISqlBuilder builder, string alias)
     {
         if (builder == null)
@@ -206,10 +198,8 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 设置子查询表
+    /// <inheritdoc />
     /// </summary>
-    /// <param name="action">子查询操作</param>
-    /// <param name="alias">表别名</param>
     public void From(Action<ISqlBuilder> action, string alias)
     {
         if (action == null)
@@ -220,9 +210,8 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 添加原始 From SQL。
+    /// <inheritdoc />
     /// </summary>
-    /// <param name="sql">原始 SQL。</param>
     public void AppendSql(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -236,7 +225,7 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 验证
+    /// <inheritdoc />
     /// </summary>
     public void Validate()
     {
@@ -245,7 +234,7 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
-    /// 输出Sql
+    /// <inheritdoc />
     /// </summary>
     public string ToSql()
     {

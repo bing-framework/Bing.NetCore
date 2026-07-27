@@ -175,10 +175,11 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册实体模型元数据提供器
+    /// 注册默认实体模型元数据提供器。
     /// </summary>
-    /// <typeparam name="TEntityMetadata">实体元数据类型</typeparam>
-    /// <param name="services">服务集合</param>
+    /// <typeparam name="TEntityMetadata">实体元数据提供器实现类型。</typeparam>
+    /// <param name="services">要注册服务的服务集合。</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddEntityModelMetadataProvider<TEntityMetadata>(this IServiceCollection services)
         where TEntityMetadata : class, IEntityModelMetadataProvider
     {
@@ -186,11 +187,12 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册实体模型元数据提供器
+    /// 将实体模型元数据提供器注册到指定服务契约。
     /// </summary>
-    /// <typeparam name="TInterface">接口类型</typeparam>
-    /// <typeparam name="TImplementation">实现类型</typeparam>
-    /// <param name="services">服务集合</param>
+    /// <typeparam name="TInterface">元数据提供器服务契约类型。</typeparam>
+    /// <typeparam name="TImplementation">元数据提供器实现类型。</typeparam>
+    /// <param name="services">要注册服务的服务集合。</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddEntityModelMetadataProvider<TInterface, TImplementation>(this IServiceCollection services)
         where TInterface : IEntityModelMetadataProvider
         where TImplementation : class, TInterface
@@ -200,12 +202,12 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册数据库类型转换器
+    /// 注册指定数据库类型的值转换器。
     /// </summary>
-    /// <typeparam name="TConverter">数据类型转换器类型</typeparam>
-    /// <param name="services">服务集合</param>
-    /// <param name="databaseType">数据库类型</param>
-    /// <returns>服务集合</returns>
+    /// <typeparam name="TConverter">数据库值转换器实现类型。</typeparam>
+    /// <param name="services">要注册服务的服务集合。</param>
+    /// <param name="databaseType">转换器适用的数据库类型。</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddDatabaseTypeConverter<TConverter>(this IServiceCollection services,
         Bing.Data.Enums.DatabaseType databaseType)
         where TConverter : class, Bing.Data.Metadata.ITypeConverter
@@ -273,13 +275,13 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册 SQL 实现类型映射
+    /// 注册指定数据库类型的 SQL 服务实现映射。
     /// </summary>
-    /// <typeparam name="TService">服务类型</typeparam>
-    /// <typeparam name="TImplementation">实现类型</typeparam>
-    /// <param name="services">服务集合</param>
-    /// <param name="databaseType">数据库类型</param>
-    /// <returns>服务集合</returns>
+    /// <typeparam name="TService">服务契约类型。</typeparam>
+    /// <typeparam name="TImplementation">具体实现类型。</typeparam>
+    /// <param name="services">要注册服务的服务集合。</param>
+    /// <param name="databaseType">映射适用的数据库类型。</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddSqlImplementationType<TService, TImplementation>(this IServiceCollection services,
         Bing.Data.Enums.DatabaseType databaseType)
         where TImplementation : TService

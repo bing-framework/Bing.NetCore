@@ -767,12 +767,12 @@ public class WhereClause : IWhereClause
     }
 
     /// <summary>
-    /// 获取最大日期
+    /// 获取日期范围的最终最大值。
     /// </summary>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="includeTime">是否包含时间</param>
-    /// <returns></returns>
+    /// <param name="min">最小日期。</param>
+    /// <param name="max">最大日期。</param>
+    /// <param name="includeTime">为 true 时保留时间部分；为 false 时扩展到日期结束边界。</param>
+    /// <returns>经范围纠正后的最大日期；未指定最大日期时返回 null。</returns>
     private DateTime? GetMax(DateTime? min, DateTime? max, bool includeTime)
     {
         if (max == null)

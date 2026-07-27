@@ -10,9 +10,16 @@ namespace Bing.Data.Sql.Builders;
 /// </summary>
 public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider
 {
-    /// <summary>默认实例。</summary>
+    /// <summary>
+    /// 可在线程间安全共享的 MySQL Provider 单例。
+    /// </summary>
     public static MySqlSqlProvider Instance { get; } = new();
+
+    /// <summary>
+    /// 初始化 MySQL Provider 单例。
+    /// </summary>
     private MySqlSqlProvider() { }
+
     /// <inheritdoc />
     public string Key => "bing.mysql";
     /// <inheritdoc />
@@ -30,22 +37,42 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider
     /// <inheritdoc />
     public IParamLiteralsResolver ParamLiteralsResolver { get; } =
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
+
     /// <inheritdoc />
+    /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>
     public int? MaxParameterCount => null;
 
+    /// <summary>
+    /// 创建使用 MySQL 表引用子句的 Clause 集合。
+    /// </summary>
     private sealed class MySqlClauseFactory : ISqlClauseFactory
     {
+        /// <inheritdoc />
         public ISelectClause CreateSelect(SqlClauseContext context) => new SelectClause(context);
+
+        /// <inheritdoc />
         public IFromClause CreateFrom(SqlClauseContext context) => new MySqlFromClause(context);
+
+        /// <inheritdoc />
         public IJoinClause CreateJoin(SqlClauseContext context) => new MySqlJoinClause(context);
+
+        /// <inheritdoc />
         public IWhereClause CreateWhere(SqlClauseContext context) => new WhereClause(context);
+
+        /// <inheritdoc />
         public IGroupByClause CreateGroupBy(SqlClauseContext context) => new GroupByClause(context);
+
+        /// <inheritdoc />
         public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
     }
 }
 
+/// <summary>
+/// 渲染 MySQL <c>Limit ... Offset ...</c> 分页语法。
+/// </summary>
 internal sealed class LimitOffsetPaginationRenderer : ISqlPaginationRenderer
 {
+    /// <inheritdoc />
     public string Render(string offsetParameterName, string limitParameterName) =>
         $"Limit {limitParameterName} OFFSET {offsetParameterName}";
 }
