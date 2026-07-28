@@ -31,12 +31,16 @@ public class ExtraProperty<TProperty> where TProperty : class
     /// 获取属性
     /// </summary>
     /// <param name="properties">扩展属性集合</param>
+    /// <returns>属性存在时返回对应实例；否则返回 null。</returns>
     public TProperty GetProperty(ExtraPropertyDictionary properties)
     {
         _properties = properties;
         var property = _properties.GetProperty<TProperty>(_propertyName);
-        if (_property == null)
+        if (property == null)
+        {
+            _property = null;
             return null;
+        }
         if (_property == property)
             return _property;
         _property = property;
@@ -49,6 +53,7 @@ public class ExtraProperty<TProperty> where TProperty : class
     /// </summary>
     /// <param name="properties">扩展属性集合</param>
     /// <param name="property">属性实例</param>
+    /// <returns>当前扩展属性访问器。</returns>
     public ExtraProperty<TProperty> SetProperty(ExtraPropertyDictionary properties, TProperty property)
     {
         _properties = properties;

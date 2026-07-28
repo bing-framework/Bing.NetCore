@@ -40,9 +40,29 @@ public static class Helper
     {
         if (string.IsNullOrWhiteSpace(pager.Order) == false)
             return;
-        if (source.Expression.SafeString().Contains(".OrderBy("))
+        if (HasOrdering(source.Expression))
             return;
         pager.Order = "Id";
+    }
+
+    /// <summary>
+    /// 判断查询表达式是否包含标准排序操作。
+    /// </summary>
+    /// <param name="expression">查询表达式。</param>
+    /// <returns>包含排序操作时返回 true。</returns>
+    private static bool HasOrdering(Expression expression)
+    {
+        while (expression is MethodCallExpression methodCall)
+        {
+            if (methodCall.Method.DeclaringType == typeof(Queryable) &&
+                (methodCall.Method.Name == nameof(Queryable.OrderBy) ||
+                 methodCall.Method.Name == nameof(Queryable.OrderByDescending) ||
+                 methodCall.Method.Name == nameof(Queryable.ThenBy) ||
+                 methodCall.Method.Name == nameof(Queryable.ThenByDescending)))
+                return true;
+            expression = methodCall.Arguments.Count > 0 ? methodCall.Arguments[0] : null;
+        }
+        return false;
     }
 
     /// <summary>
