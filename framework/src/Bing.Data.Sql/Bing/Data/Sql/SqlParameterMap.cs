@@ -7,87 +7,9 @@ using Bing.Extensions;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql 参数映射
+/// 面向实体属性的 SQL 参数映射。
 /// </summary>
-public interface ISqlParameterMap
-{
-    /// <summary>
-    /// 参数源对象
-    /// </summary>
-    object Source { get; }
-
-    /// <summary>
-    /// 获取参数映射项集合
-    /// </summary>
-    /// <returns>参数映射项集合</returns>
-    IReadOnlyCollection<SqlParameterMapItem> GetItems();
-}
-
-/// <summary>
-/// Sql 参数映射项
-/// </summary>
-public class SqlParameterMapItem
-{
-    /// <summary>
-    /// 参数名
-    /// </summary>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// 实体类型
-    /// </summary>
-    public Type EntityType { get; set; }
-
-    /// <summary>
-    /// 属性名
-    /// </summary>
-    public string PropertyName { get; set; }
-
-    /// <summary>
-    /// 参数值
-    /// </summary>
-    public object Value { get; set; }
-
-    /// <summary>
-    /// 是否已显式提供参数值
-    /// </summary>
-    public bool HasExplicitValue { get; set; }
-
-    /// <summary>
-    /// 参数值是否已成功解析
-    /// </summary>
-    public bool ValueResolved { get; set; }
-
-    /// <summary>
-    /// 参数方向
-    /// </summary>
-    public ParameterDirection? Direction { get; set; }
-
-    /// <summary>
-    /// 参数类型
-    /// </summary>
-    public DbType? DbType { get; set; }
-
-    /// <summary>
-    /// 参数长度
-    /// </summary>
-    public int? Size { get; set; }
-
-    /// <summary>
-    /// 数值有效位数
-    /// </summary>
-    public byte? Precision { get; set; }
-
-    /// <summary>
-    /// 数值小数位数
-    /// </summary>
-    public byte? Scale { get; set; }
-}
-
-/// <summary>
-/// Sql 参数映射
-/// </summary>
-/// <typeparam name="TEntity">实体类型</typeparam>
+/// <typeparam name="TEntity">实体类型。</typeparam>
 public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
 {
     /// <summary>

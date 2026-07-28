@@ -157,4 +157,32 @@ public class DateSegmentConditionTest
         _output.WriteLine(condition.GetCondition().ToString());
         Assert.Equal(result.ToString(), condition.GetCondition().ToString());
     }
+
+    /// <summary>
+    /// 测试目的：反向输入日期范围时应交换边界，并按整天包含交换后的起止日期。
+    /// </summary>
+    [Fact]
+    public void GetCondition_WhenDateRangeIsReversed_ShouldMatchWholeNormalizedRange()
+    {
+        // Arrange
+        var condition = new DateSegmentCondition<Sample, DateTime>(
+            item => item.DateValue,
+            new DateTime(2026, 3, 10, 18, 0, 0),
+            new DateTime(2026, 3, 8, 4, 0, 0),
+            Boundary.Both);
+        var items = new[]
+        {
+            new Sample { IntValue = 1, DateValue = new DateTime(2026, 3, 7, 23, 59, 59) },
+            new Sample { IntValue = 2, DateValue = new DateTime(2026, 3, 8, 0, 0, 0) },
+            new Sample { IntValue = 3, DateValue = new DateTime(2026, 3, 10, 23, 59, 59) },
+            new Sample { IntValue = 4, DateValue = new DateTime(2026, 3, 11, 0, 0, 0) }
+        };
+
+        // Act
+        var predicate = condition.GetCondition().Compile();
+        var result = items.Where(predicate).Select(item => item.IntValue).ToList();
+
+        // Assert
+        Assert.Equal(new[] { 2, 3 }, result);
+    }
 }

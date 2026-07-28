@@ -236,3 +236,23 @@
 | `NewEmptyBuilder` | 空 MySQL Builder 的 New 生命周期。 | Mean 326.9 ns，Allocated 4.64 KB，Gen0 0.2522，Gen1 0.0033，无 Gen2。 |
 | `CloneTenAggregates` | 十个结构化聚合列的 Provider Builder Clone。 | Mean 496.2 ns，Allocated 5.25 KB，Gen0 0.2851，Gen1 0.0038，无 Gen2。 |
 | `RebindClauseContext` | Context 对新 Builder、AliasRegister、ParameterManager 的重绑定。 | Mean 260.3 ns，Allocated 3.75 KB，Gen0 0.2036，Gen1 0.0024，无 Gen2。 |
+
+## 参数管理器合同与快照追溯
+
+| 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
+| --- | --- | --- | --- | --- |
+| `IParameterManager` / `IAdvancedParameterManager` / `ISqlBuilder` / `ISqlQuery` / `SqlQueryBase` | `Bing.Data.Sql.Tests` | `BuilderNewLifecycleTest`; `BuilderCloneIsolationTest` | `New_WhenIndependentBuildersRunConcurrently_ShouldKeepSqlAndParametersIsolated`; `Clone_WhenIndependentBuildersRunConcurrently_ShouldKeepSourceAndClonesIsolated` | Documentation and Unit; 单个 Builder、Query 和 ParameterManager 是可变且非线程安全实例。受支持的并发模式是每个操作使用独立 New/Clone 实例；不对共享实例并发读写作出成功承诺。 |
+| `ParameterManager.NormalizeName` / `Add` / `Contains` / `GetValue` / `GenerateName` | `Bing.Data.Sql.Tests` | `ParameterManagerTest` | `Add_WhenNamesUseKnownPrefixesOrDifferentCasing_ShouldReplaceSingleNormalizedParameter`; `NormalizeName_WhenDialectOrInputNameChanges_ShouldUseDialectPrefixAndIgnoreInvalidNames`; `GenerateName_WhenGeneratedNameAlreadyExists_ShouldSkipExistingName` | Unit; 剥离一个已知 `@`/`:`/`?` 前缀，再应用当前方言前缀并以 `OrdinalIgnoreCase` 比较；无效名称不写入。 |
+| `ParameterManager.GetParams` / `ExportValues` / `GetSqlParams` / `CloneSqlParam` / `Clone` | `Bing.Data.Sql.Tests`; `Bing.Dapper.SqlServer.Tests` | `ParameterManagerTest`; `DefaultSqlParameterBinderTest` | `GetParamsAndExportValues_WhenManagerChangesLater_ShouldKeepOriginalSnapshots`; `GetSqlParamsAndClone_WhenParameterContainsMetadata_ShouldPreserveMetadataWithoutSharingContainer`; `GetSqlParams_WhenBuilderUsesEnhancedParameterSnapshot_ShouldPreserveMetadata` | Unit; 导出集合是调用时刻的独立快照，增强参数复制 `SqlParam` 容器、`OriginalValue` 和全部绑定元数据。任意 `Value`/`OriginalValue` 业务对象仅保留引用，不递归复制。 |
+| `ParameterLimitManagerBase.EnsureCanAdd` / `ParameterLimitManager` / `AdvancedParameterLimitManager` | `Bing.Data.Sql.Tests` | `ParameterLimitManagerTest`; `AdvancedParameterLimitManagerTest` | `Add_WhenWithinLimitOrReplacingExisting_ShouldPreserveCountAndAllowClear`; `Add_WhenLimitExceeded_ShouldThrowWithProviderAndCountsWithoutMutatingState`; `CloneAndCreateEmpty_ShouldRetainLimitAndKeepParameterStateIsolated`; `AddSqlParam_WhenLimitExceeded_ShouldThrowWithoutMutatingMetadata` | Unit; 标准化后的同名替换不增加计数；无效名称不触发满额异常；快照、Clone 和 CreateEmpty 保留上限与隔离合同。 |
+| `SqlBuilderBase.ApplyParameterLimit` / `CreateParameterManager` / 构造函数注入路径 | `Bing.Data.Sql.CustomProvider.Tests`; `Bing.Dapper.SqlServer.Tests` | `CustomProviderBuilderTest`; `OfficialProviderInstanceTest` | `ParameterLimit_WhenExplicitManagerIsInjected_ShouldRejectParametersBeyondProviderLimit`; `ParameterLimit_WhenBuilderIsNewOrCloned_ShouldPreserveLimitAndIsolateParameters`; `Provider_WhenParameterLimitIsRequested_ShouldReturnOfficialContract` | Unit; 工厂和显式注入的普通/增强管理器均执行 Provider 上限，已包装实例不重复装饰，Clone/New 保留限制。 |
+
+`ParameterManagerSnapshotBenchmarks` 位于 `framework/tests/Bing.Data.Sql.Benchmarks/SqlMetadataBenchmarks.cs`。2026-07-28 在 Windows 10、Intel Core Ultra 7 270K Plus、.NET 8.0.27、BenchmarkDotNet 0.14.0 的 `FormalHost`（3 launch、6 warmup、15 iteration）完成首次正式基线。
+
+| 参数数量 | `GetParams` Mean / Allocated | `ExportValues` Mean / Allocated | `GetSqlParams` Mean / Allocated |
+| ---: | ---: | ---: | ---: |
+| 10 | 61.89 ns / 480 B | 56.89 ns / 480 B | 264.16 ns / 1,896 B |
+| 100 | 479.98 ns / 3,168 B | 481.62 ns / 3,168 B | 2.608 us / 16,824 B |
+| 1000 | 4.283 us / 31,056 B | 4.275 us / 31,056 B | 28.431 us / 167,112 B |
+
+基础值快照随参数规模线性增长；增强快照额外复制 `SqlParam` 容器与元数据，时间和分配成本相应更高。完整报告：`BenchmarkDotNet.Artifacts/parameter-manager-snapshot-20260728/results/Bing.Data.Sql.Benchmarks.ParameterManagerSnapshotBenchmarks-report-github.md`。

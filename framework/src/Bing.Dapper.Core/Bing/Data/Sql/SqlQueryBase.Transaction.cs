@@ -18,6 +18,7 @@ public abstract partial class SqlQueryBase
     private void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
         ISqlTransactionScopeLease lease)
     {
+        ThrowIfTransactionScopeChildDisposed();
         if (context == null)
             throw new ArgumentNullException(nameof(context));
         if (connection == null)
@@ -40,7 +41,6 @@ public abstract partial class SqlQueryBase
         Options.DatabaseType = contextSnapshot.DataSource?.DatabaseType ?? Options.DatabaseType;
         Options.SetDatabaseContext(contextSnapshot);
         _transactionScopeLease = lease;
-        _isTransactionScopeChildDisposed = false;
         _transaction = transaction;
         _transactionId = lease.TransactionId;
         _transactionOwnership = SqlResourceOwnership.External;

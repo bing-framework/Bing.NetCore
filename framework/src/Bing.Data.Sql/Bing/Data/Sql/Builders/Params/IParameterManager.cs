@@ -3,6 +3,9 @@
 /// <summary>
 /// SQL Builder 参数管理器。
 /// </summary>
+/// <remarks>
+/// 实例包含可变参数状态，不支持并发读写。跨线程共享实例时调用方必须自行同步；并发操作应使用独立的克隆实例。
+/// </remarks>
 public interface IParameterManager
 {
     /// <summary>
@@ -14,8 +17,8 @@ public interface IParameterManager
     /// <summary>
     /// 将参数名称规范化为内部比较使用的标准形式。
     /// </summary>
-    /// <param name="name">可能包含 Provider 前缀的参数名称。</param>
-    /// <returns>去除 Provider 前缀并完成标准化的参数名称。</returns>
+    /// <param name="name">可能包含 <c>@</c>、<c>:</c> 或 <c>?</c> 前缀的参数名称。</param>
+    /// <returns>移除已知前缀后按当前 Provider 前缀重建的标准参数名称；无效名称返回空字符串。</returns>
     string NormalizeName(string name);
 
     /// <summary>
@@ -29,7 +32,7 @@ public interface IParameterManager
     /// <summary>
     /// 获取当前参数的只读快照。
     /// </summary>
-    /// <returns>以标准参数名称为键的参数值集合。</returns>
+    /// <returns>调用时刻以标准参数名称为键的独立参数值集合；后续写入不会改变返回集合。</returns>
     IReadOnlyDictionary<string, object> GetParams();
 
     /// <summary>
@@ -49,7 +52,7 @@ public interface IParameterManager
     /// <summary>
     /// 克隆当前参数管理器。
     /// </summary>
-    /// <returns>保留参数和值但不与当前实例共享可变状态的副本。</returns>
+    /// <returns>保留参数的独立副本；管理器和参数容器不共享可变状态，任意参数值对象仍按引用保留。</returns>
     IParameterManager Clone();
 
     /// <summary>

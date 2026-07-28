@@ -100,6 +100,21 @@ public class ConnectionStringCollectionTest
     }
 
     /// <summary>
+    /// 测试目的：连接字符串名称缺失或为空白时应回退到默认连接字符串。
+    /// </summary>
+    [Fact]
+    public void GetConnectionString_NameMissingOrWhitespace_ShouldFallbackToDefault()
+    {
+        // Arrange
+        var col = new ConnectionStringCollection { Default = "Server=default;" };
+
+        // Act and Assert
+        col.GetConnectionString(null).ShouldBe("Server=default;");
+        col.GetConnectionString(string.Empty).ShouldBe("Server=default;");
+        col.GetConnectionString("   ").ShouldBe("Server=default;");
+    }
+
+    /// <summary>
     /// 测试目的：GetConnectionString 传入 "Default" 应返回 Default 属性的值。
     /// </summary>
     [Fact]

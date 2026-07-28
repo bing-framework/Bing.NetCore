@@ -94,4 +94,39 @@ public class BuilderCloneIsolationTest
         Assert.Equal(20, builder.Pager.PageSize);
         Assert.Equal(string.Empty, builder.JoinClause.ToSql());
     }
+
+    /// <summary>
+    /// 测试 - 不同并发操作使用独立 Clone 实例时，条件和参数不应污染来源或其他副本。
+    /// </summary>
+    [Fact]
+    public async Task Clone_WhenIndependentBuildersRunConcurrently_ShouldKeepSourceAndClonesIsolated()
+    {
+        // Arrange
+        var source = new TestSqlBuilder();
+        source.Select("*").From("Orders");
+        var first = source.Clone();
+        var second = source.Clone();
+        var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // Act
+        var firstTask = Task.Run(async () =>
+        {
+            await start.Task;
+            return first.Where("OrderId", 1).ToSql();
+        });
+        var secondTask = Task.Run(async () =>
+        {
+            await start.Task;
+            return second.Where("OrderId", 2).ToSql();
+        });
+        start.SetResult(true);
+        var sql = await Task.WhenAll(firstTask, secondTask);
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Orders] \r\nWhere [OrderId]=@_p_0", sql[0]);
+        Assert.Equal(sql[0], sql[1]);
+        Assert.Empty(source.GetParams());
+        Assert.Equal(1, first.GetParam("@_p_0"));
+        Assert.Equal(2, second.GetParam("@_p_0"));
+    }
 }

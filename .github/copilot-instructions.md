@@ -71,9 +71,9 @@
 > 禁止：为了让测试“看起来能跑”，在 Integration 里写 sleep、随机等待、依赖公网。
 
 ### 3.2 命名规范
-- 测试方法名：**英文**，建议：`Method_State_Expected()`
-- 测试注释：**中文**，每个测试必须写“测试目的”
-- 结构：AAA（Arrange / Act / Assert）
+- 测试方法名：**英文**，建议：`Method_State_Expected()`。
+- 测试注释：**中文**，每个测试必须写“测试目的”，参照下面的示例内容。
+- 结构：AAA（Arrange / Act / Assert）。
 
 示例：
 ```csharp

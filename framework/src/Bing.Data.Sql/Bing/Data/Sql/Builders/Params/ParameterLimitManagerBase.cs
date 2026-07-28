@@ -10,12 +10,14 @@ internal abstract class ParameterLimitManagerBase
     /// </summary>
     /// <param name="inner">实际保存参数及生成参数名称的内部管理器。</param>
     /// <param name="maxParameterCount">允许同时保存的最大参数数量，必须大于或等于 0。</param>
-    protected ParameterLimitManagerBase(IParameterManager inner, int maxParameterCount)
+    /// <param name="providerKey">应用参数限制的 Provider 标识。</param>
+    protected ParameterLimitManagerBase(IParameterManager inner, int maxParameterCount, string providerKey = null)
     {
         Inner = inner ?? throw new ArgumentNullException(nameof(inner));
         if (maxParameterCount < 0)
             throw new ArgumentOutOfRangeException(nameof(maxParameterCount));
         MaxParameterCount = maxParameterCount;
+        ProviderKey = string.IsNullOrWhiteSpace(providerKey) ? "<未指定>" : providerKey.Trim();
     }
 
     /// <summary>
@@ -29,14 +31,38 @@ internal abstract class ParameterLimitManagerBase
     protected int MaxParameterCount { get; }
 
     /// <summary>
+    /// 应用参数数量限制的 Provider 标识。
+    /// </summary>
+    protected string ProviderKey { get; }
+
+    /// <summary>
     /// 验证新增参数不会超过配置上限。
     /// </summary>
     /// <param name="name">待添加或替换的参数名称。</param>
     protected void EnsureCanAdd(string name)
     {
-        if (string.IsNullOrWhiteSpace(name) || Inner.Contains(name) || Inner.GetParams().Count < MaxParameterCount)
+        name = Inner.NormalizeName(name);
+        if (string.IsNullOrWhiteSpace(name) || Inner.Contains(name))
             return;
-        throw new InvalidOperationException($"SQL 参数数量不能超过 {MaxParameterCount}。");
+        var currentCount = Inner.GetParams().Count;
+        if (currentCount < MaxParameterCount)
+            return;
+        throw new InvalidOperationException(
+            $"SQL Provider '{ProviderKey}' 的参数数量超出上限。当前参数数量: {currentCount}；尝试添加后数量: {currentCount + 1}；最大参数数量: {MaxParameterCount}。");
+    }
+
+    /// <summary>
+    /// 克隆内部参数管理器并确保副本不与当前实例共享参数状态。
+    /// </summary>
+    /// <returns>独立的内部参数管理器副本。</returns>
+    protected IParameterManager CloneInner()
+    {
+        var result = Inner.Clone();
+        if (result == null)
+            throw new InvalidOperationException("参数管理器克隆时返回了 null。");
+        if (ReferenceEquals(result, Inner))
+            throw new InvalidOperationException("参数管理器克隆时不能返回当前实例。");
+        return result;
     }
 
     /// <summary>

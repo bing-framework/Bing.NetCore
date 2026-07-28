@@ -255,6 +255,86 @@ public class ExtraPropertyDictionaryTest
     }
 }
 
+/// <summary>
+/// <see cref="ExtraProperty{TProperty}"/> 单元测试。
+/// </summary>
+public class ExtraPropertyTest
+{
+    /// <summary>
+    /// 测试目的：属性名为空时应拒绝创建扩展属性访问器。
+    /// </summary>
+    [Fact]
+    public void Constructor_WhenPropertyNameIsNull_ShouldThrowArgumentNullException()
+    {
+        // Act and Assert
+        Assert.Throws<ArgumentNullException>(() => new ExtraProperty<ExtraPropertyValue>(null));
+    }
+
+    /// <summary>
+    /// 测试目的：字典中存在扩展属性时应返回原始实例。
+    /// </summary>
+    [Fact]
+    public void GetProperty_WhenDictionaryContainsValue_ShouldReturnStoredInstance()
+    {
+        // Arrange
+        var property = new ExtraPropertyValue { Name = "primary" };
+        var properties = new ExtraPropertyDictionary { ["Profile"] = property };
+        var accessor = new ExtraProperty<ExtraPropertyValue>("Profile");
+
+        // Act
+        var result = accessor.GetProperty(properties);
+
+        // Assert
+        Assert.Same(property, result);
+    }
+
+    /// <summary>
+    /// 测试目的：字典中缺少扩展属性时应返回 null。
+    /// </summary>
+    [Fact]
+    public void GetProperty_WhenDictionaryDoesNotContainValue_ShouldReturnNull()
+    {
+        // Arrange
+        var accessor = new ExtraProperty<ExtraPropertyValue>("Profile");
+
+        // Act
+        var result = accessor.GetProperty(new ExtraPropertyDictionary());
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    /// <summary>
+    /// 测试目的：设置扩展属性时应写入字典并返回当前访问器。
+    /// </summary>
+    [Fact]
+    public void SetProperty_WhenValueProvided_ShouldUpdateDictionaryAndReturnSelf()
+    {
+        // Arrange
+        var property = new ExtraPropertyValue { Name = "updated" };
+        var properties = new ExtraPropertyDictionary();
+        var accessor = new ExtraProperty<ExtraPropertyValue>("Profile");
+
+        // Act
+        var result = accessor.SetProperty(properties, property);
+
+        // Assert
+        Assert.Same(accessor, result);
+        Assert.Same(property, properties.GetProperty<ExtraPropertyValue>("Profile"));
+    }
+
+    /// <summary>
+    /// 扩展属性测试值对象。
+    /// </summary>
+    private sealed class ExtraPropertyValue
+    {
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // TransactionActionManager
 // ─────────────────────────────────────────────────────────────────────────────

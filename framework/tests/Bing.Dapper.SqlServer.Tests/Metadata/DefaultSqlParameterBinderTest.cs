@@ -4,7 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
+using Bing.Data;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Enums;
 using Dapper;
 
 namespace Bing.Dapper.Tests.Metadata;
@@ -111,6 +115,49 @@ public class DefaultSqlParameterBinderTest
         var output = command.CreatedParameters.Single(t => t.ParameterName == "result");
         output.Direction.ShouldBe(ParameterDirection.Output);
         accessor.GetValue<int>("result").ShouldBe(42);
+    }
+
+    /// <summary>
+    /// 测试 - 绑定器从 Builder 的增强参数快照读取时应保留值、原始值和完整数据库元数据。
+    /// </summary>
+    [Fact]
+    public void GetSqlParams_WhenBuilderUsesEnhancedParameterSnapshot_ShouldPreserveMetadata()
+    {
+        // Arrange
+        var builder = new SqlServerBuilder();
+        var manager = Assert.IsAssignableFrom<IAdvancedParameterManager>(((ISqlPartAccessor)builder).ParameterManager);
+        manager.Add(new SqlParam(":amount", 12.34m, DbType.Decimal, ParameterDirection.InputOutput, 20, 10, 2)
+        {
+            OriginalValue = "12.34",
+            DatabaseType = DatabaseType.SqlServer,
+            ProviderTypeName = "decimal",
+            Source = SqlParameterSource.Manual,
+            MetadataLevel = SqlParameterMetadataLevel.Full,
+            StorageKind = ColumnStorageKind.Number,
+            ConverterKind = FieldValueConverterKind.Custom,
+            CustomConverterName = "CurrencyConverter"
+        });
+        var binder = new DefaultSqlParameterBinder();
+
+        // Act
+        var parameter = Assert.Single(binder.GetSqlParams(builder, new SqlOptions()));
+
+        // Assert
+        Assert.Equal("@amount", parameter.Name);
+        Assert.Equal(12.34m, parameter.Value);
+        Assert.Equal("12.34", parameter.OriginalValue);
+        Assert.Equal(DbType.Decimal, parameter.DbType);
+        Assert.Equal(ParameterDirection.InputOutput, parameter.Direction);
+        Assert.Equal(20, parameter.Size);
+        Assert.Equal((byte)10, parameter.Precision);
+        Assert.Equal((byte)2, parameter.Scale);
+        Assert.Equal(DatabaseType.SqlServer, parameter.DatabaseType);
+        Assert.Equal("decimal", parameter.ProviderTypeName);
+        Assert.Equal(SqlParameterSource.Manual, parameter.Source);
+        Assert.Equal(SqlParameterMetadataLevel.Full, parameter.MetadataLevel);
+        Assert.Equal(ColumnStorageKind.Number, parameter.StorageKind);
+        Assert.Equal(FieldValueConverterKind.Custom, parameter.ConverterKind);
+        Assert.Equal("CurrencyConverter", parameter.CustomConverterName);
     }
 
     /// <summary>

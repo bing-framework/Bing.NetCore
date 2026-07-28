@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Data;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Bing.Data.Enums;
@@ -183,6 +185,80 @@ public class SqlMetadataBenchmarks
 
         public override char ClosingIdentifier => ']';
 
+        public override string GetPrefix() => "@";
+    }
+}
+
+/// <summary>
+/// 参数管理器快照性能基线。
+/// </summary>
+[MemoryDiagnoser]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class ParameterManagerSnapshotBenchmarks
+{
+    /// <summary>
+    /// 用于快照测试的参数管理器。
+    /// </summary>
+    private ParameterManager _parameterManager;
+
+    /// <summary>
+    /// 参数集合规模。
+    /// </summary>
+    [Params(10, 100, 1000)]
+    public int ParameterCount { get; set; }
+
+    /// <summary>
+    /// 初始化指定规模的增强参数集合。
+    /// </summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        _parameterManager = new ParameterManager(new SnapshotBenchmarkDialect());
+        for (var index = 0; index < ParameterCount; index++)
+        {
+            _parameterManager.Add(new SqlParam($"value_{index}", index, DbType.Int32)
+            {
+                OriginalValue = index,
+                MetadataLevel = SqlParameterMetadataLevel.Full,
+                Source = SqlParameterSource.Manual,
+                StorageKind = ColumnStorageKind.Number
+            });
+        }
+    }
+
+    /// <summary>
+    /// 测量基础参数值快照。
+    /// </summary>
+    /// <returns>独立的参数值快照。</returns>
+    [Benchmark]
+    public IReadOnlyDictionary<string, object> GetParamsSnapshot() => _parameterManager.GetParams();
+
+    /// <summary>
+    /// 测量用于数据库执行的参数值快照。
+    /// </summary>
+    /// <returns>独立的执行参数值快照。</returns>
+    [Benchmark]
+    public IReadOnlyDictionary<string, object> ExportValuesSnapshot() => _parameterManager.ExportValues();
+
+    /// <summary>
+    /// 测量包含独立 SqlParam 容器复制的增强参数快照。
+    /// </summary>
+    /// <returns>独立的增强参数元数据快照。</returns>
+    [Benchmark]
+    public IReadOnlyDictionary<string, SqlParam> GetSqlParamsSnapshot() => _parameterManager.GetSqlParams();
+
+    /// <summary>
+    /// 参数快照基准使用的 SQL 方言。
+    /// </summary>
+    private sealed class SnapshotBenchmarkDialect : DialectBase
+    {
+        /// <inheritdoc />
+        public override char OpeningIdentifier => '[';
+
+        /// <inheritdoc />
+        public override char ClosingIdentifier => ']';
+
+        /// <inheritdoc />
         public override string GetPrefix() => "@";
     }
 }

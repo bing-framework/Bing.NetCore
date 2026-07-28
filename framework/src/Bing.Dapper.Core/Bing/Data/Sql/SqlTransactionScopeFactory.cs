@@ -60,6 +60,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             var connection = GetResourceAccessor(query).GetOrCreateConnection();
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
             var transaction = await SqlTransactionAsyncAdapter.BeginAsync(connection, isolationLevel, cancellationToken)
                 .ConfigureAwait(false);
             return CreateScope(context, query, connection, transaction);

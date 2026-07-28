@@ -417,7 +417,9 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     public override int SaveChanges()
     {
         SaveChangesBefore();
-        return base.SaveChanges();
+        var result = base.SaveChanges();
+        SaveChangesAfter().GetAwaiter().GetResult();
+        return result;
     }
 
     #endregion
@@ -432,9 +434,11 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     {
         SaveChangesBefore();
         var transactionActionManager = Create<ITransactionActionManager>();
-        if (transactionActionManager.Count == 0)
-            return await base.SaveChangesAsync(cancellationToken);
-        return await TransactionCommitAsync(transactionActionManager, cancellationToken);
+        var result = transactionActionManager.Count == 0
+            ? await base.SaveChangesAsync(cancellationToken)
+            : await TransactionCommitAsync(transactionActionManager, cancellationToken);
+        await SaveChangesAfter();
+        return result;
     }
 
     /// <summary>

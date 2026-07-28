@@ -30,7 +30,7 @@ public abstract class FilterBase<TFilterType> : IFilter<TFilterType> where TFilt
     public IDisposable Disable()
     {
         if (IsEnabled == false)
-            return new DisposeAction(null);
+            return new DisposeAction(() => { });
         IsEnabled = false;
         return new DisposeAction(Enable);
     }

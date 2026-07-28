@@ -1,6 +1,7 @@
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Enums;
 using Bing.Data.Sql.CustomProvider.Tests.Samples;
 using Xunit;
@@ -196,7 +197,7 @@ public class CustomProviderBuilderTest
         var exception = Assert.Throws<InvalidOperationException>(() => builder.Where("u.Name", "blocked"));
 
         // Assert
-        Assert.Equal("SQL 参数数量不能超过 1。", exception.Message);
+        Assert.Equal("SQL Provider 'custom.limited' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。", exception.Message);
         Assert.Single(builder.GetParams());
         Assert.Equal(2, builder.GetParam("@_p_0"));
     }
@@ -219,13 +220,37 @@ public class CustomProviderBuilderTest
         var freshException = Assert.Throws<InvalidOperationException>(() => fresh.Where("u.Enabled", true));
 
         // Assert
-        Assert.Equal("SQL 参数数量不能超过 1。", cloneException.Message);
-        Assert.Equal("SQL 参数数量不能超过 1。", freshException.Message);
+        Assert.Equal("SQL Provider 'custom.limited' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。", cloneException.Message);
+        Assert.Equal("SQL Provider 'custom.limited' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。", freshException.Message);
         Assert.Single(source.GetParams());
         Assert.Single(clone.GetParams());
         Assert.Single(fresh.GetParams());
         Assert.Equal(1, source.GetParam("@_p_0"));
         Assert.Equal("fresh", fresh.GetParam("@_p_0"));
+    }
+
+    /// <summary>
+    /// 测试目的：显式注入普通或增强参数管理器时，Provider 参数上限均不应被绕过。
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ParameterLimit_WhenExplicitManagerIsInjected_ShouldRejectParametersBeyondProviderLimit(bool useAdvancedManager)
+    {
+        // Arrange
+        IParameterManager parameterManager = useAdvancedManager
+            ? new ParameterManager(LimitedCustomSqlProvider.Instance.Dialect)
+            : new PlainParameterManager(LimitedCustomSqlProvider.Instance.Dialect);
+        var builder = new LimitedCustomSqlBuilder(parameterManager);
+
+        // Act
+        builder.Where("u.Id", 1);
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Where("u.Name", "blocked"));
+
+        // Assert
+        Assert.Equal("SQL Provider 'custom.limited' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。", exception.Message);
+        Assert.Single(builder.GetParams());
+        Assert.Equal(1, builder.GetParam("@_p_0"));
     }
 
     /// <summary>
@@ -291,5 +316,61 @@ public class CustomProviderBuilderTest
         Assert.Equal(false, clone.GetParam("@_p_1"));
         Assert.Single(source.GetParams());
         Assert.Equal(2, clone.GetParams().Count);
+    }
+
+    /// <summary>
+    /// 仅公开基础参数能力的测试代理，用于验证 Builder 的普通参数管理器包装路径。
+    /// </summary>
+    private sealed class PlainParameterManager : IParameterManager, IParameterManagerLifecycle
+    {
+        /// <summary>
+        /// 实际存储参数的内部管理器。
+        /// </summary>
+        private readonly IParameterManager _inner;
+
+        /// <summary>
+        /// 初始化基础参数管理器测试代理。
+        /// </summary>
+        /// <param name="dialect">参数名称使用的 SQL 方言。</param>
+        public PlainParameterManager(IDialect dialect) : this(new ParameterManager(dialect))
+        {
+        }
+
+        /// <summary>
+        /// 使用已有内部管理器初始化基础参数管理器测试代理。
+        /// </summary>
+        /// <param name="inner">实际存储参数的内部管理器。</param>
+        private PlainParameterManager(IParameterManager inner) => _inner = inner;
+
+        /// <inheritdoc />
+        public string GenerateName() => _inner.GenerateName();
+
+        /// <inheritdoc />
+        public string NormalizeName(string name) => _inner.NormalizeName(name);
+
+        /// <inheritdoc />
+        public void Add(string name, object value, Operator? @operator = null) => _inner.Add(name, value, @operator);
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
+
+        /// <inheritdoc />
+        public bool Contains(string name) => _inner.Contains(name);
+
+        /// <inheritdoc />
+        public object GetValue(string name) => _inner.GetValue(name);
+
+        /// <inheritdoc />
+        public IParameterManager Clone() => new PlainParameterManager(_inner.Clone());
+
+        /// <inheritdoc />
+        public void Clear() => _inner.Clear();
+
+        /// <inheritdoc />
+        public IParameterManager CreateEmpty()
+        {
+            var lifecycle = (IParameterManagerLifecycle)_inner;
+            return new PlainParameterManager(lifecycle.CreateEmpty());
+        }
     }
 }

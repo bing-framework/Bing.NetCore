@@ -18,10 +18,10 @@ public class PagerTest
     public PagerTest() => _pager = new Pager();
 
     /// <summary>
-    /// 测试 - 分页默认值
+    /// 测试目的：验证新建分页参数应使用约定的默认值。
     /// </summary>
     [Fact]
-    public void Test_Default()
+    public void Constructor_WhenCreated_ShouldUseDefaultValues()
     {
         Assert.Equal(1, _pager.Page);
         Assert.Equal(20, _pager.PageSize);
@@ -34,10 +34,10 @@ public class PagerTest
     }
 
     /// <summary>
-    /// 测试 - 总页数
+    /// 测试目的：验证总记录数或每页数量变化时应正确计算总页数。
     /// </summary>
     [Fact]
-    public void Test_PageCount()
+    public void GetPageCount_WhenTotalCountOrPageSizeChanges_ShouldReturnExpectedValue()
     {
         _pager.TotalCount = 0;
         Assert.Equal(0, _pager.GetPageCount());
@@ -54,10 +54,10 @@ public class PagerTest
     }
 
     /// <summary>
-    /// 测试 - 页索引 - 小于1，则修正为1
+    /// 测试目的：验证小于一的页码应规范化为第一页。
     /// </summary>
     [Fact]
-    public void Test_Page()
+    public void Page_WhenAssignedValueIsLessThanOne_ShouldNormalizeToOne()
     {
         _pager.Page = 0;
         Assert.Equal(1, _pager.Page);
@@ -67,10 +67,10 @@ public class PagerTest
     }
 
     /// <summary>
-    /// 测试 - 跳过的行数
+    /// 测试目的：验证不同页码和总记录数下应计算正确的跳过行数。
     /// </summary>
     [Fact]
-    public void Test_SkipCount()
+    public void GetSkipCount_WhenPageAndTotalCountVary_ShouldReturnExpectedValue()
     {
         _pager.TotalCount = 100;
 
@@ -124,10 +124,10 @@ public class PagerTest
     }
 
     /// <summary>
-    /// 测试 - 起始和结束行数
+    /// 测试目的：验证指定页码和每页数量时应计算正确的起止行号。
     /// </summary>
     [Fact]
-    public void Test_GetStartNumber()
+    public void GetStartAndEndNumber_WhenPageAndPageSizeSet_ShouldReturnExpectedRange()
     {
         _pager.Page = 2;
         _pager.PageSize = 10;

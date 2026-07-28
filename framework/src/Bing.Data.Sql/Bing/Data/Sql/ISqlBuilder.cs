@@ -6,6 +6,9 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql生成器
 /// </summary>
+/// <remarks>
+/// 实例包含子句、参数、别名、分页和联合查询等可变状态，不支持并发读写。每个并发操作应使用独立的 <see cref="Clone"/> 或 <see cref="New"/> 实例；共享实例时调用方必须自行同步。
+/// </remarks>
 public interface ISqlBuilder : ICondition, ISqlContent, ISqlOperation
 {
     /// <summary>

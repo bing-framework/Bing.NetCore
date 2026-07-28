@@ -26,8 +26,8 @@ public static class SqliteServiceCollectionExtensions
         if (services == null)
             throw new ArgumentNullException(nameof(services));
         services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
-        var queryOptions = new SqlOptions<SqliteSqlQuery>();
-        var executorOptions = new SqlOptions<SqliteSqlExecutor>();
+        var queryOptions = new SqlOptions<SqliteSqlQuery> { DatabaseType = DatabaseType.Sqlite };
+        var executorOptions = new SqlOptions<SqliteSqlExecutor> { DatabaseType = DatabaseType.Sqlite };
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
@@ -102,7 +102,7 @@ public static class SqliteServiceCollectionExtensions
         where TInterface : ISqlQuery
         where TImplementation : SqliteSqlQueryBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Sqlite };
         services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
@@ -178,7 +178,7 @@ public static class SqliteServiceCollectionExtensions
         where TInterface : ISqlExecutor
         where TImplementation : SqliteSqlExecutorBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Sqlite };
         services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();

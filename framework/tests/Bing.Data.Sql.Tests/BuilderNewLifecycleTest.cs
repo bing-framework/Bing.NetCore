@@ -122,4 +122,38 @@ public class BuilderNewLifecycleTest
         // Assert
         Assert.IsType<TestSqlBuilder>(fresh);
     }
+
+    /// <summary>
+    /// 测试 - 不同并发操作使用独立 New 实例时，SQL 和参数状态应保持隔离。
+    /// </summary>
+    [Fact]
+    public async Task New_WhenIndependentBuildersRunConcurrently_ShouldKeepSqlAndParametersIsolated()
+    {
+        // Arrange
+        var source = new TestSqlBuilder();
+        var first = source.New();
+        var second = source.New();
+        var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // Act
+        var firstTask = Task.Run(async () =>
+        {
+            await start.Task;
+            return first.Select("*").From("Orders").Where("OrderId", 1).ToSql();
+        });
+        var secondTask = Task.Run(async () =>
+        {
+            await start.Task;
+            return second.Select("*").From("Orders").Where("OrderId", 2).ToSql();
+        });
+        start.SetResult(true);
+        var sql = await Task.WhenAll(firstTask, secondTask);
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Orders] \r\nWhere [OrderId]=@_p_0", sql[0]);
+        Assert.Equal(sql[0], sql[1]);
+        Assert.Equal(1, first.GetParam("@_p_0"));
+        Assert.Equal(2, second.GetParam("@_p_0"));
+        Assert.Empty(source.GetParams());
+    }
 }

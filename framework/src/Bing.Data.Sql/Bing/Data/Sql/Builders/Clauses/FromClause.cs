@@ -84,9 +84,7 @@ public class FromClause : IFromClause
         ProviderDatabaseType = providerDatabaseType;
     }
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public virtual IFromClause Clone(SqlClauseContext context)
     {
         if (context.AliasRegister != null)
@@ -103,9 +101,7 @@ public class FromClause : IFromClause
     protected virtual FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new FromClause(context, table, ProviderDatabaseType);
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void From(string table, string alias = null)
     {
         var parsedTable = ParseTableName(table, alias);
@@ -125,9 +121,7 @@ public class FromClause : IFromClause
         return (parsedTable.TableName, parsedTable.Alias, parsedTable.Schema);
     }
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void From(SqlTableReference reference)
     {
         if (reference == null)
@@ -153,9 +147,7 @@ public class FromClause : IFromClause
     protected virtual SqlItem CreateSqlItem(string table, string schema, string alias) =>
         SqlItem.Parse(table, schema, alias);
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
         var type = typeof(TEntity);
@@ -185,9 +177,7 @@ public class FromClause : IFromClause
     /// <returns>结构化表引用；原始字符串 From 返回 <see langword="null"/>。</returns>
     internal SqlTableReference GetStructuredReference() => (Table as StructuredSqlItem)?.Reference;
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void From(ISqlBuilder builder, string alias)
     {
         if (builder == null)
@@ -197,9 +187,7 @@ public class FromClause : IFromClause
         Table = SqlItem.Raw($"({result}) As {Dialect.SafeName(alias)}");
     }
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void From(Action<ISqlBuilder> action, string alias)
     {
         if (action == null)
@@ -209,9 +197,7 @@ public class FromClause : IFromClause
         From(builder, alias);
     }
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void AppendSql(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -224,18 +210,14 @@ public class FromClause : IFromClause
         Table = SqlItem.Raw(sql);
     }
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public void Validate()
     {
         if (string.IsNullOrWhiteSpace(Table?.Name))
             throw new InvalidOperationException(LibraryResource.TableIsEmpty);
     }
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public string ToSql()
     {
         var table = Table?.ToSql(Dialect);

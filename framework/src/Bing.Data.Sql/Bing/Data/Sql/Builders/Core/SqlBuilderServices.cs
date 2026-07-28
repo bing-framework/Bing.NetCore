@@ -9,58 +9,58 @@ namespace Bing.Data.Sql.Builders.Core;
 /// SQL Builder 共享服务集合。
 /// </summary>
 /// <remarks>
-/// 该对象只保存可在 Builder、New 和 Clone 间共享的不可变服务和配置，
-/// 不包含参数、别名、子句、分页、CTE、Union 或其它查询状态。
+/// 保存可在 Builder、New 和 Clone 生命周期之间安全共享的服务引用，
+/// 不声明所有被引用服务绝对不可变；不包含参数、别名、子句、分页、CTE、Union 或其它查询级可变状态。
 /// </remarks>
 public sealed class SqlBuilderServices
 {
     /// <summary>
-    /// 实体映射解析器。
+    /// 将实体成员解析为表、列和数据库映射元数据的解析器。
     /// </summary>
     public IEntityMappingResolver EntityMappingResolver { get; }
 
     /// <summary>
-    /// 数据库上下文访问器。
+    /// 访问当前执行流数据库上下文的访问器。
     /// </summary>
     public IDatabaseContextAccessor DatabaseContextAccessor { get; }
 
     /// <summary>
-    /// SQL 参数工厂。
+    /// 根据字段元数据和数据库上下文创建 SQL 参数的工厂。
     /// </summary>
     public ISqlParameterFactory ParameterFactory { get; }
 
     /// <summary>
-    /// SQL 元数据配置。
+    /// 控制实体映射、字段转换和默认数据库上下文的元数据配置。
     /// </summary>
     public SqlMetadataOptions MetadataOptions { get; }
 
     /// <summary>
-    /// SQL 配置。
+    /// 保存当前 Builder 使用的查询和数据库选项。
     /// </summary>
     public SqlOptions Options { get; }
 
     /// <summary>
-    /// 数据库上下文解析器。
+    /// 按 SQL 选项、访问器和元数据配置解析数据库上下文的解析器。
     /// </summary>
     public ISqlDatabaseContextResolver DatabaseContextResolver { get; }
 
     /// <summary>
-    /// SQL 对象名称格式化器。
+    /// 格式化数据库、架构、表和列等 SQL 对象名称的格式化器。
     /// </summary>
     public ISqlObjectNameFormatter ObjectNameFormatter { get; }
 
     /// <summary>
-    /// 跨数据库查询校验器。
+    /// 校验跨数据库查询是否满足当前 Provider 能力的校验器。
     /// </summary>
     public ISqlCrossDatabaseQueryValidator CrossDatabaseQueryValidator { get; }
 
     /// <summary>
-    /// SQL 表引用校验器。
+    /// 校验结构化表引用完整性和命名约束的校验器。
     /// </summary>
     public ISqlTableReferenceValidator TableReferenceValidator { get; }
 
     /// <summary>
-    /// 实体模型原始元数据提供器。
+    /// 提供实体原始模型元数据以支持映射、过滤和对象名称解析的提供器。
     /// </summary>
     public IEntityModelMetadataProvider EntityModelMetadataProvider { get; }
 

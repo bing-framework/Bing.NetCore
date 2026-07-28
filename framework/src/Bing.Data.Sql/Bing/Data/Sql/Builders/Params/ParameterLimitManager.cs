@@ -10,7 +10,9 @@ internal sealed class ParameterLimitManager : ParameterLimitManagerBase, IParame
     /// </summary>
     /// <param name="inner">实际保存参数的内部管理器。</param>
     /// <param name="maxParameterCount">允许保存的最大参数数量。</param>
-    public ParameterLimitManager(IParameterManager inner, int maxParameterCount) : base(inner, maxParameterCount)
+    /// <param name="providerKey">应用参数限制的 Provider 标识。</param>
+    public ParameterLimitManager(IParameterManager inner, int maxParameterCount, string providerKey = null)
+        : base(inner, maxParameterCount, providerKey)
     {
     }
 
@@ -38,12 +40,12 @@ internal sealed class ParameterLimitManager : ParameterLimitManagerBase, IParame
 
     /// <inheritdoc />
     /// <remarks>副本保留参数上限，但拥有独立的内部参数集合。</remarks>
-    public IParameterManager Clone() => new ParameterLimitManager(Inner.Clone(), MaxParameterCount);
+    public IParameterManager Clone() => new ParameterLimitManager(CloneInner(), MaxParameterCount, ProviderKey);
 
     /// <inheritdoc />
     public void Clear() => Inner.Clear();
 
     /// <inheritdoc />
     /// <remarks>返回实例保留参数上限，但不继承当前参数。</remarks>
-    public IParameterManager CreateEmpty() => new ParameterLimitManager(CreateEmptyInner(), MaxParameterCount);
+    public IParameterManager CreateEmpty() => new ParameterLimitManager(CreateEmptyInner(), MaxParameterCount, ProviderKey);
 }

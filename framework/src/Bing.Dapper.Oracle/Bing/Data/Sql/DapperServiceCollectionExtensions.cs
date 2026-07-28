@@ -27,8 +27,8 @@ public static class OracleServiceCollectionExtensions
         if (services == null)
             throw new ArgumentNullException(nameof(services));
         services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
-        var queryOptions = new SqlOptions<OracleSqlQuery>();
-        var executorOptions = new SqlOptions<OracleSqlExecutor>();
+        var queryOptions = new SqlOptions<OracleSqlQuery> { DatabaseType = DatabaseType.Oracle };
+        var executorOptions = new SqlOptions<OracleSqlExecutor> { DatabaseType = DatabaseType.Oracle };
         queryOptions.RegisterStringTypeHandler();
         queryOptions.RegisterGuidTypeHandler();
         executorOptions.RegisterStringTypeHandler();
@@ -105,7 +105,7 @@ public static class OracleServiceCollectionExtensions
         where TInterface : ISqlQuery
         where TImplementation : OracleSqlQueryBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Oracle };
         services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
@@ -182,7 +182,7 @@ public static class OracleServiceCollectionExtensions
         where TInterface : ISqlExecutor
         where TImplementation : OracleSqlExecutorBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Oracle };
         services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();

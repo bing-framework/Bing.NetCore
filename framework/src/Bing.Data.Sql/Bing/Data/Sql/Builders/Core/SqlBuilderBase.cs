@@ -257,7 +257,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         IParameterManager parameterManager = null)
     {
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
-        _parameterManager = parameterManager;
+        _parameterManager = ApplyParameterLimit(parameterManager);
         Services = services ?? throw new ArgumentNullException(nameof(services));
         MetadataOptions = Services.MetadataOptions;
         Options = Services.Options;
@@ -292,11 +292,22 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         var parameterManager = Provider.ParameterManagerFactory.Create(Dialect);
         if (parameterManager == null)
             throw new InvalidOperationException("SQL Provider 的参数管理器工厂返回了 null。");
-        if (Provider is not ISqlParameterLimitProvider { MaxParameterCount: int maxParameterCount })
+        return ApplyParameterLimit(parameterManager);
+    }
+
+    /// <summary>
+    /// 将参数管理器按当前 Provider 的参数数量限制进行幂等包装。
+    /// </summary>
+    /// <param name="parameterManager">待包装的参数管理器。</param>
+    /// <returns>应用当前 Provider 参数数量限制后的参数管理器；输入为 null 时返回 null。</returns>
+    private IParameterManager ApplyParameterLimit(IParameterManager parameterManager)
+    {
+        if (parameterManager == null || parameterManager is ParameterLimitManagerBase ||
+            Provider is not ISqlParameterLimitProvider { MaxParameterCount: int maxParameterCount })
             return parameterManager;
         return parameterManager is IAdvancedParameterManager advancedParameterManager
-            ? new AdvancedParameterLimitManager(advancedParameterManager, maxParameterCount)
-            : new ParameterLimitManager(parameterManager, maxParameterCount);
+            ? new AdvancedParameterLimitManager(advancedParameterManager, maxParameterCount, Provider.Key)
+            : new ParameterLimitManager(parameterManager, maxParameterCount, Provider.Key);
     }
 
     /// <summary>

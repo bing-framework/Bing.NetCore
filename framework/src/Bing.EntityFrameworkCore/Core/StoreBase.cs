@@ -498,6 +498,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
         }
 
         var oldVersion = entry.OriginalValues.GetValue<byte[]>(nameof(IVersion.Version));
+        if (oldVersion == null || current.Version.Length != oldVersion.Length)
+        {
+            ThrowConcurrencyException(entity);
+            return;
+        }
         for (var i = 0; i < oldVersion.Length; i++)
         {
             if (current.Version[i] != oldVersion[i])

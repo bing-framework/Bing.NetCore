@@ -33,29 +33,29 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 默认输出空
+    /// 测试目的：验证未设置来源时不应输出 From 子句。
     /// </summary>
     [Fact]
-    public void Test_Default()
+    public void ToSql_WhenSourceIsMissing_ShouldReturnNull()
     {
         Assert.Null(GetSql());
     }
 
     /// <summary>
-    /// 设置表
+    /// 测试目的：验证设置表名后应输出带方言引号的 From 子句。
     /// </summary>
     [Fact]
-    public void Test_From_1()
+    public void From_WhenTableProvided_ShouldRenderQuotedTable()
     {
         _clause.From("a");
         Assert.Equal("From [a]", GetSql());
     }
 
     /// <summary>
-    /// 设置表 - 别名
+    /// 测试目的：验证设置表名和别名后应输出格式化的别名。
     /// </summary>
     [Fact]
-    public void Test_From_2()
+    public void From_WhenTableAndAliasProvided_ShouldRenderQuotedAlias()
     {
         _clause.From("a", "b");
         Assert.Equal("From [a] As [b]", GetSql());
@@ -65,17 +65,7 @@ public class FromClauseTest
     /// 测试目的：独立 schema 应由结构化表引用格式化。
     /// </summary>
     [Fact]
-    public void Test_From_3()
-    {
-        _clause.From("c.a", "b");
-        Assert.Equal("From [c].[a] As [b]", GetSql());
-    }
-
-    /// <summary>
-    /// 测试目的：SQL Server 字符串表名应按既有规则拆分限定段。
-    /// </summary>
-    [Fact]
-    public void Test_From_4()
+    public void From_WhenSchemaQualifiedTableProvided_ShouldRenderStructuredReference()
     {
         _clause.From("c.a", "b");
         Assert.Equal("From [c].[a] As [b]", GetSql());
@@ -85,7 +75,7 @@ public class FromClauseTest
     /// 测试目的：字符串中的别名应按既有规则解析。
     /// </summary>
     [Fact]
-    public void Test_From_5()
+    public void From_WhenEmbeddedAliasProvided_ShouldParseAlias()
     {
         _clause.From("a.b as t");
         Assert.Equal("From [a].[b] As [t]", GetSql());
@@ -149,40 +139,40 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 设置表 - 泛型实体
+    /// 测试目的：验证泛型实体应解析为对应表名。
     /// </summary>
     [Fact]
-    public void Test_From_6()
+    public void From_WhenGenericEntityProvided_ShouldRenderEntityTable()
     {
         _clause.From<Sample>();
         Assert.Equal("From [Sample]", GetSql());
     }
 
     /// <summary>
-    /// 设置表 - 泛型实体 - 别名
+    /// 测试目的：验证泛型实体和别名应输出格式化 From 子句。
     /// </summary>
     [Fact]
-    public void Test_From_7()
+    public void From_WhenGenericEntityAndAliasProvided_ShouldRenderAlias()
     {
         _clause.From<Sample>("a");
         Assert.Equal("From [Sample] As [a]", GetSql());
     }
 
     /// <summary>
-    /// 设置表 - 泛型实体 - 别名 -架构
+    /// 测试目的：验证泛型实体、别名和架构应按约定顺序输出。
     /// </summary>
     [Fact]
-    public void Test_From_8()
+    public void From_WhenGenericEntityAliasAndSchemaProvided_ShouldRenderStructuredReference()
     {
         _clause.From<Sample>("a", "b");
         Assert.Equal("From [b].[Sample] As [a]", GetSql());
     }
 
     /// <summary>
-    /// 设置表 - 泛型实体 - 多次设置From - 后面的覆盖前面
+    /// 测试目的：验证重复设置实体来源时最后一次设置应覆盖前一次。
     /// </summary>
     [Fact]
-    public void Test_From_9()
+    public void From_WhenGenericEntitySetRepeatedly_ShouldUseLatestSource()
     {
         _clause.From<Sample>("a");
         _clause.From<Sample>("b");
@@ -190,20 +180,20 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 设置表 - 原始Sql
+    /// 测试目的：验证原始 SQL 表表达式应保持调用方提供的内容。
     /// </summary>
     [Fact]
-    public void Test_From_10()
+    public void AppendSql_WhenRawExpressionProvided_ShouldPreserveExpression()
     {
         _clause.AppendSql("a.b as c");
         Assert.Equal("From a.b as c", GetSql());
     }
 
     /// <summary>
-    /// 设置表 - 多次设置From，最后一个生效
+    /// 测试目的：验证来源与原始表达式混合设置时最后一次设置应生效。
     /// </summary>
     [Fact]
-    public void Test_From_11()
+    public void From_WhenSourceAndRawExpressionSetRepeatedly_ShouldUseLatestExpression()
     {
         _clause.From<Sample>("a");
         _clause.AppendSql("b");
@@ -213,10 +203,10 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 追加原始表表达式应保持调用方提供的内容。
+    /// 测试目的：验证连续追加原始表表达式应保留追加顺序。
     /// </summary>
     [Fact]
-    public void Test_From_12()
+    public void AppendSql_WhenCalledRepeatedly_ShouldAppendExpressions()
     {
         _clause.AppendSql("a");
         _clause.AppendSql("b");
@@ -224,10 +214,10 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 测试实体解析器
+    /// 测试目的：验证自定义实体解析器应决定实体的架构和表名。
     /// </summary>
     [Fact]
-    public void Test_From_13()
+    public void From_WhenCustomEntityResolverProvided_ShouldUseResolvedTable()
     {
         _clause = new FromClause(TestSqlBuilder.CreateTestClauseContext(
             entityResolver: new TestEntityResolver()));
@@ -237,10 +227,10 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 测试实体解析器 - 设置别名
+    /// 测试目的：验证自定义实体解析器与别名应共同输出格式化来源。
     /// </summary>
     [Fact]
-    public void Test_From_14()
+    public void From_WhenCustomEntityResolverAndAliasProvided_ShouldUseResolvedTableAndAlias()
     {
         _clause = new FromClause(TestSqlBuilder.CreateTestClauseContext(
             entityResolver: new TestEntityResolver()));
@@ -250,10 +240,10 @@ public class FromClauseTest
     }
 
     /// <summary>
-    /// 测试复制副本
+    /// 测试目的：验证克隆后应保留来源且与原子句保持独立。
     /// </summary>
     [Fact]
-    public void Test_Clone()
+    public void Clone_WhenSourceConfigured_ShouldPreserveSourceAndRemainIndependent()
     {
         _clause.From("a", "b");
         var copy = _clause.Clone(TestSqlBuilder.CreateTestClauseContext());

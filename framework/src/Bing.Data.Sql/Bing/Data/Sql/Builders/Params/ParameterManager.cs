@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Bing.Data.Sql;
 using Bing.Extensions;
 
 namespace Bing.Data.Sql.Builders.Params;
@@ -9,6 +10,11 @@ namespace Bing.Data.Sql.Builders.Params;
 public class ParameterManager : IAdvancedParameterManager, IParameterManagerLifecycle
 {
     #region 字段
+
+    /// <summary>
+    /// 参数名称规范化器。
+    /// </summary>
+    private static readonly DefaultSqlParameterNameNormalizer ParameterNameNormalizer = new();
 
     /// <summary>
     /// 参数集合
@@ -37,8 +43,8 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     {
         Dialect = dialect;
         _paramIndex = 0;
-        _params = new Dictionary<string, object>();
-        _sqlParams = new Dictionary<string, SqlParam>();
+        _params = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        _sqlParams = new Dictionary<string, SqlParam>(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -49,8 +55,8 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     {
         Dialect = parameterManager.Dialect;
         _paramIndex = parameterManager._paramIndex;
-        _params = new Dictionary<string, object>(parameterManager._params);
-        _sqlParams = new Dictionary<string, SqlParam>();
+        _params = new Dictionary<string, object>(parameterManager._params, StringComparer.OrdinalIgnoreCase);
+        _sqlParams = new Dictionary<string, SqlParam>(StringComparer.OrdinalIgnoreCase);
         foreach (var parameter in parameterManager._sqlParams)
             _sqlParams.Add(parameter.Key, CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value));
     }
@@ -88,11 +94,9 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     public virtual string NormalizeName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return name;
-        name = name.Trim();
-        if (name.StartsWith(Dialect.GetPrefix()))
-            return name;
-        return $"{Dialect.GetPrefix()}{name}";
+            return string.Empty;
+        name = ParameterNameNormalizer.Normalize(name);
+        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"{Dialect.GetPrefix()}{name}";
     }
 
     
@@ -104,9 +108,9 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     /// <inheritdoc />
     public void Add(string name, object value, Operator? @operator = null)
     {
+        name = NormalizeName(name);
         if (string.IsNullOrWhiteSpace(name))
             return;
-        name = NormalizeName(name);
         value = Dialect.GetParamValue(value);
         value = GetValue(value, @operator);
         if (_params.ContainsKey(name))
@@ -121,9 +125,11 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     /// <param name="parameter">Sql 参数</param>
     public void Add(SqlParam parameter)
     {
-        if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
+        if (parameter == null)
             return;
         var name = NormalizeName(parameter.Name);
+        if (string.IsNullOrWhiteSpace(name))
+            return;
         var value = Dialect.GetParamValue(parameter.Value);
         if (_params.ContainsKey(name))
             _params.Remove(name);
@@ -172,6 +178,7 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
             parameter.Scale)
         {
             EntityType = parameter.EntityType,
+            OriginalValue = parameter.OriginalValue,
             PropertyName = parameter.PropertyName,
             ColumnName = parameter.ColumnName,
             DatabaseType = parameter.DatabaseType,
@@ -213,20 +220,22 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
 
     #region GetParams(获取参数列表)
 
-    /// <summary>
-    /// 获取参数列表
-    /// </summary>
-    public IReadOnlyDictionary<string, object> GetParams() => new ReadOnlyDictionary<string, object>(_params);
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, object> GetParams() =>
+        new ReadOnlyDictionary<string, object>(new Dictionary<string, object>(_params, StringComparer.OrdinalIgnoreCase));
 
-    /// <summary>
-    /// 获取增强参数列表
-    /// </summary>
-    public IReadOnlyDictionary<string, SqlParam> GetSqlParams() => new ReadOnlyDictionary<string, SqlParam>(_sqlParams);
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, SqlParam> GetSqlParams()
+    {
+        var result = new Dictionary<string, SqlParam>(_sqlParams.Count, StringComparer.OrdinalIgnoreCase);
+        foreach (var parameter in _sqlParams)
+            result.Add(parameter.Key, CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value));
+        return new ReadOnlyDictionary<string, SqlParam>(result);
+    }
 
-    /// <summary>
-    /// 导出参数值集合
-    /// </summary>
-    public IReadOnlyDictionary<string, object> ExportValues() => new ReadOnlyDictionary<string, object>(_params);
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, object> ExportValues() =>
+        new ReadOnlyDictionary<string, object>(new Dictionary<string, object>(_params, StringComparer.OrdinalIgnoreCase));
 
     #endregion
 
@@ -236,7 +245,7 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     public virtual bool Contains(string name)
     {
         name = NormalizeName(name);
-        return _params.ContainsKey(name);
+        return string.IsNullOrWhiteSpace(name) == false && _params.ContainsKey(name);
     }
 
     #endregion
@@ -247,7 +256,7 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     public virtual object GetValue(string name)
     {
         name = NormalizeName(name);
-        return _params.ContainsKey(name) ? _params[name] : null;
+        return string.IsNullOrWhiteSpace(name) == false && _params.ContainsKey(name) ? _params[name] : null;
     }
 
     #endregion

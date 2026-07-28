@@ -16,8 +16,10 @@ internal sealed class AdvancedParameterLimitManager : ParameterLimitManagerBase,
     /// </summary>
     /// <param name="inner">实际保存参数元数据的增强参数管理器。</param>
     /// <param name="maxParameterCount">允许保存的最大参数数量。</param>
-    public AdvancedParameterLimitManager(IAdvancedParameterManager inner, int maxParameterCount)
-        : base(inner, maxParameterCount)
+    /// <param name="providerKey">应用参数限制的 Provider 标识。</param>
+    public AdvancedParameterLimitManager(IAdvancedParameterManager inner, int maxParameterCount,
+        string providerKey = null)
+        : base(inner, maxParameterCount, providerKey)
     {
     }
 
@@ -60,8 +62,8 @@ internal sealed class AdvancedParameterLimitManager : ParameterLimitManagerBase,
 
     /// <inheritdoc />
     /// <remarks>副本保留参数上限和参数元数据类型，但拥有独立参数状态。</remarks>
-    public IParameterManager Clone() => new AdvancedParameterLimitManager((IAdvancedParameterManager)Inner.Clone(),
-        MaxParameterCount);
+    public IParameterManager Clone() => new AdvancedParameterLimitManager((IAdvancedParameterManager)CloneInner(),
+        MaxParameterCount, ProviderKey);
 
     /// <inheritdoc />
     public void Clear() => Inner.Clear();
@@ -69,5 +71,5 @@ internal sealed class AdvancedParameterLimitManager : ParameterLimitManagerBase,
     /// <inheritdoc />
     /// <remarks>返回实例保留参数上限，但不继承当前参数。</remarks>
     public IParameterManager CreateEmpty() => new AdvancedParameterLimitManager(
-        (IAdvancedParameterManager)CreateEmptyInner(), MaxParameterCount);
+        (IAdvancedParameterManager)CreateEmptyInner(), MaxParameterCount, ProviderKey);
 }

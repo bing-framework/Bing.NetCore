@@ -26,8 +26,8 @@ public static class MySqlServiceCollectionExtensions
         if (services == null)
             throw new ArgumentNullException(nameof(services));
         services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
-        var queryOptions = new SqlOptions<MySqlQuery>();
-        var executorOptions = new SqlOptions<MySqlExecutor>();
+        var queryOptions = new SqlOptions<MySqlQuery> { DatabaseType = DatabaseType.MySql };
+        var executorOptions = new SqlOptions<MySqlExecutor> { DatabaseType = DatabaseType.MySql };
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
@@ -106,7 +106,7 @@ public static class MySqlServiceCollectionExtensions
         where TInterface : ISqlQuery
         where TImplementation : MySqlQueryBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.MySql };
         services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
@@ -182,7 +182,7 @@ public static class MySqlServiceCollectionExtensions
         where TInterface : ISqlExecutor
         where TImplementation : MySqlExecutorBase, TInterface
     {
-        var sqlOptions = new SqlOptions<TImplementation>();
+        var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.MySql };
         services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
