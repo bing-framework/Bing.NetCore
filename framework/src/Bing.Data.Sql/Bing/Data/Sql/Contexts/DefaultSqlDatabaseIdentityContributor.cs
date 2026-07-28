@@ -143,7 +143,8 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
                 DatabaseType = DatabaseType.Sqlite,
                 FilePath = isSharedMemory ? $"memory:{name}" : "memory:exclusive",
                 SharedMemoryName = isSharedMemory ? name : null,
-                IsExclusiveMemory = !isSharedMemory
+                IsExclusiveMemory = !isSharedMemory,
+                IsComparable = isSharedMemory
             };
         }
         if (normalizedSource.StartsWith("file:", StringComparison.OrdinalIgnoreCase))

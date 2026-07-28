@@ -1,3 +1,4 @@
+using System.Reflection;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Tests;
@@ -7,6 +8,26 @@ namespace Bing.Data.Sql.Tests;
 /// </summary>
 public class EntityMappingCacheIsolationTest
 {
+    /// <summary>
+    /// 测试目的：修改公开实体描述副本不应污染后续映射解析使用的静态描述缓存。
+    /// </summary>
+    [Fact]
+    public void GetDescriptor_WhenCallerMutatesProperties_ShouldNotChangeLaterMapping()
+    {
+        // Arrange
+        var resolver = new DefaultEntityMappingResolver();
+        var descriptor = resolver.GetDescriptor(typeof(CacheSample));
+        var properties = Assert.IsAssignableFrom<IList<PropertyInfo>>(descriptor.Properties);
+
+        // Act
+        properties.Clear();
+        var mapping = new DefaultEntityMappingResolver().Resolve(typeof(CacheSample), null);
+
+        // Assert
+        Assert.Empty(descriptor.Properties);
+        Assert.True(mapping.Columns.ContainsKey(nameof(CacheSample.Name)));
+    }
+
     /// <summary>
     /// 测试 - 修改映射结果副本不应污染缓存。
     /// </summary>

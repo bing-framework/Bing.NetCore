@@ -231,6 +231,7 @@ public class SqlDatabaseIdentityResolverTest
 
         // Assert
         Assert.True(identity.IsExclusiveMemory);
+        Assert.False(identity.IsComparable);
     }
 
     /// <summary>
@@ -251,6 +252,7 @@ public class SqlDatabaseIdentityResolverTest
         // Assert
         Assert.Equal(first, second);
         Assert.False(first.IsExclusiveMemory);
+        Assert.True(first.IsComparable);
     }
 
     /// <summary>

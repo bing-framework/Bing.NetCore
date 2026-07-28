@@ -91,7 +91,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     {
         if (entityType == null)
             throw new ArgumentNullException(nameof(entityType));
-        return DescriptorCache.GetOrAdd(entityType, CreateDescriptor);
+        return CloneDescriptor(DescriptorCache.GetOrAdd(entityType, CreateDescriptor));
     }
 
     /// <summary>
@@ -289,6 +289,18 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             KeyProperties = keyProperties
         };
     }
+
+    /// <summary>
+    /// 创建实体描述缓存项的独立副本。
+    /// </summary>
+    /// <param name="descriptor">缓存中的实体描述。</param>
+    /// <returns>可安全提供给调用方的实体描述副本。</returns>
+    private static EntityDescriptor CloneDescriptor(EntityDescriptor descriptor) => new()
+    {
+        EntityType = descriptor.EntityType,
+        Properties = descriptor.Properties?.ToList() ?? new List<PropertyInfo>(),
+        KeyProperties = descriptor.KeyProperties?.ToList() ?? new List<PropertyInfo>()
+    };
 
     /// <summary>
     /// 创建实体映射元数据
