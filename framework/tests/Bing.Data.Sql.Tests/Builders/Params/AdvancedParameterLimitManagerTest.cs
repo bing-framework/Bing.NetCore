@@ -52,7 +52,7 @@ public class AdvancedParameterLimitManagerTest
     }
 
     /// <summary>
-    /// 测试 - Clone 和 CreateEmpty 应保留增强参数能力、限制和隔离状态。
+    /// 测试目的：Clone 和 CreateEmpty 应保留增强参数能力、限制和隔离状态。
     /// </summary>
     [Fact]
     public void CloneAndCreateEmpty_ShouldKeepMetadataContractAndIsolation()
@@ -64,7 +64,7 @@ public class AdvancedParameterLimitManagerTest
         // Act
         var clone = Assert.IsAssignableFrom<IAdvancedParameterManager>(manager.Clone());
         clone.Add(new SqlParam("second", 2, DbType.Int32));
-        var empty = Assert.IsAssignableFrom<IAdvancedParameterManager>(((IParameterManagerLifecycle)manager).CreateEmpty());
+        var empty = Assert.IsAssignableFrom<IAdvancedParameterManager>(manager.CreateEmpty());
 
         // Assert
         Assert.Single(manager.GetSqlParams());

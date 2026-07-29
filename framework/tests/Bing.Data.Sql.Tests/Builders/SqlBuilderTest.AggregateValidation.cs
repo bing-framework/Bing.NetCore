@@ -127,7 +127,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("expressionSql", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("column", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public partial class SqlBuilderTest
         Assert.Equal("argumentSql", rawException.ParamName);
         Assert.Equal("expressionSql", expressionException.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -248,7 +248,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("column", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -266,7 +266,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("column", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -315,39 +315,39 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - CountAll 应明确渲染 Count 通配符。
+    /// 测试 - Count 未提供列名时应渲染 Count 通配符。
     /// </summary>
     [Fact]
-    public void CountAll_WhenAliasIsConfigured_ShouldRenderCountWildcard()
+    public void Count_WhenAliasIsConfigured_ShouldRenderCountWildcard()
     {
         // Act
-        var sql = _builder.CountAll("Total").From("Orders").ToSql();
+        var sql = _builder.Count(alias: "Total").From("Orders").ToSql();
 
         // Assert
         Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", sql);
     }
 
     /// <summary>
-    /// 测试 - CountColumn 应统计指定列的非空值。
+    /// 测试 - Count 应统计指定列的非空值。
     /// </summary>
     [Fact]
-    public void CountColumn_WhenColumnIsConfigured_ShouldRenderColumnCount()
+    public void Count_WhenColumnIsConfigured_ShouldRenderColumnCount()
     {
         // Act
-        var sql = _builder.CountColumn("o.UserId", "UserCount").From("Orders", "o").ToSql();
+        var sql = _builder.Count("o.UserId", "UserCount").From("Orders", "o").ToSql();
 
         // Assert
         Assert.Equal("Select Count([o].[UserId]) As [UserCount] \r\nFrom [Orders] As [o]", sql);
     }
 
     /// <summary>
-    /// 测试 - CountColumn 应支持聚合参数 Distinct。
+    /// 测试 - Count 应支持聚合参数 Distinct。
     /// </summary>
     [Fact]
-    public void CountColumn_WhenDistinctIsConfigured_ShouldRenderDistinctColumnCount()
+    public void Count_WhenDistinctIsConfigured_ShouldRenderDistinctColumnCount()
     {
         // Act
-        var sql = _builder.CountColumn("o.UserId", "UserCount", distinct: true).From("Orders", "o").ToSql();
+        var sql = _builder.Count("o.UserId", "UserCount", distinct: true).From("Orders", "o").ToSql();
 
         // Assert
         Assert.Equal("Select Count(Distinct [o].[UserId]) As [UserCount] \r\nFrom [Orders] As [o]", sql);
@@ -361,7 +361,7 @@ public partial class SqlBuilderTest
     {
         // Act
         var sql = _builder.Aggregate(SqlAggregateFunction.Sum, "o.Amount")
-            .CountColumn("o.UserId")
+            .Count("o.UserId")
             .AggregateRaw(SqlAggregateFunction.Max, "o.UpdatedAt")
             .AggregateExpression(SqlAggregateFunction.Min, "[o].[CreatedAt]")
             .From("Orders", "o")
@@ -372,34 +372,34 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 旧便捷聚合 API 未指定 Alias 时应使用限定列的叶子名称。
+    /// 测试 - 标准聚合 API 未指定 Alias 时不应使用叶子名称。
     /// </summary>
     [Fact]
-    public void LegacyAggregateApis_WhenAliasIsNotConfigured_ShouldUseLeafColumnAlias()
+    public void AggregateApis_WhenAliasIsNotConfigured_ShouldNotUseLeafColumnAlias()
     {
         // Act
         var sql = _builder.Sum("o.Amount")
             .Avg("o.Amount")
             .Max("o.Amount")
             .Min("o.Amount")
-            .Count("o.Id", null)
+            .Count("o.Id")
             .From("Orders", "o")
             .ToSql();
 
         // Assert
-        Assert.Equal("Select Sum([o].[Amount]) As [Amount],Avg([o].[Amount]) As [Amount],Max([o].[Amount]) As [Amount],Min([o].[Amount]) As [Amount],Count([o].[Id]) As [Id] \r\nFrom [Orders] As [o]", sql);
+        Assert.Equal("Select Sum([o].[Amount]),Avg([o].[Amount]),Max([o].[Amount]),Min([o].[Amount]),Count([o].[Id]) \r\nFrom [Orders] As [o]", sql);
     }
 
     /// <summary>
-    /// 测试 - 旧 Count 单字符串重载仍应将参数解释为 Count 通配符别名。
+    /// 测试 - Count 单字符串参数应明确解释为待统计列。
     /// </summary>
     [Fact]
-    public void LegacyCount_WhenSingleStringIsConfigured_ShouldTreatStringAsAlias()
+    public void Count_WhenSingleStringIsConfigured_ShouldTreatStringAsColumn()
     {
         // Act
         var sql = _builder.Count("UserId").From("Orders").ToSql();
 
         // Assert
-        Assert.Equal("Select Count(*) As [UserId] \r\nFrom [Orders]", sql);
+        Assert.Equal("Select Count([UserId]) \r\nFrom [Orders]", sql);
     }
 }

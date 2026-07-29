@@ -3,7 +3,7 @@ namespace Bing.Data.Sql.Builders.Params;
 /// <summary>
 /// 带参数数量上限的参数管理器。
 /// </summary>
-internal sealed class ParameterLimitManager : ParameterLimitManagerBase, IParameterManager, IParameterManagerLifecycle
+internal sealed class ParameterLimitManager : ParameterLimitManagerBase, IParameterManager
 {
     /// <summary>
     /// 初始化带参数数量上限的参数管理器。

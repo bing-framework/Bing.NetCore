@@ -466,18 +466,17 @@ public class EfCoreSqlQueryFactoryTest
         connection.Open();
         using var serviceProvider = CreateServiceProvider();
         using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
-        var builder = new MySqlBuilder(new SqlBuilderServices(entityModelMetadataProvider: unitOfWork));
+        var metadataProvider = new EfCoreEntityModelMetadataProvider(unitOfWork.Model);
+        var builder = new MySqlBuilder(new SqlBuilderServices(entityModelMetadataProvider: metadataProvider));
 
         // Act
-        var tableName = unitOfWork.GetTableName(typeof(DottedTableEntity));
-        var schema = unitOfWork.GetSchema(typeof(DottedTableEntity));
-        var columnName = unitOfWork.GetColumnName(typeof(DottedTableEntity), nameof(DottedTableEntity.DisplayName));
+        var metadata = metadataProvider.GetMetadata(typeof(DottedTableEntity));
         var sql = builder.Select("*").From<DottedTableEntity>("c").ToSql();
 
         // Assert
-        Assert.Equal("Merchants.Company", tableName);
-        Assert.Empty(schema);
-        Assert.Equal("display_name", columnName);
+        Assert.Equal("Merchants.Company", metadata.TableName);
+        Assert.Empty(metadata.Schema);
+        Assert.Equal("display_name", metadata.Properties[nameof(DottedTableEntity.DisplayName)].ColumnName);
         Assert.Equal("Select * \r\nFrom `Merchants.Company` As `c`", sql);
     }
 

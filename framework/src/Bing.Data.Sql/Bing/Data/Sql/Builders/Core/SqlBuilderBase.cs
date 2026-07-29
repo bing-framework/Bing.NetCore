@@ -314,14 +314,13 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// 创建与当前 Builder 参数管理器配置一致的空实例。
     /// </summary>
     /// <remarks>
-    /// 支持 <see cref="IParameterManagerLifecycle"/> 的自定义实现可直接创建同类型空实例；
-    /// 旧实现通过 Clone 后 Clear 保持二进制兼容。两条路径都禁止返回当前实例，避免 New 清空来源参数。
+    /// 参数管理器必须创建同类型的空实例，且不得返回当前实例，避免 New 清空来源参数。
     /// </remarks>
     /// <returns>不含参数和值且序号已重置的独立参数管理器。</returns>
     protected IParameterManager CreateEmptyParameterManager()
     {
         var source = ParameterManager;
-        var result = source is IParameterManagerLifecycle lifecycle ? lifecycle.CreateEmpty() : source.Clone();
+        var result = source.CreateEmpty();
         if (result == null)
             throw new InvalidOperationException("参数管理器创建空实例时返回了 null。");
         if (ReferenceEquals(source, result))
@@ -402,7 +401,14 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         if (sqlBuilder == null)
             throw new ArgumentNullException(nameof(sqlBuilder));
 
-        _parameterManager = sqlBuilder._parameterManager?.Clone();
+        if (sqlBuilder._parameterManager != null)
+        {
+            _parameterManager = sqlBuilder._parameterManager.Clone();
+            if (_parameterManager == null)
+                throw new InvalidOperationException("参数管理器克隆时返回了 null。");
+            if (ReferenceEquals(_parameterManager, sqlBuilder._parameterManager))
+                throw new InvalidOperationException("参数管理器克隆时不能返回当前实例。");
+        }
         Services = sqlBuilder.Services;
         MetadataOptions = Services.MetadataOptions;
         Options = Services.Options;
@@ -663,7 +669,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// </summary>
     public ISqlBuilder ClearSqlParams()
     {
-        _parameterManager.Clear();
+        ParameterManager.Clear();
         return this;
     }
 
@@ -891,8 +897,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             return;
 
         _isAddFilters = true;
-        var context = new SqlFilterContext(Dialect, AliasRegister, ParameterManager, this, EntityMappingResolver,
-            DatabaseContextAccessor, MetadataOptions, Options, DatabaseContextResolver, EntityModelMetadataProvider,
+        var context = new SqlFilterContext(Dialect, AliasRegister, ParameterManager, this, Services,
             ExecutionContext.DatabaseContext);
         foreach (var filter in SqlFilterCollection.Filters)
         {
@@ -1028,20 +1033,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             builder.Remove(length, builder.Length - length);
     }
 
-    /// <summary>
-    /// 添加Sql
-    /// </summary>
-    /// <param name="builder">字符串生成器</param>
-    /// <param name="content">Sql子句</param>
-    protected void AppendSql(StringBuilder builder, ISqlClause content)
-    {
-        if (content == null)
-            return;
-        if (content.Validate() == false)
-            return;
-        content.AppendTo(builder);
-        builder.AppendLine(" ");
-    }
 }
 
 /// <summary>

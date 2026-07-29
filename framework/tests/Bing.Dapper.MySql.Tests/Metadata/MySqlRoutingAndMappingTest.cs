@@ -127,7 +127,7 @@ public class MySqlRoutingAndMappingTest
         var builder = CreateBuilder(options: CreateSqlOptions(DatabaseType.Doris));
 
         // Act
-        var sql = builder.CountColumn("c.Id", "CompanyCount", distinct: true)
+        var sql = builder.Count("c.Id", "CompanyCount", distinct: true)
             .Sum("c.Amount", "Amount", distinct: true)
             .AggregateRaw(SqlAggregateFunction.Count, "JsonExtract(c.Data, '$[0]')", "JsonCount")
             .AggregateExpression(SqlAggregateFunction.Sum, "[c].[Amount] * 2", "DoubleAmount")

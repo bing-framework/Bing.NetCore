@@ -9,6 +9,12 @@
     <Folder Include="Bing\Data\Sql\Configs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Data.Sql.Analyzers\Bing.Data.Sql.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
   <Import Project="..\..\..\framework.props" />
 
   <Import Project="dependency.props" />

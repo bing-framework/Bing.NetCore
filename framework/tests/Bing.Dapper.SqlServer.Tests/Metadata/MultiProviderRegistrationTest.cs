@@ -55,6 +55,31 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
+    /// 测试目的：多结果集执行器工厂应按数据源类型创建支持批量结果读取的 Provider 实现。
+    /// </summary>
+    [Fact]
+    public void CreateMultipleQueryExecutor_WhenSupportedProvidersRegistered_ShouldResolveByDbKey()
+    {
+        // Arrange
+        using var provider = CreateProvider();
+        var factory = provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>();
+
+        // Act
+        using var mySql = factory.Create("mysql");
+        using var doris = factory.Create("doris");
+        using var postgreSql = factory.Create("pgsql");
+        using var sqlServer = factory.Create("sqlserver");
+        using var sqlite = factory.Create("sqlite");
+
+        // Assert
+        Assert.IsType<MySqlMultipleQueryExecutor>(mySql);
+        Assert.IsType<MySqlMultipleQueryExecutor>(doris);
+        Assert.IsType<PostgreSqlMultipleQueryExecutor>(postgreSql);
+        Assert.IsType<SqlServerSqlMultipleQueryExecutor>(sqlServer);
+        Assert.IsType<SqliteSqlMultipleQueryExecutor>(sqlite);
+    }
+
+    /// <summary>
     /// 测试 - Doris 数据源应复用 MySQL Provider，并拒绝本地事务。
     /// </summary>
     [Fact]

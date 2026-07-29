@@ -56,6 +56,12 @@ public interface IParameterManager
     IParameterManager Clone();
 
     /// <summary>
+    /// 创建保留当前配置但不包含参数和值的独立参数管理器。
+    /// </summary>
+    /// <returns>同配置的空参数管理器。</returns>
+    IParameterManager CreateEmpty();
+
+    /// <summary>
     /// 清空当前保存的全部参数。
     /// </summary>
     void Clear();

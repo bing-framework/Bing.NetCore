@@ -15,6 +15,7 @@ public abstract partial class SqlQueryBase
     protected TResult InternalProcedureQuery<TResult>(string procedure,
         Func<IDbConnection, string, object, IDbTransaction, TResult> func)
     {
+        using var executionLease = AcquireExecutionLease();
         TResult result = default;
         DiagnosticsMessage message = null;
         var command = GetProcedure(procedure);
@@ -55,6 +56,7 @@ public abstract partial class SqlQueryBase
     protected async Task<TResult> InternalProcedureQueryAsync<TResult>(string procedure,
         Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> func)
     {
+        using var executionLease = AcquireExecutionLease();
         TResult result = default;
         DiagnosticsMessage message = null;
         var command = GetProcedure(procedure);

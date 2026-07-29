@@ -65,7 +65,7 @@ public class SqlServerBuilderAggregateTest
 
         // Assert
         Assert.Equal("column", exception.ParamName);
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [dbo].[Orders]", builder.CountAll("Total").From("dbo.Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [dbo].[Orders]", builder.Count(alias: "Total").From("dbo.Orders").ToSql());
     }
 
     /// <summary>

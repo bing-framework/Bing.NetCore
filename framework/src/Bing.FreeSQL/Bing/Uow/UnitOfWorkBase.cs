@@ -17,7 +17,7 @@ namespace Bing.Uow;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase, IEntityModelMetadataProvider
+public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabase
 {
     #region 字段
 
@@ -234,66 +234,5 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// 获取数据库连接
     /// </summary>
     public IDbConnection GetConnection() => base.UnitOfWork.GetOrBeginTransaction()?.Connection;
-
-    #region Matedata(获取元数据)
-
-    /// <summary>
-    /// 获取表名
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    public virtual string GetTable(Type entity)
-    {
-        if (entity == null)
-            return null;
-        try
-        {
-            var tableName = Orm.CodeFirst.GetTableByEntity(entity)?.DbName;
-            return string.IsNullOrWhiteSpace(tableName) ? entity.Name : tableName;
-        }
-        catch
-        {
-            return entity.Name;
-        }
-    }
-
-    /// <summary>
-    /// 获取架构
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    public virtual string GetSchema(Type entity)
-    {
-        if (entity == null)
-            return null;
-        return null;
-    }
-
-    /// <summary>
-    /// 获取列名
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    /// <param name="property">属性名</param>
-    public virtual string GetColumn(Type entity, string property)
-    {
-        if (entity == null || string.IsNullOrWhiteSpace(property))
-            return null;
-        try
-        {
-            var tableInfo = Orm.CodeFirst.GetTableByEntity(entity);
-            var result = tableInfo?.ColumnsByCs[property]?.Attribute?.Name;
-            return string.IsNullOrWhiteSpace(result) ? property : result;
-        }
-        catch
-        {
-            return property;
-        }
-    }
-
-    /// <inheritdoc />
-    public string GetTableName(Type entityType) => GetTable(entityType);
-
-    /// <inheritdoc />
-    public string GetColumnName(Type entityType, string propertyName) => GetColumn(entityType, propertyName);
-
-    #endregion
 
 }

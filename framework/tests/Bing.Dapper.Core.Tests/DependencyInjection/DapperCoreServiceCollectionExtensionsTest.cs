@@ -4,6 +4,7 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -33,6 +34,25 @@ public class DapperCoreServiceCollectionExtensionsTest
         Assert.Same(provider.GetRequiredService<ISqlQueryFactory>(), provider.GetRequiredService<ISqlQueryFactory>());
         Assert.Same(provider.GetRequiredService<ISqlExecutorFactory>(), provider.GetRequiredService<ISqlExecutorFactory>());
         Assert.Same(provider.GetRequiredService<SqlMetadataOptions>(), provider.GetRequiredService<SqlMetadataOptions>());
+    }
+
+    /// <summary>
+    /// 测试目的：自定义元数据提供器应作为组合提供器的前置层解析，且不得造成依赖循环。
+    /// </summary>
+    [Fact]
+    public void AddEntityModelMetadataProvider_WhenRegisteredBeforeCore_ShouldPrecedeDefaultProviders()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddEntityModelMetadataProvider<TestEntityModelMetadataProvider>();
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var metadata = provider.GetRequiredService<IEntityModelMetadataProvider>().GetMetadata(typeof(TestEntity));
+
+        // Assert
+        Assert.Equal("custom_entities", metadata.TableName);
     }
 
     /// <summary>
@@ -165,5 +185,34 @@ public class DapperCoreServiceCollectionExtensionsTest
 
         /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => null;
+    }
+
+    /// <summary>
+    /// 仅用于实体元数据注册测试的实体。
+    /// </summary>
+    private sealed class TestEntity
+    {
+        /// <summary>
+        /// 实体标识。
+        /// </summary>
+        public int Id { get; set; }
+    }
+
+    /// <summary>
+    /// 仅用于实体元数据注册测试的自定义提供器。
+    /// </summary>
+    private sealed class TestEntityModelMetadataProvider : IEntityModelMetadataProvider
+    {
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata(Type entityType)
+        {
+            if (entityType != typeof(TestEntity))
+                return null;
+            return new EntityModelMetadata(entityType, "custom_entities", string.Empty,
+                new[] { new EntityPropertyMetadata(entityType.GetProperty(nameof(TestEntity.Id)), isKey: true) });
+        }
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
     }
 }

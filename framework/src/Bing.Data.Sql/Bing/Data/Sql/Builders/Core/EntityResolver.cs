@@ -64,7 +64,7 @@ public class EntityResolver : IEntityResolver
         SqlOptions sqlOptions = null, ISqlDatabaseContextResolver databaseContextResolver = null,
         IEntityModelMetadataProvider entityModelMetadataProvider = null, DatabaseContext databaseContext = null)
     {
-        _entityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
+        _entityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
         _entityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
             databaseContextAccessor: databaseContextAccessor, options: options,
             entityModelMetadataProvider: _entityModelMetadataProvider);

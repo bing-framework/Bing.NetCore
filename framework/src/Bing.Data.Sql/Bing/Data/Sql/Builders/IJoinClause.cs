@@ -7,13 +7,8 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// 表连接子句
 /// </summary>
-public interface IJoinClause
+public interface IJoinClause : ISqlClauseCloneable<IJoinClause>
 {
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    IJoinClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 查找连接项

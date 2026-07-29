@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// MySQL SQL 提供程序。
 /// </summary>
-public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider
+public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 MySQL Provider 单例。
@@ -37,6 +37,9 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider
     /// <inheritdoc />
     public IParamLiteralsResolver ParamLiteralsResolver { get; } =
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
+
+    /// <inheritdoc />
+    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true);
 
     /// <inheritdoc />
     /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>

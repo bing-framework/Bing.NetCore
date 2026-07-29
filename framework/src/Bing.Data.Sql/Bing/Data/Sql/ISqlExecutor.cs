@@ -5,7 +5,10 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql执行对象
 /// </summary>
-public interface ISqlExecutor : ISqlQuery, ISqlOperation
+/// <remarks>
+/// 实例包含可变的 Builder、连接和事务状态，不支持并发复用；每个并发操作必须由 Factory 创建独立实例。
+/// </remarks>
+public interface ISqlExecutor : ISqlQuery, ISqlOperation, ISqlInsertExecutor, ISqlUpdateExecutor, ISqlDeleteExecutor
 {
     /// <summary>
     /// 最近一次执行的输出参数访问器

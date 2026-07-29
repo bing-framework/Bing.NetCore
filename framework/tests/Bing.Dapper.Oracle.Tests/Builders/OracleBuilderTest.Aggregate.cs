@@ -65,7 +65,7 @@ public class OracleBuilderAggregateTest
 
         // Assert
         Assert.Equal("column", exception.ParamName);
-        Assert.Equal("Select Count(*) \"Total\" \r\nFrom \"APP\".\"ORDERS\"", builder.CountAll("Total").From("APP.ORDERS").ToSql());
+        Assert.Equal("Select Count(*) \"Total\" \r\nFrom \"APP\".\"ORDERS\"", builder.Count(alias: "Total").From("APP.ORDERS").ToSql());
     }
 
     /// <summary>

@@ -58,6 +58,31 @@ public sealed class ColumnMappingMetadata
     public bool IsNullable { get; init; }
 
     /// <summary>
+    /// 是否为主键。
+    /// </summary>
+    public bool IsKey { get; init; }
+
+    /// <summary>
+    /// 是否由数据库生成。
+    /// </summary>
+    public bool IsDatabaseGenerated { get; init; }
+
+    /// <summary>
+    /// 是否为并发令牌。
+    /// </summary>
+    public bool IsConcurrencyToken { get; init; }
+
+    /// <summary>
+    /// 是否可插入。
+    /// </summary>
+    public bool CanInsert { get; init; }
+
+    /// <summary>
+    /// 是否可更新。
+    /// </summary>
+    public bool CanUpdate { get; init; }
+
+    /// <summary>
     /// 字段存储方式
     /// </summary>
     public ColumnStorageKind StorageKind { get; init; } = ColumnStorageKind.Default;

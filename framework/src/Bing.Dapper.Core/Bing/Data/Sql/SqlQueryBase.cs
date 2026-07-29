@@ -95,6 +95,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// </summary>
     private SqlConnectionSource _connectionSource;
 
+    /// <summary>
+    /// 当前实例的执行租约状态。
+    /// </summary>
+    private int _executionLease;
+
     #endregion
 
     #region 构造函数
@@ -370,6 +375,49 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <returns>执行使用的数据库连接。</returns>
     protected IDbConnection GetExecutionConnection() =>
         ((ISqlQueryExecutionResourceAccessor)this).GetOrCreateConnection();
+
+    /// <summary>
+    /// 获取当前实例的非阻塞执行租约。
+    /// </summary>
+    /// <remarks>
+    /// Query 和 Executor 保存可变的 Builder、连接与事务状态；同一实例只允许一个执行操作。
+    /// </remarks>
+    /// <returns>必须在操作结束时释放的执行租约。</returns>
+    protected IDisposable AcquireExecutionLease()
+    {
+        if (Interlocked.CompareExchange(ref _executionLease, 1, 0) != 0)
+            throw new InvalidOperationException("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。");
+        return new ExecutionLease(this);
+    }
+
+    /// <summary>
+    /// 归还当前实例的执行租约。
+    /// </summary>
+    private void ReleaseExecutionLease() => Volatile.Write(ref _executionLease, 0);
+
+    /// <summary>
+    /// 当前实例执行租约。
+    /// </summary>
+    private sealed class ExecutionLease : IDisposable
+    {
+        /// <summary>
+        /// 所属查询对象。
+        /// </summary>
+        private SqlQueryBase _owner;
+
+        /// <summary>
+        /// 初始化执行租约。
+        /// </summary>
+        /// <param name="owner">所属查询对象。</param>
+        public ExecutionLease(SqlQueryBase owner) => _owner = owner;
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            var owner = Interlocked.Exchange(ref _owner, null);
+            owner?.ReleaseExecutionLease();
+        }
+    }
 
     /// <summary>
     /// 获取或创建执行连接。
@@ -660,6 +708,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <param name="timeout">执行超时时间。单位：秒</param>
     protected int GetCount(int? timeout = null)
     {
+        using var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         try
         {
@@ -727,6 +776,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <param name="timeout">执行超时时间。单位：秒</param>
     protected async Task<int> GetCountAsync(int? timeout = null)
     {
+        using var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         try
         {

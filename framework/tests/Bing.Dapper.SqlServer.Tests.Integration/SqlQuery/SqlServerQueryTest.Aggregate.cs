@@ -47,9 +47,9 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
 
         // Act
         using var countAllQuery = CreateAggregateQuery();
-        var countAll = await countAllQuery.CountAll().ExecuteScalarAsync<int>();
+        var countAll = await countAllQuery.Count().ExecuteScalarAsync<int>();
         using var countColumnQuery = CreateAggregateQuery();
-        var distinctUsers = await countColumnQuery.CountColumn("p.UserId", distinct: true).ExecuteScalarAsync<int>();
+        var distinctUsers = await countColumnQuery.Count("p.UserId", distinct: true).ExecuteScalarAsync<int>();
         using var sumQuery = CreateAggregateQuery();
         var total = await sumQuery.Sum("p.Amount").ExecuteScalarAsync<decimal>();
         using var expressionQuery = CreateAggregateQuery();

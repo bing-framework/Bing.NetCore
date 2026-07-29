@@ -5,13 +5,8 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// From子句
 /// </summary>
-public interface IFromClause
+public interface IFromClause : ISqlClauseCloneable<IFromClause>
 {
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    IFromClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 设置表名

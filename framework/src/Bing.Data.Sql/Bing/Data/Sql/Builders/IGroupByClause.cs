@@ -5,7 +5,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// 分组子句
 /// </summary>
-public interface IGroupByClause
+public interface IGroupByClause : ISqlClauseCloneable<IGroupByClause>
 {
     /// <summary>
     /// 是否存在分组
@@ -16,12 +16,6 @@ public interface IGroupByClause
     /// 分组列表
     /// </summary>
     string GroupColumns { get; }
-
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    IGroupByClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 分组

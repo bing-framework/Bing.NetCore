@@ -5,7 +5,7 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>SQL Server SQL 提供程序。</summary>
-public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvider
+public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 SQL Server Provider 单例。
@@ -41,6 +41,9 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvi
     /// <inheritdoc />
     public IParamLiteralsResolver ParamLiteralsResolver { get; } =
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
+
+    /// <inheritdoc />
+    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true);
 
     /// <inheritdoc />
     /// <remarks>SQL Server 单个命令最多允许 2100 个参数。</remarks>

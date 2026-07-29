@@ -57,7 +57,7 @@ public class ParameterLimitManagerTest
     }
 
     /// <summary>
-    /// 测试 - Clone 和 CreateEmpty 应保留限制并与来源参数状态隔离。
+    /// 测试目的：Clone 和 CreateEmpty 应保留限制并与来源参数状态隔离。
     /// </summary>
     [Fact]
     public void CloneAndCreateEmpty_ShouldRetainLimitAndKeepParameterStateIsolated()
@@ -69,7 +69,7 @@ public class ParameterLimitManagerTest
         // Act
         var clone = manager.Clone();
         clone.Add("second", 2);
-        var empty = ((IParameterManagerLifecycle)manager).CreateEmpty();
+        var empty = manager.CreateEmpty();
         empty.Add("only", 1);
         empty.Add("another", 2);
 

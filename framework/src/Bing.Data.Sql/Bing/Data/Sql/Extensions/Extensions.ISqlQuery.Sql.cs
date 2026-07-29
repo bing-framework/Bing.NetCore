@@ -18,14 +18,14 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
+    /// <param name="alias">聚合结果别名。</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlQuery Count<TEntity>(this ISqlQuery sqlQuery, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null, bool distinct = false)
+        string alias = null, bool distinct = false)
         where TEntity : class
     {
         var builder = sqlQuery.GetBuilder();
-        builder.Count(expression, columnAlias, distinct);
+        builder.Count(expression, alias, distinct);
         return sqlQuery;
     }
 

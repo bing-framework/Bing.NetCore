@@ -12,24 +12,16 @@ namespace Bing.Data.Sql.Metadata;
 public interface IEntityModelMetadataProvider
 {
     /// <summary>
-    /// 获取最终物理表名。
+    /// 获取实体模型元数据。
     /// </summary>
     /// <param name="entityType">实体类型。</param>
-    /// <returns>模型声明的最终物理表名；未声明时返回 <see langword="null"/>。</returns>
-    string GetTableName(Type entityType);
+    /// <returns>实体模型元数据；未处理时返回 <see langword="null"/>。</returns>
+    EntityModelMetadata GetMetadata(Type entityType);
 
     /// <summary>
-    /// 获取数据库架构。
+    /// 获取实体模型元数据。
     /// </summary>
-    /// <param name="entityType">实体类型。</param>
-    /// <returns>模型声明的数据库架构；未声明时返回 <see langword="null"/>。</returns>
-    string GetSchema(Type entityType);
-
-    /// <summary>
-    /// 获取实体属性对应的原始列名。
-    /// </summary>
-    /// <param name="entityType">实体类型。</param>
-    /// <param name="propertyName">属性名称。</param>
-    /// <returns>模型声明的列名；未声明时返回 <see langword="null"/>。</returns>
-    string GetColumnName(Type entityType, string propertyName);
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <returns>实体模型元数据；未处理时返回 <see langword="null"/>。</returns>
+    EntityModelMetadata GetMetadata<TEntity>();
 }

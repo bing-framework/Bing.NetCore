@@ -64,6 +64,7 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
         services.AddSqlDataSource(SecondDatabaseKey, DatabaseType.Sqlite, SecondConnectionString);
         services.AddSqliteSqlQuery();
         services.AddSqliteSqlExecutor();
+        services.AddSqliteSqlMultipleQueryExecutor();
         _serviceProvider = services.BuildServiceProvider();
 
         await InitializeDatabaseAsync(FirstConnectionString);
@@ -94,6 +95,14 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// <returns>SQL 执行对象。</returns>
     public ISqlExecutor CreateExecutor(string dbKey = FirstDatabaseKey)
         => ServiceProvider.GetRequiredService<ISqlExecutorFactory>().Create<ISqlExecutor>(dbKey);
+
+    /// <summary>
+    /// 创建指定数据源的多结果集查询执行器。
+    /// </summary>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <returns>多结果集查询执行器。</returns>
+    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor(string dbKey = FirstDatabaseKey)
+        => ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create(dbKey);
 
     /// <summary>
     /// 获取数据库作用域管理器。
@@ -138,6 +147,27 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
         await using var command = connection.CreateCommand();
         command.CommandText = "Select Count(*) From samples";
         return Convert.ToInt32(await command.ExecuteScalarAsync());
+    }
+
+    /// <summary>
+    /// 向指定 SQLite 样例表插入一条参数化测试数据。
+    /// </summary>
+    /// <param name="name">样例名称。</param>
+    /// <param name="amount">样例金额。</param>
+    /// <param name="secretText">样例敏感文本。</param>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <returns>插入任务。</returns>
+    public async Task InsertSampleAsync(string name, decimal? amount, string secretText,
+        string dbKey = FirstDatabaseKey)
+    {
+        await using var connection = new SqliteConnection(GetConnectionString(dbKey));
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "Insert Into samples (Name, Amount, SecretText) Values (@name, @amount, @secretText)";
+        command.Parameters.AddWithValue("@name", (object)name ?? DBNull.Value);
+        command.Parameters.AddWithValue("@amount", (object)amount ?? DBNull.Value);
+        command.Parameters.AddWithValue("@secretText", (object)secretText ?? DBNull.Value);
+        await command.ExecuteNonQueryAsync();
     }
 
     /// <summary>

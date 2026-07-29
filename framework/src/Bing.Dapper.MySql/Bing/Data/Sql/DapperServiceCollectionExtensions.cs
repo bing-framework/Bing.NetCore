@@ -28,8 +28,10 @@ public static class MySqlServiceCollectionExtensions
         services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
         var queryOptions = new SqlOptions<MySqlQuery> { DatabaseType = DatabaseType.MySql };
         var executorOptions = new SqlOptions<MySqlExecutor> { DatabaseType = DatabaseType.MySql };
+        var multipleQueryOptions = new SqlOptions<MySqlMultipleQueryExecutor> { DatabaseType = DatabaseType.MySql };
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
+        multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
         services.AddSqlDbConnectionFactory(DatabaseType.Doris, connection => new MySqlConnection(connection));
@@ -37,12 +39,16 @@ public static class MySqlServiceCollectionExtensions
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
         services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.MySql);
         services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.MySql);
         services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.Doris);
         services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.Doris);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.Doris);
         services.TryAddTransient<ISqlQuery, MySqlQuery>();
         services.TryAddTransient<ISqlExecutor, MySqlExecutor>();
+        services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
+        services.TryAddSingleton(multipleQueryOptions);
         return services;
     }
 
@@ -117,6 +123,54 @@ public static class MySqlServiceCollectionExtensions
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
+        return services;
+    }
+
+    #endregion
+
+    #region AddMySqlMultipleQueryExecutor(注册 MySQL 多结果集查询执行器)
+
+    /// <summary>
+    /// 注册 MySQL 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddMySqlMultipleQueryExecutor(this IServiceCollection services)
+    {
+        return services.AddMySqlMultipleQueryExecutor("");
+    }
+
+    /// <summary>
+    /// 注册 MySQL 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="connection">数据库连接字符串。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddMySqlMultipleQueryExecutor(this IServiceCollection services, string connection)
+    {
+        return services.AddMySqlMultipleQueryExecutor(options => options.ConnectionString(connection));
+    }
+
+    /// <summary>
+    /// 注册 MySQL 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="setupAction">SQL 配置操作。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddMySqlMultipleQueryExecutor(this IServiceCollection services,
+        Action<SqlOptions> setupAction)
+    {
+        var sqlOptions = new SqlOptions<MySqlMultipleQueryExecutor> { DatabaseType = DatabaseType.MySql };
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, serviceProvider => new MySqlBuilder(serviceProvider));
+        setupAction?.Invoke(sqlOptions);
+        sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
+        services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.MySql);
+        services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();
+        services.TryAddSingleton(sqlOptions);
         return services;
     }
 

@@ -277,6 +277,7 @@ public abstract partial class SqlQueryBase
     /// <param name="func">查询操作</param>
     protected TResult InternalQuery<TResult>(Func<IDbConnection, string, object, IDbTransaction, TResult> func)
     {
+        using var executionLease = AcquireExecutionLease();
         TResult result = default;
         DiagnosticsMessage message = default;
         try
@@ -314,6 +315,7 @@ public abstract partial class SqlQueryBase
     /// <param name="func">查询操作</param>
     protected async Task<TResult> InternalQueryAsync<TResult>(Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> func)
     {
+        using var executionLease = AcquireExecutionLease();
         TResult result = default;
         DiagnosticsMessage message = default;
         try

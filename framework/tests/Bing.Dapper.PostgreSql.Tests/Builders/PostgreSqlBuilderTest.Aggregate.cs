@@ -65,7 +65,7 @@ public class PostgreSqlBuilderAggregateTest
 
         // Assert
         Assert.Equal("column", exception.ParamName);
-        Assert.Equal("Select Count(*) As \"Total\" \r\nFrom \"public\".\"orders\"", builder.CountAll("Total").From("public.orders").ToSql());
+        Assert.Equal("Select Count(*) As \"Total\" \r\nFrom \"public\".\"orders\"", builder.Count(alias: "Total").From("public.orders").ToSql());
     }
 
     /// <summary>

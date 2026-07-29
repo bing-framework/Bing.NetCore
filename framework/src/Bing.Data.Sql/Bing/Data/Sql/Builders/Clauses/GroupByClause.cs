@@ -67,8 +67,18 @@ public class GroupByClause : IGroupByClause
     /// 克隆
     /// </summary>
     /// <param name="context">重绑定后的子句运行上下文。</param>
-    public virtual IGroupByClause Clone(SqlClauseContext context) => new GroupByClause(context,
+    public virtual IGroupByClause Clone(SqlClauseContext context) => CreateClone(context,
         _group.Select(item => item.Clone()).ToList(), _having);
+
+    /// <summary>
+    /// 创建克隆后的 Group By 子句。
+    /// </summary>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <param name="group">已深复制的分组项。</param>
+    /// <param name="having">分组条件。</param>
+    /// <returns>保留 Provider 子类类型的 Group By 子句。</returns>
+    protected virtual GroupByClause CreateClone(SqlClauseContext context, List<SqlItem> group, string having) =>
+        new GroupByClause(context, group, having);
 
     /// <summary>
     /// 分组

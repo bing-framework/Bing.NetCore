@@ -76,15 +76,4 @@ public sealed record SqlClauseContext
         Services = services ?? throw new ArgumentNullException(nameof(services));
     }
 
-    /// <summary>
-    /// 使用新的 Builder、别名注册器和参数管理器创建重绑定上下文。
-    /// </summary>
-    /// <param name="builder">重绑定后的 Builder。</param>
-    /// <param name="entityResolver">重绑定后的实体解析器。</param>
-    /// <param name="aliasRegister">重绑定后的别名注册器。</param>
-    /// <param name="parameterManager">重绑定后的参数管理器。</param>
-    /// <returns>保留共享服务和执行上下文的新运行上下文。</returns>
-    public SqlClauseContext Rebind(ISqlBuilder builder, IEntityResolver entityResolver,
-        IEntityAliasRegister aliasRegister, IParameterManager parameterManager) => new(builder, Provider,
-        entityResolver, aliasRegister, parameterManager, ExecutionContext, Services);
 }

@@ -7,7 +7,7 @@ namespace Bing.Data.Sql.Builders.Params;
 /// <summary>
 /// 参数管理器
 /// </summary>
-public class ParameterManager : IAdvancedParameterManager, IParameterManagerLifecycle
+public class ParameterManager : IAdvancedParameterManager
 {
     #region 字段
 
@@ -160,7 +160,7 @@ public class ParameterManager : IAdvancedParameterManager, IParameterManagerLife
     {
         return new SqlParam(name, value)
         {
-            Source = SqlParameterSource.Legacy,
+            Source = SqlParameterSource.Basic,
             MetadataLevel = SqlParameterMetadataLevel.Weak
         };
     }

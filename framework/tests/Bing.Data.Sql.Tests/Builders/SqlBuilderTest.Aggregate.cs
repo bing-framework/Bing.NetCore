@@ -18,7 +18,7 @@ public partial class SqlBuilderTest
         const string expected = "Select Count(*) As [Total] \r\nFrom [Users]";
 
         // Act
-        var sql = _builder.Count("Total").From("Users").ToSql();
+        var sql = _builder.Count(alias: "Total").From("Users").ToSql();
 
         // Assert
         Assert.Equal(expected, sql);

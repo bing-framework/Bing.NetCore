@@ -9,16 +9,6 @@ public sealed class SqlBuilderFactoryRegistration
     /// 初始化一个 <see cref="SqlBuilderFactoryRegistration"/> 类型的实例。
     /// </summary>
     /// <param name="provider">SQL 提供程序。</param>
-    /// <param name="creator">Builder 创建委托。</param>
-    public SqlBuilderFactoryRegistration(ISqlProvider provider, Func<ISqlBuilder> creator)
-        : this(provider, _ => creator?.Invoke())
-    {
-    }
-
-    /// <summary>
-    /// 初始化一个 <see cref="SqlBuilderFactoryRegistration"/> 类型的实例。
-    /// </summary>
-    /// <param name="provider">SQL 提供程序。</param>
     /// <param name="creator">使用查询级共享服务创建 Builder 的委托。</param>
     public SqlBuilderFactoryRegistration(ISqlProvider provider, Func<SqlBuilderServices, ISqlBuilder> creator)
     {

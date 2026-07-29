@@ -28,17 +28,22 @@ public static class SqlServerServiceCollectionExtensions
         services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
         var queryOptions = new SqlOptions<SqlServerSqlQuery>();
         var executorOptions = new SqlOptions<SqlServerSqlExecutor>();
+        var multipleQueryOptions = new SqlOptions<SqlServerSqlMultipleQueryExecutor>();
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
+        multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlConnection(connection));
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<ISqlQuery, SqlServerSqlQuery>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<ISqlExecutor, SqlServerSqlExecutor>(DatabaseType.SqlServer);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>(DatabaseType.SqlServer);
         services.TryAddTransient<ISqlQuery, SqlServerSqlQuery>();
         services.TryAddTransient<ISqlExecutor, SqlServerSqlExecutor>();
+        services.TryAddTransient<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
+        services.TryAddSingleton(multipleQueryOptions);
         return services;
     }
 
@@ -113,6 +118,57 @@ public static class SqlServerServiceCollectionExtensions
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
+        return services;
+    }
+
+    #endregion
+
+    #region AddSqlServerSqlMultipleQueryExecutor(注册 SQL Server 多结果集查询执行器)
+
+    /// <summary>
+    /// 注册 SQL Server 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlServerSqlMultipleQueryExecutor(this IServiceCollection services)
+    {
+        return services.AddSqlServerSqlMultipleQueryExecutor("");
+    }
+
+    /// <summary>
+    /// 注册 SQL Server 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="connection">数据库连接字符串。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlServerSqlMultipleQueryExecutor(this IServiceCollection services,
+        string connection)
+    {
+        return services.AddSqlServerSqlMultipleQueryExecutor(options => options.ConnectionString(connection));
+    }
+
+    /// <summary>
+    /// 注册 SQL Server 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="setupAction">SQL 配置操作。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddSqlServerSqlMultipleQueryExecutor(this IServiceCollection services,
+        Action<SqlOptions> setupAction)
+    {
+        var sqlOptions = new SqlOptions<SqlServerSqlMultipleQueryExecutor>();
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance,
+            serviceProvider => new SqlServerBuilder(serviceProvider));
+        setupAction?.Invoke(sqlOptions);
+        sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.SqlServer, connection => new SqlConnection(connection));
+        services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>(
+            DatabaseType.SqlServer);
+        services.TryAddTransient<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>();
+        services.TryAddSingleton(sqlOptions);
         return services;
     }
 

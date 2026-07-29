@@ -5,13 +5,8 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// Order By子句
 /// </summary>
-public interface IOrderByClause
+public interface IOrderByClause : ISqlClauseCloneable<IOrderByClause>
 {
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    IOrderByClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// 排序

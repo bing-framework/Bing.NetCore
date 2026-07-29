@@ -24,7 +24,7 @@ public partial class SqlBuilderTest
 
         // Act
         var clone = _builder.Clone();
-        clone.CountAll("Total");
+        clone.Count(alias: "Total");
 
         // Assert
         Assert.Equal(sourceExpected, _builder.ToSql());
@@ -38,10 +38,10 @@ public partial class SqlBuilderTest
     public void New_WhenSourceHasAggregate_ShouldNotShareAggregateState()
     {
         // Arrange
-        _builder.CountColumn("u.Id", "Users", distinct: true).From("Users", "u");
+        _builder.Count("u.Id", "Users", distinct: true).From("Users", "u");
 
         // Act
-        var result = _builder.New().CountAll("Total").From("Orders").ToSql();
+        var result = _builder.New().Count(alias: "Total").From("Orders").ToSql();
 
         // Assert
         Assert.Equal("Select Count(Distinct [u].[Id]) As [Users] \r\nFrom [Users] As [u]", _builder.ToSql());
@@ -61,7 +61,7 @@ public partial class SqlBuilderTest
         expected.AppendLine("From [Users] As [u])");
         expected.AppendLine("Select Sum([a].[Amount]) As [Total] ");
         expected.Append("From [active_users] As [a]");
-        var cte = _builder.New().CountColumn("u.Id", "UserCount", distinct: true).From("Users", "u");
+        var cte = _builder.New().Count("u.Id", "UserCount", distinct: true).From("Users", "u");
 
         // Act
         var sql = _builder.Sum("a.Amount", "Total").From("active_users", "a").With("active_users", cte).ToSql();
@@ -92,7 +92,7 @@ public partial class SqlBuilderTest
             .Where("a.Enabled", false);
 
         // Act
-        var sql = _builder.CountColumn("u.Id", "UserCount", distinct: true).From("Users", "u")
+        var sql = _builder.Count("u.Id", "UserCount", distinct: true).From("Users", "u")
             .Where("u.Enabled", true)
             .Union(union)
             .ToSql();

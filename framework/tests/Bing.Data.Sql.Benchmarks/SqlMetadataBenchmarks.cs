@@ -559,7 +559,7 @@ public class MySqlBuilderConstructionBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlBuilderCloneBenchmarks
 {
-    private ContextExposingMySqlBuilder _fromOnlyBuilder;
+    private MySqlBuilder _fromOnlyBuilder;
     private MySqlBuilder _oneJoinBuilder;
     private MySqlBuilder _fiveJoinBuilder;
     private MySqlBuilder _twentyJoinBuilder;
@@ -567,7 +567,6 @@ public class MySqlBuilderCloneBenchmarks
     private MySqlBuilder _fiftyParameterBuilder;
     private MySqlBuilder _mixedBuilder;
     private MySqlBuilder _tenAggregateBuilder;
-    private SqlClauseContext _clauseContext;
 
     /// <summary>
     /// 初始化 Clone 使用的稳定 Builder 状态。
@@ -583,7 +582,6 @@ public class MySqlBuilderCloneBenchmarks
         _fiftyParameterBuilder = CreateBuilder(1, 50, false);
         _mixedBuilder = CreateBuilder(5, 10, true);
         _tenAggregateBuilder = CreateAggregateBuilder();
-        _clauseContext = _fromOnlyBuilder.CurrentClauseContext;
     }
 
     /// <summary>
@@ -592,6 +590,13 @@ public class MySqlBuilderCloneBenchmarks
     /// <returns>独立的空 Builder。</returns>
     [Benchmark]
     public ISqlBuilder NewEmptyBuilder() => new MySqlBuilder().New();
+
+    /// <summary>
+    /// 测量包含五十个参数时 Builder 的 New 生命周期成本。
+    /// </summary>
+    /// <returns>保留共享服务且不继承参数的独立 Builder。</returns>
+    [Benchmark]
+    public ISqlBuilder NewBuilderWithFiftyParameters() => _fiftyParameterBuilder.New();
 
     /// <summary>
     /// 测量仅 From Builder Clone。
@@ -643,19 +648,11 @@ public class MySqlBuilderCloneBenchmarks
     public ISqlBuilder CloneTenAggregates() => _tenAggregateBuilder.Clone();
 
     /// <summary>
-    /// 测量 Context 对独立 Builder 运行状态的重绑定成本。
-    /// </summary>
-    /// <returns>重绑定后的子句运行上下文。</returns>
-    [Benchmark]
-    public object RebindClauseContext() => _clauseContext.Rebind(new MySqlBuilder(),
-        _clauseContext.EntityResolver, new EntityAliasRegister(), new ParameterManager(_clauseContext.Dialect));
-
-    /// <summary>
     /// 创建指定规模的 MySQL Builder。
     /// </summary>
-    private static ContextExposingMySqlBuilder CreateBuilder(int joinCount, int parameterCount, bool includeRawJoin)
+    private static MySqlBuilder CreateBuilder(int joinCount, int parameterCount, bool includeRawJoin)
     {
-        var builder = new ContextExposingMySqlBuilder();
+        var builder = new MySqlBuilder();
         builder.Select("c.CompanyId,c.Name").From("Merchants.Company", "c");
         for (var index = 0; index < joinCount; index++)
         {
@@ -673,10 +670,6 @@ public class MySqlBuilderCloneBenchmarks
         return builder;
     }
 
-    private sealed class ContextExposingMySqlBuilder : MySqlBuilder
-    {
-        public SqlClauseContext CurrentClauseContext => CreateClauseContext();
-    }
 
     /// <summary>
     /// 创建包含十个结构化聚合列的 MySQL Builder。

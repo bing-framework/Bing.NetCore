@@ -71,7 +71,7 @@ internal abstract class ParameterLimitManagerBase
     /// <returns>已清空且不与当前管理器共享参数状态的内部管理器。</returns>
     protected IParameterManager CreateEmptyInner()
     {
-        var result = Inner is IParameterManagerLifecycle lifecycle ? lifecycle.CreateEmpty() : Inner.Clone();
+        var result = Inner.CreateEmpty();
         if (result == null)
             throw new InvalidOperationException("参数管理器创建空实例时返回了 null。");
         if (ReferenceEquals(result, Inner))

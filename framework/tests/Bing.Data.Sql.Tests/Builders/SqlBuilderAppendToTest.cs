@@ -52,7 +52,7 @@ public class SqlBuilderAppendToTest
     {
         // Arrange
         var builder = new TestSqlBuilder();
-        builder.Count("Total").From("Users");
+        builder.Count(alias: "Total").From("Users");
         var result = new StringBuilder();
         var sql = builder.ToSql();
 

@@ -91,7 +91,16 @@ public class WhereClause : IWhereClause
     /// <param name="context">克隆 Builder 的运行上下文。</param>
     /// <returns>独立的 Where 子句。</returns>
     public virtual IWhereClause Clone(SqlClauseContext context) =>
-        new WhereClause(context, new SqlCondition(_condition?.GetCondition()));
+        CreateClone(context, new SqlCondition(_condition?.GetCondition()));
+
+    /// <summary>
+    /// 创建克隆后的 Where 子句。
+    /// </summary>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <param name="condition">已深复制的查询条件。</param>
+    /// <returns>保留 Provider 子类类型的 Where 子句。</returns>
+    protected virtual WhereClause CreateClone(SqlClauseContext context, ICondition condition) =>
+        new WhereClause(context, condition);
 
     /// <summary>
     /// 获取合并参数上下文后的子查询 SQL。

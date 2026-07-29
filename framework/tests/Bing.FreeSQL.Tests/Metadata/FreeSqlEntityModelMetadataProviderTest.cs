@@ -2,7 +2,6 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.FreeSQL;
-using Bing.Uow;
 using FreeSql;
 using FreeSql.DataAnnotations;
 using MySqlConnector;
@@ -23,13 +22,10 @@ public class FreeSqlEntityModelMetadataProviderTest
     {
         // Arrange
         using var orm = CreateOrm();
-        using var unitOfWork = new MetadataUnitOfWork(new FreeSqlWrapper { Orm = orm });
+        var provider = new FreeSqlEntityModelMetadataProvider(orm);
 
         // Act and Assert
-        Assert.Null(unitOfWork.GetTable(null));
-        Assert.Null(unitOfWork.GetSchema(null));
-        Assert.Null(unitOfWork.GetColumn(null, nameof(DottedCompany.CompanyName)));
-        Assert.Null(unitOfWork.GetColumn(typeof(DottedCompany), null));
+        Assert.Null(provider.GetMetadata(null));
     }
 
     /// <summary>
@@ -40,15 +36,14 @@ public class FreeSqlEntityModelMetadataProviderTest
     {
         // Arrange
         using var orm = CreateOrm();
-        using var unitOfWork = new MetadataUnitOfWork(new FreeSqlWrapper { Orm = orm });
+        var provider = new FreeSqlEntityModelMetadataProvider(orm);
 
         // Act
-        var table = unitOfWork.GetTable(typeof(UnmappedCompany));
-        var column = unitOfWork.GetColumn(typeof(UnmappedCompany), nameof(UnmappedCompany.Name));
+        var metadata = provider.GetMetadata(typeof(UnmappedCompany));
 
         // Assert
-        Assert.Equal(nameof(UnmappedCompany), table);
-        Assert.Equal(nameof(UnmappedCompany.Name), column);
+        Assert.Equal(nameof(UnmappedCompany), metadata.TableName);
+        Assert.Equal(nameof(UnmappedCompany.Name), metadata.Properties[nameof(UnmappedCompany.Name)].ColumnName);
     }
 
     /// <summary>
@@ -59,20 +54,16 @@ public class FreeSqlEntityModelMetadataProviderTest
     {
         // Arrange
         using var orm = CreateOrm();
-        using var unitOfWork = new MetadataUnitOfWork(new FreeSqlWrapper { Orm = orm });
-        var builder = new MySqlBuilder(new SqlBuilderServices(entityModelMetadataProvider: unitOfWork));
+        var metadataProvider = new FreeSqlEntityModelMetadataProvider(orm);
+        var builder = new MySqlBuilder(new SqlBuilderServices(entityModelMetadataProvider: metadataProvider));
 
         // Act
-        var tableName = unitOfWork.GetTable(typeof(DottedCompany));
-        var schema = unitOfWork.GetSchema(typeof(DottedCompany));
-        var columnName = unitOfWork.GetColumn(typeof(DottedCompany), nameof(DottedCompany.CompanyName));
+        var metadata = metadataProvider.GetMetadata(typeof(DottedCompany));
         var sql = builder.Select("*").From<DottedCompany>("c").ToSql();
 
         // Assert
-        Assert.Equal("Merchants.Company", tableName);
-        Assert.Equal(tableName, unitOfWork.GetTableName(typeof(DottedCompany)));
-        Assert.Null(schema);
-        Assert.Equal("company_name", columnName);
+        Assert.Equal("Merchants.Company", metadata.TableName);
+        Assert.Equal("company_name", metadata.Properties[nameof(DottedCompany.CompanyName)].ColumnName);
         Assert.Equal("Select * \r\nFrom `Merchants.Company` As `c`", sql);
     }
 
@@ -83,38 +74,6 @@ public class FreeSqlEntityModelMetadataProviderTest
     private static IFreeSql CreateOrm() => new FreeSqlBuilder()
         .UseConnectionFactory(DataType.MySql, () => new MySqlConnection())
         .Build();
-
-    /// <summary>
-    /// 仅用于测试 FreeSQL 元数据的工作单元。
-    /// </summary>
-    private sealed class MetadataUnitOfWork : UnitOfWorkBase
-    {
-        /// <summary>
-        /// 初始化仅提供元数据的工作单元。
-        /// </summary>
-        /// <param name="wrapper">FreeSQL 包装器。</param>
-        public MetadataUnitOfWork(FreeSqlWrapper wrapper) : base(wrapper, EmptyServiceProvider.Instance)
-        {
-        }
-    }
-
-    /// <summary>
-    /// 不提供依赖服务的测试服务提供程序。
-    /// </summary>
-    private sealed class EmptyServiceProvider : IServiceProvider
-    {
-        /// <summary>
-        /// 空服务提供程序单例。
-        /// </summary>
-        public static readonly EmptyServiceProvider Instance = new();
-
-        /// <summary>
-        /// 不解析任何服务。
-        /// </summary>
-        /// <param name="serviceType">请求的服务类型。</param>
-        /// <returns>始终返回 <see langword="null"/>。</returns>
-        public object GetService(Type serviceType) => null;
-    }
 
     /// <summary>
     /// 带点物理表名实体。

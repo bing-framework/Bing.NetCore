@@ -27,6 +27,7 @@ public abstract partial class SqlQueryBase
     /// <returns>实体流</returns>
     private IEnumerable<TEntity> StreamQueryIterator<TEntity>(int? timeout)
     {
+        using var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         var completed = false;
         var failed = false;
@@ -102,6 +103,7 @@ public abstract partial class SqlQueryBase
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureStreamingSupported();
+        using var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         var completed = false;
         var failed = false;

@@ -104,19 +104,13 @@ public class EntityMappingCacheIsolationTest
 
         // Act
         var first = resolver.Resolve(typeof(CacheSample), null);
-        var tableNameCallCount = provider.TableNameCallCount;
-        var schemaCallCount = provider.SchemaCallCount;
-        var columnNameCallCount = provider.ColumnNameCallCount;
+        var metadataCallCount = provider.MetadataCallCount;
         var second = resolver.Resolve(typeof(CacheSample), null);
 
         // Assert
         Assert.Same(first, second);
-        Assert.Equal(1, tableNameCallCount);
-        Assert.Equal(1, schemaCallCount);
-        Assert.Equal(1, columnNameCallCount);
-        Assert.Equal(tableNameCallCount, provider.TableNameCallCount);
-        Assert.Equal(schemaCallCount, provider.SchemaCallCount);
-        Assert.Equal(columnNameCallCount, provider.ColumnNameCallCount);
+        Assert.Equal(1, metadataCallCount);
+        Assert.Equal(metadataCallCount, provider.MetadataCallCount);
     }
 
     /// <summary>
@@ -136,39 +130,19 @@ public class EntityMappingCacheIsolationTest
     private sealed class CountingEntityModelMetadataProvider : IEntityModelMetadataProvider
     {
         /// <summary>
-        /// 获取表名的调用次数。
+        /// 获取元数据的调用次数。
         /// </summary>
-        public int TableNameCallCount { get; private set; }
-
-        /// <summary>
-        /// 获取架构的调用次数。
-        /// </summary>
-        public int SchemaCallCount { get; private set; }
-
-        /// <summary>
-        /// 获取列名的调用次数。
-        /// </summary>
-        public int ColumnNameCallCount { get; private set; }
+        public int MetadataCallCount { get; private set; }
 
         /// <inheritdoc />
-        public string GetTableName(Type entityType)
+        public EntityModelMetadata GetMetadata(Type entityType)
         {
-            TableNameCallCount++;
-            return "cache_samples";
+            MetadataCallCount++;
+            var properties = entityType.GetProperties().Select(property => new EntityPropertyMetadata(property));
+            return new EntityModelMetadata(entityType, "cache_samples", "cache", properties);
         }
 
         /// <inheritdoc />
-        public string GetSchema(Type entityType)
-        {
-            SchemaCallCount++;
-            return "cache";
-        }
-
-        /// <inheritdoc />
-        public string GetColumnName(Type entityType, string propertyName)
-        {
-            ColumnNameCallCount++;
-            return propertyName;
-        }
+        public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
     }
 }

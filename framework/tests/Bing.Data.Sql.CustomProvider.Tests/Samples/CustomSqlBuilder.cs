@@ -76,7 +76,7 @@ internal sealed class CustomSqlProvider : ISqlProvider
 internal sealed class CustomClauseFactory : ISqlClauseFactory
 {
     /// <inheritdoc />
-    public ISelectClause CreateSelect(SqlClauseContext context) => new SelectClause(context);
+    public ISelectClause CreateSelect(SqlClauseContext context) => new CustomSelectClause(context);
 
     /// <inheritdoc />
     public IFromClause CreateFrom(SqlClauseContext context) => new FromClause(context);
@@ -92,6 +92,35 @@ internal sealed class CustomClauseFactory : ISqlClauseFactory
 
     /// <inheritdoc />
     public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
+}
+
+/// <summary>
+/// 验证 Provider 自定义 Clause 在 Builder 生命周期中保持运行类型的 Select 实现。
+/// </summary>
+internal sealed class CustomSelectClause : SelectClause
+{
+    /// <summary>
+    /// 初始化自定义 Select 子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    public CustomSelectClause(SqlClauseContext context) : base(context)
+    {
+    }
+
+    /// <summary>
+    /// 使用已复制状态初始化自定义 Select 子句。
+    /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="columns">已复制的列集合。</param>
+    /// <param name="distinct">是否保留去重状态。</param>
+    private CustomSelectClause(SqlClauseContext context, ColumnCollection columns, bool distinct)
+        : base(context, columns, distinct)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override SelectClause CreateClone(SqlClauseContext context, ColumnCollection columns, bool distinct) =>
+        new CustomSelectClause(context, columns, distinct);
 }
 
 /// <summary>

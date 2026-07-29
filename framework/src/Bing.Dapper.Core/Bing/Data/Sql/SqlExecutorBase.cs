@@ -1,4 +1,8 @@
 ﻿using Bing.Data.Sql.Diagnostics;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Mutations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Data.Sql;
 
@@ -21,6 +25,66 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #endregion
 
+    #region Insert(插入实体)
+
+    /// <inheritdoc />
+    public virtual int Insert<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null)
+        where TEntity : class
+    {
+        var command = CreateMutationBuilder().Insert(entity, options);
+        return ExecuteSql(command.Sql, command.Parameters, timeout);
+    }
+
+    /// <inheritdoc />
+    public virtual Task<int> InsertAsync<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null)
+        where TEntity : class
+    {
+        var command = CreateMutationBuilder().Insert(entity, options);
+        return ExecuteSqlAsync(command.Sql, command.Parameters, timeout);
+    }
+
+    #endregion
+
+    #region Update(更新实体)
+
+    /// <inheritdoc />
+    public virtual int Update<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null)
+        where TEntity : class
+    {
+        var command = CreateMutationBuilder().Update(entity, options);
+        return ExecuteSql(command.Sql, command.Parameters, timeout);
+    }
+
+    /// <inheritdoc />
+    public virtual Task<int> UpdateAsync<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null)
+        where TEntity : class
+    {
+        var command = CreateMutationBuilder().Update(entity, options);
+        return ExecuteSqlAsync(command.Sql, command.Parameters, timeout);
+    }
+
+    #endregion
+
+    #region Delete(删除实体)
+
+    /// <inheritdoc />
+    public virtual int Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null)
+        where TEntity : class
+    {
+        var command = CreateMutationBuilder().Delete(entity, options);
+        return ExecuteSql(command.Sql, command.Parameters, timeout);
+    }
+
+    /// <inheritdoc />
+    public virtual Task<int> DeleteAsync<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null)
+        where TEntity : class
+    {
+        var command = CreateMutationBuilder().Delete(entity, options);
+        return ExecuteSqlAsync(command.Sql, command.Parameters, timeout);
+    }
+
+    #endregion
+
     #region ExecuteSql(执行Sql增删改操作)
 
     /// <summary>
@@ -32,6 +96,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>操作影响的行数</returns>
     public virtual int ExecuteSql(string sql, object param = null, int? timeout = null)
     {
+        using var executionLease = AcquireExecutionLease();
         var result = 0;
         DiagnosticsMessage message = default;
         try
@@ -73,6 +138,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>操作影响的行数</returns>
     public virtual async Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null)
     {
+        using var executionLease = AcquireExecutionLease();
         var result = 0;
         DiagnosticsMessage message = default;
         try
@@ -114,6 +180,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>受影响行数</returns>
     public virtual int ExecuteProcedure(string procedure, object param = null, int? timeout = null)
     {
+        using var executionLease = AcquireExecutionLease();
         var result = 0;
         DiagnosticsMessage message = default;
         try
@@ -155,6 +222,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>受影响行数</returns>
     public virtual async Task<int> ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null)
     {
+        using var executionLease = AcquireExecutionLease();
         var result = 0;
         DiagnosticsMessage message = default;
         try
@@ -204,6 +272,23 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>操作影响的行数</returns>
     public virtual Task<int> ExecuteSqlAsync<TEntity>(string sql, SqlParameterMap<TEntity> param, int? timeout = null)
         where TEntity : class => ExecuteSqlAsync(sql, (object)param, timeout);
+
+    /// <summary>
+    /// 创建绑定当前 Executor 数据源和映射服务的实体写入 Builder。
+    /// </summary>
+    /// <returns>实体写入 Builder。</returns>
+    private ISqlMutationBuilder CreateMutationBuilder()
+    {
+        var factory = ServiceProvider.GetService<ISqlMutationBuilderFactory>();
+        if (factory == null)
+            throw new InvalidOperationException("未注册实体写入 SQL Builder 工厂。");
+        var databaseType = GetDatabaseType();
+        var provider = ServiceProvider.GetServices<ISqlProvider>()
+            .FirstOrDefault(item => item.DatabaseType == databaseType);
+        if (provider == null)
+            throw new InvalidOperationException($"未注册数据库类型 {databaseType} 的 SQL Provider。");
+        return factory.Create(provider, CreateSqlBuilderServices());
+    }
 
     #endregion
 }

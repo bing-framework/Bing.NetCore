@@ -89,7 +89,7 @@ public sealed class SqlBuilderServices
         MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
         Options = options;
         DatabaseContextAccessor = databaseContextAccessor;
-        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
+        EntityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(
             databaseContextAccessor, MetadataOptions);
         EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(

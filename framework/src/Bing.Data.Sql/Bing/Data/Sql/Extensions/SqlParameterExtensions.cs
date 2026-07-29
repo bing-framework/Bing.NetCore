@@ -91,7 +91,7 @@ public static class SqlParameterExtensions
             item => item.Key,
             item => new SqlParam(item.Key, item.Value)
             {
-                Source = SqlParameterSource.Legacy,
+                Source = SqlParameterSource.Basic,
                 MetadataLevel = SqlParameterMetadataLevel.Weak
             },
             StringComparer.OrdinalIgnoreCase);

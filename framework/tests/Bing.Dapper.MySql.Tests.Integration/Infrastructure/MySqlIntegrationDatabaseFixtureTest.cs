@@ -1,5 +1,6 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Metadata;
+using Bing.Datas.EntityFramework.Core;
 using Bing.Tests.Models;
 using Bing.Tests.UnitOfWorks;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,8 +52,9 @@ public sealed class MySqlIntegrationDatabaseFixtureTest
         Assert.NotNull(databaseContextResolver);
         Assert.NotNull(dataSourceResolver);
         Assert.NotNull(entityMappingResolver);
-        Assert.IsAssignableFrom<MySqlUnitOfWork>(entityModelMetadataProvider);
-        Assert.Equal("ProductId", entityModelMetadataProvider.GetColumnName(typeof(Product), nameof(Product.Id)));
+        Assert.IsType<EfCoreEntityModelMetadataProvider>(entityModelMetadataProvider);
+        Assert.Equal("ProductId", entityModelMetadataProvider.GetMetadata(typeof(Product))
+            .Properties[nameof(Product.Id)].ColumnName);
     }
 
     /// <summary>

@@ -72,17 +72,17 @@ public class MySqlBuilderAggregateTest
     }
 
     /// <summary>
-    /// 测试 - MySQL Count API 应明确区分 CountAll、CountColumn 和聚合参数 Distinct。
+    /// 测试 - MySQL Count API 应支持通配符、列和聚合参数 Distinct。
     /// </summary>
     [Fact]
-    public void CountAllAndCountColumn_WhenConfigured_ShouldRenderMySqlSql()
+    public void Count_WhenWildcardAndDistinctColumnAreConfigured_ShouldRenderMySqlSql()
     {
         // Arrange
         const string expected = "Select Count(*) As `Total`,Count(Distinct `o`.`UserId`) As `UserCount` \r\nFrom `orders` As `o`";
         var builder = new MySqlBuilder();
 
         // Act
-        var sql = builder.CountAll("Total").CountColumn("o.UserId", "UserCount", distinct: true)
+        var sql = builder.Count(alias: "Total").Count("o.UserId", "UserCount", distinct: true)
             .From("orders", "o")
             .ToSql();
 

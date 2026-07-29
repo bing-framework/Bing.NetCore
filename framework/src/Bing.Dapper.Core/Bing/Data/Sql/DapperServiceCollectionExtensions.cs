@@ -2,6 +2,7 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -78,7 +79,10 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
         services.TryAddSingleton<ISqlDatabaseContextResolver, DefaultSqlDatabaseContextResolver>();
         services.TryAddSingleton<ITypeConverterResolver, DefaultTypeConverterResolver>();
-        services.TryAddSingleton<IEntityModelMetadataProvider, DefaultEntityModelMetadataProvider>();
+        services.TryAddSingleton<IEntityModelMetadataProvider>(provider =>
+            new CompositeEntityModelMetadataProvider(provider
+                .GetServices<IEntityModelMetadataProviderRegistration>()
+                .Select(registration => registration.Create(provider))));
         services.TryAddSingleton<ISqlObjectNameFormatter, DefaultSqlObjectNameFormatter>();
         services.TryAddSingleton<ISqlObjectNameCapabilityProvider, DefaultSqlObjectNameCapabilityProvider>();
         services.TryAddSingleton<ISqlTableReferenceValidator, DefaultSqlTableReferenceValidator>();
@@ -90,10 +94,12 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<IDapperParameterBinder, DefaultSqlParameterBinder>();
         services.TryAddSingleton<ISqlParameterBinder>(provider => provider.GetRequiredService<IDapperParameterBinder>());
         services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
+        services.TryAddSingleton<ISqlMutationBuilderFactory, SqlMutationBuilderFactory>();
         services.TryAddSingleton<SqlImplementationTypeOptions>();
         services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
         services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
+        services.TryAddSingleton<ISqlMultipleQueryExecutorFactory, SqlMultipleQueryExecutorFactory>();
         services.TryAddSingleton<ISqlTransactionScopeFactory, SqlTransactionScopeFactory>();
         services.TryAddSingleton<ISqlDbConnectionFactoryResolver, DefaultSqlDbConnectionFactoryResolver>();
         return services;
@@ -197,7 +203,13 @@ public static class DapperCoreServiceCollectionExtensions
         where TInterface : IEntityModelMetadataProvider
         where TImplementation : class, TInterface
     {
-        services.TryAddSingleton(typeof(TInterface), typeof(TImplementation));
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        services.TryAddSingleton<TImplementation>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEntityModelMetadataProviderRegistration,
+            EntityModelMetadataProviderRegistration<TImplementation>>());
+        if (typeof(TInterface) != typeof(IEntityModelMetadataProvider))
+            services.TryAddSingleton(typeof(TInterface), provider => provider.GetRequiredService<TImplementation>());
         return services;
     }
 
@@ -308,4 +320,29 @@ public static class DapperCoreServiceCollectionExtensions
         return options;
     }
 
+}
+
+/// <summary>
+/// 创建注册到组合元数据提供器前置链中的提供器。
+/// </summary>
+internal interface IEntityModelMetadataProviderRegistration
+{
+    /// <summary>
+    /// 从服务提供器创建元数据提供器实例。
+    /// </summary>
+    /// <param name="serviceProvider">当前服务提供器。</param>
+    /// <returns>实体模型元数据提供器。</returns>
+    IEntityModelMetadataProvider Create(IServiceProvider serviceProvider);
+}
+
+/// <summary>
+/// 通过依赖注入解析指定类型的元数据提供器。
+/// </summary>
+/// <typeparam name="TProvider">元数据提供器实现类型。</typeparam>
+internal sealed class EntityModelMetadataProviderRegistration<TProvider> : IEntityModelMetadataProviderRegistration
+    where TProvider : class, IEntityModelMetadataProvider
+{
+    /// <inheritdoc />
+    public IEntityModelMetadataProvider Create(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<TProvider>();
 }

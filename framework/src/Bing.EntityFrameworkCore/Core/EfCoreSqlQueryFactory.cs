@@ -154,9 +154,13 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <param name="unitOfWork">工作单元</param>
     private void BindEntityMetadata(ISqlQuery query, UnitOfWorkBase unitOfWork)
     {
+        var metadataProvider = new CompositeEntityModelMetadataProvider(new IEntityModelMetadataProvider[]
+        {
+            new EfCoreEntityModelMetadataProvider(unitOfWork.Model)
+        });
         GetMetadataBinder(query).BindEntityMappingResolver(new DefaultEntityMappingResolver(
             databaseContextAccessor: _databaseContextAccessor, options: _metadataOptions,
-            typeConverterResolver: _typeConverterResolver, entityModelMetadataProvider: unitOfWork));
+            typeConverterResolver: _typeConverterResolver, entityModelMetadataProvider: metadataProvider));
     }
 
     /// <summary>
@@ -195,12 +199,12 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         var dbContextConnectionString = unitOfWork.Database.GetDbConnection().ConnectionString;
         var dataSourceIdentity = _databaseIdentityResolver.Resolve(dataSource.DatabaseType, dataSourceConnectionString);
         var dbContextIdentity = _databaseIdentityResolver.Resolve(dataSource.DatabaseType, dbContextConnectionString);
-        if (dataSourceIdentity.IsComparable == false || dbContextIdentity.IsComparable == false)
-            throw new InvalidOperationException(
-                "SQL 数据源或当前 DbContext 的物理身份无法安全比较，Shared 模式不能复用该连接，请使用 Independent 模式或配置可解析的连接终结点。");
         if (dataSourceIdentity.IsExclusiveMemory || dbContextIdentity.IsExclusiveMemory)
             throw new InvalidOperationException(
                 "SQLite 独占内存数据库不能安全地用于 Shared 模式。请使用 Independent 模式或配置命名的 file: 共享内存数据库。");
+        if (dataSourceIdentity.IsComparable == false || dbContextIdentity.IsComparable == false)
+            throw new InvalidOperationException(
+                "SQL 数据源或当前 DbContext 的物理身份无法安全比较，Shared 模式不能复用该连接，请使用 Independent 模式或配置可解析的连接终结点。");
         if (dataSourceIdentity.Equals(dbContextIdentity))
             return;
         throw new InvalidOperationException(

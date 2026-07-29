@@ -50,8 +50,17 @@ public class OrderByClause : IOrderByClause
     /// 克隆
     /// </summary>
     /// <param name="context">重绑定后的子句运行上下文。</param>
-    public virtual IOrderByClause Clone(SqlClauseContext context) => new OrderByClause(context,
-        new List<OrderByItem>(_items));
+    public virtual IOrderByClause Clone(SqlClauseContext context) =>
+        CreateClone(context, new List<OrderByItem>(_items));
+
+    /// <summary>
+    /// 创建克隆后的 Order By 子句。
+    /// </summary>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <param name="items">已复制的排序项。</param>
+    /// <returns>保留 Provider 子类类型的 Order By 子句。</returns>
+    protected virtual OrderByClause CreateClone(SqlClauseContext context, List<OrderByItem> items) =>
+        new OrderByClause(context, items);
 
     /// <summary>
     /// 排序

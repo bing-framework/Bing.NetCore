@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Reflection;
@@ -16,11 +14,6 @@ namespace Bing.Data.Sql.Metadata;
 /// </summary>
 public class DefaultEntityMappingResolver : IEntityMappingResolver
 {
-    /// <summary>
-    /// 实体描述缓存
-    /// </summary>
-    private static readonly ConcurrentDictionary<Type, EntityDescriptor> DescriptorCache = new();
-
     /// <summary>
     /// 实体映射缓存
     /// </summary>
@@ -63,7 +56,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         ITypeConverterResolver typeConverterResolver = null,
         IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
-        _entityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
+        _entityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
         _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
@@ -85,19 +78,32 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 获取实体描述信息
     /// </summary>
-    /// <param name="entityType">实体类型</param>
+    /// <param name="entityType">实体类型。</param>
     /// <returns>实体描述信息</returns>
     public EntityDescriptor GetDescriptor(Type entityType)
     {
         if (entityType == null)
             throw new ArgumentNullException(nameof(entityType));
-        return CloneDescriptor(DescriptorCache.GetOrAdd(entityType, CreateDescriptor));
+        var model = GetModelMetadata(entityType);
+        var properties = model.Properties.Values
+            .Where(property => property.IsIgnored == false)
+            .Select(property => property.Property)
+            .ToList();
+        return new EntityDescriptor
+        {
+            EntityType = entityType,
+            Properties = properties,
+            KeyProperties = model.Properties.Values
+                .Where(property => property.IsIgnored == false && property.IsKey)
+                .Select(property => property.Property)
+                .ToList()
+        };
     }
 
     /// <summary>
     /// 解析实体映射元数据
     /// </summary>
-    /// <param name="entityType">实体类型</param>
+    /// <param name="entityType">实体类型。</param>
     /// <param name="databaseContext">数据库上下文</param>
     /// <returns>实体映射元数据</returns>
     public EntityMappingMetadata Resolve(Type entityType, DatabaseContext databaseContext)
@@ -114,10 +120,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             GetCacheTableRouteKey(mappingOptions));
         if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
             return cachedMapping;
-        var schema = GetSchema(entityType, mappingOptions);
-        var tableName = GetTableName(entityType, mappingOptions);
+        var model = GetModelMetadata(entityType);
+        var schema = GetSchema(model, mappingOptions);
+        var tableName = GetTableName(model, mappingOptions);
         return _mappingCache.GetOrAdd(cacheKey,
-            _ => CreateMapping(entityType, context, schema, tableName, mappingOptions));
+            _ => CreateMapping(model, context, schema, tableName, mappingOptions));
     }
 
     /// <summary>
@@ -163,25 +170,25 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 获取数据库架构。
     /// </summary>
-    /// <param name="entityType">实体类型</param>
+    /// <param name="model">实体模型元数据。</param>
     /// <param name="mappingOptions">实体映射配置</param>
     /// <returns>数据库架构。</returns>
-    protected virtual string GetSchema(Type entityType, EntityMappingOptions mappingOptions)
+    protected virtual string GetSchema(EntityModelMetadata model, EntityMappingOptions mappingOptions)
     {
         if (string.IsNullOrWhiteSpace(mappingOptions?.Schema) == false)
             return mappingOptions.Schema;
-        return _entityModelMetadataProvider.GetSchema(entityType) ?? string.Empty;
+        return model.Schema ?? string.Empty;
     }
 
     /// <summary>
     /// 获取表名
     /// </summary>
-    /// <param name="entityType">实体类型</param>
+    /// <param name="model">实体模型元数据。</param>
     /// <param name="mappingOptions">实体映射配置</param>
     /// <returns>表名</returns>
-    protected virtual string GetTableName(Type entityType, EntityMappingOptions mappingOptions) =>
+    protected virtual string GetTableName(EntityModelMetadata model, EntityMappingOptions mappingOptions) =>
         string.IsNullOrWhiteSpace(mappingOptions?.TableName)
-            ? _entityModelMetadataProvider.GetTableName(entityType) ?? entityType.Name
+            ? model.TableName ?? model.EntityType.Name
             : mappingOptions.TableName;
 
     /// <summary>
@@ -268,67 +275,33 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     }
 
     /// <summary>
-    /// 创建实体描述信息
-    /// </summary>
-    /// <param name="entityType">实体类型</param>
-    /// <returns>实体描述信息</returns>
-    protected virtual EntityDescriptor CreateDescriptor(Type entityType)
-    {
-        var properties = entityType
-            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .Where(t => t.CanRead && t.GetIndexParameters().Length == 0)
-            .Where(t => t.GetCustomAttribute<NotMappedAttribute>() == null)
-            .ToList();
-        var keyProperties = properties
-            .Where(IsKeyProperty)
-            .ToList();
-        return new EntityDescriptor
-        {
-            EntityType = entityType,
-            Properties = properties,
-            KeyProperties = keyProperties
-        };
-    }
-
-    /// <summary>
-    /// 创建实体描述缓存项的独立副本。
-    /// </summary>
-    /// <param name="descriptor">缓存中的实体描述。</param>
-    /// <returns>可安全提供给调用方的实体描述副本。</returns>
-    private static EntityDescriptor CloneDescriptor(EntityDescriptor descriptor) => new()
-    {
-        EntityType = descriptor.EntityType,
-        Properties = descriptor.Properties?.ToList() ?? new List<PropertyInfo>(),
-        KeyProperties = descriptor.KeyProperties?.ToList() ?? new List<PropertyInfo>()
-    };
-
-    /// <summary>
     /// 创建实体映射元数据
     /// </summary>
-    /// <param name="entityType">实体类型</param>
+    /// <param name="model">实体模型元数据</param>
     /// <param name="databaseContext">数据库上下文</param>
     /// <param name="schema">架构</param>
     /// <param name="tableName">表名</param>
     /// <param name="mappingOptions">实体映射配置</param>
     /// <returns>实体映射元数据</returns>
-    protected virtual EntityMappingMetadata CreateMapping(Type entityType, DatabaseContext databaseContext, string schema,
+    protected virtual EntityMappingMetadata CreateMapping(EntityModelMetadata model, DatabaseContext databaseContext, string schema,
         string tableName, EntityMappingOptions mappingOptions)
     {
-        var descriptor = GetDescriptor(entityType);
-        var columns = new ReadOnlyDictionary<string, ColumnMappingMetadata>(descriptor.Properties.ToDictionary(
-            t => t.Name,
-            t => CreateColumnMetadata(entityType, t, GetColumnMappingOptions(mappingOptions, t), databaseContext),
+        var columns = new ReadOnlyDictionary<string, ColumnMappingMetadata>(model.Properties.Values
+            .Where(property => property.IsIgnored == false)
+            .ToDictionary(property => property.PropertyName,
+            property => CreateColumnMetadata(property, GetColumnMappingOptions(mappingOptions, property.Property), databaseContext),
             StringComparer.OrdinalIgnoreCase));
         var tableReference = new SqlTableReference
         {
-            EntityType = entityType,
+            EntityType = model.EntityType,
             Database = mappingOptions?.Database,
             Schema = schema,
             TableName = tableName,
         };
         return new EntityMappingMetadata
         {
-            EntityType = entityType,
+            EntityType = model.EntityType,
+            Model = model,
             MappingProfile = GetMappingProfile(databaseContext, mappingOptions),
             Table = tableReference,
             TableRouteKey = GetCacheTableRouteKey(mappingOptions),
@@ -371,20 +344,18 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 创建列映射元数据
     /// </summary>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="property">属性信息</param>
+    /// <param name="property">实体属性元数据</param>
     /// <param name="mappingOptions">列映射配置</param>
     /// <param name="databaseContext">数据库上下文</param>
     /// <returns>列映射元数据</returns>
-    protected virtual ColumnMappingMetadata CreateColumnMetadata(Type entityType, PropertyInfo property,
+    protected virtual ColumnMappingMetadata CreateColumnMetadata(EntityPropertyMetadata property,
         ColumnMappingOptions mappingOptions, DatabaseContext databaseContext)
     {
-        var propertyType = GetUnderlyingType(property.PropertyType);
-        var columnAttribute = property.GetCustomAttribute<ColumnAttribute>();
+        var propertyType = GetUnderlyingType(property.ClrType);
         var providerTypeName = string.IsNullOrWhiteSpace(mappingOptions?.ProviderTypeName)
-            ? columnAttribute?.TypeName
+            ? property.ProviderTypeName
             : mappingOptions.ProviderTypeName;
-        var size = mappingOptions?.Size ?? GetSize(property);
+        var size = mappingOptions?.Size ?? property.MaxLength;
         var storageKind = mappingOptions == null || mappingOptions.StorageKind == ColumnStorageKind.Default
             ? GetStorageKind(propertyType, providerTypeName)
             : mappingOptions.StorageKind;
@@ -392,21 +363,26 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             ? GetConverterKind(propertyType, storageKind)
             : mappingOptions.ConverterKind;
         var columnName = string.IsNullOrWhiteSpace(mappingOptions?.ColumnName)
-            ? _entityModelMetadataProvider.GetColumnName(entityType, property.Name) ?? property.Name
+            ? property.ColumnName
             : mappingOptions.ColumnName;
         var column = new ColumnMappingMetadata
         {
-            PropertyName = string.IsNullOrWhiteSpace(mappingOptions?.PropertyName) ? property.Name : mappingOptions.PropertyName,
+            PropertyName = string.IsNullOrWhiteSpace(mappingOptions?.PropertyName) ? property.PropertyName : mappingOptions.PropertyName,
             ColumnName = columnName,
             Column = new ColumnIdentifier(columnName),
-            ClrType = property.PropertyType,
+            ClrType = property.ClrType,
             DbType = mappingOptions?.DbType ?? GetDbType(propertyType, providerTypeName, size,
                 GetDatabaseType(databaseContext)),
             Size = size,
             Precision = mappingOptions?.Precision ?? GetPrecision(providerTypeName),
             Scale = mappingOptions?.Scale ?? GetScale(providerTypeName),
             ProviderTypeName = providerTypeName,
-            IsNullable = IsNullable(property.PropertyType),
+            IsNullable = property.IsNullable,
+            IsKey = property.IsKey,
+            IsDatabaseGenerated = property.IsDatabaseGenerated,
+            IsConcurrencyToken = property.IsConcurrencyToken,
+            CanInsert = property.CanInsert,
+            CanUpdate = property.CanUpdate,
             StorageKind = storageKind,
             ConverterKind = converterKind,
             CustomConverterName = mappingOptions?.CustomConverterName
@@ -423,40 +399,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         databaseContext?.DataSource?.DatabaseType;
 
     /// <summary>
-    /// 判断是否为主键属性
-    /// </summary>
-    /// <param name="property">属性信息</param>
-    /// <returns>是否为主键属性</returns>
-    protected virtual bool IsKeyProperty(PropertyInfo property)
-    {
-        if (property.GetCustomAttribute<KeyAttribute>() != null)
-            return true;
-        if (property.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
-            return true;
-        var declaringType = property.DeclaringType;
-        return declaringType != null && property.Name.Equals($"{declaringType.Name}Id", StringComparison.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
     /// 获取实际 CLR 类型
     /// </summary>
     /// <param name="type">类型</param>
     /// <returns>实际 CLR 类型</returns>
     protected virtual Type GetUnderlyingType(Type type) => Nullable.GetUnderlyingType(type) ?? type;
-
-    /// <summary>
-    /// 获取长度
-    /// </summary>
-    /// <param name="property">属性信息</param>
-    /// <returns>长度</returns>
-    protected virtual int? GetSize(PropertyInfo property)
-    {
-        var maxLength = property.GetCustomAttribute<MaxLengthAttribute>()?.Length;
-        if (maxLength > 0)
-            return maxLength;
-        var stringLength = property.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength;
-        return stringLength > 0 ? stringLength : null;
-    }
 
     /// <summary>
     /// 获取精度
@@ -569,6 +516,15 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             return true;
         return Nullable.GetUnderlyingType(type) != null;
     }
+
+    /// <summary>
+    /// 获取实体模型元数据，未处理时回退到命名约定模型。
+    /// </summary>
+    /// <param name="entityType">实体类型。</param>
+    /// <returns>实体模型元数据。</returns>
+    protected virtual EntityModelMetadata GetModelMetadata(Type entityType) =>
+        _entityModelMetadataProvider.GetMetadata(entityType) ??
+        new ConventionEntityModelMetadataProvider().GetMetadata(entityType);
 
     /// <summary>
     /// 获取字段存储方式

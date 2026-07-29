@@ -448,6 +448,29 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：同步流式 Reader 存活期间，同一 Query 的其他执行入口必须快速失败；释放枚举器后应可继续执行。
+    /// </summary>
+    [Fact]
+    public async Task StreamQuery_WhenEnumeratorIsActive_ShouldRejectOtherExecutionUntilDisposed()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = CreateSamplesQuery();
+
+        // Act and Assert
+        using (var enumerator = query.StreamQuery<Sample>().GetEnumerator())
+        {
+            Assert.True(enumerator.MoveNext());
+            var exception = Assert.Throws<InvalidOperationException>(() => query.ExecuteScalar());
+            Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
+                exception.Message);
+        }
+
+        query.AppendSelect("Count(*)").AppendFrom("samples");
+        Assert.Equal(3, query.ExecuteScalar<int>());
+    }
+
+    /// <summary>
     /// 测试 - SQLite流式查询枚举前取消应释放资源。
     /// </summary>
     [Fact]
@@ -806,7 +829,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试 - SQLite 应真实执行统一 CountAll、列计数和 Distinct 聚合。
+    /// 测试 - SQLite 应真实执行统一 Count、列计数和 Distinct 聚合。
     /// </summary>
     [Fact]
     public async Task Aggregate_WhenDuplicateAndNullValuesExist_ShouldReturnExpectedCountsAndExtremes()
@@ -816,12 +839,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         using var countAllQuery = _fixture.CreateQuery();
-        var countAll = countAllQuery.CountAll("Total").From("samples", "s").ExecuteScalar<int>();
+        var countAll = countAllQuery.Count(alias: "Total").From("samples", "s").ExecuteScalar<int>();
         using var countColumnQuery = _fixture.CreateQuery();
-        var countColumn = countColumnQuery.CountColumn("s.Amount", "AmountCount").From("samples", "s")
+        var countColumn = countColumnQuery.Count("s.Amount", "AmountCount").From("samples", "s")
             .ExecuteScalar<int>();
         using var distinctCountQuery = _fixture.CreateQuery();
-        var distinctCount = distinctCountQuery.CountColumn("s.Name", "NameCount", distinct: true)
+        var distinctCount = distinctCountQuery.Count("s.Name", "NameCount", distinct: true)
             .From("samples", "s")
             .ExecuteScalar<int>();
         using var sumQuery = _fixture.CreateQuery();
@@ -871,7 +894,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             .From("samples", "s")
             .ExecuteScalar<int>();
         using var dtoQuery = _fixture.CreateQuery();
-        var result = dtoQuery.CountColumn("s.Name", "DistinctNameCount", distinct: true)
+        var result = dtoQuery.Count("s.Name", "DistinctNameCount", distinct: true)
             .Sum("s.Amount", "DistinctAmount", distinct: true)
             .From("samples", "s")
             .ExecuteSingle<AggregateResult>();

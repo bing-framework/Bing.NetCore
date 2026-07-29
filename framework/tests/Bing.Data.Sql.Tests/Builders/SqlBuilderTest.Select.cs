@@ -89,14 +89,14 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 求总行数 - lambda表达式 - 默认别名
+    /// 求总行数 - lambda表达式 - 无别名
     /// </summary>
     [Fact]
     public void Test_Count_3()
     {
         //结果
         var result = new StringBuilder();
-        result.AppendLine("Select Count([DoubleValue]) As [DoubleValue] ");
+        result.AppendLine("Select Count([DoubleValue]) ");
         result.Append("From [b]");
 
         //执行
@@ -169,14 +169,14 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 求和 - lambda表达式 - 默认别名
+    /// 求和 - lambda表达式 - 无别名
     /// </summary>
     [Fact]
     public void Test_Sum_3()
     {
         //结果
         var result = new StringBuilder();
-        result.AppendLine("Select Sum([DoubleValue]) As [DoubleValue] ");
+        result.AppendLine("Select Sum([DoubleValue]) ");
         result.Append("From [b]");
 
         //执行
@@ -249,14 +249,14 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 求平均值 - lambda表达式 - 默认别名
+    /// 求平均值 - lambda表达式 - 无别名
     /// </summary>
     [Fact]
     public void Test_Avg_3()
     {
         //结果
         var result = new StringBuilder();
-        result.AppendLine("Select Avg([DoubleValue]) As [DoubleValue] ");
+        result.AppendLine("Select Avg([DoubleValue]) ");
         result.Append("From [b]");
 
         //执行
@@ -329,14 +329,14 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 求最大值 - lambda表达式 - 默认别名
+    /// 求最大值 - lambda表达式 - 无别名
     /// </summary>
     [Fact]
     public void Test_Max_3()
     {
         //结果
         var result = new StringBuilder();
-        result.AppendLine("Select Max([DoubleValue]) As [DoubleValue] ");
+        result.AppendLine("Select Max([DoubleValue]) ");
         result.Append("From [b]");
 
         //执行
@@ -409,14 +409,14 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 求最小值 - lambda表达式 - 默认别名
+    /// 求最小值 - lambda表达式 - 无别名
     /// </summary>
     [Fact]
     public void Test_Min_3()
     {
         //结果
         var result = new StringBuilder();
-        result.AppendLine("Select Min([DoubleValue]) As [DoubleValue] ");
+        result.AppendLine("Select Min([DoubleValue]) ");
         result.Append("From [b]");
 
         //执行
@@ -620,7 +620,7 @@ public partial class SqlBuilderTest
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new TestSqlBuilder(entityModelMetadataProvider: new DefaultEntityModelMetadataProvider());
+        _builder = new TestSqlBuilder(entityModelMetadataProvider: new CompositeEntityModelMetadataProvider());
         _builder.Select<Sample3>().From<Sample3>("s");
 
         //验证
@@ -639,7 +639,7 @@ public partial class SqlBuilderTest
         result.Append("From [Sample3] As [s]");
 
         //执行
-        _builder = new TestSqlBuilder(entityModelMetadataProvider: new DefaultEntityModelMetadataProvider());
+        _builder = new TestSqlBuilder(entityModelMetadataProvider: new CompositeEntityModelMetadataProvider());
         _builder.Select<Sample3>()
             .Select<Sample3>(t => t.StringValue, "a")
             .From<Sample3>("s");
@@ -660,7 +660,7 @@ public partial class SqlBuilderTest
         result.Append("From [Sample2] As [s]");
 
         //执行
-        _builder = new TestSqlBuilder(entityModelMetadataProvider: new DefaultEntityModelMetadataProvider());
+        _builder = new TestSqlBuilder(entityModelMetadataProvider: new CompositeEntityModelMetadataProvider());
         _builder.Select<Sample2>()
             .RemoveSelect<Sample2>(x => x.Display)
             .From<Sample2>("s");

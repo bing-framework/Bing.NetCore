@@ -18,7 +18,7 @@ public class SqlAggregateRenderingBenchmarks
     private MySqlBuilder _rawJsonPathBuilder;
     private MySqlBuilder _expressionArithmeticBuilder;
     private MySqlBuilder _expressionCaseBuilder;
-    private MySqlBuilder _countColumnDistinctBuilder;
+    private MySqlBuilder _countDistinctColumnBuilder;
     private MySqlBuilder _aggregateExpressionBuilder;
 
     /// <summary>
@@ -28,7 +28,7 @@ public class SqlAggregateRenderingBenchmarks
     public void Setup()
     {
         _countBuilder = new MySqlBuilder();
-        _countBuilder.Count("Total").From("orders");
+        _countBuilder.Count(alias: "Total").From("orders");
 
         _aggregateBuilder = new MySqlBuilder();
         _aggregateBuilder.Count("o.Id", "Count")
@@ -62,8 +62,8 @@ public class SqlAggregateRenderingBenchmarks
         _expressionCaseBuilder.AggregateExpression(SqlAggregateFunction.Count,
             "Case When [o].[Enabled]=1 Then [o].[Id] End", "EnabledCount", distinct: true).From("orders", "o");
 
-        _countColumnDistinctBuilder = new MySqlBuilder();
-        _countColumnDistinctBuilder.CountColumn("o.UserId", "DistinctUsers", distinct: true).From("orders", "o");
+        _countDistinctColumnBuilder = new MySqlBuilder();
+        _countDistinctColumnBuilder.Count("o.UserId", "DistinctUsers", distinct: true).From("orders", "o");
 
         _aggregateExpressionBuilder = new MySqlBuilder();
         _aggregateExpressionBuilder.AggregateExpression(SqlAggregateFunction.Count, "[o].[Id]", "Count")
@@ -128,10 +128,10 @@ public class SqlAggregateRenderingBenchmarks
     public string AggregateExpression_Case() => _expressionCaseBuilder.ToSql();
 
     /// <summary>
-    /// 测量 CountColumn Distinct 聚合渲染。
+    /// 测量 Count Distinct 聚合渲染。
     /// </summary>
     [Benchmark]
-    public string CountColumn_Distinct() => _countColumnDistinctBuilder.ToSql();
+    public string Count_DistinctColumn() => _countDistinctColumnBuilder.ToSql();
 
     /// <summary>
     /// 测量十个聚合表达式的 ToSql 渲染。

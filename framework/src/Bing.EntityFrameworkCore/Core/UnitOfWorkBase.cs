@@ -29,7 +29,7 @@ namespace Bing.Datas.EntityFramework.Core;
 /// <summary>
 /// 工作单元
 /// </summary>
-public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntityModelMetadataProvider
+public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 {
     #region 字段
 
@@ -69,7 +69,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>
-    protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) 
+    protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider)
         : base(options)
     {
         TraceId = Guid.NewGuid().ToString();
@@ -574,75 +574,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase, IEntit
     /// 获取数据库连接
     /// </summary>
     public IDbConnection GetConnection() => Database.GetDbConnection();
-
-    #endregion
-
-    #region Matedata(获取元数据)
-
-    /// <summary>
-    /// 获取表名
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    public string GetTable(Type entity)
-    {
-        if (entity == null)
-            return null;
-        try
-        {
-            var entityType = Model.FindEntityType(entity);
-            return entityType?.FindAnnotation("Relational:TableName")?.Value.SafeString();
-        }
-        catch
-        {
-            return entity.Name;
-        }
-    }
-
-    /// <summary>
-    /// 获取架构
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    public string GetSchema(Type entity)
-    {
-        if (entity == null)
-            return null;
-        try
-        {
-            var entityType = Model.FindEntityType(entity);
-            return entityType?.FindAnnotation("Relational:Schema")?.Value.SafeString();
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// 获取列名
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    /// <param name="property">属性名</param>
-    public string GetColumn(Type entity, string property)
-    {
-        if (entity == null || string.IsNullOrWhiteSpace(property))
-            return null;
-        try
-        {
-            var entityType = Model.FindEntityType(entity);
-            var result = entityType?.GetProperty(property)?.FindAnnotation("Relational:ColumnName")?.Value.SafeString();
-            return string.IsNullOrWhiteSpace(result) ? property : result;
-        }
-        catch
-        {
-            return property;
-        }
-    }
-
-    /// <inheritdoc />
-    public string GetTableName(Type entityType) => GetTable(entityType);
-
-    /// <inheritdoc />
-    public string GetColumnName(Type entityType, string propertyName) => GetColumn(entityType, propertyName);
 
     #endregion
 

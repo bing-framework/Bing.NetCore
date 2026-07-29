@@ -1,4 +1,5 @@
 using Bing.Data.Sql.Tests.Samples;
+using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Tests;
 
@@ -128,5 +129,73 @@ public class BuilderCloneIsolationTest
         Assert.Empty(source.GetParams());
         Assert.Equal(1, first.GetParam("@_p_0"));
         Assert.Equal(2, second.GetParam("@_p_0"));
+    }
+
+    /// <summary>
+    /// 测试目的：参数管理器 Clone 返回 null 时，Builder 必须拒绝生成不可用副本。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenParameterManagerCloneReturnsNull_ShouldThrow()
+    {
+        // Arrange
+        var source = new TestSqlBuilder(parameterManager: new InvalidCloneParameterManager(true));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => source.Clone());
+
+        // Assert
+        Assert.Equal("参数管理器克隆时返回了 null。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：参数管理器 Clone 返回自身时，Builder 必须拒绝共享可变参数状态。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenParameterManagerCloneReturnsSource_ShouldThrow()
+    {
+        // Arrange
+        var source = new TestSqlBuilder(parameterManager: new InvalidCloneParameterManager(false));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => source.Clone());
+
+        // Assert
+        Assert.Equal("参数管理器克隆时不能返回当前实例。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：延迟初始化参数管理器的 Builder 清理参数时不应发生空引用。
+    /// </summary>
+    [Fact]
+    public void ClearSqlParams_WhenParameterManagerIsNotInitialized_ShouldCreateAndClearManager()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        builder.ClearSqlParams();
+
+        // Assert
+        Assert.Empty(builder.GetParams());
+    }
+
+    /// <summary>
+    /// 返回无效 Clone 结果的参数管理器测试替身。
+    /// </summary>
+    private sealed class InvalidCloneParameterManager : ParameterManager
+    {
+        /// <summary>
+        /// 是否返回 null。
+        /// </summary>
+        private readonly bool _returnNull;
+
+        /// <summary>
+        /// 初始化测试替身。
+        /// </summary>
+        /// <param name="returnNull">是否返回 null。</param>
+        public InvalidCloneParameterManager(bool returnNull) : base(TestDialect.Instance) => _returnNull = returnNull;
+
+        /// <inheritdoc />
+        public override IParameterManager Clone() => _returnNull ? null : this;
     }
 }

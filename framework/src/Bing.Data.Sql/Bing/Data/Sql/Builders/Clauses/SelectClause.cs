@@ -69,7 +69,17 @@ public class SelectClause : ISelectClause
     /// <param name="context">克隆 Builder 的运行上下文。</param>
     /// <returns>独立的 Select 子句。</returns>
     public virtual ISelectClause Clone(SqlClauseContext context) =>
-        new SelectClause(context, _columns.Clone(), _distinct);
+        CreateClone(context, _columns.Clone(), _distinct);
+
+    /// <summary>
+    /// 创建克隆后的 Select 子句。
+    /// </summary>
+    /// <param name="context">克隆 Builder 的运行上下文。</param>
+    /// <param name="columns">已深复制的列集合。</param>
+    /// <param name="distinct">是否保留去重状态。</param>
+    /// <returns>保留 Provider 子类类型的 Select 子句。</returns>
+    protected virtual SelectClause CreateClone(SqlClauseContext context, ColumnCollection columns, bool distinct) =>
+        new SelectClause(context, columns, distinct);
 
     /// <summary>
     /// 过滤重复记录
@@ -77,35 +87,13 @@ public class SelectClause : ISelectClause
     public void Distinct() => _distinct = true;
 
     /// <inheritdoc />
-    public void Count(string columnAlias = null) => CountAll(columnAlias);
+    public void Count(string column = "*", string alias = null, bool distinct = false) =>
+        Aggregate(SqlAggregateFunction.Count, column, alias, distinct);
 
     /// <inheritdoc />
-    public void CountAll(string columnAlias = null) => _columns.AddAggregationColumn(SqlAggregateFunction.Count,
-        null, columnAlias, wildcard: true);
-
-    /// <inheritdoc />
-    public void CountColumn(string column, string columnAlias = null, bool distinct = false) =>
-        Aggregate(SqlAggregateFunction.Count, column, columnAlias, distinct);
-
-    /// <summary>
-    /// 求总行数
-    /// </summary>
-    /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    public void Count(string column, string columnAlias, bool distinct = false) =>
-        AggregateLegacy(SqlAggregateFunction.Count, column, columnAlias, distinct);
-
-    /// <summary>
-    /// 求总行数
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+    public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string alias = null,
         bool distinct = false) where TEntity : class =>
-        AggregateLegacy(SqlAggregateFunction.Count, expression, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Count, expression, alias, distinct);
 
     /// <summary>
     /// 添加结构化聚合列。
@@ -180,7 +168,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Sum(string column, string columnAlias = null, bool distinct = false) =>
-        AggregateLegacy(SqlAggregateFunction.Sum, column, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Sum, column, columnAlias, distinct);
 
     /// <summary>
     /// 求和
@@ -191,7 +179,7 @@ public class SelectClause : ISelectClause
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
-        AggregateLegacy(SqlAggregateFunction.Sum, expression, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Sum, expression, columnAlias, distinct);
 
     /// <summary>
     /// 求平均值
@@ -200,7 +188,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Avg(string column, string columnAlias = null, bool distinct = false) =>
-        AggregateLegacy(SqlAggregateFunction.Avg, column, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Avg, column, columnAlias, distinct);
 
     /// <summary>
     /// 求平均值
@@ -211,7 +199,7 @@ public class SelectClause : ISelectClause
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
-        AggregateLegacy(SqlAggregateFunction.Avg, expression, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Avg, expression, columnAlias, distinct);
 
     /// <summary>
     /// 求最大值
@@ -220,7 +208,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Max(string column, string columnAlias = null, bool distinct = false) =>
-        AggregateLegacy(SqlAggregateFunction.Max, column, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Max, column, columnAlias, distinct);
 
     /// <summary>
     /// 求最大值
@@ -231,7 +219,7 @@ public class SelectClause : ISelectClause
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
-        AggregateLegacy(SqlAggregateFunction.Max, expression, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Max, expression, columnAlias, distinct);
 
     /// <summary>
     /// 求最小值
@@ -240,7 +228,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Min(string column, string columnAlias = null, bool distinct = false) =>
-        AggregateLegacy(SqlAggregateFunction.Min, column, columnAlias, distinct);
+        Aggregate(SqlAggregateFunction.Min, column, columnAlias, distinct);
 
     /// <summary>
     /// 求最小值
@@ -251,45 +239,7 @@ public class SelectClause : ISelectClause
     /// <param name="distinct">是否对聚合参数去重。</param>
     public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
-        AggregateLegacy(SqlAggregateFunction.Min, expression, columnAlias, distinct);
-
-    /// <summary>
-    /// 添加保留自动叶子列 Alias 的旧便捷结构化聚合列。
-    /// </summary>
-    /// <param name="function">聚合函数。</param>
-    /// <param name="column">列名。</param>
-    /// <param name="columnAlias">聚合结果列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    private void AggregateLegacy(SqlAggregateFunction function, string column, string columnAlias, bool distinct)
-    {
-        SqlAggregateArgumentValidator.ValidateFunction(function);
-        if (SqlAggregateArgumentValidator.ValidateWildcard(function, column, distinct, nameof(column)))
-        {
-            _columns.AddAggregationColumn(function, null, columnAlias, distinct, wildcard: true);
-            return;
-        }
-        _columns.AddStructuredAggregationColumn(function, SqlAggregateArgumentValidator.ParseStructuredColumn(column),
-            columnAlias, distinct, useDefaultAlias: true);
-    }
-
-    /// <summary>
-    /// 添加保留自动叶子列 Alias 的旧便捷实体表达式聚合列。
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型。</typeparam>
-    /// <param name="function">聚合函数。</param>
-    /// <param name="expression">列名表达式。</param>
-    /// <param name="columnAlias">聚合结果列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    private void AggregateLegacy<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
-        string columnAlias, bool distinct) where TEntity : class
-    {
-        SqlAggregateArgumentValidator.ValidateFunction(function);
-        if (expression == null)
-            throw new ArgumentNullException(nameof(expression));
-        _columns.AddStructuredAggregationColumn(function,
-            SqlAggregateArgumentValidator.ParseStructuredColumn(_resolver.GetColumn(expression)), columnAlias,
-            distinct, typeof(TEntity), useDefaultAlias: true);
-    }
+        Aggregate(SqlAggregateFunction.Min, expression, columnAlias, distinct);
 
     /// <summary>
     /// 设置列名

@@ -11,9 +11,9 @@ public enum SqlParameterSource
     Unknown = 0,
 
     /// <summary>
-    /// 旧参数链路
+    /// 基础参数管理器
     /// </summary>
-    Legacy = 1,
+    Basic = 1,
 
     /// <summary>
     /// Lambda 表达式

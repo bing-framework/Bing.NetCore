@@ -7,14 +7,8 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// Where子句
 /// </summary>
-public interface IWhereClause : ICondition
+public interface IWhereClause : ICondition, ISqlClauseCloneable<IWhereClause>
 {
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    /// <returns>独立的 Where 子句。</returns>
-    IWhereClause Clone(Core.SqlClauseContext context);
 
     /// <summary>
     /// And连接条件

@@ -19,15 +19,15 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
+    /// <param name="alias">聚合结果别名。</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     public static ISqlBuilder Count<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
-        string columnAlias = null, bool distinct = false) where TEntity : class
+        string alias = null, bool distinct = false) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Count(expression, columnAlias, distinct);
+            accessor.SelectClause.Count(expression, alias, distinct);
         return source;
     }
 

@@ -29,7 +29,7 @@ public class CustomProviderBuilderTest
         // Assert
         Assert.Same(CustomSqlProvider.Instance, provider);
         Assert.IsType<CustomClauseFactory>(provider.ClauseFactory);
-        Assert.IsType<SelectClause>(accessor.SelectClause);
+        Assert.IsType<CustomSelectClause>(accessor.SelectClause);
         Assert.IsType<FromClause>(accessor.FromClause);
         Assert.IsType<JoinClause>(accessor.JoinClause);
         Assert.IsType<WhereClause>(accessor.WhereClause);
@@ -87,7 +87,7 @@ public class CustomProviderBuilderTest
         // Arrange
         var factory = new SqlBuilderFactory(new[]
         {
-            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder())
+            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, _ => new CustomSqlBuilder())
         });
 
         // Act
@@ -108,7 +108,7 @@ public class CustomProviderBuilderTest
         // Arrange
         var factory = new SqlBuilderFactory(new[]
         {
-            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder())
+            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, _ => new CustomSqlBuilder())
         });
 
         // Act
@@ -147,8 +147,8 @@ public class CustomProviderBuilderTest
         // Arrange
         var factory = new SqlBuilderFactory(new[]
         {
-            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder()),
-            new SqlBuilderFactoryRegistration(CustomSqliteAliasProvider.Instance, () => new CustomSqlBuilder())
+            new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, _ => new CustomSqlBuilder()),
+            new SqlBuilderFactoryRegistration(CustomSqliteAliasProvider.Instance, _ => new CustomSqlBuilder())
         });
 
         // Act
@@ -169,7 +169,7 @@ public class CustomProviderBuilderTest
     public void Factory_WhenProviderKeyIsUnknownOrDuplicated_ShouldThrowWithKey()
     {
         // Arrange
-        var registration = new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, () => new CustomSqlBuilder());
+        var registration = new SqlBuilderFactoryRegistration(CustomSqlProvider.Instance, _ => new CustomSqlBuilder());
         var factory = new SqlBuilderFactory(new[] { registration });
 
         // Act
@@ -319,9 +319,31 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：外部 Provider 的自定义子句在首次创建、Clear、New 和 Clone 后均应保持实际运行类型，且 Clone 必须保留列状态。
+    /// </summary>
+    [Fact]
+    public void CustomClause_WhenBuilderLifecycleChanges_ShouldPreserveTypeAndCloneState()
+    {
+        // Arrange
+        var source = new CustomSqlBuilder();
+        source.Select("u.Id").From("Users", "u");
+
+        // Act
+        var clone = Assert.IsType<CustomSqlBuilder>(source.Clone());
+        var fresh = Assert.IsType<CustomSqlBuilder>(source.New());
+        source.Clear();
+
+        // Assert
+        Assert.IsType<CustomSelectClause>(((ISqlPartAccessor)source).SelectClause);
+        Assert.IsType<CustomSelectClause>(((ISqlPartAccessor)clone).SelectClause);
+        Assert.IsType<CustomSelectClause>(((ISqlPartAccessor)fresh).SelectClause);
+        Assert.Equal("Select [u].[Id] \r\nFrom [Users] As [u]", clone.ToSql());
+    }
+
+    /// <summary>
     /// 仅公开基础参数能力的测试代理，用于验证 Builder 的普通参数管理器包装路径。
     /// </summary>
-    private sealed class PlainParameterManager : IParameterManager, IParameterManagerLifecycle
+    private sealed class PlainParameterManager : IParameterManager
     {
         /// <summary>
         /// 实际存储参数的内部管理器。
@@ -367,10 +389,6 @@ public class CustomProviderBuilderTest
         public void Clear() => _inner.Clear();
 
         /// <inheritdoc />
-        public IParameterManager CreateEmpty()
-        {
-            var lifecycle = (IParameterManagerLifecycle)_inner;
-            return new PlainParameterManager(lifecycle.CreateEmpty());
-        }
+        public IParameterManager CreateEmpty() => new PlainParameterManager(_inner.CreateEmpty());
     }
 }

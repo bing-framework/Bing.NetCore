@@ -3,9 +3,12 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Bing.Data.Queries;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
 using Bing.Extensions;
+using Bing.FreeSQL;
 using Bing.FreeSQL.Extensions;
 using Bing.Helpers;
 using Bing.Uow;
@@ -65,7 +68,16 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     protected virtual ISqlQuery CreateSqlQuery()
     {
         var result = ServiceLocator.Instance.GetService<ISqlQuery>();
-        //result.SetConnection(Connection);
+        if (result is not ISqlQueryMetadataBinder binder)
+            throw new InvalidOperationException("SQL 查询对象未实现元数据绑定器，无法绑定 FreeSQL 工作单元映射。");
+        var metadataProvider = new CompositeEntityModelMetadataProvider(new IEntityModelMetadataProvider[]
+        {
+            new FreeSqlEntityModelMetadataProvider(UnitOfWork.Orm)
+        });
+        binder.BindEntityMappingResolver(new DefaultEntityMappingResolver(
+            ServiceLocator.Instance.GetService<IDatabaseContextAccessor>(),
+            ServiceLocator.Instance.GetService<SqlMetadataOptions>(),
+            ServiceLocator.Instance.GetService<ITypeConverterResolver>(), metadataProvider));
         return result;
     }
 

@@ -79,35 +79,23 @@ public class SqlFilterContext
     /// <param name="entityAliasRegister">实体别名注册器。</param>
     /// <param name="parameterManager">参数管理器。</param>
     /// <param name="clause">SQL 子句访问器。</param>
-    /// <param name="entityMappingResolver">实体映射解析器。</param>
-    /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
-    /// <param name="metadataOptions">SQL 元数据配置。</param>
-    /// <param name="options">SQL 选项。</param>
-    /// <param name="databaseContextResolver">SQL 数据库上下文解析器。</param>
-    /// <param name="entityModelMetadataProvider">实体模型元数据提供器。</param>
+    /// <param name="services">SQL Builder 共享服务集合。</param>
     /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文。</param>
     public SqlFilterContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IParameterManager parameterManager,
-        ISqlPartAccessor clause,
-        IEntityMappingResolver entityMappingResolver = null,
-        IDatabaseContextAccessor databaseContextAccessor = null,
-        SqlMetadataOptions metadataOptions = null,
-        SqlOptions options = null,
-        ISqlDatabaseContextResolver databaseContextResolver = null,
-        IEntityModelMetadataProvider entityModelMetadataProvider = null, DatabaseContext databaseContext = null)
+        ISqlPartAccessor clause, SqlBuilderServices services, DatabaseContext databaseContext = null)
     {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
         EntityAliasRegister = entityAliasRegister ?? new EntityAliasRegister();
-        EntityModelMetadataProvider = entityModelMetadataProvider ?? new DefaultEntityModelMetadataProvider();
+        EntityModelMetadataProvider = services.EntityModelMetadataProvider;
         Dialect = dialect;
         ParameterManager = parameterManager;
         ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));
-        MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
-        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
-            databaseContextAccessor: databaseContextAccessor, options: MetadataOptions,
-            entityModelMetadataProvider: EntityModelMetadataProvider);
-        DatabaseContextAccessor = databaseContextAccessor;
-        Options = options;
-        DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
-            MetadataOptions);
+        MetadataOptions = services.MetadataOptions;
+        EntityMappingResolver = services.EntityMappingResolver;
+        DatabaseContextAccessor = services.DatabaseContextAccessor;
+        Options = services.Options;
+        DatabaseContextResolver = services.DatabaseContextResolver;
         _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
     }
 }

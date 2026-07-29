@@ -3,6 +3,7 @@ using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Metadata;
+using Bing.Datas.EntityFramework.Core;
 using Bing.DependencyInjection;
 using Bing.Test.Shared;
 using Bing.Tests.Models;
@@ -96,7 +97,8 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         var options = new DbContextOptionsBuilder<IntegrationMySqlUnitOfWork>()
             .UseMySql(connectionString, ServerVersion.Parse("8.0.0"))
             .Options;
-        return new IntegrationMySqlUnitOfWork(options, serviceProvider);
+        using var unitOfWork = new IntegrationMySqlUnitOfWork(options, serviceProvider);
+        return new EfCoreEntityModelMetadataProvider(unitOfWork.Model);
     }
 
     /// <summary>

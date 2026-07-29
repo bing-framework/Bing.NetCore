@@ -13,7 +13,7 @@ namespace Bing.Dapper.Tests.Metadata;
 public class PostgreSqlProviderRegistrationTest
 {
     /// <summary>
-    /// 测试目的：具名 PostgreSQL 数据源应创建 PostgreSQL 查询、执行器、方言和 Npgsql 连接。
+    /// 测试目的：具名 PostgreSQL 数据源应创建 PostgreSQL 查询、执行器、多结果集执行器、方言和 Npgsql 连接。
     /// </summary>
     [Fact]
     public void Factories_WhenPgSqlDataSourceIsConfigured_ShouldResolvePostgreSqlServices()
@@ -28,14 +28,18 @@ public class PostgreSqlProviderRegistrationTest
         // Act
         using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("pgsql");
         using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create<ISqlExecutor>("pgsql");
+        using var multipleQueryExecutor = provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>()
+            .Create("pgsql");
         using var connection = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>()
             .Create(DatabaseType.PgSql, "Host=localhost;Database=test;");
 
         // Assert
         Assert.IsType<PostgreSqlQuery>(query);
         Assert.IsType<PostgreSqlExecutor>(executor);
+        Assert.IsType<PostgreSqlMultipleQueryExecutor>(multipleQueryExecutor);
         Assert.IsType<PostgreSqlDialect>(((ISqlPartAccessor)query).Dialect);
         Assert.IsType<NpgsqlConnection>(connection);
         Assert.Equal("Host=localhost;Database=test;", connection.ConnectionString);
+        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsMultipleResultSets);
     }
 }

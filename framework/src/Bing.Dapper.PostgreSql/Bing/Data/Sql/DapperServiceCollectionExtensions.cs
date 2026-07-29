@@ -28,17 +28,22 @@ public static class PostgreSqlServiceCollectionExtensions
         services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
         var queryOptions = new SqlOptions<PostgreSqlQuery> { DatabaseType = DatabaseType.PgSql };
         var executorOptions = new SqlOptions<PostgreSqlExecutor> { DatabaseType = DatabaseType.PgSql };
+        var multipleQueryOptions = new SqlOptions<PostgreSqlMultipleQueryExecutor> { DatabaseType = DatabaseType.PgSql };
         queryOptions.RegisterStringTypeHandler();
         executorOptions.RegisterStringTypeHandler();
+        multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlQuery, PostgreSqlQuery>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlExecutor, PostgreSqlExecutor>(DatabaseType.PgSql);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>(DatabaseType.PgSql);
         services.TryAddTransient<ISqlQuery, PostgreSqlQuery>();
         services.TryAddTransient<ISqlExecutor, PostgreSqlExecutor>();
+        services.TryAddTransient<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
+        services.TryAddSingleton(multipleQueryOptions);
         return services;
     }
 
@@ -113,6 +118,56 @@ public static class PostgreSqlServiceCollectionExtensions
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
+        return services;
+    }
+
+    #endregion
+
+    #region AddPostgreSqlMultipleQueryExecutor(注册 PostgreSQL 多结果集查询执行器)
+
+    /// <summary>
+    /// 注册 PostgreSQL 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddPostgreSqlMultipleQueryExecutor(this IServiceCollection services)
+    {
+        return services.AddPostgreSqlMultipleQueryExecutor("");
+    }
+
+    /// <summary>
+    /// 注册 PostgreSQL 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="connection">数据库连接字符串。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddPostgreSqlMultipleQueryExecutor(this IServiceCollection services,
+        string connection)
+    {
+        return services.AddPostgreSqlMultipleQueryExecutor(options => options.ConnectionString(connection));
+    }
+
+    /// <summary>
+    /// 注册 PostgreSQL 多结果集查询执行器。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="setupAction">SQL 配置操作。</param>
+    /// <returns>服务集合。</returns>
+    public static IServiceCollection AddPostgreSqlMultipleQueryExecutor(this IServiceCollection services,
+        Action<SqlOptions> setupAction)
+    {
+        var sqlOptions = new SqlOptions<PostgreSqlMultipleQueryExecutor> { DatabaseType = DatabaseType.PgSql };
+        services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance,
+            serviceProvider => new PostgreSqlBuilder(serviceProvider));
+        setupAction?.Invoke(sqlOptions);
+        sqlOptions.RegisterStringTypeHandler();
+        services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
+        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
+        services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>(DatabaseType.PgSql);
+        services.TryAddTransient<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>();
+        services.TryAddSingleton(sqlOptions);
         return services;
     }
 

@@ -39,10 +39,10 @@ public class MetadataAwareParameterTest
     }
 
     /// <summary>
-    /// 测试 - 旧参数入口导出的增强参数应保持弱元数据等级。
+    /// 测试目的：基础参数入口导出的增强参数应保持弱元数据等级。
     /// </summary>
     [Fact]
-    public void GetSqlParams_WithLegacyParameter_ShouldReturnWeakMetadata()
+    public void GetSqlParams_WithBasicParameter_ShouldReturnWeakMetadata()
     {
         // Arrange
         var builder = new TestSqlBuilder(TestDialect.Instance);
@@ -53,7 +53,7 @@ public class MetadataAwareParameterTest
 
         // Assert
         parameter.MetadataLevel.ShouldBe(SqlParameterMetadataLevel.Weak);
-        parameter.Source.ShouldBe(SqlParameterSource.Legacy);
+        parameter.Source.ShouldBe(SqlParameterSource.Basic);
         parameter.ColumnName.ShouldBeNull();
         parameter.PropertyName.ShouldBeNull();
         parameter.Value.ShouldBe("abc");

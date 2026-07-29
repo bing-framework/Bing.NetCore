@@ -23,69 +23,20 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 统计全部记录。
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="columnAlias">聚合结果列别名。该重载始终表示 Count(*)，不表示待统计列。</param>
-    public static T Count<T>(this T source, string columnAlias = null) where T : ISelect
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Count(columnAlias);
-        return source;
-    }
-
-    /// <summary>
-    /// 统计全部记录。
+    /// 添加 Count 聚合。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源对象。</param>
-    /// <param name="columnAlias">聚合结果列别名；未提供时不输出 Alias。</param>
-    /// <returns>源对象。</returns>
-    public static T CountAll<T>(this T source, string columnAlias = null) where T : ISelect
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.CountAll(columnAlias);
-        return source;
-    }
-
-    /// <summary>
-    /// 统计指定列的非空值。
-    /// </summary>
-    /// <typeparam name="T">源类型。</typeparam>
-    /// <param name="source">源对象。</param>
-    /// <param name="column">单个结构化列名。</param>
-    /// <param name="columnAlias">聚合结果列别名；未提供时不输出 Alias。</param>
+    /// <param name="column">待统计列。默认值为 *，表示统计全部记录。</param>
+    /// <param name="alias">聚合结果别名。</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     /// <returns>源对象。</returns>
-    public static T CountColumn<T>(this T source, string column, string columnAlias = null,
-        bool distinct = false) where T : ISelect
+    public static T Count<T>(this T source, string column = "*", string alias = null, bool distinct = false) where T : ISelect
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.CountColumn(column, columnAlias, distinct);
-        return source;
-    }
-
-    /// <summary>
-    /// 求总行数
-    /// </summary>
-    /// <typeparam name="T">源类型</typeparam>
-    /// <param name="source">源</param>
-    /// <param name="column">列名</param>
-    /// <param name="columnAlias">列别名；未提供时使用列路径的叶子名称。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    public static T Count<T>(this T source, string column, string columnAlias, bool distinct = false) where T : ISelect
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
-            accessor.SelectClause.Count(column, columnAlias, distinct);
+            accessor.SelectClause.Count(column, alias, distinct);
         return source;
     }
 

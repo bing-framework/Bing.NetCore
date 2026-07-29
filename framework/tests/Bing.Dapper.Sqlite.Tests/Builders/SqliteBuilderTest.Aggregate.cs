@@ -65,7 +65,7 @@ public class SqliteBuilderAggregateTest
 
         // Assert
         Assert.Equal("column", exception.ParamName);
-        Assert.Equal("Select Count(*) As `Total` \r\nFrom `Orders`", builder.CountAll("Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As `Total` \r\nFrom `Orders`", builder.Count(alias: "Total").From("Orders").ToSql());
     }
 
     /// <summary>
