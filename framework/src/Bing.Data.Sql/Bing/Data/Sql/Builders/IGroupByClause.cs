@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
+using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// 分组子句
 /// </summary>
-public interface IGroupByClause : ISqlClauseCloneable<IGroupByClause>
+public interface IGroupByClause : ISqlClause, ISqlClauseCloneable<IGroupByClause>
 {
     /// <summary>
     /// 是否存在分组

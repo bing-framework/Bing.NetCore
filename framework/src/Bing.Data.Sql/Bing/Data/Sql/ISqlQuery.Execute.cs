@@ -13,7 +13,8 @@ public partial interface ISqlQuery
     /// 获取单值
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<object> ExecuteScalarAsync(int? timeout = null);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<object> ExecuteScalarAsync(int? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取单值
@@ -27,7 +28,8 @@ public partial interface ISqlQuery
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<T> ExecuteScalarAsync<T>(int? timeout = null);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<T> ExecuteScalarAsync<T>(int? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 执行存储过程获取单值
@@ -41,7 +43,9 @@ public partial interface ISqlQuery
     /// </summary>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 执行存储过程获取单值
@@ -57,7 +61,9 @@ public partial interface ISqlQuery
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取单个实体
@@ -71,7 +77,8 @@ public partial interface ISqlQuery
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<TEntity> ExecuteSingleAsync<TEntity>(int? timeout = null);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<TEntity> ExecuteSingleAsync<TEntity>(int? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 执行存储过程获取单个实体
@@ -87,5 +94,7 @@ public partial interface ISqlQuery
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null,
+        CancellationToken cancellationToken = default);
 }

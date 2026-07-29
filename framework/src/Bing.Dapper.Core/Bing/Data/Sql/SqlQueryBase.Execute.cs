@@ -28,16 +28,20 @@ public abstract partial class SqlQueryBase
     /// 获取单值
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<object> ExecuteScalarAsync(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => await conn.ExecuteScalarAsync(sql, param, transaction, timeout));
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<object> ExecuteScalarAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) => await conn.ExecuteScalarAsync(
+            new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken)));
 
     /// <summary>
     /// 获取单值
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<T> ExecuteScalarAsync<T>(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => await conn.ExecuteScalarAsync<T>(sql, param, transaction, timeout));
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<T> ExecuteScalarAsync<T>(int? timeout = null, CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) => await conn.ExecuteScalarAsync<T>(
+            new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken)));
 
     #endregion
 
@@ -77,11 +81,13 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public Task<object> ExecuteProcedureScalarAsync(string procedure, int? timeout = null,
+        CancellationToken cancellationToken = default)
     {
         return InternalProcedureQueryAsync(procedure,
             async (conn, command, param, transaction) => await conn.ExecuteScalarAsync(new CommandDefinition(command,
-                param, transaction, timeout, GetProcedureCommandType())));
+                param, transaction, timeout, GetProcedureCommandType(), cancellationToken: cancellationToken)));
     }
 
     /// <summary>
@@ -90,11 +96,13 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public Task<T> ExecuteProcedureScalarAsync<T>(string procedure, int? timeout = null,
+        CancellationToken cancellationToken = default)
     {
         return InternalProcedureQueryAsync(procedure,
             async (conn, command, param, transaction) => await conn.ExecuteScalarAsync<T>(new CommandDefinition(command,
-                param, transaction, timeout, GetProcedureCommandType())));
+                param, transaction, timeout, GetProcedureCommandType(), cancellationToken: cancellationToken)));
     }
 
     #endregion
@@ -118,8 +126,11 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public async Task<TEntity> ExecuteSingleAsync<TEntity>(int? timeout = null) =>
-        await InternalQueryAsync(async (conn, sql, param, transaction) => await conn.QueryFirstOrDefaultAsync<TEntity>(sql, param, transaction, timeout));
+    /// <param name="cancellationToken">取消令牌</param>
+    public async Task<TEntity> ExecuteSingleAsync<TEntity>(int? timeout = null,
+        CancellationToken cancellationToken = default) =>
+        await InternalQueryAsync(async (conn, sql, param, transaction) => await conn.QueryFirstOrDefaultAsync<TEntity>(
+            new CommandDefinition(sql, param, transaction, timeout, cancellationToken: cancellationToken)));
 
     #endregion
 
@@ -148,11 +159,14 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="procedure">存储过程</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public Task<TEntity> ExecuteProcedureSingleAsync<TEntity>(string procedure, int? timeout = null,
+        CancellationToken cancellationToken = default)
     {
         return InternalProcedureQueryAsync(procedure,
             async (conn, command, param, transaction) => await conn.QueryFirstOrDefaultAsync<TEntity>(
-                new CommandDefinition(command, param, transaction, timeout, GetProcedureCommandType())));
+                new CommandDefinition(command, param, transaction, timeout, GetProcedureCommandType(),
+                    cancellationToken: cancellationToken)));
     }
 
     #endregion

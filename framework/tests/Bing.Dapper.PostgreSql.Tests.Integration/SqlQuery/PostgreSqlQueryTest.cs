@@ -196,7 +196,8 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         var pager = new Pager(2, 2, order: "code");
 
         // Act
-        var result = await query.PagerQueryAsync(() => query.ExecuteQueryAsync<IntegrationProduct>(), pager);
+        var result = await query.PagerQueryAsync(token => query.ExecuteQueryAsync<IntegrationProduct>(cancellationToken: token),
+            pager);
 
         // Assert
         Assert.Equal(5, result.TotalCount);

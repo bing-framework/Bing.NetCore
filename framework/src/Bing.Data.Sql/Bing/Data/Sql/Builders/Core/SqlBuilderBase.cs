@@ -475,7 +475,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        if (builder is not ISqlPartAccessor accessor || ReferenceEquals(ParameterManager, accessor.ParameterManager))
+        if (builder is not ISqlCommonPartAccessor accessor || ReferenceEquals(ParameterManager, accessor.ParameterManager))
             return sql;
 
         var sourceParameters = accessor.ParameterManager.GetParams();
@@ -822,9 +822,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
         result.Append("(");
         AppendSelect(result);
         AppendFrom(result);
-        AppendSql(result, JoinClause.ToSql());
-        AppendSql(result, WhereClause.ToSql());
-        AppendSql(result, GroupByClause.ToSql());
+        AppendClause(result, JoinClause);
+        AppendClause(result, WhereClause);
+        AppendClause(result, GroupByClause);
         AppendSql(result, ")");
         foreach (var operation in UnionItems)
         {
@@ -833,7 +833,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
             AppendSql(result, ")");
         }
 
-        AppendSql(result, OrderByClause.ToSql());
+        AppendClause(result, OrderByClause);
         AppendLimit(result);
     }
 
@@ -845,10 +845,10 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     {
         AppendSelect(result);
         AppendFrom(result);
-        AppendSql(result, JoinClause.ToSql());
-        AppendSql(result, WhereClause.ToSql());
-        AppendSql(result, GroupByClause.ToSql());
-        AppendSql(result, OrderByClause.ToSql());
+        AppendClause(result, JoinClause);
+        AppendClause(result, WhereClause);
+        AppendClause(result, GroupByClause);
+        AppendClause(result, OrderByClause);
         AppendLimit(result);
     }
 
@@ -865,15 +865,34 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     }
 
     /// <summary>
+    /// 追加 SQL 子句，并保持查询 Builder 的既有换行布局。
+    /// </summary>
+    /// <param name="result">最终 SQL 缓冲区。</param>
+    /// <param name="clause">待输出的 SQL 子句。</param>
+    protected void AppendClause(StringBuilder result, ISqlContent clause)
+    {
+        if (result == null)
+            throw new ArgumentNullException(nameof(result));
+        if (clause == null)
+            return;
+        var startIndex = result.Length;
+        clause.AppendTo(result);
+        if (result.Length == startIndex)
+            return;
+        result.AppendLine(" ");
+    }
+
+    /// <summary>
     /// 添加Select子句
     /// </summary>
     /// <param name="result">Sql拼接器</param>
     protected virtual void AppendSelect(StringBuilder result)
     {
-        var sql = SelectClause.ToSql();
-        if (string.IsNullOrWhiteSpace(sql))
+        var startIndex = result.Length;
+        SelectClause.AppendTo(result);
+        if (result.Length == startIndex)
             throw new InvalidOperationException("必须设置Select子句");
-        AppendSql(result, sql);
+        result.AppendLine(" ");
     }
 
     /// <summary>
@@ -882,10 +901,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAcce
     /// <param name="result">Sql拼接器</param>
     protected virtual void AppendFrom(StringBuilder result)
     {
-        var sql = FromClause.ToSql();
-        if (string.IsNullOrWhiteSpace(sql))
+        var startIndex = result.Length;
+        FromClause.AppendTo(result);
+        if (result.Length == startIndex)
             throw new InvalidOperationException("必须设置From子句");
-        AppendSql(result, sql);
+        result.AppendLine(" ");
     }
 
     /// <summary>

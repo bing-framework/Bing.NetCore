@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders;
@@ -7,7 +8,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// 表连接子句
 /// </summary>
-public interface IJoinClause : ISqlClauseCloneable<IJoinClause>
+public interface IJoinClause : ISqlClause, ISqlClauseCloneable<IJoinClause>
 {
 
     /// <summary>

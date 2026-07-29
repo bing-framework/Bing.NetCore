@@ -33,7 +33,7 @@ public class SqlFilterContext
     /// <summary>
     /// 提供当前 Builder 子句访问能力的访问器。
     /// </summary>
-    public ISqlPartAccessor ClauseAccessor { get; }
+    public ISqlQueryClauseAccessor ClauseAccessor { get; }
 
     /// <summary>
     /// 将实体成员解析为 SQL 映射元数据的解析器。
@@ -82,7 +82,7 @@ public class SqlFilterContext
     /// <param name="services">SQL Builder 共享服务集合。</param>
     /// <param name="databaseContext">Builder 生命周期内固定的数据库上下文。</param>
     public SqlFilterContext(IDialect dialect, IEntityAliasRegister entityAliasRegister, IParameterManager parameterManager,
-        ISqlPartAccessor clause, SqlBuilderServices services, DatabaseContext databaseContext = null)
+        ISqlQueryClauseAccessor clause, SqlBuilderServices services, DatabaseContext databaseContext = null)
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));

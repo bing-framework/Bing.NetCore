@@ -6,7 +6,7 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>Oracle SQL 提供程序。</summary>
-public sealed class OracleSqlProvider : ISqlProvider, ISqlParameterLimitProvider
+public sealed class OracleSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 Oracle Provider 单例。
@@ -42,6 +42,10 @@ public sealed class OracleSqlProvider : ISqlProvider, ISqlParameterLimitProvider
     /// <inheritdoc />
     public IParamLiteralsResolver ParamLiteralsResolver { get; } =
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
+
+    /// <inheritdoc />
+    /// <remarks>Oracle 不支持标准 <c>Values (...), (...)</c> 多行插入语法。</remarks>
+    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultiRowValues: false);
 
     /// <inheritdoc />
     /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>

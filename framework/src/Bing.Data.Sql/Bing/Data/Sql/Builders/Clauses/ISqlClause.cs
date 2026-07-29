@@ -6,8 +6,7 @@
 public interface ISqlClause : ISqlContent
 {
     /// <summary>
-    /// 验证当前子句配置是否可参与 SQL 渲染。
+    /// 清空当前子句保存的全部可变状态。
     /// </summary>
-    /// <returns>子句状态有效时返回 true；否则返回 false。</returns>
-    bool Validate();
+    void Clear();
 }

@@ -51,6 +51,45 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：异步列表、标量和单实体查询在执行前取消时，应停止执行并释放当前 Query 的执行资源。
+    /// </summary>
+    [Fact]
+    public async Task QueryAsync_WhenCancellationRequested_ShouldCancelAndReleaseExecutionResources()
+    {
+        // Arrange
+        await SeedAsync();
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        using (var listQuery = CreateSamplesQuery())
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                listQuery.ExecuteQueryAsync<Sample>(cancellationToken: cancellationTokenSource.Token));
+        using (var scalarQuery = _fixture.CreateQuery())
+        {
+            scalarQuery.AppendSelect("Count(*)").AppendFrom("samples");
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                scalarQuery.ExecuteScalarAsync<int>(cancellationToken: cancellationTokenSource.Token));
+        }
+        using (var scalarExtensionQuery = _fixture.CreateQuery())
+        {
+            scalarExtensionQuery.AppendSelect("Count(*)").AppendFrom("samples");
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                scalarExtensionQuery.ToIntAsync(cancellationTokenSource.Token));
+        }
+        using (var singleQuery = CreateSamplesQuery())
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                singleQuery.ExecuteSingleAsync<Sample>(cancellationToken: cancellationTokenSource.Token));
+        using (var pagerQuery = CreateSamplesQuery())
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => pagerQuery.ToPagerListAsync<Sample>(
+                new Pager(1, 2), cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        await InsertAsync("after-query-cancellation");
+        Assert.Equal(4, await _fixture.CountAsync());
+    }
+
+    /// <summary>
     /// 测试目的：SQLite 应在同一连接内通过受控别名访问附加数据库，并在结束时分离该数据库。
     /// </summary>
     [Fact]

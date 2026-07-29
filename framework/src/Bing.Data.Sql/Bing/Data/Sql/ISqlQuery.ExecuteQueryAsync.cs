@@ -31,7 +31,9 @@ public partial interface ISqlQuery
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, TEntity>(Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, TEntity>(Func<T1, T2, TEntity> map, int? timeout = null,
+        bool buffered = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合
@@ -43,7 +45,9 @@ public partial interface ISqlQuery
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, TEntity>(Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, TEntity>(Func<T1, T2, T3, TEntity> map, int? timeout = null,
+        bool buffered = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合
@@ -56,7 +60,9 @@ public partial interface ISqlQuery
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, TEntity>(Func<T1, T2, T3, T4, TEntity> map, int? timeout = null, bool buffered = true);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, TEntity>(Func<T1, T2, T3, T4, TEntity> map, int? timeout = null,
+        bool buffered = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合
@@ -70,7 +76,9 @@ public partial interface ISqlQuery
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, TEntity>(Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null, bool buffered = true);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, TEntity>(Func<T1, T2, T3, T4, T5, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合
@@ -85,7 +93,9 @@ public partial interface ISqlQuery
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null, bool buffered = true);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(Func<T1, T2, T3, T4, T5, T6, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取实体集合
@@ -101,5 +111,7 @@ public partial interface ISqlQuery
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null, bool buffered = true);
+    /// <param name="cancellationToken">取消令牌</param>
+    Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default);
 }

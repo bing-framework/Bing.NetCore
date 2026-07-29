@@ -111,6 +111,120 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
+    /// 测试目的：所有公开的异步列表、多映射、标量、单实体及存储过程查询入口都应在末尾提供可选取消令牌。
+    /// </summary>
+    [Fact]
+    public void QueryAsyncContracts_ShouldExposeOptionalCancellationToken()
+    {
+        // Arrange
+        var cancellationAwareMethods = typeof(ISqlQuery).GetMethods().Where(method => method.Name is
+            nameof(ISqlQuery.ExecuteQueryAsync) or nameof(ISqlQuery.ExecuteProcedureQueryAsync) or
+            nameof(ISqlQuery.ExecuteScalarAsync) or nameof(ISqlQuery.ExecuteProcedureScalarAsync) or
+            nameof(ISqlQuery.ExecuteSingleAsync) or nameof(ISqlQuery.ExecuteProcedureSingleAsync)).ToList();
+
+        // Act and Assert
+        Assert.NotEmpty(cancellationAwareMethods);
+        Assert.All(cancellationAwareMethods, method =>
+        {
+            var parameter = method.GetParameters().Last();
+            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
+            Assert.True(parameter.HasDefaultValue);
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：分页查询应保留令牌感知重载，并将无法向数据页传递令牌的旧委托重载标记为过时。
+    /// </summary>
+    [Fact]
+    public void PagerQueryAsyncContracts_ShouldPreferCancellationAwareCallback()
+    {
+        // Arrange
+        var methods = typeof(ISqlQuery).GetMethods().Where(method => method.Name == nameof(ISqlQuery.PagerQueryAsync))
+            .ToList();
+        var legacyMethod = methods.Single(method => method.GetParameters()[0].ParameterType.GetGenericArguments().Length == 1);
+        var cancellationAwareMethod = methods.Single(method =>
+            method.GetParameters()[0].ParameterType.GetGenericArguments().Length == 2);
+
+        // Act
+        var obsolete = legacyMethod.GetCustomAttribute<ObsoleteAttribute>();
+        var cancellationToken = cancellationAwareMethod.GetParameters().Last();
+
+        // Assert
+        Assert.NotNull(obsolete);
+        Assert.Equal(typeof(CancellationToken), cancellationToken.ParameterType);
+        Assert.True(cancellationToken.HasDefaultValue);
+    }
+
+    /// <summary>
+    /// 测试目的：多结果集异步读取应优先使用令牌感知重载，旧无令牌入口仅保留兼容用途。
+    /// </summary>
+    [Fact]
+    public void MultipleQueryResultAsyncContracts_ShouldPreferCancellationAwareRead()
+    {
+        // Arrange
+        var methods = typeof(ISqlMultipleQueryResult).GetMethods().Where(method => method.Name == "ReadAsync").ToList();
+        var legacyMethods = methods.Where(method => method.GetParameters().Length == 0).ToList();
+        var cancellationAwareMethods = methods.Where(method => method.GetParameters().Length == 1).ToList();
+
+        // Act and Assert
+        Assert.Equal(2, legacyMethods.Count);
+        Assert.Equal(2, cancellationAwareMethods.Count);
+        Assert.All(legacyMethods, method => Assert.NotNull(method.GetCustomAttribute<ObsoleteAttribute>()));
+        Assert.All(cancellationAwareMethods, method =>
+        {
+            var parameter = method.GetParameters().Single();
+            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
+            Assert.True(parameter.HasDefaultValue);
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：查询 Fluent 异步扩展和分页扩展均应在末尾提供可选取消令牌。
+    /// </summary>
+    [Fact]
+    public void QueryAsyncExtensions_ShouldExposeOptionalCancellationToken()
+    {
+        // Arrange
+        var cancellationAwareMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.Name is "ToAsync" or "ToEntityAsync" or "ToListAsync" or "ToPagerListAsync")
+            .ToList();
+
+        // Act and Assert
+        Assert.NotEmpty(cancellationAwareMethods);
+        Assert.All(cancellationAwareMethods, method =>
+        {
+            var parameter = method.GetParameters().Last();
+            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
+            Assert.True(parameter.HasDefaultValue);
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：所有异步标量转换扩展都应在末尾提供可选取消令牌。
+    /// </summary>
+    [Fact]
+    public void ScalarAsyncExtensions_ShouldExposeOptionalCancellationToken()
+    {
+        // Arrange
+        var scalarMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.Name is "ToScalarAsync" or "ToStringAsync" or "ToIntAsync" or "ToIntOrNullAsync" or
+                "ToLongAsync" or "ToLongOrNullAsync" or "ToGuidAsync" or "ToGuidOrNullAsync" or "ToBoolAsync" or
+                "ToBoolOrNullAsync" or "ToFloatAsync" or "ToFloatOrNullAsync" or "ToDoubleAsync" or
+                "ToDoubleOrNullAsync" or "ToDecimalAsync" or "ToDecimalOrNullAsync" or "ToDateTimeAsync" or
+                "ToDateTimeOrNullAsync")
+            .ToList();
+
+        // Act and Assert
+        Assert.Equal(18, scalarMethods.Count);
+        Assert.All(scalarMethods, method =>
+        {
+            var parameter = method.GetParameters().Last();
+            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
+            Assert.True(parameter.HasDefaultValue);
+        });
+    }
+
+    /// <summary>
     /// 测试目的：跨 ORM 的数据库契约仍应提供只读连接访问器。
     /// </summary>
     [Fact]

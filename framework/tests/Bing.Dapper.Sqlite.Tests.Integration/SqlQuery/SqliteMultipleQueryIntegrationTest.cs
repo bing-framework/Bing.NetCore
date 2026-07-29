@@ -39,8 +39,8 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
 
         // Act
         using var result = await executor.ExecuteAsync(command);
-        var rows = await result.ReadAsync<SampleName>();
-        var count = (await result.ReadAsync<int>()).Single();
+        var rows = await result.ReadAsync<SampleName>(CancellationToken.None);
+        var count = (await result.ReadAsync<int>(CancellationToken.None)).Single();
 
         // Assert
         Assert.Single(rows);
@@ -66,8 +66,8 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
         using (var result = executor.Execute(command))
         {
             var exception = Assert.Throws<InvalidOperationException>(() => executor.Execute(command));
-            await result.ReadAsync<SampleName>();
-            await result.ReadAsync<int>();
+            await result.ReadAsync<SampleName>(CancellationToken.None);
+            await result.ReadAsync<int>(CancellationToken.None);
 
             // Assert
             Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。", exception.Message);
@@ -75,6 +75,37 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
         using var nextResult = executor.Execute(command);
         nextResult.Read<SampleName>();
         var count = nextResult.Read<int>();
+
+        // Assert
+        Assert.Single(count);
+        Assert.Equal(1, count[0]);
+    }
+
+    /// <summary>
+    /// 测试目的：多结果集读取在开始前收到取消令牌时应释放执行租约，以便执行器继续执行后续操作。
+    /// </summary>
+    [Fact]
+    public async Task ReadAsync_WhenCancellationRequested_ShouldReleaseExecutionResources()
+    {
+        // Arrange
+        await _fixture.InsertSampleAsync("first", 1m, "secret-1");
+        using var executor = _fixture.CreateMultipleQueryExecutor();
+        var command = executor.CreateBatch()
+            .Append("Select Name From samples")
+            .Append("Select Count(*) From samples")
+            .Build();
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act
+        using (var result = await executor.ExecuteAsync(command))
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                result.ReadAsync<SampleName>(cancellationTokenSource.Token));
+        }
+        using var nextResult = await executor.ExecuteAsync(command);
+        await nextResult.ReadAsync<SampleName>(CancellationToken.None);
+        var count = await nextResult.ReadAsync<int>(CancellationToken.None);
 
         // Assert
         Assert.Single(count);

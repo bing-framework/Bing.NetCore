@@ -1590,8 +1590,8 @@ public class SqlServerRoutingAndExecutionTest
         asyncQuery.Select("Id,Name").From("[Users]");
 
         // Act
-        var asyncResult = await asyncQuery.PagerQueryAsync(() => asyncQuery.ExecuteQueryAsync<MappedSample>(),
-            new Pager(1, 20, "Id"));
+        var asyncResult = await asyncQuery.PagerQueryAsync(
+            token => asyncQuery.ExecuteQueryAsync<MappedSample>(cancellationToken: token), new Pager(1, 20, "Id"));
 
         // Assert
         Assert.Single(asyncResult.Data);

@@ -1,11 +1,12 @@
 ﻿using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// From子句
 /// </summary>
-public interface IFromClause : ISqlClauseCloneable<IFromClause>
+public interface IFromClause : ISqlClause, ISqlClauseCloneable<IFromClause>
 {
 
     /// <summary>

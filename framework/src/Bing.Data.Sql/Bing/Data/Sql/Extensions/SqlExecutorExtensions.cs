@@ -39,16 +39,17 @@ public static class SqlExecutorExtensions
     /// <param name="param">参数对象</param>
     /// <param name="map">参数映射配置</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="cancellationToken">取消令牌</param>
     /// <returns>操作影响的行数</returns>
     public static Task<int> ExecuteSqlAsync<TEntity>(this ISqlExecutor executor, string sql, object param,
-        Action<SqlParameterMap<TEntity>> map, int? timeout = null)
+        Action<SqlParameterMap<TEntity>> map, int? timeout = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
         executor.CheckNull(nameof(executor));
         if (map == null)
-            return executor.ExecuteSqlAsync(sql, param, timeout);
+            return executor.ExecuteSqlAsync(sql, param, timeout, cancellationToken);
         var parameterMap = new SqlParameterMap<TEntity>().UseSource(param);
         map(parameterMap);
-        return executor.ExecuteSqlAsync(sql, parameterMap, timeout);
+        return executor.ExecuteSqlAsync(sql, parameterMap, timeout, cancellationToken);
     }
 }

@@ -42,12 +42,20 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     public List<TEntity> Read<TEntity>() => Read(reader => reader.Read<TEntity>().ToList());
 
     /// <inheritdoc />
-    public async Task<List<dynamic>> ReadAsync() => await ReadAsync(async reader =>
-        (await reader.ReadAsync()).ToList());
+    [Obsolete("请使用接收 CancellationToken 的 ReadAsync 重载")]
+    public Task<List<dynamic>> ReadAsync() => ReadAsync(CancellationToken.None);
 
     /// <inheritdoc />
-    public async Task<List<TEntity>> ReadAsync<TEntity>() => await ReadAsync(async reader =>
-        (await reader.ReadAsync<TEntity>()).ToList());
+    [Obsolete("请使用接收 CancellationToken 的 ReadAsync 重载")]
+    public Task<List<TEntity>> ReadAsync<TEntity>() => ReadAsync<TEntity>(CancellationToken.None);
+
+    /// <inheritdoc />
+    public async Task<List<dynamic>> ReadAsync(CancellationToken cancellationToken) => await ReadAsync(async reader =>
+        (await reader.ReadAsync()).ToList(), cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<List<TEntity>> ReadAsync<TEntity>(CancellationToken cancellationToken) => await ReadAsync(async reader =>
+        (await reader.ReadAsync<TEntity>()).ToList(), cancellationToken);
 
     /// <inheritdoc />
     public void Dispose()
@@ -98,12 +106,15 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="read">异步读取操作。</param>
+    /// <param name="cancellationToken">开始读取当前结果集前使用的取消令牌。</param>
     /// <returns>当前结果集。</returns>
-    private async Task<TResult> ReadAsync<TResult>(Func<SqlMapper.GridReader, Task<TResult>> read)
+    private async Task<TResult> ReadAsync<TResult>(Func<SqlMapper.GridReader, Task<TResult>> read,
+        CancellationToken cancellationToken)
     {
         var reader = GetReader();
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await read(reader);
         }
         catch (Exception exception)

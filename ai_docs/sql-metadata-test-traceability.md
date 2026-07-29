@@ -32,6 +32,16 @@
 
 ## 统一聚合与 AppendTo 追溯
 
+## Mutation Clause 与批量 CRUD 追溯
+
+| 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
+| --- | --- | --- | --- | --- |
+| `SqlInsertBuilder` / `InsertClause` / `InsertColumnsClause` / `ValuesClause` | `Bing.Data.Sql.Tests` | `SqlInsertBuilderTest` | `InsertInto_WhenColumnsAndValuesConfigured_ShouldRenderExpectedSql`; `Values_WhenRowColumnCountDiffers_ShouldThrowInvalidOperationException`; `Clone_WhenSourceContainsValues_ShouldKeepInstancesIndependent` | Unit |
+| `SqlUpdateBuilder` / `UpdateClause` / `SetClause` / `MutationWhereClause` | `Bing.Data.Sql.Tests` | `SqlUpdateBuilderTest` | 专用 Builder 的完整 SQL、无条件保护、Clone 与 Clear 测试 | Unit |
+| `SqlDeleteBuilder` / `DeleteClause` / `MutationWhereClause` | `Bing.Data.Sql.Tests` | `SqlDeleteBuilderTest` | 专用 Builder 的完整 SQL、无条件保护、Clone 与 Clear 测试 | Unit |
+| `SqlMutationBatchPlanner.Plan` | `Bing.Data.Sql.Tests` | `SqlMutationBatchPlannerTest` | `Plan_WhenMultipleLimitsConfigured_ShouldUseSmallestCapacity`; `Plan_WhenEntitySetIsEmpty_ShouldReturnEmptyPlan`; `Plan_WhenNoCapacityLimitConfigured_ShouldCreateSingleBatch`; `Plan_WhenParameterLimitCannotFitOneEntity_ShouldThrowInvalidOperationException` | Unit |
+| `SqlExecutorBase.InsertBatchAsync` / `UpdateBatch` / `DeleteBatchAsync` | `Bing.Dapper.Sqlite.Tests.Integration` | `SqliteMutationExecutionIntegrationTest` | `InsertBatch_WhenEntitiesAreProvided_ShouldInsertAllEntities`; `UpdateBatch_WhenOneConcurrencyTokenDoesNotMatch_ShouldReturnActualAffectedRows`; `DeleteBatch_WhenEntitySetIsEmpty_ShouldReturnZero` | SQLite Integration |
+
 | 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
 | --- | --- | --- | --- | --- |
 | `SqlAggregateFunction` / `SqlAggregateArgumentValidator.ValidateFunction` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `Aggregate_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException`; `AggregateRaw_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException`; `AggregateExpression_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException` | Unit |

@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
+using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// Order By子句
 /// </summary>
-public interface IOrderByClause : ISqlClauseCloneable<IOrderByClause>
+public interface IOrderByClause : ISqlClause, ISqlClauseCloneable<IOrderByClause>
 {
 
     /// <summary>

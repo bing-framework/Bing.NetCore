@@ -622,16 +622,32 @@ public class JoinClause : IJoinClause
 
     #endregion
 
-    #region ToSql(输出Sql)
+    #region 输出
+
+    /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        for (var index = 0; index < _params.Count; index++)
+        {
+            if (index > 0)
+                builder.AppendLine(" ");
+            builder.Append(_params[index].ToSql(_dialect));
+        }
+    }
+
+    /// <inheritdoc />
+    public void Clear() => _params.Clear();
 
     /// <summary>
-    /// 输出Sql
+    /// 输出Sql。
     /// </summary>
     public string ToSql()
     {
         var result = new StringBuilder();
-        _params.ForEach(item => result.AppendLine($"{item.ToSql(_dialect)} "));
-        return result.ToString().Trim();
+        AppendTo(result);
+        return result.ToString();
     }
 
     #endregion

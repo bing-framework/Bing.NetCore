@@ -132,18 +132,35 @@ public class GroupByClause : IGroupByClause
         _group.Add(new SqlItem(sql, raw: true));
     }
 
+    /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        if (IsGroup == false)
+            return;
+        builder.Append("Group By ");
+        builder.Append(GroupColumns);
+        if (string.IsNullOrWhiteSpace(_having))
+            return;
+        builder.Append(" Having ");
+        builder.Append(_having);
+    }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        _group.Clear();
+        _having = null;
+    }
+
     /// <summary>
-    /// 获取Sql
+    /// 获取Sql。
     /// </summary>
     public string ToSql()
     {
-        if (IsGroup == false)
-            return null;
         var result = new StringBuilder();
-        result.Append($"Group By {GroupColumns}");
-        if (string.IsNullOrWhiteSpace(_having))
-            return result.ToString();
-        result.Append($" Having {_having}");
-        return result.ToString();
+        AppendTo(result);
+        return result.Length == 0 ? null : result.ToString();
     }
 }

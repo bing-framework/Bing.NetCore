@@ -20,6 +20,12 @@ Builder 必须通过 `ISqlBuilderFactory.Create(provider, queryServices)` 创建
 
 若数据库存在参数数限制，实现 `ISqlParameterLimitProvider` 并返回明确上限；没有已知限制时返回 `null`。SQL Server 的官方契约为 2100。
 
+## Mutation Clause 扩展
+
+默认实体 Mutation 通过 `DefaultSqlMutationClauseFactory` 创建 Insert、Update、Delete、列、Values、Set 和 Where Clause。外部 Provider 需要局部 SQL 差异时，实现 `ISqlMutationClauseFactoryProvider` 并返回自定义 `ISqlMutationClauseFactory`；不要复制完整 `SqlInsertBuilder`、`SqlUpdateBuilder` 或 `SqlDeleteBuilder`。
+
+批量 `Auto` 当前采用每实体参数化命令串行执行。Provider 在实现合并式 Insert Values、Delete IN 或其他方言能力前，必须保持 `Combined` 不可用，并用完整 SQL、参数和分片边界测试证明行为。
+
 ## 验收
 
 外部 Provider 至少应覆盖 Factory Key、全部 Clause 创建、From/Join 表引用解析、分页、参数限制，以及 New/Clone 状态隔离。无需访问框架内部类型；`Bing.Data.Sql.CustomProvider.Tests` 是无 IVT 的契约样例。

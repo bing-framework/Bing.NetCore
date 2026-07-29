@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text;
 using Bing.Data;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Conditions;
@@ -820,15 +821,29 @@ public class WhereClause : IWhereClause
         And(new SqlCondition(sql));
     }
 
+    /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        var condition = GetCondition();
+        if (string.IsNullOrWhiteSpace(condition))
+            return;
+        builder.Append("Where ");
+        builder.Append(condition);
+    }
+
+    /// <inheritdoc />
+    public void Clear() => _condition = null;
+
     /// <summary>
-    /// 输出Sql
+    /// 输出Sql。
     /// </summary>
     public string ToSql()
     {
-        var condition = GetCondition();
-        if (string.IsNullOrWhiteSpace(condition))
-            return null;
-        return $"Where {condition}";
+        var result = new StringBuilder();
+        AppendTo(result);
+        return result.Length == 0 ? null : result.ToString();
     }
 
     /// <summary>

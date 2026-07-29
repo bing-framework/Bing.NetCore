@@ -22,7 +22,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Where(condition);
         return source;
     }
@@ -40,7 +40,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Where(column, value, @operator);
         return source;
     }
@@ -58,7 +58,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Where(column, builder, @operator);
         return source;
     }
@@ -76,7 +76,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Where(column, action, @operator);
         return source;
     }
@@ -135,7 +135,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.WhereIfNotEmpty(column, value, @operator);
         return source;
     }
@@ -326,7 +326,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.IsNull(column);
         return source;
     }
@@ -346,7 +346,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.IsNotNull(column);
         return source;
     }
@@ -366,7 +366,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.IsEmpty(column);
         return source;
     }
@@ -386,7 +386,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.IsNotEmpty(column);
         return source;
     }
@@ -407,7 +407,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.In(column, values);
         return source;
     }
@@ -424,7 +424,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.In(column, builder);
         return source;
     }
@@ -441,7 +441,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.In(column, action);
         return source;
     }
@@ -462,7 +462,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.NotIn(column, values);
         return source;
     }
@@ -479,7 +479,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.NotIn(column, builder);
         return source;
     }
@@ -496,7 +496,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.NotIn(column, action);
         return source;
     }
@@ -516,7 +516,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Exists(builder);
         return source;
     }
@@ -532,7 +532,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Exists(action);
         return source;
     }
@@ -552,7 +552,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.NotExists(builder);
         return source;
     }
@@ -568,7 +568,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.NotExists(action);
         return source;
     }
@@ -591,7 +591,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Between(column, min, max, boundary);
         return source;
     }
@@ -610,7 +610,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Between(column, min, max, boundary);
         return source;
     }
@@ -629,7 +629,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Between(column, min, max, boundary);
         return source;
     }
@@ -648,7 +648,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Between(column, min, max, boundary);
         return source;
     }
@@ -667,7 +667,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Between(column, min, max, boundary);
         return source;
     }
@@ -687,7 +687,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Between(column, min, max, includeTime, boundary);
         return source;
     }
@@ -707,7 +707,7 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.AppendSql(sql);
         return source;
     }

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Extensions;
@@ -140,13 +141,27 @@ public class OrderByClause : IOrderByClause
             throw new ArgumentException(LibraryResource.OrderIsEmptyForPage);
     }
 
+    /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        if (_items.Count == 0)
+            return;
+        builder.Append("Order By ");
+        builder.Append(_items.Select(t => t.ToSql(_dialect, _register)).Join());
+    }
+
+    /// <inheritdoc />
+    public void Clear() => _items.Clear();
+
     /// <summary>
-    /// 获取Sql
+    /// 获取Sql。
     /// </summary>
     public string ToSql()
     {
-        if (_items.Count == 0)
-            return null;
-        return $"Order By {_items.Select(t => t.ToSql(_dialect, _register)).Join()}";
+        var result = new StringBuilder();
+        AppendTo(result);
+        return result.Length == 0 ? null : result.ToString();
     }
 }

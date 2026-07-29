@@ -28,7 +28,7 @@ public static class SqlParameterExtensions
         where T : ISqlParameter
     {
         source.CheckNull(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlCommonPartAccessor accessor)
             accessor.ParameterManager.Add(name, value);
         return source;
     }
@@ -49,7 +49,7 @@ public static class SqlParameterExtensions
     {
         source.CheckNull(nameof(source));
         property.CheckNull(nameof(property));
-        if (source is not ISqlPartAccessor accessor)
+        if (source is not ISqlCommonPartAccessor accessor)
             return source;
         if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
         {
@@ -71,7 +71,7 @@ public static class SqlParameterExtensions
     public static IReadOnlyDictionary<string, object> GetParams(this ISqlParameter source)
     {
         source.CheckNull(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlCommonPartAccessor accessor)
             return accessor.ParameterManager.GetParams();
         return default;
     }
@@ -83,7 +83,7 @@ public static class SqlParameterExtensions
     public static IReadOnlyDictionary<string, SqlParam> GetSqlParams(this ISqlParameter source)
     {
         source.CheckNull(nameof(source));
-        if (source is not ISqlPartAccessor accessor)
+        if (source is not ISqlCommonPartAccessor accessor)
             return default;
         if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
             return advancedParameterManager.GetSqlParams();
@@ -113,7 +113,7 @@ public static class SqlParameterExtensions
         source.CheckNull(nameof(source));
         if (source is IGetParameter target)
             return target.GetParam<T>(name);
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlCommonPartAccessor accessor)
             return (T)accessor.ParameterManager.GetValue(name);
         return default;
     }
@@ -126,7 +126,7 @@ public static class SqlParameterExtensions
     public static object GetParam(this ISqlParameter source, string name)
     {
         source.CheckNull(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlCommonPartAccessor accessor)
             return accessor.ParameterManager.GetValue(name);
         return default;
     }
@@ -149,7 +149,7 @@ public static class SqlParameterExtensions
             target.ClearParams();
             return source;
         }
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlCommonPartAccessor accessor)
             accessor.ParameterManager.Clear();
         return source;
     }

@@ -196,12 +196,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <summary>
     /// Sql方言
     /// </summary>
-    public IDialect Dialect => ((ISqlPartAccessor)SqlBuilder).Dialect;
+    public IDialect Dialect => ((ISqlCommonPartAccessor)SqlBuilder).Dialect;
 
     /// <summary>
     /// 参数管理器
     /// </summary>
-    public IParameterManager ParameterManager => ((ISqlPartAccessor)SqlBuilder).ParameterManager;
+    public IParameterManager ParameterManager => ((ISqlCommonPartAccessor)SqlBuilder).ParameterManager;
 
     /// <summary>
     /// 参数字面值解析器
@@ -216,32 +216,32 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <summary>
     /// Select子句
     /// </summary>
-    public ISelectClause SelectClause => ((ISqlPartAccessor)SqlBuilder).SelectClause;
+    public ISelectClause SelectClause => ((ISqlQueryClauseAccessor)SqlBuilder).SelectClause;
 
     /// <summary>
     /// From子句
     /// </summary>
-    public IFromClause FromClause => ((ISqlPartAccessor)SqlBuilder).FromClause;
+    public IFromClause FromClause => ((ISqlQueryClauseAccessor)SqlBuilder).FromClause;
 
     /// <summary>
     /// Join子句
     /// </summary>
-    public IJoinClause JoinClause => ((ISqlPartAccessor)SqlBuilder).JoinClause;
+    public IJoinClause JoinClause => ((ISqlQueryClauseAccessor)SqlBuilder).JoinClause;
 
     /// <summary>
     /// Where子句
     /// </summary>
-    public IWhereClause WhereClause => ((ISqlPartAccessor)SqlBuilder).WhereClause;
+    public IWhereClause WhereClause => ((ISqlQueryClauseAccessor)SqlBuilder).WhereClause;
 
     /// <summary>
     /// GroupBy子句
     /// </summary>
-    public IGroupByClause GroupByClause => ((ISqlPartAccessor)SqlBuilder).GroupByClause;
+    public IGroupByClause GroupByClause => ((ISqlQueryClauseAccessor)SqlBuilder).GroupByClause;
 
     /// <summary>
     /// OrderBy子句
     /// </summary>
-    public IOrderByClause OrderByClause => ((ISqlPartAccessor)SqlBuilder).OrderByClause;
+    public IOrderByClause OrderByClause => ((ISqlQueryClauseAccessor)SqlBuilder).OrderByClause;
 
     /// <summary>
     /// 参数列表
@@ -746,19 +746,42 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     }
 
     /// <summary>
-    /// 分页查询
+    /// 分页查询。
     /// </summary>
     /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="func">获取列表操作</param>
+    /// <param name="func">不接收取消令牌的获取列表操作。</param>
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public virtual async Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter, int? timeout = null)
+    /// <remarks>该重载无法将取消令牌传递给列表操作，请改用接收 <see cref="CancellationToken"/> 的重载。</remarks>
+    [Obsolete("请使用接收 CancellationToken 的 PagerQueryAsync 重载")]
+    public virtual Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter,
+        int? timeout = null)
     {
+        if (func == null)
+            throw new ArgumentNullException(nameof(func));
+        return PagerQueryAsync(_ => func(), parameter, timeout);
+    }
+
+    /// <summary>
+    /// 分页查询。
+    /// </summary>
+    /// <typeparam name="TResult">返回结果类型。</typeparam>
+    /// <param name="func">使用取消令牌获取列表的操作。</param>
+    /// <param name="parameter">分页参数。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示最终分页结果的异步操作。</returns>
+    public virtual async Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<CancellationToken, Task<List<TResult>>> func,
+        IPager parameter, int? timeout = null, CancellationToken cancellationToken = default)
+    {
+        if (func == null)
+            throw new ArgumentNullException(nameof(func));
+        cancellationToken.ThrowIfCancellationRequested();
         parameter = GetPage(parameter);
         if (parameter.TotalCount == 0)
-            parameter.TotalCount = await GetCountAsync(timeout);
+            parameter.TotalCount = await GetCountAsync(timeout, cancellationToken);
         SetPager(parameter);
-        return new PagerList<TResult>(parameter, await func());
+        return new PagerList<TResult>(parameter, await func(cancellationToken));
     }
 
     /// <summary>
@@ -774,7 +797,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// 获取行数
     /// </summary>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    protected async Task<int> GetCountAsync(int? timeout = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    protected async Task<int> GetCountAsync(int? timeout = null, CancellationToken cancellationToken = default)
     {
         using var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
@@ -789,7 +813,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
             message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
 
             WriteTraceLog(builder, sql);
-            var result = await conn.ExecuteScalarAsync(sql, dbParameters, transaction, timeout);
+            var result = await conn.ExecuteScalarAsync(new CommandDefinition(sql, dbParameters, transaction, timeout,
+                cancellationToken: cancellationToken));
 
             CompleteQueryTransaction();
             ExecuteAfter(message);
@@ -881,7 +906,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// <param name="builder">Sql生成器</param>
     private bool IsGroup(ISqlBuilder builder)
     {
-        if (builder is ISqlPartAccessor accessor)
+        if (builder is ISqlQueryClauseAccessor accessor)
             return accessor.GroupByClause.IsGroup;
         return false;
     }

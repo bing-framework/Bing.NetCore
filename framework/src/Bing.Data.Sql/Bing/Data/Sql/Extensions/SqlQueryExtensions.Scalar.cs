@@ -26,9 +26,10 @@ public static partial class SqlQueryExtensions
     /// </summary>
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="cancellationToken">取消令牌</param>
     [Obsolete("请使用 ExecuteScalarAsync()")]
-    public static Task<object> ToScalarAsync(this ISqlQuery sqlQuery, int? timeout = null) =>
-        sqlQuery.ExecuteScalarAsync(timeout);
+    public static Task<object> ToScalarAsync(this ISqlQuery sqlQuery, int? timeout = null,
+        CancellationToken cancellationToken = default) => sqlQuery.ExecuteScalarAsync(timeout, cancellationToken);
 
     #endregion
 
@@ -52,10 +53,11 @@ public static partial class SqlQueryExtensions
     /// 获取字符串值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<string> ToStringAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<string> ToStringAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return result.SafeString();
     }
 
@@ -81,10 +83,11 @@ public static partial class SqlQueryExtensions
     /// 获取32位整型值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<int> ToIntAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<int> ToIntAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToInt(result);
     }
 
@@ -110,10 +113,11 @@ public static partial class SqlQueryExtensions
     /// 获取32位可空整型值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<int?> ToIntOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<int?> ToIntOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToIntOrNull(result);
     }
 
@@ -139,10 +143,11 @@ public static partial class SqlQueryExtensions
     /// 获取64位整型值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<long> ToLongAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<long> ToLongAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToLong(result);
     }
 
@@ -168,10 +173,11 @@ public static partial class SqlQueryExtensions
     /// 获取64位可空整型值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<long?> ToLongOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<long?> ToLongOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToLongOrNull(result);
     }
 
@@ -197,10 +203,11 @@ public static partial class SqlQueryExtensions
     /// 获取Guid值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<Guid> ToGuidAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<Guid> ToGuidAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToGuid(result);
     }
 
@@ -226,10 +233,11 @@ public static partial class SqlQueryExtensions
     /// 获取可空Guid值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<Guid?> ToGuidOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<Guid?> ToGuidOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToGuidOrNull(result);
     }
 
@@ -255,10 +263,11 @@ public static partial class SqlQueryExtensions
     /// 获取布尔值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<bool> ToBoolAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<bool> ToBoolAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToBool(result);
     }
 
@@ -284,10 +293,11 @@ public static partial class SqlQueryExtensions
     /// 获取可空布尔值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<bool?> ToBoolOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<bool?> ToBoolOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToBoolOrNull(result);
     }
 
@@ -313,10 +323,11 @@ public static partial class SqlQueryExtensions
     /// 获取32位浮点值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<float> ToFloatAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<float> ToFloatAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToFloat(result);
     }
 
@@ -342,10 +353,11 @@ public static partial class SqlQueryExtensions
     /// 获取32位可空浮点值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<float?> ToFloatOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<float?> ToFloatOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToFloatOrNull(result);
     }
 
@@ -371,10 +383,11 @@ public static partial class SqlQueryExtensions
     /// 获取64位浮点值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<double> ToDoubleAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<double> ToDoubleAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToDouble(result);
     }
 
@@ -400,10 +413,11 @@ public static partial class SqlQueryExtensions
     /// 获取64位可空浮点值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<double?> ToDoubleOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<double?> ToDoubleOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToDoubleOrNull(result);
     }
 
@@ -429,10 +443,11 @@ public static partial class SqlQueryExtensions
     /// 获取128位浮点值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<decimal> ToDecimalAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<decimal> ToDecimalAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToDecimal(result);
     }
 
@@ -458,10 +473,11 @@ public static partial class SqlQueryExtensions
     /// 获取128位可空浮点值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<decimal?> ToDecimalOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<decimal?> ToDecimalOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToDecimalOrNull(result);
     }
 
@@ -487,10 +503,11 @@ public static partial class SqlQueryExtensions
     /// 获取日期值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<DateTime> ToDateTimeAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<DateTime> ToDateTimeAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToDate(result);
     }
 
@@ -516,10 +533,11 @@ public static partial class SqlQueryExtensions
     /// 获取可空日期值
     /// </summary>
     /// <param name="source">源</param>
-    public static async Task<DateTime?> ToDateTimeOrNullAsync(this ISqlQuery source)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<DateTime?> ToDateTimeOrNullAsync(this ISqlQuery source, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        var result = await source.ExecuteScalarAsync();
+        var result = await source.ExecuteScalarAsync(cancellationToken: cancellationToken);
         return Conv.ToDateOrNull(result);
     }
 

@@ -1,49 +1,12 @@
-﻿using Bing.Data.Sql.Builders.Params;
-
-namespace Bing.Data.Sql.Builders;
+﻿namespace Bing.Data.Sql.Builders;
 
 /// <summary>
-/// Sql组件访问器
+/// SQL 组件兼容访问器。
 /// </summary>
-public interface ISqlPartAccessor
+/// <remarks>
+/// 新代码应按职责依赖 <see cref="ISqlCommonPartAccessor"/> 或
+/// <see cref="ISqlQueryClauseAccessor"/>。保留此接口以兼容已有 Provider 与调用方。
+/// </remarks>
+public interface ISqlPartAccessor : ISqlCommonPartAccessor, ISqlQueryClauseAccessor
 {
-    /// <summary>
-    /// Sql方言
-    /// </summary>
-    IDialect Dialect { get; }
-
-    /// <summary>
-    /// 参数管理器
-    /// </summary>
-    IParameterManager ParameterManager { get; }
-
-    /// <summary>
-    /// Select子句
-    /// </summary>
-    ISelectClause SelectClause { get; }
-
-    /// <summary>
-    /// From子句
-    /// </summary>
-    IFromClause FromClause { get; }
-
-    /// <summary>
-    /// Join子句
-    /// </summary>
-    IJoinClause JoinClause { get; }
-
-    /// <summary>
-    /// Where子句
-    /// </summary>
-    IWhereClause WhereClause { get; }
-
-    /// <summary>
-    /// GroupBy子句
-    /// </summary>
-    IGroupByClause GroupByClause { get; }
-
-    /// <summary>
-    /// OrderBy子句
-    /// </summary>
-    IOrderByClause OrderByClause { get; }
 }

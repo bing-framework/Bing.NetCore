@@ -1,13 +1,14 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// Where子句
 /// </summary>
-public interface IWhereClause : ICondition, ISqlClauseCloneable<IWhereClause>
+public interface IWhereClause : ICondition, ISqlClause, ISqlClauseCloneable<IWhereClause>
 {
 
     /// <summary>

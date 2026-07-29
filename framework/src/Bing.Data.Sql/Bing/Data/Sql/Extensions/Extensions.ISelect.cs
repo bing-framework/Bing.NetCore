@@ -17,7 +17,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Distinct();
         return source;
     }
@@ -35,7 +35,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Count(column, alias, distinct);
         return source;
     }
@@ -55,7 +55,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Aggregate(function, column, columnAlias, distinct);
         return source;
     }
@@ -75,7 +75,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.AggregateRaw(function, argumentSql, columnAlias, distinct);
         return source;
     }
@@ -95,7 +95,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.AggregateExpression(function, expressionSql, columnAlias, distinct);
         return source;
     }
@@ -112,7 +112,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Sum(column, columnAlias, distinct);
         return source;
     }
@@ -129,7 +129,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Avg(column, columnAlias, distinct);
         return source;
     }
@@ -146,7 +146,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Max(column, columnAlias, distinct);
         return source;
     }
@@ -163,7 +163,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.SelectClause.Min(column, columnAlias, distinct);
         return source;
     }

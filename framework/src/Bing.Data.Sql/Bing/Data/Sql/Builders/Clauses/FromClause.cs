@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders.Core;
+using System.Text;
 using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Data.Sql.Metadata;
@@ -218,9 +219,27 @@ public class FromClause : IFromClause
     }
 
     /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        var table = Table?.ToSql(Dialect);
+        if (string.IsNullOrWhiteSpace(table))
+            return;
+        builder.Append("From ");
+        builder.Append(table);
+    }
+
+    /// <inheritdoc />
+    public void Clear() => Table = null;
+
+    /// <summary>
+    /// 输出Sql。
+    /// </summary>
     public string ToSql()
     {
-        var table = Table?.ToSql(Dialect);
-        return string.IsNullOrWhiteSpace(table) ? null : $"From {table}";
+        var result = new StringBuilder();
+        AppendTo(result);
+        return result.Length == 0 ? null : result.ToString();
     }
 }

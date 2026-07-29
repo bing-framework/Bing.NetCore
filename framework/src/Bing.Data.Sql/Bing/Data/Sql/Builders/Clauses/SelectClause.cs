@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Internal;
 
@@ -354,10 +355,32 @@ public class SelectClause : ISelectClause
         _columns.RemoveColumns(_resolver.GetColumn(expression), typeof(TEntity));
     }
 
+    /// <inheritdoc />
+    public void AppendTo(StringBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        builder.Append("Select ");
+        builder.Append(GetDistinct());
+        builder.Append(GetColumns());
+    }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        _columns.Clear();
+        _distinct = false;
+    }
+
     /// <summary>
-    /// 输出Sql
+    /// 输出Sql。
     /// </summary>
-    public string ToSql() => $"Select {GetDistinct()}{GetColumns()}";
+    public string ToSql()
+    {
+        var result = new StringBuilder();
+        AppendTo(result);
+        return result.ToString();
+    }
 
     /// <summary>
     /// 获取Distinct

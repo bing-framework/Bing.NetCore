@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
+using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
 /// Select子句
 /// </summary>
-public interface ISelectClause : ISqlClauseCloneable<ISelectClause>
+public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
 {
 
     /// <summary>

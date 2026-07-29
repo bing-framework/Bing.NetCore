@@ -28,9 +28,10 @@ public static partial class SqlQueryExtensions
     /// <typeparam name="TEntity">返回结果类型</typeparam>
     /// <param name="sqlQuery">Sql查询对象</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="cancellationToken">取消令牌</param>
     [Obsolete("请使用 ToEntityAsync()")]
-    public static Task<TEntity> ToAsync<TEntity>(this ISqlQuery sqlQuery, int? timeout = null) =>
-        sqlQuery.ExecuteSingleAsync<TEntity>(timeout);
+    public static Task<TEntity> ToAsync<TEntity>(this ISqlQuery sqlQuery, int? timeout = null,
+        CancellationToken cancellationToken = default) => sqlQuery.ExecuteSingleAsync<TEntity>(timeout, cancellationToken);
 
     #endregion
 
@@ -58,10 +59,12 @@ public static partial class SqlQueryExtensions
     /// <typeparam name="TEntity">返回结果类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
-    public static async Task<TEntity> ToEntityAsync<TEntity>(this ISqlQuery source, int? timeout = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<TEntity> ToEntityAsync<TEntity>(this ISqlQuery source, int? timeout = null,
+        CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteSingleAsync<TEntity>(timeout);
+        return await source.ExecuteSingleAsync<TEntity>(timeout, cancellationToken);
     }
 
     #endregion
@@ -255,10 +258,12 @@ public static partial class SqlQueryExtensions
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<List<TEntity>> ToListAsync<T1, T2, TEntity>(this ISqlQuery source, Func<T1, T2, TEntity> map, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, TEntity>(this ISqlQuery source, Func<T1, T2, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteQueryAsync(map, timeout, buffered);
+        return await source.ExecuteQueryAsync(map, timeout, buffered, cancellationToken);
     }
 
     /// <summary>
@@ -272,10 +277,12 @@ public static partial class SqlQueryExtensions
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, TEntity>(this ISqlQuery source, Func<T1, T2, T3, TEntity> map, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, TEntity>(this ISqlQuery source, Func<T1, T2, T3, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteQueryAsync(map, timeout, buffered);
+        return await source.ExecuteQueryAsync(map, timeout, buffered, cancellationToken);
     }
 
     /// <summary>
@@ -290,10 +297,12 @@ public static partial class SqlQueryExtensions
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, TEntity> map, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteQueryAsync(map, timeout, buffered);
+        return await source.ExecuteQueryAsync(map, timeout, buffered, cancellationToken);
     }
 
     /// <summary>
@@ -309,10 +318,12 @@ public static partial class SqlQueryExtensions
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, TEntity> map, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteQueryAsync(map, timeout, buffered);
+        return await source.ExecuteQueryAsync(map, timeout, buffered, cancellationToken);
     }
 
     /// <summary>
@@ -329,10 +340,12 @@ public static partial class SqlQueryExtensions
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, T6, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, TEntity> map, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, T6, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteQueryAsync(map, timeout, buffered);
+        return await source.ExecuteQueryAsync(map, timeout, buffered, cancellationToken);
     }
 
     /// <summary>
@@ -350,10 +363,12 @@ public static partial class SqlQueryExtensions
     /// <param name="map">映射函数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<List<TEntity>> ToListAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map,
+        int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.ExecuteQueryAsync(map, timeout, buffered);
+        return await source.ExecuteQueryAsync(map, timeout, buffered, cancellationToken);
     }
 
     #endregion
@@ -525,8 +540,7 @@ public static partial class SqlQueryExtensions
     {
         source.CheckNull(nameof(source));
         return await source.PagerQueryAsync(
-            async () => await source.ExecuteQueryAsync<TEntity>(timeout, buffered, cancellationToken), parameter,
-            timeout);
+            token => source.ExecuteQueryAsync<TEntity>(timeout, buffered, token), parameter, timeout, cancellationToken);
     }
 
     /// <summary>
@@ -558,10 +572,13 @@ public static partial class SqlQueryExtensions
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, TEntity>(this ISqlQuery source, Func<T1, T2, TEntity> map, IPager parameter = null, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, TEntity>(this ISqlQuery source, Func<T1, T2, TEntity> map,
+        IPager parameter = null, int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.PagerQueryAsync(async () => await source.ExecuteQueryAsync(map, timeout, buffered), parameter, timeout);
+        return await source.PagerQueryAsync(token => source.ExecuteQueryAsync(map, timeout, buffered, token), parameter,
+            timeout, cancellationToken);
     }
 
     /// <summary>
@@ -576,10 +593,13 @@ public static partial class SqlQueryExtensions
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, TEntity>(this ISqlQuery source, Func<T1, T2, T3, TEntity> map, IPager parameter = null, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, TEntity>(this ISqlQuery source, Func<T1, T2, T3, TEntity> map,
+        IPager parameter = null, int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.PagerQueryAsync(async () => await source.ExecuteQueryAsync(map, timeout, buffered), parameter, timeout);
+        return await source.PagerQueryAsync(token => source.ExecuteQueryAsync(map, timeout, buffered, token), parameter,
+            timeout, cancellationToken);
     }
 
     /// <summary>
@@ -595,10 +615,13 @@ public static partial class SqlQueryExtensions
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, TEntity> map, IPager parameter = null, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, TEntity> map,
+        IPager parameter = null, int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.PagerQueryAsync(async () => await source.ExecuteQueryAsync(map, timeout, buffered), parameter, timeout);
+        return await source.PagerQueryAsync(token => source.ExecuteQueryAsync(map, timeout, buffered, token), parameter,
+            timeout, cancellationToken);
     }
 
     /// <summary>
@@ -615,10 +638,13 @@ public static partial class SqlQueryExtensions
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, T5, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, TEntity> map, IPager parameter = null, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, T5, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, TEntity> map,
+        IPager parameter = null, int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.PagerQueryAsync(async () => await source.ExecuteQueryAsync(map, timeout, buffered), parameter, timeout);
+        return await source.PagerQueryAsync(token => source.ExecuteQueryAsync(map, timeout, buffered, token), parameter,
+            timeout, cancellationToken);
     }
 
     /// <summary>
@@ -636,10 +662,13 @@ public static partial class SqlQueryExtensions
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, T5, T6, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, TEntity> map, IPager parameter = null, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, T5, T6, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, TEntity> map,
+        IPager parameter = null, int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.PagerQueryAsync(async () => await source.ExecuteQueryAsync(map, timeout, buffered), parameter, timeout);
+        return await source.PagerQueryAsync(token => source.ExecuteQueryAsync(map, timeout, buffered, token), parameter,
+            timeout, cancellationToken);
     }
 
     /// <summary>
@@ -658,10 +687,13 @@ public static partial class SqlQueryExtensions
     /// <param name="parameter">分页参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map, IPager parameter = null, int? timeout = null, bool buffered = true)
+    /// <param name="cancellationToken">取消令牌</param>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(this ISqlQuery source, Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map,
+        IPager parameter = null, int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default)
     {
         source.CheckNull(nameof(source));
-        return await source.PagerQueryAsync(async () => await source.ExecuteQueryAsync(map, timeout, buffered), parameter, timeout);
+        return await source.PagerQueryAsync(token => source.ExecuteQueryAsync(map, timeout, buffered, token), parameter,
+            timeout, cancellationToken);
     }
 
     #endregion

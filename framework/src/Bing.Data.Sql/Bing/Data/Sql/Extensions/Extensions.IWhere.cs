@@ -19,7 +19,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.And(condition);
         return source;
     }
@@ -35,7 +35,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlPartAccessor accessor)
+        if (source is ISqlQueryClauseAccessor accessor)
             accessor.WhereClause.Or(condition);
         return source;
     }

@@ -268,7 +268,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     public IReadOnlyCollection<SqlParam> GetSqlParams(ISqlBuilder builder, SqlOptions options,
         SqlParameterBindingContext context)
     {
-        if (builder is ISqlPartAccessor accessor && accessor.ParameterManager is IAdvancedParameterManager advanced)
+        if (builder is ISqlCommonPartAccessor accessor && accessor.ParameterManager is IAdvancedParameterManager advanced)
             return advanced.GetSqlParams().Values.Where(t => t != null).ToList();
         return new List<SqlParam>();
     }

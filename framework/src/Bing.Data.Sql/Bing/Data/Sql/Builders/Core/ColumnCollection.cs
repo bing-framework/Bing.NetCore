@@ -113,6 +113,11 @@ public class ColumnCollection
         _items.Add(item);
     }
 
+    /// <summary>
+    /// 清空全部列项。
+    /// </summary>
+    public void Clear() => _items.Clear();
+
     #endregion
 
     #region AddRawColumn(添加原始列)

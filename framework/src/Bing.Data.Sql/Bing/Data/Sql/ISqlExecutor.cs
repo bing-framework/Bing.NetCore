@@ -30,8 +30,10 @@ public interface ISqlExecutor : ISqlQuery, ISqlOperation, ISqlInsertExecutor, IS
     /// <param name="sql">执行的SQL语句</param>
     /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间。单位：秒</param>
+    /// <param name="cancellationToken">取消令牌</param>
     /// <returns>操作影响的行数</returns>
-    Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null);
+    Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 执行存储过程增删改操作
@@ -48,6 +50,8 @@ public interface ISqlExecutor : ISqlQuery, ISqlOperation, ISqlInsertExecutor, IS
     /// <param name="procedure">存储过程</param>
     /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间，单位：秒</param>
+    /// <param name="cancellationToken">取消令牌</param>
     /// <returns>受影响行数</returns>
-    Task<int> ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null);
+    Task<int> ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null,
+        CancellationToken cancellationToken = default);
 }
