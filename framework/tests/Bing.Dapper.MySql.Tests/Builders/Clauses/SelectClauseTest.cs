@@ -19,7 +19,7 @@ public class SelectClauseTest
     /// </summary>
     public SelectClauseTest()
     {
-        _clause = (SelectClause)((ISqlPartAccessor)new MySqlBuilder()).SelectClause;
+        _clause = (SelectClause)((ISqlQueryClauseAccessor)new MySqlBuilder()).SelectClause;
     }
 
     /// <summary>

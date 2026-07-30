@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Builders;
@@ -69,5 +71,62 @@ public sealed class SqlUpdateBuilderTest
         // Assert
         Assert.Equal("Update [samples] Set [Name] = @_p_0", builder.ToSql());
         Assert.Single(builder.GetParameters());
+    }
+
+    /// <summary>
+    /// 测试目的：强类型 Set 与 Where 应使用实体映射列和带元数据参数输出完整 Update SQL。
+    /// </summary>
+    [Fact]
+    public void Update_WhenTypedSetAndWhereConfigured_ShouldRenderMappedParameterizedSql()
+    {
+        // Arrange
+        var builder = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        builder.Update<TypedMutationSample>()
+            .Set<TypedMutationSample, string>(item => item.Name, "Bing")
+            .Where<TypedMutationSample, int>(item => item.Id, 7);
+
+        // Assert
+        var command = builder.BuildCommand();
+        Assert.Equal("Update [typed_samples] Set [Name] = @_p_0 Where [Id]=@_p_1", command.Sql);
+        Assert.Equal(new object[] { "Bing", 7 }, command.Parameters.Select(item => item.Value));
+        Assert.All(command.Parameters, item => Assert.Equal(SqlParameterMetadataLevel.Full, item.MetadataLevel));
+    }
+
+    /// <summary>
+    /// 测试目的：强类型 Set 不得更新实体主键，避免 Fluent API 绕过实体写入安全规则。
+    /// </summary>
+    [Fact]
+    public void Set_WhenTypedPrimaryKeyIsProvided_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var builder = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices())
+            .Update<TypedMutationSample>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.Set<TypedMutationSample, int>(item => item.Id, 7));
+
+        // Assert
+        Assert.Equal("实体 TypedMutationSample 的属性 Id 不能用于更新。", exception.Message);
+    }
+
+    /// <summary>
+    /// 强类型 Fluent Mutation 的映射实体。
+    /// </summary>
+    [Table("typed_samples")]
+    private sealed class TypedMutationSample
+    {
+        /// <summary>
+        /// 主键。
+        /// </summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 可更新名称。
+        /// </summary>
+        public string Name { get; set; }
     }
 }

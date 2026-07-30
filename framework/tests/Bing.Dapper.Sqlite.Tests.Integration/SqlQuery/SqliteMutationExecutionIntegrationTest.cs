@@ -40,15 +40,12 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         using var identityQuery = _fixture.CreateQuery();
         entity.Id = identityQuery.Select("Id").From("samples").Where("Name", "created").ExecuteScalar<int>();
         entity.Name = "updated";
-        var updated = executor.Update(entity, new SqlUpdateOptions
+        var updated = executor.Update(entity, new SqlUpdateOptions<MutationSample>
         {
-            IncludeProperties = new[] { nameof(MutationSample.Name) },
-            OriginalValues = new MutationOriginalValues { SecretText = "v1" }
-        });
-        var deleted = executor.Delete(entity, new SqlDeleteOptions
-        {
-            OriginalValues = new MutationOriginalValues { SecretText = "v1" }
-        });
+            IncludeProperties = new[] { nameof(MutationSample.Name) }
+        }.Original(item => item.SecretText, "v1"));
+        var deleted = executor.Delete(entity, new SqlDeleteOptions<MutationSample>()
+            .Original(item => item.SecretText, "v1"));
 
         // Assert
         Assert.Equal(1, inserted);
@@ -58,10 +55,10 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试目的：并发原始值不匹配时删除应返回零行，避免删除已被其它操作修改的数据。
+    /// 测试目的：默认并发策略下原始值不匹配时删除应抛出异常且保留数据。
     /// </summary>
     [Fact]
-    public async Task Delete_WhenConcurrencyOriginalValueDoesNotMatch_ShouldNotDeleteRow()
+    public async Task Delete_WhenConcurrencyOriginalValueDoesNotMatch_ShouldThrowAndNotDeleteRow()
     {
         // Arrange
         var entity = new MutationSample { Name = "protected", Amount = 1m, SecretText = "v1" };
@@ -71,13 +68,11 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         entity.Id = identityQuery.Select("Id").From("samples").Where("Name", "protected").ExecuteScalar<int>();
 
         // Act
-        var affectedRows = executor.Delete(entity, new SqlDeleteOptions
-        {
-            OriginalValues = new MutationOriginalValues { SecretText = "other" }
-        });
+        var exception = Assert.Throws<Bing.Exceptions.ConcurrencyException>(() => executor.Delete(entity,
+            new SqlDeleteOptions<MutationSample>().Original(item => item.SecretText, "other")));
 
         // Assert
-        Assert.Equal(0, affectedRows);
+        Assert.NotNull(exception);
         Assert.Equal(1, await _fixture.CountAsync());
     }
 
@@ -127,7 +122,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         var affectedRows = await executor.InsertBatchAsync(entities, new SqlBatchInsertOptions
         {
             BatchSize = 2,
-            Strategy = SqlBatchStrategy.Combined,
+            Strategy = SqlBatchInsertStrategy.MultiRowValues,
             UseTransaction = true
         });
 
@@ -158,7 +153,11 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         var affectedRows = executor.UpdateBatch(new[] { first, second }, new SqlBatchUpdateOptions
         {
             BatchSize = 1,
-            UpdateOptions = new SqlUpdateOptions { IncludeProperties = new[] { nameof(MutationSample.Name) } }
+            UpdateOptions = new SqlUpdateOptions
+            {
+                IncludeProperties = new[] { nameof(MutationSample.Name) },
+                ConcurrencyConflictBehavior = SqlConcurrencyConflictBehavior.ReturnAffectedRows
+            }
         });
 
         // Assert
@@ -219,14 +218,4 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         public string SecretText { get; set; }
     }
 
-    /// <summary>
-    /// 仅包含并发原始值的对象。
-    /// </summary>
-    private sealed class MutationOriginalValues
-    {
-        /// <summary>
-        /// 乐观并发令牌原始值。
-        /// </summary>
-        public string SecretText { get; set; }
-    }
 }

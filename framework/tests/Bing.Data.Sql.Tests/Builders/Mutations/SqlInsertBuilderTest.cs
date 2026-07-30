@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Builders;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders.Mutations;
@@ -29,6 +31,50 @@ public sealed class SqlInsertBuilderTest
         Assert.Same(builder, result);
         Assert.Equal("Insert Into [samples] ([Name], [Age]) Values (@_p_0, @_p_1), (@_p_2, @_p_3)", builder.ToSql());
         Assert.Equal(4, builder.GetParameters().Count);
+    }
+
+    /// <summary>
+    /// 测试目的：强类型 Columns 应通过实体映射输出物理列名，且保持后续 Values 参数化行为。
+    /// </summary>
+    [Fact]
+    public void Columns_WhenTypedMappedPropertiesAreProvided_ShouldRenderMappedColumns()
+    {
+        // Arrange
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        builder.InsertInto<MutationSample>()
+            .Columns<MutationSample>(item => new object[] { item.Name, item.Age })
+            .Values("Bing", 18);
+
+        // Assert
+        Assert.Equal("Insert Into [samples] ([Name], [Age]) Values (@_p_0, @_p_1)", builder.ToSql());
+        Assert.Equal(new object[] { "Bing", 18 }, builder.BuildCommand().Parameters.Select(item => item.Value));
+    }
+
+    /// <summary>
+    /// 测试目的：SQL 渲染不得导出参数快照，BuildCommand 应仅导出一次带元数据的可执行参数快照。
+    /// </summary>
+    [Fact]
+    public void BuildCommand_WhenParametersConfigured_ShouldExportSingleSnapshotAfterRendering()
+    {
+        // Arrange
+        var parameterManager = new CountingParameterManager(TestMutationSqlProvider.Instance.Dialect);
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices(), parameterManager)
+            .InsertInto<SqlInsertBuilder, MutationSample>()
+            .Columns(nameof(MutationSample.Name))
+            .Values("Bing");
+
+        // Act
+        var sql = builder.ToSql();
+        var command = builder.BuildCommand();
+
+        // Assert
+        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", sql);
+        Assert.Equal(sql, command.Sql);
+        Assert.Single(command.Parameters);
+        Assert.Equal(1, parameterManager.GetSqlParamsCallCount);
+        Assert.Equal(1, parameterManager.Count);
     }
 
     /// <summary>
@@ -86,5 +132,70 @@ public sealed class SqlInsertBuilderTest
         /// 年龄。
         /// </summary>
         public int Age { get; set; }
+    }
+
+    /// <summary>
+    /// 用于验证参数快照导出次数的增强参数管理器。
+    /// </summary>
+    private sealed class CountingParameterManager : IAdvancedParameterManager
+    {
+        /// <summary>
+        /// 实际参数管理器。
+        /// </summary>
+        private readonly ParameterManager _inner;
+
+        /// <summary>
+        /// 初始化一个 <see cref="CountingParameterManager"/> 类型的实例。
+        /// </summary>
+        /// <param name="dialect">SQL 方言。</param>
+        public CountingParameterManager(IDialect dialect) => _inner = new ParameterManager(dialect);
+
+        /// <summary>
+        /// 获取增强参数快照的调用次数。
+        /// </summary>
+        public int GetSqlParamsCallCount { get; private set; }
+
+        /// <inheritdoc />
+        public int Count => _inner.Count;
+
+        /// <inheritdoc />
+        public string GenerateName() => _inner.GenerateName();
+
+        /// <inheritdoc />
+        public string NormalizeName(string name) => _inner.NormalizeName(name);
+
+        /// <inheritdoc />
+        public void Add(string name, object value, Operator? @operator = null) => _inner.Add(name, value, @operator);
+
+        /// <inheritdoc />
+        public void Add(SqlParam parameter) => _inner.Add(parameter);
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, SqlParam> GetSqlParams()
+        {
+            GetSqlParamsCallCount++;
+            return _inner.GetSqlParams();
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> ExportValues() => _inner.ExportValues();
+
+        /// <inheritdoc />
+        public bool Contains(string name) => _inner.Contains(name);
+
+        /// <inheritdoc />
+        public object GetValue(string name) => _inner.GetValue(name);
+
+        /// <inheritdoc />
+        public IParameterManager Clone() => _inner.Clone();
+
+        /// <inheritdoc />
+        public IParameterManager CreateEmpty() => _inner.CreateEmpty();
+
+        /// <inheritdoc />
+        public void Clear() => _inner.Clear();
     }
 }

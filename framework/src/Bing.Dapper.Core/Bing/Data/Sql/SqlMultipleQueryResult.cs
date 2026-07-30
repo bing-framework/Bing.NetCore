@@ -42,14 +42,6 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     public List<TEntity> Read<TEntity>() => Read(reader => reader.Read<TEntity>().ToList());
 
     /// <inheritdoc />
-    [Obsolete("请使用接收 CancellationToken 的 ReadAsync 重载")]
-    public Task<List<dynamic>> ReadAsync() => ReadAsync(CancellationToken.None);
-
-    /// <inheritdoc />
-    [Obsolete("请使用接收 CancellationToken 的 ReadAsync 重载")]
-    public Task<List<TEntity>> ReadAsync<TEntity>() => ReadAsync<TEntity>(CancellationToken.None);
-
-    /// <inheritdoc />
     public async Task<List<dynamic>> ReadAsync(CancellationToken cancellationToken) => await ReadAsync(async reader =>
         (await reader.ReadAsync()).ToList(), cancellationToken);
 

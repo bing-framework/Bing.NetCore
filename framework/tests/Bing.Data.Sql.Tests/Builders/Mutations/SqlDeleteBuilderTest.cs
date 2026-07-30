@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Builders;
@@ -61,5 +63,37 @@ public sealed class SqlDeleteBuilderTest
 
         // Assert
         Assert.Equal("Delete From [samples] Where [Id]=@_p_0 And [TenantId]=@_p_1", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：强类型 Delete Where 应通过实体映射创建参数化物理列条件，不能拼接调用方输入。
+    /// </summary>
+    [Fact]
+    public void DeleteFrom_WhenTypedWhereConfigured_ShouldRenderMappedParameterizedSql()
+    {
+        // Arrange
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        builder.DeleteFrom<TypedDeleteSample>()
+            .Where<TypedDeleteSample, int>(item => item.Id, 7);
+
+        // Assert
+        var command = builder.BuildCommand();
+        Assert.Equal("Delete From [typed_delete_samples] Where [Id]=@_p_0", command.Sql);
+        Assert.Equal(new object[] { 7 }, command.Parameters.Select(item => item.Value));
+    }
+
+    /// <summary>
+    /// 强类型 Delete 条件的映射实体。
+    /// </summary>
+    [Table("typed_delete_samples")]
+    private sealed class TypedDeleteSample
+    {
+        /// <summary>
+        /// 主键。
+        /// </summary>
+        [Key]
+        public int Id { get; set; }
     }
 }

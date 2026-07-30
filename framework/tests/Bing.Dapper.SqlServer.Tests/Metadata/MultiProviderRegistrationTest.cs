@@ -38,20 +38,20 @@ public class MultiProviderRegistrationTest
 
         // Assert
         Assert.IsType<MySqlQuery>(mysql);
-        Assert.IsType<MySqlDialect>(((ISqlPartAccessor)mysql).Dialect);
-        Assert.Equal('`', ((ISqlPartAccessor)mysql).Dialect.OpeningIdentifier);
+        Assert.IsType<MySqlDialect>(((ISqlCommonPartAccessor)mysql).Dialect);
+        Assert.Equal('`', ((ISqlCommonPartAccessor)mysql).Dialect.OpeningIdentifier);
         Assert.IsType<PostgreSqlQuery>(postgreSql);
-        Assert.IsType<PostgreSqlDialect>(((ISqlPartAccessor)postgreSql).Dialect);
-        Assert.Equal('"', ((ISqlPartAccessor)postgreSql).Dialect.OpeningIdentifier);
+        Assert.IsType<PostgreSqlDialect>(((ISqlCommonPartAccessor)postgreSql).Dialect);
+        Assert.Equal('"', ((ISqlCommonPartAccessor)postgreSql).Dialect.OpeningIdentifier);
         Assert.IsType<SqlServerSqlQuery>(sqlServer);
-        Assert.IsType<SqlServerDialect>(((ISqlPartAccessor)sqlServer).Dialect);
-        Assert.Equal('[', ((ISqlPartAccessor)sqlServer).Dialect.OpeningIdentifier);
+        Assert.IsType<SqlServerDialect>(((ISqlCommonPartAccessor)sqlServer).Dialect);
+        Assert.Equal('[', ((ISqlCommonPartAccessor)sqlServer).Dialect.OpeningIdentifier);
         Assert.IsType<SqliteSqlQuery>(sqlite);
-        Assert.IsType<SqliteDialect>(((ISqlPartAccessor)sqlite).Dialect);
-        Assert.Equal('`', ((ISqlPartAccessor)sqlite).Dialect.OpeningIdentifier);
+        Assert.IsType<SqliteDialect>(((ISqlCommonPartAccessor)sqlite).Dialect);
+        Assert.Equal('`', ((ISqlCommonPartAccessor)sqlite).Dialect.OpeningIdentifier);
         Assert.IsType<OracleSqlQuery>(oracle);
-        Assert.IsType<OracleDialect>(((ISqlPartAccessor)oracle).Dialect);
-        Assert.Equal('"', ((ISqlPartAccessor)oracle).Dialect.OpeningIdentifier);
+        Assert.IsType<OracleDialect>(((ISqlCommonPartAccessor)oracle).Dialect);
+        Assert.Equal('"', ((ISqlCommonPartAccessor)oracle).Dialect.OpeningIdentifier);
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class MultiProviderRegistrationTest
 
         // Assert
         Assert.IsType<MySqlQuery>(query);
-        Assert.IsType<MySqlDialect>(((ISqlPartAccessor)query).Dialect);
+        Assert.IsType<MySqlDialect>(((ISqlCommonPartAccessor)query).Dialect);
         Assert.Contains("doris", exception.Message);
         Assert.DoesNotContain("Password", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -119,7 +119,7 @@ public class MultiProviderRegistrationTest
         };
 
         // Act
-        var result = formatter.Format(reference, ((ISqlPartAccessor)query).Dialect, DatabaseType.SqlServer);
+        var result = formatter.Format(reference, ((ISqlCommonPartAccessor)query).Dialect, DatabaseType.SqlServer);
 
         // Assert
         Assert.Equal("[reporting].[dbo].[users]", result);
@@ -136,11 +136,11 @@ public class MultiProviderRegistrationTest
         var resolver = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>();
         var registrations = new[]
         {
-            (DatabaseType.MySql, "Server=mysql;Database=test;", "MySqlConnection"),
-            (DatabaseType.PgSql, "Host=pgsql;Database=test;", "NpgsqlConnection"),
-            (DatabaseType.SqlServer, "Server=sqlserver;Database=test;", "SqlConnection"),
-            (DatabaseType.Sqlite, "Data Source=executor-only.db", "SqliteConnection"),
-            (DatabaseType.Oracle, "User Id=bing;Password=secret;Data Source=oracle-test", "OracleConnection")
+            (MySqlSqlProvider.Instance.Key, "Server=mysql;Database=test;", "MySqlConnection"),
+            (PostgreSqlSqlProvider.Instance.Key, "Host=pgsql;Database=test;", "NpgsqlConnection"),
+            (SqlServerSqlProvider.Instance.Key, "Server=sqlserver;Database=test;", "SqlConnection"),
+            (SqliteSqlProvider.Instance.Key, "Data Source=executor-only.db", "SqliteConnection"),
+            (OracleSqlProvider.Instance.Key, "User Id=bing;Password=secret;Data Source=oracle-test", "OracleConnection")
         };
 
         // Act

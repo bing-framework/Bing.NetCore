@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Dapper;
 using Npgsql;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@ public static class PostgreSqlServiceCollectionExtensions
         if (services == null)
             throw new ArgumentNullException(nameof(services));
         services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlBatchUpdateRenderer, PostgreSqlBatchUpdateRenderer>());
         var queryOptions = new SqlOptions<PostgreSqlQuery> { DatabaseType = DatabaseType.PgSql };
         var executorOptions = new SqlOptions<PostgreSqlExecutor> { DatabaseType = DatabaseType.PgSql };
         var multipleQueryOptions = new SqlOptions<PostgreSqlMultipleQueryExecutor> { DatabaseType = DatabaseType.PgSql };
@@ -33,7 +35,7 @@ public static class PostgreSqlServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
+        services.AddSqlDbConnectionFactory(PostgreSqlSqlProvider.Instance.Key, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlQuery, PostgreSqlQuery>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlExecutor, PostgreSqlExecutor>(DatabaseType.PgSql);
@@ -109,11 +111,12 @@ public static class PostgreSqlServiceCollectionExtensions
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.PgSql };
         services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlBatchUpdateRenderer, PostgreSqlBatchUpdateRenderer>());
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
+        services.AddSqlDbConnectionFactory(PostgreSqlSqlProvider.Instance.Key, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -159,11 +162,12 @@ public static class PostgreSqlServiceCollectionExtensions
         var sqlOptions = new SqlOptions<PostgreSqlMultipleQueryExecutor> { DatabaseType = DatabaseType.PgSql };
         services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance,
             serviceProvider => new PostgreSqlBuilder(serviceProvider));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlBatchUpdateRenderer, PostgreSqlBatchUpdateRenderer>());
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
+        services.AddSqlDbConnectionFactory(PostgreSqlSqlProvider.Instance.Key, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>(DatabaseType.PgSql);
         services.TryAddTransient<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>();
@@ -235,11 +239,12 @@ public static class PostgreSqlServiceCollectionExtensions
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.PgSql };
         services.AddSqlBuilderProvider(PostgreSqlSqlProvider.Instance, services => new PostgreSqlBuilder(services));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlBatchUpdateRenderer, PostgreSqlBatchUpdateRenderer>());
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.PgSql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.PgSql, connection => new NpgsqlConnection(connection));
+        services.AddSqlDbConnectionFactory(PostgreSqlSqlProvider.Instance.Key, connection => new NpgsqlConnection(connection));
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.PgSql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

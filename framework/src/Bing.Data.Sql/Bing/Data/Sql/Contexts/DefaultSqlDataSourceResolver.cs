@@ -70,6 +70,7 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
         var result = new SqlDataSourceDescriptor
         {
             Key = string.IsNullOrWhiteSpace(descriptor.Key) ? key : descriptor.Key,
+            ProviderKey = descriptor.ProviderKey,
             DatabaseType = descriptor.DatabaseType,
             ConnectionStringName = descriptor.ConnectionStringName,
             ConnectionString = descriptor.ConnectionString,
@@ -105,6 +106,10 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
         if (result.DatabaseType != descriptor.DatabaseType)
             throw new InvalidOperationException(
                 $"数据源 {descriptor.Key} 的 Provider {descriptor.DatabaseType} 与主库数据源 {result.Key} 的 Provider {result.DatabaseType} 不一致，无法建立主库读取关系。");
+        if (string.IsNullOrWhiteSpace(descriptor.ProviderKey) == false &&
+            string.Equals(descriptor.ProviderKey, result.ProviderKey, StringComparison.OrdinalIgnoreCase) == false)
+            throw new InvalidOperationException(
+                $"数据源 {descriptor.Key} 的 Provider Key {descriptor.ProviderKey} 与主库数据源 {result.Key} 的 Provider Key {result.ProviderKey ?? "<未指定>"} 不一致，无法建立主库读取关系。");
         if (string.IsNullOrWhiteSpace(result.MappingProfile))
             result.MappingProfile = descriptor.MappingProfile;
         return result;

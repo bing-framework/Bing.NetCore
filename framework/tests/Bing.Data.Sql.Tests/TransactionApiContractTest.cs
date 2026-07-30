@@ -133,43 +133,37 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：分页查询应保留令牌感知重载，并将无法向数据页传递令牌的旧委托重载标记为过时。
+    /// 测试目的：分页查询只应暴露令牌感知重载，避免旧委托入口丢失取消语义。
     /// </summary>
     [Fact]
-    public void PagerQueryAsyncContracts_ShouldPreferCancellationAwareCallback()
+    public void PagerQueryAsyncContracts_ShouldOnlyExposeCancellationAwareCallback()
     {
         // Arrange
         var methods = typeof(ISqlQuery).GetMethods().Where(method => method.Name == nameof(ISqlQuery.PagerQueryAsync))
             .ToList();
-        var legacyMethod = methods.Single(method => method.GetParameters()[0].ParameterType.GetGenericArguments().Length == 1);
-        var cancellationAwareMethod = methods.Single(method =>
-            method.GetParameters()[0].ParameterType.GetGenericArguments().Length == 2);
+        var cancellationAwareMethod = Assert.Single(methods);
 
         // Act
-        var obsolete = legacyMethod.GetCustomAttribute<ObsoleteAttribute>();
         var cancellationToken = cancellationAwareMethod.GetParameters().Last();
 
         // Assert
-        Assert.NotNull(obsolete);
+        Assert.Equal(2, cancellationAwareMethod.GetParameters()[0].ParameterType.GetGenericArguments().Length);
         Assert.Equal(typeof(CancellationToken), cancellationToken.ParameterType);
         Assert.True(cancellationToken.HasDefaultValue);
     }
 
     /// <summary>
-    /// 测试目的：多结果集异步读取应优先使用令牌感知重载，旧无令牌入口仅保留兼容用途。
+    /// 测试目的：多结果集异步读取只应保留令牌感知重载，避免旧无令牌入口丢失取消语义。
     /// </summary>
     [Fact]
-    public void MultipleQueryResultAsyncContracts_ShouldPreferCancellationAwareRead()
+    public void MultipleQueryResultAsyncContracts_ShouldOnlyExposeCancellationAwareRead()
     {
         // Arrange
         var methods = typeof(ISqlMultipleQueryResult).GetMethods().Where(method => method.Name == "ReadAsync").ToList();
-        var legacyMethods = methods.Where(method => method.GetParameters().Length == 0).ToList();
         var cancellationAwareMethods = methods.Where(method => method.GetParameters().Length == 1).ToList();
 
         // Act and Assert
-        Assert.Equal(2, legacyMethods.Count);
         Assert.Equal(2, cancellationAwareMethods.Count);
-        Assert.All(legacyMethods, method => Assert.NotNull(method.GetCustomAttribute<ObsoleteAttribute>()));
         Assert.All(cancellationAwareMethods, method =>
         {
             var parameter = method.GetParameters().Single();
@@ -186,7 +180,7 @@ public class TransactionApiContractTest
     {
         // Arrange
         var cancellationAwareMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(method => method.Name is "ToAsync" or "ToEntityAsync" or "ToListAsync" or "ToPagerListAsync")
+            .Where(method => method.Name is "ToEntityAsync" or "ToListAsync" or "ToPagerListAsync")
             .ToList();
 
         // Act and Assert
@@ -207,7 +201,7 @@ public class TransactionApiContractTest
     {
         // Arrange
         var scalarMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(method => method.Name is "ToScalarAsync" or "ToStringAsync" or "ToIntAsync" or "ToIntOrNullAsync" or
+            .Where(method => method.Name is "ToStringAsync" or "ToIntAsync" or "ToIntOrNullAsync" or
                 "ToLongAsync" or "ToLongOrNullAsync" or "ToGuidAsync" or "ToGuidOrNullAsync" or "ToBoolAsync" or
                 "ToBoolOrNullAsync" or "ToFloatAsync" or "ToFloatOrNullAsync" or "ToDoubleAsync" or
                 "ToDoubleOrNullAsync" or "ToDecimalAsync" or "ToDecimalOrNullAsync" or "ToDateTimeAsync" or
@@ -215,13 +209,30 @@ public class TransactionApiContractTest
             .ToList();
 
         // Act and Assert
-        Assert.Equal(18, scalarMethods.Count);
+        Assert.Equal(17, scalarMethods.Count);
         Assert.All(scalarMethods, method =>
         {
             var parameter = method.GetParameters().Last();
             Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
             Assert.True(parameter.HasDefaultValue);
         });
+    }
+
+    /// <summary>
+    /// 测试目的：7.0 不再公开含义重复的旧 Query 扩展，调用方必须使用命名明确的替代 API。
+    /// </summary>
+    [Fact]
+    public void QueryExtensions_ShouldNotExposeRemovedLegacyMethods()
+    {
+        // Arrange
+        var extensionMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static);
+        var removedMethodNames = new[] { "To", "ToAsync", "ToScalar", "ToScalarAsync" };
+
+        // Act
+        var remainingLegacyMethods = extensionMethods.Where(method => removedMethodNames.Contains(method.Name)).ToList();
+
+        // Assert
+        Assert.Empty(remainingLegacyMethods);
     }
 
     /// <summary>

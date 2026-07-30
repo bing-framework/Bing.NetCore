@@ -56,6 +56,7 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
         var context = new DatabaseContext
         {
             DbKey = dataSource.Key,
+            ProviderKey = dataSource.ProviderKey,
             DataSource = dataSource,
             TenantId = options.TenantId ?? parent?.TenantId,
             MappingProfile = dataSource.MappingProfile ?? parent?.MappingProfile ?? _options.DefaultDatabaseContext?.MappingProfile,

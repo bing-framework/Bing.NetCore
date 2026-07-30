@@ -18,9 +18,8 @@ public class OracleJoinClauseTest
     public OracleJoinClauseTest()
     {
         var builder = new OracleBuilder();
-        var parts = (ISqlPartAccessor)builder;
-        _parameterManager = parts.ParameterManager;
-        _clause = (OracleJoinClause)parts.JoinClause;
+        _parameterManager = ((ISqlCommonPartAccessor)builder).ParameterManager;
+        _clause = (OracleJoinClause)((ISqlQueryClauseAccessor)builder).JoinClause;
     }
 
     private string GetSql() => _clause.ToSql();

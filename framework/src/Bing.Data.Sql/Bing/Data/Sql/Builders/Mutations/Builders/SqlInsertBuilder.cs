@@ -50,6 +50,9 @@ public sealed class SqlInsertBuilder : SqlMutationBuilderBase, ISqlInsertBuilder
     public string ToSql() => Render(AppendTo);
 
     /// <inheritdoc />
+    public SqlMutationCommand BuildCommand() => BuildCommand(ToSql);
+
+    /// <inheritdoc />
     public ISqlInsertBuilder New() => new SqlInsertBuilder(Provider, MutationContext.Services,
         ParameterManager.CreateEmpty(), ClauseFactory);
 
@@ -77,7 +80,7 @@ public sealed class SqlInsertBuilder : SqlMutationBuilderBase, ISqlInsertBuilder
     /// </summary>
     private void Validate()
     {
-        var context = new SqlValidationContext(Provider, GetParameters().Count, false, SqlExecutionKind.Insert);
+        var context = new SqlValidationContext(Provider, ParameterManager.Count, false, SqlExecutionKind.Insert);
         InsertClause.Validate(context);
         InsertColumnsClause.Validate(context);
         ValuesClause.Validate(context);

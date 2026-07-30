@@ -52,12 +52,12 @@ public class SqliteProviderRegistrationTest
         using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlite");
         using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create<ISqlExecutor>("sqlite");
         using var connection = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>()
-            .Create(DatabaseType.Sqlite, "Data Source=:memory:");
+            .Create(SqliteSqlProvider.Instance.Key, "Data Source=:memory:");
 
         // Assert
         Assert.IsType<SqliteSqlQuery>(query);
         Assert.IsType<SqliteSqlExecutor>(executor);
-        Assert.IsType<SqliteDialect>(((ISqlPartAccessor)query).Dialect);
+        Assert.IsType<SqliteDialect>(((ISqlCommonPartAccessor)query).Dialect);
         Assert.IsType<SqliteConnection>(connection);
         Assert.Equal("Data Source=:memory:", connection.ConnectionString);
     }

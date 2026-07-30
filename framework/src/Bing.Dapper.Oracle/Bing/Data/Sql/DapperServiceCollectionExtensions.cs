@@ -34,7 +34,7 @@ public static class OracleServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         executorOptions.RegisterGuidTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Oracle, connection => new OracleConnection(connection));
+        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, connection => new OracleConnection(connection));
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.AddSqlImplementationType<ISqlQuery, OracleSqlQuery>(DatabaseType.Oracle);
         services.AddSqlImplementationType<ISqlExecutor, OracleSqlExecutor>(DatabaseType.Oracle);
@@ -112,7 +112,7 @@ public static class OracleServiceCollectionExtensions
         sqlOptions.RegisterGuidTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Oracle, connection => new OracleConnection(connection));
+        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, connection => new OracleConnection(connection));
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Oracle);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -188,7 +188,7 @@ public static class OracleServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Oracle, connection => new OracleConnection(connection));
+        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, connection => new OracleConnection(connection));
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Oracle);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

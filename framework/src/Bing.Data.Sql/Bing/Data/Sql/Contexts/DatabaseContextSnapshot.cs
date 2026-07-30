@@ -17,6 +17,7 @@ public static class DatabaseContextSnapshot
         return new DatabaseContext
         {
             DbKey = source.DbKey,
+            ProviderKey = source.ProviderKey,
             TenantId = source.TenantId,
             ReadPreference = source.ReadPreference,
             MappingProfile = source.MappingProfile,
@@ -36,6 +37,7 @@ public static class DatabaseContextSnapshot
         return new SqlDataSourceDescriptor
         {
             Key = source.Key,
+            ProviderKey = source.ProviderKey,
             DatabaseType = source.DatabaseType,
             ConnectionStringName = source.ConnectionStringName,
             ConnectionString = source.ConnectionString,

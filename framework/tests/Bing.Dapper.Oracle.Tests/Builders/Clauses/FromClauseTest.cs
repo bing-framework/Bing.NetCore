@@ -19,7 +19,7 @@ public class FromClauseTest
     /// </summary>
     public FromClauseTest()
     {
-        _clause = (OracleFromClause)((ISqlPartAccessor)new OracleBuilder()).FromClause;
+        _clause = (OracleFromClause)((ISqlQueryClauseAccessor)new OracleBuilder()).FromClause;
     }
 
     /// <summary>

@@ -33,8 +33,7 @@ public static class MySqlServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
-        services.AddSqlDbConnectionFactory(DatabaseType.Doris, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
         services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.MySql);
@@ -118,7 +117,7 @@ public static class MySqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -166,7 +165,7 @@ public static class MySqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.MySql);
         services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();
@@ -242,7 +241,7 @@ public static class MySqlServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.MySql, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

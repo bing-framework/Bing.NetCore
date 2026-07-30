@@ -70,6 +70,9 @@ public class ParameterManager : IAdvancedParameterManager
     /// </summary>
     protected IDialect Dialect { get; }
 
+    /// <inheritdoc />
+    public int Count => _params.Count;
+
     #endregion
 
     #region GenerateName(创建参数名)

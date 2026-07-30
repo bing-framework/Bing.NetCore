@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql.Builders.Mutations.Builders;
 
@@ -69,8 +70,21 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor
     {
         if (Provider is not ISqlParameterLimitProvider { MaxParameterCount: int maximum })
             return;
-        if (GetParameters().Count > maximum)
+        if (ParameterManager.Count > maximum)
             throw new InvalidOperationException($"Provider {Provider.Key} 的参数数量不能超过 {maximum}。");
+    }
+
+    /// <summary>
+    /// 渲染 SQL 并导出一次可执行参数快照。
+    /// </summary>
+    /// <param name="render">当前 Builder 的 SQL 渲染操作。</param>
+    /// <returns>可执行的 Mutation 命令快照。</returns>
+    protected SqlMutationCommand BuildCommand(Func<string> render)
+    {
+        if (render == null)
+            throw new ArgumentNullException(nameof(render));
+        var sql = render();
+        return new SqlMutationCommand(sql, GetParameters());
     }
 
     /// <summary>

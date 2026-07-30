@@ -51,6 +51,9 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     public string ToSql() => Render(AppendTo);
 
     /// <inheritdoc />
+    public SqlMutationCommand BuildCommand() => BuildCommand(ToSql);
+
+    /// <inheritdoc />
     public ISqlDeleteBuilder New() => new SqlDeleteBuilder(Provider, MutationContext.Services,
         ParameterManager.CreateEmpty(), ClauseFactory);
 
@@ -78,7 +81,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     /// </summary>
     private void Validate()
     {
-        var context = new SqlValidationContext(Provider, GetParameters().Count, AllowAllRows, SqlExecutionKind.Delete);
+        var context = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows, SqlExecutionKind.Delete);
         DeleteClause.Validate(context);
         WhereClause.Validate(context);
         ValidateParameterLimit();

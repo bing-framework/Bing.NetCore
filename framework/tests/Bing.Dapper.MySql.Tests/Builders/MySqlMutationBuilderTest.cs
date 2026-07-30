@@ -17,7 +17,7 @@ public sealed class MySqlMutationBuilderTest
     public void Insert_WhenMappedEntityIsProvided_ShouldRenderMySqlSql()
     {
         // Arrange
-        var builder = new DefaultSqlMutationBuilder(MySqlSqlProvider.Instance, new SqlBuilderServices());
+        var builder = new DefaultSqlEntityMutationCommandBuilder(MySqlSqlProvider.Instance, new SqlBuilderServices());
 
         // Act
         var command = builder.Insert(new MutationSample { Name = "Bing" });

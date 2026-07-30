@@ -125,7 +125,7 @@ public class DefaultSqlParameterBinderTest
     {
         // Arrange
         var builder = new SqlServerBuilder();
-        var manager = Assert.IsAssignableFrom<IAdvancedParameterManager>(((ISqlPartAccessor)builder).ParameterManager);
+        var manager = Assert.IsAssignableFrom<IAdvancedParameterManager>(((ISqlCommonPartAccessor)builder).ParameterManager);
         manager.Add(new SqlParam(":amount", 12.34m, DbType.Decimal, ParameterDirection.InputOutput, 20, 10, 2)
         {
             OriginalValue = "12.34",

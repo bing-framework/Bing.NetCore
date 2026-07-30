@@ -1,4 +1,3 @@
-using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql.Builders;
@@ -29,11 +28,4 @@ public interface ISqlBuilderFactory
     /// <param name="services">当前查询的共享服务，包含选项、元数据和数据库上下文解析能力。</param>
     /// <returns>保留指定查询级服务实例的 SQL Builder。</returns>
     ISqlBuilder Create(ISqlProvider provider, SqlBuilderServices services);
-
-    /// <summary>
-    /// 根据数据库类型创建 Builder。
-    /// </summary>
-    /// <param name="databaseType">用于兼容路由的数据库类型。</param>
-    /// <returns>该数据库类型首个已注册 Provider 对应的 SQL Builder。</returns>
-    ISqlBuilder Create(DatabaseType databaseType);
 }

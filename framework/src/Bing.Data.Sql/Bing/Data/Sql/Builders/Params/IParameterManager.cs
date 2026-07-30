@@ -9,6 +9,11 @@
 public interface IParameterManager
 {
     /// <summary>
+    /// 当前已保存的参数数量。
+    /// </summary>
+    int Count { get; }
+
+    /// <summary>
     /// 创建尚未使用的标准参数名称。
     /// </summary>
     /// <returns>可直接用于添加参数的唯一标准名称。</returns>

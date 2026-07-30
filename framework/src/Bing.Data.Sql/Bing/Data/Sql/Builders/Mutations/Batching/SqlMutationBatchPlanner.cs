@@ -24,15 +24,8 @@ public sealed class SqlMutationBatchPlanner : ISqlMutationBatchPlanner
         var batchCount = context.EntityCount / batchSize;
         if (context.EntityCount % batchSize != 0)
             batchCount++;
-        var sizes = new List<int>(batchCount);
-        var remaining = context.EntityCount;
-        while (remaining > 0)
-        {
-            var current = Math.Min(batchSize, remaining);
-            sizes.Add(current);
-            remaining -= current;
-        }
-        return new SqlMutationBatchPlan(context.EntityCount, batchSize, sizes);
+        return new SqlMutationBatchPlan(context.EntityCount, batchSize,
+            new SqlMutationBatchSizeList(context.EntityCount, batchSize, batchCount));
     }
 
     /// <summary>
@@ -53,5 +46,61 @@ public sealed class SqlMutationBatchPlanner : ISqlMutationBatchPlanner
         if (context.MaxSqlLength == null || context.EstimatedSqlLengthPerEntity == 0)
             return int.MaxValue;
         return context.MaxSqlLength.Value / context.EstimatedSqlLengthPerEntity;
+    }
+
+    /// <summary>
+    /// 按需计算每批实体数量，避免大规模小批次在规划阶段分配等同于实体数的内存。
+    /// </summary>
+    private sealed class SqlMutationBatchSizeList : IReadOnlyList<int>
+    {
+        /// <summary>
+        /// 所有待处理实体数量。
+        /// </summary>
+        private readonly int _entityCount;
+
+        /// <summary>
+        /// 除最后一批外的固定批次大小。
+        /// </summary>
+        private readonly int _batchSize;
+
+        /// <summary>
+        /// 初始化一个 <see cref="SqlMutationBatchSizeList"/> 类型的实例。
+        /// </summary>
+        /// <param name="entityCount">待处理实体数量。</param>
+        /// <param name="batchSize">固定批次大小。</param>
+        /// <param name="count">批次数量。</param>
+        public SqlMutationBatchSizeList(int entityCount, int batchSize, int count)
+        {
+            _entityCount = entityCount;
+            _batchSize = batchSize;
+            Count = count;
+        }
+
+        /// <inheritdoc />
+        public int Count { get; }
+
+        /// <inheritdoc />
+        public int this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= Count)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                if (index < Count - 1)
+                    return _batchSize;
+                var remainder = _entityCount % _batchSize;
+                return remainder == 0 ? _batchSize : remainder;
+            }
+        }
+
+        /// <inheritdoc />
+        public IEnumerator<int> GetEnumerator()
+        {
+            for (var index = 0; index < Count; index++)
+                yield return this[index];
+        }
+
+        /// <inheritdoc />
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

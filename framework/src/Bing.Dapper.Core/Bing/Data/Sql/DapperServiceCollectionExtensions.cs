@@ -74,6 +74,7 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
         services.TryAddScoped<IReadPreferenceScopeManager, ReadPreferenceScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
+        services.TryAddSingleton<ISqlProviderResolver, DefaultSqlProviderResolver>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDatabaseIdentityContributor, DefaultSqlDatabaseIdentityContributor>());
         services.TryAddSingleton<ISqlDatabaseIdentityResolver, DefaultSqlDatabaseIdentityResolver>();
         services.TryAddSingleton<ISqlConnectionStringResolver, DefaultSqlConnectionStringResolver>();
@@ -94,7 +95,8 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<IDapperParameterBinder, DefaultSqlParameterBinder>();
         services.TryAddSingleton<ISqlParameterBinder>(provider => provider.GetRequiredService<IDapperParameterBinder>());
         services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
-        services.TryAddSingleton<ISqlMutationBuilderFactory, SqlMutationBuilderFactory>();
+        services.TryAddSingleton<ISqlEntityMutationCommandBuilderFactory, SqlEntityMutationCommandBuilderFactory>();
+        services.TryAddSingleton<ISqlFluentMutationBuilderFactory, SqlFluentMutationBuilderFactory>();
         services.TryAddSingleton<SqlImplementationTypeOptions>();
         services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
@@ -129,10 +131,11 @@ public static class DapperCoreServiceCollectionExtensions
     /// <param name="connectionString">连接字符串。</param>
     /// <param name="connectionStringName">连接字符串配置名称。</param>
     /// <param name="setupAction">数据源配置操作。</param>
+    /// <param name="providerKey">SQL Provider 唯一标识；未指定时使用官方数据库类型兼容映射。</param>
     /// <returns>服务集合。</returns>
     public static IServiceCollection AddSqlDataSource(this IServiceCollection services, string key,
         DatabaseType databaseType, string connectionString = null, string connectionStringName = null,
-        Action<SqlDataSourceDescriptor> setupAction = null)
+        Action<SqlDataSourceDescriptor> setupAction = null, string providerKey = null)
     {
         return services.ConfigureSqlMetadata(options =>
         {
@@ -150,6 +153,7 @@ public static class DapperCoreServiceCollectionExtensions
                     $"默认 SQL 数据源 {dataSourceKey} 已注册为 {descriptor.DatabaseType}，不能使用无键注册覆盖为 {databaseType}。多 Provider 请使用具名数据源。");
             }
             descriptor.Key = dataSourceKey;
+            descriptor.ProviderKey = string.IsNullOrWhiteSpace(providerKey) ? null : providerKey.Trim();
             descriptor.DatabaseType = databaseType;
             if (databaseType == DatabaseType.Doris)
                 descriptor.SupportsTransactions = false;
@@ -170,14 +174,15 @@ public static class DapperCoreServiceCollectionExtensions
     /// <param name="databaseType">数据库类型。</param>
     /// <param name="connectionStringName">连接字符串配置名称。</param>
     /// <param name="setupAction">数据源配置操作。</param>
+    /// <param name="providerKey">SQL Provider 唯一标识；未指定时使用官方数据库类型兼容映射。</param>
     /// <returns>服务集合。</returns>
     public static IServiceCollection AddSqlDataSource(this IServiceCollection services, IConfiguration configuration,
         string key, DatabaseType databaseType, string connectionStringName = null,
-        Action<SqlDataSourceDescriptor> setupAction = null)
+        Action<SqlDataSourceDescriptor> setupAction = null, string providerKey = null)
     {
         var name = string.IsNullOrWhiteSpace(connectionStringName) ? key : connectionStringName;
         var connectionString = configuration?.GetConnectionString(name);
-        return services.AddSqlDataSource(key, databaseType, connectionString, name, setupAction);
+        return services.AddSqlDataSource(key, databaseType, connectionString, name, setupAction, providerKey);
     }
 
     /// <summary>
@@ -234,20 +239,22 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册独立数据库连接工厂。
+    /// 注册指定 SQL Provider 的独立连接工厂。
     /// </summary>
     /// <param name="services">服务集合。</param>
-    /// <param name="databaseType">数据库类型。</param>
+    /// <param name="providerKey">SQL Provider 唯一标识。</param>
     /// <param name="factory">连接创建委托。</param>
     /// <returns>服务集合。</returns>
     public static IServiceCollection AddSqlDbConnectionFactory(this IServiceCollection services,
-        DatabaseType databaseType, Func<string, System.Data.IDbConnection> factory)
+        string providerKey, Func<string, System.Data.IDbConnection> factory)
     {
+        if (string.IsNullOrWhiteSpace(providerKey))
+            throw new ArgumentException("SQL Provider Key 不能为空。", nameof(providerKey));
         if (factory == null)
             throw new ArgumentNullException(nameof(factory));
         services.AddSingleton(new SqlDbConnectionFactoryRegistration
         {
-            DatabaseType = databaseType,
+            ProviderKey = providerKey.Trim(),
             Factory = factory
         });
         return services;

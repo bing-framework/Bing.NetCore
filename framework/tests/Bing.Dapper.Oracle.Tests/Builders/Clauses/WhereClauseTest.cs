@@ -20,7 +20,7 @@ public class WhereClauseTest
     /// </summary>
     public WhereClauseTest()
     {
-        _clause = (WhereClause)((ISqlPartAccessor)new OracleBuilder()).WhereClause;
+        _clause = (WhereClause)((ISqlQueryClauseAccessor)new OracleBuilder()).WhereClause;
     }
 
     /// <summary>

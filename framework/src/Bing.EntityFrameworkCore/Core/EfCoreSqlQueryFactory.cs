@@ -100,7 +100,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
             if (mode == EfCoreSqlConnectionMode.Independent)
             {
                 var connectionString = ResolveIndependentConnectionString(dataSource);
-                var connection = CreateIndependentConnection(databaseType, connectionString);
+                var connection = CreateIndependentConnection(dataSource, connectionString);
                 try
                 {
                     GetResourceBinder(query).BindOwnedConnection(connection, SqlConnectionSource.DataSource);
@@ -166,17 +166,37 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     /// <summary>
     /// 基于 EF Core Provider 创建独立连接
     /// </summary>
-    /// <param name="databaseType">数据库类型</param>
+    /// <param name="dataSource">已解析 SQL 数据源。</param>
     /// <param name="connectionString">连接字符串</param>
     /// <returns>独立数据库连接</returns>
-    private System.Data.IDbConnection CreateIndependentConnection(DatabaseType databaseType, string connectionString)
+    private System.Data.IDbConnection CreateIndependentConnection(SqlDataSourceDescriptor dataSource,
+        string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new InvalidOperationException("EF Core 数据库连接字符串不能为空，无法创建独立 SQL 查询连接。");
         if (_connectionFactoryResolver == null)
             throw new InvalidOperationException("未注册独立 SQL 数据库连接工厂解析器。");
-        return _connectionFactoryResolver.Create(databaseType, connectionString);
+        var providerKey = dataSource?.ProviderKey?.Trim() ?? ResolveOfficialProviderKey(dataSource?.DatabaseType);
+        if (string.IsNullOrWhiteSpace(providerKey))
+            throw new InvalidOperationException(
+                "EF Core Independent 模式的数据源必须配置 SQL Provider Key，不能仅使用数据库类型解析独立连接工厂。");
+        return _connectionFactoryResolver.Create(providerKey, connectionString);
     }
+
+    /// <summary>
+    /// 解析官方数据库类型对应的 Provider Key。
+    /// </summary>
+    /// <param name="databaseType">数据源声明的数据库类型。</param>
+    /// <returns>官方 Provider Key；未知或自定义类型返回 <c>null</c>。</returns>
+    private static string ResolveOfficialProviderKey(DatabaseType? databaseType) => databaseType switch
+    {
+        DatabaseType.MySql or DatabaseType.Doris => "bing.mysql",
+        DatabaseType.PgSql => "bing.postgresql",
+        DatabaseType.SqlServer => "bing.sqlserver",
+        DatabaseType.Sqlite => "bing.sqlite",
+        DatabaseType.Oracle => "bing.oracle",
+        _ => null
+    };
 
     /// <summary>
     /// 解析独立连接字符串

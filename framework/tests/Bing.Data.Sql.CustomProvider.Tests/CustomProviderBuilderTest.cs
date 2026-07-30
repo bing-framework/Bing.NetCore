@@ -21,7 +21,7 @@ public class CustomProviderBuilderTest
     {
         // Arrange
         var builder = new CustomSqlBuilder();
-        var accessor = (ISqlPartAccessor)builder;
+        var accessor = (ISqlQueryClauseAccessor)builder;
 
         // Act
         var provider = builder.Provider;
@@ -79,10 +79,10 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：公开 Builder 工厂应按 Provider 实例和数据库类型创建对应外部 Builder。
+    /// 测试目的：公开 Builder 工厂应按 Provider 实例创建对应外部 Builder。
     /// </summary>
     [Fact]
-    public void Factory_WhenProviderAndDatabaseTypeRegistered_ShouldCreateExpectedBuilder()
+    public void Factory_WhenProviderRegistered_ShouldCreateExpectedBuilder()
     {
         // Arrange
         var factory = new SqlBuilderFactory(new[]
@@ -92,11 +92,9 @@ public class CustomProviderBuilderTest
 
         // Act
         var byProvider = factory.Create(CustomSqlProvider.Instance);
-        var byDatabaseType = factory.Create(CustomSqlProvider.Instance.DatabaseType);
 
         // Assert
         Assert.IsType<CustomSqlBuilder>(byProvider);
-        Assert.IsType<CustomSqlBuilder>(byDatabaseType);
     }
 
     /// <summary>
@@ -139,7 +137,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：不同 Key 的外部 Provider 应可复用同一个 DatabaseType，兼容入口保留首个官方映射。
+    /// 测试目的：不同 Key 的外部 Provider 应可复用同一个 DatabaseType，并始终通过 Key 显式创建。
     /// </summary>
     [Fact]
     public void Factory_WhenDifferentProviderKeysShareDatabaseType_ShouldAllowRegistration()
@@ -154,12 +152,10 @@ public class CustomProviderBuilderTest
         // Act
         var first = factory.Create(CustomSqlProvider.Instance.Key);
         var alias = factory.Create(CustomSqliteAliasProvider.Instance.Key);
-        var compatibility = factory.Create(DatabaseType.Sqlite);
 
         // Assert
         Assert.IsType<CustomSqlBuilder>(first);
         Assert.IsType<CustomSqlBuilder>(alias);
-        Assert.IsType<CustomSqlBuilder>(compatibility);
     }
 
     /// <summary>
@@ -189,7 +185,7 @@ public class CustomProviderBuilderTest
     {
         // Arrange
         var builder = new LimitedCustomSqlBuilder();
-        var parameterManager = ((ISqlPartAccessor)builder).ParameterManager;
+        var parameterManager = ((ISqlCommonPartAccessor)builder).ParameterManager;
 
         // Act
         builder.Where("u.Id", 1);
@@ -334,9 +330,9 @@ public class CustomProviderBuilderTest
         source.Clear();
 
         // Assert
-        Assert.IsType<CustomSelectClause>(((ISqlPartAccessor)source).SelectClause);
-        Assert.IsType<CustomSelectClause>(((ISqlPartAccessor)clone).SelectClause);
-        Assert.IsType<CustomSelectClause>(((ISqlPartAccessor)fresh).SelectClause);
+        Assert.IsType<CustomSelectClause>(((ISqlQueryClauseAccessor)source).SelectClause);
+        Assert.IsType<CustomSelectClause>(((ISqlQueryClauseAccessor)clone).SelectClause);
+        Assert.IsType<CustomSelectClause>(((ISqlQueryClauseAccessor)fresh).SelectClause);
         Assert.Equal("Select [u].[Id] \r\nFrom [Users] As [u]", clone.ToSql());
     }
 
@@ -369,6 +365,9 @@ public class CustomProviderBuilderTest
 
         /// <inheritdoc />
         public string NormalizeName(string name) => _inner.NormalizeName(name);
+
+        /// <inheritdoc />
+        public int Count => _inner.Count;
 
         /// <inheritdoc />
         public void Add(string name, object value, Operator? @operator = null) => _inner.Add(name, value, @operator);

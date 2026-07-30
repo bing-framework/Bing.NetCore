@@ -118,7 +118,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await InsertCompanyAsync(connection, tableName, companyId, null, "structured-cross-database-company");
             using var query = _fixture.CreateQuery();
             query.Select("c.CompanyId,c.Name");
-            ((ISqlPartAccessor)query.GetBuilder()).FromClause.From(new SqlTableReference
+            ((ISqlQueryClauseAccessor)query.GetBuilder()).FromClause.From(new SqlTableReference
             {
                 Schema = databaseName,
                 TableName = "Merchants.Company",
@@ -323,7 +323,7 @@ public sealed class MySqlCrossDatabaseQueryTest
     {
         var query = _fixture.CreateQuery();
         query.Select("c.CompanyId,c.Name,m.Name As MerchantName");
-        var builder = (ISqlPartAccessor)query.GetBuilder();
+        var builder = (ISqlQueryClauseAccessor)query.GetBuilder();
         builder.FromClause.From(new SqlTableReference { TableName = "Merchants.Company", Alias = "c" });
         builder.JoinClause.LeftJoin(new SqlTableReference
         {

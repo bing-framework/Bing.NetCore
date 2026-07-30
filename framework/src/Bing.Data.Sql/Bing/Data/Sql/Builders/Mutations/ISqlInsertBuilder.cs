@@ -1,5 +1,6 @@
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql.Builders.Mutations;
 
@@ -30,4 +31,10 @@ public interface ISqlInsertBuilder : ISqlContent, IInsert, IInsertClauseAccessor
     /// </summary>
     /// <returns>当前 Insert SQL 文本。</returns>
     string ToSql();
+
+    /// <summary>
+    /// 生成当前 Insert 的可执行命令快照。
+    /// </summary>
+    /// <returns>包含 SQL 与参数元数据的命令快照。</returns>
+    SqlMutationCommand BuildCommand();
 }

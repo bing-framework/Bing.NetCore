@@ -1,6 +1,7 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -31,14 +32,15 @@ public class PostgreSqlProviderRegistrationTest
         using var multipleQueryExecutor = provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>()
             .Create("pgsql");
         using var connection = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>()
-            .Create(DatabaseType.PgSql, "Host=localhost;Database=test;");
+            .Create(PostgreSqlSqlProvider.Instance.Key, "Host=localhost;Database=test;");
 
         // Assert
         Assert.IsType<PostgreSqlQuery>(query);
         Assert.IsType<PostgreSqlExecutor>(executor);
         Assert.IsType<PostgreSqlMultipleQueryExecutor>(multipleQueryExecutor);
-        Assert.IsType<PostgreSqlDialect>(((ISqlPartAccessor)query).Dialect);
+        Assert.IsType<PostgreSqlDialect>(((ISqlCommonPartAccessor)query).Dialect);
         Assert.IsType<NpgsqlConnection>(connection);
+        Assert.IsType<PostgreSqlBatchUpdateRenderer>(provider.GetRequiredService<ISqlBatchUpdateRenderer>());
         Assert.Equal("Host=localhost;Database=test;", connection.ConnectionString);
         Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsMultipleResultSets);
     }

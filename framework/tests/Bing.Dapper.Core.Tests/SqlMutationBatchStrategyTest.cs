@@ -4,9 +4,11 @@ using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Mutations;
 using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -65,6 +67,164 @@ public sealed class SqlMutationBatchStrategyTest
         Assert.Equal(2, executor.Commands.Count);
         Assert.All(executor.Commands, command =>
             Assert.Equal("Insert Into [mutation_samples] ([Name]) Values (@_p_0)", command.Sql));
+    }
+
+    /// <summary>
+    /// 测试目的：Auto DeleteBatch 应将无并发列的单主键实体合并为一条参数化 IN 删除命令。
+    /// </summary>
+    [Fact]
+    public void DeleteBatch_WhenAutoStrategyAndSingleKeyHasNoConcurrency_ShouldExecuteCombinedCommand()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.DeleteBatch(new[]
+        {
+            new DeleteSample { Id = 1 },
+            new DeleteSample { Id = 2 }
+        }, new SqlBatchDeleteOptions { BatchSize = 2, UseTransaction = false });
+
+        // Assert
+        var command = Assert.Single(executor.Commands);
+        Assert.Equal(2, affectedRows);
+        Assert.Equal("Delete From [delete_samples] Where [Id] In (@_p_0,@_p_1)", command.Sql);
+        Assert.Equal(new object[] { 1, 2 }, command.Parameters.Select(parameter => parameter.Value));
+    }
+
+    /// <summary>
+    /// 测试目的：未注册 Provider 优化 Delete 实现时，显式优化策略必须明确失败，不能静默退化为组合或逐实体命令。
+    /// </summary>
+    [Fact]
+    public void DeleteBatch_WhenProviderOptimizedStrategyHasNoRenderer_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => executor.DeleteBatch(new[]
+        {
+            new DeleteSample { Id = 1 }
+        }, new SqlBatchDeleteOptions
+        {
+            Strategy = SqlBatchDeleteStrategy.ProviderOptimized,
+            UseTransaction = false
+        }));
+
+        // Assert
+        Assert.Equal("Provider test.mutation-batch 未实现优化批量 Delete 命令。", exception.Message);
+        Assert.Empty(executor.Commands);
+    }
+
+    /// <summary>
+    /// 测试目的：未注册 Provider 优化 Update 渲染器时，显式优化策略必须返回明确异常，不能静默降级。
+    /// </summary>
+    [Fact]
+    public void UpdateBatch_WhenProviderOptimizedStrategyHasNoRenderer_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => executor.UpdateBatch(new[]
+        {
+            new UpdateSample { Id = 1, Name = "updated" }
+        }, new SqlBatchUpdateOptions
+        {
+            Strategy = SqlBatchUpdateStrategy.ProviderOptimized,
+            UseTransaction = false
+        }));
+
+        // Assert
+        Assert.Equal("Provider test.mutation-batch 未注册优化批量 Update 渲染器。", exception.Message);
+        Assert.Empty(executor.Commands);
+    }
+
+    /// <summary>
+    /// 测试目的：批量 Update 应接受强类型并发原始值，并将其写入实体条件参数。
+    /// </summary>
+    [Fact]
+    public void UpdateBatch_WhenTypedOriginalValueIsProvided_ShouldUseConfiguredValue()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.UpdateBatch(new[]
+        {
+            new ConcurrencyUpdateSample { Id = 1, Name = "first", Version = "v1" }
+        }, new SqlBatchUpdateOptions
+        {
+            UseTransaction = false,
+            UpdateOptions = new SqlUpdateOptions<ConcurrencyUpdateSample>
+            {
+                ConcurrencyConflictBehavior = SqlConcurrencyConflictBehavior.ReturnAffectedRows
+            }.Original(item => item.Version, "original")
+        });
+
+        // Assert
+        Assert.Equal(4, affectedRows);
+        Assert.Equal("original", executor.Commands.Single().Parameters.Last().Value);
+    }
+
+    /// <summary>
+    /// 测试目的：批量 Delete 应接受强类型并发原始值，并将其写入实体条件参数。
+    /// </summary>
+    [Fact]
+    public void DeleteBatch_WhenTypedOriginalValueIsProvided_ShouldUseConfiguredValue()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.DeleteBatch(new[]
+        {
+            new ConcurrencyDeleteSample { Id = 1, Version = "v1" }
+        }, new SqlBatchDeleteOptions
+        {
+            UseTransaction = false,
+            DeleteOptions = new SqlDeleteOptions<ConcurrencyDeleteSample>
+            {
+                ConcurrencyConflictBehavior = SqlConcurrencyConflictBehavior.ReturnAffectedRows
+            }.Original(item => item.Version, "original")
+        });
+
+        // Assert
+        Assert.Equal(2, affectedRows);
+        Assert.Equal("original", executor.Commands.Single().Parameters.Last().Value);
+    }
+
+    /// <summary>
+    /// 测试目的：带并发列的优化批量 Update 受影响行数少于实体数时，应抛出框架并发异常，避免静默丢失更新。
+    /// </summary>
+    [Fact]
+    public void UpdateBatch_WhenOptimizedConcurrencyCommandAffectsFewerRows_ShouldThrowConcurrencyException()
+    {
+        // Arrange
+        var renderer = new TestBatchUpdateRenderer();
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false, renderer: renderer);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var exception = Assert.Throws<Bing.Exceptions.ConcurrencyException>(() => executor.UpdateBatch(new[]
+        {
+            new ConcurrencyUpdateSample { Id = 1, Name = "first", Version = "v1" },
+            new ConcurrencyUpdateSample { Id = 2, Name = "second", Version = "v2" }
+        }, new SqlBatchUpdateOptions
+        {
+            Strategy = SqlBatchUpdateStrategy.ProviderOptimized,
+            UseTransaction = false
+        }));
+
+        // Assert
+        Assert.Contains("批量 Update 预期影响 2 行，实际影响 1 行。", exception.Message);
+        Assert.Equal(2, renderer.LastEntityCount);
+        Assert.Single(executor.Commands);
     }
 
     /// <summary>
@@ -369,11 +529,13 @@ public sealed class SqlMutationBatchStrategyTest
     /// <param name="supportsMultiRowValues">Provider 是否支持标准多行 Values。</param>
     /// <returns>用于执行器测试的服务提供程序。</returns>
     private static ServiceProvider CreateServiceProvider(bool supportsMultiRowValues, int? maxParameterCount = null,
-        ISqlTransactionScopeFactory transactionScopeFactory = null)
+        ISqlTransactionScopeFactory transactionScopeFactory = null, ISqlBatchUpdateRenderer renderer = null)
     {
         var services = new ServiceCollection();
         services.AddSqlCore();
         services.AddSingleton<ISqlProvider>(new TestProvider(supportsMultiRowValues, maxParameterCount));
+        if (renderer != null)
+            services.AddSingleton<ISqlBatchUpdateRenderer>(renderer);
         if (transactionScopeFactory != null)
             services.AddSingleton(transactionScopeFactory);
         return services.BuildServiceProvider();
@@ -392,6 +554,92 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
+    /// 映射到单主键删除测试表的实体。
+    /// </summary>
+    [Table("delete_samples")]
+    private sealed class DeleteSample
+    {
+        /// <summary>
+        /// 主键。
+        /// </summary>
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+    }
+
+    /// <summary>
+    /// 映射到 Update 策略测试表的实体。
+    /// </summary>
+    [Table("update_samples")]
+    private sealed class UpdateSample
+    {
+        /// <summary>
+        /// 主键。
+        /// </summary>
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// 映射到带并发令牌 Update 测试表的实体。
+    /// </summary>
+    [Table("concurrency_update_samples")]
+    private sealed class ConcurrencyUpdateSample
+    {
+        /// <summary>主键。</summary>
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+
+        /// <summary>名称。</summary>
+        public string Name { get; set; }
+
+        /// <summary>并发令牌。</summary>
+        [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
+        public string Version { get; set; }
+    }
+
+    /// <summary>
+    /// 映射到带并发令牌 Delete 测试表的实体。
+    /// </summary>
+    [Table("concurrency_delete_samples")]
+    private sealed class ConcurrencyDeleteSample
+    {
+        /// <summary>主键。</summary>
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+
+        /// <summary>并发令牌。</summary>
+        [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
+        public string Version { get; set; }
+    }
+
+    /// <summary>
+    /// 用于验证执行器批量行为的测试渲染器。
+    /// </summary>
+    private sealed class TestBatchUpdateRenderer : ISqlBatchUpdateRenderer
+    {
+        /// <inheritdoc />
+        public string ProviderKey => "test.mutation-batch";
+
+        public bool CanRender(SqlBatchUpdateRenderContext context) => true;
+
+        /// <summary>最近一次上下文中的实体数量。</summary>
+        public int LastEntityCount { get; private set; }
+
+        /// <inheritdoc />
+        public SqlMutationCommand Render(SqlBatchUpdateRenderContext context)
+        {
+            LastEntityCount = context.Entities.Count;
+            return new SqlMutationCommand("Update [concurrency_update_samples] Set [Name] = @_p_0",
+                new[] { new SqlParam("@_p_0", "updated") });
+        }
+    }
+
+    /// <summary>
     /// 用于记录执行命令的 SQL Executor。
     /// </summary>
     private sealed class RecordingExecutor : SqlExecutorBase
@@ -402,8 +650,27 @@ public sealed class SqlMutationBatchStrategyTest
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="databaseType">测试 Provider 的数据库类型。</param>
         public RecordingExecutor(IServiceProvider serviceProvider, DatabaseType databaseType)
-            : base(serviceProvider, new SqlOptions { DatabaseType = databaseType })
+            : base(serviceProvider, CreateOptions(databaseType))
         {
+        }
+
+        /// <summary>
+        /// 创建绑定测试 Provider Key 的执行器选项。
+        /// </summary>
+        /// <param name="databaseType">测试 Provider 的数据库类型。</param>
+        /// <returns>执行器选项。</returns>
+        private static SqlOptions CreateOptions(DatabaseType databaseType)
+        {
+            var options = new SqlOptions { DatabaseType = databaseType };
+            options.SetDatabaseContext(new DatabaseContext
+            {
+                DataSource = new SqlDataSourceDescriptor
+                {
+                    DatabaseType = databaseType,
+                    ProviderKey = "test.mutation-batch"
+                }
+            });
+            return options;
         }
 
         /// <summary>

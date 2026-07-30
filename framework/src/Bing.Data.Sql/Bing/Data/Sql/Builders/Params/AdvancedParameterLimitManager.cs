@@ -29,6 +29,9 @@ internal sealed class AdvancedParameterLimitManager : ParameterLimitManagerBase,
     public string NormalizeName(string name) => Inner.NormalizeName(name);
 
     /// <inheritdoc />
+    public int Count => Inner.Count;
+
+    /// <inheritdoc />
     public void Add(string name, object value, Operator? @operator = null)
     {
         EnsureCanAdd(name);

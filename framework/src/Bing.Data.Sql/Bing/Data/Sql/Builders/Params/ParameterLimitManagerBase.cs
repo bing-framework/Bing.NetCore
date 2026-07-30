@@ -44,7 +44,7 @@ internal abstract class ParameterLimitManagerBase
         name = Inner.NormalizeName(name);
         if (string.IsNullOrWhiteSpace(name) || Inner.Contains(name))
             return;
-        var currentCount = Inner.GetParams().Count;
+        var currentCount = Inner.Count;
         if (currentCount < MaxParameterCount)
             return;
         throw new InvalidOperationException(

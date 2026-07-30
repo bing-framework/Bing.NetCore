@@ -18,7 +18,7 @@ public sealed class SqlMutationBuilderFactoryTest
     public void CreateSpecializedBuilders_WhenConfigured_ShouldRenderIndependentSql()
     {
         // Arrange
-        var factory = new SqlMutationBuilderFactory();
+        var factory = new SqlFluentMutationBuilderFactory();
         var services = new SqlBuilderServices();
         var table = new SqlTableReference { TableName = "samples" };
 
@@ -42,22 +42,22 @@ public sealed class SqlMutationBuilderFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：新实体创建入口与兼容 Create 入口均应返回实体映射 Mutation 适配 Builder。
+    /// 测试目的：实体命令工厂应创建独立的实体映射 Mutation 命令 Builder。
     /// </summary>
     [Fact]
-    public void CreateEntity_AndLegacyCreate_ShouldReturnEntityMutationBuilder()
+    public void Create_WhenConfigured_ShouldReturnEntityMutationCommandBuilder()
     {
         // Arrange
-        var factory = new SqlMutationBuilderFactory();
+        var factory = new SqlEntityMutationCommandBuilderFactory();
         var services = new SqlBuilderServices();
 
         // Act
-        var entityBuilder = factory.CreateEntity(TestMutationSqlProvider.Instance, services);
-        var legacyBuilder = factory.Create(TestMutationSqlProvider.Instance, services);
+        var first = factory.Create(TestMutationSqlProvider.Instance, services);
+        var second = factory.Create(TestMutationSqlProvider.Instance, services);
 
         // Assert
-        Assert.IsType<DefaultSqlMutationBuilder>(entityBuilder);
-        Assert.IsType<DefaultSqlMutationBuilder>(legacyBuilder);
-        Assert.NotSame(entityBuilder, legacyBuilder);
+        Assert.IsType<DefaultSqlEntityMutationCommandBuilder>(first);
+        Assert.IsType<DefaultSqlEntityMutationCommandBuilder>(second);
+        Assert.NotSame(first, second);
     }
 }

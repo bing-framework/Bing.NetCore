@@ -13,6 +13,11 @@ public sealed class SqlDataSourceDescriptor
     public string Key { get; set; }
 
     /// <summary>
+    /// SQL Provider 唯一标识。未设置时仅允许使用官方数据库类型兼容映射。
+    /// </summary>
+    public string ProviderKey { get; set; }
+
+    /// <summary>
     /// 数据库类型，仅供框架内部使用
     /// </summary>
     public DatabaseType DatabaseType { get; set; }

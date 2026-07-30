@@ -30,7 +30,7 @@ public sealed class OracleMutationBuilderTest
     public void Insert_WhenMappedEntityIsProvided_ShouldRenderOracleSql()
     {
         // Arrange
-        var builder = new DefaultSqlMutationBuilder(OracleSqlProvider.Instance, new SqlBuilderServices());
+        var builder = new DefaultSqlEntityMutationCommandBuilder(OracleSqlProvider.Instance, new SqlBuilderServices());
 
         // Act
         var command = builder.Insert(new MutationSample { Name = "Bing" });
@@ -47,7 +47,7 @@ public sealed class OracleMutationBuilderTest
     public void InsertCombined_WhenMultipleEntitiesAreProvided_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new DefaultSqlMutationBuilder(OracleSqlProvider.Instance, new SqlBuilderServices());
+        var builder = new DefaultSqlEntityMutationCommandBuilder(OracleSqlProvider.Instance, new SqlBuilderServices());
 
         // Act
         var exception = Assert.Throws<NotSupportedException>(() => builder.InsertCombined(new[]

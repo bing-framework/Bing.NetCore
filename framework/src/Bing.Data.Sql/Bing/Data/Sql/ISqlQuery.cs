@@ -42,17 +42,6 @@ public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposabl
     PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter, int? timeout = null);
 
     /// <summary>
-    /// 分页查询
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="func">不接收取消令牌的获取列表操作</param>
-    /// <param name="parameter">分页参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <remarks>该重载无法将取消令牌传递给列表操作，请改用接收 <see cref="CancellationToken"/> 的重载。</remarks>
-    [Obsolete("请使用接收 CancellationToken 的 PagerQueryAsync 重载")]
-    Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter, int? timeout = null);
-
-    /// <summary>
     /// 分页查询。
     /// </summary>
     /// <typeparam name="TResult">返回结果类型。</typeparam>

@@ -124,14 +124,6 @@ public interface IDapperParameterSet
 }
 
 /// <summary>
-/// Dapper 增强参数集访问器
-/// </summary>
-/// <remarks>兼容旧命名，新增代码应使用 <see cref="IDapperParameterSet"/>。</remarks>
-public interface IDapperSqlParameterSet : IDapperParameterSet
-{
-}
-
-/// <summary>
 /// 默认 Sql 参数绑定器
 /// </summary>
 public class DefaultSqlParameterBinder : IDapperParameterBinder
@@ -453,7 +445,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// 元数据参数对象
     /// </summary>
     private sealed class MetadataDynamicParameters : SqlMapper.IDynamicParameters, ISqlOutputParameterAccessor,
-        IDapperSqlParameterSet
+        IDapperParameterSet
     {
         /// <summary>
         /// 参数集合

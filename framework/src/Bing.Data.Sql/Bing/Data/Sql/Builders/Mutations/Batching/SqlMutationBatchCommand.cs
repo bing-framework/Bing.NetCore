@@ -11,14 +11,16 @@ public sealed class SqlMutationBatchCommand
     /// <param name="commands">按执行顺序保存的命令。</param>
     /// <param name="entityCount">本批命令覆盖的实体数量。</param>
     /// <param name="requiresTransaction">是否要求在单一事务中执行。</param>
+    /// <param name="validateAffectedRows">是否校验实际受影响行数与实体数量一致。</param>
     public SqlMutationBatchCommand(IReadOnlyList<SqlMutationCommand> commands, int entityCount,
-        bool requiresTransaction)
+        bool requiresTransaction, bool validateAffectedRows = false)
     {
         Commands = commands ?? throw new ArgumentNullException(nameof(commands));
         if (entityCount < 0)
             throw new ArgumentOutOfRangeException(nameof(entityCount));
         EntityCount = entityCount;
         RequiresTransaction = requiresTransaction;
+        ValidateAffectedRows = validateAffectedRows || Commands.Any(command => command.ValidateAffectedRows);
     }
 
     /// <summary>
@@ -32,7 +34,12 @@ public sealed class SqlMutationBatchCommand
     public int EntityCount { get; }
 
     /// <summary>
-    /// 是否要求在单一事务中执行。
+    /// 是否要求在单一事务中执行。即使外层批处理选项禁用事务，执行器也必须尊重该要求。
     /// </summary>
     public bool RequiresTransaction { get; }
+
+    /// <summary>
+    /// 是否要求本批实际受影响行数与实体数量完全一致。
+    /// </summary>
+    public bool ValidateAffectedRows { get; }
 }

@@ -20,7 +20,7 @@ public class SelectClauseTest
     /// </summary>
     public SelectClauseTest(ITestOutputHelper output)
     {
-        _clause = (SelectClause)((ISqlPartAccessor)new PostgreSqlBuilder()).SelectClause;
+        _clause = (SelectClause)((ISqlQueryClauseAccessor)new PostgreSqlBuilder()).SelectClause;
     }
 
     /// <summary>

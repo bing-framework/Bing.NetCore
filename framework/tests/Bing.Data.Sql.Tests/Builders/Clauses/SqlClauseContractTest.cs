@@ -52,21 +52,23 @@ public class SqlClauseContractTest
     }
 
     /// <summary>
-    /// 测试目的：兼容组件访问器应由通用组件与查询 Clause 两类细分访问器组合而成。
+    /// 测试目的：历史聚合访问器已移除，SQL Builder 应直接暴露按职责拆分的两个访问器。
     /// </summary>
     [Fact]
-    public void SqlPartAccessor_ShouldComposeSplitAccessors()
+    public void SplitAccessors_ShouldReplaceLegacyPartAccessor()
     {
         // Arrange
-        var partAccessor = typeof(ISqlPartAccessor);
+        var assemblyTypes = typeof(ISqlCommonPartAccessor).Assembly.GetTypes();
 
         // Act
-        var hasCommonParts = typeof(ISqlCommonPartAccessor).IsAssignableFrom(partAccessor);
-        var hasQueryClauses = typeof(ISqlQueryClauseAccessor).IsAssignableFrom(partAccessor);
+        var supportsCommonParts = typeof(ISqlCommonPartAccessor).IsAssignableFrom(typeof(TestSqlBuilder));
+        var supportsQueryClauses = typeof(ISqlQueryClauseAccessor).IsAssignableFrom(typeof(TestSqlBuilder));
+        var hasLegacyPartAccessor = assemblyTypes.Any(type => type.Name == "ISqlPartAccessor");
 
         // Assert
-        Assert.True(hasCommonParts);
-        Assert.True(hasQueryClauses);
+        Assert.True(supportsCommonParts);
+        Assert.True(supportsQueryClauses);
+        Assert.False(hasLegacyPartAccessor);
     }
 
     /// <summary>
@@ -85,12 +87,28 @@ public class SqlClauseContractTest
         parameterAccessor.AddParam("id", 1);
 
         // Assert
-        Assert.False((object)queryAccessor is ISqlPartAccessor);
+        Assert.IsAssignableFrom<ISqlQueryClauseAccessor>(queryAccessor);
         Assert.Equal("Select Distinct *", builder.SelectClause.ToSql());
         Assert.Equal("From [orders]", builder.FromClause.ToSql());
         Assert.NotNull(builder.WhereClause.ToSql());
-        Assert.False((object)parameterAccessor is ISqlPartAccessor);
+        Assert.IsAssignableFrom<ISqlCommonPartAccessor>(parameterAccessor);
         Assert.Equal(1, parameterAccessor.ParameterManager.GetValue("id"));
+    }
+
+    /// <summary>
+    /// 测试目的：实体执行器仅提供查询和实体 CRUD 操作，不得继承 Fluent Mutation 标记以暴露 Builder 专属扩展。
+    /// </summary>
+    [Fact]
+    public void SqlExecutor_ShouldNotInheritFluentMutationOperationMarker()
+    {
+        // Arrange
+        var executor = typeof(ISqlExecutor);
+
+        // Act
+        var exposesMutationMarker = typeof(ISqlOperation).IsAssignableFrom(executor);
+
+        // Assert
+        Assert.False(exposesMutationMarker);
     }
 
     /// <summary>

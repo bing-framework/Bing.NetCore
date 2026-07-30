@@ -1,4 +1,6 @@
 using Bing.Dapper.Tests.Infrastructure;
+using Bing.Data.Sql.Builders.Mutations.Batching;
+using Bing.Data.Sql.Mutations;
 using Bing.Test.Shared;
 
 namespace Bing.Dapper.Tests.SqlExecutor;
@@ -51,5 +53,82 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         Assert.Equal(1, updated);
         Assert.Equal(1, deleted);
         Assert.Equal(0, unmatched);
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL 优化批量 Update 应真实执行 UPDATE FROM VALUES，并在并发令牌未命中时抛出并发异常。
+    /// </summary>
+    [IntegrationFact("PostgreSql")]
+    public async Task UpdateBatchAsync_WhenProviderOptimized_ShouldUpdateRowsAndRejectConcurrencyConflict()
+    {
+        // Arrange
+        using var executor = _fixture.CreateExecutor();
+        var first = new PostgreSqlMutationProduct
+        {
+            Id = Guid.NewGuid(), Code = "batch-first", Name = "before-first", Amount = 1m,
+            OccurredAt = new DateTime(2026, 7, 24, 0, 0, 0, DateTimeKind.Utc), Version = 1
+        };
+        var second = new PostgreSqlMutationProduct
+        {
+            Id = Guid.NewGuid(), Code = "batch-second", Name = "before-second", Amount = 2m,
+            OccurredAt = new DateTime(2026, 7, 24, 0, 0, 0, DateTimeKind.Utc), Version = 1
+        };
+        await executor.InsertBatchAsync(new[] { first, second });
+        first.Name = "after-first";
+        second.Name = "after-second";
+        var options = new SqlBatchUpdateOptions
+        {
+            Strategy = SqlBatchUpdateStrategy.ProviderOptimized,
+            UpdateOptions = new SqlUpdateOptions { IncludeProperties = new[] { nameof(PostgreSqlMutationProduct.Name) } }
+        };
+
+        // Act
+        var updated = await executor.UpdateBatchAsync(new[] { first, second }, options);
+        var conflict = await Assert.ThrowsAsync<Bing.Exceptions.ConcurrencyException>(() => executor.UpdateBatchAsync(
+            new[]
+            {
+                new PostgreSqlMutationProduct
+                {
+                    Id = first.Id, Code = first.Code, Name = "conflict", Amount = first.Amount,
+                    OccurredAt = first.OccurredAt, Version = 2
+                }
+            }, options));
+
+        // Assert
+        Assert.Equal(2, updated);
+        Assert.Contains("批量 Update 预期影响 1 行，实际影响 0 行。", conflict.Message);
+    }
+
+    /// <summary>
+    /// PostgreSQL 优化批量 Update 的映射实体。
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.Table("integration_products", Schema = "public")]
+    private sealed class PostgreSqlMutationProduct
+    {
+        /// <summary>主键。</summary>
+        [System.ComponentModel.DataAnnotations.Key]
+        [System.ComponentModel.DataAnnotations.Schema.Column("id")]
+        public Guid Id { get; set; }
+
+        /// <summary>业务编码。</summary>
+        [System.ComponentModel.DataAnnotations.Schema.Column("code")]
+        public string Code { get; set; }
+
+        /// <summary>名称。</summary>
+        [System.ComponentModel.DataAnnotations.Schema.Column("name")]
+        public string Name { get; set; }
+
+        /// <summary>金额。</summary>
+        [System.ComponentModel.DataAnnotations.Schema.Column("amount")]
+        public decimal? Amount { get; set; }
+
+        /// <summary>发生时间。</summary>
+        [System.ComponentModel.DataAnnotations.Schema.Column("occurred_at")]
+        public DateTime OccurredAt { get; set; }
+
+        /// <summary>并发令牌。</summary>
+        [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
+        [System.ComponentModel.DataAnnotations.Schema.Column("version")]
+        public int Version { get; set; }
     }
 }

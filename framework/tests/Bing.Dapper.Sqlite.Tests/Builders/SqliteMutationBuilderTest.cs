@@ -19,20 +19,17 @@ public sealed class SqliteMutationBuilderTest
     public void MutationBuilder_WhenMappedEntityIsProvided_ShouldRenderSqlAndParameters()
     {
         // Arrange
-        var builder = new DefaultSqlMutationBuilder(SqliteSqlProvider.Instance, new SqlBuilderServices());
+        var builder = new DefaultSqlEntityMutationCommandBuilder(SqliteSqlProvider.Instance, new SqlBuilderServices());
         var entity = new MutationSample { Id = 7, Name = "Bing", Secret = "v1" };
 
         // Act
         var insert = builder.Insert(entity);
-        var update = builder.Update(entity, new SqlUpdateOptions
+        var update = builder.Update(entity, new SqlUpdateOptions<MutationSample>
         {
-            IncludeProperties = new[] { nameof(MutationSample.Name) },
-            OriginalValues = new MutationOriginalValues { Secret = "v1" }
-        });
-        var delete = builder.Delete(entity, new SqlDeleteOptions
-        {
-            OriginalValues = new MutationOriginalValues { Secret = "v1" }
-        });
+            IncludeProperties = new[] { nameof(MutationSample.Name) }
+        }.Original(item => item.Secret, "v1"));
+        var delete = builder.Delete(entity, new SqlDeleteOptions<MutationSample>()
+            .Original(item => item.Secret, "v1"));
 
         // Assert
         Assert.Equal("Insert Into `samples` (`Name`, `Secret`) Values (@_p_0, @_p_1)", insert.Sql);
@@ -48,12 +45,31 @@ public sealed class SqliteMutationBuilderTest
     public void MutationBuilder_WhenEntityHasNoKey_ShouldRejectUnsafeUpdateAndDelete()
     {
         // Arrange
-        var builder = new DefaultSqlMutationBuilder(SqliteSqlProvider.Instance, new SqlBuilderServices());
+        var builder = new DefaultSqlEntityMutationCommandBuilder(SqliteSqlProvider.Instance, new SqlBuilderServices());
         var entity = new KeylessMutationSample { Name = "unsafe" };
 
         // Act and Assert
         Assert.Throws<InvalidOperationException>(() => builder.Update(entity));
         Assert.Throws<InvalidOperationException>(() => builder.Delete(entity));
+    }
+
+    /// <summary>
+    /// 测试目的：仅声明并发令牌但未声明主键的实体不得执行 Update 或 Delete，避免并发列被误用为实体写入条件。
+    /// </summary>
+    [Fact]
+    public void MutationBuilder_WhenEntityHasConcurrencyTokenButNoKey_ShouldRejectUpdateAndDelete()
+    {
+        // Arrange
+        var builder = new DefaultSqlEntityMutationCommandBuilder(SqliteSqlProvider.Instance, new SqlBuilderServices());
+        var entity = new KeylessConcurrencyMutationSample { Name = "unsafe", Secret = "v1" };
+
+        // Act
+        var updateException = Assert.Throws<InvalidOperationException>(() => builder.Update(entity));
+        var deleteException = Assert.Throws<InvalidOperationException>(() => builder.Delete(entity));
+
+        // Assert
+        Assert.Equal("实体 KeylessConcurrencyMutationSample 没有主键，不能执行更新。", updateException.Message);
+        Assert.Equal("实体 KeylessConcurrencyMutationSample 没有主键，不能执行删除。", deleteException.Message);
     }
 
     /// <summary>
@@ -82,17 +98,6 @@ public sealed class SqliteMutationBuilderTest
     }
 
     /// <summary>
-    /// 仅包含并发原始值的对象。
-    /// </summary>
-    private sealed class MutationOriginalValues
-    {
-        /// <summary>
-        /// 并发令牌。
-        /// </summary>
-        public string Secret { get; set; }
-    }
-
-    /// <summary>
     /// 未定义主键的实体。
     /// </summary>
     [Table("samples")]
@@ -102,5 +107,23 @@ public sealed class SqliteMutationBuilderTest
         /// 名称。
         /// </summary>
         public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// 未定义主键但声明并发令牌的实体。
+    /// </summary>
+    [Table("samples")]
+    private sealed class KeylessConcurrencyMutationSample
+    {
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 并发令牌。
+        /// </summary>
+        [ConcurrencyCheck]
+        public string Secret { get; set; }
     }
 }

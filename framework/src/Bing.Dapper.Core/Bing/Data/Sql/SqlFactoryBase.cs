@@ -216,6 +216,7 @@ public abstract class SqlFactoryBase
         return DatabaseContextSnapshot.Create(new DatabaseContext
         {
             DbKey = dataSource.Key,
+            ProviderKey = dataSource.ProviderKey,
             TenantId = tenantId,
             MappingProfile = string.IsNullOrWhiteSpace(dataSource.MappingProfile) ? mappingProfile : dataSource.MappingProfile,
             ReadPreference = readPreference,

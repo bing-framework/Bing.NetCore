@@ -31,6 +31,8 @@ Create Table If Not Exists public.integration_products(
         await ExecuteAsync(connection,
             "Alter Table public.integration_products Add Column If Not Exists user_id text Null;");
         await ExecuteAsync(connection,
+            "Alter Table public.integration_products Add Column If Not Exists version integer Not Null Default 1;");
+        await ExecuteAsync(connection,
             "Alter Table public.integration_products Alter Column amount Drop Not Null;");
         await ExecuteAsync(connection, @"
 Create Table If Not Exists public.integration_product_items(

@@ -1,6 +1,4 @@
 ﻿using System.Data;
-using Bing.Data.Enums;
-
 namespace Bing.Data.Sql;
 
 /// <summary>
@@ -9,10 +7,10 @@ namespace Bing.Data.Sql;
 public interface ISqlDbConnectionFactoryResolver
 {
     /// <summary>
-    /// 创建指定数据库类型的连接
+    /// 创建指定 Provider 的连接。
     /// </summary>
-    /// <param name="databaseType">数据库类型</param>
+    /// <param name="providerKey">SQL Provider 唯一标识。</param>
     /// <param name="connectionString">连接字符串</param>
     /// <returns>数据库连接</returns>
-    IDbConnection Create(DatabaseType databaseType, string connectionString);
+    IDbConnection Create(string providerKey, string connectionString);
 }

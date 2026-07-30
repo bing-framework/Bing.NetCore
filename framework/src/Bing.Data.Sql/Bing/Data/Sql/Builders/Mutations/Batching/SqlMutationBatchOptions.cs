@@ -29,11 +29,6 @@ public class SqlMutationBatchOptions
     public bool UseTransaction { get; set; } = true;
 
     /// <summary>
-    /// 批量 SQL 生成策略；默认自动选择 Provider 支持的最优 Insert 策略。
-    /// </summary>
-    public SqlBatchStrategy Strategy { get; set; } = SqlBatchStrategy.Auto;
-
-    /// <summary>
     /// 获取当前批处理适用的最大参数数量。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>

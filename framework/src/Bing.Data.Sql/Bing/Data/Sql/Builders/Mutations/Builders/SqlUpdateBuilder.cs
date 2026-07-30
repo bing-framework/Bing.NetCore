@@ -56,6 +56,9 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     public string ToSql() => Render(AppendTo);
 
     /// <inheritdoc />
+    public SqlMutationCommand BuildCommand() => BuildCommand(ToSql);
+
+    /// <inheritdoc />
     public ISqlUpdateBuilder New() => new SqlUpdateBuilder(Provider, MutationContext.Services,
         ParameterManager.CreateEmpty(), ClauseFactory);
 
@@ -85,7 +88,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     /// </summary>
     private void Validate()
     {
-        var context = new SqlValidationContext(Provider, GetParameters().Count, AllowAllRows, SqlExecutionKind.Update);
+        var context = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows, SqlExecutionKind.Update);
         UpdateClause.Validate(context);
         SetClause.Validate(context);
         WhereClause.Validate(context);

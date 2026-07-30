@@ -1,5 +1,3 @@
-using Bing.Data.Enums;
-
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
@@ -16,11 +14,6 @@ public sealed class SqlBuilderFactory : ISqlBuilderFactory
     private readonly IReadOnlyDictionary<string, Func<SqlBuilderServices, ISqlBuilder>> _providers;
 
     /// <summary>
-    /// 数据库类型注册映射。
-    /// </summary>
-    private readonly IReadOnlyDictionary<DatabaseType, Func<SqlBuilderServices, ISqlBuilder>> _databaseTypes;
-
-    /// <summary>
     /// 初始化一个 <see cref="SqlBuilderFactory"/> 类型的实例。
     /// </summary>
     /// <param name="registrations">Provider Builder 注册项。</param>
@@ -29,7 +22,6 @@ public sealed class SqlBuilderFactory : ISqlBuilderFactory
         if (registrations == null)
             throw new ArgumentNullException(nameof(registrations));
         var providers = new Dictionary<string, Func<SqlBuilderServices, ISqlBuilder>>(StringComparer.OrdinalIgnoreCase);
-        var databaseTypes = new Dictionary<DatabaseType, Func<SqlBuilderServices, ISqlBuilder>>();
         foreach (var registration in registrations)
         {
             if (registration == null)
@@ -38,11 +30,8 @@ public sealed class SqlBuilderFactory : ISqlBuilderFactory
             if (providers.ContainsKey(providerKey))
                 throw new ArgumentException($"SQL Provider Key '{providerKey}' 已注册。", nameof(registrations));
             providers.Add(providerKey, registration.Creator);
-            if (databaseTypes.ContainsKey(registration.Provider.DatabaseType) == false)
-                databaseTypes.Add(registration.Provider.DatabaseType, registration.Creator);
         }
         _providers = providers;
-        _databaseTypes = databaseTypes;
     }
 
     /// <inheritdoc />
@@ -73,14 +62,6 @@ public sealed class SqlBuilderFactory : ISqlBuilderFactory
         if (_providers.TryGetValue(providerKey, out var creator) == false)
             throw new NotSupportedException($"未注册 Provider Key '{providerKey}' 对应的 SQL Builder。");
         return CreateBuilder(creator, providerKey, services);
-    }
-
-    /// <inheritdoc />
-    public ISqlBuilder Create(DatabaseType databaseType)
-    {
-        if (_databaseTypes.TryGetValue(databaseType, out var creator) == false)
-            throw new NotSupportedException($"未注册数据库类型 '{databaseType}' 对应的 SQL Builder。");
-        return CreateBuilder(creator, databaseType.ToString(), null);
     }
 
     /// <summary>

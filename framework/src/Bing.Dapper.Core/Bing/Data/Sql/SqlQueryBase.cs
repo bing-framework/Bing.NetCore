@@ -20,8 +20,9 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
 /// </remarks>
-public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetParameter, IClearParameters, IUnionAccessor,
-    ICteAccessor, ISqlQueryExecutionResourceAccessor, ISqlTransactionScopeResourceBinder, ISqlQueryMetadataBinder
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IGetParameter,
+    IClearParameters, IUnionAccessor, ICteAccessor, ISqlQueryExecutionResourceAccessor,
+    ISqlTransactionScopeResourceBinder, ISqlQueryMetadataBinder
 {
     #region 字段
 
@@ -29,6 +30,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     /// Sql生成器
     /// </summary>
     private ISqlBuilder _sqlBuilder;
+
+    /// <summary>
+    /// 当前查询首次解析后固定使用的 SQL Provider。
+    /// </summary>
+    private ISqlProvider _provider;
 
     /// <summary>
     /// 数据库连接
@@ -184,6 +190,24 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     internal DatabaseContext GetDatabaseContext() => Options.GetDatabaseContext();
 
     /// <summary>
+    /// 获取当前查询和实体 Mutation 共享的 SQL Provider。
+    /// </summary>
+    /// <remarks>
+    /// 查询 Builder 首次创建时会固定 Provider 实例；后续实体 Mutation 必须复用该实例，
+    /// 避免同一 <see cref="DatabaseType"/> 下的多个 Provider 因兼容映射而发生分叉。
+    /// </remarks>
+    /// <returns>当前执行上下文解析出的 SQL Provider。</returns>
+    protected ISqlProvider GetCurrentProvider()
+    {
+        if (_provider != null)
+            return _provider;
+        var providerResolver = ServiceProvider.GetService<ISqlProviderResolver>();
+        if (providerResolver == null)
+            throw new InvalidOperationException("未注册 SQL Provider 解析器。");
+        return _provider = providerResolver.Resolve(GetDatabaseContext(), databaseType: GetDatabaseType());
+    }
+
+    /// <summary>
     /// 是否启用调试SQL
     /// </summary>
     protected bool EnabledDebugSql { get; set; } = true;
@@ -283,7 +307,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         var factory = ServiceProvider.GetService<ISqlBuilderFactory>();
         if (factory == null)
             throw new InvalidOperationException("未注册 SQL Builder 工厂。");
-        return factory.Create(provider, CreateSqlBuilderServices());
+        var providerResolver = ServiceProvider.GetService<ISqlProviderResolver>();
+        if (providerResolver == null)
+            throw new InvalidOperationException("未注册 SQL Provider 解析器。");
+        var resolvedProvider = providerResolver.Resolve(GetDatabaseContext(), provider, GetDatabaseType());
+        _provider = resolvedProvider;
+        return factory.Create(resolvedProvider, CreateSqlBuilderServices());
     }
 
     /// <summary>
@@ -435,7 +464,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
         var resolver = ServiceProvider.GetService<ISqlDbConnectionFactoryResolver>();
         if (resolver == null)
             throw new InvalidOperationException("未注册 SQL 数据库连接工厂解析器。");
-        _connection = resolver.Create(GetDatabaseType(), connectionString);
+        _connection = resolver.Create(GetCurrentProvider().Key, connectionString);
         _connectionOwnership = SqlResourceOwnership.Owned;
         if (_connection == null)
             throw new InvalidOperationException("数据库连接不能为空");
@@ -743,23 +772,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlPartAccessor, IGetPa
     {
         SqlBuilder.OrderBy(parameter.Order);
         SqlBuilder.Page(parameter);
-    }
-
-    /// <summary>
-    /// 分页查询。
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="func">不接收取消令牌的获取列表操作。</param>
-    /// <param name="parameter">分页参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <remarks>该重载无法将取消令牌传递给列表操作，请改用接收 <see cref="CancellationToken"/> 的重载。</remarks>
-    [Obsolete("请使用接收 CancellationToken 的 PagerQueryAsync 重载")]
-    public virtual Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<Task<List<TResult>>> func, IPager parameter,
-        int? timeout = null)
-    {
-        if (func == null)
-            throw new ArgumentNullException(nameof(func));
-        return PagerQueryAsync(_ => func(), parameter, timeout);
     }
 
     /// <summary>

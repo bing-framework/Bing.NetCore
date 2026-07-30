@@ -11,6 +11,12 @@ public sealed class DatabaseContext
     public string DbKey { get; set; }
 
     /// <summary>
+    /// 当前上下文指定的 SQL Provider 唯一标识。
+    /// </summary>
+    /// <remarks>数据源未指定 Provider Key 时使用该值。</remarks>
+    public string ProviderKey { get; set; }
+
+    /// <summary>
     /// 租户标识
     /// </summary>
     public string TenantId { get; set; }

@@ -1,5 +1,4 @@
 using System.Data;
-using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Moq;
 using Xunit;
@@ -21,7 +20,7 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         var resolver = new DefaultSqlDbConnectionFactoryResolver(null);
 
         // Act and Assert
-        Assert.Throws<InvalidOperationException>(() => resolver.Create(DatabaseType.SqlServer, "Server=(local)"));
+        Assert.Throws<InvalidOperationException>(() => resolver.Create("bing.sqlserver", "Server=(local)"));
     }
 
     /// <summary>
@@ -37,7 +36,7 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         {
             new SqlDbConnectionFactoryRegistration
             {
-                DatabaseType = DatabaseType.Sqlite,
+                ProviderKey = "test.sqlite",
                 Factory = connectionString =>
                 {
                     receivedConnectionString = connectionString;
@@ -47,7 +46,7 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         });
 
         // Act
-        var result = resolver.Create(DatabaseType.Sqlite, "Data Source=test.db");
+        var result = resolver.Create("TEST.SQLITE", "Data Source=test.db");
 
         // Assert
         Assert.Same(connection, result);
@@ -65,15 +64,39 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         var latestConnection = new Mock<IDbConnection>().Object;
         var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
         {
-            new SqlDbConnectionFactoryRegistration { DatabaseType = DatabaseType.MySql, Factory = _ => firstConnection },
-            new SqlDbConnectionFactoryRegistration { DatabaseType = DatabaseType.MySql, Factory = _ => latestConnection }
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => firstConnection },
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => latestConnection }
         });
 
         // Act
-        var result = resolver.Create(DatabaseType.MySql, "Server=localhost");
+        var result = resolver.Create("test.mysql", "Server=localhost");
 
         // Assert
         Assert.Same(latestConnection, result);
+    }
+
+    /// <summary>
+    /// 测试目的：共享同一数据库类型的不同 Provider Key 必须各自解析连接工厂，避免自定义 Provider 相互覆盖。
+    /// </summary>
+    [Fact]
+    public void Create_WhenProviderKeysShareDatabaseType_ShouldKeepFactoriesIsolated()
+    {
+        // Arrange
+        var firstConnection = new Mock<IDbConnection>().Object;
+        var secondConnection = new Mock<IDbConnection>().Object;
+        var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
+        {
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "custom.sqlite.first", Factory = _ => firstConnection },
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "custom.sqlite.second", Factory = _ => secondConnection }
+        });
+
+        // Act
+        var first = resolver.Create("custom.sqlite.first", "Data Source=first.db");
+        var second = resolver.Create("custom.sqlite.second", "Data Source=second.db");
+
+        // Assert
+        Assert.Same(firstConnection, first);
+        Assert.Same(secondConnection, second);
     }
 
     /// <summary>
@@ -85,10 +108,10 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         // Arrange
         var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
         {
-            new SqlDbConnectionFactoryRegistration { DatabaseType = DatabaseType.Oracle, Factory = _ => null }
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.oracle", Factory = _ => null }
         });
 
         // Act and Assert
-        Assert.Throws<InvalidOperationException>(() => resolver.Create(DatabaseType.Oracle, "Data Source=oracle"));
+        Assert.Throws<InvalidOperationException>(() => resolver.Create("test.oracle", "Data Source=oracle"));
     }
 }

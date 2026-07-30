@@ -6,35 +6,6 @@ namespace Bing.Data.Sql;
 // SqlQuery - Query
 public static partial class SqlQueryExtensions
 {
-    #region To(获取单个实体)
-
-    /// <summary>
-    /// 获取单个实体
-    /// </summary>
-    /// <typeparam name="TEntity">返回结果类型</typeparam>
-    /// <param name="sqlQuery">Sql查询对象</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    [Obsolete("请使用 ToEntity()")]
-    public static TEntity To<TEntity>(this ISqlQuery sqlQuery, int? timeout = null) =>
-        sqlQuery.ExecuteSingle<TEntity>(timeout);
-
-    #endregion
-
-    #region ToAsync(获取单个实体)
-
-    /// <summary>
-    /// 获取单个实体
-    /// </summary>
-    /// <typeparam name="TEntity">返回结果类型</typeparam>
-    /// <param name="sqlQuery">Sql查询对象</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    [Obsolete("请使用 ToEntityAsync()")]
-    public static Task<TEntity> ToAsync<TEntity>(this ISqlQuery sqlQuery, int? timeout = null,
-        CancellationToken cancellationToken = default) => sqlQuery.ExecuteSingleAsync<TEntity>(timeout, cancellationToken);
-
-    #endregion
-
     #region ToEntity(获取单个实体)
 
     /// <summary>

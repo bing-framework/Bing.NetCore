@@ -17,7 +17,7 @@ public sealed class SqlServerMutationBuilderTest
     public void Insert_WhenMappedEntityIsProvided_ShouldRenderSqlServerSql()
     {
         // Arrange
-        var builder = new DefaultSqlMutationBuilder(SqlServerSqlProvider.Instance, new SqlBuilderServices());
+        var builder = new DefaultSqlEntityMutationCommandBuilder(SqlServerSqlProvider.Instance, new SqlBuilderServices());
 
         // Act
         var command = builder.Insert(new MutationSample { Name = "Bing" });

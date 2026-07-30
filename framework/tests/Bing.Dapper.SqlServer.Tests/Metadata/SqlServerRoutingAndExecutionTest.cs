@@ -514,6 +514,29 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：自有连接创建必须传递已解析 SQL Provider Key，不能回退为仅按 DatabaseType 查找工厂。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenOwnedConnectionIsCreated_ShouldResolveFactoryByProviderKey()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var resolver = new CaptureConnectionResolver(connection);
+        var services = CreateServices();
+        services.AddSingleton<ISqlDbConnectionFactoryResolver>(resolver);
+        services.AddSqlServerSqlExecutor<InspectableSqlServerExecutor, InspectableSqlServerExecutor>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+        var executor = provider.GetRequiredService<InspectableSqlServerExecutor>();
+
+        // Act
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" });
+
+        // Assert
+        resolver.LastProviderKey.ShouldBe(SqlServerSqlProvider.Instance.Key);
+    }
+
+    /// <summary>
     /// 测试目的：主库短事务策略执行成功后应提交内部事务并关闭内部连接。
     /// </summary>
     [Fact]
@@ -2243,7 +2266,13 @@ public class SqlServerRoutingAndExecutionTest
 
         public CaptureConnectionResolver(IDbConnection connection) => _connection = connection;
 
-        public IDbConnection Create(DatabaseType databaseType, string connectionString) => _connection;
+        public string LastProviderKey { get; private set; }
+
+        public IDbConnection Create(string providerKey, string connectionString)
+        {
+            LastProviderKey = providerKey;
+            return _connection;
+        }
     }
 
     /// <summary>

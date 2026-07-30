@@ -33,7 +33,7 @@ public static class SqliteServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<ISqlQuery, SqliteSqlQuery>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<ISqlExecutor, SqliteSqlExecutor>(DatabaseType.Sqlite);
@@ -113,7 +113,7 @@ public static class SqliteServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
@@ -163,7 +163,7 @@ public static class SqliteServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>(DatabaseType.Sqlite);
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>();
@@ -239,7 +239,7 @@ public static class SqliteServiceCollectionExtensions
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(DatabaseType.Sqlite, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));

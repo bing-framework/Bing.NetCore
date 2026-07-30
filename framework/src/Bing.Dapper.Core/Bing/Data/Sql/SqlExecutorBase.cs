@@ -65,7 +65,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         where TEntity : class
     {
         var command = CreateMutationBuilder().Update(entity, options);
-        return ExecuteSql(command.Sql, command.Parameters, timeout);
+        return ExecuteMutationCommand(command, timeout);
     }
 
     /// <inheritdoc />
@@ -74,19 +74,19 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         where TEntity : class
     {
         var command = CreateMutationBuilder().Update(entity, options);
-        return ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken);
+        return ExecuteMutationCommandAsync(command, timeout, cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual int UpdateBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options = null,
         int? timeout = null) where TEntity : class => ExecuteMutationBatch(
-        CreateMutationBatchCommands(entities, entity => CreateMutationBuilder().Update(entity, options?.UpdateOptions), options),
+        CreateUpdateBatchCommands(entities, options),
         options?.UseTransaction ?? true, timeout);
 
     /// <inheritdoc />
     public virtual Task<int> UpdateBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options = null,
         int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class => ExecuteMutationBatchAsync(
-        CreateMutationBatchCommands(entities, entity => CreateMutationBuilder().Update(entity, options?.UpdateOptions), options),
+        CreateUpdateBatchCommands(entities, options),
         options?.UseTransaction ?? true, timeout, cancellationToken);
 
     #endregion
@@ -98,7 +98,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         where TEntity : class
     {
         var command = CreateMutationBuilder().Delete(entity, options);
-        return ExecuteSql(command.Sql, command.Parameters, timeout);
+        return ExecuteMutationCommand(command, timeout);
     }
 
     /// <inheritdoc />
@@ -107,19 +107,19 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         where TEntity : class
     {
         var command = CreateMutationBuilder().Delete(entity, options);
-        return ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken);
+        return ExecuteMutationCommandAsync(command, timeout, cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual int DeleteBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null,
         int? timeout = null) where TEntity : class => ExecuteMutationBatch(
-        CreateMutationBatchCommands(entities, entity => CreateMutationBuilder().Delete(entity, options?.DeleteOptions), options),
+        CreateDeleteBatchCommands(entities, options),
         options?.UseTransaction ?? true, timeout);
 
     /// <inheritdoc />
     public virtual Task<int> DeleteBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null,
         int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class => ExecuteMutationBatchAsync(
-        CreateMutationBatchCommands(entities, entity => CreateMutationBuilder().Delete(entity, options?.DeleteOptions), options),
+        CreateDeleteBatchCommands(entities, options),
         options?.UseTransaction ?? true, timeout, cancellationToken);
 
     #endregion
@@ -324,7 +324,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// 创建绑定当前 Executor 数据源和映射服务的实体写入 Builder。
     /// </summary>
     /// <returns>实体写入 Builder。</returns>
-    private ISqlMutationBuilder CreateMutationBuilder() =>
+    private ISqlEntityMutationCommandBuilder CreateMutationBuilder() =>
         CreateMutationBuilder(ResolveMutationProvider());
 
     /// <summary>
@@ -332,12 +332,12 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// </summary>
     /// <param name="provider">已解析的当前 SQL Provider。</param>
     /// <returns>实体写入 Builder。</returns>
-    private ISqlMutationBuilder CreateMutationBuilder(ISqlProvider provider)
+    private ISqlEntityMutationCommandBuilder CreateMutationBuilder(ISqlProvider provider)
     {
-        var factory = ServiceProvider.GetService<ISqlMutationBuilderFactory>();
+        var factory = ServiceProvider.GetService<ISqlEntityMutationCommandBuilderFactory>();
         if (factory == null)
             throw new InvalidOperationException("未注册实体写入 SQL Builder 工厂。");
-        return factory.CreateEntity(provider, CreateSqlBuilderServices());
+        return factory.Create(provider, CreateSqlBuilderServices());
     }
 
     /// <summary>
@@ -346,12 +346,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>当前数据源的 SQL Provider。</returns>
     private ISqlProvider ResolveMutationProvider()
     {
-        var databaseType = GetDatabaseType();
-        var provider = ServiceProvider.GetServices<ISqlProvider>()
-            .FirstOrDefault(item => item.DatabaseType == databaseType);
-        if (provider == null)
-            throw new InvalidOperationException($"未注册数据库类型 {databaseType} 的 SQL Provider。");
-        return provider;
+        return GetCurrentProvider();
     }
 
     /// <summary>
@@ -361,9 +356,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>应使用组合式 Insert 时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     private bool ShouldUseCombinedInsert(SqlBatchInsertOptions options)
     {
-        if (options?.Strategy == SqlBatchStrategy.PerEntity)
+        if (options?.Strategy == SqlBatchInsertStrategy.PerEntity)
             return false;
-        if (options?.Strategy == SqlBatchStrategy.Combined)
+        if (options?.Strategy == SqlBatchInsertStrategy.MultiRowValues)
             return true;
         var provider = ResolveMutationProvider();
         return provider is ISqlProviderCapabilityProvider { Capabilities.SupportsMultiRowValues: true };
@@ -391,6 +386,230 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <summary>
+    /// 根据实体集合和当前策略生成 Update 批次。
+    /// </summary>
+    private IReadOnlyList<SqlMutationBatchCommand> CreateUpdateBatchCommands<TEntity>(IEnumerable<TEntity> entities,
+        SqlBatchUpdateOptions options) where TEntity : class
+    {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities));
+        var items = entities.ToList();
+        if (items.Count == 0)
+            return Array.Empty<SqlMutationBatchCommand>();
+        options ??= new SqlBatchUpdateOptions();
+        if (options.Strategy != SqlBatchUpdateStrategy.PerEntity)
+        {
+            var provider = ResolveMutationProvider();
+            var renderer = TryResolveBatchUpdateRenderer(provider);
+            if (renderer != null && CreateMutationBuilder(provider) is ISqlBatchUpdateRenderContextBuilder contextBuilder)
+            {
+                var context = contextBuilder.CreateUpdateRenderContext(items.Take(1).ToArray(), options.UpdateOptions);
+                if (renderer.CanRender(context))
+                    return CreateProviderOptimizedUpdateBatchCommands(items, options);
+            }
+            if (options.Strategy == SqlBatchUpdateStrategy.ProviderOptimized)
+                return CreateProviderOptimizedUpdateBatchCommands(items, options);
+        }
+        return CreateMutationBatchCommands(items,
+            entity => CreateMutationBuilder().Update(entity, options.UpdateOptions), options);
+    }
+
+    /// <summary>
+    /// 使用当前 Provider 注册的优化渲染器生成 Update 批次。
+    /// </summary>
+    private IReadOnlyList<SqlMutationBatchCommand> CreateProviderOptimizedUpdateBatchCommands<TEntity>(
+        IReadOnlyList<TEntity> items, SqlBatchUpdateOptions options) where TEntity : class
+    {
+        var provider = ResolveMutationProvider();
+        var renderer = ResolveBatchUpdateRenderer(provider);
+        if (CreateMutationBuilder(provider) is not ISqlBatchUpdateRenderContextBuilder contextBuilder)
+            throw new NotSupportedException($"Provider {provider.Key} 的实体 Mutation Builder 未实现批量 Update 渲染上下文。");
+        var firstContext = contextBuilder.CreateUpdateRenderContext(items.Take(1).ToArray(), options.UpdateOptions);
+        var firstCommand = renderer.Render(firstContext);
+        var validateAffectedRows = firstContext.ConcurrencyColumns.Count > 0 &&
+            (options.UpdateOptions?.ConcurrencyConflictBehavior ?? SqlConcurrencyConflictBehavior.Throw) ==
+            SqlConcurrencyConflictBehavior.Throw;
+        var maxParameterCount = options.GetEffectiveMaxParameterCount(provider);
+        var plan = new SqlMutationBatchPlanner().Plan(new SqlMutationBatchPlanContext(items.Count,
+            Math.Max(1, firstCommand.Parameters.Count), maxParameterCount: maxParameterCount,
+            estimatedSqlLengthPerEntity: 0, options: options));
+        var batches = new List<SqlMutationBatchCommand>(plan.BatchSizes.Count);
+        var offset = 0;
+        foreach (var size in plan.BatchSizes)
+        {
+            if (options.MaxSqlLength == null)
+            {
+                var command = RenderProviderOptimizedUpdateCommand(items.Skip(offset).Take(size).ToArray(), options,
+                    provider, renderer);
+                batches.Add(new SqlMutationBatchCommand(new[] { command }, size, options.UseTransaction,
+                    validateAffectedRows));
+                offset += size;
+                continue;
+            }
+            var remaining = size;
+            while (remaining > 0)
+            {
+                var minimumSize = 1;
+                var maximumSize = remaining;
+                var commandSize = 0;
+                SqlMutationCommand command = null;
+                while (minimumSize <= maximumSize)
+                {
+                    var candidateSize = minimumSize + (maximumSize - minimumSize) / 2;
+                    var candidate = RenderProviderOptimizedUpdateCommand(items.Skip(offset).Take(candidateSize).ToArray(),
+                        options, provider, renderer);
+                    if (options.MaxSqlLength != null && candidate.Sql.Length > options.MaxSqlLength.Value)
+                    {
+                        maximumSize = candidateSize - 1;
+                        continue;
+                    }
+                    command = candidate;
+                    commandSize = candidateSize;
+                    minimumSize = candidateSize + 1;
+                }
+                if (command == null)
+                    throw new InvalidOperationException("当前 Provider 参数或 SQL 长度上限无法容纳一个 Mutation 实体。");
+                batches.Add(new SqlMutationBatchCommand(new[] { command }, commandSize, options.UseTransaction,
+                    validateAffectedRows));
+                offset += commandSize;
+                remaining -= commandSize;
+            }
+        }
+        return batches;
+    }
+
+    /// <summary>
+    /// 生成单个 Provider 优化 Update 命令。
+    /// </summary>
+    private SqlMutationCommand RenderProviderOptimizedUpdateCommand<TEntity>(IReadOnlyCollection<TEntity> entities,
+        SqlBatchUpdateOptions options, ISqlProvider provider, ISqlBatchUpdateRenderer renderer) where TEntity : class
+    {
+        if (CreateMutationBuilder(provider) is not ISqlBatchUpdateRenderContextBuilder contextBuilder)
+            throw new NotSupportedException($"Provider {provider.Key} 的实体 Mutation Builder 未实现批量 Update 渲染上下文。");
+        return renderer.Render(contextBuilder.CreateUpdateRenderContext(entities, options.UpdateOptions));
+    }
+
+    /// <summary>
+    /// 解析当前 Provider 唯一匹配的批量 Update 渲染器。
+    /// </summary>
+    private ISqlBatchUpdateRenderer ResolveBatchUpdateRenderer(ISqlProvider provider)
+    {
+        var renderers = ServiceProvider.GetServices<ISqlBatchUpdateRenderer>()
+            .Where(renderer => string.Equals(renderer.ProviderKey?.Trim(), provider.Key?.Trim(),
+                StringComparison.OrdinalIgnoreCase))
+            .Take(2)
+            .ToArray();
+        if (renderers.Length == 0)
+            throw new NotSupportedException($"Provider {provider.Key} 未注册优化批量 Update 渲染器。");
+        if (renderers.Length > 1)
+            throw new InvalidOperationException($"Provider {provider.Key} 注册了多个优化批量 Update 渲染器。");
+        return renderers[0];
+    }
+
+    /// <summary>
+    /// 尝试解析当前 Provider 的唯一批量 Update 渲染器。
+    /// </summary>
+    private ISqlBatchUpdateRenderer TryResolveBatchUpdateRenderer(ISqlProvider provider)
+    {
+        var renderers = ServiceProvider.GetServices<ISqlBatchUpdateRenderer>()
+            .Where(renderer => string.Equals(renderer.ProviderKey?.Trim(), provider.Key?.Trim(),
+                StringComparison.OrdinalIgnoreCase))
+            .Take(2)
+            .ToArray();
+        if (renderers.Length == 0)
+            return null;
+        if (renderers.Length > 1)
+            throw new InvalidOperationException($"Provider {provider.Key} 注册了多个优化批量 Update 渲染器。");
+        return renderers[0];
+    }
+
+    /// <summary>
+    /// 根据实体集合和当前策略生成 Delete 批次。
+    /// </summary>
+    private IReadOnlyList<SqlMutationBatchCommand> CreateDeleteBatchCommands<TEntity>(IEnumerable<TEntity> entities,
+        SqlBatchDeleteOptions options) where TEntity : class
+    {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities));
+        var items = entities.ToList();
+        if (items.Count == 0)
+            return Array.Empty<SqlMutationBatchCommand>();
+        options ??= new SqlBatchDeleteOptions();
+        if (options.Strategy == SqlBatchDeleteStrategy.PerEntity)
+            return CreateMutationBatchCommands(items,
+                entity => CreateMutationBuilder().Delete(entity, options.DeleteOptions), options);
+        var provider = ResolveMutationProvider();
+        if (options.Strategy == SqlBatchDeleteStrategy.ProviderOptimized)
+            throw new NotSupportedException($"Provider {provider.Key} 未实现优化批量 Delete 命令。");
+        if (CreateMutationBuilder(provider) is not ISqlCombinedDeleteMutationBuilder)
+        {
+            if (options.Strategy == SqlBatchDeleteStrategy.Auto)
+                return CreateMutationBatchCommands(items,
+                    entity => CreateMutationBuilder(provider).Delete(entity, options.DeleteOptions), options);
+            throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Delete 批量命令。");
+        }
+        return CreateCombinedDeleteBatchCommands(items, options, provider);
+    }
+
+    /// <summary>
+    /// 将实体映射为按参数和 SQL 长度限制分片的组合 Delete 命令。
+    /// </summary>
+    private IReadOnlyList<SqlMutationBatchCommand> CreateCombinedDeleteBatchCommands<TEntity>(IReadOnlyList<TEntity> items,
+        SqlBatchDeleteOptions options, ISqlProvider provider) where TEntity : class
+    {
+        if (items.Any(entity => entity == null))
+            throw new ArgumentException("批量 Delete 实体集合不能包含 null。", nameof(items));
+        var firstCommand = ((ISqlCombinedDeleteMutationBuilder)CreateMutationBuilder(provider))
+            .DeleteCombined(new[] { items[0] }, options.DeleteOptions, options.Strategy);
+        var maxParameterCount = options.GetEffectiveMaxParameterCount(provider);
+        var plan = new SqlMutationBatchPlanner().Plan(new SqlMutationBatchPlanContext(items.Count,
+            Math.Max(1, firstCommand.Parameters.Count), maxParameterCount: maxParameterCount,
+            estimatedSqlLengthPerEntity: 0, options: options));
+        var batches = new List<SqlMutationBatchCommand>(plan.BatchSizes.Count);
+        var offset = 0;
+        foreach (var size in plan.BatchSizes)
+        {
+            if (options.MaxSqlLength == null)
+            {
+                var command = ((ISqlCombinedDeleteMutationBuilder)CreateMutationBuilder(provider)).DeleteCombined(
+                    items.Skip(offset).Take(size).ToArray(), options.DeleteOptions, options.Strategy);
+                batches.Add(new SqlMutationBatchCommand(new[] { command }, size, options.UseTransaction));
+                offset += size;
+                continue;
+            }
+            var remaining = size;
+            while (remaining > 0)
+            {
+                var minimumSize = 1;
+                var maximumSize = remaining;
+                var commandSize = 0;
+                SqlMutationCommand command = null;
+                while (minimumSize <= maximumSize)
+                {
+                    var candidateSize = minimumSize + (maximumSize - minimumSize) / 2;
+                    var builder = (ISqlCombinedDeleteMutationBuilder)CreateMutationBuilder(provider);
+                    var candidate = builder.DeleteCombined(items.Skip(offset).Take(candidateSize).ToArray(),
+                        options.DeleteOptions, options.Strategy);
+                    if (options.MaxSqlLength != null && candidate.Sql.Length > options.MaxSqlLength.Value)
+                    {
+                        maximumSize = candidateSize - 1;
+                        continue;
+                    }
+                    command = candidate;
+                    commandSize = candidateSize;
+                    minimumSize = candidateSize + 1;
+                }
+                if (command == null)
+                    throw new InvalidOperationException("当前 Provider 参数或 SQL 长度上限无法容纳一个 Mutation 实体。");
+                batches.Add(new SqlMutationBatchCommand(new[] { command }, commandSize, options.UseTransaction));
+                offset += commandSize;
+                remaining -= commandSize;
+            }
+        }
+        return batches;
+    }
+
+    /// <summary>
     /// 将实体映射为按参数及 SQL 长度限制分组的 Mutation 命令。
     /// </summary>
     private IReadOnlyList<SqlMutationBatchCommand> CreateMutationBatchCommands<TEntity>(
@@ -405,8 +624,6 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         if (commands.Count == 0)
             return Array.Empty<SqlMutationBatchCommand>();
         options ??= new SqlMutationBatchOptions();
-        if (options.Strategy == SqlBatchStrategy.Combined)
-            throw new NotSupportedException("当前 Provider 尚未实现合并式 Mutation 批量命令。");
         var parametersPerEntity = commands.Max(command => command.Parameters.Count);
         var estimatedSqlLengthPerEntity = commands.Max(command => command.Sql.Length);
         var maxParameterCount = options.GetEffectiveMaxParameterCount(ResolveMutationProvider());
@@ -447,13 +664,13 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             throw new NotSupportedException($"Provider {provider.Key} 未声明支持组合式 Insert 批量命令。");
         if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder)
         {
-            if (options?.Strategy == SqlBatchStrategy.Auto)
+            if (options?.Strategy == SqlBatchInsertStrategy.Auto)
                 return CreateMutationBatchCommands(items,
                     entity => CreateMutationBuilder(provider).Insert(entity, options.InsertOptions), options);
             throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
         }
-        var commands = items.Select(entity => CreateMutationBuilder(provider).Insert(entity, options.InsertOptions)).ToList();
-        var parametersPerEntity = commands.Max(command => command.Parameters.Count);
+        var firstCommand = CreateMutationBuilder(provider).Insert(items[0], options.InsertOptions);
+        var parametersPerEntity = firstCommand.Parameters.Count;
         var maxParameterCount = options.GetEffectiveMaxParameterCount(provider);
         var plan = new SqlMutationBatchPlanner().Plan(new SqlMutationBatchPlanContext(items.Count,
             Math.Max(1, parametersPerEntity), maxParameterCount: maxParameterCount,
@@ -462,6 +679,15 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         var offset = 0;
         foreach (var size in plan.BatchSizes)
         {
+            if (options.MaxSqlLength == null)
+            {
+                if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder builder)
+                    throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
+                var command = builder.InsertCombined(items.GetRange(offset, size), options.InsertOptions);
+                batches.Add(new SqlMutationBatchCommand(new[] { command }, size, options.UseTransaction));
+                offset += size;
+                continue;
+            }
             var remaining = size;
             while (remaining > 0)
             {
@@ -501,7 +727,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     {
         if (batches == null || batches.Count == 0)
             return 0;
-        if (useTransaction == false)
+        if (useTransaction == false && batches.Any(batch => batch.RequiresTransaction) == false)
             return ExecuteMutationCommands(this, batches, timeout);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
@@ -536,7 +762,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         cancellationToken.ThrowIfCancellationRequested();
         if (batches == null || batches.Count == 0)
             return 0;
-        if (useTransaction == false)
+        if (useTransaction == false && batches.Any(batch => batch.RequiresTransaction) == false)
             return await ExecuteMutationCommandsAsync(this, batches, timeout, cancellationToken).ConfigureAwait(false);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
@@ -570,8 +796,18 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         int? timeout)
     {
         var result = 0;
-        foreach (var command in batches.SelectMany(batch => batch.Commands))
-            result = checked(result + executor.ExecuteSql(command.Sql, command.Parameters, timeout));
+        foreach (var batch in batches)
+        {
+            var batchResult = 0;
+            foreach (var command in batch.Commands)
+            {
+                var commandResult = executor.ExecuteSql(command.Sql, command.Parameters, timeout);
+                ValidateAffectedRows(command, commandResult);
+                batchResult = checked(batchResult + commandResult);
+            }
+            ValidateAffectedRows(batch, batchResult);
+            result = checked(result + batchResult);
+        }
         return result;
     }
 
@@ -582,13 +818,62 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         IEnumerable<SqlMutationBatchCommand> batches, int? timeout, CancellationToken cancellationToken)
     {
         var result = 0;
-        foreach (var command in batches.SelectMany(batch => batch.Commands))
+        foreach (var batch in batches)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            result = checked(result + await executor.ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken)
-                .ConfigureAwait(false));
+            var batchResult = 0;
+            foreach (var command in batch.Commands)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var commandResult = await executor.ExecuteSqlAsync(command.Sql, command.Parameters, timeout,
+                    cancellationToken).ConfigureAwait(false);
+                ValidateAffectedRows(command, commandResult);
+                batchResult = checked(batchResult + commandResult);
+            }
+            ValidateAffectedRows(batch, batchResult);
+            result = checked(result + batchResult);
         }
         return result;
+    }
+
+    /// <summary>
+    /// 验证带并发令牌的优化批量命令是否更新了全部目标实体。
+    /// </summary>
+    private static void ValidateAffectedRows(SqlMutationBatchCommand batch, int affectedRows)
+    {
+        if (batch.ValidateAffectedRows && affectedRows != batch.EntityCount)
+            throw new Bing.Exceptions.ConcurrencyException(
+                $"批量 Update 预期影响 {batch.EntityCount} 行，实际影响 {affectedRows} 行。");
+    }
+
+    /// <summary>
+    /// 执行单体 Mutation 命令并校验并发结果。
+    /// </summary>
+    private int ExecuteMutationCommand(SqlMutationCommand command, int? timeout)
+    {
+        var result = ExecuteSql(command.Sql, command.Parameters, timeout);
+        ValidateAffectedRows(command, result);
+        return result;
+    }
+
+    /// <summary>
+    /// 异步执行单体 Mutation 命令并校验并发结果。
+    /// </summary>
+    private async Task<int> ExecuteMutationCommandAsync(SqlMutationCommand command, int? timeout,
+        CancellationToken cancellationToken)
+    {
+        var result = await ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken)
+            .ConfigureAwait(false);
+        ValidateAffectedRows(command, result);
+        return result;
+    }
+
+    /// <summary>
+    /// 验证单体带并发令牌的命令是否影响了一行。
+    /// </summary>
+    private static void ValidateAffectedRows(SqlMutationCommand command, int affectedRows)
+    {
+        if (command.ValidateAffectedRows && affectedRows != 1)
+            throw new Bing.Exceptions.ConcurrencyException($"实体 Mutation 预期影响 1 行，实际影响 {affectedRows} 行。");
     }
 
     #endregion

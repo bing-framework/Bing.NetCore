@@ -14,7 +14,8 @@ namespace Bing.Data.Sql.Builders.Core;
 /// <summary>
 /// Sql生成器基类
 /// </summary>
-public abstract class SqlBuilderBase : ISqlBuilder, ISqlPartAccessor, IUnionAccessor, ICteAccessor
+public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IUnionAccessor,
+    ICteAccessor
 {
     #region 字段
 
